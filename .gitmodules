@@ -1,0 +1,3 @@
+[submodule "popss"]
+	path = popss
+	url = https://github.com/ncsu-landscape-dynamics/PoPSS
