@@ -1,7 +1,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
-#include "popss/simulation.hpp"
-#include "popss/raster.hpp"
+#include "pops/simulation.hpp"
+#include "pops/raster.hpp"
 #include <iostream>
 
 using std::cout;
