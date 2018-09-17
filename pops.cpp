@@ -9,7 +9,7 @@ using std::cout;
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 NumericVector pops(NumericVector x) {
-  Raster<int> infected = {{5, 0}, {0, 0}};
+  Raster<int> infected = {{2, 0}, {0, 0}};
   Raster<int> exposed = {{0, 0}, {0, 0}};
   Raster<int> diseased = {{0, 0}, {0, 0}};
   Raster<int> infected_cohort = {{0, 0}, {0, 0}};
