@@ -9,27 +9,26 @@ using std::cout;
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 NumericVector pops(NumericVector x) {
-  Raster<int> infected = {{2, 0}, {0, 0}};
-  Raster<int> exposed = {{0, 0}, {0, 0}};
-  Raster<int> diseased = {{0, 0}, {0, 0}};
-  Raster<int> infected_cohort = {{0, 0}, {0, 0}};
-  Raster<int> susceptible = {{5, 6}, {14, 15}};
-  Raster<int> total_plants = {{10, 6}, {14, 15}};
+  Raster<int> infected = {{5, 0}, {0, 0}};
+  Raster<int> mortality_tracker = {{0, 0}, {0, 0}};
+  Raster<int> susceptible = {{10, 6}, {14, 15}};
+  Raster<int> total_plants = {{15, 6}, {14, 15}};
   Raster<double> temperature = {{5, 0}, {0, 0}};
-  // Raster<double> weather_coef_value = {{0.5,0.7},{0.2,0.8}};
+  Raster<double> weather_coefficient = {{0.8, 0.8}, {0.2, 0.8}};
   std::vector<std::tuple<int, int>> outside_dispersers;
   Dispersal_kernel dispersal_kernel = CAUCHY;
+  bool weather = true;
   double lethal_temperature = -4.5;
   double reproductive_rate = 4.5;
-  double short_distance_scale = 18.7;
+  double short_distance_scale = 0.0;
   Simulation<Raster<int>, Raster<double>> simulation(42, infected);
-  simulation.remove(infected, susceptible, exposed, diseased,
+  simulation.remove(infected, susceptible,
                     temperature, lethal_temperature);
-  simulation.generate(infected, 0, reproductive_rate);
+  simulation.generate(infected, weather, weather_coefficient, reproductive_rate);
   simulation.disperse(susceptible, infected,
-                      infected_cohort, total_plants,
-                      outside_dispersers, dispersal_kernel, 0,
-                      0, short_distance_scale);
+                      mortality_tracker, total_plants,
+                      outside_dispersers, weather_coefficient, weather,
+                      dispersal_kernel, short_distance_scale);
   cout << infected;
   cout << outside_dispersers.size() << endl;
   return 0;
