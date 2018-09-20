@@ -3,8 +3,20 @@ using namespace Rcpp;
 #include "pops/simulation.hpp"
 #include "pops/raster.hpp"
 #include <iostream>
+#include <vector>
+#include <map>
+#include <iostream>
+#include <memory>
+#include <stdexcept>
+#include <fstream>
+#include <sstream>
+#include <string>
 
+using std::string;
 using std::cout;
+using std::cerr;
+using std::endl;
+
 using namespace pops;
 
 // [[Rcpp::plugins(cpp11)]]
@@ -30,8 +42,14 @@ NumericVector pops_model(NumericVector x) {
                       mortality_tracker, total_plants,
                       outside_dispersers, weather, weather_coefficient, 
                       dispersal_kernel, short_distance_scale);
+  // this is a test of vector of rasters
+  std::vector<Raster<int>> v;
+  v = {infected,susceptible};
+   // this is a test of vector of rasters
+   
   cout << infected;
   cout << outside_dispersers.size() << endl;
+  cout << v[1](0,0);  // this is a test of vector of rasters
   return 0;
 }
 
