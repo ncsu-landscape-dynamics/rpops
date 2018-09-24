@@ -5,7 +5,6 @@ using namespace Rcpp;
 #include <iostream>
 #include <vector>
 #include <map>
-#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <fstream>
@@ -17,19 +16,21 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-using namespace pops;
-// RCPP_EXPOSED_CLASS(Raster<int>);
 
+using namespace pops;
+
+//Raster<int> total_plants;
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 List pops_model(int random_seed, double lethal_temperature,
-                  double reproductive_rate,
-                  bool weather, 
-                  double short_distance_scale, 
-                  double percent_short_distance_dispersal = 0.0,
-                  double long_distance_scale = 0.0
-                  )
+                double reproductive_rate,
+                bool weather,
+                double short_distance_scale,
+                double start_time, double end_time,
+                double percent_short_distance_dispersal = 0.0,
+                double long_distance_scale = 0.0
+                )
   {
   Raster<int> infected = {{5, 0}, {0, 0}};
   Raster<int> mortality_tracker = {{0, 0}, {0, 0}};
@@ -39,10 +40,17 @@ List pops_model(int random_seed, double lethal_temperature,
   Raster<double> weather_coefficient = {{0.8, 0.8}, {0.2, 0.8}};
   std::vector<std::tuple<int, int>> outside_dispersers;
   DispersalKernel dispersal_kernel = CAUCHY;
-  //bool weather = true;
-  //double lethal_temperature = -4.5;
-  //double reproductive_rate = 4.5;
-  //double short_distance_scale = 0.0;
+  
+  Date dd_start(start_time, 01, 01);
+  Date dd_end(end_time, 12, 31);
+  string step = "month";
+  Date dd_current(dd_start);
+
+for (int current_week = 0; ; current_week++, step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
+        if (dd_current < dd_end)
+            if (season.month_in_season(dd_current.getMonth()))
+}
+  
   Simulation<Raster<int>, Raster<double>> simulation(random_seed, infected);
   simulation.remove(infected, susceptible,
                     temperature, lethal_temperature);
@@ -58,7 +66,10 @@ List pops_model(int random_seed, double lethal_temperature,
    
   cout << infected;
   cout << outside_dispersers.size() << endl;
-  cout << v[0];  // this is a test of vector of rasters
+  for(Raster<int> n : v) {
+    cout << n;  // this is a test of vector of rasters
+  }
+  
   return 0;
 }
 
