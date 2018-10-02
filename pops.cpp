@@ -2,6 +2,7 @@
 using namespace Rcpp;
 #include "pops/simulation.hpp"
 #include "pops/raster.hpp"
+#include "pops/date.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -21,13 +22,29 @@ using namespace pops;
 
 //Raster<int> total_plants;
 
+class Season
+{
+public:
+    Season(int start, int end)
+        : m_start_month(start), m_end_month(end)
+    {}
+    inline bool month_in_season(int month)
+    {
+        return month >= m_start_month && month <= m_end_month;
+    }
+private:
+    int m_start_month;
+    int m_end_month;
+};
+
+
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 List pops_model(int random_seed, double lethal_temperature,
                 double reproductive_rate,
                 bool weather,
                 double short_distance_scale,
-                double start_time, double end_time,
+                double start_time = 2018, double end_time = 2018,
                 double percent_short_distance_dispersal = 0.0,
                 double long_distance_scale = 0.0
                 )
@@ -41,16 +58,20 @@ List pops_model(int random_seed, double lethal_temperature,
   std::vector<std::tuple<int, int>> outside_dispersers;
   DispersalKernel dispersal_kernel = CAUCHY;
   
-  Date dd_start(start_time, 01, 01);
-  Date dd_end(end_time, 12, 31);
+  pops::Date dd_start(start_time, 01, 01);
+  pops::Date dd_end(end_time, 12, 31);
+  Season season(6,11);
   string step = "month";
-  Date dd_current(dd_start);
+  pops::Date dd_current(dd_start);
 
+  int counter = 0;
+  
 for (int current_week = 0; ; current_week++, step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
         if (dd_current < dd_end)
-            if (season.month_in_season(dd_current.getMonth()))
+            if (season.month_in_season(dd_current.month()))
+                counter += 1;
 }
-  
+
   Simulation<Raster<int>, Raster<double>> simulation(random_seed, infected);
   simulation.remove(infected, susceptible,
                     temperature, lethal_temperature);
@@ -69,8 +90,10 @@ for (int current_week = 0; ; current_week++, step == "month" ? dd_current.increa
   for(Raster<int> n : v) {
     cout << n;  // this is a test of vector of rasters
   }
+  cout << counter;
+  cout << dd_start;
+  cout << dd_end;
   
   return 0;
 }
-
 
