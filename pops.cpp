@@ -1,5 +1,6 @@
+// #define POPS_RASTER_WITH_GRASS_GIS
+
 #include <Rcpp.h>
-using namespace Rcpp;
 #include "pops/simulation.hpp"
 #include "pops/raster.hpp"
 #include "pops/date.hpp"
@@ -12,15 +13,24 @@ using namespace Rcpp;
 #include <sstream>
 #include <string>
 
+
+// extern "C"{
+// #include "grass/gis.h"
+// #include "grass/glocale.h"
+// #include "grass/raster.h"
+// }
+
 using std::string;
 using std::cout;
 using std::cerr;
 using std::endl;
 
-
+using namespace Rcpp;
 using namespace pops;
 
-//Raster<int> total_plants;
+// typedef Raster<int> IntegerRaster;
+// typedef Raster<double> DoubleRaster;
+// #define POPS_RASTER_WITH_GRASS_GIS
 
 class Season
 {
@@ -37,6 +47,17 @@ private:
     int m_end_month;
 };
 
+// RCPP_MODULE(rast) {
+//   class_<Raster<int>>("int_rast");
+//   
+// }
+
+// RcppExport SEXP Raster__new(SEXP rast_) {
+//   Raster<int> rast = as<Raster<int>>(rast_);
+//   Rcpp::XPtr<Raster<int>>
+//   ptr( new Raster<int>(rast), true);
+//   return ptr;
+// }
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
@@ -44,14 +65,30 @@ List pops_model(int random_seed, double lethal_temperature,
                 double reproductive_rate,
                 bool weather,
                 double short_distance_scale,
+                IntegerMatrix sus,
+                int cols,
+                int rows,
+                int ew_res,
+                int ns_res,
                 double start_time = 2018, double end_time = 2018,
                 double percent_short_distance_dispersal = 0.0,
                 double long_distance_scale = 0.0
                 )
   {
+  // Environment raster("package:raster");
+  // Function rast = raster["raster"];
+  
+  //Raster<int> suscept = Raster<int>::from_grass_raster(sus);
+  // infected = rast(infected);
+  Raster<int> susceptible = Raster<int>(cols, rows, ew_res, ns_res);
+  // mortality_tracker = rast(mortality_tracker);
+  // total_plants = rast(total_plants);
+  // temperature = rast(temperature);
+  // weather_coefficient = rast(weather_coefficient);
+  
   Raster<int> infected = {{5, 0}, {0, 0}};
   Raster<int> mortality_tracker = {{0, 0}, {0, 0}};
-  Raster<int> susceptible = {{10, 6}, {14, 15}};
+  // Raster<int> susceptible = {{10, 6}, {14, 15}};
   Raster<int> total_plants = {{15, 6}, {14, 15}};
   Raster<double> temperature = {{5, 0}, {0, 0}};
   Raster<double> weather_coefficient = {{0.8, 0.8}, {0.2, 0.8}};
@@ -66,12 +103,14 @@ List pops_model(int random_seed, double lethal_temperature,
 
   int counter = 0;
   
-for (int current_week = 0; ; current_week++, step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
-        if (dd_current < dd_end)
-            if (season.month_in_season(dd_current.month()))
-                counter += 1;
+for (int current_time_step = 0; ; current_time_step++, step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
+    if (season.month_in_season(dd_current.month()))
+    counter += 1;
+    if (dd_current >= dd_end)
+            break;
 }
 
+  // Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected);
   Simulation<Raster<int>, Raster<double>> simulation(random_seed, infected);
   simulation.remove(infected, susceptible,
                     temperature, lethal_temperature);
@@ -81,6 +120,7 @@ for (int current_week = 0; ; current_week++, step == "month" ? dd_current.increa
                       outside_dispersers, weather, weather_coefficient, 
                       dispersal_kernel, short_distance_scale);
   // this is a test of vector of rasters
+  // std::vector<IntegerMatrix> v;
   std::vector<Raster<int>> v;
   v = {infected,susceptible};
    // this is a test of vector of rasters
@@ -93,6 +133,8 @@ for (int current_week = 0; ; current_week++, step == "month" ? dd_current.increa
   cout << counter;
   cout << dd_start;
   cout << dd_end;
+  cout << dd_current;
+  //cout << sus;
   
   return 0;
 }
