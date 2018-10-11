@@ -29,16 +29,36 @@ reproductive_rate = 3.0
 dispersal_kernel = "CAUCHY"
 weather = TRUE
 short_distance_scale = 1.5
+use_lethal_temperature = TRUE
+lethal_temperature_month = 1
 infected = as.matrix(infected)
 susceptible = as.matrix(susceptible)
 total_plants = as.matrix(total_plants)
 mortality_tracker = as.matrix(mortality_tracker)
 temperature = as.matrix(temperature)
 weather_coefficient = as.matrix(weather_coefficient)
+start_time = 2018
+end_time = 2018
+dispersal_kern = "cauchy"
+percent_short_distance_dispersal = 1.0
+long_distance_scale = 0.0
+wind_dir = "NONE"
+kappa = 0
+season_month_start = 6
+season_month_end = 11
+time_step = "month"
 
-pops_model(random_seed = random_seed, lethal_temperature = lethal_temperature, 
+pops_model(random_seed = random_seed, 
+           lethal_temperature = lethal_temperature, use_lethal_temperature, lethal_temperature_month,
            reproductive_rate = reproductive_rate, 
            weather = weather, short_distance_scale = short_distance_scale, infected = infected,
            susceptible = susceptible, mortality_tracker =mortality_tracker,
            total_plants = total_plants, temperature = temperature,
-           weather_coefficient = weather_coefficient, ew_res = ew_res, ns_res = ns_res)
+           weather_coefficient = weather_coefficient, 
+           ew_res = ew_res, ns_res = ns_res,
+           time_step = time_step,
+           season_month_start = season_month_start, season_month_end = season_month_end,
+           start_time = start_time, end_time = end_time,
+           dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
+           long_distance_scale = long_distance_scale,
+           wind_dir = wind_dir, kappa = kappa)

@@ -2,37 +2,43 @@
 library(Rcpp)
 library(raster)
 library(rgdal)
-# library(velox)
-# library(rgrass7)
-# library(link2GI)
-##link = findGRASS()
 Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
 sourceCpp("pops.cpp")
 
-# initGRASS(gisBase = "C:/Program Files/GRASS GIS 7.4.1",
-#           home = getwd(), gisDbase = "GRASS_TEMP", override = TRUE)
-
 ## Read in data
-# sus = "C:/Users/Chris/Desktop/sus.tif"
-infected = raster(matrix(c(5,0,0,0), ncol=2, nrow=2))
-sus = matrix(c(10,6,14,15), ncol=2, nrow=2)
-#writeRaster(x= sus, filename = "C:/Users/Chris/Desktop/sus.tif", overwrite = TRUE, format = 'GTiff')
-total_plants = raster(matrix(c(15,6,14,15), ncol=2, nrow=2))
-mortality_tracker = raster(matrix(c(0,0,0,0), ncol=2, nrow=2))
-weather_coefficient = raster(matrix(c(5,0,0,0), ncol=2, nrow=2))
+infected_file = 
 
-cols = as.numeric(ncol(sus))
-rows = as.numeric(nrow(sus))
-ew_res = xres(sus)
-ns_res = yres(sus)
+infected = raster(infected_file)
+susceptible = raster(susceptible_file)
+total_plants = raster(total_plants_file)
+temperature = raster(temperature_file)
+weather_coefficient = raster(weather_coefficient_file)
+
+mortality_tracker = raster(mortality_tracker_file)
+
+cols = as.numeric(ncol(susceptible))
+rows = as.numeric(nrow(susceptible))
+ew_res = xres(susceptible)
+ns_res = yres(susceptible)
 lethal_temperature = -4.5
 random_seed = 42
-reproductive_rate = 7.0
+reproductive_rate = 8.0
 dispersal_kernel = "CAUCHY"
 weather = TRUE
-short_distance_scale = 0.5
+short_distance_scale = 1.5
+use_lethal_temperature = TRUE
+lethal_temperature_month = 1
+infected = as.matrix(infected)
+susceptible = as.matrix(susceptible)
+total_plants = as.matrix(total_plants)
+mortality_tracker = as.matrix(mortality_tracker)
+temperature = as.matrix(temperature)
+weather_coefficient = as.matrix(weather_coefficient)
 
-pops_model(random_seed = random_seed, lethal_temperature = lethal_temperature, 
+pops_model(random_seed = random_seed, 
+           lethal_temperature = lethal_temperature, use_lethal_temperature, lethal_temperature_month,
            reproductive_rate = reproductive_rate, 
-           weather = weather, short_distance_scale = short_distance_scale,
-           sus = sus)
+           weather = weather, short_distance_scale = short_distance_scale, infected = infected,
+           susceptible = susceptible, mortality_tracker =mortality_tracker,
+           total_plants = total_plants, temperature = temperature,
+           weather_coefficient = weather_coefficient, ew_res = ew_res, ns_res = ns_res)

@@ -1,5 +1,3 @@
-// #define POPS_RASTER_WITH_GRASS_GIS
-
 #include <Rcpp.h>
 #include "pops/simulation.hpp"
 #include "pops/raster.hpp"
@@ -13,13 +11,6 @@
 #include <sstream>
 #include <string>
 
-
-// extern "C"{
-// #include "grass/gis.h"
-// #include "grass/glocale.h"
-// #include "grass/raster.h"
-// }
-
 using std::string;
 using std::cout;
 using std::cerr;
@@ -28,113 +19,144 @@ using std::endl;
 using namespace Rcpp;
 using namespace pops;
 
-// typedef Raster<int> IntegerRaster;
-// typedef Raster<double> DoubleRaster;
-// #define POPS_RASTER_WITH_GRASS_GIS
-
 class Season
 {
 public:
-    Season(int start, int end)
-        : m_start_month(start), m_end_month(end)
-    {}
-    inline bool month_in_season(int month)
-    {
-        return month >= m_start_month && month <= m_end_month;
-    }
+  Season(int start, int end)
+    : m_start_month(start), m_end_month(end)
+  {}
+  inline bool month_in_season(int month)
+  {
+    return month >= m_start_month && month <= m_end_month;
+  }
 private:
-    int m_start_month;
-    int m_end_month;
+  int m_start_month;
+  int m_end_month;
 };
 
-// RCPP_MODULE(rast) {
-//   class_<Raster<int>>("int_rast");
-//   
-// }
+bool all_infected(IntegerMatrix susceptible)
+{
+  bool allInfected = true;
+  for (int j = 0; j < susceptible.rows(); j++) {
+    for (int k = 0; k < susceptible.cols(); k++) {
+      if (susceptible(j, k) > 0)
+        allInfected = false;
+    }
+  }
+  return allInfected;
+}
 
-// RcppExport SEXP Raster__new(SEXP rast_) {
-//   Raster<int> rast = as<Raster<int>>(rast_);
-//   Rcpp::XPtr<Raster<int>>
-//   ptr( new Raster<int>(rast), true);
-//   return ptr;
-// }
+Direction direction_enum_from_string(const string& text)
+{
+  std::map<string, Direction> mapping{
+    {"N", N}, {"NE", NE}, {"E", E}, {"SE", SE}, {"S", S},
+    {"SW", SW}, {"W", W}, {"NW", NW}, {"NONE", NONE}
+  };
+  try {
+    return mapping.at(text);
+  }
+  catch (const std::out_of_range&) {
+    throw std::invalid_argument("direction_enum_from_string: Invalid"
+                                  " value '" + text +"' provided");
+  }
+}
+
+DispersalKernel radial_type_from_string(const string& text)
+{
+  if (text == "cauchy")
+    return CAUCHY;
+  else if (text == "cauchy_double_scale")
+    return CAUCHY_DOUBLE_SCALE;
+  else
+    throw std::invalid_argument("radial_type_from_string: Invalid"
+                                  " value '" + text +"' provided");
+}
 
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
-List pops_model(int random_seed, double lethal_temperature,
+List pops_model(int random_seed, 
+                double lethal_temperature, bool use_lethal_temperature, int lethal_temperature_month,
                 double reproductive_rate,
                 bool weather,
                 double short_distance_scale,
-                IntegerMatrix sus,
-                int cols,
-                int rows,
-                int ew_res,
-                int ns_res,
+                IntegerMatrix infected,
+                IntegerMatrix susceptible,
+                IntegerMatrix mortality_tracker,
+                IntegerMatrix total_plants,
+                NumericMatrix temperature,
+                NumericMatrix weather_coefficient,
+                int ew_res, int ns_res,
+                string time_step,
+                int season_month_start = 1, int season_month_end = 12,
                 double start_time = 2018, double end_time = 2018,
-                double percent_short_distance_dispersal = 0.0,
-                double long_distance_scale = 0.0
-                )
-  {
-  // Environment raster("package:raster");
-  // Function rast = raster["raster"];
+                string dispersal_kern = "cauchy", double percent_short_distance_dispersal = 0.0,
+                double long_distance_scale = 0.0,
+                string wind_dir = "NONE", double kappa = 0
+)
+{
   
-  //Raster<int> suscept = Raster<int>::from_grass_raster(sus);
-  // infected = rast(infected);
-  Raster<int> susceptible = Raster<int>(cols, rows, ew_res, ns_res);
-  // mortality_tracker = rast(mortality_tracker);
-  // total_plants = rast(total_plants);
-  // temperature = rast(temperature);
-  // weather_coefficient = rast(weather_coefficient);
-  
-  Raster<int> infected = {{5, 0}, {0, 0}};
-  Raster<int> mortality_tracker = {{0, 0}, {0, 0}};
-  // Raster<int> susceptible = {{10, 6}, {14, 15}};
-  Raster<int> total_plants = {{15, 6}, {14, 15}};
-  Raster<double> temperature = {{5, 0}, {0, 0}};
-  Raster<double> weather_coefficient = {{0.8, 0.8}, {0.2, 0.8}};
   std::vector<std::tuple<int, int>> outside_dispersers;
-  DispersalKernel dispersal_kernel = CAUCHY;
-  
+  DispersalKernel dispersal_kernel = radial_type_from_string(dispersal_kern);
   pops::Date dd_start(start_time, 01, 01);
   pops::Date dd_end(end_time, 12, 31);
-  Season season(6,11);
-  string step = "month";
+  Direction wind_direction = direction_enum_from_string(wind_dir);
+  Season season(season_month_start,season_month_end);
   pops::Date dd_current(dd_start);
-
+  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected, ew_res, ns_res);
   int counter = 0;
+  std::vector<IntegerMatrix> infected_vector;
+  infected_vector.push_back(infected);
   
-for (int current_time_step = 0; ; current_time_step++, step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
-    if (season.month_in_season(dd_current.month()))
-    counter += 1;
-    if (dd_current >= dd_end)
-            break;
-}
+  for (int current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
+    
+    if (all_infected(susceptible)) {
+      cerr << "In the " << dd_current << "all suspectible hosts are infected!" << endl;
+      break;
+    }
+    
+    if (use_lethal_temperature && dd_current.month() == lethal_temperature_month && dd_current.year() <= dd_end.year()) {
+      simulation.remove(infected, susceptible, temperature, lethal_temperature);
+    }
+    
+    if (season.month_in_season(dd_current.month())) {
+      counter += 1;
 
-  // Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected);
-  Simulation<Raster<int>, Raster<double>> simulation(random_seed, infected);
-  simulation.remove(infected, susceptible,
-                    temperature, lethal_temperature);
-  simulation.generate(infected, weather, weather_coefficient, reproductive_rate);
-  simulation.disperse(susceptible, infected,
-                      mortality_tracker, total_plants,
-                      outside_dispersers, weather, weather_coefficient, 
-                      dispersal_kernel, short_distance_scale);
+      simulation.generate(infected, weather, weather_coefficient, reproductive_rate);
+      simulation.disperse(susceptible, infected,
+                          mortality_tracker, total_plants,
+                          outside_dispersers, 
+                          weather, weather_coefficient, 
+                          dispersal_kernel, short_distance_scale,
+                          percent_short_distance_dispersal, long_distance_scale,
+                          wind_direction, kappa);
+    }
+  
+    if (dd_current.day() == 01 && dd_current.month() == 01 && dd_current.year() > dd_start.year()) {
+      infected_vector.push_back(infected);
+    }
+    if (dd_current >= dd_end) {
+      break;
+    }
+  
+  }
+  
   // this is a test of vector of rasters
   // std::vector<IntegerMatrix> v;
-  std::vector<Raster<int>> v;
+  std::vector<IntegerMatrix> v;
   v = {infected,susceptible};
-   // this is a test of vector of rasters
-   
-  cout << infected;
+
+  
+  for (IntegerMatrix infe : infected_vector) {
+    cout << infe;
+  }
   cout << outside_dispersers.size() << endl;
-  for(Raster<int> n : v) {
+  for(IntegerMatrix n : v) {
     cout << n;  // this is a test of vector of rasters
   }
   cout << counter;
   cout << dd_start;
   cout << dd_end;
   cout << dd_current;
-  //cout << sus;
   
   return 0;
 }
