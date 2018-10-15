@@ -72,6 +72,7 @@ DispersalKernel radial_type_from_string(const string& text)
                                   " value '" + text +"' provided");
 }
 
+
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 List pops_model(int random_seed, 
@@ -83,8 +84,8 @@ List pops_model(int random_seed,
                 IntegerMatrix susceptible,
                 IntegerMatrix mortality_tracker,
                 IntegerMatrix total_plants,
-                NumericMatrix temperature,
-                NumericMatrix weather_coefficient,
+                std::vector<NumericMatrix> temperature,
+                std::vector<NumericMatrix> weather_coefficient,
                 int ew_res, int ns_res,
                 string time_step,
                 int season_month_start = 1, int season_month_end = 12,
@@ -104,60 +105,57 @@ List pops_model(int random_seed,
   pops::Date dd_current(dd_start);
   Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected, ew_res, ns_res);
   int counter = 0;
+  int n_year = 0;
   std::vector<IntegerMatrix> infected_vector;
-  infected_vector.push_back(infected);
+  std::vector<IntegerMatrix> susceptible_vector;
   
   for (int current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
-    
+        
+    if (dd_current.day() == 01 && dd_current.month() == 01 && dd_current.year() >= dd_start.year()) {
+      infected_vector.push_back(Rcpp::clone(infected));
+      susceptible_vector.push_back(Rcpp::clone(susceptible));
+      n_year += 1;
+    }
+      
     if (all_infected(susceptible)) {
       cerr << "In the " << dd_current << "all suspectible hosts are infected!" << endl;
       break;
     }
     
     if (use_lethal_temperature && dd_current.month() == lethal_temperature_month && dd_current.year() <= dd_end.year()) {
-      simulation.remove(infected, susceptible, temperature, lethal_temperature);
+      unsigned simulation_year = dd_current.year() - dd_start.year();
+      if (simulation_year >= temperature.size()){
+        cerr << "Not enough years of temperature data" << endl;
+      }
+      simulation.remove(infected, susceptible, temperature[simulation_year], lethal_temperature);
     }
     
     if (season.month_in_season(dd_current.month())) {
       counter += 1;
+      if (current_time_step >= weather_coefficient.size()) {
+        cerr << "Not enough time steps of weather coefficient data" << endl;
+      }
 
-      simulation.generate(infected, weather, weather_coefficient, reproductive_rate);
+      simulation.generate(infected, weather, weather_coefficient[current_time_step], reproductive_rate);
       simulation.disperse(susceptible, infected,
                           mortality_tracker, total_plants,
                           outside_dispersers, 
-                          weather, weather_coefficient, 
+                          weather, weather_coefficient[current_time_step], 
                           dispersal_kernel, short_distance_scale,
                           percent_short_distance_dispersal, long_distance_scale,
                           wind_direction, kappa);
+    
     }
-  
-    if (dd_current.day() == 01 && dd_current.month() == 01 && dd_current.year() > dd_start.year()) {
-      infected_vector.push_back(infected);
-    }
+    
     if (dd_current >= dd_end) {
       break;
     }
   
   }
+  cout << infected_vector[0];
+  return List::create(
+    _["infected_vector"] = infected_vector,
+    _["susceptible_vector"] = susceptible_vector
+  );
   
-  // this is a test of vector of rasters
-  // std::vector<IntegerMatrix> v;
-  std::vector<IntegerMatrix> v;
-  v = {infected,susceptible};
-
-  
-  for (IntegerMatrix infe : infected_vector) {
-    cout << infe;
-  }
-  cout << outside_dispersers.size() << endl;
-  for(IntegerMatrix n : v) {
-    cout << n;  // this is a test of vector of rasters
-  }
-  cout << counter;
-  cout << dd_start;
-  cout << dd_end;
-  cout << dd_current;
-  
-  return 0;
 }
-

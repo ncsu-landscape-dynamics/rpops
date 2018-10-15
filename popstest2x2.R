@@ -19,6 +19,32 @@ temperature = raster(temperature, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
 weather_coefficient = matrix(c(0.8,0.5,0.9,0.2), ncol=2, nrow=2)
 weather_coefficient = raster(weather_coefficient, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
 
+season_month_start = 6
+season_month_end = 11
+time_step = "month"
+start_time = 2018
+end_time = 2020
+
+number_of_years = end_time-start_time+1
+temperature_stack <- stack(lapply(1:number_of_years, function(i) temperature))
+temperature = list(as.matrix(temperature_stack[[1]]))
+for(i in 2:number_of_years) {
+   temperature[[i]] <- as.matrix(temperature_stack[[i]])
+}
+
+if (time_step == "week") {
+  number_of_time_steps = (end_time-start_time+1)*52 +1
+} else if (time_step == "month") {
+  number_of_time_steps = (end_time-start_time+1)*12
+} else if (time_step == "day") {
+  number_of_time_steps = (end_time-start_time+1)*365
+}
+weather_coefficient_stack <- stack(lapply(1:number_of_time_steps, function(i) weather_coefficient))
+weather_coefficient <- list(as.matrix(weather_coefficient_stack[[1]]))
+for(i in 2:number_of_time_steps) {
+  weather_coefficient[[i]] <- as.matrix(weather_coefficient_stack[[i]])
+}
+
 cols = as.numeric(ncol(susceptible))
 rows = as.numeric(nrow(susceptible))
 ew_res = xres(susceptible)
@@ -35,20 +61,15 @@ infected = as.matrix(infected)
 susceptible = as.matrix(susceptible)
 total_plants = as.matrix(total_plants)
 mortality_tracker = as.matrix(mortality_tracker)
-temperature = as.matrix(temperature)
 weather_coefficient = as.matrix(weather_coefficient)
-start_time = 2018
-end_time = 2018
 dispersal_kern = "cauchy"
 percent_short_distance_dispersal = 1.0
 long_distance_scale = 0.0
 wind_dir = "NONE"
 kappa = 0
-season_month_start = 6
-season_month_end = 11
-time_step = "month"
 
-pops_model(random_seed = random_seed, 
+
+data <- pops_model(random_seed = random_seed, 
            lethal_temperature = lethal_temperature, use_lethal_temperature, lethal_temperature_month,
            reproductive_rate = reproductive_rate, 
            weather = weather, short_distance_scale = short_distance_scale, infected = infected,
