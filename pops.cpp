@@ -152,7 +152,7 @@ List pops_model(int random_seed,
     }
   
   }
-  cout << infected_vector[0];
+
   return List::create(
     _["infected_vector"] = infected_vector,
     _["susceptible_vector"] = susceptible_vector
