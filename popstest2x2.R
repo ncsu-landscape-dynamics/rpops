@@ -6,50 +6,27 @@ Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
 sourceCpp("pops.cpp")
 
 ## Read in data
-infected_file = "H:/My Drive/PoPS and Tangible Landscape/Case Studies/spotted_latternfly/slf_new_extent/initial_infections_2017_single_count_pm.tif"
-host_file = "H:/My Drive/PoPS and Tangible Landscape/Case Studies/spotted_latternfly/slf_new_extent/tree_of_heaven_new_extent_pm.tif"
-total_plants_file = "H:/My Drive/PoPS and Tangible Landscape/Case Studies/spotted_latternfly/slf_new_extent/total_hosts_pm.tif"
-temperature_file = "H:/My Drive/PoPS and Tangible Landscape/Case Studies/spotted_latternfly/slf_new_extent/avg_spread_crit_temp_slf_2018_2022_pm.tif"
-temperature_coefficient_file = "H:/My Drive/PoPS and Tangible Landscape/Case Studies/spotted_latternfly/slf_new_extent/avg_spread_temp_coefficient_slf_2018_2022_pm.tif"
-precipitation_coefficient_file = ""
+infected = matrix(c(5,0,0,0), ncol=2, nrow=2)
+infected = raster(infected, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
+susceptible = matrix(c(10,6,14,15), ncol=2, nrow=2)
+susceptible = raster(susceptible, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
+total_plants = matrix(c(15,6,14,15), ncol=2, nrow=2)
+total_plants = raster(total_plants, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
+mortality_tracker = matrix(c(0,0,0,0), ncol=2, nrow=2)
+mortality_tracker = raster(mortality_tracker, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
+temperature = matrix(c(5,0,0,0), ncol=2, nrow=2)
+temperature = raster(temperature, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
+weather_coefficient = matrix(c(0.8,0.5,0.9,0.2), ncol=2, nrow=2)
+weather_coefficient = raster(weather_coefficient, xmn = 0, ymn = 0, xmx = 60, ymx = 60)
 
-use_lethal_temperature = TRUE 
-temp = TRUE
-precip = FALSE
-
-infected = raster(infected_file)
-infected[is.na(infected)] <- 0
-host = raster(host_file)
-host[is.na(host)] <- 0
-susceptible = host - infected
-susceptible[is.na(susceptible)] <- 0
-total_plants = raster(total_plants_file)
-total_plants[is.na(total_plants)] <- 0
-if (use_lethal_temperature == TRUE) {
-  temperature_stack = stack(temperature_file)
-  temperature_stack[is.na(temperature_stack)] <- 0
-}
-if (temp == TRUE) {
-  temperature_coefficient = stack(temperature_coefficient_file)
-  weather = TRUE
-  weather_coefficient_stack = temperature_coefficient
-  if (precip ==TRUE){
-    precipitation_coefficient = stack(precipitation_coefficient_file)
-    weather_coefficient_stack = weather_coefficient_stack * precipitation_coefficient
-  }
-} else if(precip == TRUE){
-   precipitation_coefficient = stack(precipitation_coefficient_file)
-   weather = TRUE
-   weather_coefficient_stack = precipitation_coefficient
-}
-weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
 season_month_start = 6
 season_month_end = 11
 time_step = "month"
 start_time = 2018
-end_time = 2022
+end_time = 2020
 
 number_of_years = end_time-start_time+1
+temperature_stack <- stack(lapply(1:number_of_years, function(i) temperature))
 temperature = list(as.matrix(temperature_stack[[1]]))
 for(i in 2:number_of_years) {
    temperature[[i]] <- as.matrix(temperature_stack[[i]])
@@ -62,33 +39,35 @@ if (time_step == "week") {
 } else if (time_step == "day") {
   number_of_time_steps = (end_time-start_time+1)*365
 }
-
+weather_coefficient_stack <- stack(lapply(1:number_of_time_steps, function(i) weather_coefficient))
 weather_coefficient <- list(as.matrix(weather_coefficient_stack[[1]]))
 for(i in 2:number_of_time_steps) {
   weather_coefficient[[i]] <- as.matrix(weather_coefficient_stack[[i]])
 }
 
-mortality_tracker = infected
-values(mortality_tracker) <- 0
-
 cols = as.numeric(ncol(susceptible))
 rows = as.numeric(nrow(susceptible))
 ew_res = xres(susceptible)
 ns_res = yres(susceptible)
-lethal_temperature = -12.87
+lethal_temperature = -4.5
 random_seed = 42
 reproductive_rate = 3.0
-short_distance_scale = 59
+dispersal_kernel = "CAUCHY"
+weather = TRUE
+short_distance_scale = 1.5
+use_lethal_temperature = TRUE
 lethal_temperature_month = 1
 infected = as.matrix(infected)
 susceptible = as.matrix(susceptible)
 total_plants = as.matrix(total_plants)
 mortality_tracker = as.matrix(mortality_tracker)
+weather_coefficient = as.matrix(weather_coefficient)
 dispersal_kern = "cauchy"
 percent_short_distance_dispersal = 1.0
 long_distance_scale = 0.0
 wind_dir = "NONE"
 kappa = 0
+
 
 data <- pops_model(random_seed = random_seed, 
            lethal_temperature = lethal_temperature, use_lethal_temperature, lethal_temperature_month,
