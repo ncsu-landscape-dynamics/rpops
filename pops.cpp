@@ -105,17 +105,12 @@ List pops_model(int random_seed,
   pops::Date dd_current(dd_start);
   Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected, ew_res, ns_res);
   int counter = 0;
-  int n_year = 0;
+  
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
+  std::vector<int> simulated_weeks;
   
   for (int current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
-        
-    if (dd_current.day() == 01 && dd_current.month() == 01 && dd_current.year() >= dd_start.year()) {
-      infected_vector.push_back(Rcpp::clone(infected));
-      susceptible_vector.push_back(Rcpp::clone(susceptible));
-      n_year += 1;
-    }
       
     if (all_infected(susceptible)) {
       cerr << "In the " << dd_current << "all suspectible hosts are infected!" << endl;
@@ -132,6 +127,8 @@ List pops_model(int random_seed,
     
     if (season.month_in_season(dd_current.month())) {
       counter += 1;
+      simulated_weeks.push_back(current_time_step);
+      
       if (current_time_step >= weather_coefficient.size()) {
         cerr << "Not enough time steps of weather coefficient data" << endl;
       }
@@ -147,6 +144,11 @@ List pops_model(int random_seed,
     
     }
     
+    if ((time_step == "month" ? dd_current.is_last_month_of_year() : dd_current.is_last_week_of_year())) {
+      infected_vector.push_back(Rcpp::clone(infected));
+      susceptible_vector.push_back(Rcpp::clone(susceptible));
+    }
+    
     if (dd_current >= dd_end) {
       break;
     }
@@ -155,7 +157,8 @@ List pops_model(int random_seed,
 
   return List::create(
     _["infected_vector"] = infected_vector,
-    _["susceptible_vector"] = susceptible_vector
+    _["susceptible_vector"] = susceptible_vector, 
+    _["simulated_weeks"] = simulated_weeks
   );
   
 }
