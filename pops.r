@@ -104,3 +104,48 @@ data <- pops_model(random_seed = random_seed,
            dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
            long_distance_scale = long_distance_scale,
            wind_dir = wind_dir, kappa = kappa)
+
+data2 <- list(data)
+for (seed in 1:100) {
+  data2[[seed]] <- pops_model(random_seed = seed, 
+           lethal_temperature = lethal_temperature, use_lethal_temperature, lethal_temperature_month,
+           reproductive_rate = reproductive_rate, 
+           weather = weather, short_distance_scale = short_distance_scale, infected = infected,
+           susceptible = susceptible, mortality_tracker =mortality_tracker,
+           total_plants = total_plants, temperature = temperature,
+           weather_coefficient = weather_coefficient, 
+           ew_res = ew_res, ns_res = ns_res,
+           time_step = time_step,
+           season_month_start = season_month_start, season_month_end = season_month_end,
+           start_time = start_time, end_time = end_time,
+           dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
+           long_distance_scale = long_distance_scale,
+           wind_dir = wind_dir, kappa = kappa)
+}
+
+infected = raster(infected_file)
+infected[is.na(infected)] <- 0
+infected_stack <- stack()
+infected_list <- list()
+for (j in 1:length(data2)) {
+  infected_stack <- stack()
+  for (q in 1:length(data2[[1]]$infected_vector)) {
+    infected[] <- data2[[j]]$infected_vector[[q]]
+    infected_stack <- stack(infected_stack, infected)
+  }
+  infected_list[[j]] <- infected_stack
+}
+
+m <- c(0, .99, 0, 
+       1, Inf,1)
+rcl_mat <- matrix(m, ncol=3, byrow=TRUE)
+prediction_list <- list()
+probability <- prediction <- reclassify(infected_list[[i]], rcl_mat)
+probability[probability > 0] <- 0
+for (i in 1:length(infected_list)) {
+  prediction <- reclassify(infected_list[[i]], rcl_mat)
+  prediction_list[[i]] <- prediction
+  probability <- probability + prediction
+}
+
+
