@@ -19,20 +19,6 @@ using std::endl;
 using namespace Rcpp;
 using namespace pops;
 
-class Season
-{
-public:
-  Season(int start, int end)
-    : m_start_month(start), m_end_month(end)
-  {}
-  inline bool month_in_season(int month)
-  {
-    return month >= m_start_month && month <= m_end_month;
-  }
-private:
-  int m_start_month;
-  int m_end_month;
-};
 
 bool all_infected(IntegerMatrix susceptible)
 {
