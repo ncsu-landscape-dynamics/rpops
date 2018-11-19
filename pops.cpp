@@ -115,7 +115,7 @@ List pops_model(int random_seed,
       counter += 1;
       simulated_weeks.push_back(current_time_step);
       
-      if (current_time_step >= weather_coefficient.size()) {
+      if (current_time_step >= weather_coefficient.size()  && weather == TRUE) {
         cerr << "Not enough time steps of weather coefficient data" << endl;
       }
 
