@@ -1,0 +1,19 @@
+# select language
+language: r
+cache: packages
+sudo: false
+
+r:
+  - oldrel
+  - release
+  - devel
+
+# install dependencies
+addons:
+  apt:
+    packages:
+      - R
+
+# test code
+script:
+  - R -e "source('popstest2x2.R'); data;"
