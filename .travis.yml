@@ -1,5 +1,4 @@
-# select language
-language: r
+language: R
 cache: packages
 sudo: false
 
@@ -13,6 +12,12 @@ addons:
   apt:
     packages:
       - R
+
+r_packages:
+  - covr
+
+after_success:
+  - Rscript -e 'library(covr); codecov()'
 
 # test code
 script:
