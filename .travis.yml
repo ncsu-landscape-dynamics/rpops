@@ -1,13 +1,11 @@
 language: r
+cache: packages
+sudo: true
+dist: trusty
 
 env: _R_CHECK_CRAN_INCOMING_=FALSE
 
-r:
-  - oldrel
-  - release
-  - devel
 
-# install dependencies
 addons:
   apt:
     packages:
@@ -23,6 +21,5 @@ r_packages:
 after_success:
   - Rscript -e 'library(covr); codecov()'
 
-# test code
 script:
-  - R -e "source('popstest2x2.R'); data;"
+  - R -e "source('test/popstest2x2.R'); data;"
