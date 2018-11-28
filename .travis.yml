@@ -1,6 +1,6 @@
-language: R
-cache: packages
-sudo: false
+language: r
+
+env: _R_CHECK_CRAN_INCOMING_=FALSE
 
 r:
   - oldrel
@@ -15,6 +15,10 @@ addons:
 
 r_packages:
   - covr
+  - devtools
+  - raster
+  - rgdal
+  - Rcpp
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
