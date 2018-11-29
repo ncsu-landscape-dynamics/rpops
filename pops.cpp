@@ -143,8 +143,7 @@ List pops_model(int random_seed,
 
   return List::create(
     _["infected_vector"] = infected_vector,
-    _["susceptible_vector"] = susceptible_vector, 
-    _["simulated_weeks"] = simulated_weeks
+    _["susceptible_vector"] = susceptible_vector
   );
   
 }

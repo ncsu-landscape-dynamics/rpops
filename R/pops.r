@@ -41,8 +41,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
                  wind_dir = "NONE", kappa = 0, random_seed = 42){ 
   
   Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
-  Rcpp::sourceCpp("src/pops.cpp")
-  random_seed <- random_seed
+  Rcpp::sourceCpp("pops.cpp")
   
   if (time_step == "week") {
     number_of_time_steps <- (end_time-start_time+1)*52 +1
@@ -70,6 +69,10 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
     for(i in 2:number_of_years) {
       temperature[[i]] <- as.matrix(temperature_stack[[i]])
     }
+  } else {
+    temperature <- host
+    raster::values(temperature) <- 1
+    temperature <- raster::as.matrix(temperature)
   }
   
   weather <- FALSE
@@ -93,6 +96,10 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
     for(i in 2:number_of_time_steps) {
       weather_coefficient[[i]] <- as.matrix(weather_coefficient_stack[[i]])
     }
+  } else {
+    weather_coefficient <- host
+    raster::values(weather_coefficient) <- 1
+    weather_coefficient <- raster::as.matrix(weather_coefficient)
   }
   
   ew_res <- raster::xres(susceptible)
@@ -101,10 +108,10 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   mortality_tracker <- infected
   raster::values(mortality_tracker) <- 0
   
-  infected <- as.matrix(infected)
-  susceptible <- as.matrix(susceptible)
-  total_plants <- as.matrix(total_plants)
-  mortality_tracker <- as.matrix(mortality_tracker)
+  infected <- raster::as.matrix(infected)
+  susceptible <- raster::as.matrix(susceptible)
+  total_plants <- raster::as.matrix(total_plants)
+  mortality_tracker <- raster::as.matrix(mortality_tracker)
   
   data <- pops_model(random_seed, 
            lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
@@ -120,5 +127,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
            dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
            long_distance_scale = long_distance_scale,
            wind_dir = wind_dir, kappa = kappa)
+  
+  return(data)
 }
 
