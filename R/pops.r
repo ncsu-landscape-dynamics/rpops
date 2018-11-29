@@ -1,8 +1,35 @@
-library(Rcpp)
-library(raster)
-library(rgdal)
-Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
-
+#' PoPS (Pest or Pathogen Spread) model
+#'
+#' @param infected_file path to raster file with initial infections
+#' @param host_file path to raster file with number of hosts
+#' @param total_plants_file path to raster file with number of total plants
+#' @param reproductive_rate 
+#' @param use_lethal_temperature 
+#' @param temp 
+#' @param precip 
+#' @param temperature_file path to raster file with temperature data for minimum temperature
+#' @param temperature_coefficient_file path to raster file with 
+#' @param precipitation_coefficient_file path to raster file with 
+#' @param season_month_start 
+#' @param season_month_end 
+#' @param time_step 
+#' @param start_time 
+#' @param end_time 
+#' @param dispersal_kern 
+#' @param percent_short_distance_dispersal 
+#' @param short_distance_scale 
+#' @param long_distance_scale 
+#' @param lethal_temperature 
+#' @param lethal_temperature_month 
+#' @param wind_dir sets the wind direction 
+#' @param kappa sets the strength of the wind direction in the von-mises distribution
+#' @param random_seed sets the random seed for the simulation used for reproducibility
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' 
 pops <- function(infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
                  use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE,
                  temperature_file = "", temperature_coefficient_file = "", precipitation_coefficient_file ="",
@@ -13,6 +40,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
                  wind_dir = "NONE", kappa = 0, random_seed = 42){ 
   
+  Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
   sourceCpp("pops.cpp")
   random_seed <- random_seed
   

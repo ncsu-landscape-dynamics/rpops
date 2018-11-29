@@ -1,2 +1,5 @@
+^pops/\.travis\.yml$
 ^rpops\.Rproj$
 ^\.Rproj\.user$
+^\.travis\.yml$
+^pops\.travis\.yml$
