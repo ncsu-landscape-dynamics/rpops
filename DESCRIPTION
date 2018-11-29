@@ -8,7 +8,7 @@ Authors@R: c(
     person("Vaclav", "Petras", role = c("aut")),
     person("Anna", "Petrasova", role = c("aut"))
     )
-Depends: R (>= 3.1)
+Depends: R (>= 3.1.0)
 Imports: 
     raster,
     rgdal,
@@ -18,3 +18,6 @@ Encoding: UTF-8
 LazyData: true
 Suggests: 
     testthat
+RoxygenNote: 6.1.1
+LinkingTo: 
+    Rcpp

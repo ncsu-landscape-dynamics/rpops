@@ -41,7 +41,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
                  wind_dir = "NONE", kappa = 0, random_seed = 42){ 
   
   Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
-  sourceCpp("pops.cpp")
+  Rcpp::sourceCpp("src/pops.cpp")
   random_seed <- random_seed
   
   if (time_step == "week") {
@@ -54,17 +54,17 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   
   number_of_years <- end_time-start_time+1
   
-  infected <- raster(infected_file)
+  infected <- raster::raster(infected_file)
   infected[is.na(infected)] <- 0
-  host <- raster(host_file)
+  host <- raster::raster(host_file)
   host[is.na(host)] <- 0
   susceptible <- host - infected
   susceptible[is.na(susceptible)] <- 0
-  total_plants <- raster(total_plants_file)
+  total_plants <- raster::raster(total_plants_file)
   total_plants[is.na(total_plants)] <- 0
   
   if (use_lethal_temperature == TRUE) {
-    temperature_stack <- stack(temperature_file)
+    temperature_stack <- raster::stack(temperature_file)
     temperature_stack[is.na(temperature_stack)] <- 0
     temperature <- list(as.matrix(temperature_stack[[1]]))
     for(i in 2:number_of_years) {
@@ -74,15 +74,15 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   
   weather <- FALSE
   if (temp == TRUE) {
-    temperature_coefficient <- stack(temperature_coefficient_file)
+    temperature_coefficient <- raster::stack(temperature_coefficient_file)
     weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (precip ==TRUE){
-      precipitation_coefficient <- stack(precipitation_coefficient_file)
+      precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if(precip == TRUE){
-    precipitation_coefficient <- stack(precipitation_coefficient_file)
+    precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
     weather <- TRUE
     weather_coefficient_stack <- precipitation_coefficient
   }
@@ -95,11 +95,11 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
     }
   }
   
-  ew_res <- xres(susceptible)
-  ns_res <- yres(susceptible)
+  ew_res <- raster::xres(susceptible)
+  ns_res <- raster::yres(susceptible)
   
   mortality_tracker <- infected
-  values(mortality_tracker) <- 0
+  raster::values(mortality_tracker) <- 0
   
   infected <- as.matrix(infected)
   susceptible <- as.matrix(susceptible)
