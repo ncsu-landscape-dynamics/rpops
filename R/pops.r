@@ -17,46 +17,46 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   random_seed <- random_seed
   
   if (time_step == "week") {
-    number_of_time_steps = (end_time-start_time+1)*52 +1
+    number_of_time_steps <- (end_time-start_time+1)*52 +1
   } else if (time_step == "month") {
-    number_of_time_steps = (end_time-start_time+1)*12
+    number_of_time_steps <- (end_time-start_time+1)*12
   } else if (time_step == "day") {
-    number_of_time_steps = (end_time-start_time+1)*365
+    number_of_time_steps <- (end_time-start_time+1)*365
   }
   
-  number_of_years = end_time-start_time+1
+  number_of_years <- end_time-start_time+1
   
   infected <- raster(infected_file)
   infected[is.na(infected)] <- 0
   host <- raster(host_file)
   host[is.na(host)] <- 0
-  susceptible = host - infected
+  susceptible <- host - infected
   susceptible[is.na(susceptible)] <- 0
-  total_plants = raster(total_plants_file)
+  total_plants <- raster(total_plants_file)
   total_plants[is.na(total_plants)] <- 0
   
   if (use_lethal_temperature == TRUE) {
-    temperature_stack = stack(temperature_file)
+    temperature_stack <- stack(temperature_file)
     temperature_stack[is.na(temperature_stack)] <- 0
-    temperature = list(as.matrix(temperature_stack[[1]]))
+    temperature <- list(as.matrix(temperature_stack[[1]]))
     for(i in 2:number_of_years) {
       temperature[[i]] <- as.matrix(temperature_stack[[i]])
     }
   }
   
-  weather = FALSE
+  weather <- FALSE
   if (temp == TRUE) {
-    temperature_coefficient = stack(temperature_coefficient_file)
-    weather = TRUE
-    weather_coefficient_stack = temperature_coefficient
+    temperature_coefficient <- stack(temperature_coefficient_file)
+    weather <- TRUE
+    weather_coefficient_stack <- temperature_coefficient
     if (precip ==TRUE){
-      precipitation_coefficient = stack(precipitation_coefficient_file)
-      weather_coefficient_stack = weather_coefficient_stack * precipitation_coefficient
+      precipitation_coefficient <- stack(precipitation_coefficient_file)
+      weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if(precip == TRUE){
-    precipitation_coefficient = stack(precipitation_coefficient_file)
-    weather = TRUE
-    weather_coefficient_stack = precipitation_coefficient
+    precipitation_coefficient <- stack(precipitation_coefficient_file)
+    weather <- TRUE
+    weather_coefficient_stack <- precipitation_coefficient
   }
   
   if (weather == TRUE){
@@ -79,10 +79,10 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   mortality_tracker <- as.matrix(mortality_tracker)
   
   data <- pops_model(random_seed, 
-           lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month,
+           lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
            reproductive_rate = reproductive_rate, 
            weather = weather, short_distance_scale = short_distance_scale, infected = infected,
-           susceptible = susceptible, mortality_tracker =mortality_tracker,
+           susceptible = susceptible, mortality_tracker = mortality_tracker,
            total_plants = total_plants, temperature = temperature,
            weather_coefficient = weather_coefficient, 
            ew_res = ew_res, ns_res = ns_res,
