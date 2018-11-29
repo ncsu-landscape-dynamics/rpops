@@ -96,7 +96,7 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> susceptible_vector;
   std::vector<int> simulated_weeks;
   
-  for (int current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
+  for (unsigned current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
       
     if (all_infected(susceptible)) {
       cerr << "In the " << dd_current << "all suspectible hosts are infected!" << endl;
