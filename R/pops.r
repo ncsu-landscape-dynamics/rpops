@@ -25,7 +25,9 @@
 #' @param kappa sets the strength of the wind direction in the von-mises distribution
 #' @param random_seed sets the random seed for the simulation used for reproducibility
 #'
-#' @return
+#' @importFrom raster raster values as.matrix xres yres stack
+#' @importFrom Rcpp sourceCpp
+#' @return 
 #' @export
 #'
 #' @examples
@@ -41,7 +43,22 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
                  wind_dir = "NONE", kappa = 0, random_seed = 42){ 
   
   Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
-  Rcpp::sourceCpp("pops.cpp")
+  Rcpp::sourceCpp("C:/Users/Chris/Desktop/rpops/pops.cpp")
+  
+  if (!file.exists(infected_file)) {
+    return("Infected file does not exist") 
+    stop("Infected file does not exist")
+  }
+  
+  if (!file.exists(host_file)) {
+    return("Host file does not exist") 
+    stop("Host file does not exist")
+  }
+  
+  if (!file.exists(total_plants_file)) {
+    return("Total plants file does not exist") 
+    stop("Total plants file does not exist")
+  }
   
   if (time_step == "week") {
     number_of_time_steps <- (end_time-start_time+1)*52 +1
@@ -65,14 +82,14 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   if (use_lethal_temperature == TRUE) {
     temperature_stack <- raster::stack(temperature_file)
     temperature_stack[is.na(temperature_stack)] <- 0
-    temperature <- list(as.matrix(temperature_stack[[1]]))
+    temperature <- list(raster::as.matrix(temperature_stack[[1]]))
     for(i in 2:number_of_years) {
-      temperature[[i]] <- as.matrix(temperature_stack[[i]])
+      temperature[[i]] <- raster::as.matrix(temperature_stack[[i]])
     }
   } else {
     temperature <- host
     raster::values(temperature) <- 1
-    temperature <- raster::as.matrix(temperature)
+    temperature <- list(raster::as.matrix(temperature))
   }
   
   weather <- FALSE
@@ -92,14 +109,14 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   
   if (weather == TRUE){
     weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
-    weather_coefficient <- list(as.matrix(weather_coefficient_stack[[1]]))
+    weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
-      weather_coefficient[[i]] <- as.matrix(weather_coefficient_stack[[i]])
+      weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
     }
   } else {
     weather_coefficient <- host
     raster::values(weather_coefficient) <- 1
-    weather_coefficient <- raster::as.matrix(weather_coefficient)
+    weather_coefficient <- list(raster::as.matrix(weather_coefficient))
   }
   
   ew_res <- raster::xres(susceptible)
@@ -113,7 +130,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   total_plants <- raster::as.matrix(total_plants)
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   
-  data <- pops_model(random_seed, 
+  data <- pops_model(random_seed = random_seed, 
            lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
            reproductive_rate = reproductive_rate, 
            weather = weather, short_distance_scale = short_distance_scale, infected = infected,
@@ -129,5 +146,6 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
            wind_dir = wind_dir, kappa = kappa)
   
   return(data)
+  
 }
 
