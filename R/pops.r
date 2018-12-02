@@ -30,7 +30,7 @@
 #' @return 
 #' @export
 #'
-#' @examples
+#' @examples None
 #' 
 pops <- function(infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
                  use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE,
@@ -47,17 +47,36 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   
   if (!file.exists(infected_file)) {
     return("Infected file does not exist") 
-    stop("Infected file does not exist")
+  }
+  
+  if (!(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Infected file is not one of '.grd', '.tif', '.img'")
   }
   
   if (!file.exists(host_file)) {
     return("Host file does not exist") 
-    stop("Host file does not exist")
+  }
+  
+  if (!(raster::extension(host_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Host file is not one of '.grd', '.tif', '.img'")
   }
   
   if (!file.exists(total_plants_file)) {
     return("Total plants file does not exist") 
-    stop("Total plants file does not exist")
+  }
+  
+  if (!(raster::extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Total plants file is not one of '.grd', '.tif', '.img'")
+  }
+  
+  
+  
+  if (!(time_step %in% list("week", "month", "day"))) {
+    return("Time step must be one of 'week', 'month' or 'day'")
+  }
+  
+  if (class(end_time) != "numeric" || nchar(end_time) != 4 || class(start_time) != "numeric" || nchar(start_time) != 4){
+    return("End time and/or start time not of type numeric and/or in format YYYY")
   }
   
   if (time_step == "week") {
@@ -79,6 +98,14 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   total_plants <- raster::raster(total_plants_file)
   total_plants[is.na(total_plants)] <- 0
   
+  if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
+    return("Temperature file does not exist")
+  }
+  
+  if (use_lethal_temperature == TRUE  && !(raster::extension(temperature_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Temperature file is not one of '.grd', '.tif', '.img'")
+  }
+  
   if (use_lethal_temperature == TRUE) {
     temperature_stack <- raster::stack(temperature_file)
     temperature_stack[is.na(temperature_stack)] <- 0
@@ -90,6 +117,22 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
     temperature <- host
     raster::values(temperature) <- 1
     temperature <- list(raster::as.matrix(temperature))
+  }
+  
+  if (temp == TRUE  && !file.exists(temperature_coefficient_file)) {
+    return("Temperature coefficient file does not exist")
+  }
+  
+  if (temp == TRUE  && !(raster::extension(temperature_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Temperature coefficient file is not one of '.grd', '.tif', '.img'")
+  }
+  
+  if (precip == TRUE  && !file.exists(precipitation_coefficient_file)) {
+    return("Precipitation coefficient file does not exist")
+  }
+  
+  if (precip == TRUE  && !(raster::extension(precipitation_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Precipitation coefficient file is not one of '.grd', '.tif', '.img'")
   }
   
   weather <- FALSE
