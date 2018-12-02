@@ -21,11 +21,7 @@ r_packages:
   - covr
   - devtools
   - raster
-  - rgdal
   - Rcpp
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
-
-script:
-  - R -e "source('test/popstest2x2.R'); data;"
