@@ -98,7 +98,7 @@ List pops_model(int random_seed,
   
   for (unsigned current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
       
-      if (dd_current.year() >= dd_end.year()) {
+      if (dd_current.year() > dd_end.year()) {
         break;
       }
       

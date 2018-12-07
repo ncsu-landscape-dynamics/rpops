@@ -78,7 +78,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   }
   
   if (time_step == "week") {
-    number_of_time_steps <- (end_time-start_time+1)*52 +1
+    number_of_time_steps <- (end_time-start_time+1)*52
   } else if (time_step == "month") {
     number_of_time_steps <- (end_time-start_time+1)*12
   } else if (time_step == "day") {
@@ -108,6 +108,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   
   susceptible <- host - infected
   susceptible[is.na(susceptible)] <- 0
+  susceptible[susceptible < 0] <- 0
   
   if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
     return("Temperature file does not exist")
