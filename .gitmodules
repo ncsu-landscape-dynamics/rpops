@@ -1,3 +1,6 @@
 [submodule "pops"]
 	path = pops
 	url = https://github.com/ncsu-landscape-dynamics/PoPS
+[submodule "inst/cpp/pops"]
+	path = inst/cpp/pops
+	url = https://github.com/ncsu-landscape-dynamics/PoPS
