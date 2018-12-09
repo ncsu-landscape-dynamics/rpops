@@ -9,7 +9,7 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
   temperature_file = "", temperature_coefficient_file = "",
   precipitation_coefficient_file = "", season_month_start = 1,
   season_month_end = 12, time_step = "month", start_time = 2018,
-  end_time = 2022, dispersal_kern = "cauchy",
+  end_time = 2020, dispersal_kern = "cauchy",
   percent_short_distance_dispersal = 1, short_distance_scale = 59,
   long_distance_scale = 0, lethal_temperature = -12.87,
   lethal_temperature_month = 1, wind_dir = "NONE", kappa = 0,
@@ -22,13 +22,13 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
 
 \item{total_plants_file}{path to raster file with number of total plants}
 
-\item{reproductive_rate}{}
+\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
-\item{use_lethal_temperature}{}
+\item{use_lethal_temperature}{does your pest or pathogen have a temperature at which it cannot survive}
 
-\item{temp}{}
+\item{temp}{allows the use of temperature coefficients to modify spread}
 
-\item{precip}{}
+\item{precip}{allows the use of precipitation coefficients to modify spread}
 
 \item{temperature_file}{path to raster file with temperature data for minimum temperature}
 
@@ -36,27 +36,27 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
 
 \item{precipitation_coefficient_file}{path to raster file with}
 
-\item{season_month_start}{}
+\item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen}
 
-\item{season_month_end}{}
+\item{season_month_end}{when does spread end during the year for your pest or pathogen}
 
-\item{time_step}{}
+\item{time_step}{how often should spread occur}
 
-\item{start_time}{}
+\item{start_time}{first year to start the simulation}
 
-\item{end_time}{}
+\item{end_time}{last year of the simulation}
 
-\item{dispersal_kern}{}
+\item{dispersal_kern}{what type of dispersal kernel should be used}
 
-\item{percent_short_distance_dispersal}{}
+\item{percent_short_distance_dispersal}{what percentage of dispersal is short range versus long range}
 
-\item{short_distance_scale}{}
+\item{short_distance_scale}{distance scale parameter for short range dispersal kernel}
 
-\item{long_distance_scale}{}
+\item{long_distance_scale}{distance scale parameter for long range dispersal kernel}
 
-\item{lethal_temperature}{}
+\item{lethal_temperature}{the temperature at which mortality occurs for your pest or pathogen}
 
-\item{lethal_temperature_month}{}
+\item{lethal_temperature_month}{the month in which mortality occurs}
 
 \item{wind_dir}{sets the wind direction}
 

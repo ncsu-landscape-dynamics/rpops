@@ -32,9 +32,9 @@ bool all_infected(IntegerMatrix susceptible)
   return allInfected;
 }
 
-Direction direction_enum_from_string(const std::string& text)
+Direction direction_enum_from_string(const string& text)
 {
-  std::map<std::string, Direction> mapping{
+  std::map<string, Direction> mapping{
     {"N", N}, {"NE", NE}, {"E", E}, {"SE", SE}, {"S", S},
     {"SW", SW}, {"W", W}, {"NW", NW}, {"NONE", NONE}
   };
@@ -47,7 +47,7 @@ Direction direction_enum_from_string(const std::string& text)
   }
 }
 
-DispersalKernel radial_type_from_string(const std::string& text)
+DispersalKernel radial_type_from_string(const string& text)
 {
   if (text == "cauchy")
     return CAUCHY;
@@ -73,12 +73,12 @@ List pops_model(int random_seed,
                 std::vector<NumericMatrix> temperature,
                 std::vector<NumericMatrix> weather_coefficient,
                 int ew_res, int ns_res,
-                std::string time_step,
+                string time_step,
                 int season_month_start = 1, int season_month_end = 12,
                 double start_time = 2018, double end_time = 2018,
-                std::string dispersal_kern = "cauchy", double percent_short_distance_dispersal = 0.0,
+                string dispersal_kern = "cauchy", double percent_short_distance_dispersal = 0.0,
                 double long_distance_scale = 0.0,
-                std::string wind_dir = "NONE", double kappa = 0
+                string wind_dir = "NONE", double kappa = 0
 )
 {
   

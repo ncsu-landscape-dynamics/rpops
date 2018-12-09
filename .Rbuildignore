@@ -1,3 +1,10 @@
+^codecov\.yml$
+^inst/cpp/pops/Makefile$
+^inst/cpp/pops/Doxyfile$
+^inst/cpp/pops/CHANGELOG\.md$
+^inst/cpp/pops/CITATION\.cff$
+^inst/cpp/pops/\.git$
+^inst/cpp/pops/\.travis\.yml$
 ^pops/\.travis\.yml$
 ^rpops\.Rproj$
 ^\.Rproj\.user$
