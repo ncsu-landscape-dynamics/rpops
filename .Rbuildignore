@@ -1,3 +1,4 @@
+^appveyor\.yml$
 ^codecov\.yml$
 ^inst/cpp/pops/Makefile$
 ^inst/cpp/pops/Doxyfile$

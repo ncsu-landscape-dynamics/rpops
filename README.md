@@ -1,6 +1,7 @@
 # PoPS (Pest or Pathogen Spread) Model R Wrapper <img src="man/PoPS_Logo.png" align="right" width="10%" />
 
 [![Build Status](https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=development)](https://travis-ci.org/ncsu-landscape-dynamics/rpops)
+[![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/ncsu-landscape-dynamics/rpops?branch=master&svg=true)](https://ci.appveyor.com/project/ncsu-landscape-dynamics/rpops)
 
 ## Overview
 

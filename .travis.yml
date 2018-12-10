@@ -13,16 +13,7 @@ matrix:
     - r: 3.3
     - r: 3.4
     - r: 3.5
-      after_success:
-        - Rscript -e 'covr::codecov()'
     - r: devel
-
-r_packages:
-  - covr
-  - devtools
-  - raster
-  - rgdal
-  - Rcpp
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
