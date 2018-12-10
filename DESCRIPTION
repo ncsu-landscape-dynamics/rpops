@@ -12,13 +12,15 @@ Depends: R (>= 3.1.0)
 Imports: 
     raster,
     rgdal,
-    Rcpp
+    Rcpp,
+    devtools
 License: GPL-3 | file LICENSE
 Encoding: UTF-8
 LazyData: true
+SystemRequirements: C++11
 Suggests: 
     testthat,
-    devtools,
     covr
+LinkingTo: 
+    Rcpp
 RoxygenNote: 6.1.1
-

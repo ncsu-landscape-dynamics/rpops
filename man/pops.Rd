@@ -64,6 +64,9 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
 
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 }
+\value{
+list of infected and susceptible per year
+}
 \description{
 PoPS (Pest or Pathogen Spread) model
 }

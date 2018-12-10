@@ -24,10 +24,11 @@
 #' @param wind_dir sets the wind direction 
 #' @param kappa sets the strength of the wind direction in the von-mises distribution
 #' @param random_seed sets the random seed for the simulation used for reproducibility
-#'
+#' 
+#' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack
 #' @importFrom Rcpp sourceCpp
-#' @return 
+#' @return list of infected and susceptible per year
 #' @export
 #'
 #' @examples 
@@ -42,9 +43,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
                  wind_dir = "NONE", kappa = 0, random_seed = 42){ 
   
-  Sys.setenv("PKF_CXXFLAGS"="-std=c++11")
-  Rcpp::sourceCpp(system.file("cpp", "pops.cpp", package = "PoPS"))
-  
+
   if (!file.exists(infected_file)) {
     return("Infected file does not exist") 
   }

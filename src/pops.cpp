@@ -19,6 +19,8 @@ using std::endl;
 using namespace Rcpp;
 using namespace pops;
 
+// Enable C++11 via this plugin (Rcpp 0.10.3 or later)
+// [[Rcpp::plugins(cpp11)]]
 
 bool all_infected(IntegerMatrix susceptible)
 {

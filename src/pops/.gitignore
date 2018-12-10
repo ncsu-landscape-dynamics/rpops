@@ -1,0 +1,19 @@
+# compilation intermediate files
+*.gch
+*.o
+# generated executables
+a.out
+test_date
+test_raster
+test_simulation
+# generated documentation
+html
+# Qt Creator files
+*.config
+*.creator
+*.files
+*.includes
+*.user
+.Rproj.user
+.Rhistory
+PoPS.Rproj
