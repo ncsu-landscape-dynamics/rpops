@@ -28,6 +28,10 @@ install:
   - Rscript -e "devtools::install_deps(dep = TRUE)"
   - Rscript -e "devtools::install_github('jimhester/covr')"
 
+env: 
+  global:
+      - R_REMOTES_NO_ERRORS_FROM_WARNINGS=true
+
 script:
   - R CMD build .
   - R CMD check *tar.gz
