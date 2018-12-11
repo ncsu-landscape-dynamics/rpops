@@ -27,9 +27,10 @@
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack
-#' @importFrom Rcpp sourceCpp
+#' @importFrom Rcpp sourceCpp evalCpp
 #' @return list of infected and susceptible per year
-#' @export
+#' @export pops_model
+#' @export pops
 #'
 #' @examples 
 #' 

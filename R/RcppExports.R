@@ -5,3 +5,7 @@ pops_model <- function(random_seed, lethal_temperature, use_lethal_temperature, 
     .Call(`_PoPS_pops_model`, random_seed, lethal_temperature, use_lethal_temperature, lethal_temperature_month, reproductive_rate, weather, short_distance_scale, infected, susceptible, mortality_tracker, total_plants, temperature, weather_coefficient, ew_res, ns_res, time_step, season_month_start, season_month_end, start_time, end_time, dispersal_kern, percent_short_distance_dispersal, long_distance_scale, wind_dir, kappa)
 }
 
+# Register entry points for exported C++ functions
+methods::setLoadAction(function(ns) {
+    .Call('_PoPS_RcppExport_registerCCallable', PACKAGE = 'PoPS')
+})

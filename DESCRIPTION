@@ -15,9 +15,12 @@ Imports:
     Rcpp,
     devtools
 License: GPL-3 | file LICENSE
+BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 Encoding: UTF-8
 LazyData: true
-SystemRequirements: C++11
+SystemRequirements: 
+    C++11,
+    GNU make
 Suggests: 
     testthat,
     covr

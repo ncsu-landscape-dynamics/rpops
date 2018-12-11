@@ -1,7 +1,7 @@
 #include <Rcpp.h>
-#include "pops/simulation.hpp"
-#include "pops/raster.hpp"
-#include "pops/date.hpp"
+#include "simulation.hpp"
+#include "raster.hpp"
+#include "date.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -60,7 +60,7 @@ DispersalKernel radial_type_from_string(const std::string& text)
                                   " value '" + text +"' provided");
 }
 
-
+// [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 List pops_model(int random_seed, 
