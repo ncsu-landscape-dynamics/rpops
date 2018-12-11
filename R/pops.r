@@ -29,8 +29,7 @@
 #' @importFrom raster raster values as.matrix xres yres stack
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @return list of infected and susceptible per year
-#' @export pops_model
-#' @export pops
+#' @export
 #'
 #' @examples 
 #' 

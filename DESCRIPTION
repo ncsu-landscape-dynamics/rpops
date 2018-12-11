@@ -8,7 +8,7 @@ Authors@R: c(
     person("Vaclav", "Petras", role = c("aut")),
     person("Anna", "Petrasova", role = c("aut"))
     )
-Depends: R (>= 3.1.0)
+Depends: R (>= 3.3.0)
 Imports: 
     raster,
     rgdal,
