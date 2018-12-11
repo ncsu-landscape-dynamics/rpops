@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=package)](https://travis-ci.org/ncsu-landscape-dynamics/rpops)
 [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/github/ncsu-landscape-dynamics/rpops?branch=package&svg=true)](https://ci.appveyor.com/project/ncsu-landscape-dynamics/rpops)
- Copy Markdown
 [![codecov](https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/package/graph/badge.svg)](https://codecov.io/gh/ncsu-landscape-dynamics/rpops)
 ## Overview
 
