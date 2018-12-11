@@ -1,9 +1,6 @@
 language: R
 cache: packages
-os:
-    - windows
-    - linux
-    - osx
+sudo: required
 
 env: _R_CHECK_CRAN_INCOMING_=FALSE
 
@@ -16,10 +13,25 @@ matrix:
     - r: 3.5
     - r: devel
 
+before_install:
+  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
+  - sudo apt-get update -qq
+  - sudo aptitude install -y gdal-bin
+  - sudo aptitude install -y libgdal1-dev
+  - sudo aptitude install -y libproj-dev
+  - sudo apt-get install libudunits2-dev
+  - sudo apt-get install libssh2-1-dev
+  - R -e 'install.packages("devtools")'
+  - R -e 'install.packages("covr")'
+
 install:
   - Rscript -e "if (!require('devtools')) install.packages('devtools')"
   - Rscript -e "devtools::install_deps(dep = TRUE)"
   - Rscript -e "devtools::install_github('jimhester/covr')"
+
+script:
+  - R CMD build .
+  - R CMD check *tar.gz
 
 after_success:
   - Rscript -e 'library(covr); codecov()'
