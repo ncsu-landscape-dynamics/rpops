@@ -12,8 +12,10 @@ matrix:
       warnings_are_errors: false
     - r: 3.4
       warnings_are_errors: false
-    - r: 3.5
+    - r: release
       warnings_are_errors: false
+      after_success:
+        - Rscript -e 'library(covr); codecov()'
     - r: devel
       warnings_are_errors: false
 
@@ -29,6 +31,9 @@ before_install:
   - R -e 'install.packages("covr")'
   - Rscript -e 'update.packages(ask = FALSE)'
 
+r_packages:
+  - covr
+
 install:
   - Rscript -e "if (!require('devtools')) install.packages('devtools')"
   - Rscript -e "devtools::install_deps(dep = TRUE)"
@@ -42,4 +47,4 @@ script:
   #- R CMD check *tar.gz
 
 after_success:
-  - Rscript -e 'library(covr); codecov()'
+  - Rscript -e 'covr::codecov()'

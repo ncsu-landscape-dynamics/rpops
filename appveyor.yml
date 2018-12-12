@@ -12,7 +12,7 @@ install:
   
 environment:
   global:
-   WARNINGS_ARE_ERRORS: 0
+   WARNINGS_ARE_ERRORS: 
    USE_RTOOLS: true
 
 cache:
