@@ -105,7 +105,7 @@ List pops_model(int random_seed,
       }
       
     if (all_infected(susceptible)) {
-      cerr << "At timestep " << dd_current << " all suspectible hosts are infected!" << endl;
+      Rcerr << "At timestep " << dd_current << " all suspectible hosts are infected!" << std::endl;
       infected_vector.push_back(Rcpp::clone(infected));
       susceptible_vector.push_back(Rcpp::clone(susceptible));
       break;
@@ -114,7 +114,7 @@ List pops_model(int random_seed,
     if (use_lethal_temperature && dd_current.month() == lethal_temperature_month && dd_current.year() <= dd_end.year()) {
       unsigned simulation_year = dd_current.year() - dd_start.year();
       if (simulation_year >= temperature.size()){
-        cerr << "Not enough years of temperature data" << endl;
+        Rcerr << "Not enough years of temperature data" << std::endl;
       }
       simulation.remove(infected, susceptible, temperature[simulation_year], lethal_temperature);
     }
@@ -124,7 +124,7 @@ List pops_model(int random_seed,
       simulated_weeks.push_back(current_time_step);
       
       if (current_time_step >= weather_coefficient.size()  && weather == TRUE) {
-        cerr << "Not enough time steps of weather coefficient data" << endl;
+        Rcerr << "Not enough time steps of weather coefficient data" << std::endl;
       }
 
       simulation.generate(infected, weather, weather_coefficient[current_time_step], reproductive_rate);
