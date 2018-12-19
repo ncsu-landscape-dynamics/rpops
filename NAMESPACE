@@ -2,6 +2,7 @@
 
 export(pops)
 export(pops_model)
+export(quantity_allocation_disagreement)
 importFrom(Rcpp,evalCpp)
 importFrom(Rcpp,sourceCpp)
 importFrom(raster,as.matrix)
