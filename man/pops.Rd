@@ -13,7 +13,7 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
   percent_short_distance_dispersal = 1, short_distance_scale = 59,
   long_distance_scale = 0, lethal_temperature = -12.87,
   lethal_temperature_month = 1, wind_dir = "NONE", kappa = 0,
-  random_seed = 42)
+  random_seed = NULL)
 }
 \arguments{
 \item{infected_file}{path to raster file with initial infections}

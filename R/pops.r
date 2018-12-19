@@ -41,7 +41,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
                  dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
                  short_distance_scale = 59, long_distance_scale = 0.0,
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
-                 wind_dir = "NONE", kappa = 0, random_seed = 42){ 
+                 wind_dir = "NONE", kappa = 0, random_seed = NULL){ 
   
 
   if (!file.exists(infected_file)) {
@@ -74,6 +74,10 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   
   if (class(end_time) != "numeric" || nchar(end_time) != 4 || class(start_time) != "numeric" || nchar(start_time) != 4){
     return("End time and/or start time not of type numeric and/or in format YYYY")
+  }
+  
+  if (is.null(random_seed)) {
+    random_seed = round(runif(1, 1, 1000000))
   }
   
   if (time_step == "week") {
