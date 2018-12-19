@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{pops_model}
 \alias{pops_model}
-\title{Title}
+\title{PoPS model c++}
 \usage{
 pops_model(random_seed, lethal_temperature, use_lethal_temperature,
   lethal_temperature_month, reproductive_rate, weather,
@@ -68,5 +68,5 @@ pops_model(random_seed, lethal_temperature, use_lethal_temperature,
 list of vector matrices of infected and suceptible hosts per simulated year
 }
 \description{
-Title
+PoPS model c++
 }
