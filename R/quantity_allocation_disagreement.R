@@ -3,7 +3,7 @@
 #' @param reference the binary (0 or 1) raster with ground truth data
 #' @param comparison the binary (0 or 1) raster with simulated data to be compared to ground truth
 #'
-#' @return data frame of 
+#' @return data frame of with disagreement and omission/comimission
 #' @export
 #'
 #' @examples
