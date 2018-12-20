@@ -28,6 +28,7 @@
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack
 #' @importFrom Rcpp sourceCpp evalCpp
+#' @importFrom  stats runif
 #' @return list of infected and susceptible per year
 #' @export
 #'
@@ -77,7 +78,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   }
   
   if (is.null(random_seed)) {
-    random_seed = round(runif(1, 1, 1000000))
+    random_seed = round(stats::runif(1, 1, 1000000))
   }
   
   if (time_step == "week") {
