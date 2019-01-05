@@ -16,13 +16,14 @@ quantity_allocation_disagreement <- function(reference, comparison){
   comparison2 <- as.matrix(comparison)
   
   ## create data frame for comparison
-  output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 ,number_of_infected_comp =0,total_allocation_distance = 0)
+  output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 ,number_of_infected_comp =0,directional_disagreement = 0)
   output$total_disagreement <- sum(abs(compare2))
   output$quantity_disagreement <- abs(sum(reference2)-sum(comparison2))
   output$allocation_disagreement <- output$total_disagreement - output$quantity_disagreement
-  output$omission <- abs(sum(compare2[compare2== -1]))
-  output$commission <- abs(sum(compare2[compare2== 1]))
+  output$omission <- abs(sum(compare2[compare2== 1]))
+  output$commission <- abs(sum(compare2[compare2== -1]))
   output$number_of_infected_comp <- sum(comparison[comparison==1])
+  output$directional_disagreement <- sum(compare2)
   
   return(output)
 }
