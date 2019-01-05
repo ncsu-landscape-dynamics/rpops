@@ -12,7 +12,7 @@ quantity_allocation_disagreement(reference, comparison)
 \item{comparison}{the binary (0 or 1) raster with simulated data to be compared to ground truth}
 }
 \value{
-data frame of
+data frame of with disagreement and omission/comimission
 }
 \description{
 Quantity Allocation Disagreement
