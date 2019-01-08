@@ -102,6 +102,8 @@ List pops_model(int random_seed,
   
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
+  std::vector<IntegerMatrix> infected_before_treatment_vector;
+  std::vector<IntegerMatrix> susceptible_before_treatment_vector;
   std::vector<IntegerMatrix> mortality_tracker_vector;
   std::vector<IntegerMatrix> mortality_vector;
   std::vector<int> simulated_weeks;
@@ -124,6 +126,8 @@ List pops_model(int random_seed,
         Rcerr << "At timestep " << dd_current << " all suspectible hosts are infected!" << std::endl;
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
+        infected_before_treatment_vector.push_back(Rcpp::clone(infected));
+        susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
         break;
       }
     
@@ -155,6 +159,7 @@ List pops_model(int random_seed,
       }
     
       if ((time_step == "month" ? dd_current.is_last_month_of_year() : dd_current.is_last_week_of_year())) {
+        
         mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
         if (mortality_on == TRUE) {
@@ -162,6 +167,10 @@ List pops_model(int random_seed,
           simulation.mortality(infected, mortality_rate, current_year, first_mortality_year, mortality, mortality_tracker_vector);
           mortality_vector.push_back(Rcpp::clone(mortality));
         }
+        
+        infected_before_treatment_vector.push_back(Rcpp::clone(infected));
+        susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
+        
         if (use_treatments) {
           treatments.apply_treatment_host(dd_current.year(), infected, susceptible);
           for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
@@ -180,8 +189,11 @@ List pops_model(int random_seed,
   }
 
   return List::create(
-    _["infected_vector"] = infected_vector,
-    _["susceptible_vector"] = susceptible_vector
+    _["infected"] = infected_vector,
+    _["susceptible"] = susceptible_vector,
+    _["infected_before_treatment"] = infected_before_treatment_vector,
+    _["susceptible_before_treatment"] = susceptible_before_treatment_vector,
+    _["mortality"] = mortality_vector
   );
   
 }

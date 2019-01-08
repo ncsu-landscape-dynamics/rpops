@@ -263,17 +263,17 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
-    treatment_maps <- list(as.matrix(treatment_stack[[1]]))
-    if (nlayers(treatment_stack) >= 2) {
-      for(i in 2:nlayers(treatment_stack)) {
-        treatment_maps[[i]] <- as.matrix(treatment_stack[[i]])
+    treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+    if (raster::nlayers(treatment_stack) >= 2) {
+      for(i in 2:raster::nlayers(treatment_stack)) {
+        treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
       }
     }
     treatment_years = treatment_years
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
-    treatment_maps = list(as.matrix(treatment_map))
+    treatment_maps = list(raster::as.matrix(treatment_map))
   }
   
   ew_res <- raster::xres(susceptible)
