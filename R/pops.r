@@ -242,8 +242,8 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
     return("Treatments file does not exist")
   }
   
-  if (management == TRUE  && !(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Treatment file is not one of '.grd', '.tif', '.img'")
+  if (management == TRUE  && !(raster::extension(treatments_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Treatments file is not one of '.grd', '.tif', '.img'")
   }
   
   if (management == TRUE) {
