@@ -2,6 +2,7 @@
 #include "simulation.hpp"
 #include "raster.hpp"
 #include "date.hpp"
+#include "treatments.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -66,16 +67,20 @@ DispersalKernel radial_type_from_string(const std::string& text)
 List pops_model(int random_seed, 
                 double lethal_temperature, bool use_lethal_temperature, int lethal_temperature_month,
                 double reproductive_rate,
-                bool weather,
+                bool weather, bool mortality_on,
                 double short_distance_scale,
                 IntegerMatrix infected,
                 IntegerMatrix susceptible,
                 IntegerMatrix mortality_tracker,
+                IntegerMatrix mortality,
                 IntegerMatrix total_plants,
+                std::vector<NumericMatrix> treatment_maps,
+                std::vector<int> treatment_years,
                 std::vector<NumericMatrix> temperature,
                 std::vector<NumericMatrix> weather_coefficient,
                 int ew_res, int ns_res,
                 std::string time_step,
+                double mortality_rate = 0.0, int mortality_time_lag = 2,
                 int season_month_start = 1, int season_month_end = 12,
                 double start_time = 2018, double end_time = 2018,
                 std::string dispersal_kern = "cauchy", double percent_short_distance_dispersal = 0.0,

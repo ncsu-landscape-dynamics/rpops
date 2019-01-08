@@ -157,6 +157,33 @@ public:
         }
     }
     
+    void mortality(IntegerRaster& infected, double mortality_rate, 
+                   int current_year, int first_mortality_year,
+                   IntegerRaster& mortality, std::vector<IntegerRaster>& mortality_tracker_vector)
+    {
+        if (current_year >= (first_mortality_year)) {
+            int mortality_current_year = 0;
+            int max_year_index = current_year - first_mortality_year;
+            
+            for (int i = 0; i < height; i++) {
+                for (int j = 0; j < width; j++) {
+                    for (unsigned year_index = 0; year_index <= max_year_index; year_index++) {
+                      int mortality_in_year_index = 0;
+                        if (mortality_tracker_vector[year_index](i, j) > 0) {
+                            mortality_in_year_index = mortality_rate*mortality_tracker_vector[year_index](i,j);
+                            mortality_tracker_vector[year_index](i,j) -= mortality_in_year_index;
+                            mortality(i,j) += mortality_in_year_index;
+                            mortality_current_year += mortality_in_year_index;
+                            if (infected(i,j) > 0) {
+                                infected(i,j) -= mortality_in_year_index;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     void generate(const IntegerRaster& infected,
                   bool weather, const FloatRaster& weather_coefficient,
                   double reproductive_rate)
