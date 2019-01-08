@@ -2,16 +2,17 @@
 % Please edit documentation in R/RcppExports.R
 \name{pops_model}
 \alias{pops_model}
-\title{PoPS model c++}
+\title{PoPS c++ model}
 \usage{
 pops_model(random_seed, lethal_temperature, use_lethal_temperature,
-  lethal_temperature_month, reproductive_rate, weather,
+  lethal_temperature_month, reproductive_rate, weather, mortality_on,
   short_distance_scale, infected, susceptible, mortality_tracker,
-  total_plants, temperature, weather_coefficient, ew_res, ns_res,
-  time_step, season_month_start = 1L, season_month_end = 12L,
-  start_time = 2018, end_time = 2018, dispersal_kern = "cauchy",
-  percent_short_distance_dispersal = 0, long_distance_scale = 0,
-  wind_dir = "NONE", kappa = 0)
+  mortality, total_plants, treatment_maps, treatment_years, temperature,
+  weather_coefficient, ew_res, ns_res, time_step, mortality_rate = 0,
+  mortality_time_lag = 2L, season_month_start = 1L,
+  season_month_end = 12L, start_time = 2018, end_time = 2018,
+  dispersal_kern = "cauchy", percent_short_distance_dispersal = 0,
+  long_distance_scale = 0, wind_dir = "NONE", kappa = 0)
 }
 \arguments{
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
@@ -26,6 +27,8 @@ pops_model(random_seed, lethal_temperature, use_lethal_temperature,
 
 \item{weather}{Boolean that is true if weather is used}
 
+\item{mortality_on}{boolean to turn host mortality on and off}
+
 \item{short_distance_scale}{distance scale parameter for short range dispersal kernel}
 
 \item{infected}{matrix of infected hosts}
@@ -34,7 +37,13 @@ pops_model(random_seed, lethal_temperature, use_lethal_temperature,
 
 \item{mortality_tracker}{matrix of 0's to track mortality per year}
 
+\item{mortality}{matrix to track cumulative mortality}
+
 \item{total_plants}{matrix of total plants}
+
+\item{treatment_maps}{list of matrices where treatment or management has occurred in a given year}
+
+\item{treatment_years}{years in which to apply treatment}
 
 \item{temperature}{vector of matrices of temperature values used to check against lethal temperature}
 
@@ -42,9 +51,13 @@ pops_model(random_seed, lethal_temperature, use_lethal_temperature,
 
 \item{ew_res}{east and west resolution}
 
-\item{ns_res}{north south resolution}
+\item{ns_res}{north and south resolution}
 
 \item{time_step}{how often should spread occur}
+
+\item{mortality_rate}{rate at which mortality occurs}
+
+\item{mortality_time_lag}{time lag from infection until mortality can occur in years}
 
 \item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen}
 
@@ -68,5 +81,5 @@ pops_model(random_seed, lethal_temperature, use_lethal_temperature,
 list of vector matrices of infected and suceptible hosts per simulated year
 }
 \description{
-PoPS model c++
+PoPS c++ model
 }

@@ -24,6 +24,12 @@
 #' @param wind_dir sets the wind direction 
 #' @param kappa sets the strength of the wind direction in the von-mises distribution
 #' @param random_seed sets the random seed for the simulation used for reproducibility
+#' @param management boolean to allow use of managemnet
+#' @param mortality_on  boolean to turn host mortality on and off
+#' @param treatments_file path to raster file with treatment data by years
+#' @param treatment_years years in which to apply treatment
+#' @param mortality_rate rate at which mortality occurs
+#' @param mortality_time_lag time lag from infection until mortality can occur in years
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack
@@ -35,13 +41,15 @@
 #' @examples 
 #' 
 pops <- function(infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
-                 use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE,
-                 temperature_file = "", temperature_coefficient_file = "", precipitation_coefficient_file ="",
+                 use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
+                 temperature_file = "", temperature_coefficient_file = "", 
+                 precipitation_coefficient_file ="", treatments_file = "",
                  season_month_start = 1, season_month_end = 12, time_step = "month",
-                 start_time = 2018, end_time = 2020,
+                 start_time = 2018, end_time = 2020, treatment_years = c(0),
                  dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
                  short_distance_scale = 59, long_distance_scale = 0.0,
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
+                 mortality_rate = 0, mortality_time_lag = 0,
                  wind_dir = "NONE", kappa = 0, random_seed = NULL){ 
   
 
@@ -230,6 +238,44 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
     weather_coefficient <- list(raster::as.matrix(weather_coefficient))
   }
   
+  if (management == TRUE  && !file.exists(treatments_file)) {
+    return("Treatments file does not exist")
+  }
+  
+  if (management == TRUE  && !(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Treatment file is not one of '.grd', '.tif', '.img'")
+  }
+  
+  if (management == TRUE) {
+
+    treatment_stack <- stack(treatments_file)
+    treatment_stack[is.na(treatment_stack)] <- 0
+    
+    if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
+      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
+    }
+    
+    if (!(raster::xres(infected) == raster::xres(treatment_stack) && raster::yres(infected) == raster::yres(treatment_stack))) {
+      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
+    }
+    
+    if (!(raster::compareCRS(infected, treatment_stack))) {
+      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    }
+    
+    treatment_maps <- list(as.matrix(treatment_stack[[1]]))
+    if (nlayers(treatment_stack) >= 2) {
+      for(i in 2:nlayers(treatment_stack)) {
+        treatment_maps[[i]] <- as.matrix(treatment_stack[[i]])
+      }
+    }
+    treatment_years = treatment_years
+  } else {
+    treatment_map <- host
+    raster::values(treatment_map) <- 0
+    treatment_maps = list(as.matrix(treatment_map))
+  }
+  
   ew_res <- raster::xres(susceptible)
   ns_res <- raster::yres(susceptible)
   
@@ -240,16 +286,20 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   susceptible <- raster::as.matrix(susceptible)
   total_plants <- raster::as.matrix(total_plants)
   mortality_tracker <- raster::as.matrix(mortality_tracker)
+  mortality <- mortality_tracker
   
   data <- pops_model(random_seed = random_seed, 
            lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
            reproductive_rate = reproductive_rate, 
-           weather = weather, short_distance_scale = short_distance_scale, infected = infected,
-           susceptible = susceptible, mortality_tracker = mortality_tracker,
-           total_plants = total_plants, temperature = temperature,
+           weather = weather, mortality_on = mortality_on,
+           short_distance_scale = short_distance_scale, infected = infected,
+           susceptible = susceptible, mortality_tracker = mortality_tracker, mortality = mortality,
+           total_plants = total_plants, 
+           treatment_maps = treatment_maps, treatment_years = treatment_years,
+           temperature = temperature,
            weather_coefficient = weather_coefficient, 
            ew_res = ew_res, ns_res = ns_res,
-           time_step = time_step,
+           time_step = time_step, mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
            season_month_start = season_month_start, season_month_end = season_month_end,
            start_time = start_time, end_time = end_time,
            dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
