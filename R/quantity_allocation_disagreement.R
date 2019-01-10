@@ -9,11 +9,11 @@
 #' @examples
 quantity_allocation_disagreement <- function(reference, comparison){
   ## test that the comparison raster is the same extent, resolution, and crs as the reference (if not end)
-  compareRaster(reference, comparison)
+  raster::compareRaster(reference, comparison)
   compare <- reference - comparison
-  compare2 <- as.matrix(compare)
-  reference2 <- as.matrix(reference)
-  comparison2 <- as.matrix(comparison)
+  compare2 <- raster::as.matrix(compare)
+  reference2 <- raster::as.matrix(reference)
+  comparison2 <- raster::as.matrix(comparison)
   
   ## create data frame for comparison
   output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 ,number_of_infected_comp =0,directional_disagreement = 0)
