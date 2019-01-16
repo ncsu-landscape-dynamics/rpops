@@ -8,7 +8,7 @@
 #' @param sd_reproductive_rate 
 #' @param sd_short_distance_scale 
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify cellstats nlayers
+#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers
 #' @importFrom  stats runif
 #' @return a dataframe of the variables saved and their success metrics for each run
 #' @export

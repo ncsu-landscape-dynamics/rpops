@@ -12,8 +12,20 @@ install:
   
 environment:
   global:
-   WARNINGS_ARE_ERRORS: 
+   WARNINGS_ARE_ERRORS: 1
    USE_RTOOLS: true
+   
+  matrix:
+  - R_VERSION: 3.4.4
+    R_ARCH: x64
+    GCC_PATH: mingw_64
+
+  - R_VERSION: devel
+    R_ARCH: x64
+    GCC_PATH: mingw_64
+
+  - R_VERSION: patched
+    GCC_PATH: mingw_32
 
 cache:
   - C:\RLibrary
