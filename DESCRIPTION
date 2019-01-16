@@ -26,8 +26,6 @@ SystemRequirements:
 Suggests: 
     testthat,
     covr
-Remotes:
-    covr
 LinkingTo: 
     Rcpp
 RoxygenNote: 6.1.1

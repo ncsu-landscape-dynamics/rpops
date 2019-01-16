@@ -30,8 +30,6 @@ environment:
 cache:
   - C:\RLibrary
 
-on_success:
-  - Rscript -e "covr::codecov()"
 # Adapt as necessary starting from here
 
 build_script:
