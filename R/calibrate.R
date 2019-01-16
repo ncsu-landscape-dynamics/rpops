@@ -308,16 +308,9 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
     reject_count = 0
     
     ## set up comparison
-    if (management == FALSE) {
-      comp_years <- stack(lapply(1:length(data$infected), function(i) infected_file))
-      for (p in 1:raster::nlayers(comp_years)) {
-        comp_years[[p]] <- data$infected[[p]]
-      }
-    } else if (management == TRUE) {
-      comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-      for (p in 1:raster::nlayers(comp_years)) {
-        comp_years[[p]] <- data$infected_before_treatment[[p]]
-      }
+    comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
+    for (p in 1:raster::nlayers(comp_years)) {
+      comp_years[[p]] <- data$infected_before_treatment[[p]]
     }
 
     comp_total_infections = raster::cellStats(comp_years, 'sum')
@@ -358,16 +351,9 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
       data <- param_func(proposed_reproductive_rate, proposed_short_distance_scale)
       
       ## set up comparison
-      if (management == FALSE) {
-        comp_years <- stack(lapply(1:length(data$infected), function(i) infected_file))
-        for (p in 1:raster::nlayers(comp_years)) {
-          comp_years[[p]] <- data$infected[[p]]
-        }
-      } else if (management == TRUE) {
-        comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-        for (p in 1:raster::nlayers(comp_years)) {
-          comp_years[[p]] <- data$infected_before_treatment[[p]]
-        }
+      comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
+      for (p in 1:raster::nlayers(comp_years)) {
+        comp_years[[p]] <- data$infected_before_treatment[[p]]
       }
       
       comp_total_infections = raster::cellStats(comp_years, 'sum')
