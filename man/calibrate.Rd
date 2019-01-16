@@ -21,17 +21,17 @@ calibrate(infected_years_file, num_interations, start_reproductive_rate,
   kappa = 0)
 }
 \arguments{
-\item{infected_years_file}{}
+\item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
 
-\item{num_interations}{}
+\item{num_interations}{how many iterations do you want to run to allow the calibration to converge}
 
-\item{start_reproductive_rate}{}
+\item{start_reproductive_rate}{starting reproductive rate for MCMC calibration}
 
-\item{start_short_distance_scale}{}
+\item{start_short_distance_scale}{starting short distance scale parameter for MCMC calibration}
 
-\item{sd_reproductive_rate}{}
+\item{sd_reproductive_rate}{starting standard deviation for reproductive rate for MCMC calibration}
 
-\item{sd_short_distance_scale}{}
+\item{sd_short_distance_scale}{starting standard deviation for short distance scale for MCMC calibration}
 
 \item{infected_file}{path to raster file with initial infections}
 
