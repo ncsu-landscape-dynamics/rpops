@@ -1,4 +1,8 @@
 #' PoPS (Pest or Pathogen Spread) model
+#' 
+#' A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
+#' meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to simulate
+#' spread of the pest/pathogen into the future. 
 #'
 #' @param infected_file path to raster file with initial infections
 #' @param host_file path to raster file with number of hosts
@@ -38,7 +42,12 @@
 #' @return list of infected and susceptible per year
 #' @export
 #'
-#' @examples 
+#' @examples This example 
+#' infected_file <-  system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+#' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
+#' total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
+#' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "PoPS")
+#' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
 #' 
 pops <- function(infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
                  use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
