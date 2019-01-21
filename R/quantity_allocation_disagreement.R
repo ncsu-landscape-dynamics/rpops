@@ -1,12 +1,24 @@
-#' Quantity Allocation Disagreement
+#' Compares quantity and allocation disagreement of two raster datasets
+#' 
+#' Uses quantity and allocation disagreement metrics by Pontius and Millones (2014) and 
+#' omission and comission errors of comparing a modeled raster dataset to a reference raster 
+#' datatset.
 #'
 #' @param reference the binary (0 or 1) raster with ground truth data
 #' @param comparison the binary (0 or 1) raster with simulated data to be compared to ground truth
 #'
-#' @return data frame of with disagreement and omission/comimission
+#' @return A data frame with spatial configuration metrics. Particularly quantity, allocation, and 
+#' total disagreement,  omission and comission, and directional disagreement where directional disagreement.
+#' 
 #' @export
 #'
 #' @examples
+#' library(raster)
+#' reference <- raster(matrix(1, ncol = 2, nrow = 2))
+#' reference[1,1] <- 0
+#' comparison <- raster(matrix(1, ncol = 2, nrow = 2))
+#' quantity_allocation_disagreement(reference, comparison)
+#' 
 quantity_allocation_disagreement <- function(reference, comparison){
   ## test that the comparison raster is the same extent, resolution, and crs as the reference (if not end)
   raster::compareRaster(reference, comparison)
