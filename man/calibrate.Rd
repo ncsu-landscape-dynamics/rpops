@@ -2,7 +2,7 @@
 % Please edit documentation in R/calibrate.R
 \name{calibrate}
 \alias{calibrate}
-\title{Calibrate function for pops and pops_model functions}
+\title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
 calibrate(infected_years_file, num_interations, start_reproductive_rate,
   start_short_distance_scale, sd_reproductive_rate,
@@ -95,5 +95,37 @@ calibrate(infected_years_file, num_interations, start_reproductive_rate,
 a dataframe of the variables saved and their success metrics for each run
 }
 \description{
-Calibrate function for pops and pops_model functions
+Markov Chain Monte Carlo approximation is used to estimate the reproductive rate and the short distance scale parameters. Model 
+accuracy is gauged using a custom quantity allocation disagreement function to assess accuracy of spatial configuration. The 
+calibration uses this metric to determine if an MCMC run is kept either because it improves the results or randomly gets kept 
+despite being worse. We recommend running calibration for at least 10,000 iterations but even more will provide a better result. 
+If the model converges and doesn't improve for awhile it will exist calibration prior to reaching the total number of iterations specified.
+}
+\examples{
+infected_years_file <- system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+num_iterations <- 100
+start_reproductive_rate <- 0.5
+start_short_distance_scale <- 20
+sd_reproductive_rate <- 0.2
+sd_short_distance_scale <- 1
+infected_file <- system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
+total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
+temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "PoPS")
+treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
+
+params <- calibrate(infected_years_file, num_interations, start_reproductive_rate, 
+start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale,
+infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
+use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, mortality_on = TRUE,
+temperature_file = "", temperature_coefficient_file, 
+precipitation_coefficient_file ="", treatments_file,
+season_month_start = 1, season_month_end = 12, time_step = "month",
+start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
+dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
+short_distance_scale = 20.57, long_distance_scale = 0.0,
+lethal_temperature = -12.87, lethal_temperature_month = 1,
+mortality_rate = 0.05, mortality_time_lag = 2,
+wind_dir = "NONE", kappa = 0)
+
 }

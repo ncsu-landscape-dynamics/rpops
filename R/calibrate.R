@@ -1,4 +1,10 @@
-#' Calibrate function for pops and pops_model functions
+#' Calibrates the reproductive rate and dispersal scales of the pops model.
+#' 
+#' Markov Chain Monte Carlo approximation is used to estimate the reproductive rate and the short distance scale parameters. Model 
+#' accuracy is gauged using a custom quantity allocation disagreement function to assess accuracy of spatial configuration. The 
+#' calibration uses this metric to determine if an MCMC run is kept either because it improves the results or randomly gets kept 
+#' despite being worse. We recommend running calibration for at least 10,000 iterations but even more will provide a better result. 
+#' If the model converges and doesn't improve for awhile it will exist calibration prior to reaching the total number of iterations specified.
 #'
 #' @inheritParams pops
 #' @param infected_years_file years of initial infection/infestation as individual locations of a pest or pathogen in raster format
@@ -9,11 +15,37 @@
 #' @param sd_short_distance_scale starting standard deviation for short distance scale for MCMC calibration
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers
-#' @importFrom  stats runif
+#' @importFrom  stats runif rnorm
 #' @return a dataframe of the variables saved and their success metrics for each run
 #' @export
 #'
 #' @examples
+#' infected_years_file <- system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+#' num_iterations <- 100
+#' start_reproductive_rate <- 0.5
+#' start_short_distance_scale <- 20
+#' sd_reproductive_rate <- 0.2
+#' sd_short_distance_scale <- 1
+#' infected_file <- system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+#' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
+#' total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
+#' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "PoPS")
+#' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
+#' 
+#' params <- calibrate(infected_years_file, num_interations, start_reproductive_rate, 
+#' start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale,
+#' infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
+#' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, mortality_on = TRUE,
+#' temperature_file = "", temperature_coefficient_file, 
+#' precipitation_coefficient_file ="", treatments_file,
+#' season_month_start = 1, season_month_end = 12, time_step = "month",
+#' start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
+#' dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
+#' short_distance_scale = 20.57, long_distance_scale = 0.0,
+#' lethal_temperature = -12.87, lethal_temperature_month = 1,
+#' mortality_rate = 0.05, mortality_time_lag = 2,
+#' wind_dir = "NONE", kappa = 0)
+#' 
 calibrate <- function(infected_years_file, num_interations, start_reproductive_rate, 
                       start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale,
                       infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
@@ -220,7 +252,7 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
   
   if (management == TRUE) {
     
-    treatment_stack <- stack(treatments_file)
+    treatment_stack <- raster::stack(treatments_file)
     treatment_stack[is.na(treatment_stack)] <- 0
     
     if (!(raster::extent(infected) == raster::extent(treatment_stack))) {

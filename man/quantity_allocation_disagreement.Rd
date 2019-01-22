@@ -2,7 +2,7 @@
 % Please edit documentation in R/quantity_allocation_disagreement.R
 \name{quantity_allocation_disagreement}
 \alias{quantity_allocation_disagreement}
-\title{Quantity Allocation Disagreement}
+\title{Compares quantity and allocation disagreement of two raster datasets}
 \usage{
 quantity_allocation_disagreement(reference, comparison)
 }
@@ -12,8 +12,19 @@ quantity_allocation_disagreement(reference, comparison)
 \item{comparison}{the binary (0 or 1) raster with simulated data to be compared to ground truth}
 }
 \value{
-data frame of with disagreement and omission/comimission
+A data frame with spatial configuration metrics. Particularly quantity, allocation, and 
+total disagreement,  omission and comission, and directional disagreement where directional disagreement.
 }
 \description{
-Quantity Allocation Disagreement
+Uses quantity and allocation disagreement metrics by Pontius and Millones (2014) and 
+omission and comission errors of comparing a modeled raster dataset to a reference raster 
+datatset.
+}
+\examples{
+library(raster)
+reference <- raster(matrix(1, ncol = 2, nrow = 2))
+reference[1,1] <- 0
+comparison <- raster(matrix(1, ncol = 2, nrow = 2))
+quantity_allocation_disagreement(reference, comparison)
+
 }

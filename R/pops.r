@@ -49,6 +49,18 @@
 #' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
 #' 
+#' data <- pops(infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
+#' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, mortality_on = TRUE,
+#' temperature_file = "", temperature_coefficient_file, 
+#' precipitation_coefficient_file ="", treatments_file,
+#' season_month_start = 1, season_month_end = 12, time_step = "week",
+#' start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
+#' dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
+#' short_distance_scale = 20.57, long_distance_scale = 0.0,
+#' lethal_temperature = -12.87, lethal_temperature_month = 1,
+#' mortality_rate = 0.05, mortality_time_lag = 2,
+#' wind_dir = "NONE", kappa = 0, random_seed = NULL)
+#' 
 pops <- function(infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
                  use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
                  temperature_file = "", temperature_coefficient_file = "", 
@@ -99,7 +111,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   }
   
   if (time_step == "week") {
-    number_of_time_steps <- (end_time-start_time+1)*52
+    number_of_time_steps <- (end_time-start_time+1)*52+1
   } else if (time_step == "month") {
     number_of_time_steps <- (end_time-start_time+1)*12
   } else if (time_step == "day") {
@@ -257,7 +269,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   
   if (management == TRUE) {
 
-    treatment_stack <- stack(treatments_file)
+    treatment_stack <- raster::stack(treatments_file)
     treatment_stack[is.na(treatment_stack)] <- 0
     
     if (!(raster::extent(infected) == raster::extent(treatment_stack))) {

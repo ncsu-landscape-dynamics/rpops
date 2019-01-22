@@ -82,8 +82,28 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
 list of infected and susceptible per year
 }
 \description{
-PoPS (Pest or Pathogen Spread) model
+A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
+meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to simulate
+spread of the pest/pathogen into the future.
 }
 \examples{
+This example 
+infected_file <-  system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
+total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
+temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "PoPS")
+treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
+
+data <- pops(infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
+use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, mortality_on = TRUE,
+temperature_file = "", temperature_coefficient_file, 
+precipitation_coefficient_file ="", treatments_file,
+season_month_start = 1, season_month_end = 12, time_step = "week",
+start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
+dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
+short_distance_scale = 20.57, long_distance_scale = 0.0,
+lethal_temperature = -12.87, lethal_temperature_month = 1,
+mortality_rate = 0.05, mortality_time_lag = 2,
+wind_dir = "NONE", kappa = 0, random_seed = NULL)
 
 }
