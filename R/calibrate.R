@@ -340,9 +340,9 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
     reject_count = 0
     
     ## set up comparison
-    comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-    for (p in 1:raster::nlayers(comp_years)) {
-      comp_years[[p]] <- data$infected_before_treatment[[p]]
+    comp_years <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
+    for (q in 1:raster::nlayers(comp_years)) {
+      comp_years[[q]] <- data$infected_before_treatment[[q]]
     }
 
     comp_total_infections = raster::cellStats(comp_years, 'sum')
