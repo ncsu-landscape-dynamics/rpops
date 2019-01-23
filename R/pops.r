@@ -111,7 +111,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   }
   
   if (time_step == "week") {
-    number_of_time_steps <- (end_time-start_time+1)*52+1
+    number_of_time_steps <- (end_time-start_time+1)*52
   } else if (time_step == "month") {
     number_of_time_steps <- (end_time-start_time+1)*12
   } else if (time_step == "day") {

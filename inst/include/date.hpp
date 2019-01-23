@@ -72,7 +72,7 @@ Date Date::get_year_end()
 
 bool Date::is_last_week_of_year()
 {
-    if (month_ == 12 && (day_ + 7) > 31)
+    if (month_ == 12 && (day_ + 9) > 31)
         return true;
     return false;
 }
@@ -146,6 +146,11 @@ void Date::increased_by_week()
 {
     day_ += 7;
     if (year_ % 4 == 0 && (year_ % 100 != 0 || year_ % 400 == 0)) {
+        if (month_ == 12 && day_ > 23) {
+          year_++;
+          month_ = 1;
+          day_ = 1;
+        }
         if (day_ > day_in_month[1][month_]) {
             day_ = day_ - day_in_month[1][month_];
             month_++;
@@ -156,6 +161,11 @@ void Date::increased_by_week()
         }
     }
     else {
+        if (month_ == 12 && day_ > 24) {
+          year_++;
+          month_ = 1;
+          day_ = 1;
+        }
         if (day_ > day_in_month[0][month_]) {
             day_ = day_ - day_in_month[0][month_];
             month_++;
