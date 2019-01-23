@@ -94,7 +94,7 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
   }
   
   if (time_step == "week") {
-    number_of_time_steps <- (end_time-start_time+1)*52+2
+    number_of_time_steps <- (end_time-start_time+1)*52
   } else if (time_step == "month") {
     number_of_time_steps <- (end_time-start_time+1)*12
   } else if (time_step == "day") {
