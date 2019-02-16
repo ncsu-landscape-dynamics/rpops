@@ -127,7 +127,7 @@ public:
         other.data = nullptr;
     }
 
-    Raster(int cols, int rows)
+    Raster(int rows, int cols)
     {
         this->width = cols;
         this->height = rows;
@@ -135,7 +135,7 @@ public:
     }
 
     // TODO: size is unsigned?
-    Raster(int cols, int rows, Number value)
+    Raster(int rows, int cols, Number value)
     {
         this->width = cols;
         this->height = rows;
@@ -145,7 +145,7 @@ public:
     // maybe remove from the class, or make it optional together with
     // a reference
     Raster(std::initializer_list<std::initializer_list<Number>> l)
-        : Raster(l.begin()->size(), l.size())
+        : Raster(l.size(), l.begin()->size())
     {
          unsigned i = 0;
          unsigned j = 0;
@@ -241,7 +241,7 @@ public:
         else {
             auto re_width = this->width;
             auto re_height = this->height;
-            auto out = Raster(re_width, re_height);
+            auto out = Raster(re_height, re_width);
 
             for (int i = 0; i < re_height; i++) {
                 for (int j = 0; j < re_width; j++) {
@@ -261,7 +261,7 @@ public:
         else {
             auto re_width = this->width;
             auto re_height = this->height;
-            auto out = Raster(re_width, re_height);
+            auto out = Raster(re_height, re_width);
 
             for (int i = 0; i < re_height; i++) {
                 for (int j = 0; j < re_width; j++) {
@@ -278,7 +278,7 @@ public:
             throw std::runtime_error("The height or width of one image do"
                                      " not match with that of the other one.");
         }
-        auto out = Raster(width, height);
+        auto out = Raster(height, width);
 
         std::transform(data, data + (width * height), image.data, out.data,
                        [](const Number& a, const Number& b) { return a * b; });
@@ -291,7 +291,7 @@ public:
             throw std::runtime_error("The height or width of one image do"
                                      " not match with that of the other one.");
         }
-        auto out = Raster(width, height);
+        auto out = Raster(height, width);
 
         std::transform(data, data + (width * height), image.data, out.data,
                        [](const Number& a, const Number& b) { return a / b; });
@@ -300,7 +300,7 @@ public:
 
     Raster operator*(double value) const
     {
-        auto out = Raster(width, height);
+        auto out = Raster(height, width);
 
         std::transform(data, data + (width * height), out.data,
                        [&value](const Number& a) { return a * value; });
@@ -309,7 +309,7 @@ public:
 
     Raster operator/(double value) const
     {
-        auto out = Raster(width, height);
+        auto out = Raster(height, width);
 
         std::transform(data, data + (width * height), out.data,
                        [&value](const Number& a) { return a / value; });
