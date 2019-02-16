@@ -42,7 +42,7 @@
 #' @return list of infected and susceptible per year
 #' @export
 #'
-#' @examples This example 
+#' @examples
 #' infected_file <-  system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
 #' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
 #' total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
