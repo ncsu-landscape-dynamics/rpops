@@ -371,7 +371,7 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
     current_short_distance_scale = start_short_distance_scale
     proposed_short_distance_scale = 0.0
     while (proposed_short_distance_scale <= 0.0) {
-      proposed_short_distance_scale = round(abs(rnorm(1, mean=current_short_distance_scale, sd=sd_short_distance_scale)), digits = 1)
+      proposed_short_distance_scale = round(abs(rnorm(1, mean=current_short_distance_scale, sd=sd_short_distance_scale)), digits = 0)
     }
     
     params$reproductive_rate[2] <- proposed_reproductive_rate
@@ -416,10 +416,14 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
         current_short_distance_scale = proposed_short_distance_scale
         proposed_short_distance_scale = 0
         while (proposed_short_distance_scale <= 0) {
-          if (params$directional_disagreement[i] <= 0) {
-            proposed_short_distance_scale = round(current_short_distance_scale - abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 1)
-          } else if (params$directional_disagreement[i] > 0) {
-            proposed_short_distance_scale = round(current_short_distance_scale + abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 1)
+          if (management == TRUE) {
+            proposed_short_distance_scale = round(abs(rnorm(1, mean=current_short_distance_scale, sd=sd_short_distance_scale)), digits = 0)
+          } else if (management == FALSE) {
+            if (params$directional_disagreement[i] <= 0) {
+              proposed_short_distance_scale = round(current_short_distance_scale - abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
+            } else if (params$directional_disagreement[i] > 0) {
+              proposed_short_distance_scale = round(current_short_distance_scale + abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
+            }
           }
         }
         accept = TRUE
@@ -428,10 +432,14 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
         current_short_distance_scale = proposed_short_distance_scale
         proposed_short_distance_scale = 0
         while (proposed_short_distance_scale <= 0) {
-          if (params$directional_disagreement[i] <= 0) {
-            proposed_short_distance_scale = round(current_short_distance_scale - abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 1)
-          } else if (params$directional_disagreement[i] > 0) {
-            proposed_short_distance_scale = round(current_short_distance_scale + abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 1)
+          if (management == TRUE) {
+            proposed_short_distance_scale = round(abs(rnorm(1, mean=current_short_distance_scale, sd=sd_short_distance_scale)), digits = 0)
+          } else if (management == FALSE) {
+            if (params$directional_disagreement[i] <= 0) {
+              proposed_short_distance_scale = round(current_short_distance_scale - abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
+            } else if (params$directional_disagreement[i] > 0) {
+              proposed_short_distance_scale = round(current_short_distance_scale + abs(current_short_distance_scale - rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
+            }
           }
         }
         accept = TRUE
@@ -445,10 +453,14 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
         current_reproductive_rate = proposed_reproductive_rate
         proposed_reproductive_rate =  0
         while (proposed_reproductive_rate <= 0) {
-          if (sum(total_infections - comp_total_infections) <= 0) {
-            proposed_reproductive_rate = round(current_reproductive_rate - abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
-          } else if (sum(total_infections - comp_total_infections) > 0) {
-            proposed_reproductive_rate = round(current_reproductive_rate + abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
+          if (management == TRUE) {
+            proposed_reproductive_rate = round(rnorm(1,mean=current_reproductive_rate,sd= sd_reproductive_rate), digits = 1)
+          } else if (management == FALSE) {
+            if (sum(total_infections - comp_total_infections) <= 0) {
+              proposed_reproductive_rate = round(current_reproductive_rate - abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
+            } else if (sum(total_infections - comp_total_infections) > 0) {
+              proposed_reproductive_rate = round(current_reproductive_rate + abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
+            }
           }
         }
         accept = TRUE
@@ -457,10 +469,14 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
         current_reproductive_rate = proposed_reproductive_rate
         proposed_reproductive_rate =  0
         while (proposed_reproductive_rate <= 0) {
-          if (sum(total_infections - comp_total_infections) <= 0) {
-            proposed_reproductive_rate = round(current_reproductive_rate - abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
-          } else if (sum(total_infections - comp_total_infections) > 0) {
-            proposed_reproductive_rate = round(current_reproductive_rate + abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
+          if (management == TRUE) {
+            proposed_reproductive_rate = round(rnorm(1,mean=current_reproductive_rate,sd= sd_reproductive_rate), digits = 1)
+          } else if (management == FALSE) {
+            if (sum(total_infections - comp_total_infections) <= 0) {
+              proposed_reproductive_rate = round(current_reproductive_rate - abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
+            } else if (sum(total_infections - comp_total_infections) > 0) {
+              proposed_reproductive_rate = round(current_reproductive_rate + abs(current_reproductive_rate - rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate)), digits = 1)
+            }
           }
         }
         accept = TRUE
