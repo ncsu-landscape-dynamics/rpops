@@ -87,7 +87,6 @@ meaning that it uses understanding of the effect of weather on reproduction and 
 spread of the pest/pathogen into the future.
 }
 \examples{
-This example 
 infected_file <-  system.file("extdata", "SODexample", "initial_infection2001.tif", package = "PoPS")
 host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
 total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
