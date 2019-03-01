@@ -250,12 +250,12 @@ public:
                                 distance = abs(distribution_cauchy_two(generator));
                             }
                         }
-                        else {
-                            cerr <<
-                                    "The paramter dispersal_kernel muse be set as either CAUCHY OR CAUCHY_DOUBLE_SCALE"
-                                 << endl;
-                            exit(EXIT_FAILURE);
-                        }
+                        // else {
+                        //     cerr <<
+                        //             "The paramter dispersal_kernel muse be set as either CAUCHY OR CAUCHY_DOUBLE_SCALE"
+                        //          << endl;
+                        //     exit(EXIT_FAILURE);
+                        // }
 
                         theta = vonmisesvariate(generator);
 
