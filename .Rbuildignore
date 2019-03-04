@@ -12,6 +12,7 @@
 ^src/pops/CITATION\.cff$
 ^src/pops/\.git$
 ^src/pops/\.travis\.yml$
+^src/PoPS.dll$
 
 ^inst/cpp/pops/contributing\.md$
 ^inst/cpp/pops/LICENSE$
