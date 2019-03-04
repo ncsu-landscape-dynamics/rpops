@@ -167,7 +167,7 @@ public:
             
             for (int i = 0; i < height; i++) {
                 for (int j = 0; j < width; j++) {
-                    for (unsigned year_index = 0; year_index <= max_year_index; year_index++) {
+                    for (signed year_index = 0; year_index <= max_year_index; year_index++) {
                       int mortality_in_year_index = 0;
                         if (mortality_tracker_vector[year_index](i, j) > 0) {
                             mortality_in_year_index = mortality_rate*mortality_tracker_vector[year_index](i,j);
