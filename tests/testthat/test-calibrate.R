@@ -2,9 +2,9 @@ context("test-calibrate")
 
 test_that("Both reproductive rate and short distance scale are decreasing when starting values are much higher than they should converge to!", {
   infected_years_file <- "H:/Team Drives/APHIS  Projects/PoPS/test_data/parameter_estimation_test_data/20x20/sim_rr2.2_short_distance_1.5/infected_years.tif"
-  num_iterations <<- 20
+  num_iterations <<- 50
   start_reproductive_rate <- 8
-  start_short_distance_scale <- 20
+  start_short_distance_scale <- 50
   sd_reproductive_rate <- 0.2
   sd_short_distance_scale <- 1
   
@@ -35,9 +35,9 @@ expect_lte(params3$short_distance_scale[[num_iterations]], start_short_distance_
 
 test_that("Both reproductive rate and short distance scale are decreasing when starting values are much higher than they should converge to!", {
   infected_years_file <- "H:/Team Drives/APHIS  Projects/PoPS/test_data/parameter_estimation_test_data/20x20/sim_rr1.3_short_distance_43/infected_years.tif"
-  num_iterations <<- 20
-  start_reproductive_rate <- 0.2
-  start_short_distance_scale <- 5
+  num_iterations <<- 50
+  start_reproductive_rate <- 0.1
+  start_short_distance_scale <- 2
   sd_reproductive_rate <- 0.2
   sd_short_distance_scale <- 1
   
