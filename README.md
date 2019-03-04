@@ -48,7 +48,7 @@ If you are interested in contributing to PoPS development and are not a core dev
 documents to make the process as seamless as possible.
 
 1. [Contributor Code of Conduct](contributing_docs/CODE_OF_CONDUCT.md)
-1. [PoPS Style Guide](http://adv-r.had.co.nz/Style.html)
+1. [Style Guide from hadley](http://adv-r.had.co.nz/Style.html)
 1. [Contributor Guide](contributing_docs/CONTRIBUTING.md)
 
 

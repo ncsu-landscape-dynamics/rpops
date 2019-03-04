@@ -14,6 +14,8 @@
 ^src/pops/\.travis\.yml$
 ^src/PoPS.dll$
 
+^contributing_docs\.md$
+
 ^inst/cpp/pops/contributing\.md$
 ^inst/cpp/pops/LICENSE$
 ^inst/cpp/pops/README\.md$
