@@ -16,6 +16,14 @@ install.packages("devtools")
 library(devtools)
 devtools::install_github("ncsu-landscape-dynamics/rpops")
 library(PoPS)
+
+## if you get an error that says it failed check use:
+Sys.getenv("BINPREF")
+## should return "C:/Rtools/mingw_$(WIN)/bin/"
+## if not run the command below
+cat('Sys.setenv(BINPREF = "C:/Rtools/mingw_$(WIN)/bin/")',
+    file = file.path(Sys.getenv("HOME"), ".Rprofile"), 
+    sep = "\n", append = FALSE)
 ```
 
 ## Authors
