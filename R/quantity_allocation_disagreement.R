@@ -70,7 +70,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
   LSI <- 1 - ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI)/8)
   
   ## create data frame for comparison
-  output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 , number_of_infected_comp =0, directional_disagreement = 0, landscape_similarity=0)
+  output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 , number_of_infected_comp =0, directional_disagreement = 0, landscape_similarity = 0)
   output$total_disagreement <- sum(abs(compare2))
   output$quantity_disagreement <- abs(sum(reference2) - sum(comparison2))
   output$allocation_disagreement <- output$total_disagreement - output$quantity_disagreement
