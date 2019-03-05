@@ -6,7 +6,7 @@ Description: A generalized stochastic geospatial model for pest or pathogen spre
 Authors@R: c(
     person("Chris", "Jones", email = "cmjone25@ncsu.edu", role = c("aut", "cre")),
     person("Vaclav", "Petras", role = c("aut")),
-    person("Anna", "Petrasova", role = c("aut"))
+    person("Anna", "Petrasova", role = c("aut")),
     person("Gaydos", "Devon", role = c("aut"))
     )
 Depends: R (>= 3.3.0)
