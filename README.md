@@ -10,11 +10,14 @@ An R wrapper using RCPP for the [PoPS C++ library](https://github.com/ncsu-lands
 
 ## How to install
 
-Install Rtools(https://cran.r-project.org/bin/windows/Rtools/) if not already installed. 
+Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) if not already installed. 
+
 ```R
 install.packages("devtools")
 library(devtools)
 devtools::install_github("ncsu-landscape-dynamics/rpops")
+# if you want a specific branch use where branch_name is the name of the branch you want to use.
+devtools::install_github("ncsu-landscape-dynamics/rpops", ref = "branch_name")
 library(PoPS)
 
 ## if you get an error that says it failed check use:
