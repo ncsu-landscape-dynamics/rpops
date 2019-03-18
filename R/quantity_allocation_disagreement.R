@@ -26,8 +26,8 @@ quantity_allocation_disagreement <- function(reference, comparison){
   raster::compareRaster(reference, comparison)
   compare <- reference - comparison
   # compare3 <- reference + comparison
-  # extent = extent(reference)
-  # num_of_cells = max(cellsFromExtent(reference, extent(reference)))
+  extent <- extent(reference)
+  num_of_cells <- max(cellsFromExtent(reference, extent(reference)))
   
   # calculate number of infected patches
   reference_no0 <- reference
@@ -35,7 +35,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
   reference_no0[reference_no0 == 0] <- NA
   comparison_no0[comparison_no0 == 0] <- NA
   NP_ref <- landscapemetrics::lsm_c_np(reference_no0, directions = 8)$value
-  if (sum(comparison_no0[comparison_no0 >0]) == 0) {
+  if (sum(comparison_no0[comparison_no0 > 0]) == 0) {
     NP_comp <- 0
     ENN_MN_comp <- 0
     PARA_MN_comp <- 0
@@ -43,8 +43,9 @@ quantity_allocation_disagreement <- function(reference, comparison){
   } else {
     NP_comp <- landscapemetrics::lsm_c_np(comparison_no0, directions = 8)$value
   }
-  
+
   change_NP <- abs((NP_comp - NP_ref)/NP_ref)
+  if (change_NP >= 1) {change_NP <- 1}
   
   # calculate the mean euclidean distance between patches
   if (NP_ref > 1) {

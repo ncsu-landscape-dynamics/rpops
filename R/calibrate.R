@@ -575,9 +575,9 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
         reject_count <- reject_count + 1
       }
       
-      if (reject_count >= 40) {
-        break
-      }
+      # if (reject_count >= 40) {
+      #   break
+      # }
       print(i)
     }
     params <- params[1:i,]
