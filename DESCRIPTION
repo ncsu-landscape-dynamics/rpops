@@ -14,6 +14,10 @@ Imports:
     rgdal,
     Rcpp (>= 0.12.19),
     stats,
+    doParallel,
+    foreach,
+    parallel,
+    iterators,
     devtools
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
