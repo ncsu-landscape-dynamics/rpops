@@ -15,6 +15,7 @@
 ^src/PoPS.dll$
 
 ^contributing_docs\.md$
+^contributing_docs
 
 ^inst/cpp/pops/contributing\.md$
 ^inst/cpp/pops/LICENSE$
