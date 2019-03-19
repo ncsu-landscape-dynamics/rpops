@@ -25,7 +25,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
   # test that the comparison raster is the same extent, resolution, and crs as the reference (if not end)
   raster::compareRaster(reference, comparison)
   compare <- reference - comparison
-  # compare3 <- reference + comparison
+  compare3 <- reference + comparison
   extent <- extent(reference)
   num_of_cells <- max(cellsFromExtent(reference, extent(reference)))
   
@@ -44,7 +44,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
     NP_comp <- landscapemetrics::lsm_c_np(comparison_no0, directions = 8)$value
   }
 
-  change_NP <- abs((NP_comp - NP_ref)/NP_ref)
+  change_NP <- abs((NP_comp - NP_ref)/(NP_comp + NP_ref))
   if (change_NP >= 1) {change_NP <- 1}
   
   # calculate the mean euclidean distance between patches
@@ -61,7 +61,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
   }
   
   if (ENN_MN_ref != 0) {
-    change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/ENN_MN_ref)
+    change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_comp + ENN_MN_ref))
   } else if (ENN_MN_comp == 0 && ENN_MN_ref == 0) {
     change_ENN_MN <- 0
   } else {
@@ -76,7 +76,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
     PARA_MN_comp <- landscapemetrics::lsm_c_para_mn(comparison_no0, directions = 8)$value
   }
     
-  change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/PARA_MN_ref) 
+  change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_comp + PARA_MN_ref)) 
   
   # calculate the largest patch index and difference
   LPI_ref <- landscapemetrics::lsm_c_lpi(reference_no0, directions = 8)$value
@@ -86,14 +86,14 @@ quantity_allocation_disagreement <- function(reference, comparison){
     LPI_comp <- landscapemetrics::lsm_c_lpi(comparison_no0, directions = 8)$value
   }
   
-  change_LPI <- abs(LPI_comp - LPI_ref) / 100
+  change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_comp + LPI_ref))
   
   # calculate landscape similarity index between reference and comparison
   LSI <- 1 - ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
   if (LSI < 0) { LSI <- 0 }
   
   ## create data frame for comparison
-  output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, omission = 0, commission = 0 , number_of_infected_comp = 0, directional_disagreement = 0, landscape_similarity = 0)
+  output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, omission = 0, commission = 0 , number_of_infected_comp = 0, directional_disagreement = 0, landscape_similarity = 0, true_positives = 0, true_negatives = 0, odds_ratio = 0)
   output$total_disagreement <- sum(compare[compare == 1]) + abs(sum(compare[compare == -1]))
   output$quantity_disagreement <- abs(sum(compare[compare == 1]) + sum(compare[compare == -1]))
   output$allocation_disagreement <- output$total_disagreement - output$quantity_disagreement
@@ -102,9 +102,9 @@ quantity_allocation_disagreement <- function(reference, comparison){
   output$number_of_infected_comp <- sum(comparison[comparison == 1])
   output$directional_disagreement <- sum(compare[compare == 1]) + sum(compare[compare == -1])
   output$landscape_similarity <- LSI
-  # output$true_positives <- abs(sum(compare3[compare3 ==2]))
-  # output$true_negatives <- num_of_cells - output$omission - output$commission - output$true_positives
-  # output$odds_ratio = (output$true_positives*output$true_negatives)/(output$omission*output$commission)
+  output$true_positives <- abs(sum(compare3[compare3 ==2]))
+  output$true_negatives <- num_of_cells - output$omission - output$commission - output$true_positives
+  output$odds_ratio = (output$true_positives*output$true_negatives)/(output$omission*output$commission)
   
   return(output)
 }
