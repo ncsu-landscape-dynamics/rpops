@@ -28,6 +28,11 @@ quantity_allocation_disagreement <- function(reference, comparison){
   compare3 <- reference + comparison
   extent <- extent(reference)
   num_of_cells <- max(cellsFromExtent(reference, extent(reference)))
+  max_num_patches <- ceiling(nrow(reference)/2) * ceiling(ncol(reference)/2)
+  distance_min <- 2*xres(reference)
+  distance_max <- sqrt((nrow(reference) - 1)^2 + (ncol(reference) - 1)^2)*xres(reference)
+  max_para <- (xres(reference)*4)/(xres(reference)*xres(reference))
+  min_para <- ((xres(reference)*nrow(reference)*2) + (xres(reference)*ncol(reference)*2))/((xres(reference)*nrow(reference))*(xres(reference)*ncol(reference)))
   
   # calculate number of infected patches
   reference_no0 <- reference
@@ -44,7 +49,8 @@ quantity_allocation_disagreement <- function(reference, comparison){
     NP_comp <- landscapemetrics::lsm_c_np(comparison_no0, directions = 8)$value
   }
 
-  change_NP <- abs((NP_comp - NP_ref)/(NP_comp + NP_ref))
+  # change_NP <- abs((NP_comp - NP_ref)/(NP_comp + NP_ref))
+  change_NP <- abs((NP_comp - NP_ref)/max(abs(1 - NP_ref), abs(NP_ref - max_num_patches)))
   if (change_NP >= 1) {change_NP <- 1}
   
   # calculate the mean euclidean distance between patches
@@ -61,7 +67,8 @@ quantity_allocation_disagreement <- function(reference, comparison){
   }
   
   if (ENN_MN_ref != 0) {
-    change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_comp + ENN_MN_ref))
+    # change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_comp + ENN_MN_ref))
+    change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/max(abs(distance_min - ENN_MN_ref), abs(distance_max - ENN_MN_ref)))
   } else if (ENN_MN_comp == 0 && ENN_MN_ref == 0) {
     change_ENN_MN <- 0
   } else {
@@ -76,7 +83,8 @@ quantity_allocation_disagreement <- function(reference, comparison){
     PARA_MN_comp <- landscapemetrics::lsm_c_para_mn(comparison_no0, directions = 8)$value
   }
     
-  change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_comp + PARA_MN_ref)) 
+  # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_comp + PARA_MN_ref)) 
+  change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/max(abs(min_para - PARA_MN_ref), abs(max_para - PARA_MN_ref)))
   
   # calculate the largest patch index and difference
   LPI_ref <- landscapemetrics::lsm_c_lpi(reference_no0, directions = 8)$value
@@ -86,8 +94,8 @@ quantity_allocation_disagreement <- function(reference, comparison){
     LPI_comp <- landscapemetrics::lsm_c_lpi(comparison_no0, directions = 8)$value
   }
   
-  change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_comp + LPI_ref))
-  
+  # change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_comp + LPI_ref))
+  change_LPI <- abs((LPI_comp - LPI_ref)/max(abs(0 - LPI_ref),abs(100 - LPI_ref)))
   # calculate landscape similarity index between reference and comparison
   LSI <- 1 - ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
   if (LSI < 0) { LSI <- 0 }
