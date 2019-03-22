@@ -110,7 +110,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
   output$number_of_infected_comp <- sum(comparison[comparison == 1])
   output$directional_disagreement <- sum(compare[compare == 1]) + sum(compare[compare == -1])
   output$landscape_similarity <- LSI
-  output$true_positives <- abs(sum(compare3[compare3 ==2]))
+  output$true_positives <- abs(sum(compare3[compare3 ==2]))/2
   output$true_negatives <- num_of_cells - output$omission - output$commission - output$true_positives
   output$odds_ratio = (output$true_positives*output$true_negatives)/(output$omission*output$commission)
   

@@ -402,7 +402,7 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
       total_disagreement <- 0
       directional_disagreement <- 0
       landscape_similarity <- 0
-      all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 ,number_of_infected_comp = 0, directional_disagreement = 0, landscape_similarity = 0)
+      all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 ,number_of_infected_comp = 0, directional_disagreement = 0, landscape_similarity = 0,  true_positives = 0, true_negatives = 0, odds_ratio = 0)
       for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
         all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
         total_disagreement[p] <- all_disagreement$total_disagreement[p]
