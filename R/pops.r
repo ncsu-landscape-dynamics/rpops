@@ -36,7 +36,7 @@
 #' @param mortality_time_lag time lag from infection until mortality can occur in years
 #' 
 #' @useDynLib PoPS, .registration = TRUE
-#' @importFrom raster raster values as.matrix xres yres stack
+#' @importFrom raster raster values as.matrix xres yres stack extent
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
 #' @return list of infected and susceptible per year

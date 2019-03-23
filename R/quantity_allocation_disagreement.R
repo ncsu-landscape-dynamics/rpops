@@ -8,6 +8,7 @@
 #' @param comparison the binary (0 or 1) raster with simulated data to be compared to ground truth
 #'
 #' @importFrom landscapemetrics lsm_c_np lsm_c_enn_mn lsm_c_para_mn lsm_c_lpi 
+#' @importFrom raster cellsFromExtent xres ncol nrow yres extent
 #' 
 #' @return A data frame with spatial configuration metrics. Particularly quantity, allocation, and 
 #' total disagreement,  omission and comission, and directional disagreement where directional disagreement.
@@ -112,7 +113,15 @@ quantity_allocation_disagreement <- function(reference, comparison){
   output$landscape_similarity <- LSI
   output$true_positives <- abs(sum(compare3[compare3 ==2]))/2
   output$true_negatives <- num_of_cells - output$omission - output$commission - output$true_positives
-  output$odds_ratio = (output$true_positives*output$true_negatives)/(output$omission*output$commission)
+  if(output$omission == 0 && output$commission == 0) {
+    output$odds_ratio = (output$true_positives*output$true_negatives)/1
+  } else if (output$omission == 0) {
+    output$odds_ratio = (output$true_positives*output$true_negatives)/output$commission
+  } else if (output$commission == 0) {
+    output$odds_ratio = (output$true_positives*output$true_negatives)/output$omission
+  } else {
+    output$odds_ratio = (output$true_positives*output$true_negatives)/(output$omission*output$commission)
+  }
   
   return(output)
 }
