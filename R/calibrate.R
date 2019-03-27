@@ -432,7 +432,7 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
         }
         
         accept <- TRUE
-      } else if ((1 - (abs(params$odds_ratio[i] - params$odds_ratio[i-1])/abs(params$odds_ratio[i] + params$odds_ratio[i-1]))) <= runif(1)) {
+      } else if ((1 - (abs(params$odds_ratio[i] - params$odds_ratio[i-1])/abs(params$odds_ratio[i] + params$odds_ratio[i-1]))) >= runif(1)) {
         # accept change randomly if model is worse than previous run
         current_short_distance_scale <- proposed_short_distance_scale
         proposed_short_distance_scale <- 0
