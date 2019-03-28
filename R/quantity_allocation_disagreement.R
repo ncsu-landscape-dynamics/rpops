@@ -103,11 +103,12 @@ quantity_allocation_disagreement <- function(reference, comparison){
   
   ## create data frame for comparison
   output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, omission = 0, commission = 0 , number_of_infected_comp = 0, directional_disagreement = 0, landscape_similarity = 0, true_positives = 0, true_negatives = 0, odds_ratio = 0)
-  output$total_disagreement <- sum(compare[compare == 1]) + abs(sum(compare[compare == -1]))
-  output$quantity_disagreement <- abs(sum(compare[compare == 1]) + sum(compare[compare == -1]))
-  output$allocation_disagreement <- output$total_disagreement - output$quantity_disagreement
   output$omission <- abs(sum(compare[compare == 1]))
   output$commission <- abs(sum(compare[compare == -1]))
+  output$quantity_disagreement <- abs(sum(reference[reference == 1]) - sum(comparison[comparison == 1]))
+  output$allocation_disagreement <- 2 * min(output$omission, output$commission)
+  output$total_disagreement <- sum(compare[compare == 1]) + abs(sum(compare[compare == -1]))
+  output$total_disagreement2 <- output$allocation_disagreement + output$quantity_disagreement
   output$number_of_infected_comp <- sum(comparison[comparison == 1])
   output$directional_disagreement <- sum(compare[compare == 1]) + sum(compare[compare == -1])
   output$landscape_similarity <- LSI
