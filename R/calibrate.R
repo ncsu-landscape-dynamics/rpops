@@ -8,37 +8,44 @@
 #'
 #' @inheritParams pops
 #' @param infected_years_file years of initial infection/infestation as individual locations of a pest or pathogen in raster format
-#' @param num_interations how many iterations do you want to run to allow the calibration to converge
+#' @param num_iterations how many iterations do you want to run to allow the calibration to converge
 #' @param start_reproductive_rate starting reproductive rate for MCMC calibration 
 #' @param start_short_distance_scale starting short distance scale parameter for MCMC calibration
 #' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration
 #' @param sd_short_distance_scale starting standard deviation for short distance scale for MCMC calibration
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent
-#' @importFrom  stats runif rnorm
+#' @importFrom stats runif rnorm
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach  registerDoSEQ %dopar%
+#' @importFrom parallel makeCluster stopCluster detectCores
+#' @importFrom iterators icount
 #' 
 #' @return a dataframe of the variables saved and their success metrics for each run
 #' 
-#' @export
+#' @export 
 #'
 #' @examples
-#' infected_years_file <- system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+#' infected_years_file <- system.file("extdata", "SODexample", "initial_infections.tif", 
+#' package = "PoPS")
 #' num_iterations <- 100
 #' start_reproductive_rate <- 0.5
 #' start_short_distance_scale <- 20
 #' sd_reproductive_rate <- 0.2
 #' sd_short_distance_scale <- 1
-#' infected_file <- system.file("extdata", "SODexample", "initial_infection2001.tif", package = "PoPS")
+#' infected_file <- system.file("extdata", "SODexample", "initial_infection2001.tif", 
+#' package = "PoPS")
 #' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
 #' total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
-#' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "PoPS")
+#' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", 
+#' package = "PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
 #' 
-#' params <- calibrate(infected_years_file, num_interations, start_reproductive_rate, 
+#' params <- calibrate(infected_years_file, num_iterations, start_reproductive_rate, 
 #' start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale,
 #' infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
-#' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, mortality_on = TRUE,
-#' temperature_file = "", temperature_coefficient_file, 
+#' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
+#' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 #' precipitation_coefficient_file ="", treatments_file,
 #' season_month_start = 1, season_month_end = 12, time_step = "month",
 #' start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
@@ -48,7 +55,7 @@
 #' mortality_rate = 0.05, mortality_time_lag = 2,
 #' wind_dir = "NONE", kappa = 0)
 #' 
-calibrate <- function(infected_years_file, num_interations, start_reproductive_rate, 
+calibrate <- function(infected_years_file, num_iterations, start_reproductive_rate, 
                       start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale,
                       infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
                       use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
@@ -294,10 +301,24 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   
+  ## Load observed data on occurence
+  infection_years <- stack(infected_years_file)
+  ## calculate total infections per year in the landscape
+  total_infections <- raster::cellStats(infection_years, 'sum')
+  if (length(total_infections) > number_of_years){
+    total_infections <- total_infections[1:number_of_years]
+  }
+  ## set up reclassification matrix for binary reclassification
+  rcl <- c(1, Inf, 1, 0, 0.99, NA)
+  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
+  ## reclassify to binary values
+  infection_years <- raster::reclassify(infection_years, rclmat)
+  ## Get rid of NA values to make comparisons
+  infection_years[is.na(infection_years)] <- 0
+  
   ## set the parameter function to only need the parameters that chanage
   param_func <- function(reproductive_rate, short_distance_scale) {
-    
-    random_seed = round(stats::runif(1, 1, 1000000))
+    random_seed <- round(stats::runif(1, 1, 1000000))
     data <- pops_model(random_seed = random_seed, 
                        lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
                        reproductive_rate = reproductive_rate, 
@@ -318,200 +339,172 @@ calibrate <- function(infected_years_file, num_interations, start_reproductive_r
     return(data)
   }
   
-  ## Load observed data on occurence
-  infection_years <- stack(infected_years_file)
-  ## calculate total infections per year in the landscape
-  total_infections <- raster::cellStats(infection_years, 'sum')
-  if (length(total_infections) > number_of_years){
-    total_infections <- total_infections[1:number_of_years]
-  }
-  ## set up reclassification matrix for binary reclassification
-  rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
-  ## reclassify to binary values
-  infection_years <- raster::reclassify(infection_years, rclmat)
-  ## Get rid of NA values to make comparisons
-  infection_years[is.na(infection_years)] <- 0
+  data <- param_func(start_reproductive_rate, start_short_distance_scale)
   
-  ## Create function for MCMC runs
-  MCMC <- function(num_iterations, start_reproductive_rate, start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale){
-    params <- data.frame(reproductive_rate = rep(0, num_iterations + 1), short_distance_scale = rep(0, num_iterations + 1), total_disagreement = rep(0, num_iterations + 1), quantity_disagreement = rep(0, num_iterations + 1), allocation_disagreement = rep(0, num_iterations + 1), landscape_similarity = rep(0, num_iterations + 1), odds_ratio = rep(0, num_iterations + 1), number_of_infected_difference = rep(0, num_iterations + 1))
-    params$reproductive_rate[1] <- start_reproductive_rate
-    params$short_distance_scale[1] <- start_short_distance_scale
-    data <- param_func(start_reproductive_rate, start_short_distance_scale)
-    reject_count <- 0
+  ## set up comparison
+  comp_years <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
+  for (q in 1:raster::nlayers(comp_years)) {
+    comp_years[[q]] <- data$infected_before_treatment[[q]]
+  }
+  
+  comp_years <- raster::reclassify(comp_years, rclmat)
+  comp_years[is.na(comp_years)] <- 0
+  
+  all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, configuration_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
+  for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
+    all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
+  }
+  
+  ## save current state of the system
+  current_total_disagreement <- mean(all_disagreement$total_disagreement)
+  current_configuration_disagreement <- mean(all_disagreement$configuration_disagreement)
+  current_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
+  current_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
+  current_odds_ratio <- mean(all_disagreement$odds_ratio)
+  current_reproductive_rate <- start_reproductive_rate
+  current_short_distance_scale <- start_short_distance_scale
+  
+  best_total_disagreement <- current_total_disagreement
+  best_configuration_disagreement <- current_configuration_disagreement
+  best_quantity_disagreement <- current_quantity_disagreement
+  best_allocation_disagreement <- current_allocation_disagreement
+  best_odds_ratio <- current_odds_ratio
+  best_reproductive_rate <- current_reproductive_rate
+  best_short_distance_scale <- current_short_distance_scale
+  
+  ## create parallel environment
+  core_count <- parallel::detectCores() - 1
+  cl <- parallel::makeCluster(core_count)
+  doParallel::registerDoParallel(cl)
+  
+  params <- foreach::foreach(icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS"), .inorder = TRUE) %dopar% {
+    param <- data.frame(reproductive_rate = 0, short_distance_scale = 0, total_disagreement = 0, quantity_disagreement = 0, allocation_disagreement = 0, configuration_disagreement = 0, odds_ratio = 0)
+    proposed_reproductive_rate <-  0
+    while (proposed_reproductive_rate <= 0) {
+      proposed_reproductive_rate <- round(rnorm(1, mean = best_reproductive_rate, sd = best_reproductive_rate/10), digits = 1)
+    }
+    
+    proposed_short_distance_scale <- 0.0
+    while (proposed_short_distance_scale <= 0.0) {
+      proposed_short_distance_scale <- round(abs(rnorm(1, mean = best_short_distance_scale, sd = best_short_distance_scale/10)), digits = 0)
+    }
+    
+    data <- param_func(proposed_reproductive_rate, proposed_short_distance_scale)
     
     ## set up comparison
-    comp_years <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-    for (q in 1:raster::nlayers(comp_years)) {
-      comp_years[[q]] <- data$infected_before_treatment[[q]]
-    }
-
-    ## Create vector of total infections for each year of the simulation
-    comp_total_infections <- raster::cellStats(comp_years, 'sum')
-    if (length(comp_total_infections) > min(length(comp_total_infections), length(total_infections)) || length(total_infections) > min(length(comp_total_infections), length(total_infections))) {
-      comp_total_infections <- comp_total_infections[1:min(length(comp_total_infections), length(total_infections))]
-      total_infections <- total_infections[1:min(length(comp_total_infections), length(total_infections))]
+    comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
+    for (p in 1:raster::nlayers(comp_years)) {
+      comp_years[[p]] <- data$infected_before_treatment[[p]]
     }
     
     comp_years <- raster::reclassify(comp_years, rclmat)
     comp_years[is.na(comp_years)] <- 0
     
-    all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 ,number_of_infected_comp = 0, directional_disagreement = 0, landscape_similarity = 0,  true_positives = 0, true_negatives = 0, odds_ratio = 0)
+    all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, configuration_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
     for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
       all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
     }
     
-    params$total_disagreement[1] <- sum(all_disagreement$total_disagreement)
-    params$landscape_similarity[1] <- mean(all_disagreement$landscape_similarity)
-    params$quantity_disagreement[1] <- sum(all_disagreement$quantity_disagreement)
-    params$allocation_disagreement[1] <- sum(all_disagreement$allocation_disagreement)
-    params$number_of_infected_difference[1] <- sum(abs(total_infections - comp_total_infections))
-    params$odds_ratio[1] <- mean(all_disagreement$odds_ratio)
+    proposed_total_disagreement <- mean(all_disagreement$total_disagreement)
+    proposed_configuration_disagreement <- mean(all_disagreement$configuration_disagreement)
+    proposed_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
+    proposed_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
+    proposed_odds_ratio <- mean(all_disagreement$odds_ratio)
     
-    current_reproductive_rate <- start_reproductive_rate
-    proposed_reproductive_rate <-  0.0
-    while (proposed_reproductive_rate <= 0) {
-      proposed_reproductive_rate <- round(rnorm(1, mean = current_reproductive_rate, sd = sd_reproductive_rate), digits = 1)
-    }
+    allocation_test <- min(1, (1 - proposed_allocation_disagreement) / (1 - current_allocation_disagreement))
+    quantity_test <- min(1, (1 - proposed_quantity_disagreement) / (1 - current_quantity_disagreement))
+    configuration_test <- min(1, (1 - proposed_configuration_disagreement) / (1 - current_configuration_disagreement))
+    total_disagreement_test <- min(1, (1 - proposed_total_disagreement) / (1 - current_total_disagreement))
+    oddsratio_test <- min(1, proposed_odds_ratio / current_odds_ratio)
     
-    current_short_distance_scale <- start_short_distance_scale
-    proposed_short_distance_scale <- 0.0
-    while (proposed_short_distance_scale <= 0.0) {
-      proposed_short_distance_scale <- round(abs(rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
-    }
-    
-    params$reproductive_rate[2] <- proposed_reproductive_rate
-    params$short_distance_scale[2] <- proposed_short_distance_scale
-    i <- 2
-    
-    while(i <= num_iterations){
+    # if ( oddsratio_test == 1 ) {
+    #   current_short_distance_scale <- proposed_short_distance_scale
+    #   current_reproductive_rate <- proposed_reproductive_rate
+    #   current_total_disagreement <- proposed_total_disagreement
+    #   current_configuration_disagreement <- proposed_configuration_disagreement
+    #   current_quantity_disagreement <- proposed_quantity_disagreement
+    #   current_allocation_disagreement <- proposed_allocation_disagreement
+    #   current_odds_ratio <- proposed_odds_ratio
+    #   
+    #   param$total_disagreement <- current_total_disagreement
+    #   param$configuration_disagreement <- current_configuration_disagreement
+    #   param$quantity_disagreement <- current_quantity_disagreement
+    #   param$allocation_disagreement <- current_allocation_disagreement
+    #   param$odds_ratio <- current_odds_ratio
+    #   param$short_distance_scale <- current_short_distance_scale
+    #   param$reproductive_rate <- current_reproductive_rate
+    #   to.params <- param
+    # } else 
+      if ( runif(1) < oddsratio_test ) { # accept change if model improves or doesn't change
+      current_short_distance_scale <- proposed_short_distance_scale
+      current_reproductive_rate <- proposed_reproductive_rate
+      current_total_disagreement <- proposed_total_disagreement
+      current_configuration_disagreement <- proposed_configuration_disagreement
+      current_quantity_disagreement <- proposed_quantity_disagreement
+      current_allocation_disagreement <- proposed_allocation_disagreement
+      current_odds_ratio <- proposed_odds_ratio
       
-      data <- param_func(proposed_reproductive_rate, proposed_short_distance_scale)
-      
-      ## set up comparison
-      comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-      for (p in 1:raster::nlayers(comp_years)) {
-        comp_years[[p]] <- data$infected_before_treatment[[p]]
+      if(current_odds_ratio >= best_odds_ratio) {
+        best_total_disagreement <- current_total_disagreement
+        best_configuration_disagreement <- current_configuration_disagreement
+        best_quantity_disagreement <- current_quantity_disagreement
+        best_allocation_disagreement <- current_allocation_disagreement
+        best_odds_ratio <- current_odds_ratio
+        best_reproductive_rate <- current_reproductive_rate
+        best_short_distance_scale <- current_short_distance_scale
       }
       
-      comp_total_infections <- raster::cellStats(comp_years, 'sum')
-      if (length(comp_total_infections) > min(length(comp_total_infections), length(total_infections)) || length(total_infections) > min(length(comp_total_infections), length(total_infections))) {
-        comp_total_infections <- comp_total_infections[1:min(length(comp_total_infections), length(total_infections))]
-        total_infections <- total_infections[1:min(length(comp_total_infections), length(total_infections))]
-      }
-      
-      comp_years <- raster::reclassify(comp_years, rclmat)
-      comp_years[is.na(comp_years)] <- 0
-      
-      all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0 , omission = 0, commission = 0 ,number_of_infected_comp = 0, directional_disagreement = 0, landscape_similarity = 0,  true_positives = 0, true_negatives = 0, odds_ratio = 0)
-      for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
-        all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
-      }
-      
-      params$total_disagreement[i] <- sum(all_disagreement$total_disagreement)
-      params$landscape_similarity[i] <- mean(all_disagreement$landscape_similarity)
-      params$quantity_disagreement[i] <- sum(all_disagreement$quantity_disagreement)
-      params$allocation_disagreement[i] <- sum(all_disagreement$allocation_disagreement)
-      params$number_of_infected_difference[i] <- sum(abs(total_infections - comp_total_infections))
-      params$odds_ratio[i] <- mean(all_disagreement$odds_ratio)
-      
-      accept <- FALSE
-      
-      if (params$odds_ratio[i] >= params$odds_ratio[i-1]) { # accept change if model improves or doesn't change
-        current_short_distance_scale <- proposed_short_distance_scale
-        proposed_short_distance_scale <- 0
-        while (proposed_short_distance_scale <= 0) {
-          proposed_short_distance_scale <- round(abs(rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
-        }
-        
-        current_reproductive_rate <- proposed_reproductive_rate
-        proposed_reproductive_rate <-  0
-        while (proposed_reproductive_rate <= 0) {
-          proposed_reproductive_rate <- round(rnorm(1,mean = current_reproductive_rate,sd = sd_reproductive_rate), digits = 1)
-        }
-        
-        accept <- TRUE
-      } else if ((1 - (abs(params$odds_ratio[i] - params$odds_ratio[i-1])/abs(params$odds_ratio[i] + params$odds_ratio[i-1]))) >= runif(1)) {
-        # accept change randomly if model is worse than previous run
-        current_short_distance_scale <- proposed_short_distance_scale
-        proposed_short_distance_scale <- 0
-        while (proposed_short_distance_scale <= 0) {
-          proposed_short_distance_scale <- round(abs(rnorm(1, mean = current_short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
-        }
-        
-        current_reproductive_rate <- proposed_reproductive_rate
-        proposed_reproductive_rate <-  0
-        while (proposed_reproductive_rate <= 0) {
-          proposed_reproductive_rate <- round(rnorm(1,mean = current_reproductive_rate,sd = sd_reproductive_rate), digits = 1)
-        }
-        
-        accept <- TRUE
-      } else {
-        # otherwise "reject" move, and stay where we are
-        proposed_short_distance_scale <- current_short_distance_scale
-      }
+      param$total_disagreement <- current_total_disagreement
+      param$configuration_disagreement <- current_configuration_disagreement
+      param$quantity_disagreement <- current_quantity_disagreement
+      param$allocation_disagreement <- current_allocation_disagreement
+      param$odds_ratio <- current_odds_ratio
+      param$short_distance_scale <- current_short_distance_scale
+      param$reproductive_rate <- current_reproductive_rate
+      to.params <- param
+    } else {
+      # data <- param_func(current_reproductive_rate, current_short_distance_scale)
+      # ## set up comparison
+      # comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
+      # for (p in 1:raster::nlayers(comp_years)) {
+      #   comp_years[[p]] <- data$infected_before_treatment[[p]]
+      # }
       # 
-      # if ((params$number_of_infected_difference[i] <= params$number_of_infected_difference[i-1]) && (params$quantity_disagreement[i] <= params$quantity_disagreement[i-1])) {
-      #   # accept change if model improves or doesn't change
-      #   current_reproductive_rate <- proposed_reproductive_rate
-      #   proposed_reproductive_rate <-  0
-      #   while (proposed_reproductive_rate <= 0) {
-      #     proposed_reproductive_rate <- round(rnorm(1,mean = current_reproductive_rate,sd = sd_reproductive_rate), digits = 1)
-      #   }
-      #   accept <- TRUE
-      # } else if (((params$number_of_infected_difference[i] <= params$number_of_infected_difference[i-1]) && ((1 - (abs(params$quantity_disagreement[i] - params$quantity_disagreement[i-1])/(params$quantity_disagreement[i] + params$quantity_disagreement[i-1]))) <= runif(1)))) {
-      #   # accept change randomly if model is worse than previous run
-      #   current_reproductive_rate <- proposed_reproductive_rate
-      #   proposed_reproductive_rate <-  0
-      #   while (proposed_reproductive_rate <= 0) {
-      #     proposed_reproductive_rate <- round(rnorm(1,mean = current_reproductive_rate,sd = sd_reproductive_rate), digits = 1)
-      #   }
-      #   accept <- TRUE
-      # } else if (((params$quantity_disagreement[i] <= params$quantity_disagreement[i-1]) && ((1 - (abs(params$number_of_infected_difference[i] - params$number_of_infected_difference[i-1])/(params$number_of_infected_difference[i] + params$number_of_infected_difference[i-1]))) <= runif(1)))) {
-      #   # accept change randomly if model is worse than previous run
-      #   current_reproductive_rate <- proposed_reproductive_rate
-      #   proposed_reproductive_rate <-  0
-      #   while (proposed_reproductive_rate <= 0) {
-      #     proposed_reproductive_rate <- round(rnorm(1,mean = current_reproductive_rate,sd = sd_reproductive_rate), digits = 1)
-      #   }
-      #   accept <- TRUE
+      # comp_years <- raster::reclassify(comp_years, rclmat)
+      # comp_years[is.na(comp_years)] <- 0
+      # 
+      # all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, configuration_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
+      # for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
+      #   all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
       # }
-      # else if (((params$number_of_infected_difference[i] > params$number_of_infected_difference[i-1]) && (params$quantity_disagreement[i] > params$quantity_disagreement[i-1])) && (((1 - (abs(params$number_of_infected_difference[i] - params$number_of_infected_difference[i-1])/(params$number_of_infected_difference[i] + params$number_of_infected_difference[i-1]))) <= runif(1)) && ((1 - (abs(params$quantity_disagreement[i] - params$quantity_disagreement[i-1])/(params$quantity_disagreement[i] + params$quantity_disagreement[i-1]))) <= runif(1)))) {
-      #   # accept change randomly if model is worse than previous run
-      #   current_reproductive_rate <- proposed_reproductive_rate
-      #   proposed_reproductive_rate <-  0
-      #   while (proposed_reproductive_rate <= 0) {
-      #     proposed_reproductive_rate <- round(rnorm(1,mean = current_reproductive_rate,sd = sd_reproductive_rate), digits = 1)
-      #   }
-      #   accept <- TRUE
-      # } else {
-      #   # otherwise "reject" move, and stay where we are
-      #   proposed_reproductive_rate <- current_reproductive_rate
-      # }
-      
-      if (accept == TRUE) {
-        i <- i +1
-        params$short_distance_scale[i] <- proposed_short_distance_scale
-        params$reproductive_rate[i] <- proposed_reproductive_rate 
-        reject_count <- 0
-      } else {
-        i <- i
-        reject_count <- reject_count + 1
-      }
-      
-      # if (reject_count >= 40) {
-      #   break
-      # }
-      print(i)
+      # 
+      # current_total_disagreement <- mean(all_disagreement$total_disagreement)
+      # current_configuration_disagreement <- mean(all_disagreement$configuration_disagreement)
+      # current_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
+      # current_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
+      # current_odds_ratio <- mean(all_disagreement$odds_ratio)
+      # current_reproductive_rate <- start_reproductive_rate
+      # current_short_distance_scale <- start_short_distance_scale
+      # 
+      # best_total_disagreement <- current_total_disagreement
+      # best_configuration_disagreement <- current_configuration_disagreement
+      # best_quantity_disagreement <- current_quantity_disagreement
+      # best_allocation_disagreement <- current_allocation_disagreement
+      # best_odds_ratio <- current_odds_ratio
+      # best_reproductive_rate <- current_reproductive_rate
+      # best_short_distance_scale <- current_short_distance_scale
+      # 
+      # param$total_disagreement <- current_total_disagreement
+      # param$configuration_disagreement <- current_configuration_disagreement
+      # param$quantity_disagreement <- current_quantity_disagreement
+      # param$allocation_disagreement <- current_allocation_disagreement
+      # param$odds_ratio <- current_odds_ratio
+      # param$short_distance_scale <- current_short_distance_scale
+      # param$reproductive_rate <- current_reproductive_rate
+      # to.params <- param
     }
-    params <- params[1:i,]
-    return(params)
   }
-  
-  
-  params <- MCMC(num_iterations, start_reproductive_rate, start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale)
-  
+  parallel::stopCluster(cl)
+
   return(params)
 }
-

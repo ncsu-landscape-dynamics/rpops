@@ -4,7 +4,7 @@
 \alias{calibrate}
 \title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
-calibrate(infected_years_file, num_interations, start_reproductive_rate,
+calibrate(infected_years_file, num_iterations, start_reproductive_rate,
   start_short_distance_scale, sd_reproductive_rate,
   sd_short_distance_scale, infected_file, host_file, total_plants_file,
   reproductive_rate = 3, use_lethal_temperature = FALSE,
@@ -23,7 +23,7 @@ calibrate(infected_years_file, num_interations, start_reproductive_rate,
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
 
-\item{num_interations}{how many iterations do you want to run to allow the calibration to converge}
+\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge}
 
 \item{start_reproductive_rate}{starting reproductive rate for MCMC calibration}
 
@@ -102,23 +102,26 @@ despite being worse. We recommend running calibration for at least 10,000 iterat
 If the model converges and doesn't improve for awhile it will exist calibration prior to reaching the total number of iterations specified.
 }
 \examples{
-infected_years_file <- system.file("extdata", "SODexample", "initial_infections.tif", package = "PoPS")
+infected_years_file <- system.file("extdata", "SODexample", "initial_infections.tif", 
+package = "PoPS")
 num_iterations <- 100
 start_reproductive_rate <- 0.5
 start_short_distance_scale <- 20
 sd_reproductive_rate <- 0.2
 sd_short_distance_scale <- 1
-infected_file <- system.file("extdata", "SODexample", "initial_infection2001.tif", package = "PoPS")
+infected_file <- system.file("extdata", "SODexample", "initial_infection2001.tif", 
+package = "PoPS")
 host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
 total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
-temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "PoPS")
+temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", 
+package = "PoPS")
 treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
 
-params <- calibrate(infected_years_file, num_interations, start_reproductive_rate, 
+params <- calibrate(infected_years_file, num_iterations, start_reproductive_rate, 
 start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale,
 infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
-use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, mortality_on = TRUE,
-temperature_file = "", temperature_coefficient_file, 
+use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
+mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 precipitation_coefficient_file ="", treatments_file,
 season_month_start = 1, season_month_end = 12, time_step = "month",
 start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
