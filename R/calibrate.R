@@ -417,24 +417,6 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     total_disagreement_test <- min(1, (1 - proposed_total_disagreement) / (1 - current_total_disagreement))
     oddsratio_test <- min(1, proposed_odds_ratio / current_odds_ratio)
     
-    # if ( oddsratio_test == 1 ) {
-    #   current_short_distance_scale <- proposed_short_distance_scale
-    #   current_reproductive_rate <- proposed_reproductive_rate
-    #   current_total_disagreement <- proposed_total_disagreement
-    #   current_configuration_disagreement <- proposed_configuration_disagreement
-    #   current_quantity_disagreement <- proposed_quantity_disagreement
-    #   current_allocation_disagreement <- proposed_allocation_disagreement
-    #   current_odds_ratio <- proposed_odds_ratio
-    #   
-    #   param$total_disagreement <- current_total_disagreement
-    #   param$configuration_disagreement <- current_configuration_disagreement
-    #   param$quantity_disagreement <- current_quantity_disagreement
-    #   param$allocation_disagreement <- current_allocation_disagreement
-    #   param$odds_ratio <- current_odds_ratio
-    #   param$short_distance_scale <- current_short_distance_scale
-    #   param$reproductive_rate <- current_reproductive_rate
-    #   to.params <- param
-    # } else 
       if ( runif(1) < oddsratio_test ) { # accept change if model improves or doesn't change
       current_short_distance_scale <- proposed_short_distance_scale
       current_reproductive_rate <- proposed_reproductive_rate
@@ -462,47 +444,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
       param$short_distance_scale <- current_short_distance_scale
       param$reproductive_rate <- current_reproductive_rate
       to.params <- param
-    } else {
-      # data <- param_func(current_reproductive_rate, current_short_distance_scale)
-      # ## set up comparison
-      # comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-      # for (p in 1:raster::nlayers(comp_years)) {
-      #   comp_years[[p]] <- data$infected_before_treatment[[p]]
-      # }
-      # 
-      # comp_years <- raster::reclassify(comp_years, rclmat)
-      # comp_years[is.na(comp_years)] <- 0
-      # 
-      # all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, configuration_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
-      # for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
-      #   all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
-      # }
-      # 
-      # current_total_disagreement <- mean(all_disagreement$total_disagreement)
-      # current_configuration_disagreement <- mean(all_disagreement$configuration_disagreement)
-      # current_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
-      # current_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
-      # current_odds_ratio <- mean(all_disagreement$odds_ratio)
-      # current_reproductive_rate <- start_reproductive_rate
-      # current_short_distance_scale <- start_short_distance_scale
-      # 
-      # best_total_disagreement <- current_total_disagreement
-      # best_configuration_disagreement <- current_configuration_disagreement
-      # best_quantity_disagreement <- current_quantity_disagreement
-      # best_allocation_disagreement <- current_allocation_disagreement
-      # best_odds_ratio <- current_odds_ratio
-      # best_reproductive_rate <- current_reproductive_rate
-      # best_short_distance_scale <- current_short_distance_scale
-      # 
-      # param$total_disagreement <- current_total_disagreement
-      # param$configuration_disagreement <- current_configuration_disagreement
-      # param$quantity_disagreement <- current_quantity_disagreement
-      # param$allocation_disagreement <- current_allocation_disagreement
-      # param$odds_ratio <- current_odds_ratio
-      # param$short_distance_scale <- current_short_distance_scale
-      # param$reproductive_rate <- current_reproductive_rate
-      # to.params <- param
-    }
+    } 
   }
   parallel::stopCluster(cl)
 
