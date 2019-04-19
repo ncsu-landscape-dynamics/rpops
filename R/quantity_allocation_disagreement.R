@@ -42,6 +42,9 @@ quantity_allocation_disagreement <- function(reference, comparison){
   NP_ref <- landscapemetrics::lsm_c_np(reference, directions = 8)$value[2]
   if (sum(comparison[comparison > 0]) == 0) {
     NP_comp <- 0
+    ENN_MN_comp <- 0
+    LPI_comp <- 0
+    PARA_MN_comp <- 0
   } else {
     NP_comp <- landscapemetrics::lsm_c_np(comparison, directions = 8)$value[2]
   }
