@@ -11,13 +11,14 @@
 #' @param num_iterations how many iterations do you want to run to allow the calibration to converge
 #' @param start_reproductive_rate starting reproductive rate for MCMC calibration 
 #' @param start_short_distance_scale starting short distance scale parameter for MCMC calibration
+#' @param number_of_cores number of cores to use for calibration
 #' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration
 #' @param sd_short_distance_scale starting standard deviation for short distance scale for MCMC calibration
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
-#' @importFrom foreach  registerDoSEQ %dopar%
+#' @importFrom foreach  registerDoSEQ %dopar% %do%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom iterators icount
 #' 
@@ -55,7 +56,7 @@
 #' mortality_rate = 0.05, mortality_time_lag = 2,
 #' wind_dir = "NONE", kappa = 0)
 #' 
-calibrate <- function(infected_years_file, num_iterations, start_reproductive_rate, 
+calibrate <- function(infected_years_file, num_iterations, start_reproductive_rate, number_of_cores,
                       start_short_distance_scale, sd_reproductive_rate, sd_short_distance_scale,
                       infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
                       use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
@@ -373,15 +374,19 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   best_short_distance_scale <- current_short_distance_scale
   
   ## create parallel environment
-  core_count <- parallel::detectCores() - 1
+  if (is.na(number_of_cores)) {
+    core_count <- parallel::detectCores() - 1
+  } else {
+    core_count <- number_of_cores
+  }
   cl <- parallel::makeCluster(core_count)
   doParallel::registerDoParallel(cl)
   
-  params <- foreach::foreach(icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS"), .inorder = TRUE) %dopar% {
+  params <- foreach::foreach(icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach", "iterators"), .inorder = TRUE) %do% {
     param <- data.frame(reproductive_rate = 0, short_distance_scale = 0, total_disagreement = 0, quantity_disagreement = 0, allocation_disagreement = 0, configuration_disagreement = 0, odds_ratio = 0)
     proposed_reproductive_rate <-  0
     while (proposed_reproductive_rate <= 0) {
-      proposed_reproductive_rate <- round(rnorm(1, mean = best_reproductive_rate, sd = best_reproductive_rate/10), digits = 1)
+      proposed_reproductive_rate <- round(rnorm(1, mean = best_reproductive_rate, sd = 0.2), digits = 1)
     }
     
     proposed_short_distance_scale <- 0.0
@@ -389,39 +394,54 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
       proposed_short_distance_scale <- round(abs(rnorm(1, mean = best_short_distance_scale, sd = best_short_distance_scale/10)), digits = 0)
     }
     
-    data <- param_func(proposed_reproductive_rate, proposed_short_distance_scale)
-    
-    ## set up comparison
-    comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-    for (p in 1:raster::nlayers(comp_years)) {
-      comp_years[[p]] <- data$infected_before_treatment[[p]]
+    average_disagreements_odds_ratio <- foreach::foreach(icount(10), .combine = rbind, .packages = c("raster", "PoPS")) %dopar% {
+      disagreements_odds_ratio <- data.frame(reproductive_rate = 0, short_distance_scale = 0, total_disagreement = 0, quantity_disagreement = 0, allocation_disagreement = 0, odds_ratio = 0)
+      
+      data <- param_func(proposed_reproductive_rate, proposed_short_distance_scale)
+      
+      ## set up comparison
+      comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
+      for (p in 1:raster::nlayers(comp_years)) {
+        comp_years[[p]] <- data$infected_before_treatment[[p]]
+      }
+      
+      comp_years <- raster::reclassify(comp_years, rclmat)
+      comp_years[is.na(comp_years)] <- 0
+      
+      all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
+      for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
+        all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
+      }
+      
+      proposed_total_disagreement <- mean(all_disagreement$total_disagreement)
+      proposed_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
+      proposed_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
+      proposed_odds_ratio <- mean(all_disagreement$odds_ratio)
+      
+      disagreements_odds_ratio$total_disagreement <- proposed_total_disagreement
+      disagreements_odds_ratio$quantity_disagreement <- proposed_quantity_disagreement
+      disagreements_odds_ratio$allocation_disagreement <- proposed_allocation_disagreement
+      disagreements_odds_ratio$odds_ratio <- proposed_odds_ratio
+      disagreements_odds_ratio$short_distance_scale <- proposed_short_distance_scale
+      disagreements_odds_ratio$reproductive_rate <- proposed_reproductive_rate
+      to.average_disagreements_odds_ratio <- disagreements_odds_ratio
     }
     
-    comp_years <- raster::reclassify(comp_years, rclmat)
-    comp_years[is.na(comp_years)] <- 0
+    proposed_total_disagreement <- mean(average_disagreements_odds_ratio$total_disagreement)
+    proposed_quantity_disagreement <- mean(average_disagreements_odds_ratio$quantity_disagreement)
+    proposed_allocation_disagreement <- mean(average_disagreements_odds_ratio$allocation_disagreement)
+    proposed_odds_ratio <- mean(average_disagreements_odds_ratio$odds_ratio)
+    proposed_short_distance_scale <- mean(average_disagreements_odds_ratio$short)
     
-    all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, configuration_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
-    for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
-      all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
-    }
-    
-    proposed_total_disagreement <- mean(all_disagreement$total_disagreement)
-    proposed_configuration_disagreement <- mean(all_disagreement$configuration_disagreement)
-    proposed_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
-    proposed_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
-    proposed_odds_ratio <- mean(all_disagreement$odds_ratio)
-    
-    allocation_test <- min(1, (1 - proposed_allocation_disagreement) / (1 - current_allocation_disagreement))
-    quantity_test <- min(1, (1 - proposed_quantity_disagreement) / (1 - current_quantity_disagreement))
-    configuration_test <- min(1, (1 - proposed_configuration_disagreement) / (1 - current_configuration_disagreement))
-    total_disagreement_test <- min(1, (1 - proposed_total_disagreement) / (1 - current_total_disagreement))
+    allocation_test <- min(1, (1 - proposed_allocation_disagreement) / (1 - best_allocation_disagreement))
+    quantity_test <- min(1, (1 - proposed_quantity_disagreement) / (1 - best_quantity_disagreement))
+    total_disagreement_test <- min(1, (1 - proposed_total_disagreement) / (1 - best_total_disagreement))
     oddsratio_test <- min(1, proposed_odds_ratio / current_odds_ratio)
     
       if ( runif(1) < oddsratio_test ) { # accept change if model improves or doesn't change
       current_short_distance_scale <- proposed_short_distance_scale
       current_reproductive_rate <- proposed_reproductive_rate
       current_total_disagreement <- proposed_total_disagreement
-      current_configuration_disagreement <- proposed_configuration_disagreement
       current_quantity_disagreement <- proposed_quantity_disagreement
       current_allocation_disagreement <- proposed_allocation_disagreement
       current_odds_ratio <- proposed_odds_ratio

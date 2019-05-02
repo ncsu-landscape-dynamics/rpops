@@ -5,7 +5,7 @@
 \title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
 calibrate(infected_years_file, num_iterations, start_reproductive_rate,
-  start_short_distance_scale, sd_reproductive_rate,
+  number_of_cores, start_short_distance_scale, sd_reproductive_rate,
   sd_short_distance_scale, infected_file, host_file, total_plants_file,
   reproductive_rate = 3, use_lethal_temperature = FALSE,
   temp = FALSE, precip = FALSE, management = FALSE,
@@ -26,6 +26,8 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 \item{num_iterations}{how many iterations do you want to run to allow the calibration to converge}
 
 \item{start_reproductive_rate}{starting reproductive rate for MCMC calibration}
+
+\item{number_of_cores}{number of cores to use for calibration}
 
 \item{start_short_distance_scale}{starting short distance scale parameter for MCMC calibration}
 
