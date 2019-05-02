@@ -48,8 +48,10 @@ quantity_allocation_disagreement <- function(reference, comparison){
   } else {
     NP_comp <- landscapemetrics::lsm_c_np(comparison, directions = 8)$value[2]
   }
-
-  change_NP <- abs((NP_comp - NP_ref)/(NP_comp + NP_ref))
+  
+  change_NP <- abs((NP_comp - NP_ref)/(NP_ref))
+  if (change_NP > 1) {change_NP <- 1}
+  # change_NP <- abs((NP_comp - NP_ref)/(NP_comp + NP_ref))
   # change_NP <- abs((NP_comp - NP_ref)/max(abs(1 - NP_ref), abs(NP_ref - max_num_patches)))
   if (change_NP >= 1) {change_NP <- 1}
   
@@ -67,14 +69,16 @@ quantity_allocation_disagreement <- function(reference, comparison){
   }
   
   if (ENN_MN_ref != 0) {
-    change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_comp + ENN_MN_ref))
+    change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_ref))
+    if (change_ENN_MN > 1) {change_ENN_MN <- 1}
+    # change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_comp + ENN_MN_ref))
     # change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/max(abs(distance_min - ENN_MN_ref), abs(distance_max - ENN_MN_ref)))
   } else if (ENN_MN_comp == 0 && ENN_MN_ref == 0) {
     change_ENN_MN <- 0
   } else {
     change_ENN_MN <- 1
   }
-
+  
   # calculate the mean perimeter-area ratio of patches and the difference
   PARA_MN_ref <- landscapemetrics::lsm_c_para_mn(reference, directions = 8)$value[2]
   if (sum(comparison[comparison >0]) == 0) {
@@ -82,8 +86,10 @@ quantity_allocation_disagreement <- function(reference, comparison){
   } else if (sum(comparison[comparison >0]) != 0) {
     PARA_MN_comp <- landscapemetrics::lsm_c_para_mn(comparison, directions = 8)$value[2]
   }
-    
-  change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_comp + PARA_MN_ref)) 
+  
+  change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_ref)) 
+  if (change_PARA_MN > 1) {change_PARA_MN <- 1}
+  # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_comp + PARA_MN_ref)) 
   # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/max(abs(min_para - PARA_MN_ref), abs(max_para - PARA_MN_ref)))
   
   # calculate the largest patch index and difference
@@ -94,12 +100,14 @@ quantity_allocation_disagreement <- function(reference, comparison){
     LPI_comp <- landscapemetrics::lsm_c_lpi(comparison, directions = 8)$value[2]
   }
   
-  change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_comp + LPI_ref))
+  change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_ref))
+  if (change_LPI > 1) {change_LPI <- 1}
+  # change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_comp + LPI_ref))
   # change_LPI <- abs((LPI_comp - LPI_ref)/max(abs(0 - LPI_ref),abs(100 - LPI_ref)))
   # calculate landscape similarity index between reference and comparison
-  LSI <- 1 - ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
-  if (LSI < 0) { LSI <- 0 }
-  configuration_disagreement <- 1 - LSI
+  # LSI <- 1 - ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
+  # if (LSI < 0) { LSI <- 0 }
+  configuration_disagreement <- ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
   
   ## calculate reference and comparison totals to use for creation of probabilities 
   positives_in_reference <- sum(reference[] == 1)
@@ -107,29 +115,55 @@ quantity_allocation_disagreement <- function(reference, comparison){
   total_in_reference <- sum(reference[] >= 0)
   positives_in_comparison <- sum(comparison[] == 1)
   negatives_in_comparison <- sum(comparison[] == 0)
+  
   ## calculate confusion matrix for accurracy assessment
   true_positive <- sum(comparison[reference == 1] == 1)
   false_positive <- sum(comparison[reference == 0] == 1)
   false_negative <- sum(comparison[reference == 1] == 0)
   true_negative <- sum(comparison[reference == 0] == 0)
+  
   ## calculate probabilities of each class based on Death to Kappa (Pontius et al. 2011)
-  probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
-  probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
-  probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
-  probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
+  if (negatives_in_comparison == 0 && total_in_reference == 0) {
+    probability_00 <- (true_negative / 1) * (negatives_in_reference / 1)
+    probability_01 <- (false_negative / 1) * (negatives_in_reference / 1)
+  } else if (total_in_reference == 0) {
+    probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / 1)
+    probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / 1)
+  } else if (negatives_in_comparison == 0) {
+    probability_00 <- (true_negative / 1) * (negatives_in_reference / total_in_reference)
+    probability_01 <- (false_negative / 1) * (negatives_in_reference / total_in_reference)
+  } else {
+    probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
+    probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
+  }
+  
+  if (positives_in_comparison == 0 && total_in_reference == 0) {
+    probability_10 <- (false_positive / 1) * (positives_in_reference / 1)
+    probability_11 <- (true_positive / 1) * (positives_in_reference / 1)
+  } else if (total_in_reference == 0) {
+    probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / 1)
+    probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / 1)
+  } else if (positives_in_comparison == 0) {
+    probability_10 <- (false_positive / 1) * (positives_in_reference / total_in_reference)
+    probability_11 <- (true_positive / 1) * (positives_in_reference / total_in_reference)
+  } else {
+    probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
+    probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
+  }
+  
   ## calculate quantity and allocation disagreements for infected/infested from probabilities based on Death to Kappa (Pontius et al. 2011)
-  quantity_disagreement <- abs((probability_11 + probability_10) - (probability_11 +probability_01))
-  allocation_disagreement <- 2 * min((probability_11 + probability_10) - probability_11, (probability_11 + probability_01) - probability_11)
+  quantity_disagreement <- abs((probability_11 + probability_01) - (probability_11 + probability_10))
+  allocation_disagreement <- min((probability_11 + probability_10) - probability_11, (probability_11 + probability_01) - probability_11)
   total_disagreement <- quantity_disagreement + allocation_disagreement
   ## calculate odds ratio with adjustments so can never be NA or INF
   if(false_negative == 0 && false_positive == 0) {
-    odds_ratio = (true_positive * true_negative) / 1
+    odds_ratio <- (true_positive * true_negative) / 1
   } else if (false_negative == 0) {
-    odds_ratio = (true_positive * true_negative) / false_positive
+    odds_ratio <- (true_positive * true_negative) / false_positive
   } else if (false_positive == 0) {
-    odds_ratio = (true_positive * true_negative) / false_negative
+    odds_ratio <- (true_positive * true_negative) / false_negative
   } else {
-    odds_ratio = (true_positive * true_negative) / (false_negative * false_positive)
+    odds_ratio <- (true_positive * true_negative) / (false_negative * false_positive)
   }
   ## create data frame for outputs and add calculated values to it
   output <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, configuration_disagreement = 0, omission = 0, commission = 0,  true_positives = 0, true_negatives = 0, odds_ratio = 0)
