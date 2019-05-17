@@ -39,76 +39,76 @@ quantity_allocation_disagreement <- function(reference, comparison){
   # min_para <- ((resolution * num_rows * 2) + (resolution * num_cols * 2))/((resolution * num_rows) * (resolution * num_cols))
   
   ## calculate number of infected patches
-  NP_ref <- landscapemetrics::lsm_c_np(reference, directions = 8)$value[2]
-  if (sum(comparison[comparison > 0]) == 0) {
-    NP_comp <- 0
-    ENN_MN_comp <- 0
-    LPI_comp <- 0
-    PARA_MN_comp <- 0
-  } else {
-    NP_comp <- landscapemetrics::lsm_c_np(comparison, directions = 8)$value[2]
-  }
-  
-  change_NP <- abs((NP_comp - NP_ref)/(NP_ref))
-  if (change_NP > 1) {change_NP <- 1}
-  # change_NP <- abs((NP_comp - NP_ref)/(NP_comp + NP_ref))
-  # change_NP <- abs((NP_comp - NP_ref)/max(abs(1 - NP_ref), abs(NP_ref - max_num_patches)))
-  if (change_NP >= 1) {change_NP <- 1}
-  
-  # calculate the mean euclidean distance between patches
-  if (NP_ref > 1) {
-    ENN_MN_ref <- landscapemetrics::lsm_c_enn_mn(reference, directions = 8, verbose = TRUE)$value[2]
-  } else  if (NP_ref == 1) {
-    ENN_MN_ref <- 0
-  }
-  
-  if (sum(comparison[comparison > 0]) != 0 && NP_comp > 1) {
-    ENN_MN_comp <- landscapemetrics::lsm_c_enn_mn(comparison, directions = 8, verbose = TRUE)$value[2]
-  } else  if (sum(comparison[comparison > 0]) != 0 && NP_comp <= 1) {
-    ENN_MN_comp <- 0
-  }
-  
-  if (ENN_MN_ref != 0) {
-    change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_ref))
-    if (change_ENN_MN > 1) {change_ENN_MN <- 1}
-    # change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_comp + ENN_MN_ref))
-    # change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/max(abs(distance_min - ENN_MN_ref), abs(distance_max - ENN_MN_ref)))
-  } else if (ENN_MN_comp == 0 && ENN_MN_ref == 0) {
-    change_ENN_MN <- 0
-  } else {
-    change_ENN_MN <- 1
-  }
-  
-  # calculate the mean perimeter-area ratio of patches and the difference
-  PARA_MN_ref <- landscapemetrics::lsm_c_para_mn(reference, directions = 8)$value[2]
-  if (sum(comparison[comparison >0]) == 0) {
-    PARA_MN_comp <- 0
-  } else if (sum(comparison[comparison >0]) != 0) {
-    PARA_MN_comp <- landscapemetrics::lsm_c_para_mn(comparison, directions = 8)$value[2]
-  }
-  
-  change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_ref)) 
-  if (change_PARA_MN > 1) {change_PARA_MN <- 1}
-  # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_comp + PARA_MN_ref)) 
-  # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/max(abs(min_para - PARA_MN_ref), abs(max_para - PARA_MN_ref)))
-  
-  # calculate the largest patch index and difference
-  LPI_ref <- landscapemetrics::lsm_c_lpi(reference, directions = 8)$value[2]
-  if (sum(comparison[comparison >0]) == 0) {
-    LPI_comp <- 0
-  } else if (sum(comparison[comparison >0]) != 0) {
-    LPI_comp <- landscapemetrics::lsm_c_lpi(comparison, directions = 8)$value[2]
-  }
-  
-  change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_ref))
-  if (change_LPI > 1) {change_LPI <- 1}
-  # change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_comp + LPI_ref))
-  # change_LPI <- abs((LPI_comp - LPI_ref)/max(abs(0 - LPI_ref),abs(100 - LPI_ref)))
-  # calculate landscape similarity index between reference and comparison
-  # LSI <- 1 - ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
-  # if (LSI < 0) { LSI <- 0 }
-  configuration_disagreement <- ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
-  
+  # NP_ref <- landscapemetrics::lsm_c_np(reference, directions = 8)$value[2]
+  # if (sum(comparison[comparison > 0]) == 0) {
+  #   NP_comp <- 0
+  #   ENN_MN_comp <- 0
+  #   LPI_comp <- 0
+  #   PARA_MN_comp <- 0
+  # } else {
+  #   NP_comp <- landscapemetrics::lsm_c_np(comparison, directions = 8)$value[2]
+  # }
+  # 
+  # change_NP <- abs((NP_comp - NP_ref)/(NP_ref))
+  # if (change_NP > 1) {change_NP <- 1}
+  # # change_NP <- abs((NP_comp - NP_ref)/(NP_comp + NP_ref))
+  # # change_NP <- abs((NP_comp - NP_ref)/max(abs(1 - NP_ref), abs(NP_ref - max_num_patches)))
+  # if (change_NP >= 1) {change_NP <- 1}
+  # 
+  # # calculate the mean euclidean distance between patches
+  # if (NP_ref > 1) {
+  #   ENN_MN_ref <- landscapemetrics::lsm_c_enn_mn(reference, directions = 8, verbose = TRUE)$value[2]
+  # } else  if (NP_ref == 1) {
+  #   ENN_MN_ref <- 0
+  # }
+  # 
+  # if (sum(comparison[comparison > 0]) != 0 && NP_comp > 1) {
+  #   ENN_MN_comp <- landscapemetrics::lsm_c_enn_mn(comparison, directions = 8, verbose = TRUE)$value[2]
+  # } else  if (sum(comparison[comparison > 0]) != 0 && NP_comp <= 1) {
+  #   ENN_MN_comp <- 0
+  # }
+  # 
+  # if (ENN_MN_ref != 0) {
+  #   change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_ref))
+  #   if (change_ENN_MN > 1) {change_ENN_MN <- 1}
+  #   # change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/(ENN_MN_comp + ENN_MN_ref))
+  #   # change_ENN_MN <- abs((ENN_MN_comp - ENN_MN_ref)/max(abs(distance_min - ENN_MN_ref), abs(distance_max - ENN_MN_ref)))
+  # } else if (ENN_MN_comp == 0 && ENN_MN_ref == 0) {
+  #   change_ENN_MN <- 0
+  # } else {
+  #   change_ENN_MN <- 1
+  # }
+  # 
+  # # calculate the mean perimeter-area ratio of patches and the difference
+  # PARA_MN_ref <- landscapemetrics::lsm_c_para_mn(reference, directions = 8)$value[2]
+  # if (sum(comparison[comparison >0]) == 0) {
+  #   PARA_MN_comp <- 0
+  # } else if (sum(comparison[comparison >0]) != 0) {
+  #   PARA_MN_comp <- landscapemetrics::lsm_c_para_mn(comparison, directions = 8)$value[2]
+  # }
+  # 
+  # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_ref)) 
+  # if (change_PARA_MN > 1) {change_PARA_MN <- 1}
+  # # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/(PARA_MN_comp + PARA_MN_ref)) 
+  # # change_PARA_MN <- abs((PARA_MN_comp - PARA_MN_ref)/max(abs(min_para - PARA_MN_ref), abs(max_para - PARA_MN_ref)))
+  # 
+  # # calculate the largest patch index and difference
+  # LPI_ref <- landscapemetrics::lsm_c_lpi(reference, directions = 8)$value[2]
+  # if (sum(comparison[comparison >0]) == 0) {
+  #   LPI_comp <- 0
+  # } else if (sum(comparison[comparison >0]) != 0) {
+  #   LPI_comp <- landscapemetrics::lsm_c_lpi(comparison, directions = 8)$value[2]
+  # }
+  # 
+  # change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_ref))
+  # if (change_LPI > 1) {change_LPI <- 1}
+  # # change_LPI <- abs((LPI_comp - LPI_ref)/(LPI_comp + LPI_ref))
+  # # change_LPI <- abs((LPI_comp - LPI_ref)/max(abs(0 - LPI_ref),abs(100 - LPI_ref)))
+  # # calculate landscape similarity index between reference and comparison
+  # # LSI <- 1 - ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
+  # # if (LSI < 0) { LSI <- 0 }
+  # configuration_disagreement <- ((change_NP + change_ENN_MN + change_PARA_MN + change_LPI) / 4)
+  # 
   ## calculate reference and comparison totals to use for creation of probabilities 
   positives_in_reference <- sum(reference[] == 1)
   negatives_in_reference <- sum(reference[] == 0)
@@ -174,7 +174,7 @@ quantity_allocation_disagreement <- function(reference, comparison){
   output$quantity_disagreement <- quantity_disagreement
   output$allocation_disagreement <- allocation_disagreement
   output$total_disagreement <- total_disagreement
-  output$configuration_disagreement <- configuration_disagreement
+  # output$configuration_disagreement <- configuration_disagreement
   output$odds_ratio <- odds_ratio
   
   return(output)

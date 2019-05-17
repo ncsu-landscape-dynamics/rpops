@@ -15,10 +15,10 @@
 #' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration
 #' @param sd_short_distance_scale starting standard deviation for short distance scale for MCMC calibration
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent
+#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
-#' @importFrom foreach  registerDoSEQ %dopar% %do%
+#' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom iterators icount
 #' 
@@ -75,7 +75,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     return("Infected file does not exist") 
   }
   
-  if (!(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
+  if (!(extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
     return("Infected file is not one of '.grd', '.tif', '.img'")
   }
   
@@ -83,7 +83,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     return("Host file does not exist") 
   }
   
-  if (!(raster::extension(host_file) %in% c(".grd", ".tif", ".img"))) {
+  if (!(extension(host_file) %in% c(".grd", ".tif", ".img"))) {
     return("Host file is not one of '.grd', '.tif', '.img'")
   }
   
@@ -91,7 +91,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     return("Total plants file does not exist") 
   }
   
-  if (!(raster::extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
+  if (!(extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
     return("Total plants file is not one of '.grd', '.tif', '.img'")
   }
   
@@ -113,22 +113,22 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   
   number_of_years <- end_time-start_time+1
   
-  infected <- raster::raster(infected_file)
+  infected <- raster(infected_file)
   infected[is.na(infected)] <- 0
-  host <- raster::raster(host_file)
+  host <- raster(host_file)
   host[is.na(host)] <- 0
-  total_plants <- raster::raster(total_plants_file)
+  total_plants <- raster(total_plants_file)
   total_plants[is.na(total_plants)] <- 0
   
-  if (!(raster::extent(infected) == raster::extent(host) && raster::extent(infected) == raster::extent(total_plants))) {
+  if (!(extent(infected) == extent(host) && extent(infected) == extent(total_plants))) {
     return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
   }
   
-  if (!(raster::xres(infected) == raster::xres(host) && raster::xres(infected) == raster::xres(total_plants) && raster::yres(infected) == raster::yres(host) && raster::yres(infected) == raster::yres(total_plants))) {
+  if (!(xres(infected) == xres(host) && xres(infected) == xres(total_plants) && yres(infected) == yres(host) && yres(infected) == yres(total_plants))) {
     return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
   }
   
-  if (!(raster::compareCRS(host,infected) && raster::compareCRS(host, total_plants))) {
+  if (!(compareCRS(host,infected) && compareCRS(host, total_plants))) {
     return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
   }
   
@@ -140,41 +140,41 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     return("Temperature file does not exist")
   }
   
-  if (use_lethal_temperature == TRUE  && !(raster::extension(temperature_file) %in% c(".grd", ".tif", ".img"))) {
+  if (use_lethal_temperature == TRUE  && !(extension(temperature_file) %in% c(".grd", ".tif", ".img"))) {
     return("Temperature file is not one of '.grd', '.tif', '.img'")
   }
   
   if (use_lethal_temperature == TRUE) {
-    temperature_stack <- raster::stack(temperature_file)
+    temperature_stack <- stack(temperature_file)
     temperature_stack[is.na(temperature_stack)] <- 0
     
-    if (!(raster::extent(infected) == raster::extent(temperature_stack))) {
+    if (!(extent(infected) == extent(temperature_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
     }
     
-    if (!(raster::xres(infected) == raster::xres(temperature_stack) && raster::yres(infected) == raster::yres(temperature_stack))) {
+    if (!(xres(infected) == xres(temperature_stack) && yres(infected) == yres(temperature_stack))) {
       return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
     }
     
-    if (!(raster::compareCRS(infected, temperature_stack))) {
+    if (!(compareCRS(infected, temperature_stack))) {
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
-    temperature <- list(raster::as.matrix(temperature_stack[[1]]))
+    temperature <- list(as.matrix(temperature_stack[[1]]))
     for(i in 2:number_of_years) {
-      temperature[[i]] <- raster::as.matrix(temperature_stack[[i]])
+      temperature[[i]] <- as.matrix(temperature_stack[[i]])
     }
   } else {
     temperature <- host
-    raster::values(temperature) <- 1
-    temperature <- list(raster::as.matrix(temperature))
+    temperature[] <- 1
+    temperature <- list(as.matrix(temperature))
   }
   
   if (temp == TRUE  && !file.exists(temperature_coefficient_file)) {
     return("Temperature coefficient file does not exist")
   }
   
-  if (temp == TRUE  && !(raster::extension(temperature_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
+  if (temp == TRUE  && !(extension(temperature_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
     return("Temperature coefficient file is not one of '.grd', '.tif', '.img'")
   }
   
@@ -182,57 +182,57 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     return("Precipitation coefficient file does not exist")
   }
   
-  if (precip == TRUE  && !(raster::extension(precipitation_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
+  if (precip == TRUE  && !(extension(precipitation_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
     return("Precipitation coefficient file is not one of '.grd', '.tif', '.img'")
   }
   
   weather <- FALSE
   if (temp == TRUE) {
-    temperature_coefficient <- raster::stack(temperature_coefficient_file)
+    temperature_coefficient <- stack(temperature_coefficient_file)
     
-    if (!(raster::extent(infected) == raster::extent(temperature_coefficient))) {
+    if (!(extent(infected) == extent(temperature_coefficient))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
     }
     
-    if (!(raster::xres(infected) == raster::xres(temperature_coefficient) && raster::yres(infected) == raster::yres(temperature_coefficient))) {
+    if (!(xres(infected) == xres(temperature_coefficient) && yres(infected) == yres(temperature_coefficient))) {
       return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
     }
     
-    if (!(raster::compareCRS(infected, temperature_coefficient))) {
+    if (!(compareCRS(infected, temperature_coefficient))) {
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
     weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (precip ==TRUE){
-      precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
+      precipitation_coefficient <- stack(precipitation_coefficient_file)
       
-      if (!(raster::extent(infected) == raster::extent(precipitation_coefficient))) {
+      if (!(extent(infected) == extent(precipitation_coefficient))) {
         return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
       }
       
-      if (!(raster::xres(infected) == raster::xres(precipitation_coefficient) && raster::yres(infected) == raster::yres(precipitation_coefficient))) {
+      if (!(xres(infected) == xres(precipitation_coefficient) && yres(infected) == yres(precipitation_coefficient))) {
         return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
       }
       
-      if (!(raster::compareCRS(infected, precipitation_coefficient))) {
+      if (!(compareCRS(infected, precipitation_coefficient))) {
         return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
       }
       
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if(precip == TRUE){
-    precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
+    precipitation_coefficient <- stack(precipitation_coefficient_file)
     
-    if (!(raster::extent(infected) == raster::extent(precipitation_coefficient))) {
+    if (!(extent(infected) == extent(precipitation_coefficient))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
     }
     
-    if (!(raster::xres(infected) == raster::xres(precipitation_coefficient) && raster::yres(infected) == raster::yres(precipitation_coefficient))) {
+    if (!(xres(infected) == xres(precipitation_coefficient) && yres(infected) == yres(precipitation_coefficient))) {
       return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
     }
     
-    if (!(raster::compareCRS(infected, precipitation_coefficient))) {
+    if (!(compareCRS(infected, precipitation_coefficient))) {
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
@@ -242,70 +242,70 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   
   if (weather == TRUE){
     weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
-    weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
+    weather_coefficient <- list(as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
-      weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
+      weather_coefficient[[i]] <- as.matrix(weather_coefficient_stack[[i]])
     }
   } else {
     weather_coefficient <- host
-    raster::values(weather_coefficient) <- 1
-    weather_coefficient <- list(raster::as.matrix(weather_coefficient))
+    weather_coefficient[] <- 1
+    weather_coefficient <- list(as.matrix(weather_coefficient))
   }
   
   if (management == TRUE  && !file.exists(treatments_file)) {
     return("Treatments file does not exist")
   }
   
-  if (management == TRUE  && !(raster::extension(treatments_file) %in% c(".grd", ".tif", ".img"))) {
+  if (management == TRUE  && !(extension(treatments_file) %in% c(".grd", ".tif", ".img"))) {
     return("Treatments file is not one of '.grd', '.tif', '.img'")
   }
   
   if (management == TRUE) {
     
-    treatment_stack <- raster::stack(treatments_file)
+    treatment_stack <- stack(treatments_file)
     treatment_stack[is.na(treatment_stack)] <- 0
     
-    if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
+    if (!(extent(infected) == extent(treatment_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
     }
     
-    if (!(raster::xres(infected) == raster::xres(treatment_stack) && raster::yres(infected) == raster::yres(treatment_stack))) {
+    if (!(xres(infected) == xres(treatment_stack) && yres(infected) == yres(treatment_stack))) {
       return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
     }
     
-    if (!(raster::compareCRS(infected, treatment_stack))) {
+    if (!(compareCRS(infected, treatment_stack))) {
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
-    treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
-    if (raster::nlayers(treatment_stack) >= 2) {
-      for(i in 2:raster::nlayers(treatment_stack)) {
-        treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
+    treatment_maps <- list(as.matrix(treatment_stack[[1]]))
+    if (nlayers(treatment_stack) >= 2) {
+      for(i in 2:nlayers(treatment_stack)) {
+        treatment_maps[[i]] <- as.matrix(treatment_stack[[i]])
       }
     }
     treatment_years <- treatment_years
   } else {
     treatment_map <- host
-    raster::values(treatment_map) <- 0
-    treatment_maps <- list(raster::as.matrix(treatment_map))
+    treatment_map[] <- 0
+    treatment_maps <- list(as.matrix(treatment_map))
   }
   
-  ew_res <- raster::xres(susceptible)
-  ns_res <- raster::yres(susceptible)
+  ew_res <- xres(susceptible)
+  ns_res <- yres(susceptible)
   
   mortality_tracker <- infected
-  raster::values(mortality_tracker) <- 0
+  mortality_tracker[] <- 0
   
-  infected <- raster::as.matrix(infected)
-  susceptible <- raster::as.matrix(susceptible)
-  total_plants <- raster::as.matrix(total_plants)
-  mortality_tracker <- raster::as.matrix(mortality_tracker)
+  infected <- as.matrix(infected)
+  susceptible <- as.matrix(susceptible)
+  total_plants <- as.matrix(total_plants)
+  mortality_tracker <- as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   
   ## Load observed data on occurence
   infection_years <- stack(infected_years_file)
   ## calculate total infections per year in the landscape
-  total_infections <- raster::cellStats(infection_years, 'sum')
+  total_infections <- cellStats(infection_years, 'sum')
   if (length(total_infections) > number_of_years){
     total_infections <- total_infections[1:number_of_years]
   }
@@ -313,13 +313,13 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   rcl <- c(1, Inf, 1, 0, 0.99, NA)
   rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
   ## reclassify to binary values
-  infection_years <- raster::reclassify(infection_years, rclmat)
+  infection_years <- reclassify(infection_years, rclmat)
   ## Get rid of NA values to make comparisons
   infection_years[is.na(infection_years)] <- 0
   
   ## set the parameter function to only need the parameters that chanage
   param_func <- function(reproductive_rate, short_distance_scale) {
-    random_seed <- round(stats::runif(1, 1, 1000000))
+    random_seed <- round(runif(1, 1, 1000000))
     data <- pops_model(random_seed = random_seed, 
                        lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
                        reproductive_rate = reproductive_rate, 
@@ -343,130 +343,80 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   data <- param_func(start_reproductive_rate, start_short_distance_scale)
   
   ## set up comparison
-  comp_years <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-  for (q in 1:raster::nlayers(comp_years)) {
-    comp_years[[q]] <- data$infected_before_treatment[[q]]
-  }
   
-  comp_years <- raster::reclassify(comp_years, rclmat)
-  comp_years[is.na(comp_years)] <- 0
-  
-  all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, configuration_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
-  for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
-    all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
+  comp_year <- raster(infected_file)
+  all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS"), .final = colMeans) %do% {
+    comp_year[] <- data$infected_before_treatment[[q]]
+    comp_year <- reclassify(comp_year, rclmat)
+    to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year)
   }
   
   ## save current state of the system
-  current_total_disagreement <- mean(all_disagreement$total_disagreement)
-  current_configuration_disagreement <- mean(all_disagreement$configuration_disagreement)
-  current_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
-  current_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
-  current_odds_ratio <- mean(all_disagreement$odds_ratio)
-  current_reproductive_rate <- start_reproductive_rate
-  current_short_distance_scale <- start_short_distance_scale
-  
-  best_total_disagreement <- current_total_disagreement
-  best_configuration_disagreement <- current_configuration_disagreement
-  best_quantity_disagreement <- current_quantity_disagreement
-  best_allocation_disagreement <- current_allocation_disagreement
-  best_odds_ratio <- current_odds_ratio
-  best_reproductive_rate <- current_reproductive_rate
-  best_short_distance_scale <- current_short_distance_scale
+  current <- best <- data.frame(t(all_disagreement), reproductive_rate = start_reproductive_rate, short_distance_scale = start_short_distance_scale)
   
   ## create parallel environment
   if (is.na(number_of_cores)) {
-    core_count <- parallel::detectCores() - 1
+    core_count <- detectCores() - 1
   } else {
     core_count <- number_of_cores
   }
-  cl <- parallel::makeCluster(core_count)
-  doParallel::registerDoParallel(cl)
+  cl <- makeCluster(core_count)
+  registerDoParallel(cl)
   
-  params <- foreach::foreach(icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach", "iterators"), .inorder = TRUE) %do% {
-    param <- data.frame(reproductive_rate = 0, short_distance_scale = 0, total_disagreement = 0, quantity_disagreement = 0, allocation_disagreement = 0, configuration_disagreement = 0, odds_ratio = 0)
-    proposed_reproductive_rate <-  0
-    while (proposed_reproductive_rate <= 0) {
-      proposed_reproductive_rate <- round(rnorm(1, mean = best_reproductive_rate, sd = 0.2), digits = 1)
-    }
-    
-    proposed_short_distance_scale <- 0.0
-    while (proposed_short_distance_scale <= 0.0) {
-      proposed_short_distance_scale <- round(abs(rnorm(1, mean = best_short_distance_scale, sd = best_short_distance_scale/10)), digits = 0)
-    }
-    
-    average_disagreements_odds_ratio <- foreach::foreach(icount(10), .combine = rbind, .packages = c("raster", "PoPS")) %dopar% {
+  proposed_reproductive_rate <-  0
+  while (proposed_reproductive_rate <= 0) {
+    proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = 0.2), digits = 1)
+  }
+  
+  proposed_short_distance_scale <- 0.0
+  while (proposed_short_distance_scale <= 0.0) {
+    proposed_short_distance_scale <- round(abs(rnorm(1, mean = best$short_distance_scale, sd = 4)), digits = 0)
+  }
+  
+  params <- foreach(icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach", "iterators"), .inorder = TRUE) %do% {
+    average_disagreements_odds_ratio <- foreach(p = 1:10, .combine = rbind, .packages = c("raster", "PoPS", "foreach"), .final = colMeans) %dopar% {
       disagreements_odds_ratio <- data.frame(reproductive_rate = 0, short_distance_scale = 0, total_disagreement = 0, quantity_disagreement = 0, allocation_disagreement = 0, odds_ratio = 0)
       
       data <- param_func(proposed_reproductive_rate, proposed_short_distance_scale)
       
-      ## set up comparison
-      comp_years <- stack(lapply(1:length(data$infected_before_treatment), function(i) infected_file))
-      for (p in 1:raster::nlayers(comp_years)) {
-        comp_years[[p]] <- data$infected_before_treatment[[p]]
+      # set up comparison
+      all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS"), .final = colMeans) %dopar% {
+        comp_year[] <- data$infected_before_treatment[[q]]
+        comp_year <- reclassify(comp_year, rclmat)
+        to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year)
       }
       
-      comp_years <- raster::reclassify(comp_years, rclmat)
-      comp_years[is.na(comp_years)] <- 0
-      
-      all_disagreement <- data.frame(quantity_disagreement = 0, allocation_disagreement = 0, total_disagreement = 0, omission = 0, commission = 0 , true_positives = 0, true_negatives = 0, odds_ratio = 0)
-      for (p in 1:min(raster::nlayers(comp_years), raster::nlayers(infection_years))) {
-        all_disagreement[p,] <- quantity_allocation_disagreement(infection_years[[p]], comp_years[[p]])
-      }
-      
-      proposed_total_disagreement <- mean(all_disagreement$total_disagreement)
-      proposed_quantity_disagreement <- mean(all_disagreement$quantity_disagreement)
-      proposed_allocation_disagreement <- mean(all_disagreement$allocation_disagreement)
-      proposed_odds_ratio <- mean(all_disagreement$odds_ratio)
-      
-      disagreements_odds_ratio$total_disagreement <- proposed_total_disagreement
-      disagreements_odds_ratio$quantity_disagreement <- proposed_quantity_disagreement
-      disagreements_odds_ratio$allocation_disagreement <- proposed_allocation_disagreement
-      disagreements_odds_ratio$odds_ratio <- proposed_odds_ratio
-      disagreements_odds_ratio$short_distance_scale <- proposed_short_distance_scale
-      disagreements_odds_ratio$reproductive_rate <- proposed_reproductive_rate
-      to.average_disagreements_odds_ratio <- disagreements_odds_ratio
+      to.average_disagreements_odds_ratio <- all_disagreement
     }
     
-    proposed_total_disagreement <- mean(average_disagreements_odds_ratio$total_disagreement)
-    proposed_quantity_disagreement <- mean(average_disagreements_odds_ratio$quantity_disagreement)
-    proposed_allocation_disagreement <- mean(average_disagreements_odds_ratio$allocation_disagreement)
-    proposed_odds_ratio <- mean(average_disagreements_odds_ratio$odds_ratio)
-    proposed_short_distance_scale <- mean(average_disagreements_odds_ratio$short)
+    proposed <- data.frame(t(average_disagreements_odds_ratio), reproductive_rate = proposed_reproductive_rate, short_distance_scale = proposed_short_distance_scale)
     
-    allocation_test <- min(1, (1 - proposed_allocation_disagreement) / (1 - best_allocation_disagreement))
-    quantity_test <- min(1, (1 - proposed_quantity_disagreement) / (1 - best_quantity_disagreement))
-    total_disagreement_test <- min(1, (1 - proposed_total_disagreement) / (1 - best_total_disagreement))
-    oddsratio_test <- min(1, proposed_odds_ratio / current_odds_ratio)
+    # allocation_test <- min(1, (1 - proposed$allocation_disagreement) / (1 - best$allocation_disagreement))
+    # quantity_test <- min(1, (1 - proposed$quantity_disagreement) / (1 - best$quantity_disagreement))
+    # total_disagreement_test <- min(1, (1 - proposed$total_disagreement) / (1 - best$total_disagreement))
+    oddsratio_test <- min(1, proposed$odds_ratio / current$odds_ratio)
     
-      if ( runif(1) < oddsratio_test ) { # accept change if model improves or doesn't change
-      current_short_distance_scale <- proposed_short_distance_scale
-      current_reproductive_rate <- proposed_reproductive_rate
-      current_total_disagreement <- proposed_total_disagreement
-      current_quantity_disagreement <- proposed_quantity_disagreement
-      current_allocation_disagreement <- proposed_allocation_disagreement
-      current_odds_ratio <- proposed_odds_ratio
-      
-      if(current_odds_ratio >= best_odds_ratio) {
-        best_total_disagreement <- current_total_disagreement
-        best_configuration_disagreement <- current_configuration_disagreement
-        best_quantity_disagreement <- current_quantity_disagreement
-        best_allocation_disagreement <- current_allocation_disagreement
-        best_odds_ratio <- current_odds_ratio
-        best_reproductive_rate <- current_reproductive_rate
-        best_short_distance_scale <- current_short_distance_scale
+    oddsratio_pass <- runif(1) <= oddsratio_test 
+    
+    if ( oddsratio_pass == TRUE  ) { # accept change if model improves or doesn't change
+      current <- proposed
+      if(current$odds_ratio >= best$odds_ratio) {
+        best <- current
+      }
+      param <- current
+      proposed_reproductive_rate <-  0
+      while (proposed_reproductive_rate <= 0) {
+        proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = 0.2), digits = 1)
       }
       
-      param$total_disagreement <- current_total_disagreement
-      param$configuration_disagreement <- current_configuration_disagreement
-      param$quantity_disagreement <- current_quantity_disagreement
-      param$allocation_disagreement <- current_allocation_disagreement
-      param$odds_ratio <- current_odds_ratio
-      param$short_distance_scale <- current_short_distance_scale
-      param$reproductive_rate <- current_reproductive_rate
+      proposed_short_distance_scale <- 0.0
+      while (proposed_short_distance_scale <= 0.0) {
+        proposed_short_distance_scale <- round(abs(rnorm(1, mean = best$short_distance_scale, sd = 4)), digits = 0)
+      }
       to.params <- param
     } 
   }
-  parallel::stopCluster(cl)
+  stopCluster(cl)
 
   return(params)
 }
