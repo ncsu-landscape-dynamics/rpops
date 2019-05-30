@@ -12,6 +12,8 @@ matrix:
       warnings_are_errors: false
     - r: 3.4
       warnings_are_errors: false
+    - r: 3.5
+      warnings_are_errors: true
     - r: release
       warnings_are_errors: false
       after_success:
