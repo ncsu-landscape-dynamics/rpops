@@ -16,6 +16,10 @@ Imports:
     Rcpp (>= 0.12.19),
     stats,
     devtools,
+    foreach,
+    parallel,
+    doParallel,
+    iterators,
     landscapemetrics
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
