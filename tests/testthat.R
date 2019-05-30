@@ -1,4 +1,4 @@
 library(testthat)
 library(PoPS)
 
-test_check("PoPS")
+# test_check("PoPS")

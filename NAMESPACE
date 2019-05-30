@@ -2,6 +2,7 @@
 
 export(calibrate)
 export(pops)
+export(pops_model)
 export(quantity_allocation_disagreement)
 export(validate)
 importFrom(Rcpp,evalCpp)
