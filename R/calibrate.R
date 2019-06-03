@@ -340,9 +340,9 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = sd_reproductive_rate), digits = 1)
   }
   
-  proposed_short_distance_scale <- 0.0
-  while (proposed_short_distance_scale <= 0.0) {
-    proposed_short_distance_scale <- round(abs(rnorm(1, mean = best$short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
+  proposed_short_distance_scale <- 0
+  while (proposed_short_distance_scale <= 0) {
+    proposed_short_distance_scale <- round(rnorm(1, mean = best$short_distance_scale, sd = sd_short_distance_scale), digits = 0)
   }
   
   params <- foreach(icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach", "iterators"), .inorder = TRUE) %do% {
@@ -381,9 +381,9 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = sd_reproductive_rate), digits = 1)
       }
       
-      proposed_short_distance_scale <- 0.0
-      while (proposed_short_distance_scale <= 0.0) {
-        proposed_short_distance_scale <- round(abs(rnorm(1, mean = best$short_distance_scale, sd = sd_short_distance_scale)), digits = 0)
+      proposed_short_distance_scale <- 0
+      while (proposed_short_distance_scale <= 0) {
+        proposed_short_distance_scale <- round(rnorm(1, mean = best$short_distance_scale, sd = sd_short_distance_scale), digits = 0)
       }
       to.params <- param
     } 
