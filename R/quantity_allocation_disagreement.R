@@ -122,38 +122,40 @@ quantity_allocation_disagreement <- function(reference, comparison){
   false_negative <- sum(comparison[reference == 1] == 0)
   true_negative <- sum(comparison[reference == 0] == 0)
   
-  ## calculate probabilities of each class based on Death to Kappa (Pontius et al. 2011)
-  if (negatives_in_comparison == 0 && total_in_reference == 0) {
-    probability_00 <- (true_negative / 1) * (negatives_in_reference / 1)
-    probability_01 <- (false_negative / 1) * (negatives_in_reference / 1)
-  } else if (total_in_reference == 0) {
-    probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / 1)
-    probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / 1)
-  } else if (negatives_in_comparison == 0) {
-    probability_00 <- (true_negative / 1) * (negatives_in_reference / total_in_reference)
-    probability_01 <- (false_negative / 1) * (negatives_in_reference / total_in_reference)
-  } else {
-    probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
-    probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
-  }
-  
-  if (positives_in_comparison == 0 && total_in_reference == 0) {
-    probability_10 <- (false_positive / 1) * (positives_in_reference / 1)
-    probability_11 <- (true_positive / 1) * (positives_in_reference / 1)
-  } else if (total_in_reference == 0) {
-    probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / 1)
-    probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / 1)
-  } else if (positives_in_comparison == 0) {
-    probability_10 <- (false_positive / 1) * (positives_in_reference / total_in_reference)
-    probability_11 <- (true_positive / 1) * (positives_in_reference / total_in_reference)
-  } else {
-    probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
-    probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
-  }
+  # ## calculate probabilities of each class based on Death to Kappa (Pontius et al. 2011)
+  # if (negatives_in_comparison == 0 && total_in_reference == 0) {
+  #   probability_00 <- (true_negative / 1) * (negatives_in_reference / 1)
+  #   probability_01 <- (false_negative / 1) * (negatives_in_reference / 1)
+  # } else if (total_in_reference == 0) {
+  #   probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / 1)
+  #   probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / 1)
+  # } else if (negatives_in_comparison == 0) {
+  #   probability_00 <- (true_negative / 1) * (negatives_in_reference / total_in_reference)
+  #   probability_01 <- (false_negative / 1) * (negatives_in_reference / total_in_reference)
+  # } else {
+  #   probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
+  #   probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
+  # }
+  # 
+  # if (positives_in_comparison == 0 && total_in_reference == 0) {
+  #   probability_10 <- (false_positive / 1) * (positives_in_reference / 1)
+  #   probability_11 <- (true_positive / 1) * (positives_in_reference / 1)
+  # } else if (total_in_reference == 0) {
+  #   probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / 1)
+  #   probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / 1)
+  # } else if (positives_in_comparison == 0) {
+  #   probability_10 <- (false_positive / 1) * (positives_in_reference / total_in_reference)
+  #   probability_11 <- (true_positive / 1) * (positives_in_reference / total_in_reference)
+  # } else {
+  #   probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
+  #   probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
+  # }
   
   ## calculate quantity and allocation disagreements for infected/infested from probabilities based on Death to Kappa (Pontius et al. 2011)
-  quantity_disagreement <- abs((probability_11 + probability_01) - (probability_11 + probability_10))
-  allocation_disagreement <- min((probability_11 + probability_10) - probability_11, (probability_11 + probability_01) - probability_11)
+  # quantity_disagreement <- abs((probability_11 + probability_01) - (probability_11 + probability_10))
+  # allocation_disagreement <- min((probability_11 + probability_10) - probability_11, (probability_11 + probability_01) - probability_11)
+  quantity_disagreement <- abs(positives_in_comparison - positives_in_reference)
+  allocation_disagreement <- 2 * min(false_negative, false_positive)
   total_disagreement <- quantity_disagreement + allocation_disagreement
   ## calculate odds ratio with adjustments so can never be NA or INF
   if(false_negative == 0 && false_positive == 0) {
