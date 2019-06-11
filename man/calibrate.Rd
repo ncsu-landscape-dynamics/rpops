@@ -18,7 +18,7 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
   short_distance_scale = 59, long_distance_scale = 0,
   lethal_temperature = -12.87, lethal_temperature_month = 1,
   mortality_rate = 0, mortality_time_lag = 0, wind_dir = "NONE",
-  kappa = 0)
+  kappa = 0, mask = NULL, success_metric = "quantity")
 }
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
@@ -92,6 +92,10 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 \item{wind_dir}{sets the wind direction}
 
 \item{kappa}{sets the strength of the wind direction in the von-mises distribution}
+
+\item{mask}{Used to provide a mask to remove 0's that are not true negatives from comparisons.}
+
+\item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", and "odds_ratio". Default = "quantity"}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run

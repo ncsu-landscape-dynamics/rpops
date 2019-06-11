@@ -14,6 +14,8 @@
 #' @param number_of_cores number of cores to use for calibration
 #' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration
 #' @param sd_short_distance_scale starting standard deviation for short distance scale for MCMC calibration
+#' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", and "odds_ratio". Default = "quantity"
+#' @param mask Used to provide a mask to remove 0's that are not true negatives from comparisons. 
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues
 #' @importFrom stats runif rnorm
@@ -40,8 +42,17 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
                       short_distance_scale = 59, long_distance_scale = 0.0,
                       lethal_temperature = -12.87, lethal_temperature_month = 1,
                       mortality_rate = 0, mortality_time_lag = 0,
-                      wind_dir = "NONE", kappa = 0){ 
+                      wind_dir = "NONE", kappa = 0, mask = NULL, success_metric = "quantity"){ 
   
+  if (success_metric == "quantity") {
+    configuration = FALSE
+  } else if (success_metric == "quantity and configuration") {
+    configuration = TRUE
+  } else if (success_metric == "odds_ratio") {
+    configuration = FALSE
+  } else {
+    return("Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'")
+  }
   
   if (!file.exists(infected_file)) {
     return("Infected file does not exist") 
@@ -317,10 +328,10 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   ## set up comparison
   
   comp_year <- raster(infected_file)
-  all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS"), .final = colMeans) %do% {
+  all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS"), .final = colSums) %do% {
     comp_year[] <- data$infected_before_treatment[[q]]
     comp_year <- reclassify(comp_year, rclmat)
-    to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year)
+    to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
   }
   
   ## save current state of the system
@@ -352,10 +363,10 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
       data <- param_func(proposed_reproductive_rate, proposed_short_distance_scale)
       
       # set up comparison
-      all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS"), .final = colMeans) %dopar% {
+      all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS"), .final = colSums) %dopar% {
         comp_year[] <- data$infected_before_treatment[[q]]
         comp_year <- reclassify(comp_year, rclmat)
-        to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year)
+        to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
       }
       
       to.average_disagreements_odds_ratio <- all_disagreement
@@ -363,30 +374,100 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     
     proposed <- data.frame(t(average_disagreements_odds_ratio), reproductive_rate = proposed_reproductive_rate, short_distance_scale = proposed_short_distance_scale)
     
-    # allocation_test <- min(1, (1 - proposed$allocation_disagreement) / (1 - best$allocation_disagreement))
-    # quantity_test <- min(1, (1 - proposed$quantity_disagreement) / (1 - best$quantity_disagreement))
-    # total_disagreement_test <- min(1, (1 - proposed$total_disagreement) / (1 - best$total_disagreement))
+    if (proposed$allocation_disagreement == 0) {proposed$allocation_disagreement <- 1}
+    if (proposed$quantity_disagreement == 0) {proposed$quantity_disagreement <- 1}
+    if (proposed$total_disagreement == 0) {proposed$total_disagreement <- 1}
+    if (proposed$configuration_disagreement == 0) {proposed$configuration_disagreement <- 0.01}
+    allocation_test <- min(1,  current$allocation_disagreement / proposed$allocation_disagreement)
+    quantity_test <- min(1, current$quantity_disagreement / proposed$quantity_disagreement)
+    total_disagreement_test <- min(1,  current$total_disagreement / proposed$total_disagreement)
+    configuration_test <- min(1, current$configuration_disagreement / proposed$configuration_disagreement)
     oddsratio_test <- min(1, proposed$odds_ratio / current$odds_ratio)
     
+    quantity_pass <- runif(1) <= quantity_test
+    allocation_pass <- runif(1) <= allocation_test
+    total_pass <- runif(1) <= total_disagreement_test
+    configuration_pass <- runif(1) <= configuration_test
     oddsratio_pass <- runif(1) <= oddsratio_test 
     
-    if ( oddsratio_pass == TRUE  ) { # accept change if model improves or doesn't change
-      current <- proposed
-      if(current$odds_ratio >= best$odds_ratio) {
-        best <- current
+    if (success_metric == "quantity") {
+      if ( quantity_pass == TRUE) {
+        if (current$quantity_disagreement <= best$quantity_disagreement) {
+          best <- current
+        }
+        param <- current
+        proposed_reproductive_rate <-  0
+        while (proposed_reproductive_rate <= 0) {
+          proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = sd_reproductive_rate), digits = 1)
+        }
+        proposed_short_distance_scale <- 0
+        while (proposed_short_distance_scale <= 0) {
+          proposed_short_distance_scale <- round(rnorm(1, mean = best$short_distance_scale, sd = sd_short_distance_scale), digits = 0)
+        }
+        to.params <- param
       }
-      param <- current
-      proposed_reproductive_rate <-  0
-      while (proposed_reproductive_rate <= 0) {
-        proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = sd_reproductive_rate), digits = 1)
+    } else if (success_metric == "quantity and configuration") {
+      if ( quantity_pass == TRUE && configuration_pass == TRUE) {
+        current <- proposed
+        # if (current$quantity_disagreement <= best$quantity_disagreement && current$allocation_disagreement <= best$allocation_disagreement) {
+        if (current$quantity_disagreement <= best$quantity_disagreement) {
+          best <- current
+        }
+        param <- current
+        proposed_reproductive_rate <-  0
+        while (proposed_reproductive_rate <= 0) {
+          proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd_reproductive_rate), digits = 1)
+        }
+        proposed_short_distance_scale <- 0.0
+        while (proposed_short_distance_scale <= 0) {
+          proposed_short_distance_scale <- round(rnorm(1, mean = best$short_distance_scale, sd_short_distance_scale), digits = 0)
+        }
+        to.params <- param
+      } else if (configuration_pass == TRUE && quantity_pass == FALSE) {
+        current <- proposed
+        if (current$quantity_disagreement <= best$quantity_disagreement) {
+          best <- current
+        }
+        param <- current
+        proposed_short_distance_scale <- 0
+        while (proposed_short_distance_scale <= 0) {
+          proposed_short_distance_scale <- round(rnorm(1, mean = best$short_distance_scale, sd_short_distance_scale), digits = 0)
+        }
+        to.params <- param
+      } else if (quantity_pass == TRUE && configuration_pass == FALSE) {
+        current <- proposed
+        if (current$quantity_disagreement <= best$quantity_disagreement) {
+          best <- current
+        }
+        param <- current
+        proposed_reproductive_rate <-  0
+        while (proposed_reproductive_rate <= 0) {
+          proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd_reproductive_rate), digits = 1)
+        }
+        to.params <- param
       }
+    } else if (success_metric == "odds_ratio") {
+      if ( oddsratio_pass == TRUE  ) { # accept change if model improves or doesn't change
+        current <- proposed
+        if(current$odds_ratio >= best$odds_ratio) {
+          best <- current
+        }
+        param <- current
+        proposed_reproductive_rate <-  0
+        while (proposed_reproductive_rate <= 0) {
+          proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = sd_reproductive_rate), digits = 1)
+        }
+        
+        proposed_short_distance_scale <- 0
+        while (proposed_short_distance_scale <= 0) {
+          proposed_short_distance_scale <- round(rnorm(1, mean = best$short_distance_scale, sd = sd_short_distance_scale), digits = 0)
+        }
+        to.params <- param
+      } 
+    } else {
+      return("Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'")
+    }
       
-      proposed_short_distance_scale <- 0
-      while (proposed_short_distance_scale <= 0) {
-        proposed_short_distance_scale <- round(rnorm(1, mean = best$short_distance_scale, sd = sd_short_distance_scale), digits = 0)
-      }
-      to.params <- param
-    } 
   }
   stopCluster(cl)
 
