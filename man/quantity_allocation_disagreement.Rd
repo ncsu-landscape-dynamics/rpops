@@ -4,12 +4,17 @@
 \alias{quantity_allocation_disagreement}
 \title{Compares quantity and allocation disagreement of two raster datasets}
 \usage{
-quantity_allocation_disagreement(reference, comparison)
+quantity_allocation_disagreement(reference, comparison,
+  configuration = FALSE, mask = NULL)
 }
 \arguments{
 \item{reference}{the binary (0 or 1) raster with ground truth data}
 
 \item{comparison}{the binary (0 or 1) raster with simulated data to be compared to ground truth}
+
+\item{configuration}{Set to true if you want to use configuration disagreement for comparing model runs. Default is FALSE.}
+
+\item{mask}{Used to provide a mask to remove 0's that are not true negatives from comparisons.}
 }
 \value{
 A data frame with spatial configuration metrics. Particularly quantity, allocation, and 
