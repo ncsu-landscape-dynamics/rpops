@@ -392,6 +392,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     
     if (success_metric == "quantity") {
       if ( quantity_pass == TRUE) {
+        current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
         }
@@ -409,12 +410,11 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     } else if (success_metric == "quantity and configuration") {
       if ( quantity_pass == TRUE && configuration_pass == TRUE) {
         current <- proposed
-        # if (current$quantity_disagreement <= best$quantity_disagreement && current$allocation_disagreement <= best$allocation_disagreement) {
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
         }
         param <- current
-        proposed_reproductive_rate <-  0
+        proposed_reproductive_rate <- 0
         while (proposed_reproductive_rate <= 0) {
           proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd_reproductive_rate), digits = 1)
         }
