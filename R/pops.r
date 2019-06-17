@@ -1,7 +1,7 @@
 #' PoPS (Pest or Pathogen Spread) model
 #' 
 #' A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
-#' meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to simulate
+#' meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
 #' spread of the pest/pathogen into the future. 
 #'
 #' @param infected_file path to raster file with initial infections
@@ -32,6 +32,7 @@
 #' @param mortality_on  boolean to turn host mortality on and off
 #' @param treatments_file path to raster file with treatment data by years
 #' @param treatment_years years in which to apply treatment
+#' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
 #' @param mortality_rate rate at which mortality occurs
 #' @param mortality_time_lag time lag from infection until mortality can occur in years
 #' 
@@ -64,18 +65,22 @@
 #' wind_dir = "NONE", kappa = 0, random_seed = NULL)
 #' 
 pops <- function(infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
-                 use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
+                 use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, 
+                 management = FALSE, mortality_on = FALSE,
                  temperature_file = "", temperature_coefficient_file = "", 
-                 precipitation_coefficient_file ="", treatments_file = "",
+                 precipitation_coefficient_file = "", treatments_file = "",
                  season_month_start = 1, season_month_end = 12, time_step = "month",
                  start_time = 2018, end_time = 2020, treatment_years = c(0),
                  dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
                  short_distance_scale = 59, long_distance_scale = 0.0,
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
-                 mortality_rate = 0, mortality_time_lag = 0,
+                 mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
                  wind_dir = "NONE", kappa = 0, random_seed = NULL){ 
   
-
+  if (!treatment_method %in% c("ratio", "all infected")) {
+    return("treatment method is not one of the valid treatment options")
+  }
+  
   if (!file.exists(infected_file)) {
     return("Infected file does not exist") 
   }
@@ -293,10 +298,12 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
       }
     }
     treatment_years = treatment_years
+    treatment_method = treatment_method
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
     treatment_maps = list(raster::as.matrix(treatment_map))
+    treatment_method = treatment_method
   }
   
   ew_res <- raster::xres(susceptible)
@@ -326,7 +333,7 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
            season_month_start = season_month_start, season_month_end = season_month_end,
            start_time = start_time, end_time = end_time,
            dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
-           long_distance_scale = long_distance_scale,
+           long_distance_scale = long_distance_scale, treatment_method = treatment_method,
            wind_dir = wind_dir, kappa = kappa)
   
   return(data)
