@@ -17,8 +17,9 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
   dispersal_kern = "cauchy", percent_short_distance_dispersal = 1,
   short_distance_scale = 59, long_distance_scale = 0,
   lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_rate = 0, mortality_time_lag = 0, wind_dir = "NONE",
-  kappa = 0, mask = NULL, success_metric = "quantity")
+  mortality_rate = 0, mortality_time_lag = 0,
+  treatment_method = "ratio", wind_dir = "NONE", kappa = 0,
+  mask = NULL, success_metric = "quantity")
 }
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
@@ -88,6 +89,8 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 \item{mortality_rate}{rate at which mortality occurs}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur in years}
+
+\item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
 \item{wind_dir}{sets the wind direction}
 
