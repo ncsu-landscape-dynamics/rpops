@@ -271,10 +271,12 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
       }
     }
     treatment_years <- treatment_years
+    treatment_method <- treatment_method
   } else {
     treatment_map <- host
     treatment_map[] <- 0
     treatment_maps <- list(as.matrix(treatment_map))
+    treatment_method <- treatment_method
   }
   
   ew_res <- xres(susceptible)
