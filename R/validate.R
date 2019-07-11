@@ -57,7 +57,17 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                       short_distance_scale = 59, long_distance_scale = 0.0,
                       lethal_temperature = -12.87, lethal_temperature_month = 1,
                       mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
-                      wind_dir = "NONE", kappa = 0){ 
+                      wind_dir = "NONE", kappa = 0, mask = NULL, success_metric = "quantity"){ 
+  
+  if (success_metric == "quantity") {
+    configuration = FALSE
+  } else if (success_metric == "quantity and configuration") {
+    configuration = TRUE
+  } else if (success_metric == "odds_ratio") {
+    configuration = FALSE
+  } else {
+    return("Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'")
+  }
   
   if (!treatment_method %in% c("ratio", "all infected")) {
     return("treatment method is not one of the valid treatment options")
@@ -296,13 +306,26 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   
-  reference <- raster(infected_years_file)
+  # reference <- raster(infected_years_file)
+  ## Load observed data on occurence
+  infection_years <- stack(infected_years_file)
+  ## set up reclassification matrix for binary reclassification
+  rcl <- c(1, Inf, 1, 0, 0.99, NA)
+  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
+  ## reclassify to binary values
+  infection_years <- reclassify(infection_years, rclmat)
+  ## Get rid of NA values to make comparisons
+  # infection_years[is.na(infection_years)] <- 0
+  # rcl <- c(1, Inf, 1, 0, 0.99, NA)
+  # rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
+  # ## reclassify to binary values
+  # reference <- raster::reclassify(reference, rclmat)
   
   core_count <- parallel::detectCores() - 1
   cl <- parallel::makeCluster(core_count)
   doParallel::registerDoParallel(cl)
 
-  qa <- foreach::foreach (icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS")) %dopar% {
+  qa <- foreach::foreach (icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
     data <- PoPS::pops_model(random_seed = random_seed, 
                        lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
@@ -322,16 +345,20 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                        long_distance_scale = long_distance_scale, treatment_method = treatment_method,
                        wind_dir = wind_dir, kappa = kappa)
     
-    comparison <- reference
-    raster::values(comparison) <- data$infected[[1]]
+    comp_year <- raster(infected_file)
+    all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS", "foreach"), .final = colSums) %dopar% {
+      comp_year[] <- data$infected_before_treatment[[q]]
+      comp_year <- reclassify(comp_year, rclmat)
+      to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
+    }
     
-    rcl <- c(1, Inf, 1, 0, 0.99, NA)
-    rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
-    ## reclassify to binary values
-    reference <- raster::reclassify(reference, rclmat)
-    comparison <- raster::reclassify(comparison, rclmat)
+    # comparison <- reference
+    # raster::values(comparison) <- data$infected[[1]]
+    # 
+    # comparison <- raster::reclassify(comparison, rclmat)
     
-    to.qa <- PoPS::quantity_allocation_disagreement(reference, comparison)
+    # to.qa <- PoPS::quantity_allocation_disagreement(reference, comparison)
+    to.qa <- data.frame(t(all_disagreement))
   }
   
   parallel::stopCluster(cl)
