@@ -14,8 +14,9 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
   dispersal_kern = "cauchy", percent_short_distance_dispersal = 1,
   short_distance_scale = 59, long_distance_scale = 0,
   lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_rate = 0, mortality_time_lag = 0, wind_dir = "NONE",
-  kappa = 0, random_seed = NULL)
+  mortality_rate = 0, mortality_time_lag = 0,
+  treatment_method = "ratio", wind_dir = "NONE", kappa = 0,
+  random_seed = NULL)
 }
 \arguments{
 \item{infected_file}{path to raster file with initial infections}
@@ -72,6 +73,8 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur in years}
 
+\item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
+
 \item{wind_dir}{sets the wind direction}
 
 \item{kappa}{sets the strength of the wind direction in the von-mises distribution}
@@ -83,7 +86,7 @@ list of infected and susceptible per year
 }
 \description{
 A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
-meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to simulate
+meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
 spread of the pest/pathogen into the future.
 }
 \examples{

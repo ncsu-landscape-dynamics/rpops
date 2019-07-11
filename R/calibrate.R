@@ -41,7 +41,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
                       dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
                       short_distance_scale = 59, long_distance_scale = 0.0,
                       lethal_temperature = -12.87, lethal_temperature_month = 1,
-                      mortality_rate = 0, mortality_time_lag = 0,
+                      mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
                       wind_dir = "NONE", kappa = 0, mask = NULL, success_metric = "quantity"){ 
   
   if (success_metric == "quantity") {
@@ -52,6 +52,10 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     configuration = FALSE
   } else {
     return("Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'")
+  }
+  
+  if (!treatment_method %in% c("ratio", "all infected")) {
+    return("treatment method is not one of the valid treatment options")
   }
   
   if (!file.exists(infected_file)) {
@@ -267,10 +271,12 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
       }
     }
     treatment_years <- treatment_years
+    treatment_method <- treatment_method
   } else {
     treatment_map <- host
     treatment_map[] <- 0
     treatment_maps <- list(as.matrix(treatment_map))
+    treatment_method <- treatment_method
   }
   
   ew_res <- xres(susceptible)
@@ -318,7 +324,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
                        season_month_start = season_month_start, season_month_end = season_month_end,
                        start_time = start_time, end_time = end_time,
                        dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
-                       long_distance_scale = long_distance_scale,
+                       long_distance_scale = long_distance_scale, treatment_method = treatment_method,
                        wind_dir = wind_dir, kappa = kappa)
     return(data)
   }

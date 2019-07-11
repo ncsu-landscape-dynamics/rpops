@@ -61,6 +61,17 @@ DispersalKernel radial_type_from_string(const std::string& text)
                                   " value '" + text +"' provided");
 }
 
+TreatmentApplication treatment_application_enum_from_string(const std::string& text)
+{
+  if (text == "ratio")
+    return TreatmentApplication::Ratio;
+  else if (text == "all infected")
+    return TreatmentApplication::AllInfectedInCell;
+  else
+    throw std::invalid_argument("treatment_application_enum_from_string: Invalid"
+                                  " value '" + text +"' provided");
+}
+
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
@@ -84,13 +95,14 @@ List pops_model(int random_seed,
                 int season_month_start = 1, int season_month_end = 12,
                 double start_time = 2018, double end_time = 2018,
                 std::string dispersal_kern = "cauchy", double percent_short_distance_dispersal = 0.0,
-                double long_distance_scale = 0.0,
+                double long_distance_scale = 0.0, std::string treatment_method = "ratio",
                 std::string wind_dir = "NONE", double kappa = 0
 )
 {
   
   std::vector<std::tuple<int, int>> outside_dispersers;
   DispersalKernel dispersal_kernel = radial_type_from_string(dispersal_kern);
+  TreatmentApplication treatment_application = treatment_application_enum_from_string(treatment_method);
   pops::Date dd_start(start_time, 01, 01);
   pops::Date dd_end(end_time, 12, 31);
   Direction wind_direction = direction_enum_from_string(wind_dir);
@@ -108,7 +120,16 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> mortality_vector;
   std::vector<int> simulated_weeks;
   
-  Treatments<IntegerMatrix, NumericMatrix> treatments;
+  // if(treatment_method == "ratio") {
+  //   TreatmentApplication treatment_application = TreatmentApplication::Ratio;
+  //   // Treatments<IntegerMatrix, NumericMatrix> treatments(TreatmentApplication::Ratio);
+  // }
+  // else if (treatment_method == "all infected") {
+  //   TreatmentApplication treatment_application = TreatmentApplication::AllInfectedInCell;
+  //   // Treatments<IntegerMatrix, NumericMatrix> treatments(TreatmentApplication::AllInfectedInCell);
+  // }
+  
+  Treatments<IntegerMatrix, NumericMatrix> treatments(treatment_application);
   bool use_treatments = false;
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
     treatments.add_treatment(treatment_years[t], treatment_maps[t]);
