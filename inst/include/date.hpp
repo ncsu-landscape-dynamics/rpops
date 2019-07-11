@@ -5,6 +5,7 @@
  *
  * Authors: Zexi Chen (zchen22 ncsu edu)
  *          Anna Petrasova
+ *          Chris Jones
  *
  * The code contained herein is licensed under the GNU General Public
  * License. You may obtain a copy of the GNU General Public License
@@ -42,6 +43,7 @@ private:
 public:
     Date(const Date& d): year_(d.year_), month_(d.month_), day_(d.day_) {}
     Date(int y, int m, int d): year_(y), month_(m), day_(d) {}
+    inline void increased_by_days(int num_days);
     inline void increased_by_week();
     inline void increased_by_month();
     inline Date get_year_end();
@@ -72,7 +74,7 @@ Date Date::get_year_end()
 
 bool Date::is_last_week_of_year()
 {
-    if (month_ == 12 && (day_ + 9) > 31)
+    if (month_ == 12 && (day_ + 7) > 31)
         return true;
     return false;
 }
@@ -142,14 +144,63 @@ bool operator>= (const Date &d1, const Date &d2)
     return !(d1 < d2);
 }
 
+/*!
+ * Increases the date by the num_days (specified by the user) except on
+ * the last timestep of the year, which is increased by num_days 
+ * plus the number of  days left in the year that are less
+ * than num_days (e.g. if the num_days = 28 the last time step is 29
+ * or 30 (if leap year), if num_days = 23 that last time step is 43
+ * or 44 (if leap year) days). This ensures that each year of the 
+ * forecast starts on January 1st. 
+ */
+void Date::increased_by_days(int num_days)
+{
+  day_ += num_days;
+  if (year_ % 4 == 0 && (year_ % 100 != 0 || year_ % 400 == 0)) {
+    if (month_ == 12 && day_ > (31 - (num_days + 1))) {
+      year_++;
+      month_ = 1;
+      day_ = 1;
+    }
+    if (day_ > day_in_month[1][month_]) {
+      day_ = day_ - day_in_month[1][month_];
+      month_++;
+      if (month_ > 12) {
+        year_++;
+        month_ = 1;
+      }
+    }
+  }
+  else {
+    if (month_ == 12 && day_ > (31 - num_days)) {
+      year_++;
+      month_ = 1;
+      day_ = 1;
+    }
+    if (day_ > day_in_month[0][month_]) {
+      day_ = day_ - day_in_month[0][month_];
+      month_++;
+      if (month_ > 12) {
+        year_++;
+        month_ = 1;
+      }
+    }
+  }
+}
+
+/*!
+ * Increases the date by one week (7 days) except on the last week
+ * of the year, which is increased by 8 or 9 days if a leap year.
+ * This ensures that each year of the forecast starts on January 1st. 
+ */
 void Date::increased_by_week()
 {
     day_ += 7;
     if (year_ % 4 == 0 && (year_ % 100 != 0 || year_ % 400 == 0)) {
         if (month_ == 12 && day_ > 23) {
-          year_++;
-          month_ = 1;
-          day_ = 1;
+            year_++;
+            month_ = 1;
+            day_ = 1;
         }
         if (day_ > day_in_month[1][month_]) {
             day_ = day_ - day_in_month[1][month_];
@@ -162,9 +213,9 @@ void Date::increased_by_week()
     }
     else {
         if (month_ == 12 && day_ > 24) {
-          year_++;
-          month_ = 1;
-          day_ = 1;
+            year_++;
+            month_ = 1;
+            day_ = 1;
         }
         if (day_ > day_in_month[0][month_]) {
             day_ = day_ - day_in_month[0][month_];
