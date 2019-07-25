@@ -74,7 +74,7 @@ Date Date::get_year_end()
 
 bool Date::is_last_week_of_year()
 {
-    if (month_ == 12 && (day_ + 7) > 31)
+    if (month_ == 12 && (day_ + 9) > 31)
         return true;
     return false;
 }
