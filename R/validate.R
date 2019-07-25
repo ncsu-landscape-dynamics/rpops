@@ -47,17 +47,18 @@
 #' wind_dir = "NONE", kappa = 0)
 #' 
 validate <- function(infected_years_file, num_iterations, number_cores = NA,
-                      infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
-                      use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
-                      temperature_file = "", temperature_coefficient_file = "", 
-                      precipitation_coefficient_file ="", treatments_file = "",
-                      season_month_start = 1, season_month_end = 12, time_step = "month",
-                      start_time = 2018, end_time = 2020, treatment_years = c(0),
-                      dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
-                      short_distance_scale = 59, long_distance_scale = 0.0,
-                      lethal_temperature = -12.87, lethal_temperature_month = 1,
-                      mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
-                      wind_dir = "NONE", kappa = 0, mask = NULL, success_metric = "quantity"){ 
+                     infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
+                     use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
+                     temperature_file = "", temperature_coefficient_file = "", 
+                     precipitation_coefficient_file ="", treatments_file = "",
+                     season_month_start = 1, season_month_end = 12, time_step = "month",
+                     start_time = 2018, end_time = 2020, treatment_years = c(0),
+                     dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
+                     short_distance_scale = 59, long_distance_scale = 0.0,
+                     lethal_temperature = -12.87, lethal_temperature_month = 1,
+                     mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
+                     treatment_date = 12, wind_dir = "NONE", kappa = 0, 
+                     mask = NULL, success_metric = "quantity"){ 
   
   if (success_metric == "quantity") {
     configuration = FALSE
@@ -343,7 +344,7 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                        start_time = start_time, end_time = end_time,
                        dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
                        long_distance_scale = long_distance_scale, treatment_method = treatment_method,
-                       wind_dir = wind_dir, kappa = kappa)
+                       treatment_date = treatment_date, wind_dir = wind_dir, kappa = kappa)
     
     comp_year <- raster(infected_file)
     all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS", "foreach"), .final = colSums) %dopar% {

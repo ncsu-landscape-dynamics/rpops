@@ -9,8 +9,8 @@
 using namespace Rcpp;
 
 // pops_model
-List pops_model(int random_seed, double lethal_temperature, bool use_lethal_temperature, int lethal_temperature_month, double reproductive_rate, bool weather, bool mortality_on, double short_distance_scale, IntegerMatrix infected, IntegerMatrix susceptible, IntegerMatrix mortality_tracker, IntegerMatrix mortality, IntegerMatrix total_plants, std::vector<NumericMatrix> treatment_maps, std::vector<int> treatment_years, std::vector<NumericMatrix> temperature, std::vector<NumericMatrix> weather_coefficient, int ew_res, int ns_res, std::string time_step, double mortality_rate, int mortality_time_lag, int season_month_start, int season_month_end, double start_time, double end_time, std::string dispersal_kern, double percent_short_distance_dispersal, double long_distance_scale, std::string treatment_method, std::string wind_dir, double kappa);
-static SEXP _PoPS_pops_model_try(SEXP random_seedSEXP, SEXP lethal_temperatureSEXP, SEXP use_lethal_temperatureSEXP, SEXP lethal_temperature_monthSEXP, SEXP reproductive_rateSEXP, SEXP weatherSEXP, SEXP mortality_onSEXP, SEXP short_distance_scaleSEXP, SEXP infectedSEXP, SEXP susceptibleSEXP, SEXP mortality_trackerSEXP, SEXP mortalitySEXP, SEXP total_plantsSEXP, SEXP treatment_mapsSEXP, SEXP treatment_yearsSEXP, SEXP temperatureSEXP, SEXP weather_coefficientSEXP, SEXP ew_resSEXP, SEXP ns_resSEXP, SEXP time_stepSEXP, SEXP mortality_rateSEXP, SEXP mortality_time_lagSEXP, SEXP season_month_startSEXP, SEXP season_month_endSEXP, SEXP start_timeSEXP, SEXP end_timeSEXP, SEXP dispersal_kernSEXP, SEXP percent_short_distance_dispersalSEXP, SEXP long_distance_scaleSEXP, SEXP treatment_methodSEXP, SEXP wind_dirSEXP, SEXP kappaSEXP) {
+List pops_model(int random_seed, double lethal_temperature, bool use_lethal_temperature, int lethal_temperature_month, double reproductive_rate, bool weather, bool mortality_on, double short_distance_scale, IntegerMatrix infected, IntegerMatrix susceptible, IntegerMatrix mortality_tracker, IntegerMatrix mortality, IntegerMatrix total_plants, std::vector<NumericMatrix> treatment_maps, std::vector<int> treatment_years, std::vector<NumericMatrix> temperature, std::vector<NumericMatrix> weather_coefficient, int ew_res, int ns_res, std::string time_step, double mortality_rate, int mortality_time_lag, int season_month_start, int season_month_end, double start_time, double end_time, std::string dispersal_kern, double percent_short_distance_dispersal, double long_distance_scale, std::string treatment_method, int treatment_month, std::string wind_dir, double kappa);
+static SEXP _PoPS_pops_model_try(SEXP random_seedSEXP, SEXP lethal_temperatureSEXP, SEXP use_lethal_temperatureSEXP, SEXP lethal_temperature_monthSEXP, SEXP reproductive_rateSEXP, SEXP weatherSEXP, SEXP mortality_onSEXP, SEXP short_distance_scaleSEXP, SEXP infectedSEXP, SEXP susceptibleSEXP, SEXP mortality_trackerSEXP, SEXP mortalitySEXP, SEXP total_plantsSEXP, SEXP treatment_mapsSEXP, SEXP treatment_yearsSEXP, SEXP temperatureSEXP, SEXP weather_coefficientSEXP, SEXP ew_resSEXP, SEXP ns_resSEXP, SEXP time_stepSEXP, SEXP mortality_rateSEXP, SEXP mortality_time_lagSEXP, SEXP season_month_startSEXP, SEXP season_month_endSEXP, SEXP start_timeSEXP, SEXP end_timeSEXP, SEXP dispersal_kernSEXP, SEXP percent_short_distance_dispersalSEXP, SEXP long_distance_scaleSEXP, SEXP treatment_methodSEXP, SEXP treatment_monthSEXP, SEXP wind_dirSEXP, SEXP kappaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< int >::type random_seed(random_seedSEXP);
@@ -43,17 +43,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type percent_short_distance_dispersal(percent_short_distance_dispersalSEXP);
     Rcpp::traits::input_parameter< double >::type long_distance_scale(long_distance_scaleSEXP);
     Rcpp::traits::input_parameter< std::string >::type treatment_method(treatment_methodSEXP);
+    Rcpp::traits::input_parameter< int >::type treatment_month(treatment_monthSEXP);
     Rcpp::traits::input_parameter< std::string >::type wind_dir(wind_dirSEXP);
     Rcpp::traits::input_parameter< double >::type kappa(kappaSEXP);
-    rcpp_result_gen = Rcpp::wrap(pops_model(random_seed, lethal_temperature, use_lethal_temperature, lethal_temperature_month, reproductive_rate, weather, mortality_on, short_distance_scale, infected, susceptible, mortality_tracker, mortality, total_plants, treatment_maps, treatment_years, temperature, weather_coefficient, ew_res, ns_res, time_step, mortality_rate, mortality_time_lag, season_month_start, season_month_end, start_time, end_time, dispersal_kern, percent_short_distance_dispersal, long_distance_scale, treatment_method, wind_dir, kappa));
+    rcpp_result_gen = Rcpp::wrap(pops_model(random_seed, lethal_temperature, use_lethal_temperature, lethal_temperature_month, reproductive_rate, weather, mortality_on, short_distance_scale, infected, susceptible, mortality_tracker, mortality, total_plants, treatment_maps, treatment_years, temperature, weather_coefficient, ew_res, ns_res, time_step, mortality_rate, mortality_time_lag, season_month_start, season_month_end, start_time, end_time, dispersal_kern, percent_short_distance_dispersal, long_distance_scale, treatment_method, treatment_month, wind_dir, kappa));
     return rcpp_result_gen;
 END_RCPP_RETURN_ERROR
 }
-RcppExport SEXP _PoPS_pops_model(SEXP random_seedSEXP, SEXP lethal_temperatureSEXP, SEXP use_lethal_temperatureSEXP, SEXP lethal_temperature_monthSEXP, SEXP reproductive_rateSEXP, SEXP weatherSEXP, SEXP mortality_onSEXP, SEXP short_distance_scaleSEXP, SEXP infectedSEXP, SEXP susceptibleSEXP, SEXP mortality_trackerSEXP, SEXP mortalitySEXP, SEXP total_plantsSEXP, SEXP treatment_mapsSEXP, SEXP treatment_yearsSEXP, SEXP temperatureSEXP, SEXP weather_coefficientSEXP, SEXP ew_resSEXP, SEXP ns_resSEXP, SEXP time_stepSEXP, SEXP mortality_rateSEXP, SEXP mortality_time_lagSEXP, SEXP season_month_startSEXP, SEXP season_month_endSEXP, SEXP start_timeSEXP, SEXP end_timeSEXP, SEXP dispersal_kernSEXP, SEXP percent_short_distance_dispersalSEXP, SEXP long_distance_scaleSEXP, SEXP treatment_methodSEXP, SEXP wind_dirSEXP, SEXP kappaSEXP) {
+RcppExport SEXP _PoPS_pops_model(SEXP random_seedSEXP, SEXP lethal_temperatureSEXP, SEXP use_lethal_temperatureSEXP, SEXP lethal_temperature_monthSEXP, SEXP reproductive_rateSEXP, SEXP weatherSEXP, SEXP mortality_onSEXP, SEXP short_distance_scaleSEXP, SEXP infectedSEXP, SEXP susceptibleSEXP, SEXP mortality_trackerSEXP, SEXP mortalitySEXP, SEXP total_plantsSEXP, SEXP treatment_mapsSEXP, SEXP treatment_yearsSEXP, SEXP temperatureSEXP, SEXP weather_coefficientSEXP, SEXP ew_resSEXP, SEXP ns_resSEXP, SEXP time_stepSEXP, SEXP mortality_rateSEXP, SEXP mortality_time_lagSEXP, SEXP season_month_startSEXP, SEXP season_month_endSEXP, SEXP start_timeSEXP, SEXP end_timeSEXP, SEXP dispersal_kernSEXP, SEXP percent_short_distance_dispersalSEXP, SEXP long_distance_scaleSEXP, SEXP treatment_methodSEXP, SEXP treatment_monthSEXP, SEXP wind_dirSEXP, SEXP kappaSEXP) {
     SEXP rcpp_result_gen;
     {
         Rcpp::RNGScope rcpp_rngScope_gen;
-        rcpp_result_gen = PROTECT(_PoPS_pops_model_try(random_seedSEXP, lethal_temperatureSEXP, use_lethal_temperatureSEXP, lethal_temperature_monthSEXP, reproductive_rateSEXP, weatherSEXP, mortality_onSEXP, short_distance_scaleSEXP, infectedSEXP, susceptibleSEXP, mortality_trackerSEXP, mortalitySEXP, total_plantsSEXP, treatment_mapsSEXP, treatment_yearsSEXP, temperatureSEXP, weather_coefficientSEXP, ew_resSEXP, ns_resSEXP, time_stepSEXP, mortality_rateSEXP, mortality_time_lagSEXP, season_month_startSEXP, season_month_endSEXP, start_timeSEXP, end_timeSEXP, dispersal_kernSEXP, percent_short_distance_dispersalSEXP, long_distance_scaleSEXP, treatment_methodSEXP, wind_dirSEXP, kappaSEXP));
+        rcpp_result_gen = PROTECT(_PoPS_pops_model_try(random_seedSEXP, lethal_temperatureSEXP, use_lethal_temperatureSEXP, lethal_temperature_monthSEXP, reproductive_rateSEXP, weatherSEXP, mortality_onSEXP, short_distance_scaleSEXP, infectedSEXP, susceptibleSEXP, mortality_trackerSEXP, mortalitySEXP, total_plantsSEXP, treatment_mapsSEXP, treatment_yearsSEXP, temperatureSEXP, weather_coefficientSEXP, ew_resSEXP, ns_resSEXP, time_stepSEXP, mortality_rateSEXP, mortality_time_lagSEXP, season_month_startSEXP, season_month_endSEXP, start_timeSEXP, end_timeSEXP, dispersal_kernSEXP, percent_short_distance_dispersalSEXP, long_distance_scaleSEXP, treatment_methodSEXP, treatment_monthSEXP, wind_dirSEXP, kappaSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -78,7 +79,7 @@ RcppExport SEXP _PoPS_pops_model(SEXP random_seedSEXP, SEXP lethal_temperatureSE
 static int _PoPS_RcppExport_validate(const char* sig) { 
     static std::set<std::string> signatures;
     if (signatures.empty()) {
-        signatures.insert("List(*pops_model)(int,double,bool,int,double,bool,bool,double,IntegerMatrix,IntegerMatrix,IntegerMatrix,IntegerMatrix,IntegerMatrix,std::vector<NumericMatrix>,std::vector<int>,std::vector<NumericMatrix>,std::vector<NumericMatrix>,int,int,std::string,double,int,int,int,double,double,std::string,double,double,std::string,std::string,double)");
+        signatures.insert("List(*pops_model)(int,double,bool,int,double,bool,bool,double,IntegerMatrix,IntegerMatrix,IntegerMatrix,IntegerMatrix,IntegerMatrix,std::vector<NumericMatrix>,std::vector<int>,std::vector<NumericMatrix>,std::vector<NumericMatrix>,int,int,std::string,double,int,int,int,double,double,std::string,double,double,std::string,int,std::string,double)");
     }
     return signatures.find(sig) != signatures.end();
 }
@@ -91,7 +92,7 @@ RcppExport SEXP _PoPS_RcppExport_registerCCallable() {
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_PoPS_pops_model", (DL_FUNC) &_PoPS_pops_model, 32},
+    {"_PoPS_pops_model", (DL_FUNC) &_PoPS_pops_model, 33},
     {"_PoPS_RcppExport_registerCCallable", (DL_FUNC) &_PoPS_RcppExport_registerCCallable, 0},
     {NULL, NULL, 0}
 };
