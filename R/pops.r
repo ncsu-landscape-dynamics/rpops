@@ -32,7 +32,7 @@
 #' @param mortality_on  boolean to turn host mortality on and off
 #' @param treatments_file path to raster file with treatment data by years
 #' @param treatment_years years in which to apply treatment
-#' @param treatment_date the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.
+#' @param treatment_month the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.
 #' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
 #' @param mortality_rate rate at which mortality occurs
 #' @param mortality_time_lag time lag from infection until mortality can occur in years

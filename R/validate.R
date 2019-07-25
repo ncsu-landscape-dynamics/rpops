@@ -57,7 +57,7 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                      short_distance_scale = 59, long_distance_scale = 0.0,
                      lethal_temperature = -12.87, lethal_temperature_month = 1,
                      mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
-                     treatment_date = 12, wind_dir = "NONE", kappa = 0, 
+                     treatment_month = 12, wind_dir = "NONE", kappa = 0, 
                      mask = NULL, success_metric = "quantity"){ 
   
   if (success_metric == "quantity") {
@@ -344,7 +344,7 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                        start_time = start_time, end_time = end_time,
                        dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
                        long_distance_scale = long_distance_scale, treatment_method = treatment_method,
-                       treatment_date = treatment_date, wind_dir = wind_dir, kappa = kappa)
+                       treatment_month = treatment_month, wind_dir = wind_dir, kappa = kappa)
     
     comp_year <- raster(infected_file)
     all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS", "foreach"), .final = colSums) %dopar% {

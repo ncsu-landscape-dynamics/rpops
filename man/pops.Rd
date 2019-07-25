@@ -15,8 +15,8 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
   short_distance_scale = 59, long_distance_scale = 0,
   lethal_temperature = -12.87, lethal_temperature_month = 1,
   mortality_rate = 0, mortality_time_lag = 0,
-  treatment_method = "ratio", treatment_date = 12, wind_dir = "NONE",
-  kappa = 0, random_seed = NULL)
+  treatment_method = "ratio", treatment_month = 12,
+  wind_dir = "NONE", kappa = 0, random_seed = NULL)
 }
 \arguments{
 \item{infected_file}{path to raster file with initial infections}
@@ -75,7 +75,7 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
-\item{treatment_date}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
+\item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
 \item{wind_dir}{sets the wind direction}
 
