@@ -18,11 +18,9 @@
 #'
 #' @return list of vector matrices of infected and suceptible hosts per simulated year
 #' @export
-#'
-#' @examples
-
-pops_model <- function(random_seed, lethal_temperature, use_lethal_temperature, lethal_temperature_month, reproductive_rate, weather, mortality_on, short_distance_scale, infected, susceptible, mortality_tracker, mortality, total_plants, treatment_maps, treatment_years, temperature, weather_coefficient, ew_res, ns_res, time_step, mortality_rate = 0.0, mortality_time_lag = 2L, season_month_start = 1L, season_month_end = 12L, start_time = 2018, end_time = 2018, dispersal_kern = "cauchy", percent_short_distance_dispersal = 0.0, long_distance_scale = 0.0, treatment_method = "ratio", wind_dir = "NONE", kappa = 0) {
-    .Call(`_PoPS_pops_model`, random_seed, lethal_temperature, use_lethal_temperature, lethal_temperature_month, reproductive_rate, weather, mortality_on, short_distance_scale, infected, susceptible, mortality_tracker, mortality, total_plants, treatment_maps, treatment_years, temperature, weather_coefficient, ew_res, ns_res, time_step, mortality_rate, mortality_time_lag, season_month_start, season_month_end, start_time, end_time, dispersal_kern, percent_short_distance_dispersal, long_distance_scale, treatment_method, wind_dir, kappa)
+#' 
+pops_model <- function(random_seed, lethal_temperature, use_lethal_temperature, lethal_temperature_month, reproductive_rate, weather, mortality_on, short_distance_scale, infected, susceptible, mortality_tracker, mortality, total_plants, treatment_maps, treatment_years, temperature, weather_coefficient, ew_res, ns_res, time_step, mortality_rate = 0.0, mortality_time_lag = 2L, season_month_start = 1L, season_month_end = 12L, start_time = 2018, end_time = 2018, dispersal_kern = "cauchy", percent_short_distance_dispersal = 0.0, long_distance_scale = 0.0, treatment_method = "ratio", treatment_month = 12L, wind_dir = "NONE", kappa = 0) {
+    .Call(`_PoPS_pops_model`, random_seed, lethal_temperature, use_lethal_temperature, lethal_temperature_month, reproductive_rate, weather, mortality_on, short_distance_scale, infected, susceptible, mortality_tracker, mortality, total_plants, treatment_maps, treatment_years, temperature, weather_coefficient, ew_res, ns_res, time_step, mortality_rate, mortality_time_lag, season_month_start, season_month_end, start_time, end_time, dispersal_kern, percent_short_distance_dispersal, long_distance_scale, treatment_method, treatment_month, wind_dir, kappa)
 }
 
 # Register entry points for exported C++ functions

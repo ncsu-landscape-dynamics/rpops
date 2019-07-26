@@ -13,7 +13,7 @@ pops_model(random_seed, lethal_temperature, use_lethal_temperature,
   season_month_end = 12L, start_time = 2018, end_time = 2018,
   dispersal_kern = "cauchy", percent_short_distance_dispersal = 0,
   long_distance_scale = 0, treatment_method = "ratio",
-  wind_dir = "NONE", kappa = 0)
+  treatment_month = 12L, wind_dir = "NONE", kappa = 0)
 }
 \arguments{
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
@@ -75,6 +75,8 @@ pops_model(random_seed, lethal_temperature, use_lethal_temperature,
 \item{long_distance_scale}{distance scale parameter for long range dispersal kernel}
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
+
+\item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
 \item{wind_dir}{sets the wind direction}
 
