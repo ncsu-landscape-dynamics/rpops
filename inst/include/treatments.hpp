@@ -66,8 +66,8 @@ public:
         // this expression fails in rcpp
         // host = host - (host * treatments[year]);
         if (treatments.find(year) != treatments.end()) {
-            for(int i = 0; i < infected.rows(); i++)
-                for(int j = 0; j < infected.cols(); j++) {
+            for(unsigned i = 0; i < infected.rows(); i++)
+                for(unsigned j = 0; j < infected.cols(); j++) {
                     if (application == TreatmentApplication::Ratio) {
                         infected(i, j) = infected(i, j) - (infected(i, j) * treatments[year](i, j));
                         susceptible(i, j) = susceptible(i, j) - (susceptible(i, j) * treatments[year](i, j));
@@ -83,8 +83,8 @@ public:
     void apply_treatment_infected(int year, IntegerRaster &infected)
     {
         if (treatments.find(year) != treatments.end()) {
-            for(int i = 0; i < infected.rows(); i++)
-                for(int j = 0; j < infected.cols(); j++)
+            for(unsigned i = 0; i < infected.rows(); i++)
+                for(unsigned j = 0; j < infected.cols(); j++)
                     if (application == TreatmentApplication::Ratio) {
                         infected(i, j) = infected(i, j) - (infected(i, j) * treatments[year](i, j));
                     }
