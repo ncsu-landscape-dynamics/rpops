@@ -144,6 +144,16 @@ Direction direction_from_string(const std::string& text)
     }
 }
 
+/*! Overload which allows to pass C-style string which is nullptr (NULL)
+ */
+inline
+Direction direction_from_string(const char* text)
+{
+    // call the string version
+    return direction_from_string(text ? std::string(text)
+                                      : std::string());
+}
+
 /*! Dispersal kernel providing all the radial kernels.
  *
  * We understand a radial kernel to be a kernel which has parameters
