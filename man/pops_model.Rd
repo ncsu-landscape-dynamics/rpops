@@ -13,7 +13,7 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
   season_month_start = 1L, season_month_end = 12L, start_time = 2018,
   end_time = 2018, treatment_month = 12L, treatment_method = "ratio",
   natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-  use_anthropogenic_kernel, percent_natural_dispersal = 0,
+  use_anthropogenic_kernel = FALSE, percent_natural_dispersal = 0,
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
   natural_dir = "NONE", natural_kappa = 0,
   anthropogenic_dir = "NONE", anthropogenic_kappa = 0)
