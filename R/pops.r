@@ -7,35 +7,38 @@
 #' @param infected_file path to raster file with initial infections
 #' @param host_file path to raster file with number of hosts
 #' @param total_plants_file path to raster file with number of total plants
-#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions
-#' @param use_lethal_temperature does your pest or pathogen have a temperature at which it cannot survive 
 #' @param temp allows the use of temperature coefficients to modify spread 
+#' @param temperature_coefficient_file path to raster file with temperature coefficient data for the timestep and number of years specified
 #' @param precip allows the use of precipitation coefficients to modify spread
-#' @param temperature_file path to raster file with temperature data for minimum temperature
-#' @param temperature_coefficient_file path to raster file with 
-#' @param precipitation_coefficient_file path to raster file with 
+#' @param precipitation_coefficient_file path to raster file with precipitation coefficient data for the timestep and number of years specified
+#' @param time_step how often should spread occur
+#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions
 #' @param season_month_start when does spread first start occurring in the year for your pest or pathogen
 #' @param season_month_end when does spread end during the year for your pest or pathogen
-#' @param time_step how often should spread occur
 #' @param start_time first year to start the simulation
 #' @param end_time last year of the simulation
-#' @param dispersal_kern what type of dispersal kernel should be used
-#' @param percent_short_distance_dispersal  what percentage of dispersal is short range versus long range
-#' @param short_distance_scale distance scale parameter for short range dispersal kernel
-#' @param long_distance_scale distance scale parameter for long range dispersal kernel
-#' @param lethal_temperature the temperature at which mortality occurs for your pest or pathogen
-#' @param lethal_temperature_month the month in which mortality occurs
-#' @param wind_dir sets the wind direction 
-#' @param kappa sets the strength of the wind direction in the von-mises distribution
-#' @param random_seed sets the random seed for the simulation used for reproducibility
-#' @param management boolean to allow use of managemnet
+#' @param use_lethal_temperature does your pest or pathogen have a temperature at which it cannot survive
+#' @param temperature_file path to raster file with temperature data for minimum temperature
+#' @param lethal_temperature the temperature at which lethal temperature related mortality occurs for your pest or pathogen
+#' @param lethal_temperature_month the month in which lethal temperature related mortality occurs for your pest or pathogen
 #' @param mortality_on  boolean to turn host mortality on and off
-#' @param treatments_file path to raster file with treatment data by years
-#' @param treatment_years years in which to apply treatment
-#' @param treatment_month the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.
-#' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
 #' @param mortality_rate rate at which mortality occurs
 #' @param mortality_time_lag time lag from infection until mortality can occur in years
+#' @param management boolean to allow use of managemnet
+#' @param treatment_years years in which to apply treatment
+#' @param treatments_file path to raster file with treatment data by years
+#' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
+#' @param treatment_month the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.
+#' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range
+#' @param natural_kernel_type what type of dispersal kernel should be used for natural dispersal
+#' @param anthropogenic_kernel_type what type of dispersal kernel should be used for anthropogenic dispersal
+#' @param natural_distance_scale distance scale parameter for natural range dispersal kernel
+#' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel
+#' @param natural_dir sets the predominate direction of natural dispersal usually due to wind
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution
+#' @param anthropogenic_dir sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution
+#' @param random_seed sets the random seed for the simulation used for reproducibility
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent
@@ -59,24 +62,31 @@
 #' precipitation_coefficient_file ="", treatments_file,
 #' season_month_start = 1, season_month_end = 12, time_step = "week",
 #' start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
-#' dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
-#' short_distance_scale = 20.57, long_distance_scale = 0.0,
+#' natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
+#' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
-#' treatment_date = 12, wind_dir = "NONE", kappa = 0, random_seed = NULL)
+#' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
 #' 
-pops <- function(infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
-                 use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, 
-                 management = FALSE, mortality_on = FALSE,
-                 temperature_file = "", temperature_coefficient_file = "", 
-                 precipitation_coefficient_file = "", treatments_file = "",
-                 season_month_start = 1, season_month_end = 12, time_step = "month",
-                 start_time = 2018, end_time = 2020, treatment_years = c(0),
-                 dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
-                 short_distance_scale = 59, long_distance_scale = 0.0,
+#' 
+#' 
+pops <- function(infected_file, host_file, total_plants_file, 
+                 temp = FALSE, temperature_coefficient_file = "", 
+                 precip = FALSE, precipitation_coefficient_file = "", 
+                 time_step = "month", reproductive_rate = 3.0,
+                 season_month_start = 1, season_month_end = 12, 
+                 start_time = 2018, end_time = 2020, 
+                 use_lethal_temperature = FALSE, temperature_file = "",
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
-                 mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
-                 treatment_month = 12, wind_dir = "NONE", kappa = 0, random_seed = NULL){ 
+                 mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
+                 management = FALSE, treatment_years = c(0), treatments_file = "",
+                 treatment_method = "ratio", treatment_month = 12,
+                 percent_natural_dispersal = 1.0,
+                 natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
+                 natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
+                 natural_dir = "NONE", natural_kappa = 0, 
+                 anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
+                 random_seed = NULL){ 
   
   if (!treatment_method %in% c("ratio", "all infected")) {
     return("treatment method is not one of the valid treatment options")
@@ -307,8 +317,18 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
     treatment_method = treatment_method
   }
   
+  if(percent_natural_dispersal == 1.0) {
+    use_anthropogenic_kernel = FALSE
+  } else if (percent_natural_dispersal < 1.0  && percent_natural_dispersal >= 0.0) {
+    use_anthropogenic_kernel = TRUE
+  } else {
+    return("Percent natural dispersal must be between 0.0 and 1.0")
+  }
+  
   ew_res <- raster::xres(susceptible)
   ns_res <- raster::yres(susceptible)
+  num_cols <- raster::ncol(susceptible)
+  num_rows <- raster::nrow(susceptible)
   
   mortality_tracker <- infected
   raster::values(mortality_tracker) <- 0
@@ -320,23 +340,31 @@ pops <- function(infected_file, host_file, total_plants_file, reproductive_rate 
   mortality <- mortality_tracker
   
   data <- pops_model(random_seed = random_seed, 
-           lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
-           reproductive_rate = reproductive_rate, 
-           weather = weather, mortality_on = mortality_on,
-           short_distance_scale = short_distance_scale, infected = infected,
-           susceptible = susceptible, mortality_tracker = mortality_tracker, mortality = mortality,
-           total_plants = total_plants, 
-           treatment_maps = treatment_maps, treatment_years = treatment_years,
-           temperature = temperature,
-           weather_coefficient = weather_coefficient, 
-           ew_res = ew_res, ns_res = ns_res,
-           time_step = time_step, 
-           mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-           season_month_start = season_month_start, season_month_end = season_month_end,
-           start_time = start_time, end_time = end_time,
-           dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
-           long_distance_scale = long_distance_scale, treatment_method = treatment_method,
-           treatment_month = treatment_month, wind_dir = wind_dir, kappa = kappa)
+             use_lethal_temperature = use_lethal_temperature, 
+             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+             infected = infected,
+             susceptible = susceptible,
+             total_plants = total_plants,
+             mortality_on = mortality_on,
+             mortality_tracker = mortality_tracker,
+             mortality = mortality,
+             treatment_maps = treatment_maps,
+             treatment_years = treatment_years,
+             weather = weather,
+             temperature = temperature,
+             weather_coefficient = weather_coefficient,
+             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
+             time_step = time_step, reproductive_rate = reproductive_rate,
+             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
+             season_month_start = season_month_start, season_month_end = season_month_end,
+             start_time = start_time, end_time = end_time,
+             treatment_month = treatment_month, treatment_method = treatment_method,
+             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
+             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+             natural_dir = natural_dir, natural_kappa = natural_kappa,
+             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
+  )
   
   return(data)
   

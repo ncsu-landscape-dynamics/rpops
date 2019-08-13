@@ -4,19 +4,21 @@
 \alias{pops}
 \title{PoPS (Pest or Pathogen Spread) model}
 \usage{
-pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
-  use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE,
-  management = FALSE, mortality_on = FALSE, temperature_file = "",
-  temperature_coefficient_file = "",
-  precipitation_coefficient_file = "", treatments_file = "",
-  season_month_start = 1, season_month_end = 12, time_step = "month",
-  start_time = 2018, end_time = 2020, treatment_years = c(0),
-  dispersal_kern = "cauchy", percent_short_distance_dispersal = 1,
-  short_distance_scale = 59, long_distance_scale = 0,
+pops(infected_file, host_file, total_plants_file, temp = FALSE,
+  temperature_coefficient_file = "", precip = FALSE,
+  precipitation_coefficient_file = "", time_step = "month",
+  reproductive_rate = 3, season_month_start = 1,
+  season_month_end = 12, start_time = 2018, end_time = 2020,
+  use_lethal_temperature = FALSE, temperature_file = "",
   lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_rate = 0, mortality_time_lag = 0,
+  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
+  management = FALSE, treatment_years = c(0), treatments_file = "",
   treatment_method = "ratio", treatment_month = 12,
-  wind_dir = "NONE", kappa = 0, random_seed = NULL)
+  percent_natural_dispersal = 1, natural_kernel_type = "cauchy",
+  anthropogenic_kernel_type = "cauchy", natural_distance_scale = 21,
+  anthropogenic_distance_scale = 0, natural_dir = "NONE",
+  natural_kappa = 0, anthropogenic_dir = "NONE",
+  anthropogenic_kappa = 0, random_seed = NULL)
 }
 \arguments{
 \item{infected_file}{path to raster file with initial infections}
@@ -25,61 +27,67 @@ pops(infected_file, host_file, total_plants_file, reproductive_rate = 3,
 
 \item{total_plants_file}{path to raster file with number of total plants}
 
-\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
-
-\item{use_lethal_temperature}{does your pest or pathogen have a temperature at which it cannot survive}
-
 \item{temp}{allows the use of temperature coefficients to modify spread}
+
+\item{temperature_coefficient_file}{path to raster file with temperature coefficient data for the timestep and number of years specified}
 
 \item{precip}{allows the use of precipitation coefficients to modify spread}
 
-\item{management}{boolean to allow use of managemnet}
+\item{precipitation_coefficient_file}{path to raster file with precipitation coefficient data for the timestep and number of years specified}
 
-\item{mortality_on}{boolean to turn host mortality on and off}
+\item{time_step}{how often should spread occur}
 
-\item{temperature_file}{path to raster file with temperature data for minimum temperature}
-
-\item{temperature_coefficient_file}{path to raster file with}
-
-\item{precipitation_coefficient_file}{path to raster file with}
-
-\item{treatments_file}{path to raster file with treatment data by years}
+\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
 \item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen}
 
 \item{season_month_end}{when does spread end during the year for your pest or pathogen}
 
-\item{time_step}{how often should spread occur}
-
 \item{start_time}{first year to start the simulation}
 
 \item{end_time}{last year of the simulation}
 
-\item{treatment_years}{years in which to apply treatment}
+\item{use_lethal_temperature}{does your pest or pathogen have a temperature at which it cannot survive}
 
-\item{dispersal_kern}{what type of dispersal kernel should be used}
+\item{temperature_file}{path to raster file with temperature data for minimum temperature}
 
-\item{percent_short_distance_dispersal}{what percentage of dispersal is short range versus long range}
+\item{lethal_temperature}{the temperature at which lethal temperature related mortality occurs for your pest or pathogen}
 
-\item{short_distance_scale}{distance scale parameter for short range dispersal kernel}
+\item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen}
 
-\item{long_distance_scale}{distance scale parameter for long range dispersal kernel}
-
-\item{lethal_temperature}{the temperature at which mortality occurs for your pest or pathogen}
-
-\item{lethal_temperature_month}{the month in which mortality occurs}
+\item{mortality_on}{boolean to turn host mortality on and off}
 
 \item{mortality_rate}{rate at which mortality occurs}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur in years}
 
+\item{management}{boolean to allow use of managemnet}
+
+\item{treatment_years}{years in which to apply treatment}
+
+\item{treatments_file}{path to raster file with treatment data by years}
+
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
 \item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
-\item{wind_dir}{sets the wind direction}
+\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range}
 
-\item{kappa}{sets the strength of the wind direction in the von-mises distribution}
+\item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal}
+
+\item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal}
+
+\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel}
+
+\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel}
+
+\item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind}
+
+\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution}
+
+\item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)}
+
+\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution}
 
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 }
@@ -106,10 +114,12 @@ mortality_on = TRUE, temperature_file = "", temperature_coefficient_file,
 precipitation_coefficient_file ="", treatments_file,
 season_month_start = 1, season_month_end = 12, time_step = "week",
 start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
-dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
-short_distance_scale = 20.57, long_distance_scale = 0.0,
+natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
+natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 lethal_temperature = -12.87, lethal_temperature_month = 1,
 mortality_rate = 0.05, mortality_time_lag = 2,
-treatment_date = 12, wind_dir = "NONE", kappa = 0, random_seed = NULL)
+treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
+
+
 
 }
