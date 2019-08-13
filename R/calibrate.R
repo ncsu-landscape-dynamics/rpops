@@ -294,6 +294,14 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     return("Percent natural dispersal must be between 0.0 and 1.0")
   }
   
+  if (natural_kernel_type == "exponential") {
+    natural_distance_scale <- 1/natural_distance_scale
+  }
+  
+  if (anthropogenic_kernel_type == "exponential") {
+    anthropogenic_distance_scale <- 1/anthropogenic_distance_scale
+  }
+  
   ew_res <- xres(susceptible)
   ns_res <- yres(susceptible)
   num_cols <- raster::ncol(susceptible)

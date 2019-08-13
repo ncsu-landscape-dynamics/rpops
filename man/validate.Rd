@@ -4,7 +4,8 @@
 \alias{validate}
 \title{Validates the accuracy of the calibrated reproductive rate and dispersal scales of the pops model.}
 \usage{
-validate(infected_file, host_file, total_plants_file, temp = FALSE,
+validate(infected_years_file, num_iterations, number_cores = NA,
+  infected_file, host_file, total_plants_file, temp = FALSE,
   temperature_coefficient_file = "", precip = FALSE,
   precipitation_coefficient_file = "", time_step = "month",
   reproductive_rate = 3, season_month_start = 1,
@@ -21,6 +22,12 @@ validate(infected_file, host_file, total_plants_file, temp = FALSE,
   anthropogenic_kappa = 0, mask = NULL, success_metric = "quantity")
 }
 \arguments{
+\item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
+
+\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge}
+
+\item{number_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1.}
+
 \item{infected_file}{path to raster file with initial infections}
 
 \item{host_file}{path to raster file with number of hosts}
@@ -88,12 +95,6 @@ validate(infected_file, host_file, total_plants_file, temp = FALSE,
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)}
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution}
-
-\item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
-
-\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge}
-
-\item{number_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run
