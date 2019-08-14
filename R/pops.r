@@ -325,14 +325,6 @@ pops <- function(infected_file, host_file, total_plants_file,
     return("Percent natural dispersal must be between 0.0 and 1.0")
   }
   
-  if (natural_kernel_type == "exponential") {
-    natural_distance_scale <- 1/natural_distance_scale
-  }
-  
-  if (anthropogenic_kernel_type == "exponential") {
-    anthropogenic_distance_scale <- 1/anthropogenic_distance_scale
-  }
-  
   ew_res <- raster::xres(susceptible)
   ns_res <- raster::yres(susceptible)
   num_cols <- raster::ncol(susceptible)
