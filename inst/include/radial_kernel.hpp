@@ -189,7 +189,9 @@ public:
           // Here we initialize all distributions,
           // although we won't use all of them.
           cauchy_distribution(0.0, distance_scale),
-          exponential_distribution(distance_scale),
+          // When lambda is higher, exponential gives less higher values,
+          // so we do multiplicative inverse to behave like cauchy.
+          exponential_distribution(1.0 / distance_scale),
           // if no wind, then kappa is 0
           // TODO: change these two computations to standalone inline
           // functions (dir to rad and adjust kappa)
