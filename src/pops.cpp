@@ -7,6 +7,8 @@
 #include "kernel_types.hpp"
 #include "radial_kernel.hpp"
 #include "short_long_kernel.hpp"
+#include "spread_rate.hpp"
+#include "statistics.hpp"
 #include "switch_kernel.hpp"
 #include "uniform_kernel.hpp"
 #include <iostream>
@@ -100,6 +102,7 @@ List pops_model(int random_seed,
   SwitchDispersalKernel anthropogenic_dispersal_kernel(anthropogenic_dispersal_kernel_type, anthropogenic_radial_dispersal_kernel, uniform_kernel);
   DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
   
+  
   int counter = 0;
   int first_mortality_year = start_time + mortality_time_lag;
   
@@ -113,22 +116,12 @@ List pops_model(int random_seed,
   int current_year;
   bool treatments_done;
   
-  // if(treatment_method == "ratio") {
-  //   TreatmentApplication treatment_application = TreatmentApplication::Ratio;
-  //   // Treatments<IntegerMatrix, NumericMatrix> treatments(TreatmentApplication::Ratio);
-  // }
-  // else if (treatment_method == "all infected") {
-  //   TreatmentApplication treatment_application = TreatmentApplication::AllInfectedInCell;
-  //   // Treatments<IntegerMatrix, NumericMatrix> treatments(TreatmentApplication::AllInfectedInCell);
-  // }
-  
   Treatments<IntegerMatrix, NumericMatrix> treatments(treatment_application);
   bool use_treatments = false;
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
     treatments.add_treatment(treatment_years[t], treatment_maps[t]);
     use_treatments = true;
   }
-  
   
   for (unsigned current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
       
@@ -201,13 +194,6 @@ List pops_model(int random_seed,
         
         infected_before_treatment_vector.push_back(Rcpp::clone(infected));
         susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
-        
-        // if (use_treatments) {
-        //   treatments.apply_treatment_host(dd_current.year(), infected, susceptible);
-        //   for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
-        //     treatments.apply_treatment_infected(dd_current.year(), mortality_tracker_vector[l]);
-        //   }
-        // }
         
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
