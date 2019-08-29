@@ -5,21 +5,22 @@
 \title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
 calibrate(infected_years_file, num_iterations, start_reproductive_rate,
-  number_of_cores, start_short_distance_scale, sd_reproductive_rate,
-  sd_short_distance_scale, infected_file, host_file, total_plants_file,
-  reproductive_rate = 3, use_lethal_temperature = FALSE,
-  temp = FALSE, precip = FALSE, management = FALSE,
-  mortality_on = FALSE, temperature_file = "",
-  temperature_coefficient_file = "",
-  precipitation_coefficient_file = "", treatments_file = "",
-  season_month_start = 1, season_month_end = 12, time_step = "month",
-  start_time = 2018, end_time = 2020, treatment_years = c(0),
-  dispersal_kern = "cauchy", percent_short_distance_dispersal = 1,
-  short_distance_scale = 59, long_distance_scale = 0,
+  number_of_cores, start_natural_distance_scale, sd_reproductive_rate,
+  sd_natural_distance_scale, infected_file, host_file, total_plants_file,
+  temp = FALSE, temperature_coefficient_file = "", precip = FALSE,
+  precipitation_coefficient_file = "", time_step = "month",
+  reproductive_rate = 3, season_month_start = 1,
+  season_month_end = 12, start_time = 2018, end_time = 2020,
+  use_lethal_temperature = FALSE, temperature_file = "",
   lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_rate = 0, mortality_time_lag = 0,
+  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
+  management = FALSE, treatment_years = c(0), treatments_file = "",
   treatment_method = "ratio", treatment_month = 12,
-  wind_dir = "NONE", kappa = 0, mask = NULL,
+  percent_natural_dispersal = 1, natural_kernel_type = "cauchy",
+  anthropogenic_kernel_type = "cauchy", natural_distance_scale = 21,
+  anthropogenic_distance_scale = 0, natural_dir = "NONE",
+  natural_kappa = 0, anthropogenic_dir = "NONE",
+  anthropogenic_kappa = 0, random_seed = NULL, mask = NULL,
   success_metric = "quantity")
 }
 \arguments{
@@ -31,11 +32,11 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{number_of_cores}{number of cores to use for calibration}
 
-\item{start_short_distance_scale}{starting short distance scale parameter for MCMC calibration}
+\item{start_natural_distance_scale}{starting short distance scale parameter for MCMC calibration}
 
 \item{sd_reproductive_rate}{starting standard deviation for reproductive rate for MCMC calibration}
 
-\item{sd_short_distance_scale}{starting standard deviation for short distance scale for MCMC calibration}
+\item{sd_natural_distance_scale}{starting standard deviation for short distance scale for MCMC calibration}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -43,61 +44,69 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{total_plants_file}{path to raster file with number of total plants}
 
-\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
-
-\item{use_lethal_temperature}{does your pest or pathogen have a temperature at which it cannot survive}
-
 \item{temp}{allows the use of temperature coefficients to modify spread}
+
+\item{temperature_coefficient_file}{path to raster file with temperature coefficient data for the timestep and number of years specified}
 
 \item{precip}{allows the use of precipitation coefficients to modify spread}
 
-\item{management}{boolean to allow use of managemnet}
+\item{precipitation_coefficient_file}{path to raster file with precipitation coefficient data for the timestep and number of years specified}
 
-\item{mortality_on}{boolean to turn host mortality on and off}
+\item{time_step}{how often should spread occur}
 
-\item{temperature_file}{path to raster file with temperature data for minimum temperature}
-
-\item{temperature_coefficient_file}{path to raster file with}
-
-\item{precipitation_coefficient_file}{path to raster file with}
-
-\item{treatments_file}{path to raster file with treatment data by years}
+\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
 \item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen}
 
 \item{season_month_end}{when does spread end during the year for your pest or pathogen}
 
-\item{time_step}{how often should spread occur}
-
 \item{start_time}{first year to start the simulation}
 
 \item{end_time}{last year of the simulation}
 
-\item{treatment_years}{years in which to apply treatment}
+\item{use_lethal_temperature}{does your pest or pathogen have a temperature at which it cannot survive}
 
-\item{dispersal_kern}{what type of dispersal kernel should be used}
+\item{temperature_file}{path to raster file with temperature data for minimum temperature}
 
-\item{percent_short_distance_dispersal}{what percentage of dispersal is short range versus long range}
+\item{lethal_temperature}{the temperature at which lethal temperature related mortality occurs for your pest or pathogen}
 
-\item{short_distance_scale}{distance scale parameter for short range dispersal kernel}
+\item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen}
 
-\item{long_distance_scale}{distance scale parameter for long range dispersal kernel}
-
-\item{lethal_temperature}{the temperature at which mortality occurs for your pest or pathogen}
-
-\item{lethal_temperature_month}{the month in which mortality occurs}
+\item{mortality_on}{boolean to turn host mortality on and off}
 
 \item{mortality_rate}{rate at which mortality occurs}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur in years}
 
+\item{management}{boolean to allow use of managemnet}
+
+\item{treatment_years}{years in which to apply treatment}
+
+\item{treatments_file}{path to raster file with treatment data by years}
+
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
 \item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
-\item{wind_dir}{sets the wind direction}
+\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range}
 
-\item{kappa}{sets the strength of the wind direction in the von-mises distribution}
+\item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal}
+
+\item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal}
+
+\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel}
+
+\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel}
+
+\item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind}
+
+\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution}
+
+\item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)}
+
+\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution}
+
+\item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
 \item{mask}{Used to provide a mask to remove 0's that are not true negatives from comparisons.}
 

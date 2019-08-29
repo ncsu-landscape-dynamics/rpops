@@ -47,17 +47,22 @@
 #' wind_dir = "NONE", kappa = 0)
 #' 
 validate <- function(infected_years_file, num_iterations, number_cores = NA,
-                     infected_file, host_file, total_plants_file, reproductive_rate = 3.0,
-                     use_lethal_temperature = FALSE, temp = FALSE, precip = FALSE, management = FALSE, mortality_on = FALSE,
-                     temperature_file = "", temperature_coefficient_file = "", 
-                     precipitation_coefficient_file ="", treatments_file = "",
-                     season_month_start = 1, season_month_end = 12, time_step = "month",
-                     start_time = 2018, end_time = 2020, treatment_years = c(0),
-                     dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
-                     short_distance_scale = 59, long_distance_scale = 0.0,
+                     infected_file, host_file, total_plants_file, 
+                     temp = FALSE, temperature_coefficient_file = "", 
+                     precip = FALSE, precipitation_coefficient_file = "", 
+                     time_step = "month", reproductive_rate = 3.0,
+                     season_month_start = 1, season_month_end = 12, 
+                     start_time = 2018, end_time = 2020, 
+                     use_lethal_temperature = FALSE, temperature_file = "",
                      lethal_temperature = -12.87, lethal_temperature_month = 1,
-                     mortality_rate = 0, mortality_time_lag = 0, treatment_method = "ratio",
-                     treatment_month = 12, wind_dir = "NONE", kappa = 0, 
+                     mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
+                     management = FALSE, treatment_years = c(0), treatments_file = "",
+                     treatment_method = "ratio", treatment_month = 12,
+                     percent_natural_dispersal = 1.0,
+                     natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
+                     natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
+                     natural_dir = "NONE", natural_kappa = 0, 
+                     anthropogenic_dir = "NONE", anthropogenic_kappa = 0, 
                      mask = NULL, success_metric = "quantity"){ 
   
   if (success_metric == "quantity") {
@@ -295,8 +300,18 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
     treatment_method <- treatment_method
   }
   
+  if(percent_natural_dispersal == 1.0) {
+    use_anthropogenic_kernel = FALSE
+  } else if (percent_natural_dispersal < 1.0  && percent_natural_dispersal >= 0.0) {
+    use_anthropogenic_kernel = TRUE
+  } else {
+    return("Percent natural dispersal must be between 0.0 and 1.0")
+  }
+  
   ew_res <- raster::xres(susceptible)
   ns_res <- raster::yres(susceptible)
+  num_cols <- raster::ncol(susceptible)
+  num_rows <- raster::nrow(susceptible)
   
   mortality_tracker <- infected
   raster::values(mortality_tracker) <- 0
@@ -329,22 +344,31 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
   qa <- foreach::foreach (icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
     data <- PoPS::pops_model(random_seed = random_seed, 
-                       lethal_temperature = lethal_temperature, use_lethal_temperature = use_lethal_temperature, lethal_temperature_month = lethal_temperature_month,
-                       reproductive_rate = reproductive_rate, 
-                       weather = weather, mortality_on = mortality_on,
-                       short_distance_scale = short_distance_scale, infected = infected,
-                       susceptible = susceptible, mortality_tracker = mortality_tracker, mortality = mortality,
-                       total_plants = total_plants, 
-                       treatment_maps = treatment_maps, treatment_years = treatment_years,
-                       temperature = temperature,
-                       weather_coefficient = weather_coefficient, 
-                       ew_res = ew_res, ns_res = ns_res,
-                       time_step = time_step, mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                       season_month_start = season_month_start, season_month_end = season_month_end,
-                       start_time = start_time, end_time = end_time,
-                       dispersal_kern = dispersal_kern, percent_short_distance_dispersal = percent_short_distance_dispersal,
-                       long_distance_scale = long_distance_scale, treatment_method = treatment_method,
-                       treatment_month = treatment_month, wind_dir = wind_dir, kappa = kappa)
+                             use_lethal_temperature = use_lethal_temperature, 
+                             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                             infected = infected,
+                             susceptible = susceptible,
+                             total_plants = total_plants,
+                             mortality_on = mortality_on,
+                             mortality_tracker = mortality_tracker,
+                             mortality = mortality,
+                             treatment_maps = treatment_maps,
+                             treatment_years = treatment_years,
+                             weather = weather,
+                             temperature = temperature,
+                             weather_coefficient = weather_coefficient,
+                             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
+                             time_step = time_step, reproductive_rate = reproductive_rate,
+                             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
+                             season_month_start = season_month_start, season_month_end = season_month_end,
+                             start_time = start_time, end_time = end_time,
+                             treatment_month = treatment_month, treatment_method = treatment_method,
+                             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                             natural_dir = natural_dir, natural_kappa = natural_kappa,
+                             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
+    )
     
     comp_year <- raster(infected_file)
     all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS", "foreach"), .final = colSums) %dopar% {

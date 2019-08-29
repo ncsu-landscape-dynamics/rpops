@@ -3,6 +3,12 @@
 #include "raster.hpp"
 #include "date.hpp"
 #include "treatments.hpp"
+#include "kernel.hpp"
+#include "kernel_types.hpp"
+#include "radial_kernel.hpp"
+#include "short_long_kernel.hpp"
+#include "switch_kernel.hpp"
+#include "uniform_kernel.hpp"
 #include <iostream>
 #include <vector>
 #include <map>
@@ -35,32 +41,6 @@ bool all_infected(IntegerMatrix susceptible)
   return allInfected;
 }
 
-Direction direction_enum_from_string(const std::string& text)
-{
-  std::map<std::string, Direction> mapping{
-    {"N", N}, {"NE", NE}, {"E", E}, {"SE", SE}, {"S", S},
-    {"SW", SW}, {"W", W}, {"NW", NW}, {"NONE", NONE}
-  };
-  try {
-    return mapping.at(text);
-  }
-  catch (const std::out_of_range&) {
-    throw std::invalid_argument("direction_enum_from_string: Invalid"
-                                  " value '" + text +"' provided");
-  }
-}
-
-DispersalKernel radial_type_from_string(const std::string& text)
-{
-  if (text == "cauchy")
-    return CAUCHY;
-  else if (text == "cauchy_double_scale")
-    return CAUCHY_DOUBLE_SCALE;
-  else
-    throw std::invalid_argument("radial_type_from_string: Invalid"
-                                  " value '" + text +"' provided");
-}
-
 TreatmentApplication treatment_application_enum_from_string(const std::string& text)
 {
   if (text == "ratio")
@@ -76,39 +56,50 @@ TreatmentApplication treatment_application_enum_from_string(const std::string& t
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 List pops_model(int random_seed, 
-                double lethal_temperature, bool use_lethal_temperature, int lethal_temperature_month,
-                double reproductive_rate,
-                bool weather, bool mortality_on,
-                double short_distance_scale,
+                bool use_lethal_temperature, double lethal_temperature, int lethal_temperature_month,
                 IntegerMatrix infected,
                 IntegerMatrix susceptible,
+                IntegerMatrix total_plants,
+                bool mortality_on,
                 IntegerMatrix mortality_tracker,
                 IntegerMatrix mortality,
-                IntegerMatrix total_plants,
                 std::vector<NumericMatrix> treatment_maps,
                 std::vector<int> treatment_years,
+                bool weather,
                 std::vector<NumericMatrix> temperature,
                 std::vector<NumericMatrix> weather_coefficient,
-                int ew_res, int ns_res,
-                std::string time_step, 
+                double ew_res, double ns_res, int num_rows, int num_cols,
+                std::string time_step, double reproductive_rate,
                 double mortality_rate = 0.0, int mortality_time_lag = 2,
                 int season_month_start = 1, int season_month_end = 12,
                 double start_time = 2018, double end_time = 2018,
-                std::string dispersal_kern = "cauchy", double percent_short_distance_dispersal = 0.0,
-                double long_distance_scale = 0.0, std::string treatment_method = "ratio",
-                int treatment_month = 12, std::string wind_dir = "NONE", double kappa = 0
+                int treatment_month = 12, std::string treatment_method = "ratio",
+                std::string natural_kernel_type = "cauchy", std::string anthropogenic_kernel_type = "cauchy", 
+                bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
+                double natural_distance_scale = 21, double anthropogenic_distance_scale = 0.0, 
+                std::string natural_dir = "NONE", double natural_kappa = 0,
+                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0
 )
 {
   
   std::vector<std::tuple<int, int>> outside_dispersers;
-  DispersalKernel dispersal_kernel = radial_type_from_string(dispersal_kern);
+  DispersalKernelType natural_dispersal_kernel_type = kernel_type_from_string(natural_kernel_type);
+  DispersalKernelType anthropogenic_dispersal_kernel_type = kernel_type_from_string(anthropogenic_kernel_type);
   TreatmentApplication treatment_application = treatment_application_enum_from_string(treatment_method);
   pops::Date dd_start(start_time, 01, 01);
   pops::Date dd_end(end_time, 12, 31);
-  Direction wind_direction = direction_enum_from_string(wind_dir);
+  Direction natural_direction = direction_from_string(natural_dir);
+  Direction anthropogenic_direction = direction_from_string(anthropogenic_dir);
   Season season(season_month_start,season_month_end);
   pops::Date dd_current(dd_start);
-  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected, ew_res, ns_res);
+  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected);
+  RadialDispersalKernel natural_radial_dispersal_kernel(ew_res, ns_res, natural_dispersal_kernel_type, natural_distance_scale, natural_direction, natural_kappa);
+  RadialDispersalKernel anthropogenic_radial_dispersal_kernel(ew_res, ns_res, anthropogenic_dispersal_kernel_type, anthropogenic_distance_scale, anthropogenic_direction, anthropogenic_kappa);
+  UniformDispersalKernel uniform_kernel(num_rows, num_cols);
+  SwitchDispersalKernel natural_dispersal_kernel(natural_dispersal_kernel_type, natural_radial_dispersal_kernel, uniform_kernel);
+  SwitchDispersalKernel anthropogenic_dispersal_kernel(anthropogenic_dispersal_kernel_type, anthropogenic_radial_dispersal_kernel, uniform_kernel);
+  DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
+  
   int counter = 0;
   int first_mortality_year = start_time + mortality_time_lag;
   
@@ -120,7 +111,7 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> mortality_vector;
   std::vector<int> simulated_weeks;
   int current_year;
-  int treatments_done;
+  bool treatments_done;
   
   // if(treatment_method == "ratio") {
   //   TreatmentApplication treatment_application = TreatmentApplication::Ratio;
@@ -147,7 +138,7 @@ List pops_model(int random_seed,
       
       if (current_time_step == 0) {
         int current_year = dd_current.year();
-        bool treatments_done = false;
+        treatments_done = false;
       }
       
       if (dd_current.year() > current_year) {
@@ -194,9 +185,7 @@ List pops_model(int random_seed,
                             mortality_tracker, total_plants,
                             outside_dispersers, 
                             weather, weather_coefficient[current_time_step], 
-                            dispersal_kernel, short_distance_scale,
-                            percent_short_distance_dispersal, long_distance_scale,
-                            wind_direction, kappa);
+                            kernel);
       
       }
     

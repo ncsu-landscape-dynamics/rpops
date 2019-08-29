@@ -2,9 +2,9 @@
 #define POPS_RASTER_HPP
 
 /*
- * SOD model - raster manipulation
+ * PoPS model - native raster manipulation
  *
- * Copyright (C) 2015-2018 by the authors.
+ * Copyright (C) 2015-2019 by the authors.
  *
  * Authors: Vaclav Petras <wenzeslaus gmail com>
  *          Completely rewritten by Vaclav Petras based on
@@ -26,16 +26,6 @@
 #include <stdexcept>
 #include <initializer_list>
 #include <stdlib.h>
-
-#ifdef POPS_RASTER_WITH_GRASS_GIS
-
-extern "C" {
-#include <grass/gis.h>
-#include <grass/glocale.h>
-#include <grass/raster.h>
-}
-
-#endif // POPS_RASTER_WITH_GRASS_GIS
 
 using std::string;
 using std::cerr;
@@ -78,34 +68,39 @@ BinaryOperation for_each_zip(InputIt1 first1, InputIt1 last1, InputIt2 first2, B
  * The template parameter Number is the numerical type of the raster,
  * typically int, float, or double.
  *
- * The direct support for reading and writing GRASS GIS rasters can be
- * enabled by `POPS_RASTER_WITH_GRASS_GIS` macro:
+ * The internal storage is directly accessible which comes with a great
+ * responsibility. Although for the computations themselves, direct
+ * access is not needed, it gives a lot of advantages when
+ * initializing the values as well as when putting them to some storage
+ * when the computation is done. The values need to be stored in
+ * one liner array with row-major oder, i.e. individual value can be
+ * accessed using the following:
  *
  * ```
- * #define POPS_RASTER_WITH_GRASS_GIS
+ * row * total_number_of_columns + column
  * ```
  */
 template<typename Number>
 class Raster
 {
-private:
-    unsigned width;
-    unsigned height;
-    Number *data;
+protected:
+    unsigned cols_;
+    unsigned rows_;
+    Number *data_;
 public:
     Raster()
     {
-        width = 0;
-        height = 0;
-        data = NULL;
+        cols_ = 0;
+        rows_ = 0;
+        data_ = NULL;
     }
 
     Raster(const Raster& other)
     {
-        width = other.width;
-        height = other.height;
-        data = new Number[width * height];
-        std::copy(other.data, other.data + (width * height), data);
+        cols_ = other.cols_;
+        rows_ = other.rows_;
+        data_ = new Number[cols_ * rows_];
+        std::copy(other.data_, other.data_ + (cols_ * rows_), data_);
     }
 
     /*! Initialize size using another raster, but use given value
@@ -114,32 +109,32 @@ public:
      */
     Raster(const Raster& other, Number value)
     {
-        width = other.width;
-        height = other.height;
-        data = new Number[width * height]{value};
+        cols_ = other.cols_;
+        rows_ = other.rows_;
+        data_ = new Number[cols_ * rows_]{value};
     }
 
     Raster(Raster&& other)
     {
-        width = other.width;
-        height = other.height;
-        data = other.data;
-        other.data = nullptr;
+        cols_ = other.cols_;
+        rows_ = other.rows_;
+        data_ = other.data_;
+        other.data_ = nullptr;
     }
 
     Raster(int rows, int cols)
     {
-        this->width = cols;
-        this->height = rows;
-        this->data = new Number[width * height];
+        this->cols_ = cols;
+        this->rows_ = rows;
+        this->data_ = new Number[cols_ * rows_];
     }
 
     // TODO: size is unsigned?
     Raster(int rows, int cols, Number value)
     {
-        this->width = cols;
-        this->height = rows;
-        this->data = new Number[width * height]{value};
+        this->cols_ = cols;
+        this->rows_ = rows;
+        this->data_ = new Number[cols_ * rows_]{value};
     }
 
     // maybe remove from the class, or make it optional together with
@@ -153,7 +148,7 @@ public:
          {
             for (const auto& value : subl)
             {
-               data[width * i + j] = value;
+               data_[cols_ * i + j] = value;
                ++j;
             }
             j = 0;
@@ -163,57 +158,76 @@ public:
 
     ~Raster()
     {
-        if (data) {
-            delete[] data;
+        if (data_) {
+            delete[] data_;
         }
     }
 
-    int cols() const
+    unsigned cols() const
     {
-        return width;
+        return cols_;
     }
 
-    int rows() const
+    unsigned rows() const
     {
-        return height;
+        return rows_;
+    }
+
+    /*! Returns pointer for direct access the underlying array.
+     *
+     * The values are stored in row-major order.
+     * See the class description for details.
+     */
+    Number* data() noexcept
+    {
+        return data_;
+    }
+
+    /*! Returns pointer for direct access the underlying array.
+     *
+     * Same as the non-const version but used when the object is const.
+     */
+    const Number* data() const noexcept
+    {
+        return data_;
     }
 
     void fill(Number value)
     {
-        std::fill(data, data + (width * height), value);
+        std::fill(data_, data_ + (cols_ * rows_), value);
     }
 
     void zero()
     {
-        std::fill(data, data + (width * height), 0);
+        std::fill(data_, data_ + (cols_ * rows_), 0);
     }
 
     template<class UnaryOperation>
     void for_each(UnaryOperation op)
     {
-        std::for_each(data, data + (width * height), op);
+        std::for_each(data_, data_ + (cols_ * rows_), op);
     }
 
     const Number& operator()(unsigned row, unsigned col) const
     {
-        return data[row * width + col];
+        return data_[row * cols_ + col];
     }
 
     Number& operator()(unsigned row, unsigned col)
     {
-        return data[row * width + col];
+        return data_[row * cols_ + col];
     }
 
     Raster& operator=(const Raster& other)
     {
         if (this != &other)
         {
-            if (data)
-                delete[] data;
-            width = other.width;
-            height = other.height;
-            data = new Number[width * height];
-            std::copy(other.data, other.data + (width * height), data);
+            if (data_)
+                delete[] data_;
+            cols_ = other.cols_;
+            rows_ = other.rows_;
+            data_ = new Number[cols_ * rows_];
+            std::copy(other.data_, other.data_ + (cols_ * rows_), data_);
         }
         return *this;
     }
@@ -222,30 +236,30 @@ public:
     {
         if (this != &other)
         {
-            if (data)
-                delete[] data;
-            width = other.width;
-            height = other.height;
-            data = other.data;
-            other.data = nullptr;
+            if (data_)
+                delete[] data_;
+            cols_ = other.cols_;
+            rows_ = other.rows_;
+            data_ = other.data_;
+            other.data_ = nullptr;
         }
         return *this;
     }
 
     Raster operator+(const Raster& image) const
     {
-        if (this->width != image.cols() || this->height != image.rows()) {
+        if (this->cols_ != image.cols() || this->rows_ != image.rows()) {
             cerr << "The height or width of one image do not match with that of the other one!" << endl;
             return Raster();
         }
         else {
-            auto re_width = this->width;
-            auto re_height = this->height;
+            auto re_width = this->cols_;
+            auto re_height = this->rows_;
             auto out = Raster(re_height, re_width);
 
-            for (int i = 0; i < re_height; i++) {
-                for (int j = 0; j < re_width; j++) {
-                    out.data[i * width + j] = this->data[i * width + j] + image.data[i * width + j];
+            for (unsigned i = 0; i < re_height; i++) {
+                for (unsigned j = 0; j < re_width; j++) {
+                    out.data_[i * cols_ + j] = this->data_[i * cols_ + j] + image.data_[i * cols_ + j];
                 }
             }
             return out;
@@ -254,18 +268,18 @@ public:
 
     Raster operator-(const Raster& image) const
     {
-        if (this->width != image.cols() || this->height != image.rows()) {
+        if (this->cols_ != image.cols() || this->rows_ != image.rows()) {
             cerr << "The height or width of one image do not match with that of the other one!" << endl;
             return Raster();
         }
         else {
-            auto re_width = this->width;
-            auto re_height = this->height;
+            auto re_width = this->cols_;
+            auto re_height = this->rows_;
             auto out = Raster(re_height, re_width);
 
-            for (int i = 0; i < re_height; i++) {
-                for (int j = 0; j < re_width; j++) {
-                    out.data[i * width + j] = this->data[i * width + j] - image.data[i * width + j];
+            for (unsigned i = 0; i < re_height; i++) {
+                for (unsigned j = 0; j < re_width; j++) {
+                    out.data_[i * cols_ + j] = this->data_[i * cols_ + j] - image.data_[i * cols_ + j];
                 }
             }
             return out;
@@ -274,100 +288,100 @@ public:
 
     Raster operator*(const Raster& image) const
     {
-        if (width != image.cols() || height != image.rows()) {
+        if (cols_ != image.cols() || rows_ != image.rows()) {
             throw std::runtime_error("The height or width of one image do"
                                      " not match with that of the other one.");
         }
-        auto out = Raster(height, width);
+        auto out = Raster(rows_, cols_);
 
-        std::transform(data, data + (width * height), image.data, out.data,
+        std::transform(data_, data_ + (cols_ * rows_), image.data_, out.data_,
                        [](const Number& a, const Number& b) { return a * b; });
         return out;
     }
 
     Raster operator/(const Raster& image) const
     {
-        if (width != image.cols() || height != image.rows()) {
+        if (cols_ != image.cols() || rows_ != image.rows()) {
             throw std::runtime_error("The height or width of one image do"
                                      " not match with that of the other one.");
         }
-        auto out = Raster(height, width);
+        auto out = Raster(rows_, cols_);
 
-        std::transform(data, data + (width * height), image.data, out.data,
+        std::transform(data_, data_ + (cols_ * rows_), image.data_, out.data_,
                        [](const Number& a, const Number& b) { return a / b; });
         return out;
     }
 
     Raster operator*(double value) const
     {
-        auto out = Raster(height, width);
+        auto out = Raster(rows_, cols_);
 
-        std::transform(data, data + (width * height), out.data,
+        std::transform(data_, data_ + (cols_ * rows_), out.data_,
                        [&value](const Number& a) { return a * value; });
         return out;
     }
 
     Raster operator/(double value) const
     {
-        auto out = Raster(height, width);
+        auto out = Raster(rows_, cols_);
 
-        std::transform(data, data + (width * height), out.data,
+        std::transform(data_, data_ + (cols_ * rows_), out.data_,
                        [&value](const Number& a) { return a / value; });
         return out;
     }
 
     Raster& operator+=(Number value)
     {
-        std::for_each(data, data + (width * height),
+        std::for_each(data_, data_ + (cols_ * rows_),
                       [&value](Number& a) { a += value; });
         return *this;
     }
 
     Raster& operator-=(Number value)
     {
-        std::for_each(data, data + (width * height),
+        std::for_each(data_, data_ + (cols_ * rows_),
                       [&value](Number& a) { a -= value; });
         return *this;
     }
 
     Raster& operator*=(double value)
     {
-        std::for_each(data, data + (width * height),
+        std::for_each(data_, data_ + (cols_ * rows_),
                       [&value](Number& a) { a *= value; });
         return *this;
     }
 
     Raster& operator/=(double value)
     {
-        std::for_each(data, data + (width * height),
+        std::for_each(data_, data_ + (cols_ * rows_),
                       [&value](Number& a) { a /= value; });
         return *this;
     }
 
     Raster& operator+=(const Raster& image)
     {
-        for_each_zip(data, data + (width * height), image.data,
+        for_each_zip(data_, data_ + (cols_ * rows_), image.data_,
                      [](Number& a, Number& b) { a += b; });
         return *this;
     }
 
     Raster& operator-=(const Raster& image)
     {
-        for_each_zip(data, data + (width * height), image.data,
+        for_each_zip(data_, data_ + (cols_ * rows_), image.data_,
                      [](Number& a, Number& b) { a -= b; });
         return *this;
     }
 
     Raster& operator*=(const Raster& image)
     {
-        for_each_zip(data, data + (width * height), image.data,
+        for_each_zip(data_, data_ + (cols_ * rows_), image.data_,
                      [](Number& a, Number& b) { a *= b; });
         return *this;
     }
 
     Raster& operator/=(const Raster& image)
     {
-        for_each_zip(data, data + (width * height), image.data,
+        for_each_zip(data_, data_ + (cols_ * rows_), image.data_,
                      [](Number& a, Number& b) { a /= b; });
         return *this;
     }
@@ -375,9 +389,9 @@ public:
     bool operator==(const Raster& other) const
     {
         // TODO: assumes same sizes
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < width; j++) {
-                if (this->data[i * width + j] != other.data[i * width + j])
+        for (unsigned i = 0; i < cols_; i++) {
+            for (unsigned j = 0; j < cols_; j++) {
+                if (this->data_[i * cols_ + j] != other.data_[i * cols_ + j])
                     return false;
             }
         }
@@ -387,9 +401,9 @@ public:
     bool operator!=(const Raster& other) const
     {
         // TODO: assumes same sizes
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < width; j++) {
-                if (this->data[i * width + j] != other.data[i * width + j])
+        for (unsigned i = 0; i < cols_; i++) {
+            for (unsigned j = 0; j < cols_; j++) {
+                if (this->data_[i * cols_ + j] != other.data_[i * cols_ + j])
                     return true;
             }
         }
@@ -412,98 +426,19 @@ public:
 
     friend inline std::ostream& operator<<(std::ostream& stream, const Raster& image) {
         stream << "[[";
-        for (unsigned i = 0; i < image.height; i++) {
+        for (unsigned i = 0; i < image.rows_; i++) {
             if (i != 0)
                 stream << "],\n [";
-            for (unsigned j = 0; j < image.width; j++) {
+            for (unsigned j = 0; j < image.cols_; j++) {
                 if (j != 0)
                     stream << ", ";
-                stream << image.data[i * image.width + j];
+                stream << image.data_[i * image.cols_ + j];
             }
         }
         stream << "]]\n";
         return stream;
     }
-
-    #ifdef POPS_RASTER_WITH_GRASS_GIS
-
-    /** Read a GRASS GIS raster map to the Raster.
-     */
-    static inline Raster from_grass_raster(const char *name)
-    {
-        int fd = Rast_open_old(name, "");
-
-        Raster img;
-
-        img.width = Rast_window_cols();
-        img.height = Rast_window_rows();
-
-        img.data = new Number[img.height * img.width];
-
-        for (int row = 0; row < img.height; row++) {
-            Rast_get_d_row(fd, img.data + (row * img.width), row);
-        }
-
-        Rast_close(fd);
-        return img;
-    }
-
-    /** Write the Raster to a GRASS GIS raster map.
-     */
-    void inline to_grass_raster(const char *name)
-    {
-        int fd = Rast_open_new(name, DCELL_TYPE);
-        for (int i = 0; i < height; i++)
-            Rast_put_d_row(fd, data + (i * width));
-        Rast_close(fd);
-    }
-
-    #endif // POPS_RASTER_WITH_GRASS_GIS
 };
-
-#ifdef POPS_RASTER_WITH_GRASS_GIS
-
-/** Read a GRASS GIS raster map to the Raster.
- *
- * This is a specialization for reading using int.
- */
-template <>
-inline Raster<int> Raster<int>::from_grass_raster(const char *name)
-{
-    int fd = Rast_open_old(name, "");
-
-    Raster img;
-
-    img.width = Rast_window_cols();
-    img.height = Rast_window_rows();
-
-    Cell_head region;
-    Rast_get_window(&region);
-
-    img.data = new int[img.height * img.width];
-
-    for (int row = 0; row < img.height; row++) {
-        Rast_get_c_row(fd, img.data + (row * img.width), row);
-    }
-
-    Rast_close(fd);
-    return img;
-}
-
-/** Write the Raster to a GRASS GIS raster map.
- *
- * This is a specialization for reading using int.
- */
-template <>
-inline void Raster<int>::to_grass_raster(const char *name)
-{
-    int fd = Rast_open_new(name, CELL_TYPE);
-    for (int i = 0; i < height; i++)
-        Rast_put_c_row(fd, data + (i * width));
-    Rast_close(fd);
-}
-
-#endif // POPS_RASTER_WITH_GRASS_GIS
 
 } // namespace pops
 
