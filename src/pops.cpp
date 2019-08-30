@@ -13,6 +13,7 @@
 #include "uniform_kernel.hpp"
 #include <iostream>
 #include <vector>
+#include <tuple>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -53,6 +54,49 @@ TreatmentApplication treatment_application_enum_from_string(const std::string& t
     throw std::invalid_argument("treatment_application_enum_from_string: Invalid"
                                   " value '" + text +"' provided");
 }
+
+
+template<int... Indices>
+struct indices {
+  using next = indices<Indices..., sizeof...(Indices)>;
+};
+
+template<int Size>
+struct build_indices {
+  using type = typename build_indices<Size - 1>::type::next;
+};
+
+template<>
+struct build_indices<0> {
+  using type = indices<>;
+};
+
+template<typename T>
+using Bare = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
+template<typename Tuple>
+constexpr
+  typename build_indices<std::tuple_size<Bare<Tuple>>::value>::type
+  make_indices()
+  { return {}; }
+
+template<typename Tuple, int... Indices>
+std::array<
+  typename std::tuple_element<0, Bare<Tuple>>::type,
+  std::tuple_size<Bare<Tuple>>::value
+>
+to_array(Tuple&& tuple, indices<Indices...>)
+{
+  using std::get;
+  return {{ get<Indices>(std::forward<Tuple>(tuple))... }};
+}
+
+template<typename Tuple>
+auto to_array(Tuple&& tuple)
+  -> decltype( to_array(std::declval<Tuple>(), make_indices<Tuple>()) )
+  {
+    return to_array(std::forward<Tuple>(tuple), make_indices<Tuple>());
+  }
 
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
@@ -101,7 +145,9 @@ List pops_model(int random_seed,
   SwitchDispersalKernel natural_dispersal_kernel(natural_dispersal_kernel_type, natural_radial_dispersal_kernel, uniform_kernel);
   SwitchDispersalKernel anthropogenic_dispersal_kernel(anthropogenic_dispersal_kernel_type, anthropogenic_radial_dispersal_kernel, uniform_kernel);
   DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
-  
+  std::vector<std::array<double,4>> spread_rates_vector;
+  std::tuple<double,double,double,double> spread_rates;
+  std::array<double,4> sr;
   
   int counter = 0;
   int first_mortality_year = start_time + mortality_time_lag;
@@ -123,6 +169,10 @@ List pops_model(int random_seed,
     use_treatments = true;
   }
   
+  unsigned num_years = dd_end.year() - dd_start.year() + 1;
+  
+  SpreadRate<IntegerMatrix> spreadrate(infected, ew_res, ns_res, num_years);
+  
   for (unsigned current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
       
       if (dd_current.year() > dd_end.year()) {
@@ -130,7 +180,7 @@ List pops_model(int random_seed,
       }
       
       if (current_time_step == 0) {
-        int current_year = dd_current.year();
+        current_year = dd_current.year();
         treatments_done = false;
       }
       
@@ -197,6 +247,12 @@ List pops_model(int random_seed,
         
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
+        
+        unsigned simulation_year = dd_current.year() - dd_start.year();
+        spreadrate.compute_yearly_spread_rate(infected, simulation_year);
+        spread_rates = spreadrate.yearly_rate(simulation_year);
+        auto sr = to_array(spread_rates);
+        spread_rates_vector.push_back(sr);
       }
     
       if (dd_current >= dd_end) {
@@ -210,7 +266,8 @@ List pops_model(int random_seed,
     _["susceptible"] = susceptible_vector,
     _["infected_before_treatment"] = infected_before_treatment_vector,
     _["susceptible_before_treatment"] = susceptible_before_treatment_vector,
-    _["mortality"] = mortality_vector
+    _["mortality"] = mortality_vector,
+    _["rates"] = spread_rates_vector
   );
   
 }
