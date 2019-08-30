@@ -147,7 +147,9 @@ List pops_model(int random_seed,
   DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
-  std::array<double,4> sr;
+  // std::array<double,4> sr;
+  int num_infected;
+  std::vector<int> number_infected;
   
   int counter = 0;
   int first_mortality_year = start_time + mortality_time_lag;
@@ -248,6 +250,9 @@ List pops_model(int random_seed,
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
         
+        num_infected = sum_of_infected(infected);
+        number_infected.push_back(num_infected);
+        
         unsigned simulation_year = dd_current.year() - dd_start.year();
         spreadrate.compute_yearly_spread_rate(infected, simulation_year);
         spread_rates = spreadrate.yearly_rate(simulation_year);
@@ -267,7 +272,8 @@ List pops_model(int random_seed,
     _["infected_before_treatment"] = infected_before_treatment_vector,
     _["susceptible_before_treatment"] = susceptible_before_treatment_vector,
     _["mortality"] = mortality_vector,
-    _["rates"] = spread_rates_vector
+    _["rates"] = spread_rates_vector,
+    _["number_infected"] = number_infected
   );
   
 }
