@@ -150,6 +150,8 @@ List pops_model(int random_seed,
   // std::array<double,4> sr;
   int num_infected;
   std::vector<int> number_infected;
+  double area_infect;
+  std::vector<double> area_infected;
   
   int counter = 0;
   int first_mortality_year = start_time + mortality_time_lag;
@@ -252,6 +254,8 @@ List pops_model(int random_seed,
         
         num_infected = sum_of_infected(infected);
         number_infected.push_back(num_infected);
+        area_infect = area_of_infected(infected, ew_res, ns_res);
+        area_infected.push_back(area_infect);
         
         unsigned simulation_year = dd_current.year() - dd_start.year();
         spreadrate.compute_yearly_spread_rate(infected, simulation_year);
@@ -273,7 +277,8 @@ List pops_model(int random_seed,
     _["susceptible_before_treatment"] = susceptible_before_treatment_vector,
     _["mortality"] = mortality_vector,
     _["rates"] = spread_rates_vector,
-    _["number_infected"] = number_infected
+    _["number_infected"] = number_infected,
+    _["area_infected"] = area_infected
   );
   
 }
