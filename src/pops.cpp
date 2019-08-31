@@ -7,10 +7,13 @@
 #include "kernel_types.hpp"
 #include "radial_kernel.hpp"
 #include "short_long_kernel.hpp"
+#include "spread_rate.hpp"
+#include "statistics.hpp"
 #include "switch_kernel.hpp"
 #include "uniform_kernel.hpp"
 #include <iostream>
 #include <vector>
+#include <tuple>
 #include <map>
 #include <memory>
 #include <stdexcept>
@@ -51,6 +54,49 @@ TreatmentApplication treatment_application_enum_from_string(const std::string& t
     throw std::invalid_argument("treatment_application_enum_from_string: Invalid"
                                   " value '" + text +"' provided");
 }
+
+
+template<int... Indices>
+struct indices {
+  using next = indices<Indices..., sizeof...(Indices)>;
+};
+
+template<int Size>
+struct build_indices {
+  using type = typename build_indices<Size - 1>::type::next;
+};
+
+template<>
+struct build_indices<0> {
+  using type = indices<>;
+};
+
+template<typename T>
+using Bare = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
+
+template<typename Tuple>
+constexpr
+  typename build_indices<std::tuple_size<Bare<Tuple>>::value>::type
+  make_indices()
+  { return {}; }
+
+template<typename Tuple, int... Indices>
+std::array<
+  typename std::tuple_element<0, Bare<Tuple>>::type,
+  std::tuple_size<Bare<Tuple>>::value
+>
+to_array(Tuple&& tuple, indices<Indices...>)
+{
+  using std::get;
+  return {{ get<Indices>(std::forward<Tuple>(tuple))... }};
+}
+
+template<typename Tuple>
+auto to_array(Tuple&& tuple)
+  -> decltype( to_array(std::declval<Tuple>(), make_indices<Tuple>()) )
+  {
+    return to_array(std::forward<Tuple>(tuple), make_indices<Tuple>());
+  }
 
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
@@ -99,6 +145,13 @@ List pops_model(int random_seed,
   SwitchDispersalKernel natural_dispersal_kernel(natural_dispersal_kernel_type, natural_radial_dispersal_kernel, uniform_kernel);
   SwitchDispersalKernel anthropogenic_dispersal_kernel(anthropogenic_dispersal_kernel_type, anthropogenic_radial_dispersal_kernel, uniform_kernel);
   DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
+  std::vector<std::array<double,4>> spread_rates_vector;
+  std::tuple<double,double,double,double> spread_rates;
+  // std::array<double,4> sr;
+  int num_infected;
+  std::vector<int> number_infected;
+  double area_infect;
+  std::vector<double> area_infected;
   
   int counter = 0;
   int first_mortality_year = start_time + mortality_time_lag;
@@ -113,15 +166,6 @@ List pops_model(int random_seed,
   int current_year;
   bool treatments_done;
   
-  // if(treatment_method == "ratio") {
-  //   TreatmentApplication treatment_application = TreatmentApplication::Ratio;
-  //   // Treatments<IntegerMatrix, NumericMatrix> treatments(TreatmentApplication::Ratio);
-  // }
-  // else if (treatment_method == "all infected") {
-  //   TreatmentApplication treatment_application = TreatmentApplication::AllInfectedInCell;
-  //   // Treatments<IntegerMatrix, NumericMatrix> treatments(TreatmentApplication::AllInfectedInCell);
-  // }
-  
   Treatments<IntegerMatrix, NumericMatrix> treatments(treatment_application);
   bool use_treatments = false;
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
@@ -129,6 +173,9 @@ List pops_model(int random_seed,
     use_treatments = true;
   }
   
+  unsigned num_years = dd_end.year() - dd_start.year() + 1;
+  
+  SpreadRate<IntegerMatrix> spreadrate(infected, ew_res, ns_res, num_years);
   
   for (unsigned current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
       
@@ -137,7 +184,7 @@ List pops_model(int random_seed,
       }
       
       if (current_time_step == 0) {
-        int current_year = dd_current.year();
+        current_year = dd_current.year();
         treatments_done = false;
       }
       
@@ -202,15 +249,19 @@ List pops_model(int random_seed,
         infected_before_treatment_vector.push_back(Rcpp::clone(infected));
         susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
         
-        // if (use_treatments) {
-        //   treatments.apply_treatment_host(dd_current.year(), infected, susceptible);
-        //   for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
-        //     treatments.apply_treatment_infected(dd_current.year(), mortality_tracker_vector[l]);
-        //   }
-        // }
-        
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
+        
+        num_infected = sum_of_infected(infected);
+        number_infected.push_back(num_infected);
+        area_infect = area_of_infected(infected, ew_res, ns_res);
+        area_infected.push_back(area_infect);
+        
+        unsigned simulation_year = dd_current.year() - dd_start.year();
+        spreadrate.compute_yearly_spread_rate(infected, simulation_year);
+        spread_rates = spreadrate.yearly_rate(simulation_year);
+        auto sr = to_array(spread_rates);
+        spread_rates_vector.push_back(sr);
       }
     
       if (dd_current >= dd_end) {
@@ -224,7 +275,10 @@ List pops_model(int random_seed,
     _["susceptible"] = susceptible_vector,
     _["infected_before_treatment"] = infected_before_treatment_vector,
     _["susceptible_before_treatment"] = susceptible_before_treatment_vector,
-    _["mortality"] = mortality_vector
+    _["mortality"] = mortality_vector,
+    _["rates"] = spread_rates_vector,
+    _["number_infected"] = number_infected,
+    _["area_infected"] = area_infected
   );
   
 }
