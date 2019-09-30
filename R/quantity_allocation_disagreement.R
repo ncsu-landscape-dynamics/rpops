@@ -168,6 +168,7 @@ quantity_allocation_disagreement <- function(reference, comparison, configuratio
   output$total_disagreement <- total_disagreement
   output$configuration_disagreement <- configuration_disagreement
   output$odds_ratio <- odds_ratio
+  output$residual_error <- cellStats(abs(reference - comparison), 'sum')
   
   return(output)
 }
