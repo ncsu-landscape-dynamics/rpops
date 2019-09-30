@@ -5,9 +5,10 @@
 \title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
 calibrate(infected_years_file, num_iterations, start_reproductive_rate,
-  number_of_cores, start_natural_distance_scale, sd_reproductive_rate,
-  sd_natural_distance_scale, infected_file, host_file, total_plants_file,
-  temp = FALSE, temperature_coefficient_file = "", precip = FALSE,
+  number_of_cores = NA, start_natural_distance_scale,
+  sd_reproductive_rate, sd_natural_distance_scale, infected_file,
+  host_file, total_plants_file, temp = FALSE,
+  temperature_coefficient_file = "", precip = FALSE,
   precipitation_coefficient_file = "", time_step = "month",
   reproductive_rate = 3, season_month_start = 1,
   season_month_end = 12, start_time = 2018, end_time = 2020,
@@ -24,19 +25,19 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
   success_metric = "quantity")
 }
 \arguments{
-\item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
+\item{infected_years_file}{Raster file with years of initial infection/infestation as individual locations of a pest or pathogen}
 
-\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge}
+\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge (recommend a minimum of at least 100,000 but preferably 1 million).}
 
-\item{start_reproductive_rate}{starting reproductive rate for MCMC calibration}
+\item{start_reproductive_rate}{starting reproductive rate for MCMC calibration (affects how quickly a series converges)}
 
-\item{number_of_cores}{number of cores to use for calibration}
+\item{number_of_cores}{number of cores to use for calibration (defaults to the number of cores available on the machine)}
 
-\item{start_natural_distance_scale}{starting short distance scale parameter for MCMC calibration}
+\item{start_natural_distance_scale}{starting short distance scale parameter for MCMC calibration (affects how quickly a series converges)}
 
-\item{sd_reproductive_rate}{starting standard deviation for reproductive rate for MCMC calibration}
+\item{sd_reproductive_rate}{starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges)}
 
-\item{sd_natural_distance_scale}{starting standard deviation for short distance scale for MCMC calibration}
+\item{sd_natural_distance_scale}{starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges)}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -108,9 +109,9 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
-\item{mask}{Used to provide a mask to remove 0's that are not true negatives from comparisons.}
+\item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
 
-\item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", and "odds_ratio". Default = "quantity"}
+\item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run
