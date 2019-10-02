@@ -28,6 +28,9 @@
 #' 
 #' @export 
 #'
+#' @examples
+#' \dontrun{
+#' }
 
 
 calibrate <- function(infected_years_file, num_iterations, start_reproductive_rate, number_of_cores = NA,

@@ -53,6 +53,10 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 
 \item{ns_res}{north and south resolution}
 
+\item{num_rows}{number of rows in the raster files}
+
+\item{num_cols}{number of columns in the raster files}
+
 \item{time_step}{how often should spread occur}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
@@ -76,6 +80,8 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 \item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal}
+
+\item{use_anthropogenic_kernel}{A boolean that turns on the use of the anthropogenic or long distance dispersal portion of the 2 scale dispersal kernel function}
 
 \item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range}
 

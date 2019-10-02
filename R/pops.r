@@ -48,6 +48,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' infected_file <-  system.file("extdata", "SODexample", "initial_infection2001.tif", 
 #' package = "PoPS")
 #' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
@@ -67,7 +68,7 @@
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
 #' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
-#' 
+#' }
 #' 
 #' 
 pops <- function(infected_file, host_file, total_plants_file, 

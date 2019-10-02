@@ -95,6 +95,10 @@ validate(infected_years_file, num_iterations, number_cores = NA,
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)}
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution}
+
+\item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
+
+\item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run
@@ -106,6 +110,7 @@ with 2 or more years of data and validated for the last year or if you have 6 or
 then the model can be validated for the final 2 years.
 }
 \examples{
+\dontrun{
 infected_years_file <- system.file("extdata", "SODexample", "initial_infection2005.tif", 
 package = "PoPS")
 num_iterations <- 100
@@ -131,5 +136,5 @@ short_distance_scale = 20.57, long_distance_scale = 0.0,
 lethal_temperature = -12.87, lethal_temperature_month = 1,
 mortality_rate = 0.05, mortality_time_lag = 2,
 wind_dir = "NONE", kappa = 0)
-
+}
 }
