@@ -7,15 +7,15 @@
 #' If the model converges and doesn't improve for awhile it will exist calibration prior to reaching the total number of iterations specified.
 #'
 #' @inheritParams pops
-#' @param infected_years_file years of initial infection/infestation as individual locations of a pest or pathogen in raster format
-#' @param num_iterations how many iterations do you want to run to allow the calibration to converge
-#' @param start_reproductive_rate starting reproductive rate for MCMC calibration 
-#' @param start_natural_distance_scale starting short distance scale parameter for MCMC calibration
-#' @param number_of_cores number of cores to use for calibration
-#' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration
-#' @param sd_natural_distance_scale starting standard deviation for short distance scale for MCMC calibration
-#' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", and "odds_ratio". Default = "quantity"
-#' @param mask Used to provide a mask to remove 0's that are not true negatives from comparisons. 
+#' @param infected_years_file Raster file with years of initial infection/infestation as individual locations of a pest or pathogen
+#' @param num_iterations how many iterations do you want to run to allow the calibration to converge (recommend a minimum of at least 100,000 but preferably 1 million).
+#' @param start_reproductive_rate starting reproductive rate for MCMC calibration (affects how quickly a series converges)
+#' @param start_natural_distance_scale starting short distance scale parameter for MCMC calibration (affects how quickly a series converges)
+#' @param number_of_cores number of cores to use for calibration (defaults to the number of cores available on the machine)
+#' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges)
+#' @param sd_natural_distance_scale starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges)
+#' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
+#' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues
 #' @importFrom stats runif rnorm
@@ -30,7 +30,7 @@
 #'
 
 
-calibrate <- function(infected_years_file, num_iterations, start_reproductive_rate, number_of_cores,
+calibrate <- function(infected_years_file, num_iterations, start_reproductive_rate, number_of_cores = NA,
                       start_natural_distance_scale, sd_reproductive_rate, sd_natural_distance_scale,
                       infected_file, host_file, total_plants_file, 
                       temp = FALSE, temperature_coefficient_file = "", 
@@ -55,10 +55,12 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     configuration = FALSE
   } else if (success_metric == "quantity and configuration") {
     configuration = TRUE
-  } else if (success_metric == "odds_ratio") {
+  } else if (success_metric == "odds ratio") {
+    configuration = FALSE
+  } else if (success_metric == "residual error"){
     configuration = FALSE
   } else {
-    return("Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'")
+    return("Success metric must be one of 'quantity', 'quantity and configuration', 'residual error', or 'odds ratio'")
   }
   
   if (!treatment_method %in% c("ratio", "all infected")) {
@@ -370,10 +372,15 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   current <- best <- data.frame(t(all_disagreement), reproductive_rate = start_reproductive_rate, natural_distance_scale = start_natural_distance_scale)
   
   ## create parallel environment
+  cores_available <- detectCores()
   if (is.na(number_of_cores)) {
-    core_count <- detectCores() - 1
+    core_count <- cores_available - 1
   } else {
-    core_count <- number_of_cores
+    if (number_of_cores <= cores_available) {
+      core_count <- number_of_cores
+    } else {
+      core_count <- cores_available
+    }
   }
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
@@ -406,24 +413,29 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     
     proposed <- data.frame(t(average_disagreements_odds_ratio), reproductive_rate = proposed_reproductive_rate, natural_distance_scale = proposed_natural_distance_scale)
     
+    # make sure no proposed statistics are 0 or the calculation fails instead set them all to the lowest possible non-zero value
     if (proposed$allocation_disagreement == 0) {proposed$allocation_disagreement <- 1}
     if (proposed$quantity_disagreement == 0) {proposed$quantity_disagreement <- 1}
     if (proposed$total_disagreement == 0) {proposed$total_disagreement <- 1}
     if (proposed$configuration_disagreement == 0) {proposed$configuration_disagreement <- 0.01}
+    if (proposed$residual_error == 0) {proposed$residual_error <- 1}
+    # Set up tests for to see if new variable is an improvement in performance metrics
     allocation_test <- min(1,  current$allocation_disagreement / proposed$allocation_disagreement)
     quantity_test <- min(1, current$quantity_disagreement / proposed$quantity_disagreement)
     total_disagreement_test <- min(1,  current$total_disagreement / proposed$total_disagreement)
     configuration_test <- min(1, current$configuration_disagreement / proposed$configuration_disagreement)
-    oddsratio_test <- min(1, proposed$odds_ratio / current$odds_ratio)
+    oddsratio_test <- min(1, proposed$odds_ratio / current$odds_ratio) # odds ratio is treated differently than all the other metrics as it is the only one where higher numbers means better model performance
+    residual_error_test <- min(1, current$residual_error / proposed$residual_error)
     
     quantity_pass <- runif(1) <= quantity_test
     allocation_pass <- runif(1) <= allocation_test
     total_pass <- runif(1) <= total_disagreement_test
     configuration_pass <- runif(1) <= configuration_test
     oddsratio_pass <- runif(1) <= oddsratio_test 
+    residual_error_pass <- runif(1) <= residual_error_test
     
     if (success_metric == "quantity") {
-      if ( quantity_pass == TRUE) {
+      if ( quantity_pass ) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -440,7 +452,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         to.params <- param
       }
     } else if (success_metric == "quantity and configuration") {
-      if ( quantity_pass == TRUE && configuration_pass == TRUE) {
+      if ( quantity_pass && configuration_pass ) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -455,7 +467,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd_natural_distance_scale), digits = 0)
         }
         to.params <- param
-      } else if (configuration_pass == TRUE && quantity_pass == FALSE) {
+      } else if (configuration_pass && quantity_pass == FALSE) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -466,7 +478,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd_natural_distance_scale), digits = 0)
         }
         to.params <- param
-      } else if (quantity_pass == TRUE && configuration_pass == FALSE) {
+      } else if (quantity_pass && configuration_pass == FALSE) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -478,8 +490,8 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         }
         to.params <- param
       }
-    } else if (success_metric == "odds_ratio") {
-      if ( oddsratio_pass == TRUE  ) { # accept change if model improves or doesn't change
+    } else if (success_metric == "odds ratio") {
+      if ( oddsratio_pass ) { # accept change if model improves or doesn't change
         current <- proposed
         if(current$odds_ratio >= best$odds_ratio) {
           best <- current
@@ -496,8 +508,26 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         }
         to.params <- param
       } 
+    } else if (success_metric == "residual error") {
+      if ( residual_error_pass ) { # accept change if model improves or doesn't change
+        current <- proposed
+        if(current$residual_error >= best$residual_error) {
+          best <- current
+        }
+        param <- current
+        proposed_reproductive_rate <-  0
+        while (proposed_reproductive_rate <= 0) {
+          proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = sd_reproductive_rate), digits = 1)
+        }
+        
+        proposed_natural_distance_scale <- 0
+        while (proposed_natural_distance_scale <= 0) {
+          proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd = sd_natural_distance_scale), digits = 0)
+        }
+        to.params <- param
+      } 
     } else {
-      return("Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'")
+      return("Success metric must be one of 'quantity', 'quantity and configuration', 'residual error', or 'odds ratio'")
     }
       
   }
