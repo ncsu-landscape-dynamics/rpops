@@ -435,7 +435,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     residual_error_pass <- runif(1) <= residual_error_test
     
     if (success_metric == "quantity") {
-      if ( quantity_pass == TRUE) {
+      if ( quantity_pass ) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -452,7 +452,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         to.params <- param
       }
     } else if (success_metric == "quantity and configuration") {
-      if ( quantity_pass == TRUE && configuration_pass == TRUE) {
+      if ( quantity_pass && configuration_pass ) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -467,7 +467,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd_natural_distance_scale), digits = 0)
         }
         to.params <- param
-      } else if (configuration_pass == TRUE && quantity_pass == FALSE) {
+      } else if (configuration_pass && quantity_pass == FALSE) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -478,7 +478,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd_natural_distance_scale), digits = 0)
         }
         to.params <- param
-      } else if (quantity_pass == TRUE && configuration_pass == FALSE) {
+      } else if (quantity_pass && configuration_pass == FALSE) {
         current <- proposed
         if (current$quantity_disagreement <= best$quantity_disagreement) {
           best <- current
@@ -491,7 +491,7 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         to.params <- param
       }
     } else if (success_metric == "odds ratio") {
-      if ( oddsratio_pass == TRUE  ) { # accept change if model improves or doesn't change
+      if ( oddsratio_pass ) { # accept change if model improves or doesn't change
         current <- proposed
         if(current$odds_ratio >= best$odds_ratio) {
           best <- current
