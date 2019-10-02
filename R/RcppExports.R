@@ -15,6 +15,9 @@
 #' @param weather_coefficient vector of matrices of weather coefficients
 #' @param ew_res east and west resolution
 #' @param ns_res north and south resolution
+#' @param num_rows number of rows in the raster files
+#' @param num_cols number of columns in the raster files
+#' @param use_anthropogenic_kernel A boolean that turns on the use of the anthropogenic or long distance dispersal portion of the 2 scale dispersal kernel function
 #'
 #' @return list of vector matrices of infected and suceptible hosts per simulated year
 #' @export

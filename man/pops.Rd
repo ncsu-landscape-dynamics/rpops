@@ -100,6 +100,7 @@ meaning that it uses understanding of the effect of weather on reproduction and 
 spread of the pest/pathogen into the future.
 }
 \examples{
+\dontrun{
 infected_file <-  system.file("extdata", "SODexample", "initial_infection2001.tif", 
 package = "PoPS")
 host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
@@ -119,7 +120,7 @@ natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 lethal_temperature = -12.87, lethal_temperature_month = 1,
 mortality_rate = 0.05, mortality_time_lag = 2,
 treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
-
+}
 
 
 }

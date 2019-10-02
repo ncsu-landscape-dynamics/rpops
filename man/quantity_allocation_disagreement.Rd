@@ -26,10 +26,11 @@ omission and comission errors of comparing a modeled raster dataset to a referen
 datatset.
 }
 \examples{
+\dontrun{
 library(raster)
 reference <- raster(matrix(1, ncol = 2, nrow = 2))
 reference[1,1] <- 0
 comparison <- raster(matrix(1, ncol = 2, nrow = 2))
 quantity_allocation_disagreement(reference, comparison)
-
+}
 }

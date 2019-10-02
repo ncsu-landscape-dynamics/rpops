@@ -9,6 +9,8 @@
 #' @param infected_years_file years of initial infection/infestation as individual locations of a pest or pathogen in raster format
 #' @param num_iterations how many iterations do you want to run to allow the calibration to converge
 #' @param number_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1.
+#' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
+#' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers
 #' @importFrom stats runif rnorm
@@ -20,6 +22,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' infected_years_file <- system.file("extdata", "SODexample", "initial_infection2005.tif", 
 #' package = "PoPS")
 #' num_iterations <- 100
@@ -45,7 +48,7 @@
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
 #' wind_dir = "NONE", kappa = 0)
-#' 
+#' }
 validate <- function(infected_years_file, num_iterations, number_cores = NA,
                      infected_file, host_file, total_plants_file, 
                      temp = FALSE, temperature_coefficient_file = "", 

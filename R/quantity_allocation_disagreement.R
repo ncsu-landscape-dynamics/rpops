@@ -18,12 +18,13 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' library(raster)
 #' reference <- raster(matrix(1, ncol = 2, nrow = 2))
 #' reference[1,1] <- 0
 #' comparison <- raster(matrix(1, ncol = 2, nrow = 2))
 #' quantity_allocation_disagreement(reference, comparison)
-#' 
+#' }
 quantity_allocation_disagreement <- function(reference, comparison, configuration = FALSE, mask = NULL){
   if (is.null(mask)) {
     
