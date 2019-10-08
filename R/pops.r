@@ -4,40 +4,40 @@
 #' meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
 #' spread of the pest/pathogen into the future. 
 #'
-#' @param infected_file path to raster file with initial infections
+#' @param infected_file path to raster file with initial infections 
 #' @param host_file path to raster file with number of hosts
 #' @param total_plants_file path to raster file with number of total plants
-#' @param temp allows the use of temperature coefficients to modify spread 
+#' @param temp boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)
 #' @param temperature_coefficient_file path to raster file with temperature coefficient data for the timestep and number of years specified
-#' @param precip allows the use of precipitation coefficients to modify spread
+#' @param precip boolean that allows the use of precipitation coefficients to modify spread (TRUE or FALSE)
 #' @param precipitation_coefficient_file path to raster file with precipitation coefficient data for the timestep and number of years specified
-#' @param time_step how often should spread occur
-#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions
-#' @param season_month_start when does spread first start occurring in the year for your pest or pathogen
-#' @param season_month_end when does spread end during the year for your pest or pathogen
-#' @param start_time first year to start the simulation
-#' @param end_time last year of the simulation
-#' @param use_lethal_temperature does your pest or pathogen have a temperature at which it cannot survive
+#' @param time_step how often should spread occur options: ('day', 'week', 'month')
+#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions 
+#' @param season_month_start when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)
+#' @param season_month_end when does spread end during the year for your pest or pathogen (integer value between 1 and 12)
+#' @param start_time first year to start the simulation (needs to be a 4 digit year)
+#' @param end_time last year of the simulation (needs to be a 4 digit year)
+#' @param use_lethal_temperature a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)
 #' @param temperature_file path to raster file with temperature data for minimum temperature
-#' @param lethal_temperature the temperature at which lethal temperature related mortality occurs for your pest or pathogen
-#' @param lethal_temperature_month the month in which lethal temperature related mortality occurs for your pest or pathogen
-#' @param mortality_on  boolean to turn host mortality on and off
-#' @param mortality_rate rate at which mortality occurs
-#' @param mortality_time_lag time lag from infection until mortality can occur in years
-#' @param management boolean to allow use of managemnet
-#' @param treatment_years years in which to apply treatment
+#' @param lethal_temperature the temperature in degrees C at which lethal temperature related mortality occurs for your pest or pathogen (-50 and 60)
+#' @param lethal_temperature_month the month in which lethal temperature related mortality occurs for your pest or pathogen integer value between 1 and 12
+#' @param mortality_on  boolean to turn host mortality on and off (TRUE or FALSE)
+#' @param mortality_rate rate at which mortality occurs value between 0 and 1 
+#' @param mortality_time_lag time lag from infection until mortality can occur in years integer >= 1
+#' @param management boolean to allow use of managemnet (TRUE or FALSE)
+#' @param treatment_years years in which to apply treatment list with 4 digit years
 #' @param treatments_file path to raster file with treatment data by years
 #' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
 #' @param treatment_month the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.
-#' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range
-#' @param natural_kernel_type what type of dispersal kernel should be used for natural dispersal
-#' @param anthropogenic_kernel_type what type of dispersal kernel should be used for anthropogenic dispersal
-#' @param natural_distance_scale distance scale parameter for natural range dispersal kernel
-#' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel
-#' @param natural_dir sets the predominate direction of natural dispersal usually due to wind
-#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution
-#' @param anthropogenic_dir sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)
-#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution
+#' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1
+#' @param natural_kernel_type what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')
+#' @param anthropogenic_kernel_type what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')
+#' @param natural_distance_scale distance scale parameter for natural range dispersal kernel numeric value > 0 
+#' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel numeric value > 0 
+#' @param natural_dir sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param anthropogenic_dir sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param random_seed sets the random seed for the simulation used for reproducibility
 #' 
 #' @useDynLib PoPS, .registration = TRUE

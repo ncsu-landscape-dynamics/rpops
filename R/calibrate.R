@@ -9,11 +9,11 @@
 #' @inheritParams pops
 #' @param infected_years_file Raster file with years of initial infection/infestation as individual locations of a pest or pathogen
 #' @param num_iterations how many iterations do you want to run to allow the calibration to converge (recommend a minimum of at least 100,000 but preferably 1 million).
-#' @param start_reproductive_rate starting reproductive rate for MCMC calibration (affects how quickly a series converges)
-#' @param start_natural_distance_scale starting short distance scale parameter for MCMC calibration (affects how quickly a series converges)
-#' @param number_of_cores number of cores to use for calibration (defaults to the number of cores available on the machine)
-#' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges)
-#' @param sd_natural_distance_scale starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges)
+#' @param start_reproductive_rate starting reproductive rate for MCMC calibration (affects how quickly a series converges) numeric value > 0
+#' @param start_natural_distance_scale starting short distance scale parameter for MCMC calibration (affects how quickly a series converges) numeric value > 0
+#' @param number_of_cores number of cores to use for calibration (defaults to the number of cores available on the machine) integer value >= 1
+#' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0
+#' @param sd_natural_distance_scale starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
 #'

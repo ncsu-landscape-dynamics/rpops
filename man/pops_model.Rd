@@ -21,11 +21,11 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 \arguments{
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
-\item{use_lethal_temperature}{does your pest or pathogen have a temperature at which it cannot survive}
+\item{use_lethal_temperature}{a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)}
 
-\item{lethal_temperature}{the temperature at which lethal temperature related mortality occurs for your pest or pathogen}
+\item{lethal_temperature}{the temperature in degrees C at which lethal temperature related mortality occurs for your pest or pathogen (-50 and 60)}
 
-\item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen}
+\item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen integer value between 1 and 12}
 
 \item{infected}{matrix of infected hosts}
 
@@ -33,7 +33,7 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 
 \item{total_plants}{matrix of total plants}
 
-\item{mortality_on}{boolean to turn host mortality on and off}
+\item{mortality_on}{boolean to turn host mortality on and off (TRUE or FALSE)}
 
 \item{mortality_tracker}{matrix of 0's to track mortality per year}
 
@@ -41,7 +41,7 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 
 \item{treatment_maps}{list of matrices where treatment or management has occurred in a given year}
 
-\item{treatment_years}{years in which to apply treatment}
+\item{treatment_years}{years in which to apply treatment list with 4 digit years}
 
 \item{weather}{Boolean that is true if weather is used}
 
@@ -57,45 +57,45 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 
 \item{num_cols}{number of columns in the raster files}
 
-\item{time_step}{how often should spread occur}
+\item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
-\item{mortality_rate}{rate at which mortality occurs}
+\item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
-\item{mortality_time_lag}{time lag from infection until mortality can occur in years}
+\item{mortality_time_lag}{time lag from infection until mortality can occur in years integer >= 1}
 
-\item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen}
+\item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)}
 
-\item{season_month_end}{when does spread end during the year for your pest or pathogen}
+\item{season_month_end}{when does spread end during the year for your pest or pathogen (integer value between 1 and 12)}
 
-\item{start_time}{first year to start the simulation}
+\item{start_time}{first year to start the simulation (needs to be a 4 digit year)}
 
-\item{end_time}{last year of the simulation}
+\item{end_time}{last year of the simulation (needs to be a 4 digit year)}
 
 \item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
-\item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal}
+\item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')}
 
-\item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal}
+\item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')}
 
 \item{use_anthropogenic_kernel}{A boolean that turns on the use of the anthropogenic or long distance dispersal portion of the 2 scale dispersal kernel function}
 
-\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range}
+\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1}
 
-\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel}
+\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel numeric value > 0}
 
-\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel}
+\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel numeric value > 0}
 
-\item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind}
+\item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
-\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution}
+\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)}
+\item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
-\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution}
+\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 }
 \value{
 list of vector matrices of infected and suceptible hosts per simulated year

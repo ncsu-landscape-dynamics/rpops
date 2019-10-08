@@ -29,15 +29,15 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{num_iterations}{how many iterations do you want to run to allow the calibration to converge (recommend a minimum of at least 100,000 but preferably 1 million).}
 
-\item{start_reproductive_rate}{starting reproductive rate for MCMC calibration (affects how quickly a series converges)}
+\item{start_reproductive_rate}{starting reproductive rate for MCMC calibration (affects how quickly a series converges) numeric value > 0}
 
-\item{number_of_cores}{number of cores to use for calibration (defaults to the number of cores available on the machine)}
+\item{number_of_cores}{number of cores to use for calibration (defaults to the number of cores available on the machine) integer value >= 1}
 
-\item{start_natural_distance_scale}{starting short distance scale parameter for MCMC calibration (affects how quickly a series converges)}
+\item{start_natural_distance_scale}{starting short distance scale parameter for MCMC calibration (affects how quickly a series converges) numeric value > 0}
 
-\item{sd_reproductive_rate}{starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges)}
+\item{sd_reproductive_rate}{starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0}
 
-\item{sd_natural_distance_scale}{starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges)}
+\item{sd_natural_distance_scale}{starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -45,43 +45,43 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{total_plants_file}{path to raster file with number of total plants}
 
-\item{temp}{allows the use of temperature coefficients to modify spread}
+\item{temp}{boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)}
 
 \item{temperature_coefficient_file}{path to raster file with temperature coefficient data for the timestep and number of years specified}
 
-\item{precip}{allows the use of precipitation coefficients to modify spread}
+\item{precip}{boolean that allows the use of precipitation coefficients to modify spread (TRUE or FALSE)}
 
 \item{precipitation_coefficient_file}{path to raster file with precipitation coefficient data for the timestep and number of years specified}
 
-\item{time_step}{how often should spread occur}
+\item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
-\item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen}
+\item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)}
 
-\item{season_month_end}{when does spread end during the year for your pest or pathogen}
+\item{season_month_end}{when does spread end during the year for your pest or pathogen (integer value between 1 and 12)}
 
-\item{start_time}{first year to start the simulation}
+\item{start_time}{first year to start the simulation (needs to be a 4 digit year)}
 
-\item{end_time}{last year of the simulation}
+\item{end_time}{last year of the simulation (needs to be a 4 digit year)}
 
-\item{use_lethal_temperature}{does your pest or pathogen have a temperature at which it cannot survive}
+\item{use_lethal_temperature}{a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)}
 
 \item{temperature_file}{path to raster file with temperature data for minimum temperature}
 
-\item{lethal_temperature}{the temperature at which lethal temperature related mortality occurs for your pest or pathogen}
+\item{lethal_temperature}{the temperature in degrees C at which lethal temperature related mortality occurs for your pest or pathogen (-50 and 60)}
 
-\item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen}
+\item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen integer value between 1 and 12}
 
-\item{mortality_on}{boolean to turn host mortality on and off}
+\item{mortality_on}{boolean to turn host mortality on and off (TRUE or FALSE)}
 
-\item{mortality_rate}{rate at which mortality occurs}
+\item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
-\item{mortality_time_lag}{time lag from infection until mortality can occur in years}
+\item{mortality_time_lag}{time lag from infection until mortality can occur in years integer >= 1}
 
-\item{management}{boolean to allow use of managemnet}
+\item{management}{boolean to allow use of managemnet (TRUE or FALSE)}
 
-\item{treatment_years}{years in which to apply treatment}
+\item{treatment_years}{years in which to apply treatment list with 4 digit years}
 
 \item{treatments_file}{path to raster file with treatment data by years}
 
@@ -89,23 +89,23 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
-\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range}
+\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1}
 
-\item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal}
+\item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')}
 
-\item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal}
+\item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')}
 
-\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel}
+\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel numeric value > 0}
 
-\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel}
+\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel numeric value > 0}
 
-\item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind}
+\item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
-\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution}
+\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)}
+\item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
-\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution}
+\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 

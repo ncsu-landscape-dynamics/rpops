@@ -7,8 +7,8 @@
 #'
 #' @inheritParams pops
 #' @param infected_years_file years of initial infection/infestation as individual locations of a pest or pathogen in raster format
-#' @param num_iterations how many iterations do you want to run to allow the calibration to converge
-#' @param number_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1.
+#' @param num_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
+#' @param number_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).
 #'
