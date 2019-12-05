@@ -110,7 +110,8 @@ List pops_model(int random_seed,
                 IntegerMatrix mortality_tracker,
                 IntegerMatrix mortality,
                 std::vector<NumericMatrix> treatment_maps,
-                std::vector<int> treatment_years,
+                std::vector<std::string> treatment_dates,
+                IntegerMatrix resistant,
                 bool weather,
                 std::vector<NumericMatrix> temperature,
                 std::vector<NumericMatrix> weather_coefficient,
@@ -124,7 +125,8 @@ List pops_model(int random_seed,
                 bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
                 double natural_distance_scale = 21, double anthropogenic_distance_scale = 0.0, 
                 std::string natural_dir = "NONE", double natural_kappa = 0,
-                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0
+                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0,
+                int pesticide_duration = 100, int num_days = 1
 )
 {
   
@@ -147,6 +149,18 @@ List pops_model(int random_seed,
   DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
+  std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_week;
+  
+  if (time_step == "month") {
+    std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_month;
+  } else if (time_step == "week") {
+    std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_week;
+  } 
+    
+  // if (time_step == "day") {
+  //   std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_days;
+  // }
+  
   // std::array<double,4> sr;
   int num_infected;
   std::vector<int> number_infected;
@@ -158,18 +172,19 @@ List pops_model(int random_seed,
   
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
-  std::vector<IntegerMatrix> infected_before_treatment_vector;
-  std::vector<IntegerMatrix> susceptible_before_treatment_vector;
+  // std::vector<IntegerMatrix> infected_before_treatment_vector;
+  // std::vector<IntegerMatrix> susceptible_before_treatment_vector;
   std::vector<IntegerMatrix> mortality_tracker_vector;
   std::vector<IntegerMatrix> mortality_vector;
+  std::vector<IntegerMatrix> resistant_vector;
   std::vector<int> simulated_weeks;
   int current_year;
   bool treatments_done;
   
-  Treatments<IntegerMatrix, NumericMatrix> treatments(treatment_application);
+  Treatments<IntegerMatrix, NumericMatrix> treatments;
   bool use_treatments = false;
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
-    treatments.add_treatment(treatment_years[t], treatment_maps[t]);
+    treatments.add_treatment(treatment_maps[t], treatment_dates[t], pesticide_duration, treatment_application, increase_by_step);
     use_treatments = true;
   }
   
@@ -198,8 +213,9 @@ List pops_model(int random_seed,
         Rcerr << "At timestep " << dd_current << " all suspectible hosts are infected!" << std::endl;
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
-        infected_before_treatment_vector.push_back(Rcpp::clone(infected));
-        susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
+        resistant_vector.push_back(Rcpp::clone(resistant));
+        // infected_before_treatment_vector.push_back(Rcpp::clone(infected));
+        // susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
         break;
       }
     
@@ -212,9 +228,9 @@ List pops_model(int random_seed,
       }
       
       if (use_treatments && !treatments_done && dd_current.month() == treatment_month) {
-        treatments.apply_treatment_host(dd_current.year(), infected, susceptible);
+        treatments.manage(dd_current, infected, susceptible, resistant);
         for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
-          treatments.apply_treatment_infected(dd_current.year(), mortality_tracker_vector[l]);
+          treatments.manage_mortality(dd_current, mortality_tracker_vector[l]);
         }
         treatments_done = true;
       }
@@ -246,11 +262,12 @@ List pops_model(int random_seed,
           mortality_vector.push_back(Rcpp::clone(mortality));
         }
         
-        infected_before_treatment_vector.push_back(Rcpp::clone(infected));
-        susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
+        // infected_before_treatment_vector.push_back(Rcpp::clone(infected));
+        // susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
         
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
+        resistant_vector.push_back(Rcpp::clone(resistant));
         
         num_infected = sum_of_infected(infected);
         number_infected.push_back(num_infected);
@@ -273,8 +290,7 @@ List pops_model(int random_seed,
   return List::create(
     _["infected"] = infected_vector,
     _["susceptible"] = susceptible_vector,
-    _["infected_before_treatment"] = infected_before_treatment_vector,
-    _["susceptible_before_treatment"] = susceptible_before_treatment_vector,
+    _["resistant"] = resistant_vector,
     _["mortality"] = mortality_vector,
     _["rates"] = spread_rates_vector,
     _["number_infected"] = number_infected,
