@@ -111,6 +111,7 @@ List pops_model(int random_seed,
                 IntegerMatrix mortality,
                 std::vector<NumericMatrix> treatment_maps,
                 std::vector<std::string> treatment_dates,
+                std::vector<int> pesticide_duration,
                 IntegerMatrix resistant,
                 bool weather,
                 std::vector<NumericMatrix> temperature,
@@ -125,8 +126,7 @@ List pops_model(int random_seed,
                 bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
                 double natural_distance_scale = 21, double anthropogenic_distance_scale = 0.0, 
                 std::string natural_dir = "NONE", double natural_kappa = 0,
-                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0,
-                int pesticide_duration = 100, int num_days = 1
+                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0
 )
 {
   
@@ -184,7 +184,7 @@ List pops_model(int random_seed,
   Treatments<IntegerMatrix, NumericMatrix> treatments;
   bool use_treatments = false;
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
-    treatments.add_treatment(treatment_maps[t], treatment_dates[t], pesticide_duration, treatment_application, increase_by_step);
+    treatments.add_treatment(treatment_maps[t], treatment_dates[t], pesticide_duration[t], treatment_application, increase_by_step);
     use_treatments = true;
   }
   
