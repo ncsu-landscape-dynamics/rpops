@@ -7,11 +7,11 @@
 pops_model(random_seed, use_lethal_temperature, lethal_temperature,
   lethal_temperature_month, infected, susceptible, total_plants,
   mortality_on, mortality_tracker, mortality, treatment_maps,
-  treatment_years, weather, temperature, weather_coefficient, ew_res,
-  ns_res, num_rows, num_cols, time_step, reproductive_rate,
-  mortality_rate = 0, mortality_time_lag = 2L,
+  treatment_dates, pesticide_duration, resistant, weather, temperature,
+  weather_coefficient, ew_res, ns_res, num_rows, num_cols, time_step,
+  reproductive_rate, mortality_rate = 0, mortality_time_lag = 2L,
   season_month_start = 1L, season_month_end = 12L, start_time = 2018,
-  end_time = 2018, treatment_month = 12L, treatment_method = "ratio",
+  end_time = 2018, treatment_method = "ratio",
   natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
   use_anthropogenic_kernel = FALSE, percent_natural_dispersal = 0,
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
@@ -41,7 +41,11 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 
 \item{treatment_maps}{list of matrices where treatment or management has occurred in a given year}
 
-\item{treatment_years}{years in which to apply treatment list with 4 digit years}
+\item{treatment_dates}{dates in which to apply treatment list with format (YYYY_MM_DD)}
+
+\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.}
+
+\item{resistant}{matrix to track resistant population over time}
 
 \item{weather}{Boolean that is true if weather is used}
 
@@ -72,8 +76,6 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 \item{start_time}{first year to start the simulation (needs to be a 4 digit year)}
 
 \item{end_time}{last year of the simulation (needs to be a 4 digit year)}
-
-\item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 

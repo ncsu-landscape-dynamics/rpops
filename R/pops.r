@@ -25,10 +25,9 @@
 #' @param mortality_rate rate at which mortality occurs value between 0 and 1 
 #' @param mortality_time_lag time lag from infection until mortality can occur in years integer >= 1
 #' @param management boolean to allow use of managemnet (TRUE or FALSE)
-#' @param treatment_years years in which to apply treatment list with 4 digit years
-#' @param treatments_file path to raster file with treatment data by years
+#' @param treatment_dates dates in which to apply treatment list with format (YYYY_MM_DD)
+#' @param treatments_file path to raster file with treatment data by dates
 #' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
-#' @param treatment_month the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.
 #' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1
 #' @param natural_kernel_type what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')
 #' @param anthropogenic_kernel_type what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')
@@ -38,6 +37,8 @@
 #' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param anthropogenic_dir sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')
 #' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param pesticide_duration how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.
+#' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
 #' 
 #' @useDynLib PoPS, .registration = TRUE
@@ -62,14 +63,13 @@
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 #' precipitation_coefficient_file ="", treatments_file,
 #' season_month_start = 1, season_month_end = 12, time_step = "week",
-#' start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
+#' start_time = 2001, end_time = 2005, treatment_dates = c('2001-12-24'),
 #' natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
 #' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
 #' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
 #' }
-#' 
 #' 
 pops <- function(infected_file, host_file, total_plants_file, 
                  temp = FALSE, temperature_coefficient_file = "", 
@@ -80,13 +80,14 @@ pops <- function(infected_file, host_file, total_plants_file,
                  use_lethal_temperature = FALSE, temperature_file = "",
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
                  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                 management = FALSE, treatment_years = c(0), treatments_file = "",
-                 treatment_method = "ratio", treatment_month = 12,
+                 management = FALSE, treatment_dates = c('2000-12-24'), treatments_file = "",
+                 treatment_method = "ratio",
                  percent_natural_dispersal = 1.0,
                  natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
                  natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
+                 pesticide_duration = c(0), pesticide_efficacy = 1.0,
                  random_seed = NULL){ 
   
   if (!treatment_method %in% c("ratio", "all infected")) {
@@ -287,7 +288,6 @@ pops <- function(infected_file, host_file, total_plants_file,
   }
   
   if (management == TRUE) {
-
     treatment_stack <- raster::stack(treatments_file)
     treatment_stack[is.na(treatment_stack)] <- 0
     
@@ -303,19 +303,33 @@ pops <- function(infected_file, host_file, total_plants_file,
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
+    if (length(treatments_file) != length(treatment_dates)) {
+      return("Length of list for treatment dates and treatments_file must be equal")
+    }
+    if (length(pesticide_duration) != length(treatment_dates)) {
+      return("Length of list for treatment dates and pesticide_duration must be equal")
+    }
+    if (pesticide_duration[1] > 0) {
+      treatment_stack[[1]] <- treatment_stack[[1]] * pesticide_efficacy
+    }
     treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
     if (raster::nlayers(treatment_stack) >= 2) {
       for(i in 2:raster::nlayers(treatment_stack)) {
+        if (pesticide_duration[i] > 0) {
+          treatment_stack[[i]] <- treatment_stack[[i]] * pesticide_efficacy
+        }
         treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
       }
     }
-    treatment_years = treatment_years
-    treatment_method = treatment_method
+    treatment_dates <- treatment_dates
+    pesticide_duration <- pesticide_duration
+    treatment_method <- treatment_method
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
-    treatment_maps = list(raster::as.matrix(treatment_map))
-    treatment_method = treatment_method
+    treatment_maps <- list(raster::as.matrix(treatment_map))
+    treatment_method <- treatment_method
+    pesticide_duration <- pesticide_duration
   }
   
   if(percent_natural_dispersal == 1.0) {
@@ -339,32 +353,35 @@ pops <- function(infected_file, host_file, total_plants_file,
   total_plants <- raster::as.matrix(total_plants)
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
+  resistant <- mortality_tracker
   
-  data <- pops_model(random_seed = random_seed, 
-             use_lethal_temperature = use_lethal_temperature, 
-             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
-             infected = infected,
-             susceptible = susceptible,
-             total_plants = total_plants,
-             mortality_on = mortality_on,
-             mortality_tracker = mortality_tracker,
-             mortality = mortality,
-             treatment_maps = treatment_maps,
-             treatment_years = treatment_years,
-             weather = weather,
-             temperature = temperature,
-             weather_coefficient = weather_coefficient,
-             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-             time_step = time_step, reproductive_rate = reproductive_rate,
-             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-             season_month_start = season_month_start, season_month_end = season_month_end,
-             start_time = start_time, end_time = end_time,
-             treatment_month = treatment_month, treatment_method = treatment_method,
-             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
-             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
-             natural_dir = natural_dir, natural_kappa = natural_kappa,
-             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
+  data <- PoPS::pops_model(random_seed = random_seed, 
+                     use_lethal_temperature = use_lethal_temperature, 
+                     lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                     infected = infected,
+                     susceptible = susceptible,
+                     total_plants = total_plants,
+                     mortality_on = mortality_on,
+                     mortality_tracker = mortality_tracker,
+                     mortality = mortality,
+                     treatment_maps = treatment_maps,
+                     treatment_dates = treatment_dates,
+                     pesticide_duration = pesticide_duration,
+                     resistant = resistant,
+                     weather = weather,
+                     temperature = temperature,
+                     weather_coefficient = weather_coefficient,
+                     ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
+                     time_step = time_step, reproductive_rate = reproductive_rate,
+                     mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
+                     season_month_start = season_month_start, season_month_end = season_month_end,
+                     start_time = start_time, end_time = end_time,
+                     treatment_method = treatment_method,
+                     natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                     use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+                     natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                     natural_dir = natural_dir, natural_kappa = natural_kappa,
+                     anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
   )
   
   return(data)
