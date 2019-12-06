@@ -9,7 +9,7 @@
 #' @param number_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers
-#' @importFrom stats runif rnorm
+#' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
@@ -32,14 +32,13 @@
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 #' precipitation_coefficient_file ="", treatments_file,
 #' season_month_start = 1, season_month_end = 12, time_step = "week",
-#' start_time = 2001, end_time = 2005, treatment_years = c(2001,2002,2003,2004,2005),
+#' start_time = 2001, end_time = 2005, treatment_dates = c(2001,2002,2003,2004,2005),
 #' natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
 #' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
 #' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
 #' }
-#' 
 #' 
 pops_multirun <- function(infected_file, host_file, total_plants_file, 
                  temp = FALSE, temperature_coefficient_file = "", 
@@ -50,14 +49,15 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                  use_lethal_temperature = FALSE, temperature_file = "",
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
                  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                 management = FALSE, treatment_years = c(0), treatments_file = "",
-                 treatment_method = "ratio", treatment_month = 12,
+                 management = FALSE, treatment_dates = c(0), treatments_file = "",
+                 treatment_method = "ratio",
                  percent_natural_dispersal = 1.0,
                  natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
                  natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  num_iterations = 100, number_cores = NA,
+                 pesticide_duration = 0, pesticide_efficacy = 1.0,
                  random_seed = NULL){ 
   
   if (!treatment_method %in% c("ratio", "all infected")) {
@@ -258,7 +258,6 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   }
   
   if (management == TRUE) {
-    
     treatment_stack <- raster::stack(treatments_file)
     treatment_stack[is.na(treatment_stack)] <- 0
     
@@ -274,19 +273,33 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
+    if (length(treatments_file) != length(treatment_dates)) {
+      return("Length of list for treatment dates and treatments_file must be equal")
+    }
+    if (length(pesticide_duration) != length(treatment_dates)) {
+      return("Length of list for treatment dates and pesticide_duration must be equal")
+    }
+    if (pesticide_duration[1] > 0) {
+      treatment_stack[[1]] <- treatment_stack[[1]] * pesticide_efficacy
+    }
     treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
     if (raster::nlayers(treatment_stack) >= 2) {
       for(i in 2:raster::nlayers(treatment_stack)) {
+        if (pesticide_duration[i] > 0) {
+          treatment_stack[[i]] <- treatment_stack[[i]] * pesticide_efficacy
+        }
         treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
       }
     }
-    treatment_years = treatment_years
-    treatment_method = treatment_method
+    treatment_dates <- treatment_dates
+    pesticide_duration <- pesticide_duration
+    treatment_method <- treatment_method
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
-    treatment_maps = list(raster::as.matrix(treatment_map))
-    treatment_method = treatment_method
+    treatment_maps <- list(raster::as.matrix(treatment_map))
+    treatment_method <- treatment_method
+    pesticide_duration <- pesticide_duration
   }
   
   if(percent_natural_dispersal == 1.0) {
@@ -310,9 +323,10 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   total_plants <- raster::as.matrix(total_plants)
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
+  resistant <- mortality_tracker
   
-  if (is.na(number_cores) || number_cores > detectCores()) {
-    core_count <- detectCores() - 1
+  if (is.na(number_cores) || number_cores > parallel::detectCores()) {
+    core_count <- parallel::detectCores() - 1
   } else {
     core_count <- number_cores
   }
@@ -324,34 +338,37 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   
   infected_stack <- foreach::foreach(i = 1:num_iterations, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
-    data <- PoPS::pops_model(random_seed = random_seed, 
-                             use_lethal_temperature = use_lethal_temperature, 
-                             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
-                             infected = infected,
-                             susceptible = susceptible,
-                             total_plants = total_plants,
-                             mortality_on = mortality_on,
-                             mortality_tracker = mortality_tracker,
-                             mortality = mortality,
-                             treatment_maps = treatment_maps,
-                             treatment_years = treatment_years,
-                             weather = weather,
-                             temperature = temperature,
-                             weather_coefficient = weather_coefficient,
-                             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                             time_step = time_step, reproductive_rate = reproductive_rate,
-                             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                             season_month_start = season_month_start, season_month_end = season_month_end,
-                             start_time = start_time, end_time = end_time,
-                             treatment_month = treatment_month, treatment_method = treatment_method,
-                             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
-                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
-                             natural_dir = natural_dir, natural_kappa = natural_kappa,
-                             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa)
+    data <- pops_model(random_seed = random_seed, 
+                       use_lethal_temperature = use_lethal_temperature, 
+                       lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                       infected = infected,
+                       susceptible = susceptible,
+                       total_plants = total_plants,
+                       mortality_on = mortality_on,
+                       mortality_tracker = mortality_tracker,
+                       mortality = mortality,
+                       treatment_maps = treatment_maps,
+                       treatment_dates = treatment_dates,
+                       pesticide_duration = pesticide_duration,
+                       resistant = resistant,
+                       weather = weather,
+                       temperature = temperature,
+                       weather_coefficient = weather_coefficient,
+                       ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
+                       time_step = time_step, reproductive_rate = reproductive_rate,
+                       mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
+                       season_month_start = season_month_start, season_month_end = season_month_end,
+                       start_time = start_time, end_time = end_time,
+                       treatment_method = treatment_method,
+                       natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                       use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+                       natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                       natural_dir = natural_dir, natural_kappa = natural_kappa,
+                       anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
+    )
     
-    comp_years <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) host))
-    susceptible_runs <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) host))
+    comp_years <- raster::stack(lapply(1:length(data$infected), function(i) host))
+    susceptible_runs <- raster::stack(lapply(1:length(data$infected), function(i) host))
     
     for (q in 1:raster::nlayers(comp_years)) {
       comp_years[[q]] <- data$infected[[q]]
@@ -415,8 +432,8 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   single_run <- single_runs[[median_run_index]]
   susceptible_run <- susceptible_runs[[median_run_index]]
   
-  single_run_out <- single_run[[1]]
-  susceptible_run_out <- susceptible_run[[1]]
+  single_run_out <- single_run
+  susceptible_run_out <- susceptible_run
   
   data <- list(probability, single_run_out, number_infecteds, infected_areas, west_rate, east_rate, south_rate, north_rate)
   
