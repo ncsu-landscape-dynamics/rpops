@@ -121,7 +121,7 @@ List pops_model(int random_seed,
                 double mortality_rate = 0.0, int mortality_time_lag = 2,
                 int season_month_start = 1, int season_month_end = 12,
                 double start_time = 2018, double end_time = 2018,
-                int treatment_month = 12, std::string treatment_method = "ratio",
+                std::string treatment_method = "ratio",
                 std::string natural_kernel_type = "cauchy", std::string anthropogenic_kernel_type = "cauchy", 
                 bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
                 double natural_distance_scale = 21, double anthropogenic_distance_scale = 0.0, 
@@ -161,7 +161,6 @@ List pops_model(int random_seed,
   //   std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_days;
   // }
   
-  // std::array<double,4> sr;
   int num_infected;
   std::vector<int> number_infected;
   double area_infect;
@@ -172,14 +171,11 @@ List pops_model(int random_seed,
   
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
-  // std::vector<IntegerMatrix> infected_before_treatment_vector;
-  // std::vector<IntegerMatrix> susceptible_before_treatment_vector;
   std::vector<IntegerMatrix> mortality_tracker_vector;
   std::vector<IntegerMatrix> mortality_vector;
   std::vector<IntegerMatrix> resistant_vector;
   std::vector<int> simulated_weeks;
   int current_year;
-  bool treatments_done;
   
   Treatments<IntegerMatrix, NumericMatrix> treatments;
   bool use_treatments = false;
@@ -198,24 +194,11 @@ List pops_model(int random_seed,
         break;
       }
       
-      if (current_time_step == 0) {
-        current_year = dd_current.year();
-        treatments_done = false;
-      }
-      
-      if (dd_current.year() > current_year) {
-        treatments_done = false;
-        current_year = dd_current.year();
-      }
-      
-      
       if (all_infected(susceptible)) {
         Rcerr << "At timestep " << dd_current << " all suspectible hosts are infected!" << std::endl;
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
         resistant_vector.push_back(Rcpp::clone(resistant));
-        // infected_before_treatment_vector.push_back(Rcpp::clone(infected));
-        // susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
         break;
       }
     
@@ -227,12 +210,14 @@ List pops_model(int random_seed,
         simulation.remove(infected, susceptible, temperature[simulation_year], lethal_temperature);
       }
       
-      if (use_treatments && !treatments_done && dd_current.month() == treatment_month) {
+      if (use_treatments) {
         treatments.manage(dd_current, infected, susceptible, resistant);
-        for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
-          treatments.manage_mortality(dd_current, mortality_tracker_vector[l]);
+        if (mortality_on) {
+          for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
+            treatments.manage_mortality(dd_current, mortality_tracker_vector[l]);
+          }
         }
-        treatments_done = true;
+        // treatments_done = true;
       }
       
       if (season.month_in_season(dd_current.month())) {
@@ -261,9 +246,6 @@ List pops_model(int random_seed,
           simulation.mortality(infected, mortality_rate, current_year, first_mortality_year, mortality, mortality_tracker_vector);
           mortality_vector.push_back(Rcpp::clone(mortality));
         }
-        
-        // infected_before_treatment_vector.push_back(Rcpp::clone(infected));
-        // susceptible_before_treatment_vector.push_back(Rcpp::clone(susceptible));
         
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
