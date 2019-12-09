@@ -18,7 +18,7 @@ pops_multirun(infected_file, host_file, total_plants_file, temp = FALSE,
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
   natural_dir = "NONE", natural_kappa = 0,
   anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-  num_iterations = 100, number_cores = NA, pesticide_duration = 0,
+  num_iterations = 100, number_of_cores = NA, pesticide_duration = 0,
   pesticide_efficacy = 1, random_seed = NULL)
 }
 \arguments{
@@ -90,7 +90,7 @@ pops_multirun(infected_file, host_file, total_plants_file, temp = FALSE,
 
 \item{num_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
 
-\item{number_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
+\item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
 
 \item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.}
 

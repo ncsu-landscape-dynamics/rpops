@@ -4,7 +4,7 @@
 \alias{validate}
 \title{Validates the accuracy of the calibrated reproductive rate and dispersal scales of the pops model.}
 \usage{
-validate(infected_years_file, num_iterations, number_cores = NA,
+validate(infected_years_file, num_iterations, number_of_cores = NA,
   infected_file, host_file, total_plants_file, temp = FALSE,
   temperature_coefficient_file = "", precip = FALSE,
   precipitation_coefficient_file = "", time_step = "month",
@@ -27,7 +27,7 @@ validate(infected_years_file, num_iterations, number_cores = NA,
 
 \item{num_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
 
-\item{number_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
+\item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -117,7 +117,7 @@ then the model can be validated for the final 2 years.
 infected_years_file <- system.file("extdata", "SODexample", "initial_infection2005.tif", 
 package = "PoPS")
 num_iterations <- 100
-number_cores <- NA
+number_of_cores <- NA
 
 infected_file <- system.file("extdata", "SODexample", "initial_infection2004.tif", 
 package = "PoPS")
@@ -127,7 +127,7 @@ temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.ti
 package = "PoPS")
 treatments_file <- system.file("extdata", "SODexample", "management2005.tif", package = "PoPS")
 
-params <- validate(infected_years_file, num_iterations, number_cores,
+params <- validate(infected_years_file, num_iterations, number_of_cores,
 infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
 use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
 mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 

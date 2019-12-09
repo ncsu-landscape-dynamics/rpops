@@ -8,7 +8,7 @@
 #' @inheritParams pops
 #' @param infected_years_file years of initial infection/infestation as individual locations of a pest or pathogen in raster format
 #' @param num_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
-#' @param number_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
+#' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).
 #'
@@ -26,7 +26,7 @@
 #' infected_years_file <- system.file("extdata", "SODexample", "initial_infection2005.tif", 
 #' package = "PoPS")
 #' num_iterations <- 100
-#' number_cores <- NA
+#' number_of_cores <- NA
 #' 
 #' infected_file <- system.file("extdata", "SODexample", "initial_infection2004.tif", 
 #' package = "PoPS")
@@ -36,7 +36,7 @@
 #' package = "PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management2005.tif", package = "PoPS")
 #' 
-#' params <- validate(infected_years_file, num_iterations, number_cores,
+#' params <- validate(infected_years_file, num_iterations, number_of_cores,
 #' infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
 #' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
@@ -50,7 +50,7 @@
 #' wind_dir = "NONE", kappa = 0)
 #' }
 #' 
-validate <- function(infected_years_file, num_iterations, number_cores = NA,
+validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
                      infected_file, host_file, total_plants_file, 
                      temp = FALSE, temperature_coefficient_file = "", 
                      precip = FALSE, precipitation_coefficient_file = "", 
@@ -358,9 +358,13 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
   # ## reclassify to binary values
   # reference <- raster::reclassify(reference, rclmat)
   
-  core_count <- parallel::detectCores() - 1
-  cl <- parallel::makeCluster(core_count)
-  doParallel::registerDoParallel(cl)
+  if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
+    core_count <- parallel::detectCores() - 1
+  } else {
+    core_count <- number_of_cores
+  }
+  cl <- makeCluster(core_count)
+  registerDoParallel(cl)
   
 
   qa <- foreach::foreach (icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {

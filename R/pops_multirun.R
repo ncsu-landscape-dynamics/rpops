@@ -6,7 +6,7 @@
 #'
 #' @inheritParams pops
 #' @param num_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
-#' @param number_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
+#' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers
 #' @importFrom stats runif rnorm median sd
@@ -56,7 +56,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                  natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-                 num_iterations = 100, number_cores = NA,
+                 num_iterations = 100, number_of_cores = NA,
                  pesticide_duration = 0, pesticide_efficacy = 1.0,
                  random_seed = NULL){ 
   
@@ -325,10 +325,10 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   mortality <- mortality_tracker
   resistant <- mortality_tracker
   
-  if (is.na(number_cores) || number_cores > parallel::detectCores()) {
+  if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
-    core_count <- number_cores
+    core_count <- number_of_cores
   }
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
