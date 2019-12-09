@@ -13,13 +13,14 @@ validate(infected_years_file, num_iterations, number_cores = NA,
   use_lethal_temperature = FALSE, temperature_file = "",
   lethal_temperature = -12.87, lethal_temperature_month = 1,
   mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
-  management = FALSE, treatment_years = c(0), treatments_file = "",
-  treatment_method = "ratio", treatment_month = 12,
-  percent_natural_dispersal = 1, natural_kernel_type = "cauchy",
-  anthropogenic_kernel_type = "cauchy", natural_distance_scale = 21,
-  anthropogenic_distance_scale = 0, natural_dir = "NONE",
-  natural_kappa = 0, anthropogenic_dir = "NONE",
-  anthropogenic_kappa = 0, mask = NULL, success_metric = "quantity")
+  management = FALSE, treatment_dates = c(0), treatments_file = "",
+  treatment_method = "ratio", percent_natural_dispersal = 1,
+  natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
+  natural_distance_scale = 21, anthropogenic_distance_scale = 0,
+  natural_dir = "NONE", natural_kappa = 0,
+  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
+  pesticide_duration = 0, pesticide_efficacy = 1, mask = NULL,
+  success_metric = "quantity")
 }
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
@@ -70,13 +71,11 @@ validate(infected_years_file, num_iterations, number_cores = NA,
 
 \item{management}{boolean to allow use of managemnet (TRUE or FALSE)}
 
-\item{treatment_years}{years in which to apply treatment list with 4 digit years}
+\item{treatment_dates}{dates in which to apply treatment list with format (YYYY_MM_DD)}
 
-\item{treatments_file}{path to raster file with treatment data by years}
+\item{treatments_file}{path to raster file with treatment data by dates}
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
-
-\item{treatment_month}{the time during the year that treatment is applied. Currently monthly option so can be 1 -12. Default is 12.}
 
 \item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1}
 
@@ -95,6 +94,10 @@ validate(infected_years_file, num_iterations, number_cores = NA,
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
+
+\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.}
+
+\item{pesticide_efficacy}{how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)}
 
 \item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
 
@@ -130,11 +133,12 @@ use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE,
 mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 precipitation_coefficient_file ="", treatments_file,
 season_month_start = 1, season_month_end = 12, time_step = "month",
-start_time = 2005, end_time = 2005, treatment_years = c(2005),
+start_time = 2005, end_time = 2005, treatment_dates = c(2005),
 dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
 short_distance_scale = 20.57, long_distance_scale = 0.0,
 lethal_temperature = -12.87, lethal_temperature_month = 1,
 mortality_rate = 0.05, mortality_time_lag = 2,
 wind_dir = "NONE", kappa = 0)
 }
+
 }

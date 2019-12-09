@@ -42,13 +42,14 @@
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 #' precipitation_coefficient_file ="", treatments_file,
 #' season_month_start = 1, season_month_end = 12, time_step = "month",
-#' start_time = 2005, end_time = 2005, treatment_years = c(2005),
+#' start_time = 2005, end_time = 2005, treatment_dates = c(2005),
 #' dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
 #' short_distance_scale = 20.57, long_distance_scale = 0.0,
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
 #' wind_dir = "NONE", kappa = 0)
 #' }
+#' 
 validate <- function(infected_years_file, num_iterations, number_cores = NA,
                      infected_file, host_file, total_plants_file, 
                      temp = FALSE, temperature_coefficient_file = "", 
@@ -59,14 +60,16 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                      use_lethal_temperature = FALSE, temperature_file = "",
                      lethal_temperature = -12.87, lethal_temperature_month = 1,
                      mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                     management = FALSE, treatment_years = c(0), treatments_file = "",
-                     treatment_method = "ratio", treatment_month = 12,
+                     management = FALSE, treatment_dates = c(0), treatments_file = "",
+                     treatment_method = "ratio",
                      percent_natural_dispersal = 1.0,
                      natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
                      natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
                      natural_dir = "NONE", natural_kappa = 0, 
                      anthropogenic_dir = "NONE", anthropogenic_kappa = 0, 
-                     mask = NULL, success_metric = "quantity"){ 
+                     pesticide_duration = 0, pesticide_efficacy = 1.0,
+                     mask = NULL, success_metric = "quantity"
+                     ){ 
   
   if (success_metric == "quantity") {
     configuration = FALSE
@@ -271,8 +274,8 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
     return("Treatments file is not one of '.grd', '.tif', '.img'")
   }
   
+  
   if (management == TRUE) {
-    
     treatment_stack <- raster::stack(treatments_file)
     treatment_stack[is.na(treatment_stack)] <- 0
     
@@ -288,19 +291,33 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
       return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
     }
     
+    if (length(treatments_file) != length(treatment_dates)) {
+      return("Length of list for treatment dates and treatments_file must be equal")
+    }
+    if (length(pesticide_duration) != length(treatment_dates)) {
+      return("Length of list for treatment dates and pesticide_duration must be equal")
+    }
+    if (pesticide_duration[1] > 0) {
+      treatment_stack[[1]] <- treatment_stack[[1]] * pesticide_efficacy
+    }
     treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
     if (raster::nlayers(treatment_stack) >= 2) {
       for(i in 2:raster::nlayers(treatment_stack)) {
+        if (pesticide_duration[i] > 0) {
+          treatment_stack[[i]] <- treatment_stack[[i]] * pesticide_efficacy
+        }
         treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
       }
     }
-    treatment_years = treatment_years
+    treatment_dates <- treatment_dates
+    pesticide_duration <- pesticide_duration
     treatment_method <- treatment_method
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
-    treatment_maps = list(raster::as.matrix(treatment_map))
+    treatment_maps <- list(raster::as.matrix(treatment_map))
     treatment_method <- treatment_method
+    pesticide_duration <- pesticide_duration
   }
   
   if(percent_natural_dispersal == 1.0) {
@@ -324,6 +341,7 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
   total_plants <- raster::as.matrix(total_plants)
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
+  resistant <- mortality_tracker
   
   # reference <- raster(infected_years_file)
   ## Load observed data on occurence
@@ -343,6 +361,7 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
   core_count <- parallel::detectCores() - 1
   cl <- parallel::makeCluster(core_count)
   doParallel::registerDoParallel(cl)
+  
 
   qa <- foreach::foreach (icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
@@ -356,7 +375,9 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                              mortality_tracker = mortality_tracker,
                              mortality = mortality,
                              treatment_maps = treatment_maps,
-                             treatment_years = treatment_years,
+                             treatment_dates = treatment_dates,
+                             pesticide_duration = pesticide_duration,
+                             resistant = resistant,
                              weather = weather,
                              temperature = temperature,
                              weather_coefficient = weather_coefficient,
@@ -365,7 +386,7 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
                              mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
                              season_month_start = season_month_start, season_month_end = season_month_end,
                              start_time = start_time, end_time = end_time,
-                             treatment_month = treatment_month, treatment_method = treatment_method,
+                             treatment_method = treatment_method,
                              natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
                              use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
                              natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
@@ -374,8 +395,8 @@ validate <- function(infected_years_file, num_iterations, number_cores = NA,
     )
     
     comp_year <- raster(infected_file)
-    all_disagreement <- foreach(q = 1:length(data$infected_before_treatment), .combine = rbind, .packages =c("raster", "PoPS", "foreach"), .final = colSums) %dopar% {
-      comp_year[] <- data$infected_before_treatment[[q]]
+    all_disagreement <- foreach(q = 1:length(data$infected), .combine = rbind, .packages =c("raster", "PoPS", "foreach"), .final = colSums) %dopar% {
+      comp_year[] <- data$infected[[q]]
       comp_year <- reclassify(comp_year, rclmat)
       to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
     }
