@@ -178,10 +178,8 @@ List pops_model(int random_seed,
   int current_year;
   
   Treatments<IntegerMatrix, NumericMatrix> treatments;
-  bool use_treatments = false;
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
     treatments.add_treatment(treatment_maps[t], treatment_dates[t], pesticide_duration[t], treatment_application, increase_by_step);
-    use_treatments = true;
   }
   
   unsigned num_years = dd_end.year() - dd_start.year() + 1;
@@ -210,14 +208,11 @@ List pops_model(int random_seed,
         simulation.remove(infected, susceptible, temperature[simulation_year], lethal_temperature);
       }
       
-      if (use_treatments) {
-        treatments.manage(dd_current, infected, susceptible, resistant);
-        if (mortality_on) {
-          for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
-            treatments.manage_mortality(dd_current, mortality_tracker_vector[l]);
-          }
+      treatments.manage(dd_current, infected, susceptible, resistant);
+      if (mortality_on) {
+        for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
+          treatments.manage_mortality(dd_current, mortality_tracker_vector[l]);
         }
-        // treatments_done = true;
       }
       
       if (season.month_in_season(dd_current.month())) {
