@@ -310,14 +310,10 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
       }
     }
     treatment_dates <- treatment_dates
-    pesticide_duration <- pesticide_duration
-    treatment_method <- treatment_method
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
     treatment_maps <- list(raster::as.matrix(treatment_map))
-    treatment_method <- treatment_method
-    pesticide_duration <- pesticide_duration
   }
   
   if(percent_natural_dispersal == 1.0) {
