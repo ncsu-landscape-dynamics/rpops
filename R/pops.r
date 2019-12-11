@@ -89,7 +89,7 @@ pops <- function(infected_file, host_file, total_plants_file,
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
                  random_seed = NULL){ 
-  
+
   if (!treatment_method %in% c("ratio", "all infected")) {
     return("treatment method is not one of the valid treatment options")
   }
@@ -141,11 +141,14 @@ pops <- function(infected_file, host_file, total_plants_file,
   number_of_years <- end_time-start_time+1
   
   infected <- raster::raster(infected_file)
-  infected[is.na(infected)] <- 0
+  infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+  # infected[is.na(infected)] <- 0
   host <- raster::raster(host_file)
-  host[is.na(host)] <- 0
+  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+  # host[is.na(host)] <- 0
   total_plants <- raster::raster(total_plants_file)
-  total_plants[is.na(total_plants)] <- 0
+  total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
+  # total_plants[is.na(total_plants)] <- 0
   
   if (!(raster::extent(infected) == raster::extent(host) && raster::extent(infected) == raster::extent(total_plants))) {
     return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
@@ -160,7 +163,8 @@ pops <- function(infected_file, host_file, total_plants_file,
   }
   
   susceptible <- host - infected
-  susceptible[is.na(susceptible)] <- 0
+  susceptible <- raster::reclassify(susceptible, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+  # susceptible[is.na(susceptible)] <- 0
   susceptible[susceptible < 0] <- 0
   
   if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
@@ -173,7 +177,8 @@ pops <- function(infected_file, host_file, total_plants_file,
   
   if (use_lethal_temperature == TRUE) {
     temperature_stack <- raster::stack(temperature_file)
-    temperature_stack[is.na(temperature_stack)] <- 0
+    temperature_stack <- raster::reclassify(temperature_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+    # temperature_stack[is.na(temperature_stack)] <- 0
     
     if (!(raster::extent(infected) == raster::extent(temperature_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
@@ -268,7 +273,8 @@ pops <- function(infected_file, host_file, total_plants_file,
   }
   
   if (weather == TRUE){
-    weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
+    # weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
+    weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
       weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
@@ -289,7 +295,8 @@ pops <- function(infected_file, host_file, total_plants_file,
   
   if (management == TRUE) {
     treatment_stack <- raster::stack(treatments_file)
-    treatment_stack[is.na(treatment_stack)] <- 0
+    treatment_stack <- raster::reclassify(treatment_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+    # treatment_stack[is.na(treatment_stack)] <- 0
     
     if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")

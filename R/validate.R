@@ -128,11 +128,11 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   number_of_years <- end_time-start_time+1
   
   infected <- raster::raster(infected_file)
-  infected[is.na(infected)] <- 0
+  infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   host <- raster::raster(host_file)
-  host[is.na(host)] <- 0
+  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   total_plants <- raster::raster(total_plants_file)
-  total_plants[is.na(total_plants)] <- 0
+  total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
   
   if (!(raster::extent(infected) == raster::extent(host) && raster::extent(infected) == raster::extent(total_plants))) {
     return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
@@ -147,7 +147,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   }
   
   susceptible <- host - infected
-  susceptible[is.na(susceptible)] <- 0
+  susceptible <- raster::reclassify(susceptible, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   susceptible[susceptible < 0] <- 0
   
   if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
@@ -160,7 +160,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   
   if (use_lethal_temperature == TRUE) {
     temperature_stack <- raster::stack(temperature_file)
-    temperature_stack[is.na(temperature_stack)] <- 0
+    temperature_stack <- raster::reclassify(temperature_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     
     if (!(raster::extent(infected) == raster::extent(temperature_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
@@ -255,7 +255,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   }
   
   if (weather == TRUE){
-    weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
+    weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
       weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
@@ -277,7 +277,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   
   if (management == TRUE) {
     treatment_stack <- raster::stack(treatments_file)
-    treatment_stack[is.na(treatment_stack)] <- 0
+    treatment_stack <- raster::reclassify(treatment_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     
     if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
@@ -348,9 +348,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   ## reclassify to binary values
   infection_years <- reclassify(infection_years, rclmat)
   ## Get rid of NA values to make comparisons
-  # infection_years[is.na(infection_years)] <- 0
-  # rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  # rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
+  infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   # ## reclassify to binary values
   # reference <- raster::reclassify(reference, rclmat)
   

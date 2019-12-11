@@ -111,11 +111,11 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   number_of_years <- end_time-start_time+1
   
   infected <- raster::raster(infected_file)
-  infected[is.na(infected)] <- 0
+  infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   host <- raster::raster(host_file)
-  host[is.na(host)] <- 0
+  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   total_plants <- raster::raster(total_plants_file)
-  total_plants[is.na(total_plants)] <- 0
+  total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
   
   if (!(raster::extent(infected) == raster::extent(host) && raster::extent(infected) == raster::extent(total_plants))) {
     return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
@@ -130,7 +130,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   }
   
   susceptible <- host - infected
-  susceptible[is.na(susceptible)] <- 0
+  susceptible <- raster::reclassify(susceptible, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   susceptible[susceptible < 0] <- 0
   
   if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
@@ -143,7 +143,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   
   if (use_lethal_temperature == TRUE) {
     temperature_stack <- raster::stack(temperature_file)
-    temperature_stack[is.na(temperature_stack)] <- 0
+    temperature_stack <- raster::reclassify(temperature_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     
     if (!(raster::extent(infected) == raster::extent(temperature_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
@@ -238,7 +238,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   }
   
   if (weather == TRUE){
-    weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
+    weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
       weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
@@ -259,8 +259,8 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   
   if (management == TRUE) {
     treatment_stack <- raster::stack(treatments_file)
-    treatment_stack[is.na(treatment_stack)] <- 0
-    
+    treatment_stack <- raster::reclassify(treatment_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+
     if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
     }
@@ -380,7 +380,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
     infected_area <- data$area_infected
     single_run <- comp_years
     comp_years <- raster::reclassify(comp_years, rclmat)
-    comp_years[is.na(comp_years)] <- 0
+    comp_years <- raster::reclassify(comp_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     infected_stack <- comp_years
     data <- list(single_run, infected_stack, number_infected, susceptible_runs, infected_area, spread_rate)
   }
