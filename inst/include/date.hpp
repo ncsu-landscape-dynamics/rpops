@@ -21,7 +21,6 @@
 
 #include <iostream>
 #include <string>
-#include <vector>
 
 namespace pops {
 
@@ -49,6 +48,10 @@ public:
     inline void increased_by_days(int num_days);
     inline void increased_by_week();
     inline void increased_by_month();
+    inline void add_day();
+    inline void add_days(unsigned n);
+    inline void subtract_day();
+    inline void subtract_days(unsigned n);
     inline Date get_year_end();
     inline Date get_next_year_end();
     inline Date get_last_day_of_week();
@@ -325,6 +328,53 @@ void Date::increased_by_month()
             day_ = day_in_month[0][month_];
         }
     }
+}
+/*!
+ * \brief Adds 1 day to a date
+ */
+void Date::add_day()
+{
+    day_++;
+    if (day_ > day_in_month[is_leap_year()][month_]) {
+        day_ = 1;
+        month_++;
+        if (month_ > 12) {
+            year_++;
+            month_ = 1;
+        }
+    }
+}
+/*!
+ * \brief Subtract 1 day from a date
+ */
+void Date::subtract_day()
+{
+    day_--;
+    if (day_ == 0) {
+        month_--;
+        if (month_ == 0) {
+            year_--;
+            month_ = 12;
+        }
+        day_ = day_in_month[is_leap_year()][month_];
+    }
+}
+/*!
+ * \brief Adds N days to a date
+ */
+void Date::add_days(unsigned n)
+{
+    for (unsigned i = 0; i < n; i++)
+        this->add_day();
+}
+
+/*!
+ * \brief Subtract N days from a date
+ */
+void Date::subtract_days(unsigned n)
+{
+    for (unsigned i = 0; i < n; i++)
+        this->subtract_day();
 }
 
 /*!
