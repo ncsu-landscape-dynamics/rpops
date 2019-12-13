@@ -294,22 +294,26 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
     if (length(treatments_file) != length(treatment_dates)) {
       return("Length of list for treatment dates and treatments_file must be equal")
     }
+    
     if (length(pesticide_duration) != length(treatment_dates)) {
       return("Length of list for treatment dates and pesticide_duration must be equal")
     }
+    
     if (pesticide_duration[1] > 0) {
-      treatment_stack[[1]] <- treatment_stack[[1]] * pesticide_efficacy
+      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+    } else {
+      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
     }
-    treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
     if (raster::nlayers(treatment_stack) >= 2) {
       for(i in 2:raster::nlayers(treatment_stack)) {
         if (pesticide_duration[i] > 0) {
-          treatment_stack[[i]] <- treatment_stack[[i]] * pesticide_efficacy
+          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
+        } else {
+          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
+          
         }
-        treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
       }
     }
-    treatment_dates <- treatment_dates
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
