@@ -11,11 +11,12 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
   temperature_coefficient_file = "", precip = FALSE,
   precipitation_coefficient_file = "", time_step = "month",
   reproductive_rate = 3, season_month_start = 1,
-  season_month_end = 12, start_time = 2018, end_time = 2020,
-  use_lethal_temperature = FALSE, temperature_file = "",
-  lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
-  management = FALSE, treatment_dates = c(0), treatments_file = "",
+  season_month_end = 12, start_date = "2008-01-01",
+  end_date = "2008-12-31", use_lethal_temperature = FALSE,
+  temperature_file = "", lethal_temperature = -12.87,
+  lethal_temperature_month = 1, mortality_on = FALSE,
+  mortality_rate = 0, mortality_time_lag = 0, management = FALSE,
+  treatment_dates = c(0), treatments_file = "",
   treatment_method = "ratio", percent_natural_dispersal = 1,
   natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
@@ -61,9 +62,9 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{season_month_end}{when does spread end during the year for your pest or pathogen (integer value between 1 and 12)}
 
-\item{start_time}{first year to start the simulation (needs to be a 4 digit year)}
+\item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
 
-\item{end_time}{last year of the simulation (needs to be a 4 digit year)}
+\item{end_date}{date to end the simulation with format ('YYYY_MM_DD')}
 
 \item{use_lethal_temperature}{a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)}
 
@@ -81,9 +82,9 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{management}{boolean to allow use of managemnet (TRUE or FALSE)}
 
-\item{treatment_dates}{dates in which to apply treatment list with format (YYYY_MM_DD)}
+\item{treatment_dates}{dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates}
+\item{treatments_file}{path to raster file with treatment data by dates (needs to be the same length as treatment_dates and pesticide_duration)}
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
@@ -105,7 +106,7 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.}
+\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
 
 \item{pesticide_efficacy}{how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)}
 
