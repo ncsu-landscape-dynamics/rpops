@@ -120,7 +120,7 @@ List pops_model(int random_seed,
                 std::string time_step, double reproductive_rate,
                 double mortality_rate = 0.0, int mortality_time_lag = 2,
                 int season_month_start = 1, int season_month_end = 12,
-                double start_time = 2018, double end_time = 2018,
+                std::string start_date = "2018-01-01", std::string end_date = "2018-12-31",
                 std::string treatment_method = "ratio",
                 std::string natural_kernel_type = "cauchy", std::string anthropogenic_kernel_type = "cauchy", 
                 bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
@@ -134,8 +134,8 @@ List pops_model(int random_seed,
   DispersalKernelType natural_dispersal_kernel_type = kernel_type_from_string(natural_kernel_type);
   DispersalKernelType anthropogenic_dispersal_kernel_type = kernel_type_from_string(anthropogenic_kernel_type);
   TreatmentApplication treatment_application = treatment_application_enum_from_string(treatment_method);
-  pops::Date dd_start(start_time, 01, 01);
-  pops::Date dd_end(end_time, 12, 31);
+  pops::Date dd_start(start_date);
+  pops::Date dd_end(end_date);
   Direction natural_direction = direction_from_string(natural_dir);
   Direction anthropogenic_direction = direction_from_string(anthropogenic_dir);
   Season season(season_month_start,season_month_end);
@@ -167,7 +167,7 @@ List pops_model(int random_seed,
   std::vector<double> area_infected;
   
   int counter = 0;
-  int first_mortality_year = start_time + mortality_time_lag;
+  int first_mortality_year = dd_start.year() + mortality_time_lag;
   
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
