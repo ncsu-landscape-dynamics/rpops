@@ -8,11 +8,12 @@ pops_multirun(infected_file, host_file, total_plants_file, temp = FALSE,
   temperature_coefficient_file = "", precip = FALSE,
   precipitation_coefficient_file = "", time_step = "month",
   reproductive_rate = 3, season_month_start = 1,
-  season_month_end = 12, start_time = 2018, end_time = 2020,
-  use_lethal_temperature = FALSE, temperature_file = "",
-  lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
-  management = FALSE, treatment_dates = c(0), treatments_file = "",
+  season_month_end = 12, start_date = "2008-01-01",
+  end_date = "2008-12-31", use_lethal_temperature = FALSE,
+  temperature_file = "", lethal_temperature = -12.87,
+  lethal_temperature_month = 1, mortality_on = FALSE,
+  mortality_rate = 0, mortality_time_lag = 0, management = FALSE,
+  treatment_dates = c(0), treatments_file = "",
   treatment_method = "ratio", percent_natural_dispersal = 1,
   natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
@@ -44,9 +45,9 @@ pops_multirun(infected_file, host_file, total_plants_file, temp = FALSE,
 
 \item{season_month_end}{when does spread end during the year for your pest or pathogen (integer value between 1 and 12)}
 
-\item{start_time}{first year to start the simulation (needs to be a 4 digit year)}
+\item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
 
-\item{end_time}{last year of the simulation (needs to be a 4 digit year)}
+\item{end_date}{date to end the simulation with format ('YYYY_MM_DD')}
 
 \item{use_lethal_temperature}{a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)}
 
@@ -64,9 +65,9 @@ pops_multirun(infected_file, host_file, total_plants_file, temp = FALSE,
 
 \item{management}{boolean to allow use of managemnet (TRUE or FALSE)}
 
-\item{treatment_dates}{dates in which to apply treatment list with format (YYYY_MM_DD)}
+\item{treatment_dates}{dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates}
+\item{treatments_file}{path to raster file with treatment data by dates (needs to be the same length as treatment_dates and pesticide_duration)}
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
@@ -92,7 +93,7 @@ pops_multirun(infected_file, host_file, total_plants_file, temp = FALSE,
 
 \item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
 
-\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.}
+\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
 
 \item{pesticide_efficacy}{how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)}
 
@@ -105,28 +106,4 @@ list of infected and susceptible per year
 A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
 meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
 spread of the pest/pathogen into the future.
-}
-\examples{
-\dontrun{
-infected_file <-  system.file("extdata", "SODexample", "initial_infection2001.tif", 
-package = "PoPS")
-host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
-total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
-temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "
-PoPS")
-treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
-
-data <- pops(infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
-use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
-mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
-precipitation_coefficient_file ="", treatments_file,
-season_month_start = 1, season_month_end = 12, time_step = "week",
-start_time = 2001, end_time = 2005, treatment_dates = c(2001,2002,2003,2004,2005),
-natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
-natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
-lethal_temperature = -12.87, lethal_temperature_month = 1,
-mortality_rate = 0.05, mortality_time_lag = 2,
-treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
-}
-
 }

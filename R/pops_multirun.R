@@ -14,6 +14,7 @@
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom iterators icount
+#' @importFrom lubridate interval time_length year
 #' @return list of infected and susceptible per year
 #' @export
 #'
@@ -32,7 +33,7 @@
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 #' precipitation_coefficient_file ="", treatments_file,
 #' season_month_start = 1, season_month_end = 12, time_step = "week",
-#' start_time = 2001, end_time = 2005, treatment_dates = c(2001,2002,2003,2004,2005),
+#' start_date = '2001-01-01', end_date = 2005-12-31', treatment_dates = c(2001,2002,2003,2004,2005),
 #' natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
 #' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
@@ -45,7 +46,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                  precip = FALSE, precipitation_coefficient_file = "", 
                  time_step = "month", reproductive_rate = 3.0,
                  season_month_start = 1, season_month_end = 12, 
-                 start_time = 2018, end_time = 2020, 
+                 start_date = '2008-01-01', end_date = '2008-12-31', 
                  use_lethal_temperature = FALSE, temperature_file = "",
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
                  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
@@ -92,23 +93,17 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
     return("Time step must be one of 'week', 'month' or 'day'")
   }
   
-  if (class(end_time) != "numeric" || nchar(end_time) != 4 || class(start_time) != "numeric" || nchar(start_time) != 4){
-    return("End time and/or start time not of type numeric and/or in format YYYY")
-  }
-  
-  if (is.null(random_seed)) {
-    random_seed = round(stats::runif(1, 1, 1000000))
-  }
+  duration <- lubridate::interval(start_date, end_date)
   
   if (time_step == "week") {
-    number_of_time_steps <- (end_time-start_time+1)*52
+    number_of_time_steps <- ceiling(time_length(duration, "week"))
   } else if (time_step == "month") {
-    number_of_time_steps <- (end_time-start_time+1)*12
+    number_of_time_steps <- ceiling(time_length(duration, "month"))
   } else if (time_step == "day") {
-    number_of_time_steps <- (end_time-start_time+1)*365
+    number_of_time_steps <- ceiling(time_length(duration, "day"))
   }
   
-  number_of_years <- end_time-start_time+1
+  number_of_years <- ceiling(time_length(duration, "year"))
   
   infected <- raster::raster(infected_file)
   infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
@@ -333,7 +328,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   }
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
-  years <- seq(start_time, end_time, 1)
+  years <- seq(year(start_date), year(end_date), 1)
   rcl <- c(1, Inf, 1, 0, 0.99, NA)
   rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
   
@@ -359,7 +354,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                        time_step = time_step, reproductive_rate = reproductive_rate,
                        mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
                        season_month_start = season_month_start, season_month_end = season_month_end,
-                       start_time = start_time, end_time = end_time,
+                       start_date = start_date, end_date = end_date,
                        treatment_method = treatment_method,
                        natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
                        use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
