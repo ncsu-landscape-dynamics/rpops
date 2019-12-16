@@ -126,7 +126,8 @@ List pops_model(int random_seed,
                 bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
                 double natural_distance_scale = 21, double anthropogenic_distance_scale = 0.0, 
                 std::string natural_dir = "NONE", double natural_kappa = 0,
-                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0
+                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0,
+                std::string output_frequency = "yearly"
 )
 {
   
@@ -241,6 +242,7 @@ List pops_model(int random_seed,
           simulation.mortality(infected, mortality_rate, current_year, first_mortality_year, mortality, mortality_tracker_vector);
           mortality_vector.push_back(Rcpp::clone(mortality));
         }
+      }
         
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
@@ -256,8 +258,7 @@ List pops_model(int random_seed,
         spread_rates = spreadrate.yearly_rate(simulation_year);
         auto sr = to_array(spread_rates);
         spread_rates_vector.push_back(sr);
-      }
-    
+        
       if (dd_current >= dd_end) {
         break;
       }

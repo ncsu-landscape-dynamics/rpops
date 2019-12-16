@@ -40,6 +40,7 @@
 #' @param pesticide_duration how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
+#' @param output_frequency sets when outputs occur either ('yearly' or 'time step')
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent
@@ -69,7 +70,7 @@
 #' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
-#' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
+#' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL, output_frequency = "yearly")
 #' }
 #' 
 pops <- function(infected_file, host_file, total_plants_file, 
@@ -89,7 +90,7 @@ pops <- function(infected_file, host_file, total_plants_file,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                 random_seed = NULL){ 
+                 random_seed = NULL, output_frequency = "yearly"){ 
 
   if (!treatment_method %in% c("ratio", "all infected")) {
     return("treatment method is not one of the valid treatment options")
@@ -394,7 +395,8 @@ pops <- function(infected_file, host_file, total_plants_file,
                      use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
                      natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
                      natural_dir = natural_dir, natural_kappa = natural_kappa,
-                     anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
+                     anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
+                     output_frequency = output_frequency
   )
   
   return(data)
