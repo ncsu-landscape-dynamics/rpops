@@ -17,7 +17,8 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
   use_anthropogenic_kernel = FALSE, percent_natural_dispersal = 0,
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
   natural_dir = "NONE", natural_kappa = 0,
-  anthropogenic_dir = "NONE", anthropogenic_kappa = 0)
+  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
+  output_frequency = "year")
 }
 \arguments{
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
@@ -99,6 +100,8 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
+
+\item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
 }
 \value{
 list of vector matrices of infected and suceptible hosts per simulated year

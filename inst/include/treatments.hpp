@@ -182,6 +182,7 @@ public:
             for(signed j = 0; j < infected.cols(); j++) {
                 int infected_resistant;
                 int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
+                int current_resistant = resistant(i, j); 
                 if (this->application_ == TreatmentApplication::Ratio) {
                     infected_resistant = infected(i, j) * this->map_(i, j);
                 }
@@ -189,7 +190,7 @@ public:
                     infected_resistant = this->map_(i, j) ? infected(i, j): 0;
                 }
                 infected(i, j) -= infected_resistant;
-                resistant(i, j) = infected_resistant + susceptible_resistant;
+                resistant(i, j) = infected_resistant + susceptible_resistant + current_resistant;
                 susceptible(i, j) -= susceptible_resistant;
             }
     }
