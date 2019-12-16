@@ -59,7 +59,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  num_iterations = 100, number_of_cores = NA,
                  pesticide_duration = 0, pesticide_efficacy = 1.0,
-                 random_seed = NULL){ 
+                 random_seed = NULL, output_frequency = "year"){ 
   
   if (!treatment_method %in% c("ratio", "all infected")) {
     return("treatment method is not one of the valid treatment options")
@@ -91,6 +91,26 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   
   if (!(time_step %in% list("week", "month", "day"))) {
     return("Time step must be one of 'week', 'month' or 'day'")
+  }
+  
+  if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
+    return("End time and/or start time not of type numeric and/or in format YYYY")
+  }
+  
+  if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
+    return("Time step must be one of 'week', 'month' or 'day'")
+  }
+  
+  if (output_frequency == "day") {
+    if (time_step == "week" || time_step == "month") {
+      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+    }
+  }
+  
+  if (output_frequency == "week") {
+    if (time_step == "month") {
+      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+    }
   }
   
   duration <- lubridate::interval(start_date, end_date)
@@ -360,7 +380,8 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                        use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
                        natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
                        natural_dir = natural_dir, natural_kappa = natural_kappa,
-                       anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
+                       anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
+                       output_frequency = output_frequency
     )
     
     comp_years <- raster::stack(lapply(1:length(data$infected), function(i) host))
