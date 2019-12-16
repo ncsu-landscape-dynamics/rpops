@@ -40,7 +40,7 @@
 #' @param pesticide_duration how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
-#' @param output_frequency sets when outputs occur either ('yearly' or 'time step')
+#' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent
@@ -90,7 +90,7 @@ pops <- function(infected_file, host_file, total_plants_file,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                 random_seed = NULL, output_frequency = "yearly"){ 
+                 random_seed = NULL, output_frequency = "year"){ 
 
   if (!treatment_method %in% c("ratio", "all infected")) {
     return("treatment method is not one of the valid treatment options")
@@ -126,6 +126,22 @@ pops <- function(infected_file, host_file, total_plants_file,
   
   if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
     return("End time and/or start time not of type numeric and/or in format YYYY")
+  }
+  
+  if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
+    return("Time step must be one of 'week', 'month' or 'day'")
+  }
+  
+  if (output_frequency == "day") {
+    if (time_step == "week" || time_step == "month") {
+      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+    }
+  }
+  
+  if (output_frequency == "week") {
+    if (time_step == "month") {
+      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+    }
   }
   
   duration <- lubridate::interval(start_date, end_date)

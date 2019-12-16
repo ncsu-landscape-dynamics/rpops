@@ -23,7 +23,7 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
   natural_dir = "NONE", natural_kappa = 0,
   anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
   pesticide_duration = c(0), pesticide_efficacy = 1, mask = NULL,
-  success_metric = "quantity")
+  success_metric = "quantity", output_frequency = "year")
 }
 \arguments{
 \item{infected_years_file}{Raster file with years of initial infection/infestation as individual locations of a pest or pathogen}
@@ -113,6 +113,8 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 \item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
 
 \item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
+
+\item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run
