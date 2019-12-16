@@ -20,7 +20,7 @@ pops(infected_file, host_file, total_plants_file, temp = FALSE,
   natural_dir = "NONE", natural_kappa = 0,
   anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
   pesticide_duration = c(0), pesticide_efficacy = 1,
-  random_seed = NULL)
+  random_seed = NULL, output_frequency = "year")
 }
 \arguments{
 \item{infected_file}{path to raster file with initial infections}
@@ -94,6 +94,8 @@ pops(infected_file, host_file, total_plants_file, temp = FALSE,
 \item{pesticide_efficacy}{how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)}
 
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
+
+\item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
 }
 \value{
 list of infected and susceptible per year
