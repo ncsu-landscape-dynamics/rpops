@@ -147,6 +147,18 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   
   number_of_years <- ceiling(time_length(duration, "year"))
   
+  if (output_frequency == "week") {
+    number_of_outputs <- ceiling(lubridate::time_length(duration, "week"))
+  } else if (output_frequency == "month") {
+    number_of_outputs <- ceiling(lubridate::time_length(duration, "month"))
+  } else if (output_frequency == "day") {
+    number_of_outputs <- ceiling(lubridate::time_length(duration, "day"))
+  } else if (output_frequency == "year") {
+    number_of_outputs <- ceiling(lubridate::time_length(duration, "year"))
+  } else if (output_frequency == "time_step") {
+    number_of_outputs <- number_of_time_steps
+  }
+  
   infected <- raster::raster(infected_file)
   infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   host <- raster::raster(host_file)
@@ -375,7 +387,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   
   num_layers_infected_years <- raster::nlayers(infection_years)
-  if (num_layers_infected_years < number_of_time_steps) {
+  if (num_layers_infected_years < number_of_outputs) {
     return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
   }
   
