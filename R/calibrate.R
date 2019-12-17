@@ -121,14 +121,14 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   duration <- lubridate::interval(start_date, end_date)
   
   if (time_step == "week") {
-    number_of_time_steps <- ceiling(time_length(duration, "week"))
+    number_of_time_steps <- ceiling(lubridate::time_length(duration, "week"))
   } else if (time_step == "month") {
-    number_of_time_steps <- ceiling(time_length(duration, "month"))
+    number_of_time_steps <- ceiling(lubridate::time_length(duration, "month"))
   } else if (time_step == "day") {
-    number_of_time_steps <- ceiling(time_length(duration, "day"))
+    number_of_time_steps <- ceiling(lubridate::time_length(duration, "day"))
   }
   
-  number_of_years <- ceiling(time_length(duration, "year"))
+  number_of_years <- ceiling(lubridate::time_length(duration, "year"))
   
   infected <- raster::raster(infected_file)
   infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
@@ -359,6 +359,11 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   infection_years <- reclassify(infection_years, rclmat)
   ## Get rid of NA values to make comparisons
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+  num_layers_infected_years <- raster::nlayers(infection_years)
+  
+  if (num_layers_infected_years < number_of_time_steps) {
+    return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
+  }
   
   ## set the parameter function to only need the parameters that chanage
   param_func <- function(reproductive_rate, natural_distance_scale) {

@@ -373,8 +373,11 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   infection_years <- reclassify(infection_years, rclmat)
   ## Get rid of NA values to make comparisons
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  # ## reclassify to binary values
-  # reference <- raster::reclassify(reference, rclmat)
+  
+  num_layers_infected_years <- raster::nlayers(infection_years)
+  if (num_layers_infected_years < number_of_time_steps) {
+    return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
+  }
   
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
