@@ -4,41 +4,45 @@
 \alias{calibrate}
 \title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
-calibrate(infected_years_file, num_iterations, start_reproductive_rate,
-  number_of_cores = NA, start_natural_distance_scale,
-  sd_reproductive_rate, sd_natural_distance_scale, infected_file,
+calibrate(infected_years_file, num_iterations, number_of_cores = NA,
+  number_of_observations, prior_number_of_observations,
+  prior_reproductive_rate, prior_natural_distance_scale,
+  prior_percent_natural_dispersal = c(1, 0),
+  prior_anthropogenic_distance_scale = c(1000, 0), infected_file,
   host_file, total_plants_file, temp = FALSE,
   temperature_coefficient_file = "", precip = FALSE,
   precipitation_coefficient_file = "", time_step = "month",
-  reproductive_rate = 3, season_month_start = 1,
-  season_month_end = 12, start_date = "2008-01-01",
-  end_date = "2008-12-31", use_lethal_temperature = FALSE,
-  temperature_file = "", lethal_temperature = -12.87,
-  lethal_temperature_month = 1, mortality_on = FALSE,
-  mortality_rate = 0, mortality_time_lag = 0, management = FALSE,
-  treatment_dates = c(0), treatments_file = "",
-  treatment_method = "ratio", percent_natural_dispersal = 1,
-  natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-  natural_distance_scale = 21, anthropogenic_distance_scale = 0,
-  natural_dir = "NONE", natural_kappa = 0,
-  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-  pesticide_duration = c(0), pesticide_efficacy = 1, mask = NULL,
-  success_metric = "quantity", output_frequency = "year")
+  season_month_start = 1, season_month_end = 12,
+  start_date = "2008-01-01", end_date = "2008-12-31",
+  use_lethal_temperature = FALSE, temperature_file = "",
+  lethal_temperature = -12.87, lethal_temperature_month = 1,
+  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
+  management = FALSE, treatment_dates = c(0), treatments_file = "",
+  treatment_method = "ratio", natural_kernel_type = "cauchy",
+  anthropogenic_kernel_type = "cauchy", natural_dir = "NONE",
+  natural_kappa = 0, anthropogenic_dir = "NONE",
+  anthropogenic_kappa = 0, pesticide_duration = c(0),
+  pesticide_efficacy = 1, mask = NULL, success_metric = "quantity",
+  output_frequency = "year")
 }
 \arguments{
 \item{infected_years_file}{Raster file with years of initial infection/infestation as individual locations of a pest or pathogen}
 
 \item{num_iterations}{how many iterations do you want to run to allow the calibration to converge (recommend a minimum of at least 100,000 but preferably 1 million).}
 
-\item{start_reproductive_rate}{starting reproductive rate for MCMC calibration (affects how quickly a series converges) numeric value > 0}
-
 \item{number_of_cores}{number of cores to use for calibration (defaults to the number of cores available on the machine) integer value >= 1}
 
-\item{start_natural_distance_scale}{starting short distance scale parameter for MCMC calibration (affects how quickly a series converges) numeric value > 0}
+\item{number_of_observations}{the number of observations used for this calibartion}
 
-\item{sd_reproductive_rate}{starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0}
+\item{prior_number_of_observations}{the number of total observations from previous calibrations used to weight the posterior distributions (if this is a new calibration this value takes the form of a prior weight (0 - 1))}
 
-\item{sd_natural_distance_scale}{starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0}
+\item{prior_reproductive_rate}{the prior reproductive rate for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
+
+\item{prior_natural_distance_scale}{the prior natural distance scale for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
+
+\item{prior_percent_natural_dispersal}{the prior percent natural distance for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
+
+\item{prior_anthropogenic_distance_scale}{the prior anthropogenic distance scale for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -55,8 +59,6 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 \item{precipitation_coefficient_file}{path to raster file with precipitation coefficient data for the timestep and number of years specified}
 
 \item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
-
-\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
 \item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)}
 
@@ -88,15 +90,9 @@ calibrate(infected_years_file, num_iterations, start_reproductive_rate,
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
-\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1}
-
 \item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')}
-
-\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel numeric value > 0}
-
-\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel numeric value > 0}
 
 \item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
