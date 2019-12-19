@@ -96,6 +96,22 @@ pops <- function(infected_file, host_file, total_plants_file,
     return("treatment method is not one of the valid treatment options")
   }
   
+  time_check <- time_checks(end_date, start_date, time_step, output_frequency)
+  if(time_check$checks_passed) {
+    number_of_time_steps <- time_check$number_of_time_steps
+    number_of_years <- time_check$number_of_years
+    number_of_outputs <- time_check$number_of_outputs
+  } else {
+    return(time_check$failed_check)
+  }
+  
+  percent_check <- percent_checks(percent_natural_dispersal)
+  if (percent_check$checks_passed){
+    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
+  } else {
+    return(percent_check$failed_check)
+  }
+  
   if (!file.exists(infected_file)) {
     return("Infected file does not exist") 
   }
@@ -118,15 +134,6 @@ pops <- function(infected_file, host_file, total_plants_file,
   
   if (!(raster::extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
     return("Total plants file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  time_check <- time_checks(end_date, start_date, time_step, output_frequency)
-  if(time_check$checks_passed) {
-    number_of_time_steps <- time_check$number_of_time_steps
-    number_of_years <- time_check$number_of_years
-    number_of_outputs <- time_check$number_of_outputs
-  } else {
-    return(time_check$failed_check)
   }
   
   if (is.null(random_seed)) {
@@ -328,14 +335,6 @@ pops <- function(infected_file, host_file, total_plants_file,
     treatment_map <- host
     raster::values(treatment_map) <- 0
     treatment_maps <- list(raster::as.matrix(treatment_map))
-  }
-  
-  if(percent_natural_dispersal == 1.0) {
-    use_anthropogenic_kernel = FALSE
-  } else if (percent_natural_dispersal < 1.0  && percent_natural_dispersal >= 0.0) {
-    use_anthropogenic_kernel = TRUE
-  } else {
-    return("Percent natural dispersal must be between 0.0 and 1.0")
   }
   
   ew_res <- raster::xres(susceptible)

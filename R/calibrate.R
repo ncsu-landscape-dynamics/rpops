@@ -74,30 +74,6 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     return("treatment method is not one of the valid treatment options")
   }
   
-  if (!file.exists(infected_file)) {
-    return("Infected file does not exist") 
-  }
-  
-  if (!(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Infected file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (!file.exists(host_file)) {
-    return("Host file does not exist") 
-  }
-  
-  if (!(raster::extension(host_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Host file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (!file.exists(total_plants_file)) {
-    return("Total plants file does not exist") 
-  }
-  
-  if (!(raster::extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Total plants file is not one of '.grd', '.tif', '.img'")
-  }
-  
   time_check <- time_checks(end_date, start_date, time_step, output_frequency)
   if(time_check$checks_passed) {
     number_of_time_steps <- time_check$number_of_time_steps
@@ -201,6 +177,30 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     }
   } else {
     return("Incorrect format for prior percent natural distance")
+  }
+  
+  if (!file.exists(infected_file)) {
+    return("Infected file does not exist") 
+  }
+  
+  if (!(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Infected file is not one of '.grd', '.tif', '.img'")
+  }
+  
+  if (!file.exists(host_file)) {
+    return("Host file does not exist") 
+  }
+  
+  if (!(raster::extension(host_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Host file is not one of '.grd', '.tif', '.img'")
+  }
+  
+  if (!file.exists(total_plants_file)) {
+    return("Total plants file does not exist") 
+  }
+  
+  if (!(raster::extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
+    return("Total plants file is not one of '.grd', '.tif', '.img'")
   }
   
   infected <- raster::raster(infected_file)
@@ -395,12 +395,11 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     treatment_maps <- list(raster::as.matrix(treatment_map))
   }
   
-  if(start_percent_natural_dispersal == 1.0) {
-    use_anthropogenic_kernel = FALSE
-  } else if (start_percent_natural_dispersal < 1.0  && start_percent_natural_dispersal >= 0.0) {
-    use_anthropogenic_kernel = TRUE
+  percent_check <- percent_checks(start_percent_natural_dispersal)
+  if (percent_check$checks_passed){
+    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
   } else {
-    return("Percent natural dispersal must be between 0.0 and 1.0")
+    return(percent_check$failed_check)
   }
   
   ew_res <- xres(susceptible)

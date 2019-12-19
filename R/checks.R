@@ -28,7 +28,28 @@ initial_raster_check <- function(x) {
 }
 
 
-
+percent_checks <- function(percent_natural_dispersal) {
+  checks_passed <- TRUE
+  
+  if(percent_natural_dispersal == 1.0) {
+    use_anthropogenic_kernel = FALSE
+  } else if (percent_natural_dispersal < 1.0  && percent_natural_dispersal >= 0.0) {
+    use_anthropogenic_kernel = TRUE
+  } else {
+    checks_passed <- FALSE
+    failed_check <- "Percent natural dispersal must be between 0.0 and 1.0"
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, use_anthropogenic_kernel)
+    names(outs) <- c('checks_passed', 'use_anthropogenic_kernel')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+}
 
 
 time_checks <- function(end_date, start_date, time_step, output_frequency) {
