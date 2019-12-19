@@ -1,32 +1,86 @@
 ## These functions are designed to improve data format checks and reduce copy and pasting of code across functions
 
-initial_raster_check <- function(x) {
+initial_raster_checks <- function(x) {
   checks_passed <- TRUE
   
-  if (!file.exists(x)) {
+  if (!all(file.exists(x))) {
     checks_passed <- FALSE
     failed_check <- "file does not exist" 
   }
   
-  if (!(raster::extension(x) %in% c(".grd", ".tif", ".img"))) {
+  if (!all((raster::extension(x) %in% c(".grd", ".tif", ".img")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.grd', '.tif', '.img'"
   }
   
   if (checks_passed) {
-    r<- raster::raster(x)
+    r<- raster::stack(x)
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+  }
+  
+  if (raster::nlayers(r) > 1) {
+    r <- output_from_raster_mean_and_sd(r)
   }
   
   if (checks_passed) {
     outs <- list(checks_passed, r)
+    names(outs) <- c('checks_passed', 'raster')
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
     return(outs)
   }
 }
 
+## adds checks to test for raster extent, resolution, and crs x2 being the raster already through initial checks for comparison
+secondary_raster_checks <- function(x, x2) {
+  checks_passed <- TRUE
+  
+  if (!all(file.exists(x))) {
+    checks_passed <- FALSE
+    failed_check <- "file does not exist" 
+  }
+  
+  if (!all((raster::extension(x) %in% c(".grd", ".tif", ".img")))) {
+    checks_passed <- FALSE
+    failed_check <- "file is not one of '.grd', '.tif', '.img'"
+  }
+  
+  if (checks_passed) {
+    r<- raster::stack(x)
+    r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+  }
+  
+  if (raster::nlayers(r) > 1) {
+    r <- output_from_raster_mean_and_sd(r)
+  }
+  
+  if (!(raster::extent(x2) == raster::extent(r))) {
+    checks_passed <- FALSE
+    failed_check <- "Extents of input rasters do not match. Ensure that all of your input rasters have the same extent"
+  }
+  
+  if (!(raster::xres(x2) == raster::xres(r) && raster::yres(x2) == raster::yres(r))) {
+    checks_passed <- FALSE
+    failed_check <- "Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution"
+  }
+  
+  if (!raster::compareCRS(r,x2)) {
+    checks_passed <- FALSE
+    failed_check <- "Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs"
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, r)
+    names(outs) <- c('checks_passed', 'raster')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+}
 
 
 treatment_metric_checks <- function(treatment_method) {
