@@ -182,41 +182,21 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     return(infected_check$failed_check)
   }
   
-  if (!file.exists(host_file)) {
-    return("Host file does not exist") 
+  host_check <- secondary_raster_checks(host_file, infected)
+  if (host_check$checks_passed) {
+    host <- host_check$raster
+  } else {
+    return(host_check$failed_check)
   }
   
-  if (!(raster::extension(host_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Host file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (!file.exists(total_plants_file)) {
-    return("Total plants file does not exist") 
-  }
-  
-  if (!(raster::extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Total plants file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  host <- raster::raster(host_file)
-  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  total_plants <- raster::raster(total_plants_file)
-  total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
-  
-  if (!(extent(infected) == extent(host) && extent(infected) == extent(total_plants))) {
-    return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-  }
-  
-  if (!(xres(infected) == xres(host) && xres(infected) == xres(total_plants) && yres(infected) == yres(host) && yres(infected) == yres(total_plants))) {
-    return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-  }
-  
-  if (!(compareCRS(host,infected) && compareCRS(host, total_plants))) {
-    return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+  total_plants_check <- secondary_raster_checks(total_plants_file, infected)
+  if (total_plants_check$checks_passed) {
+    total_plants <- total_plants_check$raster
+  } else {
+    return(total_plants_check$failed_check)
   }
   
   susceptible <- host - infected
-  susceptible <- raster::reclassify(susceptible, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   susceptible[susceptible < 0] <- 0
   
   if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
