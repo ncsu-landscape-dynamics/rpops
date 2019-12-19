@@ -78,6 +78,46 @@ secondary_raster_checks <- function(x, x2) {
   }
 }
 
+treatment_checks <- function(treatment_stack, treatments_file, pesticide_duration, treatment_dates) {
+  checks_passed <- TRUE
+  
+  if (length(treatments_file) != length(treatment_dates)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for treatment dates and treatments_file must be equal"
+  }
+  
+  if (length(pesticide_duration) != length(treatment_dates)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for treatment dates and pesticide_duration must be equal"
+  }
+  
+  if (pesticide_duration[1] > 0) {
+    treatment_maps <- list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+  } else {
+    treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+  }
+  
+  if (raster::nlayers(treatment_stack) >= 2) {
+    for(i in 2:raster::nlayers(treatment_stack)) {
+      if (pesticide_duration[i] > 0) {
+        treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
+      } else {
+        treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
+        
+      }
+    }
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, treatment_maps)
+    names(outs) <- c('checks_passed', 'treatment_maps')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+}
 
 treatment_metric_checks <- function(treatment_method) {
   checks_passed <- TRUE

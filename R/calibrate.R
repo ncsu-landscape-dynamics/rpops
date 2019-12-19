@@ -271,52 +271,19 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     weather_coefficient <- list(raster::as.matrix(weather_coefficient))
   }
   
-  if (management == TRUE  && !file.exists(treatments_file)) {
-    return("Treatments file does not exist")
-  }
-  
-  if (management == TRUE  && !(extension(treatments_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Treatments file is not one of '.grd', '.tif', '.img'")
-  }
-  
   if (management == TRUE) {
-    treatment_stack <- raster::stack(treatments_file)
-    treatment_stack <- raster::reclassify(treatment_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    
-    if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(treatment_stack) && raster::yres(infected) == raster::yres(treatment_stack))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, treatment_stack))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
-    }
-    
-    if (length(treatments_file) != length(treatment_dates)) {
-      return("Length of list for treatment dates and treatments_file must be equal")
-    }
-    
-    if (length(pesticide_duration) != length(treatment_dates)) {
-      return("Length of list for treatment dates and pesticide_duration must be equal")
-    }
-    
-    if (pesticide_duration[1] > 0) {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+    treatments_check <- secondary_raster_checks(treatments_file, infected)
+    if (treatments_check$checks_passed) {
+      treatment_stack <- treatments_check$raster
     } else {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+      return(treatments_check$failed_check)
     }
-    if (raster::nlayers(treatment_stack) >= 2) {
-      for(i in 2:raster::nlayers(treatment_stack)) {
-        if (pesticide_duration[i] > 0) {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
-        } else {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
-          
-        }
-      }
+    
+    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates)
+    if (treatment_check$checks_passed) {
+      treatment_maps <- treatment_check$treatment_maps
+    } else {
+      return(treatment_check$failed_check)
     }
   } else {
     treatment_map <- host
