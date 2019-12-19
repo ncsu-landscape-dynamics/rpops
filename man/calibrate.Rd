@@ -46,7 +46,7 @@ calibrate(infected_years_file, num_iterations, number_of_cores = NA,
 
 \item{infected_file}{path to raster file with initial infections}
 
-\item{host_file}{path to raster file with number of hosts}
+\item{host_file}{path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)}
 
 \item{total_plants_file}{path to raster file with number of total plants}
 
