@@ -104,6 +104,9 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   infected_check <- initial_raster_checks(infected_file)
   if (infected_check$checks_passed) {
     infected <- infected_check$raster
+    if (raster::nlayers(infected) > 1) {
+      infected <- output_from_raster_mean_and_sd(infected)
+    }
   } else {
     return(infected_check$failed_check)
   }
@@ -111,6 +114,9 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   host_check <- secondary_raster_checks(host_file, infected)
   if (host_check$checks_passed) {
     host <- host_check$raster
+    if (raster::nlayers(host) > 1) {
+      host <- output_from_raster_mean_and_sd(host)
+    }
   } else {
     return(host_check$failed_check)
   }
@@ -118,6 +124,9 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   total_plants_check <- secondary_raster_checks(total_plants_file, infected)
   if (total_plants_check$checks_passed) {
     total_plants <- total_plants_check$raster
+    if (raster::nlayers(total_plants) > 1) {
+      total_plants <- output_from_raster_mean_and_sd(total_plants)
+    }
   } else {
     return(total_plants_check$failed_check)
   }
@@ -125,28 +134,12 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
   
-  if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
-    return("Temperature file does not exist")
-  }
-  
-  if (use_lethal_temperature == TRUE  && !(raster::extension(temperature_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Temperature file is not one of '.grd', '.tif', '.img'")
-  }
-  
   if (use_lethal_temperature == TRUE) {
-    temperature_stack <- raster::stack(temperature_file)
-    temperature_stack <- raster::reclassify(temperature_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    
-    if (!(raster::extent(infected) == raster::extent(temperature_stack))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(temperature_stack) && raster::yres(infected) == raster::yres(temperature_stack))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, temperature_stack))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    temperature_check <- secondary_raster_checks(temperature_file, infected)
+    if (temperature_check$checks_passed) {
+      temperature_stack <- temperature_check$raster
+    } else {
+      return(temperature_check$failed_check)
     }
     
     temperature <- list(raster::as.matrix(temperature_stack[[1]]))

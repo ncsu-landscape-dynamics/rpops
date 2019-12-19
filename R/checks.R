@@ -52,10 +52,6 @@ secondary_raster_checks <- function(x, x2) {
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   }
   
-  if (raster::nlayers(r) > 1) {
-    r <- output_from_raster_mean_and_sd(r)
-  }
-  
   if (!(raster::extent(x2) == raster::extent(r))) {
     checks_passed <- FALSE
     failed_check <- "Extents of input rasters do not match. Ensure that all of your input rasters have the same extent"
