@@ -92,8 +92,9 @@ pops <- function(infected_file, host_file, total_plants_file,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
                  random_seed = NULL, output_frequency = "year"){ 
 
-  if (!treatment_method %in% c("ratio", "all infected")) {
-    return("treatment method is not one of the valid treatment options")
+  treatment_metric_check <- treatment_metric_checks(treatment_method)
+  if (!treatment_metric_check$checks_passed) {
+    return(treatment_metric_check$failed_check)
   }
   
   time_check <- time_checks(end_date, start_date, time_step, output_frequency)

@@ -28,6 +28,52 @@ initial_raster_check <- function(x) {
 }
 
 
+
+treatment_metric_checks <- function(treatment_method) {
+  checks_passed <- TRUE
+  
+  if (!treatment_method %in% c("ratio", "all infected")) {
+    checks_passed <- FALSE
+    failed_check <- "treatment method is not one of the valid treatment options"
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed)
+    names(outs) <- c('checks_passed')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+}
+
+metric_checks <- function(success_metric) {
+  checks_passed <- TRUE
+  
+  if (success_metric == "quantity") {
+    configuration <- FALSE
+  } else if (success_metric == "quantity and configuration") {
+    configuration <- TRUE
+  } else if (success_metric == "odds_ratio") {
+    configuration <- FALSE
+  } else {
+    checks_passed <- FALSE
+    failed_check <- "Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'"
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, configuration)
+    names(outs) <- c('checks_passed', 'configuration')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+  
+}
+
 percent_checks <- function(percent_natural_dispersal) {
   checks_passed <- TRUE
   
@@ -50,7 +96,6 @@ percent_checks <- function(percent_natural_dispersal) {
     return(outs)
   }
 }
-
 
 time_checks <- function(end_date, start_date, time_step, output_frequency) {
   checks_passed <- TRUE

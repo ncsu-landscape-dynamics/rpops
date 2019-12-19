@@ -58,20 +58,16 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
                       pesticide_duration = c(0), pesticide_efficacy = 1.0,
                       mask = NULL, success_metric = "quantity", output_frequency = "year") { 
   
-  if (success_metric == "quantity") {
-    configuration = FALSE
-  } else if (success_metric == "quantity and configuration") {
-    configuration = TRUE
-  } else if (success_metric == "odds ratio") {
-    configuration = FALSE
-  } else if (success_metric == "residual error"){
-    configuration = FALSE
+  metric_check <- metric_checks(success_metric)
+  if (metric_check$checks_passed){
+    configuration <- metric_check$configuration
   } else {
-    return("Success metric must be one of 'quantity', 'quantity and configuration', 'residual error', or 'odds ratio'")
+    return(metric_check$failed_check)
   }
   
-  if (!treatment_method %in% c("ratio", "all infected")) {
-    return("treatment method is not one of the valid treatment options")
+  treatment_metric_check <- treatment_metric_checks(treatment_method)
+  if (!treatment_metric_check$checks_passed) {
+    return(treatment_metric_check$failed_check)
   }
   
   time_check <- time_checks(end_date, start_date, time_step, output_frequency)
