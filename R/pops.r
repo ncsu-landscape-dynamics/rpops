@@ -1,11 +1,11 @@
 #' PoPS (Pest or Pathogen Spread) model
 #' 
 #' A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
-#' meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
+#' meaning that it uses understanding of the effect of weather and other environmental factors on reproduction and survival of the pest/pathogen in order to forecast
 #' spread of the pest/pathogen into the future. 
 #'
 #' @param infected_file path to raster file with initial infections 
-#' @param host_file path to raster file with number of hosts
+#' @param host_file path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)
 #' @param total_plants_file path to raster file with number of total plants
 #' @param temp boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)
 #' @param temperature_coefficient_file path to raster file with temperature coefficient data for the timestep and number of years specified
@@ -125,7 +125,7 @@ pops <- function(infected_file, host_file, total_plants_file,
   }
   
   if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
-    return("End time and/or start time not of type numeric and/or in format YYYY")
+    return("End time and/or start time not of type numeric and/or in format YYYY-MM-DD")
   }
   
   if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
@@ -162,14 +162,11 @@ pops <- function(infected_file, host_file, total_plants_file,
   
   infected <- raster::raster(infected_file)
   infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  # infected[is.na(infected)] <- 0
   host <- raster::raster(host_file)
   host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  # host[is.na(host)] <- 0
   total_plants <- raster::raster(total_plants_file)
   total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
-  # total_plants[is.na(total_plants)] <- 0
-  
+
   if (!(raster::extent(infected) == raster::extent(host) && raster::extent(infected) == raster::extent(total_plants))) {
     return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
   }
@@ -184,7 +181,6 @@ pops <- function(infected_file, host_file, total_plants_file,
   
   susceptible <- host - infected
   susceptible <- raster::reclassify(susceptible, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  # susceptible[is.na(susceptible)] <- 0
   susceptible[susceptible < 0] <- 0
   
   if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
@@ -198,8 +194,7 @@ pops <- function(infected_file, host_file, total_plants_file,
   if (use_lethal_temperature == TRUE) {
     temperature_stack <- raster::stack(temperature_file)
     temperature_stack <- raster::reclassify(temperature_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    # temperature_stack[is.na(temperature_stack)] <- 0
-    
+
     if (!(raster::extent(infected) == raster::extent(temperature_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
     }
