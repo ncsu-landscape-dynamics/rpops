@@ -175,12 +175,11 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     return("Incorrect format for prior percent natural distance")
   }
   
-  if (!file.exists(infected_file)) {
-    return("Infected file does not exist") 
-  }
-  
-  if (!(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Infected file is not one of '.grd', '.tif', '.img'")
+  infected_check <- initial_raster_checks(infected_file)
+  if (infected_check$checks_passed) {
+    infected <- infected_check$raster
+  } else {
+    return(infected_check$failed_check)
   }
   
   if (!file.exists(host_file)) {
@@ -199,8 +198,6 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     return("Total plants file is not one of '.grd', '.tif', '.img'")
   }
   
-  infected <- raster::raster(infected_file)
-  infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   host <- raster::raster(host_file)
   host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   total_plants <- raster::raster(total_plants_file)

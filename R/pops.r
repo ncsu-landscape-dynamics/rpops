@@ -113,12 +113,15 @@ pops <- function(infected_file, host_file, total_plants_file,
     return(percent_check$failed_check)
   }
   
-  if (!file.exists(infected_file)) {
-    return("Infected file does not exist") 
+  if (is.null(random_seed)) {
+    random_seed = round(stats::runif(1, 1, 1000000))
   }
   
-  if (!(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Infected file is not one of '.grd', '.tif', '.img'")
+  infected_check <- initial_raster_checks(infected_file)
+  if (infected_check$checks_passed) {
+    infected <- infected_check$raster
+  } else {
+    return(infected_check$failed_check)
   }
   
   if (!file.exists(host_file)) {
@@ -129,6 +132,9 @@ pops <- function(infected_file, host_file, total_plants_file,
     return("Host file is not one of '.grd', '.tif', '.img'")
   }
   
+  host <- raster::raster(host_file)
+  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+  
   if (!file.exists(total_plants_file)) {
     return("Total plants file does not exist") 
   }
@@ -137,14 +143,6 @@ pops <- function(infected_file, host_file, total_plants_file,
     return("Total plants file is not one of '.grd', '.tif', '.img'")
   }
   
-  if (is.null(random_seed)) {
-    random_seed = round(stats::runif(1, 1, 1000000))
-  }
-  
-  infected <- raster::raster(infected_file)
-  infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  host <- raster::raster(host_file)
-  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   total_plants <- raster::raster(total_plants_file)
   total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
 
@@ -269,7 +267,6 @@ pops <- function(infected_file, host_file, total_plants_file,
   }
   
   if (weather == TRUE){
-    # weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
     weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
@@ -292,8 +289,7 @@ pops <- function(infected_file, host_file, total_plants_file,
   if (management == TRUE) {
     treatment_stack <- raster::stack(treatments_file)
     treatment_stack <- raster::reclassify(treatment_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    # treatment_stack[is.na(treatment_stack)] <- 0
-    
+
     if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
       return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
     }
@@ -330,8 +326,6 @@ pops <- function(infected_file, host_file, total_plants_file,
         }
       }
     }
-    
-    # treatment_dates <- treatment_dates
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
