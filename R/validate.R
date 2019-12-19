@@ -152,70 +152,33 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
     temperature <- list(raster::as.matrix(temperature))
   }
   
-  if (temp == TRUE  && !file.exists(temperature_coefficient_file)) {
-    return("Temperature coefficient file does not exist")
-  }
-  
-  if (temp == TRUE  && !(raster::extension(temperature_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Temperature coefficient file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (precip == TRUE  && !file.exists(precipitation_coefficient_file)) {
-    return("Precipitation coefficient file does not exist")
-  }
-  
-  if (precip == TRUE  && !(raster::extension(precipitation_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Precipitation coefficient file is not one of '.grd', '.tif', '.img'")
-  }
-  
   weather <- FALSE
   if (temp == TRUE) {
-    temperature_coefficient <- raster::stack(temperature_coefficient_file)
-    
-    if (!(raster::extent(infected) == raster::extent(temperature_coefficient))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(temperature_coefficient) && raster::yres(infected) == raster::yres(temperature_coefficient))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, temperature_coefficient))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    temperature_coefficient_check <- secondary_raster_checks(temperature_coefficient_file, infected)
+    if (temperature_coefficient_check$checks_passed) {
+      temperature_coefficient <- temperature_coefficient_check$raster
+    } else {
+      return(temperature_coefficient_check$failed_check)
     }
     
     weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (precip ==TRUE){
-      precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
-      
-      if (!(raster::extent(infected) == raster::extent(precipitation_coefficient))) {
-        return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-      }
-      
-      if (!(raster::xres(infected) == raster::xres(precipitation_coefficient) && raster::yres(infected) == raster::yres(precipitation_coefficient))) {
-        return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-      }
-      
-      if (!(raster::compareCRS(infected, precipitation_coefficient))) {
-        return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+      precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
+      if (precipitation_coefficient_check$checks_passed) {
+        precipitation_coefficient <- precipitation_coefficient_check$raster
+      } else {
+        return(precipitation_coefficient_check$failed_check)
       }
       
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if(precip == TRUE){
-    precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
-    
-    if (!(raster::extent(infected) == raster::extent(precipitation_coefficient))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(precipitation_coefficient) && raster::yres(infected) == raster::yres(precipitation_coefficient))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, precipitation_coefficient))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
+    if (precipitation_coefficient_check$checks_passed) {
+      precipitation_coefficient <- precipitation_coefficient_check$raster
+    } else {
+      return(precipitation_coefficient_check$failed_check)
     }
     
     weather <- TRUE
@@ -223,7 +186,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   }
   
   if (weather == TRUE){
-    weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+    # weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
       weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
