@@ -98,52 +98,13 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     return("Total plants file is not one of '.grd', '.tif', '.img'")
   }
   
-  if (!(time_step %in% list("week", "month", "day"))) {
-    return("Time step must be one of 'week', 'month' or 'day'")
-  }
-  
-  if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
-    return("End time and/or start time not of type numeric and/or in format YYYY")
-  }
-  
-  if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
-    return("Time step must be one of 'week', 'month' or 'day'")
-  }
-  
-  if (output_frequency == "day") {
-    if (time_step == "week" || time_step == "month") {
-      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
-    }
-  }
-  
-  if (output_frequency == "week") {
-    if (time_step == "month") {
-      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
-    }
-  }
-  
-  duration <- lubridate::interval(start_date, end_date)
-  
-  if (time_step == "week") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "week"))
-  } else if (time_step == "month") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "month"))
-  } else if (time_step == "day") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "day"))
-  }
-  
-  number_of_years <- ceiling(lubridate::time_length(duration, "year"))
-  
-  if (output_frequency == "week") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "week"))
-  } else if (output_frequency == "month") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "month"))
-  } else if (output_frequency == "day") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "day"))
-  } else if (output_frequency == "year") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "year"))
-  } else if (output_frequency == "time_step") {
-    number_of_outputs <- number_of_time_steps
+  time_check <- time_checks(end_date, start_date, time_step, output_frequency)
+  if(time_check$checks_passed) {
+    number_of_time_steps <- time_check$number_of_time_steps
+    number_of_years <- time_check$number_of_years
+    number_of_outputs <- time_check$number_of_outputs
+  } else {
+    return(time_check$failed_check)
   }
   
   ## Setup for reproductive rate to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
