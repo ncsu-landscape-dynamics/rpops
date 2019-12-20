@@ -213,6 +213,34 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   mortality <- mortality_tracker
   resistant <- mortality_tracker
   
+  reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = num_iterations)
+  if (reproductive_rate_check$checks_passed) {
+    reproductive_rate <- reproductive_rate_check$value
+  } else {
+    return(reproductive_rate_check$failed_check)
+  }
+  
+  natural_distance_scale_check <- uncertainty_check(natural_distance_scale, round_to = 0, n = num_iterations)
+  if (natural_distance_scale_check$checks_passed) {
+    natural_distance_scale <- natural_distance_scale_check$value
+  } else {
+    return(natural_distance_scale_check$failed_check)
+  }
+  
+  anthropogenic_distance_scale_check <- uncertainty_check(anthropogenic_distance_scale, round_to = 0, n = num_iterations)
+  if (anthropogenic_distance_scale_check$checks_passed) {
+    anthropogenic_distance_scale <- anthropogenic_distance_scale_check$value
+  } else {
+    return(anthropogenic_distance_scale_check$failed_check)
+  }
+  
+  percent_natural_dispersal_check <- uncertainty_check(percent_natural_dispersal, round_to = 3, n = num_iterations)
+  if (percent_natural_dispersal_check$checks_passed) {
+    percent_natural_dispersal <- percent_natural_dispersal_check$value
+  } else {
+    return(percent_natural_dispersal_check$failed_check)
+  }
+  
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
@@ -243,14 +271,14 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                        temperature = temperature,
                        weather_coefficient = weather_coefficient,
                        ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                       time_step = time_step, reproductive_rate = reproductive_rate,
+                       time_step = time_step, reproductive_rate = reproductive_rate[i],
                        mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
                        season_month_start = season_month_start, season_month_end = season_month_end,
                        start_date = start_date, end_date = end_date,
                        treatment_method = treatment_method,
                        natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                       use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
-                       natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                       use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal[i],
+                       natural_distance_scale = natural_distance_scale[i], anthropogenic_distance_scale = anthropogenic_distance_scale[i], 
                        natural_dir = natural_dir, natural_kappa = natural_kappa,
                        anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
                        output_frequency = output_frequency
