@@ -248,6 +248,34 @@ pops <- function(infected_file, host_file, total_plants_file,
   mortality <- mortality_tracker
   resistant <- mortality_tracker
   
+  reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = 1)
+  if (reproductive_rate_check$checks_passed) {
+    reproductive_rate <- reproductive_rate_check$value
+  } else {
+    return(reproductive_rate_check$failed_check)
+  }
+  
+  natural_distance_scale_check <- uncertainty_check(natural_distance_scale, round_to = 0, n = 1)
+  if (natural_distance_scale_check$checks_passed) {
+    natural_distance_scale <- natural_distance_scale_check$value
+  } else {
+    return(natural_distance_scale_check$failed_check)
+  }
+    
+  anthropogenic_distance_scale_check <- uncertainty_check(anthropogenic_distance_scale, round_to = 0, n = 1)
+  if (anthropogenic_distance_scale_check$checks_passed) {
+    anthropogenic_distance_scale <- anthropogenic_distance_scale_check$value
+  } else {
+    return(anthropogenic_distance_scale_check$failed_check)
+  }
+  
+  percent_natural_dispersal_check <- uncertainty_check(percent_natural_dispersal, round_to = 3, n = 1)
+  if (percent_natural_dispersal_check$checks_passed) {
+    percent_natural_dispersal <- percent_natural_dispersal_check$value
+  } else {
+    return(percent_natural_dispersal_check$failed_check)
+  }
+  
   data <- PoPS::pops_model(random_seed = random_seed, 
                      use_lethal_temperature = use_lethal_temperature, 
                      lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
