@@ -80,100 +80,44 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
   }
   
   ## Setup for reproductive rate to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
-  if (class(prior_reproductive_rate) == "numeric" && length(prior_reproductive_rate) == 2) {
-    prior_reproductive_rate <- matrix(prior_reproductive_rate, ncol = 2)
-  } 
-  
-  if (class(prior_reproductive_rate) %in% c("matrix", "data.frame") && ncol(prior_reproductive_rate) == 2) {
-    if (class(prior_reproductive_rate) == "matrix" && nrow(prior_reproductive_rate) == 1) {
-      start_reproductive_rate <- prior_reproductive_rate[1]
-      sd_reproductive_rate <- prior_reproductive_rate[2]
-    } else if (class(prior_reproductive_rate) == "data.frame" && nrow(prior_reproductive_rate) == 1) {
-      start_reproductive_rate <- prior_reproductive_rate[[1]]
-      sd_reproductive_rate <- 0
-    } else if (class(prior_reproductive_rate) %in% c("matrix", "data.frame") && nrow(prior_reproductive_rate) > 1) {
-      names(prior_reproductive_rate) <- c('var', 'prob')
-      start_reproductive_rate <- prior_reproductive_rate$var[prior_reproductive_rate$prob == max(prior_reproductive_rate$prob)]
-      if(length(start_reproductive_rate) > 1) {
-        start_reproductive_rate <- mean(start_reproductive_rate)
-      }
-      sd_reproductive_rate <- sd(prior_reproductive_rate$var)
-    }
+  prior_reproductive_rate_check <- prior_checks(prior_reproductive_rate)
+  if(prior_reproductive_rate_check$checks_passed) {
+    prior_reproductive_rate <- prior_reproductive_rate_check$priors
+    start_reproductive_rate <- prior_reproductive_rate_check$start_priors
+    sd_reproductive_rate <- prior_reproductive_rate_check$sd_priors
   } else {
-    return("Incorrect format for prior reproductive rate")
+    return(prior_reproductive_rate_check$failed_check)
   }
   
   ## Setup for natural dispersal scale to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
-  if (class(prior_natural_distance_scale) == "numeric" && length(prior_natural_distance_scale) == 2) {
-    prior_natural_distance_scale <- matrix(prior_natural_distance_scale, ncol = 2)
-  } 
-  
-  if (class(prior_natural_distance_scale) %in% c("matrix", "data.frame") && ncol(prior_natural_distance_scale) == 2) {
-    if (class(prior_natural_distance_scale) == "matrix" && nrow(prior_natural_distance_scale) == 1) {
-      start_natural_distance_scale <- prior_natural_distance_scale[1]
-      sd_natural_distance_scale <- prior_natural_distance_scale[2]
-    } else if (class(prior_natural_distance_scale) == "data.frame" && nrow(prior_natural_distance_scale) == 1) {
-      start_natural_distance_scale <- prior_natural_distance_scale[[1]]
-      sd_natural_distance_scale <- 0
-    } else if (class(prior_natural_distance_scale) %in% c("matrix", "data.frame") && nrow(prior_natural_distance_scale) > 1) {
-      names(prior_natural_distance_scale) <- c('var', 'prob')
-      start_natural_distance_scale <- prior_natural_distance_scale$var[prior_natural_distance_scale$prob == max(prior_natural_distance_scale$prob)]
-      if(length(start_natural_distance_scale) > 1) {
-        start_natural_distance_scale <- mean(start_natural_distance_scale)
-      }
-      sd_natural_distance_scale <- sd(prior_natural_distance_scale$var)
-    }
+  prior_natural_distance_scale_check <- prior_checks(prior_natural_distance_scale)
+  if(prior_natural_distance_scale_check$checks_passed) {
+    prior_natural_distance_scale <- prior_natural_distance_scale_check$priors
+    start_natural_distance_scale <- prior_natural_distance_scale_check$start_priors
+    sd_natural_distance_scale <- prior_natural_distance_scale_check$sd_priors
   } else {
-    return("Incorrect format for prior natural distance scale")
+    return(prior_natural_distance_scale_check$failed_check)
   }
-  
+
   ## Setup for anthropogenic dispersal scale to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
-  if (class(prior_anthropogenic_distance_scale) == "numeric" && length(prior_anthropogenic_distance_scale) == 2) {
-    prior_anthropogenic_distance_scale <- matrix(prior_anthropogenic_distance_scale, ncol = 2)
-  } 
-  
-  if (class(prior_anthropogenic_distance_scale) %in% c("matrix", "data.frame") && ncol(prior_anthropogenic_distance_scale) == 2) {
-    if (class(prior_anthropogenic_distance_scale) == "matrix" && nrow(prior_anthropogenic_distance_scale) == 1) {
-      start_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale[1]
-      sd_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale[2]
-    } else if (class(prior_anthropogenic_distance_scale) == "data.frame" && nrow(prior_anthropogenic_distance_scale) == 1) {
-      start_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale[[1]]
-      sd_anthropogenic_distance_scale <- 0
-    } else if (class(prior_anthropogenic_distance_scale) %in% c("matrix", "data.frame") && nrow(prior_anthropogenic_distance_scale) > 1) {
-      names(prior_anthropogenic_distance_scale) <- c('var', 'prob')
-      start_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale$var[prior_anthropogenic_distance_scale$prob == max(prior_anthropogenic_distance_scale$prob)]
-      if(length(start_anthropogenic_distance_scale) > 1) {
-        start_anthropogenic_distance_scale <- mean(start_anthropogenic_distance_scale)
-      }
-      sd_anthropogenic_distance_scale <- sd(prior_anthropogenic_distance_scale$var)
-    }
+  prior_anthropogenic_distance_scale_check <- prior_checks(prior_anthropogenic_distance_scale)
+  if(prior_anthropogenic_distance_scale_check$checks_passed) {
+    prior_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale_check$priors
+    start_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale_check$start_priors
+    sd_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale_check$sd_priors
   } else {
-    return("Incorrect format for prior athropogenic distance scale")
+    return(prior_anthropogenic_distance_scale_check$failed_check)
   }
-    
+
   ## Setup for percent natural distance to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
-  if (class(prior_percent_natural_dispersal) == "numeric" && length(prior_percent_natural_dispersal) == 2) {
-    prior_percent_natural_dispersal <- matrix(prior_percent_natural_dispersal, ncol = 2)
-  } 
-    
-  if (class(prior_percent_natural_dispersal) %in% c("matrix", "data.frame") && ncol(prior_percent_natural_dispersal) == 2) {
-    if (class(prior_percent_natural_dispersal) == "matrix" && nrow(prior_percent_natural_dispersal) == 1) {
-      start_percent_natural_dispersal <- prior_percent_natural_dispersal[1]
-      sd_percent_natural_dispersal <- prior_percent_natural_dispersal[2]
-    } else if (class(prior_percent_natural_dispersal) == "data.frame" && nrow(prior_percent_natural_dispersal) == 1) {
-      start_percent_natural_dispersal <- prior_percent_natural_dispersal[[1]]
-      sd_percent_natural_dispersal <- 0
-    } else if (class(prior_percent_natural_dispersal) %in% c("matrix", "data.frame") && nrow(prior_percent_natural_dispersal) > 1) {
-      names(prior_percent_natural_dispersal) <- c('var', 'prob')
-      start_percent_natural_dispersal <- prior_percent_natural_dispersal$var[prior_percent_natural_dispersal$prob == max(prior_percent_natural_dispersal$prob)]
-      if(length(start_percent_natural_dispersal) > 1) {
-        start_percent_natural_dispersal <- mean(start_percent_natural_dispersal)
-      }
-      sd_percent_natural_dispersal <- sd(prior_percent_natural_dispersal$var)
-    }
+  prior_percent_natural_dispersal_check <- prior_checks(prior_percent_natural_dispersal)
+  if(prior_percent_natural_dispersal_check$checks_passed) {
+    prior_percent_natural_dispersal <- prior_percent_natural_dispersal_check$priors
+    start_percent_natural_dispersal <- prior_percent_natural_dispersal_check$start_priors
+    sd_percent_natural_dispersal <- prior_percent_natural_dispersal_check$sd_priors
   } else {
-    return("Incorrect format for prior percent natural distance")
-  }
+    return(prior_percent_natural_dispersal_check$failed_check)
+  } 
   
   infected_check <- initial_raster_checks(infected_file)
   if (infected_check$checks_passed) {
@@ -615,158 +559,43 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
   ## Use prior and calibrated parameters to update to posteriors
   count <- 10000000
   # Reproductive Rate
-  if (class(prior_reproductive_rate) == "matrix" && nrow(prior_reproductive_rate) == 1) {
-    prior_reproductive_rates <- round(rnorm(count, start_reproductive_rate, sd_reproductive_rate), digits = 1)
-    prior_reproductive_rates <- as.data.frame(table(prior_reproductive_rates))
-    prior_reproductive_rates$prior_reproductive_rates <- as.numeric(as.character(prior_reproductive_rates$prior_reproductive_rates))
-    prior_reproductive_rates$prob <- round(prior_reproductive_rates$Freq/count, digits = 3)
-    prior_reproductive_rates <- prior_reproductive_rates[prior_reproductive_rates$prob > 0.00,]
-  } else if (class(prior_reproductive_rate) %in% c("matrix", "data.frame") && nrow(prior_reproductive_rate) > 1) {
-    prior_reproductive_rates <- prior_reproductive_rate[ , 1:2]
-    names(prior_reproductive_rates) <- c('prior_reproductive_rates', 'prob')
-    
+  reproductive_rate_checks <- bayesian_checks(prior_reproductive_rate, start_reproductive_rate, sd_reproductive_rate, params$reproductive_rate, count, prior_weight, weight, step_size = 0.1, bounds = c(0, Inf), round_to = 1, round_to_digits = 1)
+  if(reproductive_rate_checks$checks_passed) {
+    reproductive_rates <- reproductive_rate_checks$rates
+    posterior_reproductive_rates <- reproductive_rate_checks$posterior_rates
+  } else {
+    return(reproductive_rate_checks$failed_check)
   }
 
-  calibration_count <- nrow(params)
-  calibrated_reproductive_rates <- as.data.frame(table(params$reproductive_rate))
-  calibrated_reproductive_rates$Var1 <- as.numeric(as.character(calibrated_reproductive_rates$Var1))
-  calibrated_reproductive_rates$prob <- round(calibrated_reproductive_rates$Freq/calibration_count, digits = 3)
-  
-  min_reproductive_rate <- min(min(prior_reproductive_rates$prior_reproductive_rates), min(calibrated_reproductive_rates$Var1))
-  max_reproductive_rate <- max(max(prior_reproductive_rates$prior_reproductive_rates), max(calibrated_reproductive_rates$Var1))
-  
-  reproductive_rates <- data.frame(reproductive_rate = round(seq(min_reproductive_rate, max_reproductive_rate, 0.1), digits = 1), 
-                                   prior_probability = rep(0, length(seq(min_reproductive_rate, max_reproductive_rate, 0.1))),
-                                   calibrated_probability = rep(0, length(seq(min_reproductive_rate, max_reproductive_rate, 0.1))),
-                                   posterior_probability = rep(0, length(seq(min_reproductive_rate, max_reproductive_rate, 0.1))))
-  
-  for (i in 1:nrow(reproductive_rates)) {
-    if (length(prior_reproductive_rates$prob[prior_reproductive_rates$prior_reproductive_rates == reproductive_rates$reproductive_rate[i]]) > 0) {
-      reproductive_rates$prior_probability[i] <- prior_reproductive_rates$prob[prior_reproductive_rates$prior_reproductive_rates == reproductive_rates$reproductive_rate[i]]
-    }
-    if (length(calibrated_reproductive_rates$prob[calibrated_reproductive_rates$Var1 == reproductive_rates$reproductive_rate[i]]) > 0) {
-      reproductive_rates$calibrated_probability[i] <- calibrated_reproductive_rates$prob[calibrated_reproductive_rates$Var1 == reproductive_rates$reproductive_rate[i]]
-    }
-  }
-  reproductive_rates$posterior_probability <- round(reproductive_rates$prior_probability*prior_weight + reproductive_rates$calibrated_probability * weight, digits = 3)
-  colSums(reproductive_rates)
-  posterior_reproductive_rates <- reproductive_rates[,c(1,4)]
-  
   # Natural Distance Scale
-  if (class(prior_natural_distance_scale) == "matrix" && nrow(prior_natural_distance_scale) == 1) {
-    prior_natural_distance_scales <- round(rnorm(count, start_natural_distance_scale, sd_natural_distance_scale), digits = 0)
-    prior_natural_distance_scales <- as.data.frame(table(prior_natural_distance_scales))
-    prior_natural_distance_scales$prior_natural_distance_scales <- as.numeric(as.character(prior_natural_distance_scales$prior_natural_distance_scales))
-    prior_natural_distance_scales$prob <- round(prior_natural_distance_scales$Freq/count, digits = 3)
-    prior_natural_distance_scales <- prior_natural_distance_scales[prior_natural_distance_scales$prob > 0.000,]
-  } else if (class(prior_natural_distance_scale) %in% c("matrix", "data.frame") && nrow(prior_natural_distance_scale) > 1) {
-    prior_natural_distance_scales <- prior_natural_distance_scale[ , 1:2]
-    names(prior_natural_distance_scales) <- c('prior_natural_distance_scales', 'prob')
+  natural_distance_scale_checks <- bayesian_checks(prior_natural_distance_scale, start_natural_distance_scale, sd_natural_distance_scale, params$natural_distance_scale, count, prior_weight, weight, step_size = 1, bounds = c(0, Inf), round_to = 1, round_to_digits = 0)
+  if(natural_distance_scale_checks$checks_passed) {
+    natural_distance_scales <- natural_distance_scale_checks$rates
+    posterior_natural_distance_scales <- natural_distance_scale_checks$posterior_rates
+  } else {
+    return(natural_distance_scale_checks$failed_check)
   }
-  
-  calibration_count <- nrow(params)
-  calibrated_natural_distance_scales <- as.data.frame(table(params$natural_distance_scale))
-  calibrated_natural_distance_scales$Var1 <- as.numeric(as.character(calibrated_natural_distance_scales$Var1))
-  calibrated_natural_distance_scales$prob <- round(calibrated_natural_distance_scales$Freq/calibration_count, digits = 3)
-  
-  min_natural_distance_scale <- min(min(prior_natural_distance_scales$prior_natural_distance_scales), min(calibrated_natural_distance_scales$Var1))
-  max_natural_distance_scale <- max(max(prior_natural_distance_scales$prior_natural_distance_scales), max(calibrated_natural_distance_scales$Var1))
-  
-  natural_distance_scales <- data.frame(natural_distance_scale = round(seq(min_natural_distance_scale, max_natural_distance_scale, 1), digits = 1), 
-                                   prior_probability = rep(0, length(seq(min_natural_distance_scale, max_natural_distance_scale, 1))),
-                                   calibrated_probability = rep(0, length(seq(min_natural_distance_scale, max_natural_distance_scale, 1))),
-                                   posterior_probability = rep(0, length(seq(min_natural_distance_scale, max_natural_distance_scale, 1))))
-  
-  for (i in 1:nrow(natural_distance_scales)) {
-    if (length(prior_natural_distance_scales$prob[prior_natural_distance_scales$prior_natural_distance_scales == natural_distance_scales$natural_distance_scale[i]]) > 0) {
-      natural_distance_scales$prior_probability[i] <- prior_natural_distance_scales$prob[prior_natural_distance_scales$prior_natural_distance_scales == natural_distance_scales$natural_distance_scale[i]]
-    }
-    if (length(calibrated_natural_distance_scales$prob[calibrated_natural_distance_scales$Var1 == natural_distance_scales$natural_distance_scale[i]]) > 0) {
-      natural_distance_scales$calibrated_probability[i] <- calibrated_natural_distance_scales$prob[calibrated_natural_distance_scales$Var1 == natural_distance_scales$natural_distance_scale[i]]
-    }
-  }
-  natural_distance_scales$posterior_probability <- round(natural_distance_scales$prior_probability*prior_weight + natural_distance_scales$calibrated_probability * weight, digits = 3)
-  colSums(natural_distance_scales)
-  posterior_natural_distance_scales <- natural_distance_scales[,c(1,4)]
   
   # Anthropogenic Distance Scale
-  if (class(prior_anthropogenic_distance_scale) %in% c("matrix", "data.frame") && nrow(prior_anthropogenic_distance_scale) == 1) {
-    prior_anthropogenic_distance_scales <- round(rnorm(count, start_anthropogenic_distance_scale, sd_anthropogenic_distance_scale)/10, digits = 0)*10
-    prior_anthropogenic_distance_scales <- as.data.frame(table(prior_anthropogenic_distance_scales))
-    prior_anthropogenic_distance_scales$prior_anthropogenic_distance_scales <- as.numeric(as.character(prior_anthropogenic_distance_scales$prior_anthropogenic_distance_scales))
-    prior_anthropogenic_distance_scales$prob <- round(prior_anthropogenic_distance_scales$Freq/count, digits = 3)
-    prior_anthropogenic_distance_scales <- prior_anthropogenic_distance_scales[prior_anthropogenic_distance_scales$prob > 0.000,]
-  } else if (class(prior_anthropogenic_distance_scale) %in% c("matrix", "data.frame") && nrow(prior_anthropogenic_distance_scale) > 1) {
-    prior_anthropogenic_distance_scales <- prior_anthropogenic_distance_scale[ , 1:2]
-    names(prior_anthropogenic_distance_scales) <- c('prior_anthropogenic_distance_scales', 'prob')
+  anthropogenic_distance_scale_checks <- bayesian_checks(prior_anthropogenic_distance_scale, start_anthropogenic_distance_scale, sd_anthropogenic_distance_scale, params$anthropogenic_distance_scale, count, prior_weight, weight, step_size = 10, bounds = c(0, Inf), round_to = 10, round_to_digits = 0)
+  if(anthropogenic_distance_scale_checks$checks_passed) {
+    anthropogenic_distance_scales <- anthropogenic_distance_scale_checks$rates
+    posterior_anthropogenic_distance_scales <- anthropogenic_distance_scale_checks$posterior_rates
+  } else {
+    return(anthropogenic_distance_scale_checks$failed_check)
   }
-  
-  calibration_count <- nrow(params)
-  calibrated_anthropogenic_distance_scales <- as.data.frame(table(params$anthropogenic_distance_scale))
-  calibrated_anthropogenic_distance_scales$Var1 <- as.numeric(as.character(calibrated_anthropogenic_distance_scales$Var1))
-  calibrated_anthropogenic_distance_scales$prob <- round(calibrated_anthropogenic_distance_scales$Freq/calibration_count, digits = 3)
-  
-  min_anthropogenic_distance_scale <- min(min(prior_anthropogenic_distance_scales$prior_anthropogenic_distance_scales), min(calibrated_anthropogenic_distance_scales$Var1))
-  max_anthropogenic_distance_scale <- max(max(prior_anthropogenic_distance_scales$prior_anthropogenic_distance_scales), max(calibrated_anthropogenic_distance_scales$Var1))
-  
-  anthropogenic_distance_scales <- data.frame(anthropogenic_distance_scale = round(seq(min_anthropogenic_distance_scale, max_anthropogenic_distance_scale, 10), digits = 1), 
-                                        prior_probability = rep(0, length(seq(min_anthropogenic_distance_scale, max_anthropogenic_distance_scale, 10))),
-                                        calibrated_probability = rep(0, length(seq(min_anthropogenic_distance_scale, max_anthropogenic_distance_scale, 10))),
-                                        posterior_probability = rep(0, length(seq(min_anthropogenic_distance_scale, max_anthropogenic_distance_scale, 10))))
-  
-  for (i in 1:nrow(anthropogenic_distance_scales)) {
-    if (length(prior_anthropogenic_distance_scales$prob[prior_anthropogenic_distance_scales$prior_anthropogenic_distance_scales == anthropogenic_distance_scales$anthropogenic_distance_scale[i]]) > 0) {
-      anthropogenic_distance_scales$prior_probability[i] <- prior_anthropogenic_distance_scales$prob[prior_anthropogenic_distance_scales$prior_anthropogenic_distance_scales == anthropogenic_distance_scales$anthropogenic_distance_scale[i]]
-    }
-    if (length(calibrated_anthropogenic_distance_scales$prob[calibrated_anthropogenic_distance_scales$Var1 == anthropogenic_distance_scales$anthropogenic_distance_scale[i]]) > 0) {
-      anthropogenic_distance_scales$calibrated_probability[i] <- calibrated_anthropogenic_distance_scales$prob[calibrated_anthropogenic_distance_scales$Var1 == anthropogenic_distance_scales$anthropogenic_distance_scale[i]]
-    }
-  }
-  anthropogenic_distance_scales$posterior_probability <- round(anthropogenic_distance_scales$prior_probability*prior_weight + anthropogenic_distance_scales$calibrated_probability * weight, digits = 3)
-  colSums(anthropogenic_distance_scales)
-  posterior_anthropogenic_distance_scales <- anthropogenic_distance_scales[,c(1,4)]
   
   # Percent Natural Dispersal
-  if (class(prior_percent_natural_dispersal) %in% c("matrix", "data.frame") && nrow(prior_percent_natural_dispersal) == 1) {
-    prior_percent_natural_dispersals <- round(rnorm(count, start_percent_natural_dispersal, sd_percent_natural_dispersal), digits = 3)
-    prior_percent_natural_dispersals <- as.data.frame(table(prior_percent_natural_dispersals))
-    prior_percent_natural_dispersals$prior_percent_natural_dispersals <- as.numeric(as.character(prior_percent_natural_dispersals$prior_percent_natural_dispersals))
-    prior_percent_natural_dispersals$prob <- round(prior_percent_natural_dispersals$Freq/count, digits = 3)
-    prior_percent_natural_dispersals <- prior_percent_natural_dispersals[prior_percent_natural_dispersals$prob > 0.000,]
-    prior_percent_natural_dispersals$prob[prior_percent_natural_dispersals$prior_percent_natural_dispersals == 1.000] <- sum(prior_percent_natural_dispersals$prob[prior_percent_natural_dispersals$prior_percent_natural_dispersals >= 1.0])
-    prior_percent_natural_dispersals <- prior_percent_natural_dispersals[prior_percent_natural_dispersals$prior_percent_natural_dispersals <= 1.0,]
-  } else if (class(prior_percent_natural_dispersal) %in% c("matrix", "data.frame") && nrow(prior_percent_natural_dispersal) > 1) {
-    prior_percent_natural_dispersals <- prior_percent_natural_dispersal[ , 1:2]
-    names(prior_percent_natural_dispersals) <- c('prior_percent_natural_dispersals', 'prob')
+  percent_natural_dispersal_checks <- bayesian_checks(prior_percent_natural_dispersal, start_percent_natural_dispersal, sd_percent_natural_dispersal, params$percent_natural_dispersal, count, prior_weight, weight, step_size = 0.001, bounds = c(0, 1.000), round_to = 1, round_to_digits = 3)
+  if(percent_natural_dispersal_checks$checks_passed) {
+    percent_natural_dispersals <- percent_natural_dispersal_checks$rates
+    posterior_percent_natural_dispersals <- percent_natural_dispersal_checks$posterior_rates
+  } else {
+    return(percent_natural_dispersal_checks$failed_check)
   }
-  
-  calibration_count <- nrow(params)
-  calibrated_percent_natural_dispersals <- as.data.frame(table(params$percent_natural_dispersal))
-  calibrated_percent_natural_dispersals$Var1 <- as.numeric(as.character(calibrated_percent_natural_dispersals$Var1))
-  calibrated_percent_natural_dispersals$prob <- round(calibrated_percent_natural_dispersals$Freq/calibration_count, digits = 3)
-  
-  min_percent_natural_dispersal <- min(min(prior_percent_natural_dispersals$prior_percent_natural_dispersals), min(calibrated_percent_natural_dispersals$Var1))
-  max_percent_natural_dispersal <- max(max(prior_percent_natural_dispersals$prior_percent_natural_dispersals), max(calibrated_percent_natural_dispersals$Var1))
-  
-  percent_natural_dispersals <- data.frame(percent_natural_dispersal = round(seq(min_percent_natural_dispersal, max_percent_natural_dispersal, 0.001), digits = 3), 
-                                        prior_probability = rep(0, length(seq(min_percent_natural_dispersal, max_percent_natural_dispersal, 0.001))),
-                                        calibrated_probability = rep(0, length(seq(min_percent_natural_dispersal, max_percent_natural_dispersal, 0.001))),
-                                        posterior_probability = rep(0, length(seq(min_percent_natural_dispersal, max_percent_natural_dispersal, 0.001))))
-  
-  for (i in 1:nrow(percent_natural_dispersals)) {
-    if (length(prior_percent_natural_dispersals$prob[prior_percent_natural_dispersals$prior_percent_natural_dispersals == percent_natural_dispersals$percent_natural_dispersal[i]]) > 0) {
-      percent_natural_dispersals$prior_probability[i] <- prior_percent_natural_dispersals$prob[prior_percent_natural_dispersals$prior_percent_natural_dispersals == percent_natural_dispersals$percent_natural_dispersal[i]]
-    }
-    if (length(calibrated_percent_natural_dispersals$prob[calibrated_percent_natural_dispersals$Var1 == percent_natural_dispersals$percent_natural_dispersal[i]]) > 0) {
-      percent_natural_dispersals$calibrated_probability[i] <- calibrated_percent_natural_dispersals$prob[calibrated_percent_natural_dispersals$Var1 == percent_natural_dispersals$percent_natural_dispersal[i]]
-    }
-  }
-  percent_natural_dispersals$posterior_probability <- round(percent_natural_dispersals$prior_probability*prior_weight + percent_natural_dispersals$calibrated_probability * weight, digits = 3)
-  colSums(percent_natural_dispersals)
-  posterior_percent_natural_dispersals <- percent_natural_dispersals[,c(1,4)]
   
   outputs <- list(posterior_reproductive_rates, posterior_natural_distance_scales, posterior_anthropogenic_distance_scales, posterior_percent_natural_dispersals, total_number_of_observations, reproductive_rates, natural_distance_scales, anthropogenic_distance_scales, percent_natural_dispersals, params)
   names(outputs) <- c('posterior_reproductive_rates', 'posterior_natural_distance_scales', 'posterior_anthropogenic_distance_scales', 'posterior_percent_natural_dispersals', 'total_number_of_observations', 'reproductive_rates', 'natural_distance_scales', 'anthropogenic_distance_scales', 'percent_natural_dispersals', 'raw_calibration_data')
-  
+
   return(outputs)
 }
