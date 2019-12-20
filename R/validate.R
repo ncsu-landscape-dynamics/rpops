@@ -12,7 +12,7 @@
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers
+#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -205,7 +205,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
       return(treatments_check$failed_check)
     }
     
-    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates)
+    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy)
     if (treatment_check$checks_passed) {
       treatment_maps <- treatment_check$treatment_maps
     } else {

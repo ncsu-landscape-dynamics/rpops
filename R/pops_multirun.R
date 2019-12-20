@@ -8,7 +8,7 @@
 #' @param num_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
 #' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers
+#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -186,7 +186,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
       return(treatments_check$failed_check)
     }
     
-    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates)
+    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy)
     if (treatment_check$checks_passed) {
       treatment_maps <- treatment_check$treatment_maps
     } else {

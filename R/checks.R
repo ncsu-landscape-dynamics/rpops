@@ -78,7 +78,7 @@ secondary_raster_checks <- function(x, x2) {
   }
 }
 
-treatment_checks <- function(treatment_stack, treatments_file, pesticide_duration, treatment_dates) {
+treatment_checks <- function(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy) {
   checks_passed <- TRUE
   
   if (length(treatments_file) != length(treatment_dates)) {
@@ -342,9 +342,5 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
     outs <- list(checks_passed, rates, posterior_rates)
     names(outs) <- c('checks_passed', 'rates', 'posterior_rates')
     return(outs)
-  } else {
-    outs <- list(checks_passed, failed_check)
-    names(outs) <- c('checks_passed', 'failed_check')
-    return(outs)
-  }
+  } 
 }

@@ -43,7 +43,7 @@
 #' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
 #' 
 #' @useDynLib PoPS, .registration = TRUE
-#' @importFrom raster raster values as.matrix xres yres stack extent
+#' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
 #' @importFrom lubridate interval time_length
@@ -221,7 +221,7 @@ pops <- function(infected_file, host_file, total_plants_file,
       return(treatments_check$failed_check)
     }
     
-    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates)
+    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy)
     if (treatment_check$checks_passed) {
       treatment_maps <- treatment_check$treatment_maps
     } else {
