@@ -13,6 +13,11 @@ choose_variable_based_on_probability <- function(x, n = 1) {
   names(x) <- c('var', 'prob')
   for (i in 1:nrow(x)){
     x$bin[i] <- sum(x$prob[1:i])
+    if (i == nrow(x)) {
+      if ((x$bin[i] < 1.00 && x$bin[i] > 0.985) || (x$bin[i] > 1.00 && x$bin[i] < 1.01)) {
+        x$bin[i] <- 1.00
+      }
+    }
   }
     rn <- runif(n)
     value <- rep(0,n)
@@ -45,6 +50,10 @@ uncertainty_check <- function(priors, round_to = 0, n = 1) {
     } else if (class(priors) %in% c("matrix", "data.frame") && nrow(priors) >= 1) {
       if (class(priors) == "matrix") {
         priors <- data.frame(priors)
+      }
+      if (round(sum(priors[,2]), 3) < 0.985 || round(sum(priors[,2]), 3) > 1.01) {
+        checks_passed <- FALSE
+        failed_check <- "probabilities do not add up to 1"
       }
       value <- choose_variable_based_on_probability(priors, n)
     }
