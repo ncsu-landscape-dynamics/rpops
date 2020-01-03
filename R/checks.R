@@ -8,7 +8,7 @@ initial_raster_checks <- function(x) {
     failed_check <- "file does not exist" 
   }
   
-  if (!all((raster::extension(x) %in% c(".grd", ".tif", ".img")))) {
+  if (checks_passed && !all((raster::extension(x) %in% c(".grd", ".tif", ".img")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.grd', '.tif', '.img'"
   }
@@ -16,11 +16,11 @@ initial_raster_checks <- function(x) {
   if (checks_passed) {
     r<- raster::stack(x)
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+    if (raster::nlayers(r) > 1) {
+      r <- output_from_raster_mean_and_sd(r)
+    }
   }
   
-  if (raster::nlayers(r) > 1) {
-    r <- output_from_raster_mean_and_sd(r)
-  }
   
   if (checks_passed) {
     outs <- list(checks_passed, r)
@@ -42,7 +42,7 @@ secondary_raster_checks <- function(x, x2) {
     failed_check <- "file does not exist" 
   }
   
-  if (!all((raster::extension(x) %in% c(".grd", ".tif", ".img")))) {
+  if (checks_passed && !all((raster::extension(x) %in% c(".grd", ".tif", ".img")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.grd', '.tif', '.img'"
   }
@@ -52,17 +52,17 @@ secondary_raster_checks <- function(x, x2) {
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   }
   
-  if (!(raster::extent(x2) == raster::extent(r))) {
+  if (checks_passed && !(raster::extent(x2) == raster::extent(r))) {
     checks_passed <- FALSE
     failed_check <- "Extents of input rasters do not match. Ensure that all of your input rasters have the same extent"
   }
   
-  if (!(raster::xres(x2) == raster::xres(r) && raster::yres(x2) == raster::yres(r))) {
+  if (checks_passed && !(raster::xres(x2) == raster::xres(r) && raster::yres(x2) == raster::yres(r))) {
     checks_passed <- FALSE
     failed_check <- "Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution"
   }
   
-  if (!raster::compareCRS(r,x2)) {
+  if (checks_passed && !raster::compareCRS(r,x2)) {
     checks_passed <- FALSE
     failed_check <- "Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs"
   }
@@ -81,29 +81,31 @@ secondary_raster_checks <- function(x, x2) {
 treatment_checks <- function(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy) {
   checks_passed <- TRUE
   
-  if (length(treatments_file) != length(treatment_dates)) {
+  if (checks_passed && length(treatments_file) != length(treatment_dates)) {
     checks_passed <- FALSE
     failed_check <- "Length of list for treatment dates and treatments_file must be equal"
   }
   
-  if (length(pesticide_duration) != length(treatment_dates)) {
+  if (checks_passed && length(pesticide_duration) != length(treatment_dates)) {
     checks_passed <- FALSE
     failed_check <- "Length of list for treatment dates and pesticide_duration must be equal"
   }
   
-  if (pesticide_duration[1] > 0) {
-    treatment_maps <- list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
-  } else {
-    treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
-  }
-  
-  if (raster::nlayers(treatment_stack) >= 2) {
-    for(i in 2:raster::nlayers(treatment_stack)) {
-      if (pesticide_duration[i] > 0) {
-        treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
-      } else {
-        treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
-        
+  if (checks_passed) {
+    if (pesticide_duration[1] > 0) {
+      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+    } else {
+      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+    }
+    
+    if (raster::nlayers(treatment_stack) >= 2) {
+      for(i in 2:raster::nlayers(treatment_stack)) {
+        if (pesticide_duration[i] > 0) {
+          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
+        } else {
+          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
+          
+        }
       }
     }
   }
@@ -145,11 +147,13 @@ metric_checks <- function(success_metric) {
     configuration <- FALSE
   } else if (success_metric == "quantity and configuration") {
     configuration <- TRUE
-  } else if (success_metric == "odds_ratio") {
+  } else if (success_metric == "odds ratio") {
+    configuration <- FALSE
+  } else if (success_metric == "residual error") {
     configuration <- FALSE
   } else {
     checks_passed <- FALSE
-    failed_check <- "Success metric must be one of 'quantity', 'quantity and configuration', or 'odds_ratio'"
+    failed_check <- "Success metric must be one of 'quantity', 'quantity and configuration', 'residual error', or 'odds ratio'"
   }
   
   if (checks_passed) {
@@ -190,58 +194,59 @@ percent_checks <- function(percent_natural_dispersal) {
 time_checks <- function(end_date, start_date, time_step, output_frequency) {
   checks_passed <- TRUE
   
-  if (!(time_step %in% list("week", "month", "day"))) {
+  if (checks_passed && !(time_step %in% list("week", "month", "day"))) {
     checks_passed <- FALSE
     failed_check <- "Time step must be one of 'week', 'month' or 'day'"
   }
   
-  if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
+  if (checks_passed && (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d")))){
     checks_passed <- FALSE
     failed_check <- "End time and/or start time not of type numeric and/or in format YYYY-MM-DD"
   }
   
-  if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
+  if (checks_passed && !(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
     checks_passed <- FALSE
-    failed_check <- "Time step must be one of 'week', 'month' or 'day'"
+    failed_check <- "Output frequency must be one of 'week', 'month' or 'day'"
   }
   
-  if (output_frequency == "day") {
+  if (checks_passed && output_frequency == "day") {
     if (time_step == "week" || time_step == "month") {
       checks_passed <- FALSE
       failed_check <- "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible"
     }
   }
   
-  if (output_frequency == "week") {
+  if (checks_passed && output_frequency == "week") {
     if (time_step == "month") {
       checks_passed <- FALSE
       failed_check <- "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible"
     }
   }
   
-  
-  duration <- lubridate::interval(start_date, end_date)
-  
-  if (time_step == "week") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "week"))
-  } else if (time_step == "month") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "month"))
-  } else if (time_step == "day") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "day"))
-  }
-  
-  number_of_years <- ceiling(lubridate::time_length(duration, "year"))
-  
-  if (output_frequency == "week") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "week"))
-  } else if (output_frequency == "month") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "month"))
-  } else if (output_frequency == "day") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "day"))
-  } else if (output_frequency == "year") {
-    number_of_outputs <- ceiling(lubridate::time_length(duration, "year"))
-  } else if (output_frequency == "time_step") {
-    number_of_outputs <- number_of_time_steps
+  if (checks_passed) {
+    duration <- lubridate::interval(start_date, end_date)
+    
+    if (time_step == "week") {
+      number_of_time_steps <- ceiling(lubridate::time_length(duration, "week"))
+    } else if (time_step == "month") {
+      number_of_time_steps <- ceiling(lubridate::time_length(duration, "month"))
+    } else if (time_step == "day") {
+      number_of_time_steps <- ceiling(lubridate::time_length(duration, "day"))
+    }
+    
+    number_of_years <- ceiling(lubridate::time_length(duration, "year"))
+    
+    if (output_frequency == "week") {
+      number_of_outputs <- ceiling(lubridate::time_length(duration, "week"))
+    } else if (output_frequency == "month") {
+      number_of_outputs <- ceiling(lubridate::time_length(duration, "month"))
+    } else if (output_frequency == "day") {
+      number_of_outputs <- ceiling(lubridate::time_length(duration, "day"))
+    } else if (output_frequency == "year") {
+      number_of_outputs <- ceiling(lubridate::time_length(duration, "year"))
+    } else if (output_frequency == "time_step") {
+      number_of_outputs <- number_of_time_steps
+    }
   }
   
   if (checks_passed) {
@@ -253,7 +258,7 @@ time_checks <- function(end_date, start_date, time_step, output_frequency) {
     names(outs) <- c('checks_passed', 'failed_check')
     return(outs)
   }
-  
+
 }
 
 ## check for making sure priors are in the proper format and output the mean where the mean serves as the starting point for the calibration
