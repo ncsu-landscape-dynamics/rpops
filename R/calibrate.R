@@ -264,11 +264,6 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
   if (length(total_infections) > number_of_years){
     total_infections <- total_infections[1:number_of_years]
   }
-  ## set up reclassification matrix for binary reclassification
-  rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
-  ## reclassify to binary values
-  infection_years <- reclassify(infection_years, rclmat)
   ## Get rid of NA values to make comparisons
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   num_layers_infected_years <- raster::nlayers(infection_years)
@@ -319,7 +314,6 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
   comp_year <- raster(infected_file)
   all_disagreement <- foreach(q = 1:length(data$infected), .combine = rbind, .packages =c("raster", "PoPS"), .final = colSums) %do% {
     comp_year[] <- data$infected[[q]]
-    comp_year <- reclassify(comp_year, rclmat)
     to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
   }
   
@@ -364,7 +358,6 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
       # set up comparison
       all_disagreement <- foreach(q = 1:length(data$infected), .combine = rbind, .packages =c("raster", "PoPS"), .final = colSums) %dopar% {
         comp_year[] <- data$infected[[q]]
-        comp_year <- reclassify(comp_year, rclmat)
         to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
       }
       

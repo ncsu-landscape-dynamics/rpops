@@ -260,14 +260,9 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
     return(percent_natural_dispersal_check$failed_check)
   }
   
-  # reference <- raster(infected_years_file)
   ## Load observed data on occurence
   infection_years <- stack(infected_years_file)
-  ## set up reclassification matrix for binary reclassification
-  rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
-  ## reclassify to binary values
-  infection_years <- reclassify(infection_years, rclmat)
+
   ## Get rid of NA values to make comparisons
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   
@@ -285,7 +280,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   registerDoParallel(cl)
   
 
-  qa <- foreach::foreach (icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {
+  qa <- foreach::foreach (i = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
     data <- PoPS::pops_model(random_seed = random_seed, 
                              use_lethal_temperature = use_lethal_temperature, 
@@ -320,16 +315,9 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
     comp_year <- raster(infected_file)
     all_disagreement <- foreach(q = 1:length(data$infected), .combine = rbind, .packages =c("raster", "PoPS", "foreach"), .final = colSums) %dopar% {
       comp_year[] <- data$infected[[q]]
-      comp_year <- reclassify(comp_year, rclmat)
       to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
     }
     
-    # comparison <- reference
-    # raster::values(comparison) <- data$infected[[1]]
-    # 
-    # comparison <- raster::reclassify(comparison, rclmat)
-    
-    # to.qa <- PoPS::quantity_allocation_disagreement(reference, comparison)
     to.qa <- data.frame(t(all_disagreement))
   }
   
