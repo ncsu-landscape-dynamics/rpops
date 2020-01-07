@@ -1,11 +1,11 @@
 #' PoPS (Pest or Pathogen Spread) model
 #' 
 #' A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
-#' meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
+#' meaning that it uses understanding of the effect of weather and other environmental factors on reproduction and survival of the pest/pathogen in order to forecast
 #' spread of the pest/pathogen into the future. 
 #'
 #' @param infected_file path to raster file with initial infections 
-#' @param host_file path to raster file with number of hosts
+#' @param host_file path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)
 #' @param total_plants_file path to raster file with number of total plants
 #' @param temp boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)
 #' @param temperature_coefficient_file path to raster file with temperature coefficient data for the timestep and number of years specified
@@ -43,7 +43,7 @@
 #' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
 #' 
 #' @useDynLib PoPS, .registration = TRUE
-#' @importFrom raster raster values as.matrix xres yres stack extent
+#' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
 #' @importFrom lubridate interval time_length
@@ -92,124 +92,70 @@ pops <- function(infected_file, host_file, total_plants_file,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
                  random_seed = NULL, output_frequency = "year"){ 
 
-  if (!treatment_method %in% c("ratio", "all infected")) {
-    return("treatment method is not one of the valid treatment options")
+  treatment_metric_check <- treatment_metric_checks(treatment_method)
+  if (!treatment_metric_check$checks_passed) {
+    return(treatment_metric_check$failed_check)
   }
   
-  if (!file.exists(infected_file)) {
-    return("Infected file does not exist") 
+  time_check <- time_checks(end_date, start_date, time_step, output_frequency)
+  if(time_check$checks_passed) {
+    number_of_time_steps <- time_check$number_of_time_steps
+    number_of_years <- time_check$number_of_years
+    number_of_outputs <- time_check$number_of_outputs
+  } else {
+    return(time_check$failed_check)
   }
   
-  if (!(raster::extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Infected file is not one of '.grd', '.tif', '.img'")
+  percent_check <- percent_checks(percent_natural_dispersal)
+  if (percent_check$checks_passed){
+    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
+  } else {
+    return(percent_check$failed_check)
   }
-  
-  if (!file.exists(host_file)) {
-    return("Host file does not exist") 
-  }
-  
-  if (!(raster::extension(host_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Host file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (!file.exists(total_plants_file)) {
-    return("Total plants file does not exist") 
-  }
-  
-  if (!(raster::extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Total plants file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (!(time_step %in% list("week", "month", "day"))) {
-    return("Time step must be one of 'week', 'month' or 'day'")
-  }
-  
-  if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
-    return("End time and/or start time not of type numeric and/or in format YYYY")
-  }
-  
-  if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
-    return("Time step must be one of 'week', 'month' or 'day'")
-  }
-  
-  if (output_frequency == "day") {
-    if (time_step == "week" || time_step == "month") {
-      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
-    }
-  }
-  
-  if (output_frequency == "week") {
-    if (time_step == "month") {
-      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
-    }
-  }
-  
-  duration <- lubridate::interval(start_date, end_date)
-  
-  if (time_step == "week") {
-    number_of_time_steps <- ceiling(time_length(duration, "week"))
-  } else if (time_step == "month") {
-    number_of_time_steps <- ceiling(time_length(duration, "month"))
-  } else if (time_step == "day") {
-    number_of_time_steps <- ceiling(time_length(duration, "day"))
-  }
-  
-  number_of_years <- ceiling(time_length(duration, "year"))
   
   if (is.null(random_seed)) {
     random_seed = round(stats::runif(1, 1, 1000000))
   }
   
-  infected <- raster::raster(infected_file)
-  infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  # infected[is.na(infected)] <- 0
-  host <- raster::raster(host_file)
-  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  # host[is.na(host)] <- 0
-  total_plants <- raster::raster(total_plants_file)
-  total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
-  # total_plants[is.na(total_plants)] <- 0
-  
-  if (!(raster::extent(infected) == raster::extent(host) && raster::extent(infected) == raster::extent(total_plants))) {
-    return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
+  infected_check <- initial_raster_checks(infected_file)
+  if (infected_check$checks_passed) {
+    infected <- infected_check$raster
+    if (raster::nlayers(infected) > 1) {
+      infected <- output_from_raster_mean_and_sd(infected)
+    }
+  } else {
+    return(infected_check$failed_check)
   }
   
-  if (!(raster::xres(infected) == raster::xres(host) && raster::xres(infected) == raster::xres(total_plants) && raster::yres(infected) == raster::yres(host) && raster::yres(infected) == raster::yres(total_plants))) {
-    return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
+  host_check <- secondary_raster_checks(host_file, infected)
+  if (host_check$checks_passed) {
+    host <- host_check$raster
+    if (raster::nlayers(host) > 1) {
+      host <- output_from_raster_mean_and_sd(host)
+    }
+  } else {
+    return(host_check$failed_check)
   }
   
-  if (!(raster::compareCRS(host,infected) && raster::compareCRS(host, total_plants))) {
-    return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+  total_plants_check <- secondary_raster_checks(total_plants_file, infected)
+  if (total_plants_check$checks_passed) {
+    total_plants <- total_plants_check$raster
+    if (raster::nlayers(total_plants) > 1) {
+      total_plants <- output_from_raster_mean_and_sd(total_plants)
+    }
+  } else {
+    return(total_plants_check$failed_check)
   }
   
   susceptible <- host - infected
-  susceptible <- raster::reclassify(susceptible, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  # susceptible[is.na(susceptible)] <- 0
   susceptible[susceptible < 0] <- 0
-  
-  if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
-    return("Temperature file does not exist")
-  }
-  
-  if (use_lethal_temperature == TRUE  && !(raster::extension(temperature_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Temperature file is not one of '.grd', '.tif', '.img'")
-  }
-  
+
   if (use_lethal_temperature == TRUE) {
-    temperature_stack <- raster::stack(temperature_file)
-    temperature_stack <- raster::reclassify(temperature_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    # temperature_stack[is.na(temperature_stack)] <- 0
-    
-    if (!(raster::extent(infected) == raster::extent(temperature_stack))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(temperature_stack) && raster::yres(infected) == raster::yres(temperature_stack))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, temperature_stack))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    temperature_check <- secondary_raster_checks(temperature_file, infected)
+    if (temperature_check$checks_passed) {
+      temperature_stack <- temperature_check$raster
+    } else {
+      return(temperature_check$failed_check)
     }
     
     temperature <- list(raster::as.matrix(temperature_stack[[1]]))
@@ -222,70 +168,33 @@ pops <- function(infected_file, host_file, total_plants_file,
     temperature <- list(raster::as.matrix(temperature))
   }
   
-  if (temp == TRUE  && !file.exists(temperature_coefficient_file)) {
-    return("Temperature coefficient file does not exist")
-  }
-  
-  if (temp == TRUE  && !(raster::extension(temperature_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Temperature coefficient file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (precip == TRUE  && !file.exists(precipitation_coefficient_file)) {
-    return("Precipitation coefficient file does not exist")
-  }
-  
-  if (precip == TRUE  && !(raster::extension(precipitation_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Precipitation coefficient file is not one of '.grd', '.tif', '.img'")
-  }
-  
   weather <- FALSE
   if (temp == TRUE) {
-    temperature_coefficient <- raster::stack(temperature_coefficient_file)
-    
-    if (!(raster::extent(infected) == raster::extent(temperature_coefficient))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(temperature_coefficient) && raster::yres(infected) == raster::yres(temperature_coefficient))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, temperature_coefficient))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    temperature_coefficient_check <- secondary_raster_checks(temperature_coefficient_file, infected)
+    if (temperature_coefficient_check$checks_passed) {
+      temperature_coefficient <- temperature_coefficient_check$raster
+    } else {
+      return(temperature_coefficient_check$failed_check)
     }
     
     weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (precip ==TRUE){
-      precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
-      
-      if (!(raster::extent(infected) == raster::extent(precipitation_coefficient))) {
-        return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-      }
-      
-      if (!(raster::xres(infected) == raster::xres(precipitation_coefficient) && raster::yres(infected) == raster::yres(precipitation_coefficient))) {
-        return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-      }
-      
-      if (!(raster::compareCRS(infected, precipitation_coefficient))) {
-        return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+      precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
+      if (precipitation_coefficient_check$checks_passed) {
+        precipitation_coefficient <- precipitation_coefficient_check$raster
+      } else {
+        return(precipitation_coefficient_check$failed_check)
       }
       
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if(precip == TRUE){
-    precipitation_coefficient <- raster::stack(precipitation_coefficient_file)
-    
-    if (!(raster::extent(infected) == raster::extent(precipitation_coefficient))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(precipitation_coefficient) && raster::yres(infected) == raster::yres(precipitation_coefficient))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, precipitation_coefficient))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
+    if (precipitation_coefficient_check$checks_passed) {
+      precipitation_coefficient <- precipitation_coefficient_check$raster
+    } else {
+      return(precipitation_coefficient_check$failed_check)
     }
     
     weather <- TRUE
@@ -293,8 +202,7 @@ pops <- function(infected_file, host_file, total_plants_file,
   }
   
   if (weather == TRUE){
-    # weather_coefficient_stack[is.na(weather_coefficient_stack)] <- 0
-    weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+    # weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
       weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
@@ -305,69 +213,24 @@ pops <- function(infected_file, host_file, total_plants_file,
     weather_coefficient <- list(raster::as.matrix(weather_coefficient))
   }
   
-  if (management == TRUE  && !file.exists(treatments_file)) {
-    return("Treatments file does not exist")
-  }
-  
-  if (management == TRUE  && !(raster::extension(treatments_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Treatments file is not one of '.grd', '.tif', '.img'")
-  }
-  
   if (management == TRUE) {
-    treatment_stack <- raster::stack(treatments_file)
-    treatment_stack <- raster::reclassify(treatment_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    # treatment_stack[is.na(treatment_stack)] <- 0
-    
-    if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(treatment_stack) && raster::yres(infected) == raster::yres(treatment_stack))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, treatment_stack))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
-    }
-    
-    if (length(treatments_file) != length(treatment_dates)) {
-      return("Length of list for treatment dates and treatments_file must be equal")
-    }
-    
-    if (length(pesticide_duration) != length(treatment_dates)) {
-      return("Length of list for treatment dates and pesticide_duration must be equal")
-    }
-    
-    if (pesticide_duration[1] > 0) {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+    treatments_check <- secondary_raster_checks(treatments_file, infected)
+    if (treatments_check$checks_passed) {
+      treatment_stack <- treatments_check$raster
     } else {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+      return(treatments_check$failed_check)
     }
     
-    if (raster::nlayers(treatment_stack) >= 2) {
-      for(i in 2:raster::nlayers(treatment_stack)) {
-        if (pesticide_duration[i] > 0) {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
-        } else {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
-          
-        }
-      }
+    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy)
+    if (treatment_check$checks_passed) {
+      treatment_maps <- treatment_check$treatment_maps
+    } else {
+      return(treatment_check$failed_check)
     }
-    
-    # treatment_dates <- treatment_dates
   } else {
     treatment_map <- host
     raster::values(treatment_map) <- 0
     treatment_maps <- list(raster::as.matrix(treatment_map))
-  }
-  
-  if(percent_natural_dispersal == 1.0) {
-    use_anthropogenic_kernel = FALSE
-  } else if (percent_natural_dispersal < 1.0  && percent_natural_dispersal >= 0.0) {
-    use_anthropogenic_kernel = TRUE
-  } else {
-    return("Percent natural dispersal must be between 0.0 and 1.0")
   }
   
   ew_res <- raster::xres(susceptible)
@@ -384,6 +247,34 @@ pops <- function(infected_file, host_file, total_plants_file,
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
+  
+  reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = 1)
+  if (reproductive_rate_check$checks_passed) {
+    reproductive_rate <- reproductive_rate_check$value
+  } else {
+    return(reproductive_rate_check$failed_check)
+  }
+  
+  natural_distance_scale_check <- uncertainty_check(natural_distance_scale, round_to = 0, n = 1)
+  if (natural_distance_scale_check$checks_passed) {
+    natural_distance_scale <- natural_distance_scale_check$value
+  } else {
+    return(natural_distance_scale_check$failed_check)
+  }
+    
+  anthropogenic_distance_scale_check <- uncertainty_check(anthropogenic_distance_scale, round_to = 0, n = 1)
+  if (anthropogenic_distance_scale_check$checks_passed) {
+    anthropogenic_distance_scale <- anthropogenic_distance_scale_check$value
+  } else {
+    return(anthropogenic_distance_scale_check$failed_check)
+  }
+  
+  percent_natural_dispersal_check <- uncertainty_check(percent_natural_dispersal, round_to = 3, n = 1)
+  if (percent_natural_dispersal_check$checks_passed) {
+    percent_natural_dispersal <- percent_natural_dispersal_check$value
+  } else {
+    return(percent_natural_dispersal_check$failed_check)
+  }
   
   data <- PoPS::pops_model(random_seed = random_seed, 
                      use_lethal_temperature = use_lethal_temperature, 

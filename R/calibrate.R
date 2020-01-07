@@ -9,15 +9,17 @@
 #' @inheritParams pops
 #' @param infected_years_file Raster file with years of initial infection/infestation as individual locations of a pest or pathogen
 #' @param num_iterations how many iterations do you want to run to allow the calibration to converge (recommend a minimum of at least 100,000 but preferably 1 million).
-#' @param start_reproductive_rate starting reproductive rate for MCMC calibration (affects how quickly a series converges) numeric value > 0
-#' @param start_natural_distance_scale starting short distance scale parameter for MCMC calibration (affects how quickly a series converges) numeric value > 0
+#' @param number_of_observations the number of observations used for this calibartion 
+#' @param prior_number_of_observations the number of total observations from previous calibrations used to weight the posterior distributions (if this is a new calibration this value takes the form of a prior weight (0 - 1))
+#' @param prior_reproductive_rate the prior reproductive rate for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1
+#' @param prior_natural_distance_scale the prior natural distance scale for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1
+#' @param prior_percent_natural_dispersal the prior percent natural distance for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1
+#' @param prior_anthropogenic_distance_scale the prior anthropogenic distance scale for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1
 #' @param number_of_cores number of cores to use for calibration (defaults to the number of cores available on the machine) integer value >= 1
-#' @param sd_reproductive_rate starting standard deviation for reproductive rate for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0
-#' @param sd_natural_distance_scale starting standard deviation for short distance scale for MCMC calibration (can affect how quickly and if a series converges) numeric value > 0
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues
+#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues calc extract rasterToPoints
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
@@ -33,12 +35,16 @@
 #' \dontrun{
 #' }
 
-calibrate <- function(infected_years_file, num_iterations, start_reproductive_rate, number_of_cores = NA,
-                      start_natural_distance_scale, sd_reproductive_rate, sd_natural_distance_scale,
+calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA,
+                      number_of_observations, prior_number_of_observations,
+                      prior_reproductive_rate,
+                      prior_natural_distance_scale,
+                      prior_percent_natural_dispersal = c(1.0,0), 
+                      prior_anthropogenic_distance_scale = c(1000,0),
                       infected_file, host_file, total_plants_file, 
                       temp = FALSE, temperature_coefficient_file = "", 
                       precip = FALSE, precipitation_coefficient_file = "", 
-                      time_step = "month", reproductive_rate = 3.0,
+                      time_step = "month", 
                       season_month_start = 1, season_month_end = 12, 
                       start_date = '2008-01-01', end_date = '2008-12-31', 
                       use_lethal_temperature = FALSE, temperature_file = "",
@@ -46,135 +52,112 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
                       mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
                       management = FALSE, treatment_dates = c(0), treatments_file = "",
                       treatment_method = "ratio",
-                      percent_natural_dispersal = 1.0,
                       natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-                      natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
                       natural_dir = "NONE", natural_kappa = 0, 
                       anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                       pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                      mask = NULL, success_metric = "quantity", output_frequency = "year"){ 
+                      mask = NULL, success_metric = "quantity", output_frequency = "year") { 
   
-  if (success_metric == "quantity") {
-    configuration = FALSE
-  } else if (success_metric == "quantity and configuration") {
-    configuration = TRUE
-  } else if (success_metric == "odds ratio") {
-    configuration = FALSE
-  } else if (success_metric == "residual error"){
-    configuration = FALSE
+  metric_check <- metric_checks(success_metric)
+  if (metric_check$checks_passed){
+    configuration <- metric_check$configuration
   } else {
-    return("Success metric must be one of 'quantity', 'quantity and configuration', 'residual error', or 'odds ratio'")
+    return(metric_check$failed_check)
   }
   
-  if (!treatment_method %in% c("ratio", "all infected")) {
-    return("treatment method is not one of the valid treatment options")
+  treatment_metric_check <- treatment_metric_checks(treatment_method)
+  if (!treatment_metric_check$checks_passed) {
+    return(treatment_metric_check$failed_check)
   }
   
-  if (!file.exists(infected_file)) {
-    return("Infected file does not exist") 
+  time_check <- time_checks(end_date, start_date, time_step, output_frequency)
+  if(time_check$checks_passed) {
+    number_of_time_steps <- time_check$number_of_time_steps
+    number_of_years <- time_check$number_of_years
+    number_of_outputs <- time_check$number_of_outputs
+  } else {
+    return(time_check$failed_check)
   }
   
-  if (!(extension(infected_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Infected file is not one of '.grd', '.tif', '.img'")
+  ## Setup for reproductive rate to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
+  prior_reproductive_rate_check <- prior_checks(prior_reproductive_rate)
+  if(prior_reproductive_rate_check$checks_passed) {
+    prior_reproductive_rate <- prior_reproductive_rate_check$priors
+    start_reproductive_rate <- prior_reproductive_rate_check$start_priors
+    sd_reproductive_rate <- prior_reproductive_rate_check$sd_priors
+  } else {
+    return(prior_reproductive_rate_check$failed_check)
   }
   
-  if (!file.exists(host_file)) {
-    return("Host file does not exist") 
+  ## Setup for natural dispersal scale to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
+  prior_natural_distance_scale_check <- prior_checks(prior_natural_distance_scale)
+  if(prior_natural_distance_scale_check$checks_passed) {
+    prior_natural_distance_scale <- prior_natural_distance_scale_check$priors
+    start_natural_distance_scale <- prior_natural_distance_scale_check$start_priors
+    sd_natural_distance_scale <- prior_natural_distance_scale_check$sd_priors
+  } else {
+    return(prior_natural_distance_scale_check$failed_check)
   }
-  
-  if (!(extension(host_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Host file is not one of '.grd', '.tif', '.img'")
+
+  ## Setup for anthropogenic dispersal scale to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
+  prior_anthropogenic_distance_scale_check <- prior_checks(prior_anthropogenic_distance_scale)
+  if(prior_anthropogenic_distance_scale_check$checks_passed) {
+    prior_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale_check$priors
+    start_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale_check$start_priors
+    sd_anthropogenic_distance_scale <- prior_anthropogenic_distance_scale_check$sd_priors
+  } else {
+    return(prior_anthropogenic_distance_scale_check$failed_check)
   }
+
+  ## Setup for percent natural distance to be passed in as either mean and sd or a 2 column data.frame with value and probability as columns 1 and 2
+  prior_percent_natural_dispersal_check <- prior_checks(prior_percent_natural_dispersal)
+  if(prior_percent_natural_dispersal_check$checks_passed) {
+    prior_percent_natural_dispersal <- prior_percent_natural_dispersal_check$priors
+    start_percent_natural_dispersal <- prior_percent_natural_dispersal_check$start_priors
+    sd_percent_natural_dispersal <- prior_percent_natural_dispersal_check$sd_priors
+  } else {
+    return(prior_percent_natural_dispersal_check$failed_check)
+  } 
   
-  if (!file.exists(total_plants_file)) {
-    return("Total plants file does not exist") 
-  }
-  
-  if (!(extension(total_plants_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Total plants file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (!(time_step %in% list("week", "month", "day"))) {
-    return("Time step must be one of 'week', 'month' or 'day'")
-  }
-  
-  if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
-    return("End time and/or start time not of type numeric and/or in format YYYY")
-  }
-  
-  if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
-    return("Time step must be one of 'week', 'month' or 'day'")
-  }
-  
-  if (output_frequency == "day") {
-    if (time_step == "week" || time_step == "month") {
-      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+  infected_check <- initial_raster_checks(infected_file)
+  if (infected_check$checks_passed) {
+    infected <- infected_check$raster
+    if (raster::nlayers(infected) > 1) {
+      infected <- output_from_raster_mean_and_sd(infected)
     }
+  } else {
+    return(infected_check$failed_check)
   }
   
-  if (output_frequency == "week") {
-    if (time_step == "month") {
-      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+  host_check <- secondary_raster_checks(host_file, infected)
+  if (host_check$checks_passed) {
+    host <- host_check$raster
+    if (raster::nlayers(host) > 1) {
+      host <- output_from_raster_mean_and_sd(host)
     }
+  } else {
+    return(host_check$failed_check)
   }
   
-  duration <- lubridate::interval(start_date, end_date)
-  
-  if (time_step == "week") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "week"))
-  } else if (time_step == "month") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "month"))
-  } else if (time_step == "day") {
-    number_of_time_steps <- ceiling(lubridate::time_length(duration, "day"))
-  }
-  
-  number_of_years <- ceiling(lubridate::time_length(duration, "year"))
-  
-  infected <- raster::raster(infected_file)
-  infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  host <- raster::raster(host_file)
-  host <- raster::reclassify(host, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-  total_plants <- raster::raster(total_plants_file)
-  total_plants <- raster::reclassify(total_plants, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
-  
-  if (!(extent(infected) == extent(host) && extent(infected) == extent(total_plants))) {
-    return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-  }
-  
-  if (!(xres(infected) == xres(host) && xres(infected) == xres(total_plants) && yres(infected) == yres(host) && yres(infected) == yres(total_plants))) {
-    return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-  }
-  
-  if (!(compareCRS(host,infected) && compareCRS(host, total_plants))) {
-    return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+  total_plants_check <- secondary_raster_checks(total_plants_file, infected)
+  if (total_plants_check$checks_passed) {
+    total_plants <- total_plants_check$raster
+    if (raster::nlayers(total_plants) > 1) {
+      total_plants <- output_from_raster_mean_and_sd(total_plants)
+    }
+  } else {
+    return(total_plants_check$failed_check)
   }
   
   susceptible <- host - infected
-  susceptible <- raster::reclassify(susceptible, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   susceptible[susceptible < 0] <- 0
   
-  if (use_lethal_temperature == TRUE  && !file.exists(temperature_file)) {
-    return("Temperature file does not exist")
-  }
-  
-  if (use_lethal_temperature == TRUE  && !(extension(temperature_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Temperature file is not one of '.grd', '.tif', '.img'")
-  }
-  
   if (use_lethal_temperature == TRUE) {
-    temperature_stack <- raster::stack(temperature_file)
-    temperature_stack <- raster::reclassify(temperature_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    
-    if (!(extent(infected) == extent(temperature_stack))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(xres(infected) == xres(temperature_stack) && yres(infected) == yres(temperature_stack))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(compareCRS(infected, temperature_stack))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    temperature_check <- secondary_raster_checks(temperature_file, infected)
+    if (temperature_check$checks_passed) {
+      temperature_stack <- temperature_check$raster
+    } else {
+      return(temperature_check$failed_check)
     }
     
     temperature <- list(as.matrix(temperature_stack[[1]]))
@@ -187,70 +170,33 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     temperature <- list(as.matrix(temperature))
   }
   
-  if (temp == TRUE  && !file.exists(temperature_coefficient_file)) {
-    return("Temperature coefficient file does not exist")
-  }
-  
-  if (temp == TRUE  && !(extension(temperature_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Temperature coefficient file is not one of '.grd', '.tif', '.img'")
-  }
-  
-  if (precip == TRUE  && !file.exists(precipitation_coefficient_file)) {
-    return("Precipitation coefficient file does not exist")
-  }
-  
-  if (precip == TRUE  && !(extension(precipitation_coefficient_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Precipitation coefficient file is not one of '.grd', '.tif', '.img'")
-  }
-  
   weather <- FALSE
   if (temp == TRUE) {
-    temperature_coefficient <- stack(temperature_coefficient_file)
-    
-    if (!(extent(infected) == extent(temperature_coefficient))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(xres(infected) == xres(temperature_coefficient) && yres(infected) == yres(temperature_coefficient))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(compareCRS(infected, temperature_coefficient))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    temperature_coefficient_check <- secondary_raster_checks(temperature_coefficient_file, infected)
+    if (temperature_coefficient_check$checks_passed) {
+      temperature_coefficient <- temperature_coefficient_check$raster
+    } else {
+      return(temperature_coefficient_check$failed_check)
     }
     
     weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (precip ==TRUE){
-      precipitation_coefficient <- stack(precipitation_coefficient_file)
-      
-      if (!(extent(infected) == extent(precipitation_coefficient))) {
-        return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-      }
-      
-      if (!(xres(infected) == xres(precipitation_coefficient) && yres(infected) == yres(precipitation_coefficient))) {
-        return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-      }
-      
-      if (!(compareCRS(infected, precipitation_coefficient))) {
-        return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+      precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
+      if (precipitation_coefficient_check$checks_passed) {
+        precipitation_coefficient <- precipitation_coefficient_check$raster
+      } else {
+        return(precipitation_coefficient_check$failed_check)
       }
       
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if(precip == TRUE){
-    precipitation_coefficient <- stack(precipitation_coefficient_file)
-    
-    if (!(extent(infected) == extent(precipitation_coefficient))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(xres(infected) == xres(precipitation_coefficient) && yres(infected) == yres(precipitation_coefficient))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(compareCRS(infected, precipitation_coefficient))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
+    precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
+    if (precipitation_coefficient_check$checks_passed) {
+      precipitation_coefficient <- precipitation_coefficient_check$raster
+    } else {
+      return(precipitation_coefficient_check$failed_check)
     }
     
     weather <- TRUE
@@ -258,63 +204,30 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   }
   
   if (weather == TRUE){
-    weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
+    # weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
     for(i in 2:number_of_time_steps) {
-      weather_coefficient[[i]] <- as.matrix(weather_coefficient_stack[[i]])
+      weather_coefficient[[i]] <- raster::as.matrix(weather_coefficient_stack[[i]])
     }
   } else {
     weather_coefficient <- host
-    weather_coefficient[] <- 1
-    weather_coefficient <- list(as.matrix(weather_coefficient))
-  }
-  
-  if (management == TRUE  && !file.exists(treatments_file)) {
-    return("Treatments file does not exist")
-  }
-  
-  if (management == TRUE  && !(extension(treatments_file) %in% c(".grd", ".tif", ".img"))) {
-    return("Treatments file is not one of '.grd', '.tif', '.img'")
+    raster::values(weather_coefficient) <- 1
+    weather_coefficient <- list(raster::as.matrix(weather_coefficient))
   }
   
   if (management == TRUE) {
-    treatment_stack <- raster::stack(treatments_file)
-    treatment_stack <- raster::reclassify(treatment_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    
-    if (!(raster::extent(infected) == raster::extent(treatment_stack))) {
-      return("Extents of input rasters do not match. Ensure that all of your input rasters have the same extent")
-    }
-    
-    if (!(raster::xres(infected) == raster::xres(treatment_stack) && raster::yres(infected) == raster::yres(treatment_stack))) {
-      return("Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution")
-    }
-    
-    if (!(raster::compareCRS(infected, treatment_stack))) {
-      return("Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs")
-    }
-    
-    if (length(treatments_file) != length(treatment_dates)) {
-      return("Length of list for treatment dates and treatments_file must be equal")
-    }
-    
-    if (length(pesticide_duration) != length(treatment_dates)) {
-      return("Length of list for treatment dates and pesticide_duration must be equal")
-    }
-    
-    if (pesticide_duration[1] > 0) {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+    treatments_check <- secondary_raster_checks(treatments_file, infected)
+    if (treatments_check$checks_passed) {
+      treatment_stack <- treatments_check$raster
     } else {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+      return(treatments_check$failed_check)
     }
-    if (raster::nlayers(treatment_stack) >= 2) {
-      for(i in 2:raster::nlayers(treatment_stack)) {
-        if (pesticide_duration[i] > 0) {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
-        } else {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
-          
-        }
-      }
+    
+    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy)
+    if (treatment_check$checks_passed) {
+      treatment_maps <- treatment_check$treatment_maps
+    } else {
+      return(treatment_check$failed_check)
     }
   } else {
     treatment_map <- host
@@ -322,12 +235,11 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     treatment_maps <- list(raster::as.matrix(treatment_map))
   }
   
-  if(percent_natural_dispersal == 1.0) {
-    use_anthropogenic_kernel = FALSE
-  } else if (percent_natural_dispersal < 1.0  && percent_natural_dispersal >= 0.0) {
-    use_anthropogenic_kernel = TRUE
+  percent_check <- percent_checks(start_percent_natural_dispersal)
+  if (percent_check$checks_passed){
+    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
   } else {
-    return("Percent natural dispersal must be between 0.0 and 1.0")
+    return(percent_check$failed_check)
   }
   
   ew_res <- xres(susceptible)
@@ -352,21 +264,16 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   if (length(total_infections) > number_of_years){
     total_infections <- total_infections[1:number_of_years]
   }
-  ## set up reclassification matrix for binary reclassification
-  rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
-  ## reclassify to binary values
-  infection_years <- reclassify(infection_years, rclmat)
   ## Get rid of NA values to make comparisons
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   num_layers_infected_years <- raster::nlayers(infection_years)
   
-  if (num_layers_infected_years < number_of_time_steps) {
+  if (num_layers_infected_years < number_of_outputs) {
     return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
   }
   
   ## set the parameter function to only need the parameters that chanage
-  param_func <- function(reproductive_rate, natural_distance_scale) {
+  param_func <- function(reproductive_rate, natural_distance_scale, anthropogenic_distance_scale, percent_natural_dispersal) {
     random_seed <- round(runif(1, 1, 1000000))
     data <- pops_model(random_seed = random_seed, 
                        use_lethal_temperature = use_lethal_temperature, 
@@ -400,19 +307,18 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     return(data)
   }
   
-  data <- param_func(start_reproductive_rate, start_natural_distance_scale)
+  data <- param_func(start_reproductive_rate, start_natural_distance_scale, start_anthropogenic_distance_scale, start_percent_natural_dispersal)
   
   ## set up comparison
   
   comp_year <- raster(infected_file)
   all_disagreement <- foreach(q = 1:length(data$infected), .combine = rbind, .packages =c("raster", "PoPS"), .final = colSums) %do% {
     comp_year[] <- data$infected[[q]]
-    comp_year <- reclassify(comp_year, rclmat)
     to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
   }
   
   ## save current state of the system
-  current <- best <- data.frame(t(all_disagreement), reproductive_rate = start_reproductive_rate, natural_distance_scale = start_natural_distance_scale)
+  current <- best <- data.frame(t(all_disagreement), reproductive_rate = start_reproductive_rate, natural_distance_scale = start_natural_distance_scale, anthropogenic_distance_scale = start_anthropogenic_distance_scale, percent_natural_dispersal = start_percent_natural_dispersal)
   
   ## create parallel environment
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
@@ -433,23 +339,32 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
     proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd = sd_natural_distance_scale), digits = 0)
   }
   
+  proposed_anthropogenic_distance_scale <- 0
+  while (proposed_anthropogenic_distance_scale <= 0) {
+    proposed_anthropogenic_distance_scale <- round(rnorm(1, mean = best$anthropogenic_distance_scale, sd = sd_anthropogenic_distance_scale)/10, digits = 0) * 10
+  }
+  
+  proposed_percent_natural_dispersal <- 0
+  while (proposed_percent_natural_dispersal <= 0 || proposed_percent_natural_dispersal > 1.000) {
+    proposed_percent_natural_dispersal <- round(rnorm(1, mean = best$percent_natural_dispersal, sd = sd_percent_natural_dispersal), digits = 3)
+  }
+  
   params <- foreach(icount(num_iterations), .combine = rbind, .packages = c("raster", "PoPS", "foreach", "iterators"), .inorder = TRUE) %do% {
     average_disagreements_odds_ratio <- foreach(p = 1:10, .combine = rbind, .packages = c("raster", "PoPS", "foreach"), .final = colMeans) %dopar% {
-      disagreements_odds_ratio <- data.frame(reproductive_rate = 0, natural_distance_scale = 0, total_disagreement = 0, quantity_disagreement = 0, allocation_disagreement = 0, odds_ratio = 0)
+      # disagreements_odds_ratio <- data.frame(reproductive_rate = 0, natural_distance_scale = 0, total_disagreement = 0, quantity_disagreement = 0, allocation_disagreement = 0, odds_ratio = 0)
       
-      data <- param_func(proposed_reproductive_rate, proposed_natural_distance_scale)
+      data <- param_func(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_anthropogenic_distance_scale, proposed_percent_natural_dispersal)
       
       # set up comparison
       all_disagreement <- foreach(q = 1:length(data$infected), .combine = rbind, .packages =c("raster", "PoPS"), .final = colSums) %dopar% {
         comp_year[] <- data$infected[[q]]
-        comp_year <- reclassify(comp_year, rclmat)
         to.all_disagreement <- quantity_allocation_disagreement(infection_years[[q]], comp_year, configuration, mask)
       }
       
       to.average_disagreements_odds_ratio <- all_disagreement
     }
     
-    proposed <- data.frame(t(average_disagreements_odds_ratio), reproductive_rate = proposed_reproductive_rate, natural_distance_scale = proposed_natural_distance_scale)
+    proposed <- data.frame(t(average_disagreements_odds_ratio), reproductive_rate = proposed_reproductive_rate, natural_distance_scale = proposed_natural_distance_scale, anthropogenic_distance_scale = proposed_anthropogenic_distance_scale, percent_natural_dispersal = proposed_percent_natural_dispersal)
     
     # make sure no proposed statistics are 0 or the calculation fails instead set them all to the lowest possible non-zero value
     if (proposed$allocation_disagreement == 0) {proposed$allocation_disagreement <- 1}
@@ -483,10 +398,22 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         while (proposed_reproductive_rate <= 0) {
           proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd = sd_reproductive_rate), digits = 1)
         }
+        
         proposed_natural_distance_scale <- 0
         while (proposed_natural_distance_scale <= 0) {
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd = sd_natural_distance_scale), digits = 0)
         }
+        
+        proposed_anthropogenic_distance_scale <- 0
+        while (proposed_anthropogenic_distance_scale <= 0) {
+          proposed_anthropogenic_distance_scale <- round(rnorm(1, mean = best$anthropogenic_distance_scale, sd = sd_anthropogenic_distance_scale)/10, digits = 0) * 10
+        }
+        
+        proposed_percent_natural_dispersal <- 0
+        while (proposed_percent_natural_dispersal <= 0 || proposed_percent_natural_dispersal > 1.000) {
+          proposed_percent_natural_dispersal <- round(rnorm(1, mean = best$percent_natural_dispersal, sd = sd_percent_natural_dispersal), digits = 3)
+        }
+        
         to.params <- param
       }
     } else if (success_metric == "quantity and configuration") {
@@ -500,10 +427,21 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         while (proposed_reproductive_rate <= 0) {
           proposed_reproductive_rate <- round(rnorm(1, mean = best$reproductive_rate, sd_reproductive_rate), digits = 1)
         }
+        
         proposed_natural_distance_scale <- 0.0
         while (proposed_natural_distance_scale <= 0) {
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd_natural_distance_scale), digits = 0)
         }
+        proposed_anthropogenic_distance_scale <- 0
+        while (proposed_anthropogenic_distance_scale <= 0) {
+          proposed_anthropogenic_distance_scale <- round(rnorm(1, mean = best$anthropogenic_distance_scale, sd = sd_anthropogenic_distance_scale)/10, digits = 0) * 10
+        }
+        
+        proposed_percent_natural_dispersal <- 0
+        while (proposed_percent_natural_dispersal <= 0 || proposed_percent_natural_dispersal > 1.000) {
+          proposed_percent_natural_dispersal <- round(rnorm(1, mean = best$percent_natural_dispersal, sd = sd_percent_natural_dispersal), digits = 3)
+        }
+        
         to.params <- param
       } else if (configuration_pass && quantity_pass == FALSE) {
         current <- proposed
@@ -514,6 +452,16 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         proposed_natural_distance_scale <- 0
         while (proposed_natural_distance_scale <= 0) {
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd_natural_distance_scale), digits = 0)
+        }
+        
+        proposed_anthropogenic_distance_scale <- 0
+        while (proposed_anthropogenic_distance_scale <= 0) {
+          proposed_anthropogenic_distance_scale <- round(rnorm(1, mean = best$anthropogenic_distance_scale, sd = sd_anthropogenic_distance_scale)/10, digits = 0) * 10
+        }
+        
+        proposed_percent_natural_dispersal <- 0
+        while (proposed_percent_natural_dispersal <= 0 || proposed_percent_natural_dispersal > 1.000) {
+          proposed_percent_natural_dispersal <- round(rnorm(1, mean = best$percent_natural_dispersal, sd = sd_percent_natural_dispersal), digits = 3)
         }
         to.params <- param
       } else if (quantity_pass && configuration_pass == FALSE) {
@@ -544,6 +492,16 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         while (proposed_natural_distance_scale <= 0) {
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd = sd_natural_distance_scale), digits = 0)
         }
+        proposed_anthropogenic_distance_scale <- 0
+        while (proposed_anthropogenic_distance_scale <= 0) {
+          proposed_anthropogenic_distance_scale <- round(rnorm(1, mean = best$anthropogenic_distance_scale, sd = sd_anthropogenic_distance_scale), digits = 3)
+        }
+        
+        proposed_percent_natural_dispersal <- 0
+        while (proposed_percent_natural_dispersal <= 0 || proposed_percent_natural_dispersal > 1.000) {
+          proposed_percent_natural_dispersal <- round(rnorm(1, mean = best$percent_natural_dispersal, sd = sd_percent_natural_dispersal), digits = 3)
+        }
+        
         to.params <- param
       } 
     } else if (success_metric == "residual error") {
@@ -562,6 +520,16 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
         while (proposed_natural_distance_scale <= 0) {
           proposed_natural_distance_scale <- round(rnorm(1, mean = best$natural_distance_scale, sd = sd_natural_distance_scale), digits = 0)
         }
+        proposed_anthropogenic_distance_scale <- 0
+        while (proposed_anthropogenic_distance_scale <= 0) {
+          proposed_anthropogenic_distance_scale <- round(rnorm(1, mean = best$anthropogenic_distance_scale, sd = sd_anthropogenic_distance_scale)/10, digits = 0) * 10
+        }
+        
+        proposed_percent_natural_dispersal <- 0
+        while (proposed_percent_natural_dispersal <= 0 || proposed_percent_natural_dispersal > 1.000) {
+          proposed_percent_natural_dispersal <- round(rnorm(1, mean = best$percent_natural_dispersal, sd = sd_percent_natural_dispersal), digits = 3)
+        }
+        
         to.params <- param
       } 
     } else {
@@ -571,5 +539,56 @@ calibrate <- function(infected_years_file, num_iterations, start_reproductive_ra
   }
   stopCluster(cl)
 
-  return(params)
+  if (prior_number_of_observations < 1) {
+    prior_weight <- prior_number_of_observations
+    total_number_of_observations <- number_of_observations + round(number_of_observations * prior_number_of_observations)
+    weight <- 1 - prior_weight
+  } else if (prior_number_of_observations >= 1) {
+    total_number_of_observations <- prior_number_of_observations + number_of_observations
+    prior_weight <- prior_number_of_observations/total_number_of_observations
+    weight <- 1 - prior_weight
+  }
+  
+  ## Use prior and calibrated parameters to update to posteriors
+  count <- 10000000
+  # Reproductive Rate
+  reproductive_rate_checks <- bayesian_checks(prior_reproductive_rate, start_reproductive_rate, sd_reproductive_rate, params$reproductive_rate, count, prior_weight, weight, step_size = 0.1, bounds = c(0, Inf), round_to = 1, round_to_digits = 1)
+  if(reproductive_rate_checks$checks_passed) {
+    reproductive_rates <- reproductive_rate_checks$rates
+    posterior_reproductive_rates <- reproductive_rate_checks$posterior_rates
+  } else {
+    return(reproductive_rate_checks$failed_check)
+  }
+
+  # Natural Distance Scale
+  natural_distance_scale_checks <- bayesian_checks(prior_natural_distance_scale, start_natural_distance_scale, sd_natural_distance_scale, params$natural_distance_scale, count, prior_weight, weight, step_size = 1, bounds = c(0, Inf), round_to = 1, round_to_digits = 0)
+  if(natural_distance_scale_checks$checks_passed) {
+    natural_distance_scales <- natural_distance_scale_checks$rates
+    posterior_natural_distance_scales <- natural_distance_scale_checks$posterior_rates
+  } else {
+    return(natural_distance_scale_checks$failed_check)
+  }
+  
+  # Anthropogenic Distance Scale
+  anthropogenic_distance_scale_checks <- bayesian_checks(prior_anthropogenic_distance_scale, start_anthropogenic_distance_scale, sd_anthropogenic_distance_scale, params$anthropogenic_distance_scale, count, prior_weight, weight, step_size = 10, bounds = c(0, Inf), round_to = 10, round_to_digits = 0)
+  if(anthropogenic_distance_scale_checks$checks_passed) {
+    anthropogenic_distance_scales <- anthropogenic_distance_scale_checks$rates
+    posterior_anthropogenic_distance_scales <- anthropogenic_distance_scale_checks$posterior_rates
+  } else {
+    return(anthropogenic_distance_scale_checks$failed_check)
+  }
+  
+  # Percent Natural Dispersal
+  percent_natural_dispersal_checks <- bayesian_checks(prior_percent_natural_dispersal, start_percent_natural_dispersal, sd_percent_natural_dispersal, params$percent_natural_dispersal, count, prior_weight, weight, step_size = 0.001, bounds = c(0, 1.000), round_to = 1, round_to_digits = 3)
+  if(percent_natural_dispersal_checks$checks_passed) {
+    percent_natural_dispersals <- percent_natural_dispersal_checks$rates
+    posterior_percent_natural_dispersals <- percent_natural_dispersal_checks$posterior_rates
+  } else {
+    return(percent_natural_dispersal_checks$failed_check)
+  }
+  
+  outputs <- list(posterior_reproductive_rates, posterior_natural_distance_scales, posterior_anthropogenic_distance_scales, posterior_percent_natural_dispersals, total_number_of_observations, reproductive_rates, natural_distance_scales, anthropogenic_distance_scales, percent_natural_dispersals, params)
+  names(outputs) <- c('posterior_reproductive_rates', 'posterior_natural_distance_scales', 'posterior_anthropogenic_distance_scales', 'posterior_percent_natural_dispersals', 'total_number_of_observations', 'reproductive_rates', 'natural_distance_scales', 'anthropogenic_distance_scales', 'percent_natural_dispersals', 'raw_calibration_data')
+
+  return(outputs)
 }

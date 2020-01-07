@@ -25,7 +25,7 @@ pops(infected_file, host_file, total_plants_file, temp = FALSE,
 \arguments{
 \item{infected_file}{path to raster file with initial infections}
 
-\item{host_file}{path to raster file with number of hosts}
+\item{host_file}{path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)}
 
 \item{total_plants_file}{path to raster file with number of total plants}
 
@@ -102,6 +102,6 @@ list of infected and susceptible per year
 }
 \description{
 A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
-meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
+meaning that it uses understanding of the effect of weather and other environmental factors on reproduction and survival of the pest/pathogen in order to forecast
 spread of the pest/pathogen into the future.
 }

@@ -34,7 +34,15 @@ quantity_allocation_disagreement <- function(reference, comparison, configuratio
   }
   ## test that the comparison raster is the same extent, resolution, and crs as the reference to ensure that they can be compared accurately
   raster::compareRaster(reference, comparison)
-
+  # save initial reference and comparison to use for residual error calculation and then reclassify the original reference and comparison to binary values for other
+  # classifications as we are only concerned with locational accuracy of infection not exact population predictions (residual error is a comparison of exact population numbers)
+  comp <- comparison
+  ref <- reference
+  rcl <- c(1, Inf, 1, 0, 0.99, 0)
+  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
+  reference <- reclassify(reference, rclmat)
+  comparison <- reclassify(comparison, rclmat)
+  
   if (configuration == TRUE) {
     # calculate number of infected patches
     NP_ref <- landscapemetrics::lsm_c_np(reference, directions = 8)$value[2]
@@ -113,35 +121,6 @@ quantity_allocation_disagreement <- function(reference, comparison, configuratio
   false_negative <- sum(comparison[reference == 1] == 0)
   true_negative <- sum(comparison[reference == 0] == 0)
   
-  # ## calculate probabilities of each class based on Death to Kappa (Pontius et al. 2011)
-  # if (negatives_in_comparison == 0 && total_in_reference == 0) {
-  #   probability_00 <- (true_negative / 1) * (negatives_in_reference / 1)
-  #   probability_01 <- (false_negative / 1) * (negatives_in_reference / 1)
-  # } else if (total_in_reference == 0) {
-  #   probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / 1)
-  #   probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / 1)
-  # } else if (negatives_in_comparison == 0) {
-  #   probability_00 <- (true_negative / 1) * (negatives_in_reference / total_in_reference)
-  #   probability_01 <- (false_negative / 1) * (negatives_in_reference / total_in_reference)
-  # } else {
-  #   probability_00 <- (true_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
-  #   probability_01 <- (false_negative / negatives_in_comparison) * (negatives_in_reference / total_in_reference)
-  # }
-  # 
-  # if (positives_in_comparison == 0 && total_in_reference == 0) {
-  #   probability_10 <- (false_positive / 1) * (positives_in_reference / 1)
-  #   probability_11 <- (true_positive / 1) * (positives_in_reference / 1)
-  # } else if (total_in_reference == 0) {
-  #   probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / 1)
-  #   probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / 1)
-  # } else if (positives_in_comparison == 0) {
-  #   probability_10 <- (false_positive / 1) * (positives_in_reference / total_in_reference)
-  #   probability_11 <- (true_positive / 1) * (positives_in_reference / total_in_reference)
-  # } else {
-  #   probability_10 <- (false_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
-  #   probability_11 <- (true_positive / positives_in_comparison) * (positives_in_reference / total_in_reference)
-  # }
-  
   ## calculate quantity and allocation disagreements for infected/infested from probabilities based on Death to Kappa (Pontius et al. 2011)
   # quantity_disagreement <- abs((probability_11 + probability_01) - (probability_11 + probability_10))
   # allocation_disagreement <- min((probability_11 + probability_10) - probability_11, (probability_11 + probability_01) - probability_11)
@@ -169,7 +148,7 @@ quantity_allocation_disagreement <- function(reference, comparison, configuratio
   output$total_disagreement <- total_disagreement
   output$configuration_disagreement <- configuration_disagreement
   output$odds_ratio <- odds_ratio
-  output$residual_error <- cellStats(abs(reference - comparison), 'sum')
+  output$residual_error <- cellStats(abs(ref - comp), 'sum')
   
   return(output)
 }

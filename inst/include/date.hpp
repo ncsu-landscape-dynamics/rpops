@@ -162,11 +162,11 @@ bool Date::is_last_day_of_year()
 bool Date::is_last_week_of_month()
 {
   if (this->is_leap_year()){
-    if ((day_ + 7) == day_in_month[1][month_])
+    if ((day_ + 7) >= day_in_month[1][month_])
       return true;
     return false;
   } else {
-    if ((day_ + 7)== day_in_month[0][month_])
+    if ((day_ + 7) >= day_in_month[0][month_])
       return true;
     return false;
   }
