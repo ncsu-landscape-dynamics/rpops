@@ -15,8 +15,8 @@
 #' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions 
 #' @param season_month_start when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)
 #' @param season_month_end when does spread end during the year for your pest or pathogen (integer value between 1 and 12)
-#' @param start_time first year to start the simulation (needs to be a 4 digit year)
-#' @param end_time last year of the simulation (needs to be a 4 digit year)
+#' @param start_date date to start the simulation with format ('YYYY_MM_DD')
+#' @param end_date date to end the simulation with format ('YYYY_MM_DD')
 #' @param use_lethal_temperature a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)
 #' @param temperature_file path to raster file with temperature data for minimum temperature
 #' @param lethal_temperature the temperature in degrees C at which lethal temperature related mortality occurs for your pest or pathogen (-50 and 60)
@@ -25,8 +25,8 @@
 #' @param mortality_rate rate at which mortality occurs value between 0 and 1 
 #' @param mortality_time_lag time lag from infection until mortality can occur in years integer >= 1
 #' @param management boolean to allow use of managemnet (TRUE or FALSE)
-#' @param treatment_dates dates in which to apply treatment list with format (YYYY_MM_DD)
-#' @param treatments_file path to raster file with treatment data by dates
+#' @param treatment_dates dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)
+#' @param treatments_file path to raster file with treatment data by dates (needs to be the same length as treatment_dates and pesticide_duration)
 #' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
 #' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1
 #' @param natural_kernel_type what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')
@@ -37,14 +37,16 @@
 #' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param anthropogenic_dir sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')
 #' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
-#' @param pesticide_duration how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.
+#' @param pesticide_duration how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
+#' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
+#' @importFrom lubridate interval time_length
 #' @return list of infected and susceptible per year
 #' @export
 #'
@@ -63,12 +65,12 @@
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 #' precipitation_coefficient_file ="", treatments_file,
 #' season_month_start = 1, season_month_end = 12, time_step = "week",
-#' start_time = 2001, end_time = 2005, treatment_dates = c('2001-12-24'),
+#' start_date = '2001-01-01', end_date = 2005-12-31', treatment_dates = c('2001-12-24'),
 #' natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
 #' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
 #' lethal_temperature = -12.87, lethal_temperature_month = 1,
 #' mortality_rate = 0.05, mortality_time_lag = 2,
-#' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
+#' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL, output_frequency = "yearly")
 #' }
 #' 
 pops <- function(infected_file, host_file, total_plants_file, 
@@ -76,7 +78,7 @@ pops <- function(infected_file, host_file, total_plants_file,
                  precip = FALSE, precipitation_coefficient_file = "", 
                  time_step = "month", reproductive_rate = 3.0,
                  season_month_start = 1, season_month_end = 12, 
-                 start_time = 2018, end_time = 2020, 
+                 start_date = '2008-01-01', end_date = '2008-12-31', 
                  use_lethal_temperature = FALSE, temperature_file = "",
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
                  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
@@ -88,7 +90,7 @@ pops <- function(infected_file, host_file, total_plants_file,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                 random_seed = NULL){ 
+                 random_seed = NULL, output_frequency = "year"){ 
 
   if (!treatment_method %in% c("ratio", "all infected")) {
     return("treatment method is not one of the valid treatment options")
@@ -122,23 +124,41 @@ pops <- function(infected_file, host_file, total_plants_file,
     return("Time step must be one of 'week', 'month' or 'day'")
   }
   
-  if (class(end_time) != "numeric" || nchar(end_time) != 4 || class(start_time) != "numeric" || nchar(start_time) != 4){
+  if (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d"))){
     return("End time and/or start time not of type numeric and/or in format YYYY")
   }
+  
+  if (!(output_frequency %in% list("week", "month", "day", "year", "time_step"))) {
+    return("Time step must be one of 'week', 'month' or 'day'")
+  }
+  
+  if (output_frequency == "day") {
+    if (time_step == "week" || time_step == "month") {
+      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+    }
+  }
+  
+  if (output_frequency == "week") {
+    if (time_step == "month") {
+      return("Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+    }
+  }
+  
+  duration <- lubridate::interval(start_date, end_date)
+  
+  if (time_step == "week") {
+    number_of_time_steps <- ceiling(time_length(duration, "week"))
+  } else if (time_step == "month") {
+    number_of_time_steps <- ceiling(time_length(duration, "month"))
+  } else if (time_step == "day") {
+    number_of_time_steps <- ceiling(time_length(duration, "day"))
+  }
+  
+  number_of_years <- ceiling(time_length(duration, "year"))
   
   if (is.null(random_seed)) {
     random_seed = round(stats::runif(1, 1, 1000000))
   }
-  
-  if (time_step == "week") {
-    number_of_time_steps <- (end_time-start_time+1)*52
-  } else if (time_step == "month") {
-    number_of_time_steps <- (end_time-start_time+1)*12
-  } else if (time_step == "day") {
-    number_of_time_steps <- (end_time-start_time+1)*365
-  }
-  
-  number_of_years <- end_time-start_time+1
   
   infected <- raster::raster(infected_file)
   infected <- raster::reclassify(infected, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
@@ -385,13 +405,14 @@ pops <- function(infected_file, host_file, total_plants_file,
                      time_step = time_step, reproductive_rate = reproductive_rate,
                      mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
                      season_month_start = season_month_start, season_month_end = season_month_end,
-                     start_time = start_time, end_time = end_time,
+                     start_date = start_date, end_date = end_date,
                      treatment_method = treatment_method,
                      natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
                      use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
                      natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
                      natural_dir = natural_dir, natural_kappa = natural_kappa,
-                     anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa
+                     anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
+                     output_frequency = output_frequency
   )
   
   return(data)

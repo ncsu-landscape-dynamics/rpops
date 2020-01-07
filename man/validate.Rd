@@ -9,18 +9,19 @@ validate(infected_years_file, num_iterations, number_of_cores = NA,
   temperature_coefficient_file = "", precip = FALSE,
   precipitation_coefficient_file = "", time_step = "month",
   reproductive_rate = 3, season_month_start = 1,
-  season_month_end = 12, start_time = 2018, end_time = 2020,
-  use_lethal_temperature = FALSE, temperature_file = "",
-  lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
-  management = FALSE, treatment_dates = c(0), treatments_file = "",
+  season_month_end = 12, start_date = "2008-01-01",
+  end_date = "2008-12-31", use_lethal_temperature = FALSE,
+  temperature_file = "", lethal_temperature = -12.87,
+  lethal_temperature_month = 1, mortality_on = FALSE,
+  mortality_rate = 0, mortality_time_lag = 0, management = FALSE,
+  treatment_dates = c(0), treatments_file = "",
   treatment_method = "ratio", percent_natural_dispersal = 1,
   natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
   natural_dir = "NONE", natural_kappa = 0,
   anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
   pesticide_duration = 0, pesticide_efficacy = 1, mask = NULL,
-  success_metric = "quantity")
+  success_metric = "quantity", output_frequency = "year")
 }
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
@@ -51,9 +52,9 @@ validate(infected_years_file, num_iterations, number_of_cores = NA,
 
 \item{season_month_end}{when does spread end during the year for your pest or pathogen (integer value between 1 and 12)}
 
-\item{start_time}{first year to start the simulation (needs to be a 4 digit year)}
+\item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
 
-\item{end_time}{last year of the simulation (needs to be a 4 digit year)}
+\item{end_date}{date to end the simulation with format ('YYYY_MM_DD')}
 
 \item{use_lethal_temperature}{a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)}
 
@@ -71,9 +72,9 @@ validate(infected_years_file, num_iterations, number_of_cores = NA,
 
 \item{management}{boolean to allow use of managemnet (TRUE or FALSE)}
 
-\item{treatment_dates}{dates in which to apply treatment list with format (YYYY_MM_DD)}
+\item{treatment_dates}{dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates}
+\item{treatments_file}{path to raster file with treatment data by dates (needs to be the same length as treatment_dates and pesticide_duration)}
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
@@ -95,13 +96,15 @@ validate(infected_years_file, num_iterations, number_of_cores = NA,
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment.}
+\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
 
 \item{pesticide_efficacy}{how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)}
 
 \item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
 
 \item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
+
+\item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run
@@ -111,34 +114,4 @@ This function uses the quantity, allocation, and configuration disagreement to v
 across the landscape using the parameters from the calibrate function. Ideally the model is calibrated
 with 2 or more years of data and validated for the last year or if you have 6 or more years of data 
 then the model can be validated for the final 2 years.
-}
-\examples{
-\dontrun{
-infected_years_file <- system.file("extdata", "SODexample", "initial_infection2005.tif", 
-package = "PoPS")
-num_iterations <- 100
-number_of_cores <- NA
-
-infected_file <- system.file("extdata", "SODexample", "initial_infection2004.tif", 
-package = "PoPS")
-host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
-total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
-temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", 
-package = "PoPS")
-treatments_file <- system.file("extdata", "SODexample", "management2005.tif", package = "PoPS")
-
-params <- validate(infected_years_file, num_iterations, number_of_cores,
-infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
-use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
-mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
-precipitation_coefficient_file ="", treatments_file,
-season_month_start = 1, season_month_end = 12, time_step = "month",
-start_time = 2005, end_time = 2005, treatment_dates = c(2005),
-dispersal_kern = "cauchy", percent_short_distance_dispersal = 1.0,
-short_distance_scale = 20.57, long_distance_scale = 0.0,
-lethal_temperature = -12.87, lethal_temperature_month = 1,
-mortality_rate = 0.05, mortality_time_lag = 2,
-wind_dir = "NONE", kappa = 0)
-}
-
 }

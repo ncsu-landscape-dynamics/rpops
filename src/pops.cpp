@@ -120,13 +120,14 @@ List pops_model(int random_seed,
                 std::string time_step, double reproductive_rate,
                 double mortality_rate = 0.0, int mortality_time_lag = 2,
                 int season_month_start = 1, int season_month_end = 12,
-                double start_time = 2018, double end_time = 2018,
+                std::string start_date = "2018-01-01", std::string end_date = "2018-12-31",
                 std::string treatment_method = "ratio",
                 std::string natural_kernel_type = "cauchy", std::string anthropogenic_kernel_type = "cauchy", 
                 bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
                 double natural_distance_scale = 21, double anthropogenic_distance_scale = 0.0, 
                 std::string natural_dir = "NONE", double natural_kappa = 0,
-                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0
+                std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0,
+                std::string output_frequency = "year"
 )
 {
   
@@ -134,8 +135,8 @@ List pops_model(int random_seed,
   DispersalKernelType natural_dispersal_kernel_type = kernel_type_from_string(natural_kernel_type);
   DispersalKernelType anthropogenic_dispersal_kernel_type = kernel_type_from_string(anthropogenic_kernel_type);
   TreatmentApplication treatment_application = treatment_application_enum_from_string(treatment_method);
-  pops::Date dd_start(start_time, 01, 01);
-  pops::Date dd_end(end_time, 12, 31);
+  pops::Date dd_start(start_date);
+  pops::Date dd_end(end_date);
   Direction natural_direction = direction_from_string(natural_dir);
   Direction anthropogenic_direction = direction_from_string(anthropogenic_dir);
   Season season(season_month_start,season_month_end);
@@ -150,6 +151,8 @@ List pops_model(int random_seed,
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
   std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_week;
+  bool output = false;
+  int last_day_of_week = 1;
   
   if (time_step == "month") {
     std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_month;
@@ -167,7 +170,7 @@ List pops_model(int random_seed,
   std::vector<double> area_infected;
   
   int counter = 0;
-  int first_mortality_year = start_time + mortality_time_lag;
+  int first_mortality_year = dd_start.year() + mortality_time_lag;
   
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
@@ -219,7 +222,7 @@ List pops_model(int random_seed,
         counter += 1;
         simulated_weeks.push_back(current_time_step);
         
-        if (current_time_step >= weather_coefficient.size()  && weather == TRUE) {
+        if (current_time_step >= weather_coefficient.size()  && weather) {
           Rcerr << "Not enough time steps of weather coefficient data" << std::endl;
         }
 
@@ -236,12 +239,62 @@ List pops_model(int random_seed,
         
         mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
-        if (mortality_on == TRUE) {
+        if (mortality_on) {
           int current_year = dd_current.year();
           simulation.mortality(infected, mortality_rate, current_year, first_mortality_year, mortality, mortality_tracker_vector);
           mortality_vector.push_back(Rcpp::clone(mortality));
         }
+      }
+      
+      if (output_frequency == "year") {
+        if (time_step == "week") {
+          if (dd_current.is_last_week_of_year()) {
+            output = true;
+          } else {
+            output = false;
+          }
+        } else if (time_step == "month") {
+          if (dd_current.is_last_month_of_year()) {
+            output = true;
+          } else {
+            output = false;
+          }
+        } else if (time_step == "day") {
+          if (dd_current.is_last_day_of_year()) {
+            output = true;
+          } else {
+            output = false;
+          }
+        }
+      } else if (output_frequency == "time_step") {
+        output = true;
+      } else if (output_frequency == "month") {
+        if (time_step == "week") {
+          if (dd_current.is_last_week_of_month()) {
+            output = true;
+          } else {
+            output = false;
+          }
+        } else if (time_step == "day") {
+          if (dd_current.is_last_day_of_month()) {
+            output = true;
+          } else {
+            output = false;
+          }
+        }
+      } else if (output_frequency == "week") {
+        if (time_step == "day") {
+          if (last_day_of_week < 7) {
+            output = false;
+            last_day_of_week += last_day_of_week;
+          } else if (last_day_of_week == 7) {
+            output = true;
+            last_day_of_week = 1;
+          }
+        }
+      }
         
+      if (output) {
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
         resistant_vector.push_back(Rcpp::clone(resistant));
@@ -257,7 +310,7 @@ List pops_model(int random_seed,
         auto sr = to_array(spread_rates);
         spread_rates_vector.push_back(sr);
       }
-    
+        
       if (dd_current >= dd_end) {
         break;
       }
