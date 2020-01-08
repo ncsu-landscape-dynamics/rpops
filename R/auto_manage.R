@@ -235,14 +235,6 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   mortality <- mortality_tracker
   resistant <- mortality_tracker
   
-  if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
-    core_count <- parallel::detectCores() - 1
-  } else {
-    core_count <- number_of_cores
-  }
-  
-  cl <- makeCluster(core_count)
-  registerDoParallel(cl)
   years <- seq(year(start_date), year(end_date), 1)
   rcl <- c(1, Inf, 1, 0, 0.99, NA)
   rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
@@ -252,7 +244,17 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   buffer_cells <- buffer/ew_res
   years_simulated <- length(years)
   
-  run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "iterators")) %do% {
+  if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
+    core_count <- parallel::detectCores() - 1
+  } else {
+    core_count <- number_of_cores
+  }
+  
+  cl <- makeCluster(core_count)
+  registerDoParallel(cl)
+
+  
+  run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate"), .export = ls(globalenv())) %do% {
     
     if (treatment_priority == "equal") {
       treatment_species <- infected_speci[[1]]
@@ -275,9 +277,9 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     treatment_maps <- list(as.matrix(treatment))
     management <- TRUE
     
-    tests <-   foreach(i = 1:length(infected_files), .combine = rbind, .packages = c("raster", "PoPS", "foreach", "iterators")) %do% {
+    tests <-   foreach(i = 1:length(infected_files), .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate"), .export = ls(globalenv())) %do% {
       
-      infected_stack <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {
+      infected_stack <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate"), .export = ls(globalenv())) %do% {
         random_seed <- round(stats::runif(1, 1, 1000000))
         data <- pops_model(random_seed = random_seed, 
                            use_lethal_temperature = use_lethal_temperature, 
@@ -308,6 +310,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
                            anthropogenic_dir = anthropogenic_dir[[i]], anthropogenic_kappa = anthropogenic_kappa[[i]],
                            output_frequency = output_frequency
         )
+        
         infected_runs <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) host))
         susceptible_runs <- raster::stack(lapply(1:length(data$infected_before_treatment), function(i) host))
         
@@ -340,15 +343,15 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
       south_rates <- data.frame(t(years))
       north_rates <- data.frame(t(years))
       
-      for (i in 1:length(infected_runs)) {
-        prediction <- prediction + probability_runs[[i]]
-        infected_number[i,] <- number_infected_runs[[i]]
-        infected_area[i,] <- area_infected_runs[[i]]
-        rates <- do.call(rbind, spread_rate_runs[[i]])
-        west_rates[i,] <- rates[,4]
-        east_rates[i,] <- rates[,3]
-        south_rates[i,] <- rates[,2]
-        north_rates[i,] <- rates[,1]
+      for (k in 1:length(infected_runs)) {
+        prediction <- prediction + probability_runs[[k]]
+        infected_number[k,] <- number_infected_runs[[k]]
+        infected_area[k,] <- area_infected_runs[[k]]
+        rates <- do.call(rbind, spread_rate_runs[[k]])
+        west_rates[k,] <- rates[,4]
+        east_rates[k,] <- rates[,3]
+        south_rates[k,] <- rates[,2]
+        north_rates[k,] <- rates[,1]
       }
       
       probability <- (prediction/(length(probability_runs))) * 100
