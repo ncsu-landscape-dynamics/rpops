@@ -16,9 +16,9 @@ initial_raster_checks <- function(x) {
   if (checks_passed) {
     r<- raster::stack(x)
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    if (raster::nlayers(r) > 1) {
-      r <- output_from_raster_mean_and_sd(r)
-    }
+    # if (raster::nlayers(r) > 1) {
+    #   r <- output_from_raster_mean_and_sd(r)
+    # }
   }
   
   

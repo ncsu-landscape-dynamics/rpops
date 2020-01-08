@@ -353,6 +353,7 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   susceptible_run_out <- susceptible_run
   
   data <- list(probability, single_run_out, number_infecteds, infected_areas, west_rate, east_rate, south_rate, north_rate)
+  names(outputs) <- c('probability', 'single_run_out', 'number_infecteds', 'infected_areas', 'west_rate', 'east_rate', 'south_rate', 'north_rate')
   
   return(data)
   
