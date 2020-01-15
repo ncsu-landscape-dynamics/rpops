@@ -279,6 +279,8 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   treatment_maps <- list(as.matrix(treatment))
   management <- TRUE
 
+  treatment_speci <- raster()
+  
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
@@ -289,15 +291,10 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   registerDoParallel(cl)
   
   run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate"), .export = ls(globalenv())) %do% {
-    treatment_speci <- raster()
+
     if (treatment_priority == "equal") {
-      treatment_speci <- infected_speci[[1]]
-      if (raster::nlayers(infected_speci) > 1) {
-        for (m in 2:nlayers(infected_speci)) {
-          treatment_speci <- treatment_speci + infected_speci[[m]]
-          print("works")
-        }
-      }
+      treatment_speci <- raster::stackApply(infected_speci, indices = rep(1, raster::nlayers(infected_speci)), fun = sum)
+      print("works")
     } else if (treatment_priority == "ranked") {
       for (m in 1:raster::nlayers(infected_speci)) {
         if (treatment_rank[[m]]) {
@@ -305,12 +302,13 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
         }
       }
     }
-    
+    print("start")
     treatment <- treatmentAuto(rast = treatment_speci, rast2 = host, method = selection_method, priority = selection_priority, number_of_locations = num_cells, points = points, treatment_efficacy = treatment_efficacy, buffer_cells = buffer_cells)
     treatment_dates <- paste(years[1], "-12", "-01", sep = "")
     treatment_maps <- list(as.matrix(treatment))
     management <- TRUE
-
+    print("end_treatment")
+    
     tests <-   foreach(i = 1:length(infected_files), .combine = rbind, .packages = c("raster", "PoPS", "foreach"), .export = ls(globalenv())) %do% {
       
       infected_stack <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach"), .export = ls(globalenv())) %dopar% {
@@ -406,8 +404,8 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     }
     
     if (y == 1) {
-      infected_speci <- stack()
-      susceptible_speci <- stack()
+      infected_speci <<- stack()
+      susceptible_speci <<- stack()
       probabilities <- stack()
       
       infections_out <- c()
@@ -436,8 +434,8 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     }
     
     for (t in 1:length(infected_species)) {
-      infected_speci <- stack(infected_speci, tests[[t]][[1]])
-      susceptible_speci <- stack(susceptible_speci, tests[[t+length(infected_species)]][[1]])
+      infected_speci <<- stack(infected_speci, tests[[t]][[1]])
+      susceptible_speci <<- stack(susceptible_speci, tests[[t+length(infected_species)]][[1]])
       probabilities <- stack(probabilities, tests[[t+(2*length(infected_species))]][[1]])
       
       infections_out[[t]] <- c(tests[[t]])
@@ -461,7 +459,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     } else {
       years <- c(year(start_date))
     }
-    
+    print("outer loop")
     
     outputs <- list(infections_out, susceptibles_out, probabilities_out, number_infecteds_out, infected_areas_out, west_rate_out, east_rate_out, north_rate_out, south_rate_out, treatment)
     
@@ -481,6 +479,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   east_rates <- list()
   north_rates <- list()
   south_rates <- list()
+  treatments <- list()
   
   for (sp in 1:length(infected_files)) {
     infecs <- list()
@@ -505,16 +504,16 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
       south_rats[[l]] <- run_years[[l + years_simulated * 8]][[sp]][[1]]
       treatments[[l]] <- run_years[[l + years_simulated * 9]][[1]]
     }
-    names(infecs) <- years_names
-    names(susceps) <- years_names
-    names(probs) <- years_names
-    names(number_infects) <- years_names
-    names(infected_ars) <- years_names
-    names(west_rats) <- years_names
-    names(east_rats) <- years_names
-    names(north_rats) <- years_names
-    names(south_rats) <- years_names
-    names(treatments) <- years_names
+    names(infecs) <- year_names
+    names(susceps) <- year_names
+    names(probs) <- year_names
+    names(number_infects) <- year_names
+    names(infected_ars) <- year_names
+    names(west_rats) <- year_names
+    names(east_rats) <- year_names
+    names(north_rats) <- year_names
+    names(south_rats) <- year_names
+    names(treatments) <- year_names
     infecteds[[sp]] <- infecs
     susceptibles[[sp]] <- susceps
     probabilities[[sp]] <- probs
