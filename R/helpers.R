@@ -163,9 +163,12 @@ treatmentAuto <- function(rast, rast2, method = 'Foci', priority = 'group size',
               }  
               if (cells_treated >= number_of_locations) {break}
             }
+            if (cells_treated >= number_of_locations) {break}
           }
         }
+        if (cells_treated >= number_of_locations) {break}
       }
+      if (cells_treated >= number_of_locations) {break}
     }
   } else if (priority == 'host') {
     if (direction_first) {
