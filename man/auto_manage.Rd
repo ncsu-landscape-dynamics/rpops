@@ -25,9 +25,12 @@ auto_manage(infected_files, host_file, total_plants_file, temp = FALSE,
   budget = 1500000, buffer = 600, treatment_priority = "equal",
   treatment_rank = c(1), selection_method = "Points",
   selection_priority = "group size", points = points,
-  treatment_efficacy = 1)
+  treatment_efficacy = 1, species = c("species1"),
+  direction_first = TRUE)
 }
 \arguments{
+\item{infected_files}{file path to the infected species files for the start of the simulation}
+
 \item{host_file}{path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)}
 
 \item{total_plants_file}{path to raster file with number of total plants}
@@ -110,6 +113,8 @@ auto_manage(infected_files, host_file, total_plants_file, temp = FALSE,
 
 \item{buffer}{the size of the buffer to include around managed locations}
 
+\item{treatment_priority}{how to prioritize which of many species to treat options are 'equal' or 'ranked' where equal selects locations based on guidelines from any of the species and rank selects from the species in ranked order and then}
+
 \item{treatment_rank}{binary 0 or 1 for the species that is the most important}
 
 \item{selection_method}{the method for determining the management strategy to use. must be one of 'Foci', 'Border', or'Points'.}
@@ -120,9 +125,9 @@ auto_manage(infected_files, host_file, total_plants_file, temp = FALSE,
 
 \item{treatment_efficacy}{The overall efficacy of the treatment}
 
-\item{treatment_priortiy}{how to prioritize which of many species to treat options are 'equal' or 'ranked' where equal selects locations based on guidelines from any of the species and rank selects from the species in ranked order and then}
+\item{species}{a list of the species names for naming outputs files must be the same length and infected_files}
 
-\item{cost_per_meter_sq}{the cost of treatment per square meter}
+\item{direction_first}{boolean to indicate where or not direction is the first priortity in sorting (if false first sorting priority goes to the selection_method)}
 }
 \value{
 list of infected and susceptible per year
