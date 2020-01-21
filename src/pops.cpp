@@ -11,6 +11,7 @@
 #include "statistics.hpp"
 #include "switch_kernel.hpp"
 #include "uniform_kernel.hpp"
+#include "scheduling.hpp"
 #include <iostream>
 #include <vector>
 #include <tuple>
@@ -42,6 +43,22 @@ bool all_infected(IntegerMatrix susceptible)
     }
   }
   return allInfected;
+}
+
+inline StepUnit step_unit_enum_from_string(const string& text)
+{
+  std::map<string, StepUnit> mapping{
+    {"day", StepUnit::Day},
+    {"week", StepUnit::Week},
+    {"month", StepUnit::Month}
+  };
+  try {
+    return mapping.at(text);
+  }
+  catch (const std::out_of_range&) {
+    throw std::invalid_argument("step_unit_enum_from_string:"
+                                  " Invalid value '" + text +"' provided");
+  }
 }
 
 TreatmentApplication treatment_application_enum_from_string(const std::string& text)
@@ -179,6 +196,7 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> resistant_vector;
   std::vector<int> simulated_weeks;
   int current_year;
+  StepUnit step_unit = step_unit_enum_from_string(time_step);
   
   Treatments<IntegerMatrix, NumericMatrix> treatments;
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
@@ -188,6 +206,10 @@ List pops_model(int random_seed,
   unsigned num_years = dd_end.year() - dd_start.year() + 1;
   
   SpreadRate<IntegerMatrix> spreadrate(infected, ew_res, ns_res, num_years);
+  
+  // Define simulation time step
+  Scheduler scheduling(dd_start, dd_end, step_unit, 1);
+  std::vector<bool> spread_schedule = scheduling.schedule_spread(Season(season_month_start, season_month_end));
   
   for (unsigned current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
       
