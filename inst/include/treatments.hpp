@@ -19,6 +19,7 @@
 
 #include "raster.hpp"
 #include "date.hpp"
+#include "scheduling.hpp"
 
 #include <map>
 #include <vector>
@@ -51,10 +52,10 @@ template<typename IntegerRaster, typename FloatRaster>
 class AbstractTreatment
 {
 public:
-    virtual Date get_start() = 0;
-    virtual Date get_end() = 0;
-    virtual bool should_start(const Date& date) = 0;
-    virtual bool should_end(const Date& date) = 0;
+    virtual unsigned get_start() = 0;
+    virtual unsigned get_end() = 0;
+    virtual bool should_start(unsigned step) = 0;
+    virtual bool should_end(unsigned step) = 0;
     virtual void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& resistant) = 0;
     virtual void end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) = 0;
     virtual void apply_treatment_mortality(IntegerRaster& infected) = 0;
@@ -69,24 +70,22 @@ template<typename IntegerRaster, typename FloatRaster>
 class BaseTreatment : public AbstractTreatment<IntegerRaster, FloatRaster>
 {
 protected:
-    Date start_;
-    Date end_;
+    unsigned start_step_;
+    unsigned end_step_;
     FloatRaster map_;
     TreatmentApplication application_;
-    std::function<void (Date&)> increase_by_step_;
 public:
-    BaseTreatment(const FloatRaster& map, const Date& start,
-                  TreatmentApplication treatment_application,
-                  std::function<void (Date&)> increase_by_step):
-        start_(start), end_(start), map_(map),
-        application_(treatment_application), increase_by_step_(increase_by_step)
+    BaseTreatment(const FloatRaster& map, unsigned start,
+                  TreatmentApplication treatment_application):
+        start_step_(start), end_step_(start), map_(map),
+        application_(treatment_application)
     {}
-    Date get_start() {return start_;}
-    Date get_end() {return end_;}
+    unsigned get_start() {return start_step_;}
+    unsigned get_end() {return end_step_;}
     void apply_treatment_mortality(IntegerRaster& infected) override
     {
-        for(signed i = 0; i < infected.rows(); i++)
-            for(signed j = 0; j < infected.cols(); j++) {
+        for(int i = 0; i < infected.rows(); i++)
+            for(int j = 0; j < infected.cols(); j++) {
                 if (application_ == TreatmentApplication::Ratio) {
                     infected(i, j) = infected(i, j) - (infected(i, j) * map_(i, j));
                 }
@@ -106,27 +105,24 @@ template<typename IntegerRaster, typename FloatRaster>
 class SimpleTreatment : public BaseTreatment<IntegerRaster, FloatRaster>
 {
 public:
-    SimpleTreatment(const FloatRaster& map, const Date& start,
-                    TreatmentApplication treatment_application,
-                    std::function<void (Date&)> increase_by_step):
-        BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application, increase_by_step)
+    SimpleTreatment(const FloatRaster& map, unsigned     start,
+                    TreatmentApplication treatment_application):
+        BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
     {}
-    bool should_start(const Date& date) override
+    bool should_start(unsigned step) override
     {
-        Date st = Date(this->start_);
-        this->increase_by_step_(st);
-        if (date >= this->start_ && date < st)
+        if (this->start_step_ == step)
             return true;
         return false;
     }
-    bool should_end(const Date&) override
+    bool should_end(unsigned) override
     {
         return false;
     }
     void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& ) override
     {
-        for(signed i = 0; i < infected.rows(); i++)
-            for(signed j = 0; j < infected.cols(); j++) {
+        for(int i = 0; i < infected.rows(); i++)
+            for(int j = 0; j < infected.cols(); j++) {
                 if (this->application_ == TreatmentApplication::Ratio) {
                     infected(i, j) = infected(i, j) - (infected(i, j) * this->map_(i, j));
                 }
@@ -152,34 +148,29 @@ template<typename IntegerRaster, typename FloatRaster>
 class PesticideTreatment : public BaseTreatment<IntegerRaster, FloatRaster>
 {
 public:
-    PesticideTreatment(const FloatRaster& map, const Date& start, int num_days,
-                       TreatmentApplication treatment_application,
-                       std::function<void (Date&)> increase_by_step):
-        BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application, increase_by_step)
+    PesticideTreatment(const FloatRaster& map, unsigned start, unsigned end,
+                       TreatmentApplication treatment_application):
+        BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
     {
-        this->end_.add_days(num_days);
+        this->end_step_ = end;
     }
-    bool should_start(const Date& date) override
+    bool should_start(unsigned step) override
     {
-        Date st = Date(this->start_);
-        this->increase_by_step_(st);
-        if (date >= this->start_ && date < st)
+        if (this->start_step_ == step)
             return true;
         return false;
     }
-    bool should_end(const Date& date) override
+    bool should_end(unsigned step) override
     {
-        Date end = Date(this->end_);
-        this->increase_by_step_(end);
-        if (date >= this->end_ && date < end)
+        if (this->end_step_ == step)
             return true;
         return false;
     }
 
     void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& resistant) override
     {
-        for(signed i = 0; i < infected.rows(); i++)
-            for(signed j = 0; j < infected.cols(); j++) {
+        for(int i = 0; i < infected.rows(); i++)
+            for(int j = 0; j < infected.cols(); j++) {
                 int infected_resistant;
                 int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
                 int current_resistant = resistant(i, j); 
@@ -196,8 +187,8 @@ public:
     }
     void end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) override
     {
-        for(signed i = 0; i < resistant.rows(); i++)
-            for(signed j = 0; j < resistant.cols(); j++) {
+        for(int i = 0; i < resistant.rows(); i++)
+            for(int j = 0; j < resistant.cols(); j++) {
                 if (this->map_(i, j) > 0){
                     susceptible(i, j) += resistant(i, j);
                     resistant(i, j) = 0;
@@ -223,7 +214,9 @@ class Treatments
 {
 private:
     std::vector<AbstractTreatment<IntegerRaster, FloatRaster>*> treatments;
+    Scheduler scheduler_;
 public:
+    Treatments(const Scheduler &scheduler): scheduler_(scheduler) {}
     ~Treatments()
     {
         for (auto item : treatments)
@@ -244,13 +237,17 @@ public:
      * \param treatment_application if efficiency < 100% how should it be applied to infected/susceptible
      * \param increase_by_step function to increase simulation step
      */
-    void add_treatment(const FloatRaster& map, const Date& start_date, int num_days, TreatmentApplication treatment_application,
-                       std::function<void (Date&)> increase_by_step)
+    void add_treatment(const FloatRaster& map, const Date& start_date, int num_days, TreatmentApplication treatment_application)
     {
+        unsigned start = scheduler_.schedule_action_date(start_date);
         if (num_days == 0)
-            treatments.push_back(new SimpleTreatment<IntegerRaster, FloatRaster>(map, start_date, treatment_application, increase_by_step));
-        else
-            treatments.push_back(new PesticideTreatment<IntegerRaster, FloatRaster>(map, start_date, num_days, treatment_application, increase_by_step));
+            treatments.push_back(new SimpleTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application));
+        else {
+            Date end_date(start_date);
+            end_date.add_days(num_days);
+            unsigned end = scheduler_.schedule_action_date(end_date);
+            treatments.push_back(new PesticideTreatment<IntegerRaster, FloatRaster>(map, start, end, treatment_application));
+        }
     }
     /*!
      * \brief Do management if needed.
@@ -258,13 +255,13 @@ public:
      * Decides internally whether any treatment needs to be
      * activated/deactivated.
      *
-     * \param current simulation date
+     * \param current simulation step
      * \param infected raster of infected host
      * \param susceptible raster of susceptible host
      * \param resistant raster of resistant host
      * \return true if any management action was necessary
      */
-    bool manage(const Date& current, IntegerRaster& infected,
+    bool manage(unsigned current, IntegerRaster& infected,
                 IntegerRaster& susceptible, IntegerRaster& resistant)
     {
         bool changed = false;
@@ -282,11 +279,11 @@ public:
     }
     /*!
      * \brief Separately manage mortality infected cohorts
-     * \param current simulation date
+     * \param current simulation step
      * \param infected raster of infected host
      * \return true if any management action was necessary
      */
-    bool manage_mortality(const Date& current, IntegerRaster& infected)
+    bool manage_mortality(unsigned current, IntegerRaster& infected)
     {
         bool applied = false;
         for (unsigned i = 0; i < treatments.size(); i++)
@@ -297,15 +294,15 @@ public:
         return applied;
     }
     /*!
-     * \brief Used to remove treatments after certain date.
+     * \brief Used to remove treatments after certain step.
      * Needed for computational steering.
-     * \param date simulation date
+     * \param step simulation step
      */
-    void clear_after_date(const Date& date)
+    void clear_after_step(unsigned step)
     {
         for(auto& treatment : treatments)
         {
-            if (treatment->get_start() > date)
+            if (treatment->get_start() > step)
             {
                 delete treatment;
                 treatment = nullptr;
