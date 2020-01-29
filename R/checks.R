@@ -14,7 +14,7 @@ initial_raster_checks <- function(x) {
   }
   
   if (checks_passed) {
-    r<- raster::stack(x)
+    r <- raster::stack(x)
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     if (raster::nlayers(r) > 1) {
       r <- output_from_raster_mean_and_sd(r)
@@ -348,4 +348,40 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
     names(outs) <- c('checks_passed', 'rates', 'posterior_rates')
     return(outs)
   } 
+}
+
+movement_checks <- function(x, rast) {
+  checks_passed <- TRUE
+  
+  if (!all(file.exists(x))) {
+    checks_passed <- FALSE
+    failed_check <- "file does not exist" 
+  }
+  
+  if (checks_passed && !all((raster::extension(x) %in% c(".csv", ".txt")))) {
+    checks_passed <- FALSE
+    failed_check <- "file is not one of '.csv' or '.txt'"
+  }
+  
+  if (checks_passed) {
+    r <- read.csv(x, headers = TRUE)
+    movement_from <- SpatialPointsDataFrame(moves[,1:2], data = moves, proj4string = CRS("+init=epsg:4326"))
+    movement_to <- SpatialPointsDataFrame(moves[,3:4], data = moves, proj4string = CRS("+init=epsg:4326"))
+    movement_from <- spTransform(movement_from, CRS = crs(host))
+    movement_to <- spTransform(movement_to, CRS = crs(host))
+    cell_from <-  raster::extract(host, movement_from, cellnumbers = TRUE)
+    cell_to <-  raster::extract(host, movement_to, cellnumbers = TRUE)
+    rowcol_from <- rowColFromCell(host, cell_from[,1])
+    rowcol_to <- rowColFromCell(host, cell_to[,1])
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, r)
+    names(outs) <- c('checks_passed', 'movements')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
 }

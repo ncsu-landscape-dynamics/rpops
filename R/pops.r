@@ -41,6 +41,8 @@
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
 #' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
+#' @param movements this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.
+#' @param use_movements this is a boolean to turn on use of the movement module.
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints
@@ -90,7 +92,8 @@ pops <- function(infected_file, host_file, total_plants_file,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                 random_seed = NULL, output_frequency = "year"){ 
+                 random_seed = NULL, output_frequency = "year", 
+                 movements_file = "", use_movement = FALSE){ 
 
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -150,6 +153,11 @@ pops <- function(infected_file, host_file, total_plants_file,
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
 
+  if (use_movement) {
+    
+  }
+  
+  
   if (use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(temperature_file, infected)
     if (temperature_check$checks_passed) {

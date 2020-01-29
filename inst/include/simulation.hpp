@@ -131,6 +131,33 @@ public:
         }
     }
 
+    void movement(const IntegerRaster& infected,
+                  IntegerRaster& susceptible, 
+                  IntegerRaster& mortality_tracker,
+                  const IntegerRaster& total_plants,
+                  unsigned index, 
+                  std::vector<std::vector<int>> movements)
+    {
+        for (int i = 0; i < movements.size(); i++) {
+            std::vector<int> moved = movements[i];
+            int infected_moved = 0;
+            int susceptible_moved = 0;
+            double inf_ratio = 0;
+            if (moved[6] == index) {
+                inf_ratio = infected[moved[0], moved[1]]/susceptible[moved[0], moved[1]];
+                infected_moved = infected[moved[0], moved[1]] * inf_ratio;
+                susceptible_moved = moved[4] - infected_moved;
+            }
+            
+            infected[moved[0], moved[1]] -= infected_moved;
+            susceptible[moved[0], moved[1]] -= susceptible_moved;
+            infected[moved[2], moved[3]] += infected_moved;
+            susceptible[moved[2], moved[3]] += susceptible_moved;
+            total_plants[moved[0], moved[1]] -= moved[4];
+            total_plants[moved[2], moved[3]] += moved[4];
+        }
+    }
+    
     /** Creates dispersal locations for the dispersing individuals
      *
      * Assumes that the generate() function was called beforehand.
