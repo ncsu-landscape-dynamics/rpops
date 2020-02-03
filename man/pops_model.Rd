@@ -7,9 +7,10 @@
 pops_model(random_seed, use_lethal_temperature, lethal_temperature,
   lethal_temperature_month, infected, susceptible, total_plants,
   mortality_on, mortality_tracker, mortality, treatment_maps,
-  treatment_dates, pesticide_duration, resistant, weather, temperature,
-  weather_coefficient, ew_res, ns_res, num_rows, num_cols, time_step,
-  reproductive_rate, mortality_rate = 0, mortality_time_lag = 2L,
+  treatment_dates, pesticide_duration, resistant, use_movements, movements,
+  movements_dates, weather, temperature, weather_coefficient, ew_res,
+  ns_res, num_rows, num_cols, time_step, reproductive_rate,
+  mortality_rate = 0, mortality_time_lag = 2L,
   season_month_start = 1L, season_month_end = 12L,
   start_date = "2018-01-01", end_date = "2018-12-31",
   treatment_method = "ratio", natural_kernel_type = "cauchy",
@@ -48,6 +49,12 @@ pops_model(random_seed, use_lethal_temperature, lethal_temperature,
 \item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
 
 \item{resistant}{matrix to track resistant population over time}
+
+\item{use_movements}{this is a boolean to turn on use of the movement module.}
+
+\item{movements}{a matrix with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
+
+\item{movements_dates}{this is a list of dates passeed as strings in the format 'YYYY-MM-DD'}
 
 \item{weather}{Boolean that is true if weather is used}
 

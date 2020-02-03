@@ -59,7 +59,8 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  num_iterations = 100, number_of_cores = NA,
                  pesticide_duration = 0, pesticide_efficacy = 1.0,
-                 random_seed = NULL, output_frequency = "year"){ 
+                 random_seed = NULL, output_frequency = "year",
+                 movements_file = "", use_movements = FALSE){ 
   
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -114,6 +115,20 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
+  
+  if (use_movements) {
+    movements_check <- movement_checks(movements_file, infected, start_date, end_date)
+    if (movements_check$checks_passed) {
+      movements <- movements_check$movements
+      movements_dates <- movements_check$movements_dates
+      movements_r <- movements_check$movements_r
+    } else {
+      return(movements_check$failed_check)
+    }
+  } else {
+    movements <- list(0,0,0,0,0)
+    movements_dates <- start_date
+  }
   
   if (use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(temperature_file, infected)
@@ -267,6 +282,8 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                        treatment_dates = treatment_dates,
                        pesticide_duration = pesticide_duration,
                        resistant = resistant,
+                       use_movements = use_movements, movements = movements,
+                       movements_dates = movements_dates,
                        weather = weather,
                        temperature = temperature,
                        weather_coefficient = weather_coefficient,
