@@ -130,6 +130,8 @@ List pops_model(int random_seed,
                 std::vector<std::string> treatment_dates,
                 std::vector<int> pesticide_duration,
                 IntegerMatrix resistant,
+                bool use_movements, std::vector<std::vector<int>> movements,
+                std::vector<std::string> movements_dates,
                 bool weather,
                 std::vector<NumericMatrix> temperature,
                 std::vector<NumericMatrix> weather_coefficient,
@@ -167,7 +169,6 @@ List pops_model(int random_seed,
   DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
-  std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_week;
   
   int num_infected;
   std::vector<int> number_infected;
@@ -185,7 +186,7 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> mortality_tracker_vector;
   std::vector<IntegerMatrix> mortality_vector;
   std::vector<IntegerMatrix> resistant_vector;
-  std::vector<int> simulated_weeks;
+  std::vector<IntegerMatrix> total_host_vector;
   StepUnit step_unit = step_unit_enum_from_string(time_step);
 
   // Define simulation time step
@@ -234,6 +235,18 @@ List pops_model(int random_seed,
   unsigned spread_rate_outputs = get_number_of_scheduled_actions(spread_rate_schedule);
   SpreadRate<IntegerMatrix> spreadrate(infected, ew_res, ns_res, spread_rate_outputs);
             
+  unsigned last_index = 0;
+  unsigned move_scheduled;
+  std::vector<unsigned> movement_schedule;
+  if (use_movements) {
+    for (unsigned move = 0; move < movements_dates.size(); ++move){
+        pops::Date movement_date(movements_dates[move]);
+        move_scheduled = unsigned(scheduler.schedule_action_date(movement_date));
+        movement_schedule.push_back(move_scheduled);
+    }
+  }
+
+  
   for (unsigned current_index = 0; current_index < scheduler.get_num_steps(); ++current_index) {
       
       if (all_infected(susceptible)) {
@@ -263,8 +276,11 @@ List pops_model(int random_seed,
         simulation.generate(infected, weather, weather_coefficient[current_index], reproductive_rate);
         simulation.disperse(susceptible, infected, mortality_tracker, total_plants,
                             outside_dispersers, weather, weather_coefficient[current_index], kernel);
+        if (use_movements) {
+          last_index = simulation.movement(infected, susceptible, mortality_tracker, total_plants, current_index, last_index, movements, movement_schedule);
+        }
       }
-    
+      
       if (mortality_on && mortality_schedule[current_index]) {
         mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
@@ -277,6 +293,7 @@ List pops_model(int random_seed,
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
         resistant_vector.push_back(Rcpp::clone(resistant));
+        total_host_vector.push_back(Rcpp::clone(total_plants));
         
         num_infected = sum_of_infected(infected);
         number_infected.push_back(num_infected);
@@ -291,10 +308,6 @@ List pops_model(int random_seed,
         auto sr = to_array(spread_rates);
         spread_rates_vector.push_back(sr);
       }
-        
-      // if (dd_current >= dd_end) {
-      //   break;
-      // }
   }
 
   return List::create(
@@ -304,7 +317,8 @@ List pops_model(int random_seed,
     _["mortality"] = mortality_vector,
     _["rates"] = spread_rates_vector,
     _["number_infected"] = number_infected,
-    _["area_infected"] = area_infected
+    _["area_infected"] = area_infected,
+    _["total_hosts"] = total_host_vector
   );
   
 }
