@@ -59,7 +59,8 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  num_iterations = 100, number_of_cores = NA,
                  pesticide_duration = 0, pesticide_efficacy = 1.0,
-                 random_seed = NULL, output_frequency = "year"){ 
+                 random_seed = NULL, output_frequency = "year",
+                 movements_file = "", use_movements = FALSE){ 
   
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -114,6 +115,20 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
+  
+  if (use_movements) {
+    movements_check <- movement_checks(movements_file, infected, start_date, end_date)
+    if (movements_check$checks_passed) {
+      movements <- movements_check$movements
+      movements_dates <- movements_check$movements_dates
+      movements_r <- movements_check$movements_r
+    } else {
+      return(movements_check$failed_check)
+    }
+  } else {
+    movements <- list(0,0,0,0,0)
+    movements_dates <- start_date
+  }
   
   if (use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(temperature_file, infected)
@@ -254,34 +269,36 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   
   infected_stack <- foreach::foreach(i = 1:num_iterations, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
-    data <- pops_model(random_seed = random_seed, 
-                       use_lethal_temperature = use_lethal_temperature, 
-                       lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
-                       infected = infected,
-                       susceptible = susceptible,
-                       total_plants = total_plants,
-                       mortality_on = mortality_on,
-                       mortality_tracker = mortality_tracker,
-                       mortality = mortality,
-                       treatment_maps = treatment_maps,
-                       treatment_dates = treatment_dates,
-                       pesticide_duration = pesticide_duration,
-                       resistant = resistant,
-                       weather = weather,
-                       temperature = temperature,
-                       weather_coefficient = weather_coefficient,
-                       ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                       time_step = time_step, reproductive_rate = reproductive_rate[i],
-                       mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                       season_month_start = season_month_start, season_month_end = season_month_end,
-                       start_date = start_date, end_date = end_date,
-                       treatment_method = treatment_method,
-                       natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                       use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal[i],
-                       natural_distance_scale = natural_distance_scale[i], anthropogenic_distance_scale = anthropogenic_distance_scale[i], 
-                       natural_dir = natural_dir, natural_kappa = natural_kappa,
-                       anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
-                       output_frequency = output_frequency
+    data <- PoPS::pops_model(random_seed = random_seed, 
+                             use_lethal_temperature = use_lethal_temperature, 
+                             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                             infected = infected,
+                             susceptible = susceptible,
+                             total_plants = total_plants,
+                             mortality_on = mortality_on,
+                             mortality_tracker = mortality_tracker,
+                             mortality = mortality,
+                             treatment_maps = treatment_maps,
+                             treatment_dates = treatment_dates,
+                             pesticide_duration = pesticide_duration,
+                             resistant = resistant,
+                             use_movements = use_movements, movements = movements,
+                             movements_dates = movements_dates,
+                             weather = weather,
+                             temperature = temperature,
+                             weather_coefficient = weather_coefficient,
+                             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
+                             time_step = time_step, reproductive_rate = reproductive_rate,
+                             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
+                             season_month_start = season_month_start, season_month_end = season_month_end,
+                             start_date = start_date, end_date = end_date,
+                             treatment_method = treatment_method,
+                             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                             natural_dir = natural_dir, natural_kappa = natural_kappa,
+                             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
+                             output_frequency = output_frequency
     )
     
     comp_years <- raster::stack(lapply(1:length(data$infected), function(i) host))
