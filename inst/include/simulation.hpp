@@ -131,31 +131,61 @@ public:
         }
     }
 
-    void movement(const IntegerRaster& infected,
+    unsigned movement(IntegerRaster& infected,
                   IntegerRaster& susceptible, 
                   IntegerRaster& mortality_tracker,
-                  const IntegerRaster& total_plants,
-                  unsigned index, 
-                  std::vector<std::vector<int>> movements)
+                  IntegerRaster& total_plants,
+                  unsigned current_index, unsigned last_index,
+                  const std::vector<std::vector<int>>& movements,
+                  std::vector<unsigned> movement_schedule)
     {
-        for (int i = 0; i < movements.size(); i++) {
-            std::vector<int> moved = movements[i];
+        for (unsigned i = last_index; i < movements.size(); i++) {
+            auto moved = movements[i];
+            unsigned move_schedule = movement_schedule[i];
+            if (move_schedule != current_index) {
+              return i;
+            }
             int infected_moved = 0;
             int susceptible_moved = 0;
+            int total_hosts_moved = 0;
+            double infected_mean = 0;
             double inf_ratio = 0;
-            if (moved[6] == index) {
-                inf_ratio = infected[moved[0], moved[1]]/susceptible[moved[0], moved[1]];
-                infected_moved = infected[moved[0], moved[1]] * inf_ratio;
-                susceptible_moved = moved[4] - infected_moved;
+            int row_from = moved[0];
+            int col_from = moved[1];
+            int row_to = moved[2];
+            int col_to = moved[3];
+            int hosts = moved[4];
+            if (infected(row_from, col_from) > 0 || susceptible(row_from, col_from)) {
+              inf_ratio = double(infected(row_from, col_from)) / double(susceptible(row_from, col_from));
+              infected_mean = infected(row_from, col_from) * inf_ratio;
+              std::poisson_distribution<int> distribution(infected_mean);
+              if (infected_mean > 0)
+                infected_moved += distribution(generator);
             }
-            
-            infected[moved[0], moved[1]] -= infected_moved;
-            susceptible[moved[0], moved[1]] -= susceptible_moved;
-            infected[moved[2], moved[3]] += infected_moved;
-            susceptible[moved[2], moved[3]] += susceptible_moved;
-            total_plants[moved[0], moved[1]] -= moved[4];
-            total_plants[moved[2], moved[3]] += moved[4];
+            if ((hosts - infected_moved) > susceptible(row_from, col_from)) {
+              susceptible_moved = susceptible(row_from, col_from);
+            } else {
+              susceptible_moved = hosts - infected_moved;
+            }
+            infected(row_from, col_from) -= infected_moved;
+            susceptible(row_from, col_from) -= susceptible_moved;
+            if (hosts > total_plants(row_from, col_from)) {
+              total_hosts_moved = total_plants(row_from, col_from);
+            } else {
+              total_hosts_moved = hosts;
+            }
+            total_plants(row_from, col_from) -= total_hosts_moved;
+            if (infected(row_from, col_from) < 0)
+              infected(row_from, col_from) = 0;
+            if (susceptible(row_from, col_from) < 0)
+              susceptible(row_from, col_from) = 0;
+            if (total_plants(row_from, col_from) < 0)
+              total_plants(row_from, col_from) = 0;
+            infected(row_to, col_to) += infected_moved;
+            susceptible(row_to, col_to) += susceptible_moved;
+            total_plants(row_to, col_to) += total_hosts_moved;
         }
+        return movements.size();
     }
     
     /** Creates dispersal locations for the dispersing individuals
