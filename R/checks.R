@@ -16,9 +16,6 @@ initial_raster_checks <- function(x) {
   if (checks_passed) {
     r <- raster::stack(x)
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    if (raster::nlayers(r) > 1) {
-      r <- output_from_raster_mean_and_sd(r)
-    }
   }
   
   
@@ -318,7 +315,10 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
     names(priors) <- c('priors', 'prob')
     
   }
-  
+  if (class(params) == 'matrix') {
+    params <- data.frame(params)
+    names(params) <- c('params', 'prob')
+  }
   calibration_count <- length(params)
   calibrated_rates <- as.data.frame(table(params))
   calibrated_rates$params <- as.numeric(as.character(calibrated_rates$params))
@@ -348,6 +348,108 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
     names(outs) <- c('checks_passed', 'rates', 'posterior_rates')
     return(outs)
   } 
+}
+
+
+bayesian_MNN_checks <- function(prior_means, prior_cov_matrix, calibrated_means, calibrated_cov_matrix, prior_weight, weight) {
+  checks_passed <- TRUE
+  if (length(prior_means) == length(calibrated_means) && prior_weight > 0) {
+    posterior_means <- prior_means * prior_weight + calibrated_means * weight
+  } else if (prior_weight == 0){
+    posterior_means <- calibrated_means
+  } else {
+    checks_passed <- FALSE 
+    failed_check <- "There are not enough prior_means to communte the posterior means for all paramaters"
+  }
+  
+  if (nrow(prior_cov_matrix) == nrow(calibrated_cov_matrix) && ncol(prior_cov_matrix) == ncol(calibrated_cov_matrix) && prior_weight > 0) {
+    posterior_cov_matrix <- prior_cov_matrix * prior_weight + calibrated_cov_matrix * weight
+  } else if (prior_weight == 0) {
+    posterior_cov_matrix <- calibrated_cov_matrix
+  } else { 
+    checks_passed <- FALSE 
+    failed_check <- "The prior covariance matrix is not the correct dimension to match the calibrated covariance matrix in order to computer the posterior covariance matrix"
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, posterior_means, posterior_cov_matrix)
+    names(outs) <- c('checks_passed', 'posterior_means', 'posterior_cov_matrix')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+}
+
+multispecies_checks <- function(species, infected_files, reproductive_rate, percent_natural_dispersal, natural_kernel_type, anthropogenic_kernel_type, 
+                                natural_distance_scale, anthropogenic_distance_scale, natural_dir, natural_kappa, anthropogenic_dir, anthropogenic_kappa) {
+  checks_passed <- TRUE
+  
+  if (checks_passed && length(species) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for species and infected_files must be equal"
+  }
+  
+  if (checks_passed && length(reproductive_rate) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and reproductive_rate must be equal"
+  }
+  
+  if (checks_passed && length(percent_natural_dispersal) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and percent_natural_dispersal must be equal"
+  }
+  
+  if (checks_passed && length(natural_kernel_type) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and natural_kernel_type must be equal"
+  }
+  
+  if (checks_passed && length(anthropogenic_kernel_type) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and anthropogenic_kernel_type must be equal"
+  }
+  
+  if (checks_passed && length(natural_distance_scale) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and natural_distance_scale must be equal"
+  }
+  
+  if (checks_passed && length(anthropogenic_distance_scale) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and anthropogenic_distance_scale must be equal"
+  }
+  
+  if (checks_passed && length(natural_dir) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and natural_dir must be equal"
+  }
+  
+  if (checks_passed && length(natural_kappa) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and natural_kappa must be equal"
+  }
+  
+  if (checks_passed && length(anthropogenic_dir) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and anthropogenic_dir must be equal"
+  }
+  
+  if (checks_passed && length(anthropogenic_kappa) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <- "Length of list for infected_files and anthropogenic_kappa must be equal"
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed)
+    names(outs) <- c('checks_passed')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
 }
 
 movement_checks <- function(x, rast, start_date, end_date) {

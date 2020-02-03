@@ -100,7 +100,7 @@ getInfectionDistances <- function(rast, method = 'Foci', points = c()) {
   return(infections)
 }
 
-treatmentAuto <- function(rast, rast2, method = 'Foci', priority = 'group size', number_of_locations = 1, points = c(), treatment_efficacy = 1, buffer_cells = 1.5) {
+treatmentAuto <- function(rast, rast2, method = 'Foci', priority = 'group size', number_of_locations = 1, points = c(), treatment_efficacy = 1, buffer_cells = 1.5, direction_first = TRUE) {
   ## get distances and groups and group size
   if (method == "Points") {
     points <- points
@@ -116,69 +116,67 @@ treatmentAuto <- function(rast, rast2, method = 'Foci', priority = 'group size',
   treatment[] <- 0
   
   if (priority == 'group size') {
-    infections <- infections[order(infections$group_size, infections$distance, decreasing = c(TRUE, FALSE)),]
+    if (direction_first) {
+      infections <- infections[order(infections$distance, infections$group_size, decreasing = c(FALSE, TRUE)),]
+    } else {
+      infections <- infections[order(infections$group_size, infections$distance, decreasing = c(TRUE, FALSE)),]
+    }
     groups_unique <- unique(infections$group)
     for (group in groups_unique) {
       managed_group <- infections[infections$group == group,]
       group_size <- nrow(managed_group)
-      if (group_size + cells_treated >= number_of_locations) {
-        for (m in 1:nrow(managed_group)) {
-          i = managed_group$i[m]
-          j = managed_group$j[m]
-          if (treatment[i,j] < 1 & (rast[i, j] | rast2[i, j])) {
-            value <- min(1, treatment[i, j] + 1)
-            if (value > treatment[i, j]) {
-              cells_treated <- cells_treated + value - treatment[i, j]
-            } else {
-              cells_treated <- cells_treated + value
-            }
-            treatment[i, j] <- value
-            if (cells_treated >= number_of_locations) {break}
-          } 
-        }
-      } else if (group_size + cells_treated < number_of_locations) {
-        for (m in 1:nrow(managed_group)) {
-          i = managed_group$i[m]
-          j = managed_group$j[m]
-          if (treatment[i,j] < 1 & (rast[i, j] | rast2[i, j])) {
-            value <- min(1, treatment[i, j] + 1)
-            if (value > treatment[i, j]) {
-              cells_treated <- cells_treated + value - treatment[i, j]
-            } else {
-              cells_treated <- cells_treated + value
-            }
-            treatment[i, j] <- value
-            if (cells_treated >= number_of_locations) {break}
-          } 
-        }
-        for (m in 1:nrow(managed_group)) {
-          i = managed_group$i[m]
-          j = managed_group$j[m]
-          i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
-          j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
-          for (s in 1:length(i_s)) {
-            for(n in 1:length(j_s)) {
-              if (treatment[i_s[s], j_s[n]] < 1 & (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
-                if (abs(i - i_s[s]) > buffer_cells | abs(j - j_s[n]) > buffer_cells) {
-                  value <- min(1, treatment[i_s[s], j_s[n]] + (buffer_cells - floor(buffer_cells)))
-                  if (value > treatment[i_s[s], j_s[n]]) {
-                    cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
-                  } else {
-                    cells_treated <- cells_treated + value
-                  }
-                  treatment[i_s[s], j_s[n]] <- value
-                } 
-              } 
+      for (m in 1:nrow(managed_group)) {
+        i = managed_group$i[m]
+        j = managed_group$j[m]
+        if (treatment[i,j] < 1 & (rast[i, j] | rast2[i, j])) {
+          value <- min(1, treatment[i, j] + 1)
+          if (value > treatment[i, j]) {
+            cells_treated <- cells_treated + value - treatment[i, j]
+          } else {
+            cells_treated <- cells_treated + value
+          }
+          treatment[i, j] <- value
+          if (cells_treated >= number_of_locations) {break}
+        } 
+      }
+      for (m in 1:nrow(managed_group)) {
+        i = managed_group$i[m]
+        j = managed_group$j[m]
+        i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
+        j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
+        for (s in 1:length(i_s)) {
+          for(n in 1:length(j_s)) {
+            if (treatment[i_s[s], j_s[n]] < 1 & (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
+              if (abs(i - i_s[s]) > buffer_cells | abs(j - j_s[n]) > buffer_cells) {
+                value <- min(1, treatment[i_s[s], j_s[n]] + (buffer_cells - floor(buffer_cells)))
+                if (value > treatment[i_s[s], j_s[n]]) {
+                  cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
+                } else {
+                  cells_treated <- cells_treated + value
+                }
+                treatment[i_s[s], j_s[n]] <- value
+              } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
+                if (treatment[i_s[s], j_s[n]] < 1) {
+                  cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
+                  treatment[i_s[s], j_s[n]] <- 1
+                }
+              }  
               if (cells_treated >= number_of_locations) {break}
             }
+            if (cells_treated >= number_of_locations) {break}
           }
           if (cells_treated >= number_of_locations) {break}
         }
+        if (cells_treated >= number_of_locations) {break}
       }
       if (cells_treated >= number_of_locations) {break}
     }
   } else if (priority == 'host') {
-    infections <- infections[order(infections$host, infections$distance, decreasing = c(TRUE, FALSE)),]
+    if (direction_first) {
+      infections <- infections[order(infections$distance, infections$host, decreasing = c(FALSE, TRUE)),]
+    } else {
+      infections <- infections[order(infections$host, infections$distance, decreasing = c(TRUE, FALSE)),]
+    }
     for (t in 1:nrow(infections)) {
       i <- infections$i[t]
       j <- infections$j[t]
@@ -212,7 +210,11 @@ treatmentAuto <- function(rast, rast2, method = 'Foci', priority = 'group size',
       if (cells_treated >= number_of_locations) {break}
     }
   } else if (priority == 'infected') {
-    infections <- infections[order(infections$detections, infections$distance, decreasing = c(TRUE, FALSE)),]
+    if (direction_first) {
+      infections <- infections[order(infections$distance, infections$detections, decreasing = c(FALSE, TRUE)),]
+    } else {
+      infections <- infections[order(infections$detections, infections$distance, decreasing = c(TRUE, FALSE)),]
+    }
     for (t in 1:nrow(infections)) {
       i <- infections$i[t]
       j <- infections$j[t]
