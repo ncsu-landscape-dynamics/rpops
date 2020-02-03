@@ -41,12 +41,16 @@
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
 #' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
+#' @param movements_file this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.
+#' @param use_movements this is a boolean to turn on use of the movement module.
 #' 
 #' @useDynLib PoPS, .registration = TRUE
-#' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints
+#' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints crs rowColFromCell
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
-#' @importFrom lubridate interval time_length
+#' @importFrom lubridate interval time_length mdy %within%
+#' @importFrom utils read.csv 
+#' @importFrom sp SpatialPointsDataFrame CRS spTransform
 #' @return list of infected and susceptible per year
 #' @export
 #'
@@ -82,7 +86,7 @@ pops <- function(infected_file, host_file, total_plants_file,
                  use_lethal_temperature = FALSE, temperature_file = "",
                  lethal_temperature = -12.87, lethal_temperature_month = 1,
                  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                 management = FALSE, treatment_dates = c('2000-12-24'), treatments_file = "",
+                 management = FALSE, treatment_dates = c('2008-12-24'), treatments_file = "",
                  treatment_method = "ratio",
                  percent_natural_dispersal = 1.0,
                  natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
@@ -90,7 +94,8 @@ pops <- function(infected_file, host_file, total_plants_file,
                  natural_dir = "NONE", natural_kappa = 0, 
                  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                  pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                 random_seed = NULL, output_frequency = "year"){ 
+                 random_seed = NULL, output_frequency = "year", 
+                 movements_file = "", use_movements = FALSE){ 
 
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -150,6 +155,20 @@ pops <- function(infected_file, host_file, total_plants_file,
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
 
+  if (use_movements) {
+    movements_check <- movement_checks(movements_file, infected, start_date, end_date)
+    if (movements_check$checks_passed) {
+      movements <- movements_check$movements
+      movements_dates <- movements_check$movements_dates
+      movements_r <- movements_check$movements_r
+    } else {
+      return(movements_check$failed_check)
+    }
+  } else {
+    movements <- list(0,0,0,0,0)
+    movements_dates <- start_date
+  }
+  
   if (use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(temperature_file, infected)
     if (temperature_check$checks_passed) {
@@ -289,6 +308,8 @@ pops <- function(infected_file, host_file, total_plants_file,
                      treatment_dates = treatment_dates,
                      pesticide_duration = pesticide_duration,
                      resistant = resistant,
+                     use_movements = use_movements, movements = movements,
+                     movements_dates = movements_dates,
                      weather = weather,
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,

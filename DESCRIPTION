@@ -21,7 +21,9 @@ Imports:
     doParallel,
     iterators,
     landscapemetrics,
-    lubridate
+    lubridate,
+    sp,
+    utils
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 URL: http://www.github.com/ncsu-landscape-dynamics/rpops

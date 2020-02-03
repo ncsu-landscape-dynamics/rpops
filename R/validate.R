@@ -70,8 +70,8 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
                      natural_dir = "NONE", natural_kappa = 0, 
                      anthropogenic_dir = "NONE", anthropogenic_kappa = 0, 
                      pesticide_duration = 0, pesticide_efficacy = 1.0,
-                     mask = NULL, success_metric = "quantity", output_frequency = "year"
-                     ){ 
+                     mask = NULL, success_metric = "quantity", output_frequency = "year",
+                     movements_file = "", use_movements = FALSE){ 
   
   metric_check <- metric_checks(success_metric)
   if (metric_check$checks_passed){
@@ -133,6 +133,20 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
+  
+  if (use_movements) {
+    movements_check <- movement_checks(movements_file, infected, start_date, end_date)
+    if (movements_check$checks_passed) {
+      movements <- movements_check$movements
+      movements_dates <- movements_check$movements_dates
+      movements_r <- movements_check$movements_r
+    } else {
+      return(movements_check$failed_check)
+    }
+  } else {
+    movements <- list(0,0,0,0,0)
+    movements_dates <- start_date
+  }
   
   if (use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(temperature_file, infected)
@@ -295,18 +309,20 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
                              treatment_dates = treatment_dates,
                              pesticide_duration = pesticide_duration,
                              resistant = resistant,
+                             use_movements = use_movements, movements = movements,
+                             movements_dates = movements_dates,
                              weather = weather,
                              temperature = temperature,
                              weather_coefficient = weather_coefficient,
                              ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                             time_step = time_step, reproductive_rate = reproductive_rate[i],
+                             time_step = time_step, reproductive_rate = reproductive_rate,
                              mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
                              season_month_start = season_month_start, season_month_end = season_month_end,
                              start_date = start_date, end_date = end_date,
                              treatment_method = treatment_method,
                              natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal[i],
-                             natural_distance_scale = natural_distance_scale[i], anthropogenic_distance_scale = anthropogenic_distance_scale[i], 
+                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
                              natural_dir = natural_dir, natural_kappa = natural_kappa,
                              anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
                              output_frequency = output_frequency

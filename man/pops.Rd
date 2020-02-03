@@ -13,14 +13,15 @@ pops(infected_file, host_file, total_plants_file, temp = FALSE,
   temperature_file = "", lethal_temperature = -12.87,
   lethal_temperature_month = 1, mortality_on = FALSE,
   mortality_rate = 0, mortality_time_lag = 0, management = FALSE,
-  treatment_dates = c("2000-12-24"), treatments_file = "",
+  treatment_dates = c("2008-12-24"), treatments_file = "",
   treatment_method = "ratio", percent_natural_dispersal = 1,
   natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
   natural_distance_scale = 21, anthropogenic_distance_scale = 0,
   natural_dir = "NONE", natural_kappa = 0,
   anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
   pesticide_duration = c(0), pesticide_efficacy = 1,
-  random_seed = NULL, output_frequency = "year")
+  random_seed = NULL, output_frequency = "year", movements_file = "",
+  use_movements = FALSE)
 }
 \arguments{
 \item{infected_file}{path to raster file with initial infections}
@@ -96,6 +97,10 @@ pops(infected_file, host_file, total_plants_file, temp = FALSE,
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+
+\item{movements_file}{this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
+
+\item{use_movements}{this is a boolean to turn on use of the movement module.}
 }
 \value{
 list of infected and susceptible per year

@@ -21,7 +21,8 @@ validate(infected_years_file, num_iterations, number_of_cores = NA,
   natural_dir = "NONE", natural_kappa = 0,
   anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
   pesticide_duration = 0, pesticide_efficacy = 1, mask = NULL,
-  success_metric = "quantity", output_frequency = "year")
+  success_metric = "quantity", output_frequency = "year",
+  movements_file = "", use_movements = FALSE)
 }
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
@@ -105,6 +106,10 @@ validate(infected_years_file, num_iterations, number_of_cores = NA,
 \item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+
+\item{movements_file}{this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
+
+\item{use_movements}{this is a boolean to turn on use of the movement module.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run

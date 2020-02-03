@@ -14,7 +14,7 @@ initial_raster_checks <- function(x) {
   }
   
   if (checks_passed) {
-    r<- raster::stack(x)
+    r <- raster::stack(x)
     r <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   }
   
@@ -350,6 +350,7 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
   } 
 }
 
+
 bayesian_MNN_checks <- function(prior_means, prior_cov_matrix, calibrated_means, calibrated_cov_matrix, prior_weight, weight) {
   checks_passed <- TRUE
   if (length(prior_means) == length(calibrated_means) && prior_weight > 0) {
@@ -443,6 +444,63 @@ multispecies_checks <- function(species, infected_files, reproductive_rate, perc
   if (checks_passed) {
     outs <- list(checks_passed)
     names(outs) <- c('checks_passed')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+}
+
+movement_checks <- function(x, rast, start_date, end_date) {
+  checks_passed <- TRUE
+  
+  if (!all(file.exists(x))) {
+    checks_passed <- FALSE
+    failed_check <- "file does not exist" 
+  }
+  
+  if (checks_passed && !all((raster::extension(x) %in% c(".csv", ".txt")))) {
+    checks_passed <- FALSE
+    failed_check <- "file is not one of '.csv' or '.txt'"
+  }
+  
+  if (checks_passed) {
+    moves <- read.csv(x, header = TRUE)
+    movement_from <- SpatialPointsDataFrame(moves[,1:2], data = moves, proj4string = CRS("+init=epsg:4326"))
+    movement_to <- SpatialPointsDataFrame(moves[,3:4], data = moves, proj4string = CRS("+init=epsg:4326"))
+    movement_from <- spTransform(movement_from, CRSobj = crs(rast))
+    movement_to <- spTransform(movement_to, CRSobj = crs(rast))
+    cell_from <-  raster::extract(rast, movement_from, cellnumbers = TRUE)
+    cell_to <-  raster::extract(rast, movement_to, cellnumbers = TRUE)
+    rowcol_from <- rowColFromCell(rast, cell_from[,1])
+    rowcol_to <- rowColFromCell(rast, cell_to[,1])
+    movements <- data.frame(row_from = rowcol_from[,1], col_from = rowcol_from[,2], row_to = rowcol_to[,1], col_to = rowcol_to[,2], num_animals = moves$animals, date = moves$date)
+    movements <- movements[!is.na(movements$row_from) & !is.na(movements$col_from) & !is.na(movements$row_to) & !is.na(movements$col_to) & !is.na(movements$num_animals) & !is.na(movements$date),]
+    movements <- movements[movements$num_animals > 0, ]
+    movements$date <- paste("'", movements$date, "'", sep = "")
+    movements$date <- lubridate::mdy(movements$date)
+    duration <- lubridate::interval(start_date, end_date)
+    movements <- movements[movements$date %within% duration,]
+    movements <- movements[order(movements$date, decreasing = FALSE), ]
+    movements_dates <- as.character(movements$date)
+    movements_r <- movements
+    movements[,1:4] <- movements[, 1:4] - 1 # subtract 1 from the movement index to account for r indexing starts at 1 and C++ starts at 0
+    movements <- unname(movements)
+    movement2 <- as.matrix(movements[, 1:5])
+    movement2 <- unname(movement2, force = TRUE)
+    movement <- list()
+    # movements_date
+    for (i in 1:nrow(movement2)){
+      movement[[i]] <- movement2[i,1:5]
+    }
+
+    movement <- unname(movement)
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, movement, movements_dates, movements_r)
+    names(outs) <- c('checks_passed', 'movements', 'movements_dates', 'movements_r')
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
