@@ -11,6 +11,7 @@
 #include "statistics.hpp"
 #include "switch_kernel.hpp"
 #include "uniform_kernel.hpp"
+#include "scheduling.hpp"
 #include <iostream>
 #include <vector>
 #include <tuple>
@@ -42,6 +43,22 @@ bool all_infected(IntegerMatrix susceptible)
     }
   }
   return allInfected;
+}
+
+inline StepUnit step_unit_enum_from_string(const string& text)
+{
+  std::map<string, StepUnit> mapping{
+    {"day", StepUnit::Day},
+    {"week", StepUnit::Week},
+    {"month", StepUnit::Month}
+  };
+  try {
+    return mapping.at(text);
+  }
+  catch (const std::out_of_range&) {
+    throw std::invalid_argument("step_unit_enum_from_string:"
+                                  " Invalid value '" + text +"' provided");
+  }
 }
 
 TreatmentApplication treatment_application_enum_from_string(const std::string& text)
@@ -139,7 +156,7 @@ List pops_model(int random_seed,
   pops::Date dd_end(end_date);
   Direction natural_direction = direction_from_string(natural_dir);
   Direction anthropogenic_direction = direction_from_string(anthropogenic_dir);
-  Season season(season_month_start,season_month_end);
+  Season season(season_month_start, season_month_end);
   pops::Date dd_current(dd_start);
   Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected);
   RadialDispersalKernel natural_radial_dispersal_kernel(ew_res, ns_res, natural_dispersal_kernel_type, natural_distance_scale, natural_direction, natural_kappa);
@@ -151,26 +168,17 @@ List pops_model(int random_seed,
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
   std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_week;
-  bool output = false;
-  int last_day_of_week = 1;
-  
-  if (time_step == "month") {
-    std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_month;
-  } else if (time_step == "week") {
-    std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_week;
-  } 
-    
-  // if (time_step == "day") {
-  //   std::function<void (pops::Date&)> increase_by_step = &pops::Date::increased_by_days;
-  // }
   
   int num_infected;
   std::vector<int> number_infected;
   double area_infect;
   std::vector<double> area_infected;
   
-  int counter = 0;
-  int first_mortality_year = dd_start.year() + mortality_time_lag;
+  if (output_frequency == "time_step") {
+    output_frequency = time_step;
+  }
+  
+  int first_mortality_year = mortality_time_lag;
   
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
@@ -178,22 +186,55 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> mortality_vector;
   std::vector<IntegerMatrix> resistant_vector;
   std::vector<int> simulated_weeks;
-  int current_year;
-  
-  Treatments<IntegerMatrix, NumericMatrix> treatments;
-  for (unsigned t = 0; t < treatment_maps.size(); t++) {
-    treatments.add_treatment(treatment_maps[t], treatment_dates[t], pesticide_duration[t], treatment_application, increase_by_step);
+  StepUnit step_unit = step_unit_enum_from_string(time_step);
+
+  // Define simulation time step
+  Scheduler scheduler(dd_start, dd_end, step_unit, 1);
+  // Define spread schedule
+  std::vector<bool> spread_schedule = scheduler.schedule_spread(season);
+  // Define spread rate schedule
+  std::vector<bool> spread_rate_schedule = scheduler.schedule_action_end_of_year();
+  // Define mortality schedule
+  std::vector<bool> mortality_schedule = scheduler.schedule_action_end_of_year();
+  // Define lethality schedule
+  std::vector<bool> lethality_schedule = scheduler.schedule_action_yearly(lethal_temperature_month, 1);
+  // Define output schedule
+  std::vector<bool> output_schedule;
+  if (output_frequency == "year") {
+    output_schedule = scheduler.schedule_action_end_of_year();
+  } else if (output_frequency == "month") {
+    output_schedule = scheduler.schedule_action_monthly();
+  } else if (output_frequency == "week") {
+    if (time_step == "day") {
+      output_schedule = scheduler.schedule_action_nsteps(7);
+    } else if (time_step == "week") {
+      output_schedule = scheduler.schedule_action_nsteps(1);
+    }
   }
   
-  unsigned num_years = dd_end.year() - dd_start.year() + 1;
+  Treatments<IntegerMatrix, NumericMatrix> treatments(scheduler);
+  bool use_treatments = false;
+  for (unsigned t = 0; t < treatment_maps.size(); t++) {
+    treatments.add_treatment(treatment_maps[t], pops::Date(treatment_dates[t]), pesticide_duration[t], treatment_application);
+    use_treatments = true;
+  }
   
-  SpreadRate<IntegerMatrix> spreadrate(infected, ew_res, ns_res, num_years);
-  
-  for (unsigned current_time_step = 0; ; current_time_step++, time_step == "month" ? dd_current.increased_by_month() : dd_current.increased_by_week()) {
-      
-      if (dd_current.year() > dd_end.year()) {
-        break;
+  unsigned count_lethal = get_number_of_scheduled_actions(lethality_schedule);
+    if (use_lethal_temperature && count_lethal > temperature.size()){
+      Rcerr << "Not enough years of temperature data" << std::endl;
+    }
+    
+  unsigned count_weather = get_number_of_scheduled_actions(spread_schedule);
+      if (weather && count_weather > weather_coefficient.size()) {
+        Rcerr << "Not enough indices of weather coefficient data" << std::endl;
       }
+  
+  unsigned mortality_simulation_year;
+  
+  unsigned spread_rate_outputs = get_number_of_scheduled_actions(spread_rate_schedule);
+  SpreadRate<IntegerMatrix> spreadrate(infected, ew_res, ns_res, spread_rate_outputs);
+            
+  for (unsigned current_index = 0; current_index < scheduler.get_num_steps(); ++current_index) {
       
       if (all_infected(susceptible)) {
         Rcerr << "At timestep " << dd_current << " all suspectible hosts are infected!" << std::endl;
@@ -203,98 +244,36 @@ List pops_model(int random_seed,
         break;
       }
     
-      if (use_lethal_temperature && dd_current.month() == lethal_temperature_month && dd_current.year() <= dd_end.year()) {
-        unsigned simulation_year = dd_current.year() - dd_start.year();
-        if (simulation_year >= temperature.size()){
-          Rcerr << "Not enough years of temperature data" << std::endl;
-        }
-        simulation.remove(infected, susceptible, temperature[simulation_year], lethal_temperature);
+      if (lethality_schedule[current_index]  && use_lethal_temperature) {
+        int lethal_step = simulation_step_to_action_step(lethality_schedule, current_index);
+        simulation.remove(infected, susceptible, temperature[lethal_step], lethal_temperature);
       }
       
-      treatments.manage(dd_current, infected, susceptible, resistant);
-      if (mortality_on) {
-        for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
-          treatments.manage_mortality(dd_current, mortality_tracker_vector[l]);
-        }
-      }
-      
-      if (season.month_in_season(dd_current.month())) {
-        counter += 1;
-        simulated_weeks.push_back(current_time_step);
+      if (use_treatments) {
+        bool managed = treatments.manage(current_index, infected, susceptible, resistant);
         
-        if (current_time_step >= weather_coefficient.size()  && weather) {
-          Rcerr << "Not enough time steps of weather coefficient data" << std::endl;
+        if (mortality_on && managed) {
+          for (unsigned l = 0; l < mortality_tracker_vector.size(); l++) {
+            treatments.manage_mortality(current_index, mortality_tracker_vector[l]);
+          }
         }
+      }
 
-        simulation.generate(infected, weather, weather_coefficient[current_time_step], reproductive_rate);
-        simulation.disperse(susceptible, infected,
-                            mortality_tracker, total_plants,
-                            outside_dispersers, 
-                            weather, weather_coefficient[current_time_step], 
-                            kernel);
-      
+      if (spread_schedule[current_index]) {
+        simulation.generate(infected, weather, weather_coefficient[current_index], reproductive_rate);
+        simulation.disperse(susceptible, infected, mortality_tracker, total_plants,
+                            outside_dispersers, weather, weather_coefficient[current_index], kernel);
       }
     
-      if ((time_step == "month" ? dd_current.is_last_month_of_year() : dd_current.is_last_week_of_year())) {
-        
+      if (mortality_on && mortality_schedule[current_index]) {
         mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
-        if (mortality_on) {
-          int current_year = dd_current.year();
-          simulation.mortality(infected, mortality_rate, current_year, first_mortality_year, mortality, mortality_tracker_vector);
-          mortality_vector.push_back(Rcpp::clone(mortality));
-        }
-      }
-      
-      if (output_frequency == "year") {
-        if (time_step == "week") {
-          if (dd_current.is_last_week_of_year()) {
-            output = true;
-          } else {
-            output = false;
-          }
-        } else if (time_step == "month") {
-          if (dd_current.is_last_month_of_year()) {
-            output = true;
-          } else {
-            output = false;
-          }
-        } else if (time_step == "day") {
-          if (dd_current.is_last_day_of_year()) {
-            output = true;
-          } else {
-            output = false;
-          }
-        }
-      } else if (output_frequency == "time_step") {
-        output = true;
-      } else if (output_frequency == "month") {
-        if (time_step == "week") {
-          if (dd_current.is_last_week_of_month()) {
-            output = true;
-          } else {
-            output = false;
-          }
-        } else if (time_step == "day") {
-          if (dd_current.is_last_day_of_month()) {
-            output = true;
-          } else {
-            output = false;
-          }
-        }
-      } else if (output_frequency == "week") {
-        if (time_step == "day") {
-          if (last_day_of_week < 7) {
-            output = false;
-            last_day_of_week += last_day_of_week;
-          } else if (last_day_of_week == 7) {
-            output = true;
-            last_day_of_week = 1;
-          }
-        }
+        mortality_simulation_year = simulation_step_to_action_step(mortality_schedule, current_index);
+        simulation.mortality(infected, mortality_rate, mortality_simulation_year, first_mortality_year, mortality, mortality_tracker_vector);
+        mortality_vector.push_back(Rcpp::clone(mortality));
       }
         
-      if (output) {
+      if (output_schedule[current_index]) {
         infected_vector.push_back(Rcpp::clone(infected));
         susceptible_vector.push_back(Rcpp::clone(susceptible));
         resistant_vector.push_back(Rcpp::clone(resistant));
@@ -303,18 +282,19 @@ List pops_model(int random_seed,
         number_infected.push_back(num_infected);
         area_infect = area_of_infected(infected, ew_res, ns_res);
         area_infected.push_back(area_infect);
-        
-        unsigned simulation_year = dd_current.year() - dd_start.year();
+      }
+      
+      if (spread_rate_schedule[current_index]) {
+        unsigned simulation_year = simulation_step_to_action_step(spread_rate_schedule, current_index);
         spreadrate.compute_yearly_spread_rate(infected, simulation_year);
         spread_rates = spreadrate.yearly_rate(simulation_year);
         auto sr = to_array(spread_rates);
         spread_rates_vector.push_back(sr);
       }
         
-      if (dd_current >= dd_end) {
-        break;
-      }
-  
+      // if (dd_current >= dd_end) {
+      //   break;
+      // }
   }
 
   return List::create(

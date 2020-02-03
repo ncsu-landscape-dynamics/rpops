@@ -1,7 +1,7 @@
 /*
  * SOD model - date manipulation
  *
- * Copyright (C) 2015-2017 by the authors.
+ * Copyright (C) 2015-2019 by the authors.
  *
  * Authors: Zexi Chen (zchen22 ncsu edu)
  *          Anna Petrasova
@@ -154,9 +154,9 @@ bool Date::is_last_month_of_year()
 
 bool Date::is_last_day_of_year()
 {
-  if (month_ == 12 && day_ == 31)
-    return true;
-  return false;
+    if (month_ == 12 && day_ == 31)
+        return true;
+    return false;
 }
 
 bool Date::is_last_week_of_month()
@@ -446,7 +446,7 @@ public:
      * \param month A month in year (1-12)
      * \return true if in season, false otherwise
      */
-    inline bool month_in_season(int month)
+    inline bool month_in_season(int month) const
     {
         return month >= start_month_ && month <= end_month_;
     }
