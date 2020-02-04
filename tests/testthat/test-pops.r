@@ -143,9 +143,12 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
   temperature_file = system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
   start_date = "2008-01-01"
   end_date = "2010-12-31"
+  treatments_file = system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
   
-  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 1.0, start_date = start_date, end_date = end_date)$infected[[1]], matrix(0,ncol = 2, nrow = 2))
-  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 1.0, start_date = start_date, end_date = end_date)$susceptible[[1]], matrix(0,ncol = 2, nrow = 2))
+  data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 1.0, start_date = start_date, end_date = end_date)
+  
+  expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
+  expect_equal(data$susceptible[[1]], matrix(0,ncol = 2, nrow = 2))
   
 })
 
@@ -170,13 +173,17 @@ test_that("Susceptibles are never negative", {
   start_date = "2008-01-01"
   end_date = "2010-12-31"
   
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)[[2]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)[[2]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)[[2]][[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
+  
+  expect_equal(all(data[[2]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data[[2]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data[[2]][[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
 
-  expect_equal(all(pops(infected_file = infected_file, host_file = system.file("extdata", "simple2x2", "total_plants_host_greater_than_infected.tif", package = "PoPS"), total_plants_file = host_file, reproductive_rate = 1.0, random_seed = 42, start_date = start_date, end_date = end_date)[[2]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = system.file("extdata", "simple2x2", "total_plants_host_greater_than_infected.tif", package = "PoPS"), total_plants_file = host_file, reproductive_rate = 1.0, random_seed = 42, start_date = start_date, end_date = end_date)[[2]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = system.file("extdata", "simple2x2", "total_plants_host_greater_than_infected.tif", package = "PoPS"), total_plants_file = host_file, reproductive_rate = 1.0, random_seed = 42, start_date = start_date, end_date = end_date)[[2]][[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  data <- pops(infected_file = infected_file, host_file = system.file("extdata", "simple2x2", "total_plants_host_greater_than_infected.tif", package = "PoPS"), total_plants_file = host_file, reproductive_rate = 0.5, random_seed = 42, start_date = start_date, end_date = end_date)
+  
+  expect_equal(all(data[[2]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data[[2]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data[[2]][[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
 
 })
 
@@ -188,17 +195,22 @@ test_that("Infected results with weather are less than those without weather", {
   start_date = "2008-01-01"
   end_date = "2010-12-31"
   
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, reproductive_rate = 0.8, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, reproductive_rate = 0.8, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[2]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 42)[[1]][[3]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, reproductive_rate = 0.8, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[3]]), TRUE)
+  data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
+  data_temp <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
+  data_precip <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
+  data_weather <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
+  
+  expect_gte(sum(data[[1]][[1]]), sum(data_temp[[1]][[1]]))
+  expect_gte(sum(data[[1]][[2]]), sum(data_temp[[1]][[2]]))
+  expect_gte(sum(data[[1]][[3]]), sum(data_temp[[1]][[3]]))
 
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.8, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.8, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[2]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 42)[[1]][[3]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.8, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[3]]), TRUE)
+  expect_gte(sum(data[[1]][[1]]), sum(data_precip[[1]][[1]]))
+  expect_gte(sum(data[[1]][[2]]), sum(data_precip[[1]][[2]]))
+  expect_gte(sum(data[[1]][[3]]), sum(data_precip[[1]][[3]]))
 
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.9, random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.9, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.9, random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.9, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[2]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.9, random_seed = 42)[[1]][[3]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.9, random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[3]]), TRUE)
+  expect_gte(sum(data[[1]][[1]]), sum(data_weather[[1]][[1]]))
+  expect_gte(sum(data[[1]][[2]]), sum(data_weather[[1]][[2]]))
+  expect_gte(sum(data[[1]][[3]]), sum(data_weather[[1]][[3]]))
 
 })
 
@@ -210,8 +222,11 @@ test_that("Infected results are greater with same parameters for weekly spread v
   start_date = "2008-01-01"
   end_date = "2010-12-31"
   
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.3, time_step = "week", random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.3, time_step = "week", random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[2]]), TRUE)
+  data_week <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "week", random_seed = 42, start_date = start_date, end_date = end_date)
+  data_month <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
+  
+  expect_equal(all(data_week[[1]][[1]] >= data_month[[1]][[1]]), TRUE)
+  expect_equal(all(data_week[[1]][[2]] >= data_month[[1]][[2]]), TRUE)
 
 })
 
@@ -223,13 +238,14 @@ test_that("Infected results are greater with same parameters for daily spread vs
   start_date = "2008-01-01"
   end_date = "2010-12-31"
   
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.3, time_step = "day", random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.3, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.3, time_step = "day", random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.3, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[2]]), TRUE)
+  
+  data_day <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.1, time_step = "day", random_seed = 42)
+  data_week <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.1, time_step = "week", random_seed = 42, start_date = start_date, end_date = end_date)
+  data_month <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.1, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
+  
+  expect_equal(all(data_day[[1]][[1]] >= data_month[[1]][[1]]), TRUE)
 
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "day", random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "week", random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "day", random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "week", random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[2]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "day", random_seed = 42)[[1]][[3]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "week", random_seed = 42, start_date = start_date, end_date = end_date)[[1]][[3]]), TRUE)
-
+  expect_equal(all(data_day[[1]][[1]] >= data_week[[1]][[1]]), TRUE)
 })
 
 test_that("Infected results are greater without treatment than with treatment",{
@@ -237,23 +253,34 @@ test_that("Infected results are greater without treatment than with treatment",{
   host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   treatments_file = system.file("extdata", "simple2x2", "treatments_1_1.tif", package = "PoPS")
   treatment_dates = c("2008-03-05")
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management = TRUE, treatment_dates = treatment_dates, treatments_file = treatments_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)[[1]][[1]]), TRUE)
-  # expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management = TRUE, treatment_years = c(2018), treatments_file = treatments_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)[[1]][[2]]), TRUE)
-  # expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)[[1]][[3]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management = TRUE, treatment_years = c(2018), treatments_file = treatments_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)[[1]][[3]]), TRUE)
+  start_date = "2008-01-01"
+  end_date = "2010-12-31"
   
+  data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)
+  data_treat <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management = TRUE, treatment_dates = treatment_dates, treatments_file = treatments_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)
+  
+  expect_equal(all(data[[1]][[1]] >= data_treat[[1]][[1]]), TRUE)
+  expect_equal(all(data[[1]][[2]] >= data_treat[[1]][[2]]), TRUE)
 })
 
 test_that("Infected results are greater with higher reproductive rate", {
   infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date = "2008-01-01"
+  end_date = "2010-12-31"
   
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 1.25, time_step = "month", random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.75, time_step = "month", random_seed = 42)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 1.25, time_step = "month", random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.75, time_step = "month", random_seed = 42)[[1]][[2]]), TRUE)
+  data_1 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 1.00, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
+  data_075 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.75, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
+  data_050 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.50, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
+  data_025 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.25, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
+  data_010 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.10, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
+  
+  expect_gte(sum(data_1[[1]][[1]]), sum(data_075[[1]][[1]]))
 
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.42, time_step = "week", random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.24, time_step = "week", random_seed = 42)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.42, time_step = "week", random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.24, time_step = "week", random_seed = 42)[[1]][[2]]), TRUE)
+  expect_gte(sum(data_050[[1]][[1]]), sum(data_025[[1]][[1]]))
+  expect_gte(sum(data_050[[1]][[2]]), sum(data_025[[1]][[2]]))
 
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.15, time_step = "day", random_seed = 42)[[1]][[1]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.1, time_step = "month", random_seed = 42)[[1]][[1]]), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.15, time_step = "day", random_seed = 42)[[1]][[2]] >= pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.1, time_step = "month", random_seed = 42)[[1]][[2]]), TRUE)
+  expect_gte(sum(data_025[[1]][[1]]), sum(data_010[[1]][[1]]))
+  expect_gte(sum(data_025[[1]][[2]]), sum(data_010[[1]][[2]]))
 
 })
