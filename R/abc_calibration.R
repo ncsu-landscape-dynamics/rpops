@@ -13,18 +13,19 @@
 #' @param generation_size how many accepted parameter sets should occur in each generation
 #' @param prior_number_of_observations the number of total observations from previous calibrations used to weight the posterior distributions (if this is a new calibration this value takes the form of a prior weight (0 - 1))
 #' @param params_to_estimate A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
-#' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
+#' @param success_metric Choose which success metric to use for calibration. Choices are "number of locations", "number of locations and total distance", or "residual error". Default is "number of locations and total distance"
 #' @param prior_means A vector of the means of your parameters you are estimating in order from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
 #' @param prior_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues calc extract rasterToPoints
-#' @importFrom stats runif rnorm
+#' @importFrom stats runif rnorm cov
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom iterators icount
 #' @importFrom lubridate interval time_length
+#' @importFrom MASS mvrnorm
 #' 
 #' @return a dataframe of the variables saved and their success metrics for each run
 #' 
@@ -54,14 +55,14 @@ abc_calibration <- function(infected_years_file,
                       natural_dir = "NONE", natural_kappa = 0, 
                       anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                       pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                      mask = NULL, success_metric = "quantity", output_frequency = "year") { 
+                      mask = NULL, success_metric = "num", output_frequency = "year") { 
   
-  metric_check <- metric_checks(success_metric)
-  if (metric_check$checks_passed){
-    configuration <- metric_check$configuration
-  } else {
-    return(metric_check$failed_check)
-  }
+  # metric_check <- metric_checks(success_metric)
+  # if (metric_check$checks_passed){
+  #   configuration <- metric_check$configuration
+  # } else {
+  #   return(metric_check$failed_check)
+  # }
   
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -110,6 +111,20 @@ abc_calibration <- function(infected_years_file,
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
   
+  if (use_movements) {
+    movements_check <- movement_checks(movements_file, infected, start_date, end_date)
+    if (movements_check$checks_passed) {
+      movements <- movements_check$movements
+      movements_dates <- movements_check$movements_dates
+      movements_r <- movements_check$movements_r
+    } else {
+      return(movements_check$failed_check)
+    }
+  } else {
+    movements <- list(0,0,0,0,0)
+    movements_dates <- start_date
+  }
+  
   if (use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(temperature_file, infected)
     if (temperature_check$checks_passed) {
@@ -119,8 +134,10 @@ abc_calibration <- function(infected_years_file,
     }
     
     temperature <- list(as.matrix(temperature_stack[[1]]))
-    for(i in 2:number_of_years) {
-      temperature[[i]] <- as.matrix(temperature_stack[[i]])
+    if (number_of_years > 1) {
+      for(i in 2:number_of_years) {
+        temperature[[i]] <- as.matrix(temperature_stack[[i]])
+      }
     }
   } else {
     temperature <- host
@@ -193,13 +210,6 @@ abc_calibration <- function(infected_years_file,
     treatment_maps <- list(raster::as.matrix(treatment_map))
   }
   
-  percent_check <- percent_checks(start_percent_natural_dispersal)
-  if (percent_check$checks_passed){
-    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
-  } else {
-    return(percent_check$failed_check)
-  }
-  
   ew_res <- xres(susceptible)
   ns_res <- yres(susceptible)
   num_cols <- raster::ncol(susceptible)
@@ -230,42 +240,44 @@ abc_calibration <- function(infected_years_file,
     return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
   }
   
+  use_anthropogenic_kernel <- TRUE
   ## set the parameter function to only need the parameters that chanage
   param_func <- function(reproductive_rate, natural_distance_scale, anthropogenic_distance_scale, percent_natural_dispersal) {
     random_seed <- round(runif(1, 1, 1000000))
-    data <- pops_model(random_seed = random_seed, 
-                       use_lethal_temperature = use_lethal_temperature, 
-                       lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
-                       infected = infected,
-                       susceptible = susceptible,
-                       total_plants = total_plants,
-                       mortality_on = mortality_on,
-                       mortality_tracker = mortality_tracker,
-                       mortality = mortality,
-                       treatment_maps = treatment_maps,
-                       treatment_dates = treatment_dates,
-                       pesticide_duration = pesticide_duration,
-                       resistant = resistant,
-                       weather = weather,
-                       temperature = temperature,
-                       weather_coefficient = weather_coefficient,
-                       ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                       time_step = time_step, reproductive_rate = reproductive_rate,
-                       mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                       season_month_start = season_month_start, season_month_end = season_month_end,
-                       start_date = start_date, end_date = end_date,
-                       treatment_method = treatment_method,
-                       natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                       use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
-                       natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
-                       natural_dir = natural_dir, natural_kappa = natural_kappa,
-                       anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
-                       output_frequency = output_frequency
+    data <- PoPS::pops_model(random_seed = random_seed, 
+                             use_lethal_temperature = use_lethal_temperature, 
+                             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                             infected = infected,
+                             susceptible = susceptible,
+                             total_plants = total_plants,
+                             mortality_on = mortality_on,
+                             mortality_tracker = mortality_tracker,
+                             mortality = mortality,
+                             treatment_maps = treatment_maps,
+                             treatment_dates = treatment_dates,
+                             pesticide_duration = pesticide_duration,
+                             resistant = resistant,
+                             use_movements = use_movements, movements = movements,
+                             movements_dates = movements_dates,
+                             weather = weather,
+                             temperature = temperature,
+                             weather_coefficient = weather_coefficient,
+                             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
+                             time_step = time_step, reproductive_rate = reproductive_rate,
+                             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
+                             season_month_start = season_month_start, season_month_end = season_month_end,
+                             start_date = start_date, end_date = end_date,
+                             treatment_method = treatment_method,
+                             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                             natural_dir = natural_dir, natural_kappa = natural_kappa,
+                             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
+                             output_frequency = output_frequency
     )
     return(data)
   }
   
-
   num_particles <- number_of_generations * generation_size
   
   total_particles <- 1
@@ -273,12 +285,21 @@ abc_calibration <- function(infected_years_file,
   proposed_particles <- 1
   current_bin <- 1
 
-  parameters_kept <- matrix(ncol = 7, nrow = num_particles)
+  if (success_metric == "number of locations and total distance") {
+    num_metrics = 2
+  } else if (success_metric == "number of locations"){
+    num_metrics = 1
+  } else if (success_metric == "residual error") {
+    num_metrics = 1
+  }
+  
+  parameters_kept <- matrix(ncol = 8, nrow = num_particles)
   acc_rate <- 1
   acc_rates <- matrix(ncol = 1, nrow = number_of_generations)
   infected_checks <- matrix(ncol = 1, nrow = number_of_generations)
   locs_checks <- matrix(ncol = 1, nrow = number_of_generations)
   dist_checks <- matrix(ncol = 1, nrow = number_of_generations)
+  res_error_checks <- matrix(ncol = 1, nrow = number_of_generations)
   
   num_infected_data <- sum(infection_years[infection_years > 0])
   num_locs_data <- sum(infection_years[infection_years > 0] > 0)
@@ -287,7 +308,8 @@ abc_calibration <- function(infected_years_file,
 
   locs_check <- 45
   dist_check <- 100000
-  
+  res_error_check <- 1000
+  infected_sim <- infection_years
 
   while (current_bin <= number_of_generations) {
     
@@ -325,10 +347,30 @@ abc_calibration <- function(infected_years_file,
       
       dist_diff <- round(sqrt(sum(dist_diffs^2)), digits = 0)
       locs_diff <- sqrt((num_locs_data - num_locs_simulated)^2)
+      diff_raster <- abs(infection_years - infected_sim)
+      residual_diff <- sum(diff_raster[diff_raster > 0])
+      
+      diff_checks <- FALSE
+      if (success_metric == "number of locations and total distance") {
+        if (locs_diff <= locs_check && dist_diff <= dist_check) {
+          diff_checks <- TRUE
+        }
+      } else if (success_metric == "number of locations"){
+        if (locs_diff <= locs_check) {
+          diff_checks <- TRUE
+        }
+      } else if (success_metric == "residual error") {
+        if (residual_diff <= res_error_check) {
+          diff_checks <- TRUE
+        }
+      } else {
+        return("success metric must be one of 'number of locations and total distance', 'number of locations', and 'residual error'")
+      }
+      
       # set up comparison
       # if (num_difference <= infected_check  && locs_diff <= locs_check && dist_diff <= dist_check) {
-      if (locs_diff <= locs_check && dist_diff <= dist_check) {
-        parameters_kept[total_particles, ] <- c(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_percent_natural_dispersal, proposed_anthropogenic_distance_scale, num_difference, locs_diff, dist_diff)
+      if (diff_checks) {
+        parameters_kept[total_particles, ] <- c(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_percent_natural_dispersal, proposed_anthropogenic_distance_scale, num_difference, locs_diff, dist_diff, residual_diff)
         current_particles <- current_particles + 1
         total_particles <- total_particles + 1
         proposed_particles <- proposed_particles + 1
@@ -336,7 +378,7 @@ abc_calibration <- function(infected_years_file,
         proposed_particles <- proposed_particles + 1
       }
       acc_rate <- current_particles/proposed_particles
-      print(paste("The current generations is ", current_bin, " and the current particle is ", current_particles, " and the current acceptance rate is ", acc_rate, sep = ""))
+      print(paste("The current generation is ", current_bin, " and the current particle is ", current_particles, " and the current acceptance rate is ", acc_rate, sep = ""))
     }
     
     start_index <- current_bin * generation_size - generation_size + 1
