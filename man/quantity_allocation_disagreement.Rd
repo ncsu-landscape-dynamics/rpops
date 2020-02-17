@@ -4,8 +4,12 @@
 \alias{quantity_allocation_disagreement}
 \title{Compares quantity and allocation disagreement of two raster datasets}
 \usage{
-quantity_allocation_disagreement(reference, comparison,
-  configuration = FALSE, mask = NULL)
+quantity_allocation_disagreement(
+  reference,
+  comparison,
+  configuration = FALSE,
+  mask = NULL
+)
 }
 \arguments{
 \item{reference}{the binary (0 or 1) raster with ground truth data}
