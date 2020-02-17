@@ -4,24 +4,53 @@
 \alias{abc_calibration}
 \title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
-abc_calibration(infected_years_file, number_of_observations,
-  prior_number_of_observations, prior_means, prior_cov_matrix,
-  params_to_estimate = c(T, T, T, T), number_of_generations = 7,
-  generation_size = 1000, infected_file, host_file, total_plants_file,
-  temp = FALSE, temperature_coefficient_file = "", precip = FALSE,
-  precipitation_coefficient_file = "", time_step = "month",
-  season_month_start = 1, season_month_end = 12,
-  start_date = "2008-01-01", end_date = "2008-12-31",
-  use_lethal_temperature = FALSE, temperature_file = "",
-  lethal_temperature = -12.87, lethal_temperature_month = 1,
-  mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0,
-  management = FALSE, treatment_dates = c("2008-01-01"),
-  treatments_file = "", treatment_method = "ratio",
-  natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-  natural_dir = "NONE", natural_kappa = 0,
-  anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-  pesticide_duration = c(0), pesticide_efficacy = 1, mask = NULL,
-  success_metric = "num", output_frequency = "year")
+abc_calibration(
+  infected_years_file,
+  number_of_observations,
+  prior_number_of_observations,
+  prior_means,
+  prior_cov_matrix,
+  params_to_estimate = c(T, T, T, T),
+  number_of_generations = 7,
+  generation_size = 1000,
+  checks = c(500, 500, 10000, 1e+06),
+  infected_file,
+  host_file,
+  total_plants_file,
+  temp = FALSE,
+  temperature_coefficient_file = "",
+  precip = FALSE,
+  precipitation_coefficient_file = "",
+  time_step = "month",
+  season_month_start = 1,
+  season_month_end = 12,
+  start_date = "2008-01-01",
+  end_date = "2008-12-31",
+  use_lethal_temperature = FALSE,
+  temperature_file = "",
+  lethal_temperature = -12.87,
+  lethal_temperature_month = 1,
+  mortality_on = FALSE,
+  mortality_rate = 0,
+  mortality_time_lag = 0,
+  management = FALSE,
+  treatment_dates = c("2008-01-01"),
+  treatments_file = "",
+  treatment_method = "ratio",
+  natural_kernel_type = "cauchy",
+  anthropogenic_kernel_type = "cauchy",
+  natural_dir = "NONE",
+  natural_kappa = 0,
+  anthropogenic_dir = "NONE",
+  anthropogenic_kappa = 0,
+  pesticide_duration = c(0),
+  pesticide_efficacy = 1,
+  mask = NULL,
+  success_metric = "num",
+  output_frequency = "year",
+  movements_file = "",
+  use_movements = FALSE
+)
 }
 \arguments{
 \item{infected_years_file}{Raster file with years of initial infection/infestation as individual locations of a pest or pathogen}
@@ -39,6 +68,8 @@ abc_calibration(infected_years_file, number_of_observations,
 \item{number_of_generations}{the number of generations to use to decrease the uncertainty in the parameter estimation (too many and it will take a long time, too few and your parameter sets will be too wide)}
 
 \item{generation_size}{how many accepted parameter sets should occur in each generation}
+
+\item{checks}{A list of the 4 starting check values in order of # of locations, total min distance, residual error, and # infected. default is (500, 500, 10000, 1000000). Starting check values can play a role in speed of calibration and in success of calibration.}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -107,6 +138,10 @@ abc_calibration(infected_years_file, number_of_observations,
 \item{success_metric}{Choose which success metric to use for calibration. Choices are "number of locations", "number of locations and total distance", or "residual error". Default is "number of locations and total distance"}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+
+\item{movements_file}{this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
+
+\item{use_movements}{this is a boolean to turn on use of the movement module.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run

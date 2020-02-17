@@ -17,8 +17,9 @@
 #' @param prior_means A vector of the means of your parameters you are estimating in order from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
 #' @param prior_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
+#' @param checks A list of the 4 starting check values in order of # of locations, total min distance, residual error, and # infected. default is (500,500000, 100000, 1000). Starting check values can play a role in speed of calibration and in success of calibration.
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues calc extract rasterToPoints
+#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues calc extract rasterToPoints pointDistance
 #' @importFrom stats runif rnorm cov
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
@@ -38,8 +39,8 @@
 abc_calibration <- function(infected_years_file, 
                       number_of_observations, prior_number_of_observations,
                       prior_means, prior_cov_matrix, params_to_estimate = c(T, T, T, T),
-                      number_of_generations = 7,
-                      generation_size = 1000,
+                      number_of_generations = 7, generation_size = 1000,
+                      checks = c(500,500000, 100000, 1000),
                       infected_file, host_file, total_plants_file, 
                       temp = FALSE, temperature_coefficient_file = "", 
                       precip = FALSE, precipitation_coefficient_file = "", 
@@ -55,7 +56,8 @@ abc_calibration <- function(infected_years_file,
                       natural_dir = "NONE", natural_kappa = 0, 
                       anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                       pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                      mask = NULL, success_metric = "num", output_frequency = "year") { 
+                      mask = NULL, success_metric = "num", output_frequency = "year",
+                      movements_file = "", use_movements = FALSE) { 
   
   # metric_check <- metric_checks(success_metric)
   # if (metric_check$checks_passed){
@@ -306,9 +308,11 @@ abc_calibration <- function(infected_years_file,
   infected_data_points <- rasterToPoints(infection_years, fun=function(x){x>0}, spatial = TRUE)
   infected_sim <- infection_years
 
-  locs_check <- 45
-  dist_check <- 100000
-  res_error_check <- 1000
+  
+  locs_check <- checks[1]
+  dist_check <- checks[2]
+  res_error_check <- checks[3]
+  inf_check <- checks[4]
   infected_sim <- infection_years
 
   while (current_bin <= number_of_generations) {
