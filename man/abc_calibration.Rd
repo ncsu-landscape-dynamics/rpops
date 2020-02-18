@@ -13,7 +13,7 @@ abc_calibration(
   params_to_estimate = c(T, T, T, T),
   number_of_generations = 7,
   generation_size = 1000,
-  checks = c(500, 500, 10000, 1e+06),
+  checks = c(500, 5e+05, 1e+05, 1000),
   infected_file,
   host_file,
   total_plants_file,
@@ -46,7 +46,7 @@ abc_calibration(
   pesticide_duration = c(0),
   pesticide_efficacy = 1,
   mask = NULL,
-  success_metric = "num",
+  success_metric = "number of locations and total distance",
   output_frequency = "year",
   movements_file = "",
   use_movements = FALSE
@@ -69,7 +69,7 @@ abc_calibration(
 
 \item{generation_size}{how many accepted parameter sets should occur in each generation}
 
-\item{checks}{A list of the 4 starting check values in order of # of locations, total min distance, residual error, and # infected. default is (500, 500, 10000, 1000000). Starting check values can play a role in speed of calibration and in success of calibration.}
+\item{checks}{A list of the 4 starting check values in order of # of locations, total min distance, residual error, and # infected. default is (500,500000, 100000, 1000). Starting check values can play a role in speed of calibration and in success of calibration.}
 
 \item{infected_file}{path to raster file with initial infections}
 
