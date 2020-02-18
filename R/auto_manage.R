@@ -144,6 +144,20 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     susceptible_speci <- stack(susceptible_speci, susceptible)
   }
   
+  if (use_movements) {
+    movements_check <- movement_checks(movements_file, infected, start_date, end_date)
+    if (movements_check$checks_passed) {
+      movements <- movements_check$movements
+      movements_dates <- movements_check$movements_dates
+      movements_r <- movements_check$movements_r
+    } else {
+      return(movements_check$failed_check)
+    }
+  } else {
+    movements <- list(0,0,0,0,0)
+    movements_dates <- start_date
+  }
+  
   infected_species <- list(as.matrix(infected_speci[[1]]))
   susceptible_species <- list(as.matrix(susceptible_speci[[1]]))
   for(u in 2:nlayers(infected_speci)) {
@@ -305,6 +319,8 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
                            treatment_dates = treatment_dates,
                            pesticide_duration = pesticide_duration,
                            resistant = resistant,
+                           use_movements = use_movements, movements = movements,
+                           movements_dates = movements_dates,
                            weather = weather,
                            temperature = temperature,
                            weather_coefficient = weather_coefficient,
