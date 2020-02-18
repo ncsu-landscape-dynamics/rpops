@@ -56,7 +56,7 @@ abc_calibration <- function(infected_years_file,
                       natural_dir = "NONE", natural_kappa = 0, 
                       anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
                       pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                      mask = NULL, success_metric = "num", output_frequency = "year",
+                      mask = NULL, success_metric = "number of locations and total distance", output_frequency = "year",
                       movements_file = "", use_movements = FALSE) { 
   
   # metric_check <- metric_checks(success_metric)
