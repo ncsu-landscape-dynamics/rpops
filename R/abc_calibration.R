@@ -354,13 +354,13 @@ abc_calibration <- function(infected_years_file,
         }
         if (params_to_estimate[5]) {
           proposed_natural_kappa <- proposed_parameters[5]
-          if (proposed_natural_kappa < 0.000) {proposed_natural_kappa <- 0}
+          if (proposed_natural_kappa <= 0.000) {proposed_natural_kappa <- 0}
         } else {
           proposed_natural_kappa <- natural_kappa
         }
         if (params_to_estimate[6]) {
           proposed_anthropogenic_kappa <- proposed_parameters[6]
-          if (proposed_anthropogenic_kappa < 0.000) {proposed_anthropogenic_kappa <- 0}
+          if (proposed_anthropogenic_kappa <= 0.000) {proposed_anthropogenic_kappa <- 0}
         } else {
           proposed_anthropogenic_kappa <- anthropogenic_kappa
         }
@@ -417,8 +417,8 @@ abc_calibration <- function(infected_years_file,
     
     start_index <- current_bin * generation_size - generation_size + 1
     end_index <- current_bin * generation_size
-    parameter_means <- colMeans(parameters_kept[start_index:end_index,1:4])
-    parameter_cov_matrix <- cov(parameters_kept[start_index:end_index,1:4])
+    parameter_means <- colMeans(parameters_kept[start_index:end_index,1:6])
+    parameter_cov_matrix <- cov(parameters_kept[start_index:end_index,1:6])
     reproductive_rate_generation <- as.data.frame(table(parameters_kept[start_index:end_index, 1]))
     natural_distance_scale_generation <- as.data.frame(table(parameters_kept[start_index:end_index, 2]))
     percent_natural_dispersal_generation <- as.data.frame(table(parameters_kept[start_index:end_index, 3]))
@@ -442,9 +442,10 @@ abc_calibration <- function(infected_years_file,
     infected_checks[current_bin] <- inf_check
     locs_checks[current_bin] <- locs_check
     dist_checks[current_bin] <- dist_check
-    inf_check <- median(parameters_kept[start_index:end_index, 5])
-    locs_check <- median(parameters_kept[start_index:end_index, 6])
-    dist_check <- median(parameters_kept[start_index:end_index, 7])
+    inf_check <- median(parameters_kept[start_index:end_index, 7])
+    locs_check <- median(parameters_kept[start_index:end_index, 8])
+    dist_check <- median(parameters_kept[start_index:end_index, 9])
+    res_error_check <- median(parameters_kept[start_index:end_index, 10])
     current_bin <- current_bin + 1
   }
 
@@ -459,8 +460,8 @@ abc_calibration <- function(infected_years_file,
   }
 
   ## Use prior and calibrated parameters to update to posteriors
-  calibrated_means <- colMeans(parameters_kept[start_index:end_index,1:4])
-  calibrated_cov_matrix <- cov(parameters_kept[start_index:end_index,1:4])
+  calibrated_means <- colMeans(parameters_kept[start_index:end_index,1:6])
+  calibrated_cov_matrix <- cov(parameters_kept[start_index:end_index,1:6])
   posterior_check <- bayesian_MNN_checks(prior_means, prior_cov_matrix, calibrated_means, calibrated_cov_matrix, prior_weight, weight)
   
   if(posterior_check$checks_passed) {
