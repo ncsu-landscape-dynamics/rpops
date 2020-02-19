@@ -10,7 +10,7 @@ abc_calibration(
   prior_number_of_observations,
   prior_means,
   prior_cov_matrix,
-  params_to_estimate = c(T, T, T, T),
+  params_to_estimate = c(T, T, T, T, F, F),
   number_of_generations = 7,
   generation_size = 1000,
   checks = c(500, 5e+05, 1e+05, 1000),
@@ -59,11 +59,11 @@ abc_calibration(
 
 \item{prior_number_of_observations}{the number of total observations from previous calibrations used to weight the posterior distributions (if this is a new calibration this value takes the form of a prior weight (0 - 1))}
 
-\item{prior_means}{A vector of the means of your parameters you are estimating in order from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)}
+\item{prior_means}{A vector of the means of your parameters you are estimating in order from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
 
-\item{prior_cov_matrix}{A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)}
+\item{prior_cov_matrix}{A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
 
-\item{params_to_estimate}{A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)}
+\item{params_to_estimate}{A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
 
 \item{number_of_generations}{the number of generations to use to decrease the uncertainty in the parameter estimation (too many and it will take a long time, too few and your parameter sets will be too wide)}
 
