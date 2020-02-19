@@ -44,6 +44,8 @@ auto_manage(
   pesticide_efficacy = 1,
   random_seed = NULL,
   output_frequency = "year",
+  movements_file = "",
+  use_movements = FALSE,
   cost_per_meter_sq = 1.37,
   budget = 1500000,
   buffer = 600,
@@ -135,6 +137,10 @@ auto_manage(
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+
+\item{movements_file}{this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
+
+\item{use_movements}{this is a boolean to turn on use of the movement module.}
 
 \item{cost_per_meter_sq}{the cost of treatment per square meter}
 

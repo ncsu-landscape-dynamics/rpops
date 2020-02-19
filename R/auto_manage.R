@@ -72,6 +72,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
                         num_iterations = 100, number_of_cores = NA,
                         pesticide_duration = 0, pesticide_efficacy = 1.0,
                         random_seed = NULL, output_frequency = "year",
+                        movements_file = "", use_movements = FALSE,
                         cost_per_meter_sq = 1.37, budget = 1500000, buffer = 600,
                         treatment_priority = "equal", treatment_rank = c(1), 
                         selection_method = 'Points', selection_priority = 'group size',
@@ -280,8 +281,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     core_count <- number_of_cores
   }
   
-  cl <- makeCluster(core_count)
-  registerDoParallel(cl)
+
   
   run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate")) %do% {
 
@@ -303,6 +303,9 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     print("end_treatment")
     
     tests <-   foreach(i = 1:length(infected_files), .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %do% {
+      
+      cl <- makeCluster(core_count)
+      registerDoParallel(cl)
       
       infected_stack <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach"), .export = ls(globalenv())) %dopar% {
         
@@ -354,6 +357,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
         to.infected_stack <- list(infected_runs, susceptible_runs, number_infected, infected_area, spread_rate, prob_runs)
       }
       
+      stopCluster(cl)
       infected_runs <- infected_stack[1:10]
       susceptible_runs <- infected_stack[11:20]
       number_infected_runs <- infected_stack[21:30]
@@ -459,9 +463,6 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     outputs <- list(infections_out, susceptibles_out, probabilities_out, number_infecteds_out, infected_areas_out, west_rate_out, east_rate_out, north_rate_out, south_rate_out, treatment)
     
   }
-  
-  stopCluster(cl)
-  
   
   year_names <- list()
   
