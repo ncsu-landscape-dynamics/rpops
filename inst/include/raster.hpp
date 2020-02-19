@@ -4,7 +4,7 @@
 /*
  * PoPS model - native raster manipulation
  *
- * Copyright (C) 2015-2019 by the authors.
+ * Copyright (C) 2015-2020 by the authors.
  *
  * Authors: Vaclav Petras <wenzeslaus gmail com>
  *          Completely rewritten by Vaclav Petras based on
@@ -130,7 +130,7 @@ public:
     }
 
     Raster(Raster&& other)
-        : owns_(true)
+        : owns_(other.owns_)
     {
         cols_ = other.cols_;
         rows_ = other.rows_;
@@ -281,46 +281,6 @@ public:
     }
 
     template<typename OtherNumber>
-    Raster operator+(OtherNumber value) const
-    {
-        auto out = Raster(rows_, cols_);
-
-        std::transform(data_, data_ + (cols_ * rows_), out.data_,
-                       [&value](const Number& a) { return a * value; });
-        return out;
-    }
-
-    template<typename OtherNumber>
-    Raster operator-(OtherNumber value) const
-    {
-        auto out = Raster(rows_, cols_);
-
-        std::transform(data_, data_ + (cols_ * rows_), out.data_,
-                       [&value](const Number& a) { return a / value; });
-        return out;
-    }
-
-    template<typename OtherNumber>
-    Raster operator*(OtherNumber value) const
-    {
-        auto out = Raster(rows_, cols_);
-
-        std::transform(data_, data_ + (cols_ * rows_), out.data_,
-                       [&value](const Number& a) { return a * value; });
-        return out;
-    }
-
-    template<typename OtherNumber>
-    Raster operator/(OtherNumber value) const
-    {
-        auto out = Raster(rows_, cols_);
-
-        std::transform(data_, data_ + (cols_ * rows_), out.data_,
-                       [&value](const Number& a) { return a / value; });
-        return out;
-    }
-
-    template<typename OtherNumber>
     Raster& operator+=(OtherNumber value)
     {
         std::for_each(data_, data_ + (cols_ * rows_),
@@ -420,24 +380,120 @@ public:
         return false;
     }
 
-    friend inline Raster operator+(Number value, const Raster& image)
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator+(const Raster& raster, OtherNumber value)
     {
-        return image + value;
+        auto out = Raster(raster.rows(), raster.cols());
+
+        std::transform(raster.data(),
+                       raster.data() + (raster.cols() * raster.rows()),
+                       out.data(),
+                       [&value](const Number& a) { return a + value; });
+        return out;
     }
 
-    friend inline Raster operator-(Number value, const Raster& image)
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator-(const Raster& raster, OtherNumber value)
     {
-        return image - value;
+        auto out = Raster(raster.rows(), raster.cols());
+
+        std::transform(raster.data(),
+                       raster.data() + (raster.cols() * raster.rows()),
+                       out.data(),
+                       [&value](const Number& a) { return a - value; });
+        return out;
     }
 
-    friend inline Raster operator*(Number value, const Raster& image)
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator*(const Raster& raster, OtherNumber value)
     {
-        return image * value;
+        auto out = Raster(raster.rows(), raster.cols());
+
+        std::transform(raster.data(),
+                       raster.data() + (raster.cols() * raster.rows()),
+                       out.data(),
+                       [&value](const Number& a) { return a * value; });
+        return out;
     }
 
-    friend inline Raster operator/(Number value, const Raster& image)
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator/(const Raster& raster, OtherNumber value)
     {
-        return image / value;
+        auto out = Raster(raster.rows(), raster.cols());
+
+        std::transform(raster.data(),
+                       raster.data() + (raster.cols() * raster.rows()),
+                       out.data(),
+                       [&value](const Number& a) { return a / value; });
+        return out;
+    }
+
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator+(OtherNumber value, const Raster& raster)
+    {
+        return raster + value;
+    }
+
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator-(OtherNumber value, const Raster& raster)
+    {
+        auto out = Raster(raster.rows(), raster.cols());
+
+        std::transform(raster.data(),
+                       raster.data() + (raster.cols() * raster.rows()),
+                       out.data(),
+                       [&value](const Number& a) { return value - a; });
+        return out;
+    }
+
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator*(OtherNumber value, const Raster& raster)
+    {
+        return raster * value;
+    }
+
+    template<typename OtherNumber>
+    friend inline
+    typename std::enable_if<
+        std::is_arithmetic<OtherNumber>::value,
+        Raster>::type
+    operator/(OtherNumber value, const Raster& raster)
+    {
+        auto out = Raster(raster.rows(), raster.cols());
+
+        std::transform(raster.data(),
+                       raster.data() + (raster.cols() * raster.rows()),
+                       out.data(),
+                       [&value](const Number& a) { return value / a; });
+        return out;
     }
 
     friend inline Raster pow(Raster image, double value) {

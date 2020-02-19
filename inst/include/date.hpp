@@ -1,7 +1,7 @@
 /*
- * SOD model - date manipulation
+ * PoPS model - date manipulation
  *
- * Copyright (C) 2015-2019 by the authors.
+ * Copyright (C) 2015-2020 by the authors.
  *
  * Authors: Zexi Chen (zchen22 ncsu edu)
  *          Anna Petrasova
