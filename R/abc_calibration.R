@@ -12,10 +12,10 @@
 #' @param number_of_generations the number of generations to use to decrease the uncertainty in the parameter estimation (too many and it will take a long time, too few and your parameter sets will be too wide)
 #' @param generation_size how many accepted parameter sets should occur in each generation
 #' @param prior_number_of_observations the number of total observations from previous calibrations used to weight the posterior distributions (if this is a new calibration this value takes the form of a prior weight (0 - 1))
-#' @param params_to_estimate A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
+#' @param params_to_estimate A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param success_metric Choose which success metric to use for calibration. Choices are "number of locations", "number of locations and total distance", or "residual error". Default is "number of locations and total distance"
-#' @param prior_means A vector of the means of your parameters you are estimating in order from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
-#' @param prior_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, and anthropogenic_dispersal_distance)
+#' @param prior_means A vector of the means of your parameters you are estimating in order from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
+#' @param prior_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
 #' @param checks A list of the 4 starting check values in order of # of locations, total min distance, residual error, and # infected. default is (500,500000, 100000, 1000). Starting check values can play a role in speed of calibration and in success of calibration.
 #'
@@ -38,7 +38,7 @@
 
 abc_calibration <- function(infected_years_file, 
                       number_of_observations, prior_number_of_observations,
-                      prior_means, prior_cov_matrix, params_to_estimate = c(T, T, T, T),
+                      prior_means, prior_cov_matrix, params_to_estimate = c(T, T, T, T, F, F),
                       number_of_generations = 7, generation_size = 1000,
                       checks = c(500,500000, 100000, 1000),
                       infected_file, host_file, total_plants_file, 
@@ -58,13 +58,6 @@ abc_calibration <- function(infected_years_file,
                       pesticide_duration = c(0), pesticide_efficacy = 1.0,
                       mask = NULL, success_metric = "number of locations and total distance", output_frequency = "year",
                       movements_file = "", use_movements = FALSE) { 
-  
-  # metric_check <- metric_checks(success_metric)
-  # if (metric_check$checks_passed){
-  #   configuration <- metric_check$configuration
-  # } else {
-  #   return(metric_check$failed_check)
-  # }
   
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -244,7 +237,7 @@ abc_calibration <- function(infected_years_file,
   
   use_anthropogenic_kernel <- TRUE
   ## set the parameter function to only need the parameters that chanage
-  param_func <- function(reproductive_rate, natural_distance_scale, anthropogenic_distance_scale, percent_natural_dispersal) {
+  param_func <- function(reproductive_rate, natural_distance_scale, anthropogenic_distance_scale, percent_natural_dispersal, natural_kappa, anthropogenic_kappa) {
     random_seed <- round(runif(1, 1, 1000000))
     data <- PoPS::pops_model(random_seed = random_seed, 
                              use_lethal_temperature = use_lethal_temperature, 
@@ -295,7 +288,7 @@ abc_calibration <- function(infected_years_file,
     num_metrics = 1
   }
   
-  parameters_kept <- matrix(ncol = 8, nrow = num_particles)
+  parameters_kept <- matrix(ncol = 10, nrow = num_particles)
   acc_rate <- 1
   acc_rates <- matrix(ncol = 1, nrow = number_of_generations)
   infected_checks <- matrix(ncol = 1, nrow = number_of_generations)
@@ -307,7 +300,6 @@ abc_calibration <- function(infected_years_file,
   num_locs_data <- sum(infection_years[infection_years > 0] > 0)
   infected_data_points <- rasterToPoints(infection_years, fun=function(x){x>0}, spatial = TRUE)
   infected_sim <- infection_years
-
   
   locs_check <- checks[1]
   dist_check <- checks[2]
@@ -322,8 +314,26 @@ abc_calibration <- function(infected_years_file,
       if (current_bin == 1){
         proposed_reproductive_rate <- round(runif(1, 0.055, 6), digits = 1)
         proposed_natural_distance_scale <- round(runif(1, 20, 100), digits = 0)
-        proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0)*100
-        proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
+        if (params_to_estimate[3]) {
+          proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
+        } else {
+          proposed_percent_natural_dispersal <- 1.0
+        }
+        if (params_to_estimate[4]) {
+          proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0)*100
+        } else {
+          proposed_anthropogenic_distance_scale <- 0
+        }
+        if (params_to_estimate[5]) {
+          proposed_natural_kappa <- round(runif(1, 0, 8), digits = 1)
+        } else {
+          proposed_natural_kappa <- natural_kappa
+        }
+        if (params_to_estimate[6]) {
+          proposed_anthropogenic_kappa <- round(runif(1, 0, 8), digits = 1)
+        } else {
+          proposed_anthropogenic_kappa <- anthropogenic_kappa
+        }
       } else {
         proposed_parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
         while(proposed_parameters[2] <= 0) {
@@ -331,12 +341,32 @@ abc_calibration <- function(infected_years_file,
         }
         proposed_reproductive_rate <- proposed_parameters[1]
         proposed_natural_distance_scale <- proposed_parameters[2]
-        proposed_anthropogenic_distance_scale <- proposed_parameters[4]
-        proposed_percent_natural_dispersal <- proposed_parameters[3]
-        if (proposed_percent_natural_dispersal > 1.000) {proposed_percent_natural_dispersal <- 1.000} 
+        if (params_to_estimate[3]) {
+          proposed_percent_natural_dispersal <- proposed_parameters[3]
+          if (proposed_percent_natural_dispersal > 1.000) {proposed_percent_natural_dispersal <- 1.000} 
+        } else {
+          proposed_percent_natural_dispersal <- 1.0
+        }
+        if (params_to_estimate[4]) {
+          proposed_anthropogenic_distance_scale <- proposed_parameters[4]
+        } else {
+          proposed_anthropogenic_distance_scale <- 0
+        }
+        if (params_to_estimate[5]) {
+          proposed_natural_kappa <- proposed_parameters[5]
+          if (proposed_natural_kappa < 0.000) {proposed_natural_kappa <- 0}
+        } else {
+          proposed_natural_kappa <- natural_kappa
+        }
+        if (params_to_estimate[6]) {
+          proposed_anthropogenic_kappa <- proposed_parameters[6]
+          if (proposed_anthropogenic_kappa < 0.000) {proposed_anthropogenic_kappa <- 0}
+        } else {
+          proposed_anthropogenic_kappa <- anthropogenic_kappa
+        }
       }
       
-      data <- param_func(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_anthropogenic_distance_scale, proposed_percent_natural_dispersal)
+      data <- param_func(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_anthropogenic_distance_scale, proposed_percent_natural_dispersal, proposed_natural_kappa, proposed_anthropogenic_kappa)
       infected_sim[] <- data$infected[[1]]
       num_infected_simulated <- sum(infected_sim[infected_sim > 0])
       num_locs_simulated <- sum(infected_sim[infected_sim > 0] >0)
@@ -374,7 +404,7 @@ abc_calibration <- function(infected_years_file,
       # set up comparison
       # if (num_difference <= infected_check  && locs_diff <= locs_check && dist_diff <= dist_check) {
       if (diff_checks) {
-        parameters_kept[total_particles, ] <- c(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_percent_natural_dispersal, proposed_anthropogenic_distance_scale, num_difference, locs_diff, dist_diff, residual_diff)
+        parameters_kept[total_particles, ] <- c(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_percent_natural_dispersal, proposed_anthropogenic_distance_scale, proposed_natural_kappa, proposed_anthropogenic_kappa, num_difference, locs_diff, dist_diff, residual_diff)
         current_particles <- current_particles + 1
         total_particles <- total_particles + 1
         proposed_particles <- proposed_particles + 1
@@ -409,10 +439,10 @@ abc_calibration <- function(infected_years_file,
     current_particles <- 1
     proposed_particles <- 1
     acc_rates[current_bin] <- acc_rate
-    infected_checks[current_bin] <- infected_check
+    infected_checks[current_bin] <- inf_check
     locs_checks[current_bin] <- locs_check
     dist_checks[current_bin] <- dist_check
-    infected_check <- median(parameters_kept[start_index:end_index, 5])
+    inf_check <- median(parameters_kept[start_index:end_index, 5])
     locs_check <- median(parameters_kept[start_index:end_index, 6])
     dist_check <- median(parameters_kept[start_index:end_index, 7])
     current_bin <- current_bin + 1
