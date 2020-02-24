@@ -325,18 +325,18 @@ abc_calibration <- function(infected_years_file,
           proposed_anthropogenic_distance_scale <- 0
         }
         if (params_to_estimate[5]) {
-          proposed_natural_kappa <- round(runif(1, 0, 8), digits = 1)
+          proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
         } else {
           proposed_natural_kappa <- natural_kappa
         }
         if (params_to_estimate[6]) {
-          proposed_anthropogenic_kappa <- round(runif(1, 0, 8), digits = 1)
+          proposed_anthropogenic_kappa <- round(runif(1, 0, 5), digits = 1)
         } else {
           proposed_anthropogenic_kappa <- anthropogenic_kappa
         }
       } else {
         proposed_parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
-        while(proposed_parameters[2] <= 0) {
+        while(proposed_parameters[1] <= 0 || proposed_parameters[2] <= 0) {
           proposed_parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
         }
         proposed_reproductive_rate <- proposed_parameters[1]
