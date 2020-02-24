@@ -11,6 +11,9 @@
 #' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).
+#' @param posterior_means the posterior means passed from the abc calibration function
+#' @param posterior_cov_matrix the posterior covariance matrix pass from the abc calibration function
+#' @param params_to_estimate A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm
@@ -38,7 +41,7 @@
 #' package = "PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management2005.tif", package = "PoPS")
 #' 
-#' params <- validate(infected_years_file, num_iterations, number_of_cores,
+#' params <- abc_validate(infected_years_file, num_iterations, number_of_cores,
 #' infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
 #' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
@@ -52,26 +55,48 @@
 #' wind_dir = "NONE", kappa = 0)
 #' }
 #' 
-validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
-                     infected_file, host_file, total_plants_file, 
-                     temp = FALSE, temperature_coefficient_file = "", 
-                     precip = FALSE, precipitation_coefficient_file = "", 
-                     time_step = "month", reproductive_rate = 3.0,
-                     season_month_start = 1, season_month_end = 12, 
-                     start_date = '2008-01-01', end_date = '2008-12-31',  
-                     use_lethal_temperature = FALSE, temperature_file = "",
-                     lethal_temperature = -12.87, lethal_temperature_month = 1,
-                     mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                     management = FALSE, treatment_dates = c(0), treatments_file = "",
+abc_validate <- function(infected_years_file, 
+                     num_iterations, 
+                     number_of_cores = NA,
+                     posterior_means,
+                     posterior_cov_matrix,
+                     params_to_estimate = c(T, T, T, T, F, F),
+                     infected_file, 
+                     host_file, 
+                     total_plants_file, 
+                     temp = FALSE, 
+                     temperature_coefficient_file = "", 
+                     precip = FALSE, 
+                     precipitation_coefficient_file = "", 
+                     time_step = "month",
+                     season_month_start = 1, 
+                     season_month_end = 12, 
+                     start_date = '2008-01-01', 
+                     end_date = '2008-12-31',  
+                     use_lethal_temperature = FALSE, 
+                     temperature_file = "",
+                     lethal_temperature = -12.87, 
+                     lethal_temperature_month = 1,
+                     mortality_on = FALSE, 
+                     mortality_rate = 0, 
+                     mortality_time_lag = 0, 
+                     management = FALSE, 
+                     treatment_dates = c(0), 
+                     treatments_file = "",
                      treatment_method = "ratio",
-                     percent_natural_dispersal = 1.0,
-                     natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-                     natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
-                     natural_dir = "NONE", natural_kappa = 0, 
-                     anthropogenic_dir = "NONE", anthropogenic_kappa = 0, 
-                     pesticide_duration = 0, pesticide_efficacy = 1.0,
-                     mask = NULL, success_metric = "quantity", output_frequency = "year",
-                     movements_file = "", use_movements = FALSE){ 
+                     natural_kernel_type = "cauchy",
+                     anthropogenic_kernel_type = "cauchy",
+                     natural_dir = "NONE", 
+                     natural_kappa = 0, 
+                     anthropogenic_dir = "NONE", 
+                     anthropogenic_kappa = 0, 
+                     pesticide_duration = 0, 
+                     pesticide_efficacy = 1.0,
+                     mask = NULL, 
+                     success_metric = "quantity", 
+                     output_frequency = "year",
+                     movements_file = "", 
+                     use_movements = FALSE){ 
   
   metric_check <- metric_checks(success_metric)
   if (metric_check$checks_passed){
@@ -93,13 +118,7 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   } else {
     return(time_check$failed_check)
   }
-  
-  # percent_check <- percent_checks(percent_natural_dispersal)
-  # if (percent_check$checks_passed){
-  #   use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
-  # } else {
-  #   return(percent_check$failed_check)
-  # }
+
   
   infected_check <- initial_raster_checks(infected_file)
   if (infected_check$checks_passed) {
@@ -248,37 +267,9 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   
   use_anthropogenic_kernel <- TRUE
   
-  reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = num_iterations)
-  if (reproductive_rate_check$checks_passed) {
-    reproductive_rate <- reproductive_rate_check$value
-  } else {
-    return(reproductive_rate_check$failed_check)
-  }
-  
-  natural_distance_scale_check <- uncertainty_check(natural_distance_scale, round_to = 0, n = num_iterations)
-  if (natural_distance_scale_check$checks_passed) {
-    natural_distance_scale <- natural_distance_scale_check$value
-  } else {
-    return(natural_distance_scale_check$failed_check)
-  }
-  
-  anthropogenic_distance_scale_check <- uncertainty_check(anthropogenic_distance_scale, round_to = 0, n = num_iterations)
-  if (anthropogenic_distance_scale_check$checks_passed) {
-    anthropogenic_distance_scale <- anthropogenic_distance_scale_check$value
-  } else {
-    return(anthropogenic_distance_scale_check$failed_check)
-  }
-  
-  percent_natural_dispersal_check <- uncertainty_check(percent_natural_dispersal, round_to = 3, n = num_iterations)
-  if (percent_natural_dispersal_check$checks_passed) {
-    percent_natural_dispersal <- percent_natural_dispersal_check$value
-  } else {
-    return(percent_natural_dispersal_check$failed_check)
-  }
-  
   ## Load observed data on occurence
   infection_years <- stack(infected_years_file)
-
+  
   ## Get rid of NA values to make comparisons
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   
@@ -295,9 +286,39 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
   
-
-  qa <- foreach::foreach (i = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %dopar% {
+  
+  qa <- foreach::foreach (i = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "MASS")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
+    parameters <- mvrnorm(1, posterior_means, posterior_cov_matrix)
+    while(parameters[1] <= 0 || parameters[2] <= 0) {
+      parameters <- mvrnorm(1, posterior_means, posterior_cov_matrix)
+    }
+    reproductive_rate <- parameters[1]
+    natural_distance_scale <- parameters[2]
+    if (params_to_estimate[3]) {
+      percent_natural_dispersal <- parameters[3]
+      if (percent_natural_dispersal > 1.000) {percent_natural_dispersal <- 1.000} 
+    } else {
+      percent_natural_dispersal <- 1.0
+    }
+    if (params_to_estimate[4]) {
+      anthropogenic_distance_scale <- parameters[4]
+    } else {
+      anthropogenic_distance_scale <- 0
+    }
+    if (params_to_estimate[5]) {
+      natural_kappa <- parameters[5]
+      if (natural_kappa <= 0.000) {natural_kappa <- 0}
+    } else {
+      natural_kappa <- natural_kappa
+    }
+    if (params_to_estimate[6]) {
+      anthropogenic_kappa <- parameters[6]
+      if (anthropogenic_kappa <= 0.000) {anthropogenic_kappa <- 0}
+    } else {
+      anthropogenic_kappa <- anthropogenic_kappa
+    }
+    
     data <- PoPS::pops_model(random_seed = random_seed, 
                              use_lethal_temperature = use_lethal_temperature, 
                              lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
@@ -317,14 +338,14 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
                              temperature = temperature,
                              weather_coefficient = weather_coefficient,
                              ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                             time_step = time_step, reproductive_rate = reproductive_rate[i],
+                             time_step = time_step, reproductive_rate = reproductive_rate,
                              mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
                              season_month_start = season_month_start, season_month_end = season_month_end,
                              start_date = start_date, end_date = end_date,
                              treatment_method = treatment_method,
                              natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal[i],
-                             natural_distance_scale = natural_distance_scale[i], anthropogenic_distance_scale = anthropogenic_distance_scale[i], 
+                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
                              natural_dir = natural_dir, natural_kappa = natural_kappa,
                              anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
                              output_frequency = output_frequency

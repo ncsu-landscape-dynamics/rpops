@@ -160,7 +160,7 @@ List pops_model(int random_seed,
   Direction anthropogenic_direction = direction_from_string(anthropogenic_dir);
   Season season(season_month_start, season_month_end);
   pops::Date dd_current(dd_start);
-  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, infected);
+  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, num_rows, num_cols);
   RadialDispersalKernel natural_radial_dispersal_kernel(ew_res, ns_res, natural_dispersal_kernel_type, natural_distance_scale, natural_direction, natural_kappa);
   RadialDispersalKernel anthropogenic_radial_dispersal_kernel(ew_res, ns_res, anthropogenic_dispersal_kernel_type, anthropogenic_distance_scale, anthropogenic_direction, anthropogenic_kappa);
   UniformDispersalKernel uniform_kernel(num_rows, num_cols);
@@ -169,6 +169,7 @@ List pops_model(int random_seed,
   DispersalKernel kernel(natural_dispersal_kernel, anthropogenic_dispersal_kernel, use_anthropogenic_kernel, percent_natural_dispersal);
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
+  IntegerMatrix total_dispersers(num_rows, num_cols);
   
   int num_infected;
   std::vector<int> number_infected;
@@ -187,6 +188,8 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> mortality_vector;
   std::vector<IntegerMatrix> resistant_vector;
   std::vector<IntegerMatrix> total_host_vector;
+  std::vector<IntegerMatrix> dispersers_vector;
+  
   StepUnit step_unit = step_unit_enum_from_string(time_step);
 
   // Define simulation time step
@@ -234,7 +237,7 @@ List pops_model(int random_seed,
   
   unsigned spread_rate_outputs = get_number_of_scheduled_actions(spread_rate_schedule);
   SpreadRate<IntegerMatrix> spreadrate(infected, ew_res, ns_res, spread_rate_outputs);
-            
+  // Define movement schedule  
   unsigned last_index = 0;
   unsigned move_scheduled;
   std::vector<unsigned> movement_schedule;
@@ -246,7 +249,6 @@ List pops_model(int random_seed,
     }
   }
 
-  
   for (unsigned current_index = 0; current_index < scheduler.get_num_steps(); ++current_index) {
       
       if (all_infected(susceptible)) {
@@ -273,8 +275,11 @@ List pops_model(int random_seed,
       }
 
       if (spread_schedule[current_index]) {
-        simulation.generate(infected, weather, weather_coefficient[current_index], reproductive_rate);
-        simulation.disperse(susceptible, infected, mortality_tracker, total_plants,
+        IntegerMatrix dispersers(num_rows, num_cols);
+        simulation.generate(dispersers, infected, weather, weather_coefficient[current_index], reproductive_rate);
+        total_dispersers += dispersers;
+        // dispersers_vector.push_back(Rcpp::clone(dispersers));
+        simulation.disperse(dispersers, susceptible, infected, mortality_tracker, total_plants,
                             outside_dispersers, weather, weather_coefficient[current_index], kernel);
         if (use_movements) {
           last_index = simulation.movement(infected, susceptible, mortality_tracker, total_plants, current_index, last_index, movements, movement_schedule);
@@ -294,11 +299,14 @@ List pops_model(int random_seed,
         susceptible_vector.push_back(Rcpp::clone(susceptible));
         resistant_vector.push_back(Rcpp::clone(resistant));
         total_host_vector.push_back(Rcpp::clone(total_plants));
+        dispersers_vector.push_back(Rcpp::clone(total_dispersers));
         
         num_infected = sum_of_infected(infected);
         number_infected.push_back(num_infected);
         area_infect = area_of_infected(infected, ew_res, ns_res);
         area_infected.push_back(area_infect);
+        // reinitialize total dispersers so each output isn't an accumulation of the previous output
+        total_dispersers(num_rows, num_cols);
       }
       
       if (spread_rate_schedule[current_index]) {
@@ -318,7 +326,8 @@ List pops_model(int random_seed,
     _["rates"] = spread_rates_vector,
     _["number_infected"] = number_infected,
     _["area_infected"] = area_infected,
-    _["total_hosts"] = total_host_vector
+    _["total_hosts"] = total_host_vector,
+    _["propogules"] = dispersers_vector
   );
   
 }

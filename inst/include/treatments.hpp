@@ -1,7 +1,7 @@
 /*
  * PoPS model - treatments
  *
- * Copyright (C) 2015-2019 by the authors.
+ * Copyright (C) 2015-2020 by the authors.
  *
  * Authors: Anna Petrasova <akratoc gmail com>
  *          Vaclav Petras <wenzeslaus gmail com>
@@ -84,8 +84,8 @@ public:
     unsigned get_end() {return end_step_;}
     void apply_treatment_mortality(IntegerRaster& infected) override
     {
-        for(int i = 0; i < infected.rows(); i++)
-            for(int j = 0; j < infected.cols(); j++) {
+        for(signed i = 0; i < infected.rows(); i++)
+            for(signed j = 0; j < infected.cols(); j++) {
                 if (application_ == TreatmentApplication::Ratio) {
                     infected(i, j) = infected(i, j) - (infected(i, j) * map_(i, j));
                 }
@@ -121,8 +121,8 @@ public:
     }
     void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& ) override
     {
-        for(int i = 0; i < infected.rows(); i++)
-            for(int j = 0; j < infected.cols(); j++) {
+        for(signed i = 0; i < infected.rows(); i++)
+            for(signed j = 0; j < infected.cols(); j++) {
                 if (this->application_ == TreatmentApplication::Ratio) {
                     infected(i, j) = infected(i, j) - (infected(i, j) * this->map_(i, j));
                 }
@@ -169,8 +169,8 @@ public:
 
     void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& resistant) override
     {
-        for(int i = 0; i < infected.rows(); i++)
-            for(int j = 0; j < infected.cols(); j++) {
+        for(signed i = 0; i < infected.rows(); i++)
+            for(signed j = 0; j < infected.cols(); j++) {
                 int infected_resistant;
                 int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
                 int current_resistant = resistant(i, j); 
@@ -187,8 +187,8 @@ public:
     }
     void end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) override
     {
-        for(int i = 0; i < resistant.rows(); i++)
-            for(int j = 0; j < resistant.cols(); j++) {
+        for(signed i = 0; i < resistant.rows(); i++)
+            for(signed j = 0; j < resistant.cols(); j++) {
                 if (this->map_(i, j) > 0){
                     susceptible(i, j) += resistant(i, j);
                     resistant(i, j) = 0;
