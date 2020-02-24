@@ -94,12 +94,12 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
     return(time_check$failed_check)
   }
   
-  percent_check <- percent_checks(percent_natural_dispersal)
-  if (percent_check$checks_passed){
-    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
-  } else {
-    return(percent_check$failed_check)
-  }
+  # percent_check <- percent_checks(percent_natural_dispersal)
+  # if (percent_check$checks_passed){
+  #   use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
+  # } else {
+  #   return(percent_check$failed_check)
+  # }
   
   infected_check <- initial_raster_checks(infected_file)
   if (infected_check$checks_passed) {
@@ -245,6 +245,8 @@ validate <- function(infected_years_file, num_iterations, number_of_cores = NA,
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
+  
+  use_anthropogenic_kernel <- TRUE
   
   reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = num_iterations)
   if (reproductive_rate_check$checks_passed) {
