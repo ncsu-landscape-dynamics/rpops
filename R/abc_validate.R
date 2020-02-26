@@ -176,8 +176,10 @@ abc_validate <- function(infected_years_file,
     }
     
     temperature <- list(raster::as.matrix(temperature_stack[[1]]))
-    for(i in 2:number_of_years) {
-      temperature[[i]] <- raster::as.matrix(temperature_stack[[i]])
+    if (nlayers(temperature_stack) > 1) {
+      for(i in 2:number_of_years) {
+        temperature[[i]] <- raster::as.matrix(temperature_stack[[i]])
+      }
     }
   } else {
     temperature <- host
