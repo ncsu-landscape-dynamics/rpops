@@ -256,6 +256,10 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
     return(percent_natural_dispersal_check$failed_check)
   }
   
+  years <- seq(year(start_date), year(end_date), 1)
+  rcl <- c(1, Inf, 1, 0, 0.99, NA)
+  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
+  
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
@@ -263,9 +267,6 @@ pops_multirun <- function(infected_file, host_file, total_plants_file,
   }
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
-  years <- seq(year(start_date), year(end_date), 1)
-  rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
   
   infected_stack <- foreach::foreach(i = 1:num_iterations, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
