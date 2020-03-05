@@ -284,3 +284,24 @@ test_that("Infected results are greater with higher reproductive rate", {
   expect_gte(sum(data_025[[1]][[2]]), sum(data_010[[1]][[2]]))
 
 })
+
+test_that("Treatments apply no matter what time step", {
+  infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+  temperature_file = system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
+  start_date = "2009-01-01"
+  end_date = "2009-12-31"
+  treatments_file = system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
+  dates <- seq.Date(as.Date(start_date), as.Date(end_date), by = "days")
+  for (i in 1:length(dates)) {
+    print(as.character(dates[i]))
+    data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management  = TRUE, treatment_dates = c( as.character(dates[i])), treatments_file = treatments_file, reproductive_rate = 0.4, start_date = start_date, end_date = end_date)
+    expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
+    expect_equal(data$susceptible[[1]], matrix(0,ncol = 2, nrow = 2))
+  }
+  # data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 1.0, start_date = start_date, end_date = end_date)
+  # expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
+  # expect_equal(data$susceptible[[1]], matrix(0,ncol = 2, nrow = 2))
+  
+})
