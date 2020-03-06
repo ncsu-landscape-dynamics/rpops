@@ -276,6 +276,21 @@ test_that("Bayesian checks report correct errors and return all rates as a data 
   expect_length(bayesian_check$posterior_rates, 2)
   expect_lte(mean(bayesian_check$posterior_rates[,1]), 2.1)
   
-  
+})
+
+
+test_that("Bayesian MNN checks work properly", {
+  prior_means <- c(0.2,23)
+  prior_cov_matrix <- matrix(c(1,1,1,1), ncol = 2, nrow = 2)
+  calibrated_means <- c(0.3, 21)
+  calibrated_cov_matrix <- matrix(c(1,2,1,1), ncol = 2, nrow = 2)
+  prior_weight <- 0.05
+  weight <- 1 - prior_weight
+
+  mnn_check <- bayesian_MNN_checks(prior_means, prior_cov_matrix, calibrated_means, calibrated_cov_matrix, prior_weight, weight)
+  expect_equal(mnn_check$checks_passed, TRUE)
+  expect_equal(mnn_check$posterior_means, c(0.295, 21.1))
+  expect_equal(mnn_check$posterior_cov_matrix, matrix(c(1,1.95,1,1), ncol = 2, nrow = 2))
   
 })
+

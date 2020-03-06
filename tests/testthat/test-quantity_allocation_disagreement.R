@@ -96,10 +96,10 @@ test_that("Check that configuration disagreement works", {
   mask[2,2] <- NA
   data <- quantity_allocation_disagreement(ref, comp, configuration = TRUE, mask = mask)
   expect_equal(data$quantity_disagreement, 0)
-  expect_equal(data$allocation_disagreement, 2)
-  expect_equal(data$total_disagreement,2)
-  expect_equal(data$omission, 1)
-  expect_equal(data$commission, 1)
+  expect_equal(data$allocation_disagreement, 0)
+  expect_equal(data$total_disagreement,0)
+  expect_equal(data$omission, 0)
+  expect_equal(data$commission, 0)
   expect_equal(data$odds_ratio, 1)
   expect_equal(data$configuration_disagreement, 0)
   
