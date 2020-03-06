@@ -80,4 +80,5 @@ test_that("Multirun model outputs work", {
   expect_equal(data$south_rate[[2]], 0)
   expect_equal(is.nan(data$north_rate[[1]]), T)
   expect_equal(is.na(data$north_rate[[2]]), T)
+  
 })

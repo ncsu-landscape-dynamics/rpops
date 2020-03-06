@@ -136,7 +136,7 @@ test_that("Infected results returns all 0's if minimum temp drops below lethal t
 
   })
 
-test_that("Infected and Susceptible results return all 0's if treatments file is all 1's", {
+test_that("Infected and Susceptible results return all 0's if treatments file is all 1's but leaves a proportion of susceptibles if treatment method is ratio", {
   infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
@@ -145,10 +145,27 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
   end_date = "2010-12-31"
   treatments_file = system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
   
-  data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 1.0, start_date = start_date, end_date = end_date)
+  data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 0.0, start_date = start_date, end_date = end_date)
   
   expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
   expect_equal(data$susceptible[[1]], matrix(0,ncol = 2, nrow = 2))
+  
+  data <- pops(infected_file = infected_file, host_file = host_file, treatment_method = "all infected", total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 0.0, start_date = start_date, end_date = end_date)
+  
+  expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
+  expect_equal(data$susceptible[[1]], matrix(0,ncol = 2, nrow = 2))
+  
+  treatments_file = system.file("extdata", "simple2x2", "treatmentshalf.tif", package = "PoPS")
+  
+  data <- pops(infected_file = infected_file, host_file = host_file, treatment_method = "ratio", total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 0.0, start_date = start_date, end_date = end_date)
+  
+  expect_equal(data$infected[[1]], matrix(c(2,0,0,0), ncol = 2, nrow = 2))
+  expect_equal(data$susceptible[[1]], matrix(c(5,3,7,7),ncol = 2, nrow = 2))
+  
+  data <- pops(infected_file = infected_file, host_file = host_file, treatment_method = "all infected", total_plants_file = host_file, management  = TRUE, treatment_dates = c("2008-12-01"), treatments_file = treatments_file, reproductive_rate = 0.0, start_date = start_date, end_date = end_date)
+  
+  expect_equal(data$infected[[1]], matrix(c(0,0,0,0), ncol = 2, nrow = 2))
+  expect_equal(data$susceptible[[1]], matrix(c(5,3,7,7),ncol = 2, nrow = 2))
   
 })
 
@@ -299,4 +316,31 @@ test_that("Treatments apply no matter what time step", {
     expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
     expect_equal(data$susceptible[[1]], matrix(0,ncol = 2, nrow = 2))
   }
+})
+
+test_that("Changing the output frequency returns the correct number of outputs", {
+  infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date = "2009-01-01"
+  end_date = "2009-12-31"
+  treatment_date = start_date
+  
+
+  data <- pops(output_frequency = "year", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+
+  data <- pops(output_frequency = "month", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 12)
+  
+  data <- pops(output_frequency = "week", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 52)
+  
+  data <- pops(output_frequency = "day", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0, start_date = start_date, end_date = end_date)
+  expect_equal(data, "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+
+  data <- pops(output_frequency = "day", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 364)
+  
+  data <- pops(output_frequency = "time_step", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 364)
 })
