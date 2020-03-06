@@ -16,15 +16,6 @@ environment:
    USE_RTOOLS: true
    
   matrix:
-  - R_VERSION: 3.4
-    GCC_PATH: mingw_32
-    
-  - R_VERSION: 3.5
-    GCC_PATH: mingw_32
-
-  - R_VERSION: 3.6
-    GCC_PATH: mingw_32
-
   - R_VERSION: patched
     GCC_PATH: mingw_32
 
