@@ -214,6 +214,8 @@ List pops_model(int random_seed,
     } else if (time_step == "week") {
       output_schedule = scheduler.schedule_action_nsteps(1);
     }
+  } else if (output_frequency == "day") {
+    output_schedule = scheduler.schedule_action_nsteps(1);
   }
   
   Treatments<IntegerMatrix, NumericMatrix> treatments(scheduler);
