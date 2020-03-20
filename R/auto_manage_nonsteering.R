@@ -22,6 +22,7 @@
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm median sd
+#' @importFrom rlist list.append
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
@@ -53,30 +54,30 @@
 #' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
 #' }
 #' 
-auto_manage <- function(infected_files, host_file, total_plants_file, 
-                        temp = FALSE, temperature_coefficient_file = "", 
-                        precip = FALSE, precipitation_coefficient_file = "", 
-                        time_step = "month", reproductive_rate = 3.0,
-                        season_month_start = 1, season_month_end = 12, 
-                        start_date = '2008-01-01', end_date = '2008-12-31', 
-                        use_lethal_temperature = FALSE, temperature_file = "",
-                        lethal_temperature = -12.87, lethal_temperature_month = 1,
-                        mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                        management = FALSE, treatment_dates = c(0), treatments_file = "",
-                        treatment_method = "ratio",
-                        percent_natural_dispersal = 1.0,
-                        natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-                        natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
-                        natural_dir = "NONE", natural_kappa = 0, 
-                        anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-                        num_iterations = 100, number_of_cores = NA,
-                        pesticide_duration = 0, pesticide_efficacy = 1.0,
-                        random_seed = NULL, output_frequency = "year",
-                        movements_file = "", use_movements = FALSE,
-                        cost_per_meter_sq = 1.37, budget = 1500000, buffer = 600,
-                        treatment_priority = "equal", treatment_rank = c(1), 
-                        selection_method = 'Points', selection_priority = 'group size',
-                        points = points, treatment_efficacy = 1, species = c('species1'), direction_first = TRUE) { 
+auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file, 
+                                    temp = FALSE, temperature_coefficient_file = "", 
+                                    precip = FALSE, precipitation_coefficient_file = "", 
+                                    time_step = "month", reproductive_rate = 3.0,
+                                    season_month_start = 1, season_month_end = 12, 
+                                    start_date = '2008-01-01', end_date = '2008-12-31', 
+                                    use_lethal_temperature = FALSE, temperature_file = "",
+                                    lethal_temperature = -12.87, lethal_temperature_month = 1,
+                                    mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
+                                    management = FALSE, treatment_dates = c(0), treatments_file = "",
+                                    treatment_method = "ratio",
+                                    percent_natural_dispersal = 1.0,
+                                    natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
+                                    natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
+                                    natural_dir = "NONE", natural_kappa = 0, 
+                                    anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
+                                    num_iterations = 100, number_of_cores = NA,
+                                    pesticide_duration = 0, pesticide_efficacy = 1.0,
+                                    random_seed = NULL, output_frequency = "year",
+                                    movements_file = "", use_movements = FALSE,
+                                    cost_per_meter_sq = 1.37, budget = 1500000, buffer = 600,
+                                    treatment_priority = "equal", treatment_rank = c(1), 
+                                    selection_method = 'Points', selection_priority = 'group size',
+                                    points = points, treatment_efficacy = 1, species = c('species1'), direction_first = TRUE) { 
   
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -100,7 +101,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   }
   
   multispecies_check <- multispecies_checks(species, infected_files, reproductive_rate, percent_natural_dispersal, natural_kernel_type, anthropogenic_kernel_type, 
-                                  natural_distance_scale, anthropogenic_distance_scale, natural_dir, natural_kappa, anthropogenic_dir, anthropogenic_kappa)
+                                            natural_distance_scale, anthropogenic_distance_scale, natural_dir, natural_kappa, anthropogenic_dir, anthropogenic_kappa)
   if (!multispecies_check$checks_passed){
     return(percent_check$failed_check)
   }
@@ -141,7 +142,7 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
     infected_name <-  paste("infected", r, sep = "")
     susceptible <- host - infected[[r]]
     susceptible[susceptible < 0] <- 0
-
+    
     susceptible_speci <- stack(susceptible_speci, susceptible)
   }
   
@@ -263,8 +264,6 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   resistant <- mortality_tracker
   
   years <- seq(year(start_date), year(end_date), 1)
-  rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
   
   ## management module information
   num_cells <- round((budget/cost_per_meter_sq)/(ew_res*ns_res))
@@ -272,46 +271,82 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
   years_simulated <- length(years)
   
   random_seeds <- round(stats::runif(num_iterations, 1, 1000000))
-
+  
   treatment_speci <- raster()
+  
+  ## preallocate data frames and lists
+  s <- paste("sim_", years,sep = "")
+  s2 <- c("management_year", s)
+  infected_areas <- data.frame(matrix(ncol = length(years) + 1, nrow = length(years)))
+  names(infected_areas) <- s2
+  infected_areas$management_year <- years
+  number_infecteds <- infected_areas
+  west_rates <- infected_areas
+  east_rates <- infected_areas
+  south_rates <- infected_areas
+  north_rates <- infected_areas
+  
+  ## maintain starting state of the system for each simulation
+  start_date2 <- start_date
+  end_date2 <- end_date
+  years2 <- years
+  infected_species_2 <- infected_species
+  susceptible_species_2 <- susceptible_species
+  weather_coefficient_2 <- weather_coefficient
+  infected_speci_2 <- infected_speci
+  
+  points <- data.frame(i = as.integer(1), j = ncol(infected[[1]]))
   
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
     core_count <- number_of_cores
   }
+  cl <- makeCluster(core_count)
+  registerDoParallel(cl)
   
-
-  
-  run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate")) %do% {
-
-    if (treatment_priority == "equal") {
-      treatment_speci <- raster::stackApply(infected_speci, indices = rep(1, raster::nlayers(infected_speci)), fun = sum)
-      print("works")
-    } else if (treatment_priority == "ranked") {
-      for (m in 1:raster::nlayers(infected_speci)) {
-        if (treatment_rank[[m]]) {
-          treatment_speci <- infected_speci[[m]]
+  runs <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %dopar% {
+    treatment_speci <- raster()
+    # start_date <- start_date2
+    # end_date <- end_date2
+    # years <- years2
+    # infected_species <- infected_species_2
+    # susceptible_species <- susceptible_species_2
+    # weather_coefficient <- weather_coefficient_2
+    infected_speci <- infected_speci_2
+    
+    run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %do% {
+      
+      if (treatment_priority == "equal") {
+        treatment_speci <- raster::stackApply(infected_speci, indices = rep(1, raster::nlayers(infected_speci)), fun = sum)
+        print("works")
+      } else if (treatment_priority == "ranked") {
+        for (m in 1:raster::nlayers(infected_speci)) {
+          if (treatment_rank[[m]]) {
+            treatment_speci <- infected_speci[[m]]
+          }
         }
       }
-    }
-    print("start")
-    treatment <- treatmentAuto(rast = treatment_speci, rast2 = host, method = selection_method, priority = selection_priority, number_of_locations = num_cells, points = points, treatment_efficacy = treatment_efficacy, buffer_cells = buffer_cells, direction_first = direction_first)
-    treatment_dates <- paste(years[1], "-12", "-01", sep = "")
-    treatment_maps <- list(as.matrix(treatment))
-    management <- TRUE
-    print("end_treatment")
-    
-    tests <-   foreach(i = 1:length(infected_files), .combine = rbind, .packages = c("raster", "PoPS", "foreach")) %do% {
+      print("start")
+      treatment <- treatmentAuto(rast = treatment_speci, rast2 = host, method = selection_method, priority = selection_priority, number_of_locations = num_cells, points = points, treatment_efficacy = treatment_efficacy, buffer_cells = buffer_cells, direction_first = direction_first)
+      if (y == 1) {
+        treatment_dates <- c(paste(years[y], "-12", "-01", sep = ""))
+        treatment_maps <- list(as.matrix(treatment))
+      } else if (y > 1) {
+        treatment_dates <- c(treatment_dates, paste(years[y], "-12", "-01", sep = ""))
+        treatment_maps <- list.append(treatment_maps, as.matrix(treatment))
+        pesticide_duration <- c(pesticide_duration, 0)
+      }
+
+      management <- TRUE
+      print("end_treatment")
       
-      cl <- makeCluster(core_count)
-      registerDoParallel(cl)
-      
-      infected_stack <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach"), .export = ls(globalenv())) %dopar% {
-        
+      species_run <-   foreach(i = 1:length(infected_files), .combine = rbind, .packages = c("raster", "PoPS")) %do% {
+        # random_seed <- round(stats::runif(1, 1, 1000000))
         data <- pops_model(random_seed = random_seeds[p], 
                            use_lethal_temperature = use_lethal_temperature, 
-                           lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                           lethal_temperature = lethal_temperature, 
+                           lethal_temperature_month = lethal_temperature_month,
                            infected = infected_species[[i]],
                            susceptible = susceptible_species[[i]],
                            total_plants = total_plants,
@@ -322,217 +357,168 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
                            treatment_dates = treatment_dates,
                            pesticide_duration = pesticide_duration,
                            resistant = resistant,
-                           use_movements = use_movements, movements = movements,
+                           use_movements = use_movements, 
+                           movements = movements,
                            movements_dates = movements_dates,
                            weather = weather,
                            temperature = temperature,
                            weather_coefficient = weather_coefficient,
-                           ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                           time_step = time_step, reproductive_rate = reproductive_rate[[i]],
-                           mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                           season_month_start = season_month_start, season_month_end = season_month_end,
-                           start_date = start_date, end_date = end_date,
+                           ew_res = ew_res, 
+                           ns_res = ns_res, 
+                           num_rows = num_rows, 
+                           num_cols = num_cols,
+                           time_step = time_step, 
+                           reproductive_rate = reproductive_rate[[i]],
+                           mortality_rate = mortality_rate, 
+                           mortality_time_lag = mortality_time_lag,
+                           season_month_start = season_month_start, 
+                           season_month_end = season_month_end,
+                           start_date = start_date,
+                           end_date = end_date,
                            treatment_method = treatment_method,
-                           natural_kernel_type = natural_kernel_type[[i]], anthropogenic_kernel_type = anthropogenic_kernel_type[[i]], 
-                           use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal[[i]],
-                           natural_distance_scale = natural_distance_scale[[i]], anthropogenic_distance_scale = anthropogenic_distance_scale[[i]], 
-                           natural_dir = natural_dir[[i]], natural_kappa = natural_kappa[[i]],
-                           anthropogenic_dir = anthropogenic_dir[[i]], anthropogenic_kappa = anthropogenic_kappa[[i]],
+                           natural_kernel_type = natural_kernel_type[[i]],
+                           anthropogenic_kernel_type = anthropogenic_kernel_type[[i]], 
+                           use_anthropogenic_kernel = use_anthropogenic_kernel,
+                           percent_natural_dispersal = percent_natural_dispersal[[i]],
+                           natural_distance_scale = natural_distance_scale[[i]],
+                           anthropogenic_distance_scale = anthropogenic_distance_scale[[i]], 
+                           natural_dir = natural_dir[[i]],
+                           natural_kappa = natural_kappa[[i]],
+                           anthropogenic_dir = anthropogenic_dir[[i]],
+                           anthropogenic_kappa = anthropogenic_kappa[[i]],
                            output_frequency = output_frequency
         )
         
-        infected_runs <- raster::stack(lapply(1:length(data$infected), function(x) host))
-        susceptible_runs <- raster::stack(lapply(1:length(data$infected), function(x) host))
+        infected_run <- raster::stack(lapply(1:length(data$infected), function(x) host))
+        susceptible_run <- raster::stack(lapply(1:length(data$infected), function(x) host))
         
-        for (q in 1:raster::nlayers(infected_runs)) {
-          infected_runs[[q]] <- data$infected[[q]]
-          susceptible_runs[[q]] <- data$susceptible[[q]]
+        for (q in 1:raster::nlayers(infected_run)) {
+          infected_run[[q]] <- data$infected[[q]]
+          susceptible_run[[q]] <- data$susceptible[[q]]
         }
         
-        prob_runs <- raster::reclassify(infected_runs, rclmat)
-        prob_runs[is.na(prob_runs)] <- 0
         number_infected <- data$number_infected
         spread_rate <- data$rates
         infected_area <- data$area_infected
-        to.infected_stack <- list(infected_runs, susceptible_runs, number_infected, infected_area, spread_rate, prob_runs)
+        
+        west_rate <- c()
+        east_rate <- c()
+        south_rate <- c()
+        north_rate <- c()
+        
+        for (k in 1:length(spread_rate)) {
+          west_rate[k] <- spread_rate[[k]][4]
+          east_rate[k] <- spread_rate[[k]][3]
+          south_rate[k] <- spread_rate[[k]][2]
+          north_rate[k] <- spread_rate[[k]][1]
+        }
+        
+        to.species_run <- list(infected_run, susceptible_run, number_infected, infected_area, west_rate, east_rate, north_rate, south_rate)
       }
-      
-      stopCluster(cl)
-      infected_runs <- infected_stack[1:10]
-      susceptible_runs <- infected_stack[11:20]
-      number_infected_runs <- infected_stack[21:30]
-      area_infected_runs <- infected_stack[31:40]
-      spread_rate_runs <- infected_stack[41:50]
-      probability_runs <- infected_stack[51:60]
-      
-      prediction <- probability_runs[[1]]
-      prediction[prediction > 0] <- 0
-      infected_area <- data.frame(t(years))
-      infected_number <- data.frame(t(years))
-      west_rates <- data.frame(t(years))
-      east_rates <- data.frame(t(years))
-      south_rates <- data.frame(t(years))
-      north_rates <- data.frame(t(years))
-      
-      for (k in 1:length(infected_runs)) {
-        prediction <- prediction + probability_runs[[k]]
-        infected_number[k,] <- number_infected_runs[[k]]
-        infected_area[k,] <- area_infected_runs[[k]]
-        rates <- do.call(rbind, spread_rate_runs[[k]])
-        west_rates[k,] <- rates[,4]
-        east_rates[k,] <- rates[,3]
-        south_rates[k,] <- rates[,2]
-        north_rates[k,] <- rates[,1]
-      }
-      
-      probability <- (prediction/(length(probability_runs))) * 100
-      infected_areas <- round(sapply(infected_area, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      number_infecteds <- round(sapply(infected_number, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      west_rate <- round(sapply(west_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      east_rate <- round(sapply(east_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      south_rate <- round(sapply(south_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      north_rate <- round(sapply(north_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      which_median <- function(x) raster::which.min(abs(x - median(x)))
-      
-      median_run_index <- which_median(infected_number[[1]])
-      
-      infected_run <- infected_runs[[median_run_index]]
-      susceptible_run <- susceptible_runs[[median_run_index]]
-      
-      to.test <- list(infected_run, susceptible_run, probability, number_infecteds, infected_areas, west_rate, east_rate, north_rate, south_rate)
-    }
-    
-    if (y == 1) {
-      infected_speci <- stack()
-      susceptible_speci <- stack()
-      probabilities <- stack()
       
       infections_out <- c()
       susceptibles_out <- c()
-      probabilities_out <- c()
       number_infecteds_out <- c()
       infected_areas_out <- c()
       west_rate_out <- c()
       east_rate_out <- c()
       north_rate_out <- c()
       south_rate_out <- c()
-    } else if (y > 1) {
-      infections_out <- c()
-      susceptibles_out <- c()
-      probabilities_out <- c()
-      number_infecteds_out <- c()
-      infected_areas_out <- c()
-      west_rate_out <- c()
-      east_rate_out <- c()
-      north_rate_out <- c()
-      south_rate_out <- c()
-      
       infected_speci <- stack()
       susceptible_speci <- stack()
-      probabilities <- stack()
-    }
-    
-    for (t in 1:length(infected_species)) {
-      infected_speci <- stack(infected_speci, tests[[t]][[1]])
-      susceptible_speci <- stack(susceptible_speci, tests[[t+length(infected_species)]][[1]])
-      probabilities <- stack(probabilities, tests[[t+(2*length(infected_species))]][[1]])
       
-      infections_out[[t]] <- c(tests[[t]])
-      susceptibles_out[[t]] <- c(tests[[t+length(infected_species)]])
-      probabilities_out[[t]] <- c(tests[[t+(2*length(infected_species))]])
-      number_infecteds_out[[t]] <- c(tests[[t+(3*length(infected_species))]])
-      infected_areas_out[[t]] <- c(tests[[t+(4*length(infected_species))]])
-      west_rate_out[[t]] <- c(tests[[t+(5*length(infected_species))]])
-      east_rate_out[[t]] <- c(tests[[t+(6*length(infected_species))]])
-      north_rate_out[[t]] <- c(tests[[t+(7*length(infected_species))]])
-      south_rate_out[[t]] <- c(tests[[t+(8*length(infected_species))]])
+      for (t in 1:length(infected_species)) {
+        infected_speci <- stack(infected_speci, species_run[[t]][[y]])
+        susceptible_speci <- stack(susceptible_speci, species_run[[t+length(infected_species)]][[y]])
+        
+        infections_out[[t]] <- c(species_run[[t]])
+        susceptibles_out[[t]] <- c(species_run[[t+length(infected_species)]])
+        number_infecteds_out[[t]] <- c(species_run[[t+(2*length(infected_species))]])
+        infected_areas_out[[t]] <- c(species_run[[t+(3*length(infected_species))]])
+        west_rate_out[[t]] <- c(species_run[[t+(4*length(infected_species))]])
+        east_rate_out[[t]] <- c(species_run[[t+(5*length(infected_species))]])
+        north_rate_out[[t]] <- c(species_run[[t+(6*length(infected_species))]])
+        south_rate_out[[t]] <- c(species_run[[t+(7*length(infected_species))]])
+        
+        # infected_species[[t]] <- as.matrix(species_run[[t]][[1]])
+        # susceptible_species[[t]] <- as.matrix(species_run[[t+length(infected_species)]][[1]])
+      }
+      print("outer loop")
       
-      infected_species[[t]] <- as.matrix(tests[[t]][[1]])
-      susceptible_species[[t]] <- as.matrix(tests[[t+length(infected_species)]][[1]])
+      outputs <- list(infections_out, susceptibles_out, number_infecteds_out, infected_areas_out, west_rate_out, east_rate_out, north_rate_out, south_rate_out, treatment)
     }
     
-    start_date <- paste(year(start_date) + 1, "-01", "-01", sep = "")
-    end_date <- end_date 
-    if (y < years_simulated) {
-      years <- seq(year(start_date), year(end_date), 1)
-    } else {
-      years <- c(year(start_date))
+    
+    year_names <- list()
+    
+    infecteds <- list()
+    susceptibles <- list()
+    probabilities <- list()
+    number_infecteds <- list()
+    infected_areas <- list()
+    west_rates <- list()
+    east_rates <- list()
+    north_rates <- list()
+    south_rates <- list()
+    treatments <- list()
+    
+    for (sp in 1:length(infected_files)) {
+      infecs <- list()
+      susceps <- list()
+      probs <- list()
+      number_infects <- list()
+      infected_ars <- list()
+      west_rats <- list()
+      east_rats <- list()
+      north_rats <- list()
+      south_rats <- list()
+      for (l in 1:years_simulated) {
+        year_names[l] <- paste(years)
+        infecs[[l]] <- run_years[[l]][[sp]][[1]]
+        susceps[[l]] <- run_years[[l + years_simulated]][[sp]][[1]]
+        number_infects[[l]] <- run_years[[l + years_simulated * 2]][[sp]]
+        infected_ars[[l]] <- run_years[[l + years_simulated * 3]][[sp]]
+        west_rats[[l]] <- run_years[[l + years_simulated * 4]][[sp]]
+        east_rats[[l]] <- run_years[[l + years_simulated * 5]][[sp]]
+        north_rats[[l]] <- run_years[[l + years_simulated * 6]][[sp]]
+        south_rats[[l]] <- run_years[[l + years_simulated * 7]][[sp]]
+        treatments[[l]] <- run_years[[l + years_simulated * 8]][[1]]
+      }
+      names(infecs) <- year_names
+      names(susceps) <- year_names
+      names(number_infects) <- year_names
+      names(infected_ars) <- year_names
+      names(west_rats) <- year_names
+      names(east_rats) <- year_names
+      names(north_rats) <- year_names
+      names(south_rats) <- year_names
+      names(treatments) <- year_names
+      infecteds[[sp]] <- infecs
+      susceptibles[[sp]] <- susceps
+      probabilities[[sp]] <- probs
+      number_infecteds[[sp]] <- number_infects
+      infected_areas[[sp]] <- infected_ars
+      west_rates[[sp]] <- west_rats
+      east_rates[[sp]] <- east_rats
+      north_rates[[sp]] <- north_rats
+      south_rates[[sp]] <- south_rats
     }
-    print("outer loop")
     
-    outputs <- list(infections_out, susceptibles_out, probabilities_out, number_infecteds_out, infected_areas_out, west_rate_out, east_rate_out, north_rate_out, south_rate_out, treatment)
+    names(infecteds) <- species
+    names(susceptibles) <- species
+    names(number_infecteds) <- species
+    names(infected_areas) <- species
+    names(west_rates) <- species
+    names(east_rates) <- species
+    names(north_rates) <- species
+    names(south_rates) <- species
     
+    outputs <- list(infecteds, susceptibles, number_infecteds, infected_areas, west_rates, east_rates, north_rates, south_rates, treatments)
+    names(outputs) <- c('infecteds', 'susceptibles', 'number_infecteds', 'infected_areas', 'west_rates', 'east_rates', 'north_rates', 'south_rates', 'treatments')
+    
+    outputs
   }
   
-  year_names <- list()
-  
-  infecteds <- list()
-  susceptibles <- list()
-  probabilities <- list()
-  number_infecteds <- list()
-  infected_areas <- list()
-  west_rates <- list()
-  east_rates <- list()
-  north_rates <- list()
-  south_rates <- list()
-  treatments <- list()
-  
-  for (sp in 1:length(infected_files)) {
-    infecs <- list()
-    susceps <- list()
-    probs <- list()
-    number_infects <- list()
-    infected_ars <- list()
-    west_rats <- list()
-    east_rats <- list()
-    north_rats <- list()
-    south_rats <- list()
-    for (l in 1:years_simulated) {
-      year_names[l] <- paste(years - years_simulated - 1 + l)
-      infecs[[l]] <- run_years[[l]][[sp]][[1]]
-      susceps[[l]] <- run_years[[l + years_simulated]][[sp]][[1]]
-      probs[[l]] <- run_years[[l + years_simulated * 2]][[sp]][[1]]
-      number_infects[[l]] <- run_years[[l + years_simulated * 3]][[sp]][[1]]
-      infected_ars[[l]] <- run_years[[l + years_simulated * 4]][[sp]][[1]]
-      west_rats[[l]] <- run_years[[l + years_simulated * 5]][[sp]][[1]]
-      east_rats[[l]] <- run_years[[l + years_simulated * 6]][[sp]][[1]]
-      north_rats[[l]] <- run_years[[l + years_simulated * 7]][[sp]][[1]]
-      south_rats[[l]] <- run_years[[l + years_simulated * 8]][[sp]][[1]]
-      treatments[[l]] <- run_years[[l + years_simulated * 9]][[1]]
-    }
-    names(infecs) <- year_names
-    names(susceps) <- year_names
-    names(probs) <- year_names
-    names(number_infects) <- year_names
-    names(infected_ars) <- year_names
-    names(west_rats) <- year_names
-    names(east_rats) <- year_names
-    names(north_rats) <- year_names
-    names(south_rats) <- year_names
-    names(treatments) <- year_names
-    infecteds[[sp]] <- infecs
-    susceptibles[[sp]] <- susceps
-    probabilities[[sp]] <- probs
-    number_infecteds[[sp]] <- number_infects
-    infected_areas[[sp]] <- infected_ars
-    west_rates[[sp]] <- west_rats
-    east_rates[[sp]] <- east_rats
-    north_rates[[sp]] <- north_rats
-    south_rates[[sp]] <- south_rats
-  }
-  
-  names(infecteds) <- species
-  names(susceptibles) <- species
-  names(probabilities) <- species
-  names(number_infecteds) <- species
-  names(infected_areas) <- species
-  names(west_rates) <- species
-  names(east_rates) <- species
-  names(north_rates) <- species
-  names(south_rates) <- species
-  
-  outputs <- list(infecteds, susceptibles, probabilities, number_infecteds, infected_areas, west_rates, east_rates, north_rates, south_rates, treatments)
-  names(outputs) <- c('infecteds', 'susceptibles', 'probabilities', 'number_infecteds', 'infected_areas', 'west_rates', 'east_rates', 'north_rates', 'south_rates', 'treatments')
+  stopCluster(cl)
   return(outputs)
 }
-  
