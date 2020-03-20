@@ -307,12 +307,6 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
   
   runs <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %dopar% {
     treatment_speci <- raster()
-    # start_date <- start_date2
-    # end_date <- end_date2
-    # years <- years2
-    # infected_species <- infected_species_2
-    # susceptible_species <- susceptible_species_2
-    # weather_coefficient <- weather_coefficient_2
     infected_speci <- infected_speci_2
     
     run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %do% {
@@ -342,7 +336,6 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
       print("end_treatment")
       
       species_run <-   foreach(i = 1:length(infected_files), .combine = rbind, .packages = c("raster", "PoPS")) %do% {
-        # random_seed <- round(stats::runif(1, 1, 1000000))
         data <- pops_model(random_seed = random_seeds[p], 
                            use_lethal_temperature = use_lethal_temperature, 
                            lethal_temperature = lethal_temperature, 
@@ -439,9 +432,6 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
         east_rate_out[[t]] <- c(species_run[[t+(5*length(infected_species))]])
         north_rate_out[[t]] <- c(species_run[[t+(6*length(infected_species))]])
         south_rate_out[[t]] <- c(species_run[[t+(7*length(infected_species))]])
-        
-        # infected_species[[t]] <- as.matrix(species_run[[t]][[1]])
-        # susceptible_species[[t]] <- as.matrix(species_run[[t+length(infected_species)]][[1]])
       }
       print("outer loop")
       
