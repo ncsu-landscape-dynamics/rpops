@@ -295,6 +295,8 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
   weather_coefficient_2 <- weather_coefficient
   infected_speci_2 <- infected_speci
   
+  year_names <- paste(years)
+  
   points <- data.frame(i = as.integer(1), j = ncol(infected[[1]]))
   
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
@@ -438,9 +440,6 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
       outputs <- list(infections_out, susceptibles_out, number_infecteds_out, infected_areas_out, west_rate_out, east_rate_out, north_rate_out, south_rate_out, treatment)
     }
     
-    
-    year_names <- list()
-    
     infecteds <- list()
     susceptibles <- list()
     probabilities <- list()
@@ -463,7 +462,7 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
       north_rats <- list()
       south_rats <- list()
       for (l in 1:years_simulated) {
-        year_names[l] <- paste(years)
+        
         infecs[[l]] <- run_years[[l]][[sp]][[1]]
         susceps[[l]] <- run_years[[l + years_simulated]][[sp]][[1]]
         number_infects[[l]] <- run_years[[l + years_simulated * 2]][[sp]]
