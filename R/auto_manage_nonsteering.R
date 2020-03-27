@@ -272,8 +272,6 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
   
   random_seeds <- round(stats::runif(num_iterations, 1, 1000000))
   
-  treatment_speci <- raster()
-  
   ## preallocate data frames and lists
   s <- paste("sim_", years,sep = "")
   s2 <- c("management_year", s)
@@ -294,6 +292,7 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
   susceptible_species_2 <- susceptible_species
   weather_coefficient_2 <- weather_coefficient
   infected_speci_2 <- infected_speci
+  susceptible_speci_2 <- susceptible_speci
   
   year_names <- paste(years)
   
@@ -308,23 +307,22 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
   registerDoParallel(cl)
   
   runs <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %dopar% {
-    treatment_speci <- raster()
     infected_speci <- infected_speci_2
+    infected_species <- infected_species_2
+    susceptible_speci <- susceptible_speci_2
+    susceptible_species <- susceptible_species_2
     
     run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %do% {
       
-      if (treatment_priority == "equal") {
-        treatment_speci <- raster::stackApply(infected_speci, indices = rep(1, raster::nlayers(infected_speci)), fun = sum)
-        print("works")
-      } else if (treatment_priority == "ranked") {
-        for (m in 1:raster::nlayers(infected_speci)) {
-          if (treatment_rank[[m]]) {
-            treatment_speci <- infected_speci[[m]]
-          }
-        }
-      }
+
       print("start")
-      treatment <- treatmentAuto(rast = treatment_speci, rast2 = host, method = selection_method, priority = selection_priority, number_of_locations = num_cells, points = points, treatment_efficacy = treatment_efficacy, buffer_cells = buffer_cells, direction_first = direction_first)
+      treatment <- treatmentAuto(rasts = infected_speci, rasts2 = susceptible_speci, 
+                                 method = selection_method, priority = selection_priority,
+                                 number_of_locations = num_cells, points = points, 
+                                 treatment_efficacy = treatment_efficacy, 
+                                 buffer_cells = buffer_cells, direction_first = direction_first, 
+                                 treatment_rank = treatment_rank, treatment_priority = treatment_priority)
+      
       if (y == 1) {
         treatment_dates <- c(paste(years[y], "-12", "-01", sep = ""))
         treatment_maps <- list(as.matrix(treatment))
