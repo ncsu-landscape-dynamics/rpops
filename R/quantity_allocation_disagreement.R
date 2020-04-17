@@ -149,6 +149,9 @@ quantity_allocation_disagreement <- function(reference, comparison, configuratio
   output$configuration_disagreement <- configuration_disagreement
   output$odds_ratio <- odds_ratio
   output$residual_error <- cellStats(abs(ref - comp), 'sum')
+  output$true_infected <- positives_in_reference
+  output$simulated_infected <- positives_in_comparison
+  output$infected_difference <- positives_in_comparison - positives_in_reference
   
   return(output)
 }

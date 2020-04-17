@@ -13,7 +13,7 @@
 #' @param generation_size how many accepted parameter sets should occur in each generation
 #' @param prior_number_of_observations the number of total observations from previous calibrations used to weight the posterior distributions (if this is a new calibration this value takes the form of a prior weight (0 - 1))
 #' @param params_to_estimate A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
-#' @param success_metric Choose which success metric to use for calibration. Choices are "number of locations", "number of locations and total distance", or "residual error". Default is "number of locations and total distance"
+#' @param success_metric Choose which success metric to use for calibration. Choices are "number of locations", "number of locations and total distance", "number of locations, number of infections, and total distance", or "residual error". Default is "number of locations and total distance"
 #' @param prior_means A vector of the means of your parameters you are estimating in order from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param prior_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
@@ -279,14 +279,14 @@ abc_calibration <- function(infected_years_file,
   current_particles <- 1
   proposed_particles <- 1
   current_bin <- 1
-
-  if (success_metric == "number of locations and total distance") {
-    num_metrics = 2
-  } else if (success_metric == "number of locations"){
-    num_metrics = 1
-  } else if (success_metric == "residual error") {
-    num_metrics = 1
-  }
+# 
+#   if (success_metric == "number of locations and total distance") {
+#     num_metrics = 2
+#   } else if (success_metric == "number of locations"){
+#     num_metrics = 1
+#   } else if (success_metric == "residual error") {
+#     num_metrics = 1
+#   }
   
   parameters_kept <- matrix(ncol = 10, nrow = num_particles)
   acc_rate <- 1
@@ -395,6 +395,10 @@ abc_calibration <- function(infected_years_file,
         }
       } else if (success_metric == "residual error") {
         if (residual_diff <= res_error_check) {
+          diff_checks <- TRUE
+        }
+      } else if (success_metric == "number of locations, number of infections, and total distance") {
+        if (locs_diff <= locs_check && dist_diff <= dist_check && num_difference <= inf_check) {
           diff_checks <- TRUE
         }
       } else {
