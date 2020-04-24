@@ -48,7 +48,7 @@ secondary_raster_checks <- function(x, x2) {
     r <- raster::stack(x)
     r2 <- raster::reclassify(r, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     if (!(raster::extent(r2) == raster::extent(r))) {
-      extent(r2) <- extent(r)
+      raster::extent(r2) <- raster::extent(r)
     }
     r <- r2
   }
