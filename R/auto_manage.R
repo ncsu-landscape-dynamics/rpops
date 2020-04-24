@@ -296,7 +296,13 @@ auto_manage <- function(infected_files, host_file, total_plants_file,
       }
     }
     print("start")
-    treatment <- treatmentAuto(rast = treatment_speci, rast2 = host, method = selection_method, priority = selection_priority, number_of_locations = num_cells, points = points, treatment_efficacy = treatment_efficacy, buffer_cells = buffer_cells, direction_first = direction_first)
+    treatment <- treatmentAuto(rasts = infected_speci, rasts2 = susceptible_speci, 
+                               method = selection_method, priority = selection_priority,
+                               number_of_locations = num_cells, points = points, 
+                               treatment_efficacy = treatment_efficacy, 
+                               buffer_cells = buffer_cells, direction_first = direction_first, 
+                               treatment_rank = treatment_rank, treatment_priority = treatment_priority)
+    
     treatment_dates <- paste(years[1], "-12", "-01", sep = "")
     treatment_maps <- list(as.matrix(treatment))
     management <- TRUE
