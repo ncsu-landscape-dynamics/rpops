@@ -23,6 +23,7 @@
 
 #include <map>
 #include <vector>
+#include <string>
 #include <functional>
 
 namespace pops {
@@ -35,6 +36,29 @@ enum class TreatmentApplication {
     Ratio,  ///< A ratio is applied to all treated rasters
     AllInfectedInCell  ///< All infected individuals are removed, rest by ratio
 };
+
+/**
+ * @brief Get treatment application enum from string
+
+ * Throws an std::invalid_argument exception if the value
+ * is not supported.
+ */
+inline TreatmentApplication treatment_app_enum_from_string(const std::string& text)
+{
+    std::map<std::string, TreatmentApplication> mapping{
+        {"ratio_to_all", TreatmentApplication::Ratio},
+        {"ratio", TreatmentApplication::Ratio},
+        {"all_infected_in_cell", TreatmentApplication::AllInfectedInCell},
+        {"all infected", TreatmentApplication::AllInfectedInCell}
+    };
+    try {
+        return mapping.at(text);
+    }
+    catch (const std::out_of_range&) {
+        throw std::invalid_argument("treatment_application_enum_from_string:"
+                                    " Invalid value '" + text + "' provided");
+    }
+}
 
 /*!
  * Abstract interface for treatment classes
