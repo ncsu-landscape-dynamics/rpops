@@ -65,7 +65,7 @@ pops_model(
 
 \item{infected}{matrix of infected hosts}
 
-\item{exposed}{vector of matrices of the exposed classes for}
+\item{exposed}{vector of matrices of the exposed class for use with "SEI" model type}
 
 \item{susceptible}{matrix of susceptible hosts}
 
@@ -144,6 +144,8 @@ pops_model(
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+
+\item{model_type_}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
 
 \item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
 }

@@ -22,7 +22,8 @@
 #' @param movements a matrix with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.
 #' @param use_movements this is a boolean to turn on use of the movement module.
 #' @param movements_dates this is a list of dates passeed as strings in the format 'YYYY-MM-DD'
-#' @param exposed vector of matrices of the exposed classes for 
+#' @param exposed vector of matrices of the exposed class for use with "SEI" model type
+#' @param model_type_ What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".
 #' 
 #' @return list of vector matrices of infected and suceptible hosts per simulated year
 #' @export
