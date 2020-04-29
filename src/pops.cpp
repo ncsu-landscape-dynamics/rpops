@@ -45,32 +45,32 @@ bool all_infected(IntegerMatrix susceptible)
   return allInfected;
 }
 
-inline StepUnit step_unit_enum_from_string(const string& text)
-{
-  std::map<string, StepUnit> mapping{
-    {"day", StepUnit::Day},
-    {"week", StepUnit::Week},
-    {"month", StepUnit::Month}
-  };
-  try {
-    return mapping.at(text);
-  }
-  catch (const std::out_of_range&) {
-    throw std::invalid_argument("step_unit_enum_from_string:"
-                                  " Invalid value '" + text +"' provided");
-  }
-}
+// inline StepUnit step_unit_enum_from_string(const string& text)
+// {
+//   std::map<string, StepUnit> mapping{
+//     {"day", StepUnit::Day},
+//     {"week", StepUnit::Week},
+//     {"month", StepUnit::Month}
+//   };
+//   try {
+//     return mapping.at(text);
+//   }
+//   catch (const std::out_of_range&) {
+//     throw std::invalid_argument("step_unit_enum_from_string:"
+//                                   " Invalid value '" + text +"' provided");
+//   }
+// }
 
-TreatmentApplication treatment_application_enum_from_string(const std::string& text)
-{
-  if (text == "ratio")
-    return TreatmentApplication::Ratio;
-  else if (text == "all infected")
-    return TreatmentApplication::AllInfectedInCell;
-  else
-    throw std::invalid_argument("treatment_application_enum_from_string: Invalid"
-                                  " value '" + text +"' provided");
-}
+// TreatmentApplication treatment_application_enum_from_string(const std::string& text)
+// {
+//   if (text == "ratio")
+//     return TreatmentApplication::Ratio;
+//   else if (text == "all infected")
+//     return TreatmentApplication::AllInfectedInCell;
+//   else
+//     throw std::invalid_argument("treatment_application_enum_from_string: Invalid"
+//                                   " value '" + text +"' provided");
+// }
 
 
 template<int... Indices>
@@ -121,6 +121,7 @@ auto to_array(Tuple&& tuple)
 List pops_model(int random_seed, 
                 bool use_lethal_temperature, double lethal_temperature, int lethal_temperature_month,
                 IntegerMatrix infected,
+                std::vector<IntegerMatrix> exposed,
                 IntegerMatrix susceptible,
                 IntegerMatrix total_plants,
                 bool mortality_on,
@@ -141,19 +142,22 @@ List pops_model(int random_seed,
                 int season_month_start = 1, int season_month_end = 12,
                 std::string start_date = "2018-01-01", std::string end_date = "2018-12-31",
                 std::string treatment_method = "ratio",
-                std::string natural_kernel_type = "cauchy", std::string anthropogenic_kernel_type = "cauchy", 
+                std::string natural_kernel_type = "cauchy", 
+                std::string anthropogenic_kernel_type = "cauchy", 
                 bool use_anthropogenic_kernel = false, double percent_natural_dispersal = 0.0,
                 double natural_distance_scale = 21, double anthropogenic_distance_scale = 0.0, 
                 std::string natural_dir = "NONE", double natural_kappa = 0,
                 std::string anthropogenic_dir = "NONE", double anthropogenic_kappa = 0,
-                std::string output_frequency = "year"
+                std::string output_frequency = "year", std::string model_type_ = "SI",
+                int latency_period = 0
 )
 {
   
   std::vector<std::tuple<int, int>> outside_dispersers;
   DispersalKernelType natural_dispersal_kernel_type = kernel_type_from_string(natural_kernel_type);
   DispersalKernelType anthropogenic_dispersal_kernel_type = kernel_type_from_string(anthropogenic_kernel_type);
-  TreatmentApplication treatment_application = treatment_application_enum_from_string(treatment_method);
+  TreatmentApplication treatment_application = treatment_app_enum_from_string(treatment_method);
+  ModelType model_type = model_type_from_string(model_type_);
   pops::Date dd_start(start_date);
   pops::Date dd_end(end_date);
   Direction natural_direction = direction_from_string(natural_dir);
@@ -281,7 +285,7 @@ List pops_model(int random_seed,
         simulation.generate(dispersers, infected, weather, weather_coefficient[current_index], reproductive_rate);
         total_dispersers += dispersers;
         // dispersers_vector.push_back(Rcpp::clone(dispersers));
-        simulation.disperse(dispersers, susceptible, infected, mortality_tracker, total_plants,
+        simulation.disperse_and_infect(current_index, dispersers, susceptible, exposed, infected, mortality_tracker, total_plants,
                             outside_dispersers, weather, weather_coefficient[current_index], kernel);
         if (use_movements) {
           last_index = simulation.movement(infected, susceptible, mortality_tracker, total_plants, current_index, last_index, movements, movement_schedule);
@@ -322,6 +326,7 @@ List pops_model(int random_seed,
 
   return List::create(
     _["infected"] = infected_vector,
+    _["exposed"] = exposed,
     _["susceptible"] = susceptible_vector,
     _["resistant"] = resistant_vector,
     _["mortality"] = mortality_vector,
