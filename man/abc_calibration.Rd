@@ -21,6 +21,8 @@ abc_calibration(
   temperature_coefficient_file = "",
   precip = FALSE,
   precipitation_coefficient_file = "",
+  model_type = "SI",
+  latency_period = 0,
   time_step = "month",
   season_month_start = 1,
   season_month_end = 12,
@@ -85,6 +87,10 @@ abc_calibration(
 
 \item{precipitation_coefficient_file}{path to raster file with precipitation coefficient data for the timestep and number of years specified}
 
+\item{model_type}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
+
+\item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
+
 \item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
 
 \item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)}
@@ -135,7 +141,7 @@ abc_calibration(
 
 \item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
 
-\item{success_metric}{Choose which success metric to use for calibration. Choices are "number of locations", "number of locations and total distance", or "residual error". Default is "number of locations and total distance"}
+\item{success_metric}{Choose which success metric to use for calibration. Choices are "number of locations", "number of locations and total distance", "number of locations, number of infections, and total distance", or "residual error". Default is "number of locations and total distance"}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
 
