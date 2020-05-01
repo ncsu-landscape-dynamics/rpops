@@ -45,34 +45,6 @@ bool all_infected(IntegerMatrix susceptible)
   return allInfected;
 }
 
-// inline StepUnit step_unit_enum_from_string(const string& text)
-// {
-//   std::map<string, StepUnit> mapping{
-//     {"day", StepUnit::Day},
-//     {"week", StepUnit::Week},
-//     {"month", StepUnit::Month}
-//   };
-//   try {
-//     return mapping.at(text);
-//   }
-//   catch (const std::out_of_range&) {
-//     throw std::invalid_argument("step_unit_enum_from_string:"
-//                                   " Invalid value '" + text +"' provided");
-//   }
-// }
-
-// TreatmentApplication treatment_application_enum_from_string(const std::string& text)
-// {
-//   if (text == "ratio")
-//     return TreatmentApplication::Ratio;
-//   else if (text == "all infected")
-//     return TreatmentApplication::AllInfectedInCell;
-//   else
-//     throw std::invalid_argument("treatment_application_enum_from_string: Invalid"
-//                                   " value '" + text +"' provided");
-// }
-
-
 template<int... Indices>
 struct indices {
   using next = indices<Indices..., sizeof...(Indices)>;
@@ -164,7 +136,7 @@ List pops_model(int random_seed,
   Direction anthropogenic_direction = direction_from_string(anthropogenic_dir);
   Season season(season_month_start, season_month_end);
   pops::Date dd_current(dd_start);
-  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, num_rows, num_cols);
+  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, num_rows, num_cols, model_type, latency_period);
   RadialDispersalKernel natural_radial_dispersal_kernel(ew_res, ns_res, natural_dispersal_kernel_type, natural_distance_scale, natural_direction, natural_kappa);
   RadialDispersalKernel anthropogenic_radial_dispersal_kernel(ew_res, ns_res, anthropogenic_dispersal_kernel_type, anthropogenic_distance_scale, anthropogenic_direction, anthropogenic_kappa);
   UniformDispersalKernel uniform_kernel(num_rows, num_cols);
@@ -306,6 +278,7 @@ List pops_model(int random_seed,
         resistant_vector.push_back(Rcpp::clone(resistant));
         total_host_vector.push_back(Rcpp::clone(total_plants));
         dispersers_vector.push_back(Rcpp::clone(total_dispersers));
+        // exposed_vector = Rcpp::clone(exposed);
         
         num_infected = sum_of_infected(infected);
         number_infected.push_back(num_infected);
