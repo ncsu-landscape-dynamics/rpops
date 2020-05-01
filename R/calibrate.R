@@ -35,29 +35,57 @@
 #' \dontrun{
 #' }
 
-calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA,
-                      number_of_observations, prior_number_of_observations,
+calibrate <- function(infected_years_file, 
+                      num_iterations, 
+                      number_of_cores = NA,
+                      number_of_observations, 
+                      prior_number_of_observations,
                       prior_reproductive_rate,
                       prior_natural_distance_scale,
                       prior_percent_natural_dispersal = c(1.0,0), 
                       prior_anthropogenic_distance_scale = c(1000,0),
-                      infected_file, host_file, total_plants_file, 
-                      temp = FALSE, temperature_coefficient_file = "", 
-                      precip = FALSE, precipitation_coefficient_file = "", 
+                      infected_file, 
+                      host_file, 
+                      total_plants_file, 
+                      temp = FALSE, 
+                      temperature_coefficient_file = "", 
+                      precip = FALSE, 
+                      precipitation_coefficient_file = "", 
+                      model_type = "SI", 
+                      latency_period = 0,
                       time_step = "month", 
-                      season_month_start = 1, season_month_end = 12, 
-                      start_date = '2008-01-01', end_date = '2008-12-31', 
-                      use_lethal_temperature = FALSE, temperature_file = "",
-                      lethal_temperature = -12.87, lethal_temperature_month = 1,
-                      mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                      management = FALSE, treatment_dates = c(0), treatments_file = "",
+                      season_month_start = 1,
+                      season_month_end = 12, 
+                      start_date = '2008-01-01', 
+                      end_date = '2008-12-31', 
+                      use_lethal_temperature = FALSE, 
+                      temperature_file = "",
+                      lethal_temperature = -12.87, 
+                      lethal_temperature_month = 1,
+                      mortality_on = FALSE, 
+                      mortality_rate = 0, mortality_time_lag = 0, 
+                      management = FALSE, 
+                      treatment_dates = c(0), treatments_file = "",
                       treatment_method = "ratio",
-                      natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-                      natural_dir = "NONE", natural_kappa = 0, 
-                      anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-                      pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                      mask = NULL, success_metric = "quantity", output_frequency = "year",
-                      movements_file = "", use_movements = FALSE) { 
+                      natural_kernel_type = "cauchy", 
+                      anthropogenic_kernel_type = "cauchy",
+                      natural_dir = "NONE", 
+                      natural_kappa = 0, 
+                      anthropogenic_dir = "NONE", 
+                      anthropogenic_kappa = 0,
+                      pesticide_duration = c(0), 
+                      pesticide_efficacy = 1.0,
+                      mask = NULL, 
+                      success_metric = "quantity", 
+                      output_frequency = "year",
+                      movements_file = "", 
+                      use_movements = FALSE) { 
+  
+  if (model_type == "SEI" && latency_period <= 0) {
+    return("Model type is set to SEI but the latency period is less than 1")
+  } else if (model_type == "SI" && latency_period > 0) {
+    latency_period <- 0
+  } 
   
   metric_check <- metric_checks(success_metric)
   if (metric_check$checks_passed){
@@ -271,6 +299,13 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
   mortality_tracker <- as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
+  exposed <- list(mortality_tracker)
+  
+  if (latency_period > 1){
+    for (ex in 2:(latency_period + 1)) {
+      exposed[[ex]] <- mortality_tracker
+    }
+  }
   
   ## Load observed data on occurence
   infection_years <- stack(infected_years_file)
@@ -292,8 +327,10 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
     random_seed <- round(runif(1, 1, 1000000))
     data <- PoPS::pops_model(random_seed = random_seed, 
                              use_lethal_temperature = use_lethal_temperature, 
-                             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                             lethal_temperature = lethal_temperature, 
+                             lethal_temperature_month = lethal_temperature_month,
                              infected = infected,
+                             exposed = exposed,
                              susceptible = susceptible,
                              total_plants = total_plants,
                              mortality_on = mortality_on,
@@ -303,23 +340,38 @@ calibrate <- function(infected_years_file, num_iterations,  number_of_cores = NA
                              treatment_dates = treatment_dates,
                              pesticide_duration = pesticide_duration,
                              resistant = resistant,
-                             use_movements = use_movements, movements = movements,
+                             use_movements = use_movements, 
+                             movements = movements,
                              movements_dates = movements_dates,
                              weather = weather,
                              temperature = temperature,
                              weather_coefficient = weather_coefficient,
-                             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                             time_step = time_step, reproductive_rate = reproductive_rate,
-                             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                             season_month_start = season_month_start, season_month_end = season_month_end,
-                             start_date = start_date, end_date = end_date,
+                             ew_res = ew_res, 
+                             ns_res = ns_res, 
+                             num_rows = num_rows, 
+                             num_cols = num_cols,
+                             time_step = time_step, 
+                             reproductive_rate = reproductive_rate,
+                             mortality_rate = mortality_rate, 
+                             mortality_time_lag = mortality_time_lag,
+                             season_month_start = season_month_start, 
+                             season_month_end = season_month_end,
+                             start_date = start_date, 
+                             end_date = end_date,
                              treatment_method = treatment_method,
-                             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
-                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
-                             natural_dir = natural_dir, natural_kappa = natural_kappa,
-                             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
-                             output_frequency = output_frequency
+                             natural_kernel_type = natural_kernel_type, 
+                             anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                             use_anthropogenic_kernel = use_anthropogenic_kernel, 
+                             percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, 
+                             anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                             natural_dir = natural_dir, 
+                             natural_kappa = natural_kappa,
+                             anthropogenic_dir = anthropogenic_dir, 
+                             anthropogenic_kappa = anthropogenic_kappa,
+                             output_frequency = output_frequency,
+                             model_type_ = model_type,
+                             latency_period = latency_period
     )
     return(data)
   }
