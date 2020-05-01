@@ -104,20 +104,20 @@ test_that("Infected results return initial infected if reproductive rate is set 
   
   expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0)$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
   expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, use_lethal_temperature = TRUE, temperature_file = system.file("extdata", "simple2x2", "critical_temp.tif", package = "PoPS"), reproductive_rate = 0.0)$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
-  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = coefficient_file)[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
-  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, precip = TRUE, precipitation_coefficient_file = coefficient_file)[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
-  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file)[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
-  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, use_lethal_temperature = TRUE, temperature_file = system.file("extdata", "simple2x2", "critical_temp.tif", package = "PoPS"), temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file)[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
+  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = coefficient_file)$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
+  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, precip = TRUE, precipitation_coefficient_file = coefficient_file)$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
+  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file)$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
+  expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, use_lethal_temperature = TRUE, temperature_file = system.file("extdata", "simple2x2", "critical_temp.tif", package = "PoPS"), temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file)$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
 
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, use_lethal_temperature = TRUE, temperature_file = system.file("extdata", "simple2x2", "critical_temp.tif", package = "PoPS"), temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, use_lethal_temperature = TRUE, temperature_file = system.file("extdata", "simple2x2", "critical_temp.tif", package = "PoPS"), temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_weeks.tif", package = "PoPS"), time_step = "week")$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
   # 
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"))[[1]][[1]], raster::as.matrix(raster::raster(infected_file, time_step = "day")))
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"))[[1]][[1]], raster::as.matrix(raster::raster(infected_file, time_step = "day")))
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), time_step = "day")[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
-  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, use_lethal_temperature = TRUE, temperature_file = system.file("extdata", "simple2x2", "critical_temp.tif", package = "PoPS"), temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), time_step = "day")[[1]][[1]], raster::as.matrix(raster::raster(infected_file)))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"))$infected[[1]], raster::as.matrix(raster::raster(infected_file, time_step = "day")))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"))$infected[[1]], raster::as.matrix(raster::raster(infected_file, time_step = "day")))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), time_step = "day")$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
+  # expect_equal(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.0, use_lethal_temperature = TRUE, temperature_file = system.file("extdata", "simple2x2", "critical_temp.tif", package = "PoPS"), temp = TRUE, temperature_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), precip = TRUE, precipitation_coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient_days.tif", package = "PoPS"), time_step = "day")$infected[[1]], raster::as.matrix(raster::raster(infected_file)))
 
 })
 
@@ -177,8 +177,8 @@ test_that("Infected results are greater than initial infected", {
   start_date = "2008-01-01"
   end_date = "2010-12-31"
   
-  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file)[[1]][[1]] >= raster::as.matrix(raster::raster(infected_file))), TRUE)
-  expect_equal(all(pops(infected_file = infected_file, host_file = system.file("extdata", "simple2x2", "total_plants_host_greater_than_infected.tif", package = "PoPS"), total_plants_file = host_file)[[1]][[1]] >= raster::as.matrix(raster::raster(infected_file))), TRUE)
+  expect_equal(all(pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file)$infected[[1]] >= raster::as.matrix(raster::raster(infected_file))), TRUE)
+  expect_equal(all(pops(infected_file = infected_file, host_file = system.file("extdata", "simple2x2", "total_plants_host_greater_than_infected.tif", package = "PoPS"), total_plants_file = host_file)$infected[[1]] >= raster::as.matrix(raster::raster(infected_file))), TRUE)
 
 })
 
@@ -192,16 +192,48 @@ test_that("Susceptibles are never negative", {
   
   data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
   
-  expect_equal(all(data[[2]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(data[[2]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(data[[2]][[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data$susceptible[[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data$susceptible[[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data$susceptible[[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
 
   data <- pops(infected_file = infected_file, host_file = system.file("extdata", "simple2x2", "total_plants_host_greater_than_infected.tif", package = "PoPS"), total_plants_file = host_file, reproductive_rate = 0.5, random_seed = 42, start_date = start_date, end_date = end_date)
   
-  expect_equal(all(data[[2]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(data[[2]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(data[[2]][[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data$susceptible[[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data$susceptible[[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data$susceptible[[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
 
+})
+
+test_that("SEI model works as intended", {
+  infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+  temperature_file = system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
+  start_date = "2008-01-01"
+  end_date = "2008-12-31"
+  model_type <- "SI"
+  latency_period <- 2
+  time_step <- "month"
+  output_frequency <- "month"
+  treatment_dates <- "2008-02-25"
+  
+  
+  data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date, model_type = model_type, latency_period = latency_period, output_frequency = output_frequency, time_step = time_step, treatment_dates = treatment_dates)
+  model_type <- "SEI"
+  data2 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date, model_type = model_type, latency_period = latency_period, output_frequency = output_frequency, time_step = time_step, treatment_dates = treatment_dates)
+  
+  expect_equal(all(data2$exposed[[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data2$exposed[[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data2$exposed[[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  
+  expect_equal(all(data$susceptible[[1]] <= data$susceptible[[1]]), TRUE)
+  expect_equal(all(data$susceptible[[2]] <= data$susceptible[[1]]), TRUE)
+  expect_equal(all(data$susceptible[[3]] <= data$susceptible[[1]]), TRUE)
+  
+  expect_equal(all(data$infected[[1]] >= data$infected[[1]]), TRUE)
+  expect_equal(all(data$infected[[2]] >= data$infected[[1]]), TRUE)
+  expect_equal(all(data$infected[[3]] >= data$infected[[1]]), TRUE)
+  
 })
 
 test_that("Infected results with weather are less than those without weather", {
@@ -217,17 +249,17 @@ test_that("Infected results with weather are less than those without weather", {
   data_precip <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
   data_weather <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, temp = TRUE, temperature_coefficient_file = coefficient_file, precip = TRUE, precipitation_coefficient_file = coefficient_file, reproductive_rate = 0.4, random_seed = 42, start_date = start_date, end_date = end_date)
   
-  expect_gte(sum(data[[1]][[1]]), sum(data_temp[[1]][[1]]))
-  expect_gte(sum(data[[1]][[2]]), sum(data_temp[[1]][[2]]))
-  expect_gte(sum(data[[1]][[3]]), sum(data_temp[[1]][[3]]))
+  expect_gte(sum(data$infected[[1]]), sum(data_temp$infected[[1]]))
+  expect_gte(sum(data$infected[[2]]), sum(data_temp$infected[[2]]))
+  expect_gte(sum(data$infected[[3]]), sum(data_temp$infected[[3]]))
 
-  expect_gte(sum(data[[1]][[1]]), sum(data_precip[[1]][[1]]))
-  expect_gte(sum(data[[1]][[2]]), sum(data_precip[[1]][[2]]))
-  expect_gte(sum(data[[1]][[3]]), sum(data_precip[[1]][[3]]))
+  expect_gte(sum(data$infected[[1]]), sum(data_precip$infected[[1]]))
+  expect_gte(sum(data$infected[[2]]), sum(data_precip$infected[[2]]))
+  expect_gte(sum(data$infected[[3]]), sum(data_precip$infected[[3]]))
 
-  expect_gte(sum(data[[1]][[1]]), sum(data_weather[[1]][[1]]))
-  expect_gte(sum(data[[1]][[2]]), sum(data_weather[[1]][[2]]))
-  expect_gte(sum(data[[1]][[3]]), sum(data_weather[[1]][[3]]))
+  expect_gte(sum(data$infected[[1]]), sum(data_weather$infected[[1]]))
+  expect_gte(sum(data$infected[[2]]), sum(data_weather$infected[[2]]))
+  expect_gte(sum(data$infected[[3]]), sum(data_weather$infected[[3]]))
 
 })
 
@@ -242,8 +274,8 @@ test_that("Infected results are greater with same parameters for weekly spread v
   data_week <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "week", random_seed = 42, start_date = start_date, end_date = end_date)
   data_month <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.2, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
   
-  expect_equal(all(data_week[[1]][[1]] >= data_month[[1]][[1]]), TRUE)
-  expect_equal(all(data_week[[1]][[2]] >= data_month[[1]][[2]]), TRUE)
+  expect_equal(all(data_week$infected[[1]] >= data_month$infected[[1]]), TRUE)
+  expect_equal(all(data_week$infected[[2]] >= data_month$infected[[2]]), TRUE)
 
 })
 
@@ -260,9 +292,9 @@ test_that("Infected results are greater with same parameters for daily spread vs
   data_week <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.1, time_step = "week", random_seed = 42, start_date = start_date, end_date = end_date)
   data_month <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.1, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
   
-  expect_equal(all(data_day[[1]][[1]] >= data_month[[1]][[1]]), TRUE)
+  expect_equal(all(data_day$infected[[1]] >= data_month$infected[[1]]), TRUE)
 
-  expect_equal(all(data_day[[1]][[1]] >= data_week[[1]][[1]]), TRUE)
+  expect_equal(all(data_day$infected[[1]] >= data_week$infected[[1]]), TRUE)
 })
 
 test_that("Infected results are greater without treatment than with treatment",{
@@ -276,8 +308,8 @@ test_that("Infected results are greater without treatment than with treatment",{
   data <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)
   data_treat <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, management = TRUE, treatment_dates = treatment_dates, treatments_file = treatments_file, reproductive_rate = 0.8, random_seed = 44, start_date = start_date, end_date = end_date)
   
-  expect_equal(all(data[[1]][[1]] >= data_treat[[1]][[1]]), TRUE)
-  expect_equal(all(data[[1]][[2]] >= data_treat[[1]][[2]]), TRUE)
+  expect_equal(all(data$infected[[1]] >= data_treat$infected[[1]]), TRUE)
+  expect_equal(all(data$infected[[2]] >= data_treat$infected[[2]]), TRUE)
 })
 
 test_that("Infected results are greater with higher reproductive rate", {
@@ -292,13 +324,13 @@ test_that("Infected results are greater with higher reproductive rate", {
   data_025 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.25, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
   data_010 <- pops(infected_file = infected_file, host_file = host_file, total_plants_file = host_file, reproductive_rate = 0.10, time_step = "month", random_seed = 42, start_date = start_date, end_date = end_date)
   
-  expect_gte(sum(data_1[[1]][[1]]), sum(data_075[[1]][[1]]))
+  expect_gte(sum(data_1$infected[[1]]), sum(data_075$infected[[1]]))
 
-  expect_gte(sum(data_050[[1]][[1]]), sum(data_025[[1]][[1]]))
-  expect_gte(sum(data_050[[1]][[2]]), sum(data_025[[1]][[2]]))
+  expect_gte(sum(data_050$infected[[1]]), sum(data_025$infected[[1]]))
+  expect_gte(sum(data_050$infected[[2]]), sum(data_025$infected[[2]]))
 
-  expect_gte(sum(data_025[[1]][[1]]), sum(data_010[[1]][[1]]))
-  expect_gte(sum(data_025[[1]][[2]]), sum(data_010[[1]][[2]]))
+  expect_gte(sum(data_025$infected[[1]]), sum(data_010$infected[[1]]))
+  expect_gte(sum(data_025$infected[[2]]), sum(data_010$infected[[2]]))
 
 })
 

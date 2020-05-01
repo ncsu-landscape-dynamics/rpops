@@ -43,10 +43,14 @@ test_that("Multirun model outputs work", {
   use_movements <- FALSE
   num_iterations <- 5
   number_of_cores <- 2
+  model_type <- "SI"
+  latency_period <- 0
   
   data <- PoPS::pops_multirun(infected_file, host_file, total_plants_file, 
                               temp, temperature_coefficient_file, 
                               precip, precipitation_coefficient_file, 
+                              model_type = model_type,
+                              latency_period = latency_period,
                               time_step, reproductive_rate,
                               season_month_start, season_month_end, 
                               start_date, end_date, 
