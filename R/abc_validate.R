@@ -68,6 +68,8 @@ abc_validate <- function(infected_years_file,
                      temperature_coefficient_file = "", 
                      precip = FALSE, 
                      precipitation_coefficient_file = "", 
+                     model_type = "SI",
+                     latency_period = 0,
                      time_step = "month",
                      season_month_start = 1, 
                      season_month_end = 12, 
@@ -97,6 +99,12 @@ abc_validate <- function(infected_years_file,
                      output_frequency = "year",
                      movements_file = "", 
                      use_movements = FALSE){ 
+  
+  if (model_type == "SEI" && latency_period <= 0) {
+    return("Model type is set to SEI but the latency period is less than 1")
+  } else if (model_type == "SI" && latency_period > 0) {
+    latency_period <- 0
+  } 
   
   metric_check <- metric_checks(success_metric)
   if (metric_check$checks_passed){
@@ -266,6 +274,13 @@ abc_validate <- function(infected_years_file,
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
+  exposed <- list(mortality_tracker)
+  
+  if (latency_period > 1){
+    for (ex in 2:(latency_period + 1)) {
+      exposed[[ex]] <- mortality_tracker
+    }
+  }
   
   use_anthropogenic_kernel <- TRUE
   
@@ -323,8 +338,10 @@ abc_validate <- function(infected_years_file,
     
     data <- PoPS::pops_model(random_seed = random_seed, 
                              use_lethal_temperature = use_lethal_temperature, 
-                             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                             lethal_temperature = lethal_temperature, 
+                             lethal_temperature_month = lethal_temperature_month,
                              infected = infected,
+                             exposed = exposed,
                              susceptible = susceptible,
                              total_plants = total_plants,
                              mortality_on = mortality_on,
@@ -334,23 +351,36 @@ abc_validate <- function(infected_years_file,
                              treatment_dates = treatment_dates,
                              pesticide_duration = pesticide_duration,
                              resistant = resistant,
-                             use_movements = use_movements, movements = movements,
+                             use_movements = use_movements, 
+                             movements = movements,
                              movements_dates = movements_dates,
                              weather = weather,
                              temperature = temperature,
                              weather_coefficient = weather_coefficient,
-                             ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                             time_step = time_step, reproductive_rate = reproductive_rate,
-                             mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                             season_month_start = season_month_start, season_month_end = season_month_end,
+                             ew_res = ew_res, 
+                             ns_res = ns_res, 
+                             num_rows = num_rows, 
+                             num_cols = num_cols,
+                             time_step = time_step, 
+                             reproductive_rate = reproductive_rate,
+                             mortality_rate = mortality_rate, 
+                             mortality_time_lag = mortality_time_lag,
+                             season_month_start = season_month_start, 
+                             season_month_end = season_month_end,
                              start_date = start_date, end_date = end_date,
                              treatment_method = treatment_method,
-                             natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                             use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
-                             natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                             natural_kernel_type = natural_kernel_type, 
+                             anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                             use_anthropogenic_kernel = use_anthropogenic_kernel, 
+                             percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, 
+                             anthropogenic_distance_scale = anthropogenic_distance_scale, 
                              natural_dir = natural_dir, natural_kappa = natural_kappa,
-                             anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
-                             output_frequency = output_frequency
+                             anthropogenic_dir = anthropogenic_dir, 
+                             anthropogenic_kappa = anthropogenic_kappa,
+                             output_frequency = output_frequency,
+                             model_type_ = model_type,
+                             latency_period = latency_period
     )
     
     comp_year <- raster(infected_file)
