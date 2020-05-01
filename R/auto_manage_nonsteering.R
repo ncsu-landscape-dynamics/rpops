@@ -54,30 +54,66 @@
 #' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
 #' }
 #' 
-auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file, 
-                                    temp = FALSE, temperature_coefficient_file = "", 
-                                    precip = FALSE, precipitation_coefficient_file = "", 
-                                    time_step = "month", reproductive_rate = 3.0,
-                                    season_month_start = 1, season_month_end = 12, 
-                                    start_date = '2008-01-01', end_date = '2008-12-31', 
-                                    use_lethal_temperature = FALSE, temperature_file = "",
-                                    lethal_temperature = -12.87, lethal_temperature_month = 1,
-                                    mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                                    management = FALSE, treatment_dates = c(0), treatments_file = "",
+auto_manage_nonsteering <- function(infected_files, 
+                                    host_file, 
+                                    total_plants_file, 
+                                    temp = FALSE, 
+                                    temperature_coefficient_file = "", 
+                                    precip = FALSE, 
+                                    precipitation_coefficient_file = "", 
+                                    model_type = "SI", 
+                                    latency_period = 0,
+                                    time_step = "month", 
+                                    reproductive_rate = 3.0,
+                                    season_month_start = 1, 
+                                    season_month_end = 12, 
+                                    start_date = '2008-01-01', 
+                                    end_date = '2008-12-31', 
+                                    use_lethal_temperature = FALSE, 
+                                    temperature_file = "",
+                                    lethal_temperature = -12.87, 
+                                    lethal_temperature_month = 1,
+                                    mortality_on = FALSE, 
+                                    mortality_rate = 0, 
+                                    mortality_time_lag = 0, 
+                                    management = FALSE, 
+                                    treatment_dates = c(0), 
+                                    treatments_file = "",
                                     treatment_method = "ratio",
                                     percent_natural_dispersal = 1.0,
-                                    natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-                                    natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
-                                    natural_dir = "NONE", natural_kappa = 0, 
-                                    anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-                                    num_iterations = 100, number_of_cores = NA,
-                                    pesticide_duration = 0, pesticide_efficacy = 1.0,
-                                    random_seed = NULL, output_frequency = "year",
-                                    movements_file = "", use_movements = FALSE,
-                                    cost_per_meter_sq = 1.37, budget = 1500000, buffer = 600,
-                                    treatment_priority = "equal", treatment_rank = c(1), 
-                                    selection_method = 'Points', selection_priority = 'group size',
-                                    points = points, treatment_efficacy = 1, species = c('species1'), direction_first = TRUE) { 
+                                    natural_kernel_type = "cauchy", 
+                                    anthropogenic_kernel_type = "cauchy",
+                                    natural_distance_scale = 21, 
+                                    anthropogenic_distance_scale = 0.0,
+                                    natural_dir = "NONE", 
+                                    natural_kappa = 0, 
+                                    anthropogenic_dir = "NONE", 
+                                    anthropogenic_kappa = 0,
+                                    num_iterations = 100, 
+                                    number_of_cores = NA,
+                                    pesticide_duration = 0, 
+                                    pesticide_efficacy = 1.0,
+                                    random_seed = NULL, 
+                                    output_frequency = "year",
+                                    movements_file = "", 
+                                    use_movements = FALSE,
+                                    cost_per_meter_sq = 1.37, 
+                                    budget = 1500000, 
+                                    buffer = 600,
+                                    treatment_priority = "equal",
+                                    treatment_rank = c(1), 
+                                    selection_method = 'Points', 
+                                    selection_priority = 'group size',
+                                    points = points, 
+                                    treatment_efficacy = 1, 
+                                    species = c('species1'), 
+                                    direction_first = TRUE) { 
+  
+  if (model_type == "SEI" && latency_period <= 0) {
+    return("Model type is set to SEI but the latency period is less than 1")
+  } else if (model_type == "SI" && latency_period > 0) {
+    latency_period <- 0
+  } 
   
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
@@ -262,6 +298,20 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
+  exposed <- list(mortality_tracker)
+  
+  if (latency_period > 1){
+    for (ex in 2:(latency_period + 1)) {
+      exposed[[ex]] <- mortality_tracker
+    }
+  }
+  exposed_list <- list(exposed)
+  
+  if (length(infected_files) > 1) {
+    for (z in 2:length(infected_files)) {
+      exposed_list[[z]] <- exposed
+    }
+  }
   
   years <- seq(year(start_date), year(end_date), 1)
   
@@ -341,6 +391,7 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
                            lethal_temperature = lethal_temperature, 
                            lethal_temperature_month = lethal_temperature_month,
                            infected = infected_species[[i]],
+                           exposed = exposed[[i]],
                            susceptible = susceptible_species[[i]],
                            total_plants = total_plants,
                            mortality_on = mortality_on,
@@ -379,7 +430,9 @@ auto_manage_nonsteering <- function(infected_files, host_file, total_plants_file
                            natural_kappa = natural_kappa[[i]],
                            anthropogenic_dir = anthropogenic_dir[[i]],
                            anthropogenic_kappa = anthropogenic_kappa[[i]],
-                           output_frequency = output_frequency
+                           output_frequency = output_frequency,
+                           model_type_ = model_type,
+                           latency_period = latency_period
         )
         
         infected_run <- raster::stack(lapply(1:length(data$infected), function(x) host))
