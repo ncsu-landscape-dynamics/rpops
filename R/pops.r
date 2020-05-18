@@ -43,6 +43,8 @@
 #' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
 #' @param movements_file this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.
 #' @param use_movements this is a boolean to turn on use of the movement module.
+#' @param latency_period How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.
+#' @param model_type What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints crs rowColFromCell
@@ -77,26 +79,54 @@
 #' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL, output_frequency = "yearly")
 #' }
 #' 
-pops <- function(infected_file, host_file, total_plants_file, 
-                 temp = FALSE, temperature_coefficient_file = "", 
-                 precip = FALSE, precipitation_coefficient_file = "", 
-                 time_step = "month", reproductive_rate = 3.0,
-                 season_month_start = 1, season_month_end = 12, 
-                 start_date = '2008-01-01', end_date = '2008-12-31', 
-                 use_lethal_temperature = FALSE, temperature_file = "",
-                 lethal_temperature = -12.87, lethal_temperature_month = 1,
-                 mortality_on = FALSE, mortality_rate = 0, mortality_time_lag = 0, 
-                 management = FALSE, treatment_dates = c('2008-12-24'), treatments_file = "",
+pops <- function(infected_file, 
+                 host_file, 
+                 total_plants_file, 
+                 temp = FALSE, 
+                 temperature_coefficient_file = "", 
+                 precip = FALSE,
+                 precipitation_coefficient_file = "", 
+                 model_type = "SI", 
+                 latency_period = 0,
+                 time_step = "month",
+                 reproductive_rate = 3.0,
+                 season_month_start = 1, 
+                 season_month_end = 12, 
+                 start_date = '2008-01-01',
+                 end_date = '2008-12-31', 
+                 use_lethal_temperature = FALSE, 
+                 temperature_file = "",
+                 lethal_temperature = -12.87, 
+                 lethal_temperature_month = 1,
+                 mortality_on = FALSE, 
+                 mortality_rate = 0, 
+                 mortality_time_lag = 0, 
+                 management = FALSE, 
+                 treatment_dates = c('2008-12-24'), 
+                 treatments_file = "",
                  treatment_method = "ratio",
                  percent_natural_dispersal = 1.0,
-                 natural_kernel_type = "cauchy", anthropogenic_kernel_type = "cauchy",
-                 natural_distance_scale = 21, anthropogenic_distance_scale = 0.0,
-                 natural_dir = "NONE", natural_kappa = 0, 
-                 anthropogenic_dir = "NONE", anthropogenic_kappa = 0,
-                 pesticide_duration = c(0), pesticide_efficacy = 1.0,
-                 random_seed = NULL, output_frequency = "year", 
-                 movements_file = "", use_movements = FALSE){ 
-
+                 natural_kernel_type = "cauchy",
+                 anthropogenic_kernel_type = "cauchy",
+                 natural_distance_scale = 21, 
+                 anthropogenic_distance_scale = 0.0,
+                 natural_dir = "NONE", 
+                 natural_kappa = 0, 
+                 anthropogenic_dir = "NONE", 
+                 anthropogenic_kappa = 0,
+                 pesticide_duration = c(0), 
+                 pesticide_efficacy = 1.0,
+                 random_seed = NULL, 
+                 output_frequency = "year", 
+                 movements_file = "", 
+                 use_movements = FALSE){ 
+  
+  if (model_type == "SEI" && latency_period <= 0) {
+    return("Model type is set to SEI but the latency period is less than 1")
+  } else if (model_type == "SI" && latency_period > 0) {
+    latency_period <- 0
+  } 
+  
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
     return(treatment_metric_check$failed_check)
@@ -266,6 +296,13 @@ pops <- function(infected_file, host_file, total_plants_file,
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
+  exposed <- list(mortality_tracker)
+  
+  if (latency_period > 1){
+    for (ex in 2:(latency_period + 1)) {
+      exposed[[ex]] <- mortality_tracker
+    }
+  }
   
   reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = 1)
   if (reproductive_rate_check$checks_passed) {
@@ -297,8 +334,10 @@ pops <- function(infected_file, host_file, total_plants_file,
   
   data <- PoPS::pops_model(random_seed = random_seed, 
                      use_lethal_temperature = use_lethal_temperature, 
-                     lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                     lethal_temperature = lethal_temperature, 
+                     lethal_temperature_month = lethal_temperature_month,
                      infected = infected,
+                     exposed = exposed,
                      susceptible = susceptible,
                      total_plants = total_plants,
                      mortality_on = mortality_on,
@@ -308,23 +347,38 @@ pops <- function(infected_file, host_file, total_plants_file,
                      treatment_dates = treatment_dates,
                      pesticide_duration = pesticide_duration,
                      resistant = resistant,
-                     use_movements = use_movements, movements = movements,
+                     use_movements = use_movements, 
+                     movements = movements,
                      movements_dates = movements_dates,
                      weather = weather,
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,
-                     ew_res = ew_res, ns_res = ns_res, num_rows = num_rows, num_cols = num_cols,
-                     time_step = time_step, reproductive_rate = reproductive_rate,
-                     mortality_rate = mortality_rate, mortality_time_lag = mortality_time_lag,
-                     season_month_start = season_month_start, season_month_end = season_month_end,
-                     start_date = start_date, end_date = end_date,
+                     ew_res = ew_res, 
+                     ns_res = ns_res, 
+                     num_rows = num_rows, 
+                     num_cols = num_cols,
+                     time_step = time_step, 
+                     reproductive_rate = reproductive_rate,
+                     mortality_rate = mortality_rate, 
+                     mortality_time_lag = mortality_time_lag,
+                     season_month_start = season_month_start, 
+                     season_month_end = season_month_end,
+                     start_date = start_date, 
+                     end_date = end_date,
                      treatment_method = treatment_method,
-                     natural_kernel_type = natural_kernel_type, anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                     use_anthropogenic_kernel = use_anthropogenic_kernel, percent_natural_dispersal = percent_natural_dispersal,
-                     natural_distance_scale = natural_distance_scale, anthropogenic_distance_scale = anthropogenic_distance_scale, 
-                     natural_dir = natural_dir, natural_kappa = natural_kappa,
-                     anthropogenic_dir = anthropogenic_dir, anthropogenic_kappa = anthropogenic_kappa,
-                     output_frequency = output_frequency
+                     natural_kernel_type = natural_kernel_type, 
+                     anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                     use_anthropogenic_kernel = use_anthropogenic_kernel, 
+                     percent_natural_dispersal = percent_natural_dispersal,
+                     natural_distance_scale = natural_distance_scale, 
+                     anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                     natural_dir = natural_dir, 
+                     natural_kappa = natural_kappa,
+                     anthropogenic_dir = anthropogenic_dir, 
+                     anthropogenic_kappa = anthropogenic_kappa,
+                     output_frequency = output_frequency, 
+                     model_type_ = model_type,
+                     latency_period = latency_period
   )
   
   return(data)

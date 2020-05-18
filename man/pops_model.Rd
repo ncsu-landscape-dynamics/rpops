@@ -10,6 +10,7 @@ pops_model(
   lethal_temperature,
   lethal_temperature_month,
   infected,
+  exposed,
   susceptible,
   total_plants,
   mortality_on,
@@ -48,7 +49,9 @@ pops_model(
   natural_kappa = 0,
   anthropogenic_dir = "NONE",
   anthropogenic_kappa = 0,
-  output_frequency = "year"
+  output_frequency = "year",
+  model_type_ = "SI",
+  latency_period = 0L
 )
 }
 \arguments{
@@ -61,6 +64,8 @@ pops_model(
 \item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen integer value between 1 and 12}
 
 \item{infected}{matrix of infected hosts}
+
+\item{exposed}{vector of matrices of the exposed class for use with "SEI" model type}
 
 \item{susceptible}{matrix of susceptible hosts}
 
@@ -139,6 +144,10 @@ pops_model(
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+
+\item{model_type_}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
+
+\item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
 }
 \value{
 list of vector matrices of infected and suceptible hosts per simulated year

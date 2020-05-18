@@ -12,6 +12,8 @@ pops_multirun(
   temperature_coefficient_file = "",
   precip = FALSE,
   precipitation_coefficient_file = "",
+  model_type = "SI",
+  latency_period = 0,
   time_step = "month",
   reproductive_rate = 3,
   season_month_start = 1,
@@ -62,6 +64,10 @@ pops_multirun(
 \item{precip}{boolean that allows the use of precipitation coefficients to modify spread (TRUE or FALSE)}
 
 \item{precipitation_coefficient_file}{path to raster file with precipitation coefficient data for the timestep and number of years specified}
+
+\item{model_type}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
+
+\item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
 
 \item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
 

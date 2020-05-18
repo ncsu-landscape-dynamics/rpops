@@ -20,6 +20,9 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
+#include <tuple>
+#include <string>
 #include <algorithm>
 
 #include "date.hpp"
@@ -59,6 +62,30 @@ enum class StepUnit {
     Day, Week, Month
 };
 
+/**
+ * @brief Get step enum from string
+
+ * Throws an std::invalid_argument exception if the value
+ * is not supported.
+ */
+inline StepUnit step_unit_enum_from_string(const std::string& text)
+{
+    std::map<std::string, StepUnit> mapping{
+        {"day", StepUnit::Day},
+        {"week", StepUnit::Week},
+        {"month", StepUnit::Month}
+    };
+    try {
+        return mapping.at(text);
+    }
+    catch (const std::out_of_range&) {
+        throw std::invalid_argument("step_unit_enum_from_string:"
+                                    " Invalid value '" + text +"' provided");
+    }
+}
+
+
+
 class Scheduler
 {
 public:
@@ -66,6 +93,11 @@ public:
      * Scheduler creates a vector of simulation steps
      * based on start, end date, unit and number of units.
      * The steps can be e.g. 1 day, 3 months, 2 weeks.
+     * Step is scheduled if start date of an interval is
+     * within [start, end] even if end date of the step is outside.
+     * That means the entire interval is contained in the simulation steps
+     * even when only part of it was requested.
+     *
      * @param start simulation start date
      * @param end simulation end date
      * @param simulation_unit simulation unit
@@ -89,7 +121,7 @@ public:
         
         Date date(start_);
         unsigned step = 0;
-        while (date < end_) {
+        while (date <= end_) {
             Date start(date);
             increase_date(date);
             Date end(date);
@@ -112,6 +144,13 @@ public:
      */
     Step get_step(unsigned index) const {
         return steps.at(index);
+    }
+
+    /**
+     * @brief Get length of simulation step as number of units and unit type
+     */
+    std::tuple<unsigned, StepUnit> get_step_length() const {
+        return std::make_tuple(simulation_num_units_, simulation_unit_);
     }
 
     /**
@@ -306,6 +345,64 @@ unsigned simulation_step_to_action_step(std::vector<bool> &action_schedule, unsi
  */
 unsigned get_number_of_scheduled_actions(std::vector<bool> &action_schedule) {
     return std::count(action_schedule.begin(), action_schedule.end(), true);
+}
+
+/**
+ * @brief Get output (export) schedule based on
+ * frequency string ("year", "month", "week", "day", "every_n_steps").
+ * If frequency is "every_n_steps", then output is scheduled every
+ * n steps of the simulation.
+ *
+ * Throws an std::invalid_argument exception if the value
+ * is not supported or the output frequency is not compatible with
+ * simulation step (e.g., frequency is weekly, but simulation runs every 2 weeks).
+ * If frequency is empty string, empty output schedule is returned.
+ */
+inline std::vector<bool> output_schedule_from_string(const Scheduler &scheduler,
+                                                     const std::string& frequency,
+                                                     unsigned n = 0)
+{
+    StepUnit sim_unit;
+    unsigned sim_n;
+    std::invalid_argument exception("Output frequency and simulation step are incompatible");
+    std::tie(sim_n, sim_unit) = scheduler.get_step_length();
+    if (!frequency.empty()) {
+        if (frequency == "year" || frequency == "yearly")
+            return scheduler.schedule_action_end_of_year();
+        else if (frequency == "month" || frequency == "monthly")
+            return scheduler.schedule_action_monthly();
+        else if (frequency == "week" || frequency == "weekly") {
+            if (sim_unit == StepUnit::Day) {
+                if (sim_n == 1)
+                    return scheduler.schedule_action_nsteps(7);
+                else if (sim_n == 7)
+                    return scheduler.schedule_action_nsteps(1);
+                else
+                    throw exception;
+            }
+            else if (sim_unit == StepUnit::Week) {
+                if (sim_n == 1)
+                    return scheduler.schedule_action_nsteps(1);
+                else
+                    throw exception;
+            }
+            throw exception;
+        }
+        else if (frequency == "day" || frequency == "daily") {
+            if (sim_unit == StepUnit::Day && sim_n == 1)
+                 return scheduler.schedule_action_nsteps(1);
+            else
+                throw exception;
+        }
+        else if (frequency == "every_n_steps" && n > 0)
+            return scheduler.schedule_action_nsteps(n);
+        else
+            throw std::invalid_argument("Invalid value of output frequency");
+    }
+    else {
+        std::vector<bool> v(scheduler.get_num_steps(), false);
+        return v;
+    }
 }
 
 } // namespace pops
