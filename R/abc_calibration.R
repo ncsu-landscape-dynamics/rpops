@@ -259,11 +259,7 @@ abc_calibration <- function(infected_years_file,
   
   ## Load observed data on occurence
   infection_years <- stack(infected_years_file)
-  ## calculate total infections per year in the landscape
-  total_infections <- cellStats(infection_years, 'sum')
-  if (length(total_infections) > number_of_years){
-    total_infections <- total_infections[1:number_of_years]
-  }
+  infection_years[] <- as.integer(infection_years[])
   ## Get rid of NA values to make comparisons
   infection_years <- raster::reclassify(infection_years, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
   num_layers_infected_years <- raster::nlayers(infection_years)
@@ -333,14 +329,6 @@ abc_calibration <- function(infected_years_file,
   current_particles <- 1
   proposed_particles <- 1
   current_bin <- 1
-# 
-#   if (success_metric == "number of locations and total distance") {
-#     num_metrics = 2
-#   } else if (success_metric == "number of locations"){
-#     num_metrics = 1
-#   } else if (success_metric == "residual error") {
-#     num_metrics = 1
-#   }
   
   parameters_kept <- matrix(ncol = 10, nrow = num_particles)
   acc_rate <- 1
@@ -350,16 +338,34 @@ abc_calibration <- function(infected_years_file,
   dist_checks <- matrix(ncol = 1, nrow = number_of_generations)
   res_error_checks <- matrix(ncol = 1, nrow = number_of_generations)
   
-  num_infected_data <- sum(infection_years[infection_years > 0])
-  num_locs_data <- sum(infection_years[infection_years > 0] > 0)
-  infected_data_points <- rasterToPoints(infection_years, fun=function(x){x>0}, spatial = TRUE)
-  infected_sim <- infection_years
+  ## calculate comparison metrics for input data (still need to add in configuration metrics to this)
+  num_infected_data <-  c()
+  num_infected_data <- length(number_of_outputs)
+  num_locs_data <- c()
+  num_locs_data <- length(number_of_outputs)
+  infected_data_points <- vector(mode = "list", length = number_of_outputs)
+
+  for (y in 1:nlayers(infection_years)) {
+    inf_year <- infection_years[[y]]
+    num_infected_data[[y]] <- sum(inf_year[inf_year > 0])
+    num_locs_data[[y]] <- sum(inf_year[inf_year > 0] > 0)
+    if (success_metric %in% c("number of locations and total distance", "number of locations, number of infections, and total distance")) {
+      infected_data_points[[y]] <- rasterToPoints(inf_year, fun=function(x){x>0}, spatial = TRUE)
+    }
+  }
+
+  ## calculate total infections per output in the landscape
+  total_infections <- cellStats(infection_years, 'sum')
+  if (length(total_infections) > number_of_outputs){
+    total_infections <- total_infections[1:number_of_outputs]
+  }
   
   locs_check <- checks[1]
   dist_check <- checks[2]
   res_error_check <- checks[3]
   inf_check <- checks[4]
-  infected_sim <- infection_years
+  infected_sims <- infection_years
+  infected_sim <- infection_years[[1]]
 
   while (current_bin <= number_of_generations) {
     
@@ -421,22 +427,50 @@ abc_calibration <- function(infected_years_file,
       }
       
       data <- param_func(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_anthropogenic_distance_scale, proposed_percent_natural_dispersal, proposed_natural_kappa, proposed_anthropogenic_kappa)
-      infected_sim[] <- data$infected[[1]]
-      num_infected_simulated <- sum(infected_sim[infected_sim > 0])
-      num_locs_simulated <- sum(infected_sim[infected_sim > 0] >0)
-      infected_sim_points <- rasterToPoints(infected_sim, fun=function(x){x>0}, spatial = TRUE)
-      num_difference <- sqrt((num_infected_data - num_infected_simulated)^2)
-      dist <- pointDistance(infected_sim_points, infected_data_points, lonlat = FALSE)
-      if (class(dist) == "matrix") {
-        dist_diffs <- apply(dist, 2, min)
+      
+      ## calculate comparison metrics for simulation data (still need to add in configuration metrics to this)
+      num_infected_simulated <-  c()
+      num_infected_simulated <- length(number_of_outputs)
+      num_locs_simulated <- c()
+      num_locs_simulated <- length(number_of_outputs)
+      infected_sim_points <- vector(mode = "list", length = number_of_outputs)
+      dist <- vector(mode = "list", length = number_of_outputs)
+      dist_diffs <- vector(mode = "list", length = number_of_outputs)
+      residual_diffs <- c()
+      residual_diffs <- length(number_of_outputs)
+      
+      for (y in 1:nlayers(infection_years)) {
+        infected_sims[[y]][] <- data$infected[[y]]
+        infected_sim[] <- data$infected[[y]]
+        diff_raster <- infection_years[[y]] - infected_sim
+        residual_diffs[[y]] <- sum(diff_raster[diff_raster > 0])
+        
+        num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
+        num_locs_simulated[[y]] <- sum(infected_sim[infected_sim > 0] > 0)
+        if (success_metric %in% c("number of locations and total distance", "number of locations, number of infections, and total distance")) {
+          infected_sim_points[[y]] <- rasterToPoints(infected_sim, fun=function(x){x>0}, spatial = TRUE)
+          dist[[y]] <- pointDistance(infected_sim_points[[y]], infected_data_points[[y]], lonlat = FALSE)
+          if (class(dist) == "matrix") {
+            dist_diffs[[y]] <- apply(dist[[y]], 2, min)
+          } else {
+            dist_diffs[[y]] <- dist[[y]]
+          }
+        }
+      }
+
+      if (success_metric %in% c("number of locations and total distance", "number of locations, number of infections, and total distance")) {
+        dist_diffs <- round(sqrt(sum(dist_diffs^2)), digits = 0)
       } else {
-        dist_diffs <- dist
+        dist_diffs <- 0
       }
       
-      dist_diff <- round(sqrt(sum(dist_diffs^2)), digits = 0)
-      locs_diff <- sqrt((num_locs_data - num_locs_simulated)^2)
-      diff_raster <- abs(infection_years - infected_sim)
-      residual_diff <- sum(diff_raster[diff_raster > 0])
+      num_differences <- sqrt((num_infected_data - num_infected_simulated)^2)
+      locs_diffs <- sqrt((num_locs_data - num_locs_simulated)^2)
+      
+      num_difference <- sum(num_differences)
+      locs_diff <- sum(locs_diffs)
+      residual_diff <- sum(residual_diffs)
+      dist_diff <- sum(dist_diffs)
       
       diff_checks <- FALSE
       if (success_metric == "number of locations and total distance") {
@@ -459,8 +493,6 @@ abc_calibration <- function(infected_years_file,
         return("success metric must be one of 'number of locations and total distance', 'number of locations', and 'residual error'")
       }
       
-      # set up comparison
-      # if (num_difference <= infected_check  && locs_diff <= locs_check && dist_diff <= dist_check) {
       if (diff_checks) {
         parameters_kept[total_particles, ] <- c(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_percent_natural_dispersal, proposed_anthropogenic_distance_scale, proposed_natural_kappa, proposed_anthropogenic_kappa, num_difference, locs_diff, dist_diff, residual_diff)
         current_particles <- current_particles + 1
