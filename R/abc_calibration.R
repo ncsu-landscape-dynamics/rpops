@@ -365,7 +365,7 @@ abc_calibration <- function(infected_years_file,
   res_error_check <- checks[3]
   inf_check <- checks[4]
   infected_sims <- infection_years
-  infected_sim <- infection_years[[1]]  ## double check that this works with a single layer
+  infected_sim <- infection_years[[1]]
 
   while (current_bin <= number_of_generations) {
     
@@ -442,7 +442,7 @@ abc_calibration <- function(infected_years_file,
       for (y in 1:nlayers(infection_years)) {
         infected_sims[[y]][] <- data$infected[[y]]
         infected_sim[] <- data$infected[[y]]
-        diff_raster <- abs(infection_years[[y]] - infected_sim)
+        diff_raster <- infection_years[[y]] - infected_sim
         residual_diffs[[y]] <- sum(diff_raster[diff_raster > 0])
         
         num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
@@ -457,20 +457,7 @@ abc_calibration <- function(infected_years_file,
           }
         }
       }
-      
-      # infected_sim[] <- data$infected[[1]]
-      # num_infected_simulated <- sum(infected_sim[infected_sim > 0])
-      # num_locs_simulated <- sum(infected_sim[infected_sim > 0] >0)
-      # infected_sim_points <- rasterToPoints(infected_sim, fun=function(x){x>0}, spatial = TRUE)
-      # dist <- pointDistance(infected_sim_points, infected_data_points, lonlat = FALSE)
-      # if (class(dist) == "matrix") {
-      #   dist_diffs <- apply(dist, 2, min)
-      # } else {
-      #   dist_diffs <- dist
-      # }
-      # diff_raster <- abs(infection_years - infected_sims)
-      # residual_diff <- sum(diff_raster[diff_raster > 0])
-      
+
       if (success_metric %in% c("number of locations and total distance", "number of locations, number of infections, and total distance")) {
         dist_diffs <- round(sqrt(sum(dist_diffs^2)), digits = 0)
       } else {
@@ -506,8 +493,6 @@ abc_calibration <- function(infected_years_file,
         return("success metric must be one of 'number of locations and total distance', 'number of locations', and 'residual error'")
       }
       
-      # set up comparison
-      # if (num_difference <= infected_check  && locs_diff <= locs_check && dist_diff <= dist_check) {
       if (diff_checks) {
         parameters_kept[total_particles, ] <- c(proposed_reproductive_rate, proposed_natural_distance_scale, proposed_percent_natural_dispersal, proposed_anthropogenic_distance_scale, proposed_natural_kappa, proposed_anthropogenic_kappa, num_difference, locs_diff, dist_diff, residual_diff)
         current_particles <- current_particles + 1
