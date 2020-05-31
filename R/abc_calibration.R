@@ -18,7 +18,9 @@
 #' @param prior_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
 #' @param checks A list of the 4 starting check values in order of # of locations, total min distance, residual error, and # infected. default is (500,500000, 100000, 1000). Starting check values can play a role in speed of calibration and in success of calibration.
-#'
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
+#' 
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues calc extract rasterToPoints pointDistance
 #' @importFrom stats runif rnorm cov
 #' @importFrom doParallel registerDoParallel

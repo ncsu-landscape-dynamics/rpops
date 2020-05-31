@@ -24,7 +24,12 @@
 #' @param movements_dates this is a list of dates passeed as strings in the format 'YYYY-MM-DD'
 #' @param exposed vector of matrices of the exposed class for use with "SEI" model type
 #' @param model_type_ What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".
-#' 
+#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions 
+#' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1
+#' @param natural_distance_scale distance scale parameter for natural range dispersal kernel numeric value > 0 
+#' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel numeric value > 0
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
 #' @return list of vector matrices of infected and suceptible hosts per simulated year
 #' @export
 #' 
