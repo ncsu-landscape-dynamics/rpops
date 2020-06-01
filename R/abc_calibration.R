@@ -442,8 +442,13 @@ abc_calibration <- function(infected_years_file,
       residual_diffs <- length(number_of_outputs)
       
       for (y in 1:nlayers(infection_years)) {
-        infected_sims[[y]][] <- data$infected[[y]]
-        infected_sim[] <- data$infected[[y]]
+        if (nlayers(infection_years) > 1) {
+          infected_sims[[y]][] <- data$infected[[y]]
+          infected_sim[] <- data$infected[[y]]
+        } else {
+          infected_sim[] <- data$infected[[y]]
+        }
+
         diff_raster <- infection_years[[y]] - infected_sim
         residual_diffs[[y]] <- sum(diff_raster[diff_raster > 0])
         
@@ -461,10 +466,16 @@ abc_calibration <- function(infected_years_file,
       }
 
       if (success_metric %in% c("number of locations and total distance", "number of locations, number of infections, and total distance")) {
-        dist_diffs <- round(sqrt(sum(dist_diffs^2)), digits = 0)
+        all_distances <- function(dist_diffs){
+          dist_diffs <- round(sqrt(sum(dist_diffs^2)), digits = 0)
+          return(dist_diffs)
+        }
+        dist_diffs <- lapply(dist_diffs, all_distances)
+        dist_diffs <- unlist(dist_diffs, recursive = TRUE, use.names = TRUE)
       } else {
         dist_diffs <- 0
       }
+      
       
       num_differences <- sqrt((num_infected_data - num_infected_simulated)^2)
       locs_diffs <- sqrt((num_locs_data - num_locs_simulated)^2)
