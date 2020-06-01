@@ -5,7 +5,7 @@
 #' spread of the pest/pathogen into the future. 
 #'
 #' @inheritParams pops
-#' @param num_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
+#' @param number_of_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
 #' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
@@ -28,22 +28,39 @@
 #' PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
 #' 
-#' data <- pops(infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
-#' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
-#' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
-#' precipitation_coefficient_file ="", treatments_file,
-#' season_month_start = 1, season_month_end = 12, time_step = "week",
-#' start_date = '2001-01-01', end_date = 2005-12-31', treatment_dates = c(2001,2002,2003,2004,2005),
-#' natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
-#' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
-#' lethal_temperature = -12.87, lethal_temperature_month = 1,
-#' mortality_rate = 0.05, mortality_time_lag = 2,
-#' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL)
+#' data <- pops(infected_file, 
+#' host_file, 
+#' total_plants_file, 
+#' use_lethal_temperature = FALSE, 
+#' temp = TRUE, precip = FALSE, 
+#' management = TRUE, 
+#' mortality_on = TRUE, 
+#' temperature_file = "", 
+#' temperature_coefficient_file, 
+#' precipitation_coefficient_file ="", 
+#' treatments_file,
+#' season_month_start = 1, 
+#' season_month_end = 12,
+#' time_step = "week",
+#' start_date = '2001-01-01', 
+#' end_date = 2005-12-31', 
+#' treatment_dates = c(2001,2002,2003,2004,2005),
+#' natural_kernel_type = "cauchy", 
+#' lethal_temperature = -12.87, 
+#' lethal_temperature_month = 1,
+#' mortality_rate = 0.05, 
+#' mortality_time_lag = 2,
+#' treatment_date = 12, 
+#' natural_dir = "NONE", 
+#' kappa = 0, 
+#' random_seed = NULL)
 #' }
 #' 
 pops_multirun <- function(infected_file, 
                           host_file, 
-                          total_plants_file, 
+                          total_plants_file,
+                          parameter_means,
+                          parameter_cov_matrix,
                           temp = FALSE, 
                           temperature_coefficient_file = "", 
                           precip = FALSE, 
@@ -51,7 +68,6 @@ pops_multirun <- function(infected_file,
                           model_type = "SI", 
                           latency_period = 0,
                           time_step = "month", 
-                          reproductive_rate = 3.0,
                           season_month_start = 1, 
                           season_month_end = 12, 
                           start_date = '2008-01-01', 
@@ -67,16 +83,11 @@ pops_multirun <- function(infected_file,
                           treatment_dates = c(0), 
                           treatments_file = "",
                           treatment_method = "ratio",
-                          percent_natural_dispersal = 1.0,
                           natural_kernel_type = "cauchy", 
                           anthropogenic_kernel_type = "cauchy",
-                          natural_distance_scale = 21, 
-                          anthropogenic_distance_scale = 0.0,
                           natural_dir = "NONE", 
-                          natural_kappa = 0, 
                           anthropogenic_dir = "NONE", 
-                          anthropogenic_kappa = 0,
-                          num_iterations = 100, 
+                          number_of_iterations = 100, 
                           number_of_cores = NA,
                           pesticide_duration = 0,
                           pesticide_efficacy = 1.0,
@@ -91,6 +102,36 @@ pops_multirun <- function(infected_file,
     latency_period <- 0
   } 
   
+  
+  if (nrow(parameter_cov_matrix) != 6 | ncol(parameter_cov_matrix) != 6) {
+    return("parameter covariance matrix is not 6 x 6")
+  }
+  
+  if (length(parameter_means) != 6) {
+    return("parameter means is not a vector of length 6")
+  }
+  
+  parameters <- data.frame(MASS::mvrnorm(number_of_iterations, parameter_means, parameter_cov_matrix))
+  names(parameters) <- c('reproductive_rate', 'natural_dispersal_distance', 'percent_natural_dispersal', 'anthropogenic_dispersal_distance', 'natural kappa', 'anthropogenic kappa')
+  while(any(parameters[,1] < 0) || any(parameters[,2] < 0)) {
+    parameters[parameters[,1] < 0 | parameters[,2] <= 0.] <- mvrnorm(nrow(parameters[parameters[,1] < 0 | parameters[,2] < 0,]), parameter_means, parameter_cov_matrix)
+  }
+  reproductive_rate <- parameters[[1]]
+  natural_distance_scale <- parameters[[2]]
+  percent_natural_dispersal <- parameters[[3]]
+  if (any(percent_natural_dispersal > 1.000)) {percent_natural_dispersal[percent_natural_dispersal > 1.00] <- 1.000} 
+  anthropogenic_distance_scale <- parameters[[4]]
+  natural_kappa <- parameters[[5]]
+  if (any(natural_kappa < 0.000)) {natural_kappa[natural_kappa < 0.000] <- 0}
+  anthropogenic_kappa <- parameters[[6]]
+  if (any(anthropogenic_kappa < 0.000)) {anthropogenic_kappa[anthropogenic_kappa < 0.000] <- 0}
+  
+  if (any(percent_natural_dispersal < 1.0)) {
+    use_anthropogenic_kernel <- TRUE
+  } else {
+    use_anthropogenic_kernel <- FALSE
+  }
+  
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
     return(treatment_metric_check$failed_check)
@@ -103,13 +144,6 @@ pops_multirun <- function(infected_file,
     number_of_outputs <- time_check$number_of_outputs
   } else {
     return(time_check$failed_check)
-  }
-  
-  percent_check <- percent_checks(percent_natural_dispersal)
-  if (percent_check$checks_passed){
-    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
-  } else {
-    return(percent_check$failed_check)
   }
   
   infected_check <- initial_raster_checks(infected_file)
@@ -264,34 +298,6 @@ pops_multirun <- function(infected_file,
     }
   }
   
-  reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = num_iterations)
-  if (reproductive_rate_check$checks_passed) {
-    reproductive_rate <- reproductive_rate_check$value
-  } else {
-    return(reproductive_rate_check$failed_check)
-  }
-  
-  natural_distance_scale_check <- uncertainty_check(natural_distance_scale, round_to = 0, n = num_iterations)
-  if (natural_distance_scale_check$checks_passed) {
-    natural_distance_scale <- natural_distance_scale_check$value
-  } else {
-    return(natural_distance_scale_check$failed_check)
-  }
-  
-  anthropogenic_distance_scale_check <- uncertainty_check(anthropogenic_distance_scale, round_to = 0, n = num_iterations)
-  if (anthropogenic_distance_scale_check$checks_passed) {
-    anthropogenic_distance_scale <- anthropogenic_distance_scale_check$value
-  } else {
-    return(anthropogenic_distance_scale_check$failed_check)
-  }
-  
-  percent_natural_dispersal_check <- uncertainty_check(percent_natural_dispersal, round_to = 3, n = num_iterations)
-  if (percent_natural_dispersal_check$checks_passed) {
-    percent_natural_dispersal <- percent_natural_dispersal_check$value
-  } else {
-    return(percent_natural_dispersal_check$failed_check)
-  }
-  
   years <- seq(year(start_date), year(end_date), 1)
   rcl <- c(1, Inf, 1, 0, 0.99, NA)
   rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
@@ -304,7 +310,7 @@ pops_multirun <- function(infected_file,
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
   
-  infected_stack <- foreach::foreach(i = 1:num_iterations, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
+  infected_stack <- foreach::foreach(i = 1:number_of_iterations, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
     data <- pops_model(random_seed = random_seed, 
                        use_lethal_temperature = use_lethal_temperature, 
@@ -347,9 +353,9 @@ pops_multirun <- function(infected_file,
                        natural_distance_scale = natural_distance_scale[i], 
                        anthropogenic_distance_scale = anthropogenic_distance_scale[i], 
                        natural_dir = natural_dir, 
-                       natural_kappa = natural_kappa,
+                       natural_kappa = natural_kappa[i],
                        anthropogenic_dir = anthropogenic_dir, 
-                       anthropogenic_kappa = anthropogenic_kappa,
+                       anthropogenic_kappa = anthropogenic_kappa[i],
                        output_frequency = output_frequency,
                        model_type_ = model_type,
                        latency_period = latency_period

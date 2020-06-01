@@ -229,13 +229,13 @@ List pops_model(int random_seed,
 
   for (unsigned current_index = 0; current_index < scheduler.get_num_steps(); ++current_index) {
       
-      if (all_infected(susceptible)) {
-        Rcerr << "All suspectible hosts are infected!" << std::endl;
-        infected_vector.push_back(Rcpp::clone(infected));
-        susceptible_vector.push_back(Rcpp::clone(susceptible));
-        resistant_vector.push_back(Rcpp::clone(resistant));
-        break;
-      }
+      // if (all_infected(susceptible)) {
+      //   Rcerr << "All suspectible hosts are infected!" << std::endl;
+      //   infected_vector.push_back(Rcpp::clone(infected));
+      //   susceptible_vector.push_back(Rcpp::clone(susceptible));
+      //   resistant_vector.push_back(Rcpp::clone(resistant));
+      //   break;
+      // }
     
       if (lethality_schedule[current_index]  && use_lethal_temperature) {
         int lethal_step = simulation_step_to_action_step(lethality_schedule, current_index);
