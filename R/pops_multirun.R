@@ -310,7 +310,7 @@ pops_multirun <- function(infected_file,
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
   
-  infected_stack <- foreach::foreach(i = 1:number_of_iterations, .combine = c, .packages = c("raster", "PoPS"), .export = ls(globalenv())) %dopar% {
+  infected_stack <- foreach::foreach(i = 1:number_of_iterations, .combine = c, .packages = c("raster", "PoPS")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
     data <- pops_model(random_seed = random_seed, 
                        use_lethal_temperature = use_lethal_temperature, 
