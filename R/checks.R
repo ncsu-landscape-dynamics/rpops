@@ -512,3 +512,31 @@ movement_checks <- function(x, rast, start_date, end_date) {
     return(outs)
   }
 }
+
+parameter_checks <- function(n, parameter_means, parameter_cov_matrix) {
+  checks_passed <- TRUE
+  
+  if (nrow(parameter_cov_matrix) != 6 | ncol(parameter_cov_matrix) != 6) {
+    checks_passed <- FALSE
+    failed_check <- "parameter covariance matrix is not 6 x 6" 
+  }
+  
+  if (length(parameter_means) != 6) {
+    checks_passed <- FALSE
+    failed_check <- "parameter means is not a vector of length 6" 
+  }
+  
+  if(checks_passed) {
+    parameters <- data.frame(MASS::mvrnorm(n, parameter_means, parameter_cov_matrix))
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, parameters)
+    names(outs) <- c('checks_passed', 'parameters')
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c('checks_passed', 'failed_check')
+    return(outs)
+  }
+}

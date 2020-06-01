@@ -12,7 +12,6 @@
 #' @param precip boolean that allows the use of precipitation coefficients to modify spread (TRUE or FALSE)
 #' @param precipitation_coefficient_file path to raster file with precipitation coefficient data for the timestep and number of years specified
 #' @param time_step how often should spread occur options: ('day', 'week', 'month')
-#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions 
 #' @param season_month_start when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)
 #' @param season_month_end when does spread end during the year for your pest or pathogen (integer value between 1 and 12)
 #' @param start_date date to start the simulation with format ('YYYY_MM_DD')
@@ -28,15 +27,10 @@
 #' @param treatment_dates dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)
 #' @param treatments_file path to raster file with treatment data by dates (needs to be the same length as treatment_dates and pesticide_duration)
 #' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
-#' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1
 #' @param natural_kernel_type what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')
 #' @param anthropogenic_kernel_type what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')
-#' @param natural_distance_scale distance scale parameter for natural range dispersal kernel numeric value > 0 
-#' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel numeric value > 0 
 #' @param natural_dir sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')
-#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param anthropogenic_dir sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')
-#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param pesticide_duration how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
@@ -45,7 +39,8 @@
 #' @param use_movements this is a boolean to turn on use of the movement module.
 #' @param latency_period How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.
 #' @param model_type What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".
-#' 
+#' @param parameter_means A vector of the means of the model parameters (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
+#' @param parameter_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints crs rowColFromCell
 #' @importFrom Rcpp sourceCpp evalCpp
@@ -66,22 +61,41 @@
 #' PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
 #' 
-#' data <- pops(infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
-#' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
-#' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
-#' precipitation_coefficient_file ="", treatments_file,
-#' season_month_start = 1, season_month_end = 12, time_step = "week",
-#' start_date = '2001-01-01', end_date = 2005-12-31', treatment_dates = c('2001-12-24'),
-#' natural_kernel_type = "cauchy", percent_natural_dispersal = 1.0,
-#' natural_distance_scale = 20.57, anthropogenic_distance_scale = 0.0,
-#' lethal_temperature = -12.87, lethal_temperature_month = 1,
-#' mortality_rate = 0.05, mortality_time_lag = 2,
-#' treatment_date = 12, natural_dir = "NONE", kappa = 0, random_seed = NULL, output_frequency = "yearly")
+#' data <- pops(
+#' infected_file, 
+#' host_file, 
+#' total_plants_file,
+#' use_lethal_temperature = FALSE, 
+#' temp = TRUE, precip = FALSE, 
+#' management = TRUE, 
+#' mortality_on = TRUE, 
+#' temperature_file = "", 
+#' temperature_coefficient_file, 
+#' precipitation_coefficient_file ="", 
+#' treatments_file,
+#' season_month_start = 1, 
+#' season_month_end = 12, 
+#' time_step = "week",
+#' start_date = '2001-01-01', 
+#' end_date = 2005-12-31', 
+#' treatment_dates = c('2001-12-24'),
+#' natural_kernel_type = "cauchy",
+#' lethal_temperature = -12.87, 
+#' lethal_temperature_month = 1,
+#' mortality_rate = 0.05, 
+#' mortality_time_lag = 2,
+#' treatment_date = 12, 
+#' natural_dir = "NONE", 
+#' kappa = 0, 
+#' random_seed = NULL, 
+#' output_frequency = "yearly")
 #' }
 #' 
 pops <- function(infected_file, 
                  host_file, 
                  total_plants_file, 
+                 parameter_means,
+                 parameter_cov_matrix,
                  temp = FALSE, 
                  temperature_coefficient_file = "", 
                  precip = FALSE,
@@ -89,7 +103,6 @@ pops <- function(infected_file,
                  model_type = "SI", 
                  latency_period = 0,
                  time_step = "month",
-                 reproductive_rate = 3.0,
                  season_month_start = 1, 
                  season_month_end = 12, 
                  start_date = '2008-01-01',
@@ -105,15 +118,10 @@ pops <- function(infected_file,
                  treatment_dates = c('2008-12-24'), 
                  treatments_file = "",
                  treatment_method = "ratio",
-                 percent_natural_dispersal = 1.0,
                  natural_kernel_type = "cauchy",
                  anthropogenic_kernel_type = "cauchy",
-                 natural_distance_scale = 21, 
-                 anthropogenic_distance_scale = 0.0,
                  natural_dir = "NONE", 
-                 natural_kappa = 0, 
                  anthropogenic_dir = "NONE", 
-                 anthropogenic_kappa = 0,
                  pesticide_duration = c(0), 
                  pesticide_efficacy = 1.0,
                  random_seed = NULL, 
@@ -127,6 +135,35 @@ pops <- function(infected_file,
     latency_period <- 0
   } 
   
+  if (nrow(parameter_cov_matrix) != 6 | ncol(parameter_cov_matrix) != 6) {
+    return("parameter covariance matrix is not 6 x 6")
+  }
+  
+  if (length(parameter_means) != 6) {
+    return("parameter means is not a vector of length 6")
+  }
+  
+  parameters <- MASS::mvrnorm(1, parameter_means, parameter_cov_matrix)
+  # names(parameters) <- c('reproductive_rate', 'natural_dispersal_distance', 'percent_natural_dispersal', 'anthropogenic_dispersal_distance', 'natural kappa', 'anthropogenic kappa')
+  while(parameters[1] < 0 || parameters[2] < 0) {
+    parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
+  }
+  reproductive_rate <- parameters[1]
+  natural_distance_scale <- parameters[2]
+  percent_natural_dispersal <- parameters[3]
+  if (percent_natural_dispersal > 1.000) {percent_natural_dispersal <- 1.000} 
+  anthropogenic_distance_scale <- parameters[4]
+  natural_kappa <- parameters[5]
+  if (natural_kappa < 0.000) {natural_kappa <- 0}
+  anthropogenic_kappa <- parameters[6]
+  if (anthropogenic_kappa < 0.000) {anthropogenic_kappa <- 0}
+
+  if (percent_natural_dispersal < 1.0) {
+    use_anthropogenic_kernel <- TRUE
+  } else {
+    use_anthropogenic_kernel <- FALSE
+  }
+  
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
     return(treatment_metric_check$failed_check)
@@ -139,13 +176,6 @@ pops <- function(infected_file,
     number_of_outputs <- time_check$number_of_outputs
   } else {
     return(time_check$failed_check)
-  }
-  
-  percent_check <- percent_checks(percent_natural_dispersal)
-  if (percent_check$checks_passed){
-    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
-  } else {
-    return(percent_check$failed_check)
   }
   
   if (is.null(random_seed)) {
@@ -184,7 +214,7 @@ pops <- function(infected_file,
   
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
-
+  
   if (use_movements) {
     movements_check <- movement_checks(movements_file, infected, start_date, end_date)
     if (movements_check$checks_passed) {
@@ -304,81 +334,53 @@ pops <- function(infected_file,
     }
   }
   
-  reproductive_rate_check <- uncertainty_check(reproductive_rate, round_to = 1, n = 1)
-  if (reproductive_rate_check$checks_passed) {
-    reproductive_rate <- reproductive_rate_check$value
-  } else {
-    return(reproductive_rate_check$failed_check)
-  }
-  
-  natural_distance_scale_check <- uncertainty_check(natural_distance_scale, round_to = 0, n = 1)
-  if (natural_distance_scale_check$checks_passed) {
-    natural_distance_scale <- natural_distance_scale_check$value
-  } else {
-    return(natural_distance_scale_check$failed_check)
-  }
-    
-  anthropogenic_distance_scale_check <- uncertainty_check(anthropogenic_distance_scale, round_to = 0, n = 1)
-  if (anthropogenic_distance_scale_check$checks_passed) {
-    anthropogenic_distance_scale <- anthropogenic_distance_scale_check$value
-  } else {
-    return(anthropogenic_distance_scale_check$failed_check)
-  }
-  
-  percent_natural_dispersal_check <- uncertainty_check(percent_natural_dispersal, round_to = 3, n = 1)
-  if (percent_natural_dispersal_check$checks_passed) {
-    percent_natural_dispersal <- percent_natural_dispersal_check$value
-  } else {
-    return(percent_natural_dispersal_check$failed_check)
-  }
-  
   data <- PoPS::pops_model(random_seed = random_seed, 
-                     use_lethal_temperature = use_lethal_temperature, 
-                     lethal_temperature = lethal_temperature, 
-                     lethal_temperature_month = lethal_temperature_month,
-                     infected = infected,
-                     exposed = exposed,
-                     susceptible = susceptible,
-                     total_plants = total_plants,
-                     mortality_on = mortality_on,
-                     mortality_tracker = mortality_tracker,
-                     mortality = mortality,
-                     treatment_maps = treatment_maps,
-                     treatment_dates = treatment_dates,
-                     pesticide_duration = pesticide_duration,
-                     resistant = resistant,
-                     use_movements = use_movements, 
-                     movements = movements,
-                     movements_dates = movements_dates,
-                     weather = weather,
-                     temperature = temperature,
-                     weather_coefficient = weather_coefficient,
-                     ew_res = ew_res, 
-                     ns_res = ns_res, 
-                     num_rows = num_rows, 
-                     num_cols = num_cols,
-                     time_step = time_step, 
-                     reproductive_rate = reproductive_rate,
-                     mortality_rate = mortality_rate, 
-                     mortality_time_lag = mortality_time_lag,
-                     season_month_start = season_month_start, 
-                     season_month_end = season_month_end,
-                     start_date = start_date, 
-                     end_date = end_date,
-                     treatment_method = treatment_method,
-                     natural_kernel_type = natural_kernel_type, 
-                     anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                     use_anthropogenic_kernel = use_anthropogenic_kernel, 
-                     percent_natural_dispersal = percent_natural_dispersal,
-                     natural_distance_scale = natural_distance_scale, 
-                     anthropogenic_distance_scale = anthropogenic_distance_scale, 
-                     natural_dir = natural_dir, 
-                     natural_kappa = natural_kappa,
-                     anthropogenic_dir = anthropogenic_dir, 
-                     anthropogenic_kappa = anthropogenic_kappa,
-                     output_frequency = output_frequency, 
-                     model_type_ = model_type,
-                     latency_period = latency_period
+                           use_lethal_temperature = use_lethal_temperature, 
+                           lethal_temperature = lethal_temperature, 
+                           lethal_temperature_month = lethal_temperature_month,
+                           infected = infected,
+                           exposed = exposed,
+                           susceptible = susceptible,
+                           total_plants = total_plants,
+                           mortality_on = mortality_on,
+                           mortality_tracker = mortality_tracker,
+                           mortality = mortality,
+                           treatment_maps = treatment_maps,
+                           treatment_dates = treatment_dates,
+                           pesticide_duration = pesticide_duration,
+                           resistant = resistant,
+                           use_movements = use_movements, 
+                           movements = movements,
+                           movements_dates = movements_dates,
+                           weather = weather,
+                           temperature = temperature,
+                           weather_coefficient = weather_coefficient,
+                           ew_res = ew_res, 
+                           ns_res = ns_res, 
+                           num_rows = num_rows, 
+                           num_cols = num_cols,
+                           time_step = time_step, 
+                           reproductive_rate = reproductive_rate,
+                           mortality_rate = mortality_rate, 
+                           mortality_time_lag = mortality_time_lag,
+                           season_month_start = season_month_start, 
+                           season_month_end = season_month_end,
+                           start_date = start_date, 
+                           end_date = end_date,
+                           treatment_method = treatment_method,
+                           natural_kernel_type = natural_kernel_type, 
+                           anthropogenic_kernel_type = anthropogenic_kernel_type, 
+                           use_anthropogenic_kernel = use_anthropogenic_kernel, 
+                           percent_natural_dispersal = percent_natural_dispersal,
+                           natural_distance_scale = natural_distance_scale, 
+                           anthropogenic_distance_scale = anthropogenic_distance_scale, 
+                           natural_dir = natural_dir, 
+                           natural_kappa = natural_kappa,
+                           anthropogenic_dir = anthropogenic_dir, 
+                           anthropogenic_kappa = anthropogenic_kappa,
+                           output_frequency = output_frequency, 
+                           model_type_ = model_type,
+                           latency_period = latency_period
   )
   
   return(data)
