@@ -6,7 +6,7 @@
 \usage{
 abc_validate(
   infected_years_file,
-  num_iterations,
+  number_of_iterations,
   number_of_cores = NA,
   parameter_means,
   parameter_cov_matrix,
@@ -51,7 +51,7 @@ abc_validate(
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
 
-\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
+\item{number_of_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
 
 \item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
 
