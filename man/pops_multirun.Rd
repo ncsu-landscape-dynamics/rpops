@@ -8,6 +8,8 @@ pops_multirun(
   infected_file,
   host_file,
   total_plants_file,
+  parameter_means,
+  parameter_cov_matrix,
   temp = FALSE,
   temperature_coefficient_file = "",
   precip = FALSE,
@@ -15,7 +17,6 @@ pops_multirun(
   model_type = "SI",
   latency_period = 0,
   time_step = "month",
-  reproductive_rate = 3,
   season_month_start = 1,
   season_month_end = 12,
   start_date = "2008-01-01",
@@ -31,16 +32,11 @@ pops_multirun(
   treatment_dates = c(0),
   treatments_file = "",
   treatment_method = "ratio",
-  percent_natural_dispersal = 1,
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
-  natural_distance_scale = 21,
-  anthropogenic_distance_scale = 0,
   natural_dir = "NONE",
-  natural_kappa = 0,
   anthropogenic_dir = "NONE",
-  anthropogenic_kappa = 0,
-  num_iterations = 100,
+  number_of_iterations = 100,
   number_of_cores = NA,
   pesticide_duration = 0,
   pesticide_efficacy = 1,
@@ -57,6 +53,10 @@ pops_multirun(
 
 \item{total_plants_file}{path to raster file with number of total plants}
 
+\item{parameter_means}{A vector of the means of the model parameters (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
+
+\item{parameter_cov_matrix}{A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
+
 \item{temp}{boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)}
 
 \item{temperature_coefficient_file}{path to raster file with temperature coefficient data for the timestep and number of years specified}
@@ -70,8 +70,6 @@ pops_multirun(
 \item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
 
 \item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
-
-\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
 \item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)}
 
@@ -103,25 +101,15 @@ pops_multirun(
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
-\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1}
-
 \item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')}
 
-\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel numeric value > 0}
-
-\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel numeric value > 0}
-
 \item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
-
-\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
-\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
-
-\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
+\item{number_of_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
 
 \item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
 

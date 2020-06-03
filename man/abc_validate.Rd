@@ -6,11 +6,10 @@
 \usage{
 abc_validate(
   infected_years_file,
-  num_iterations,
+  number_of_iterations,
   number_of_cores = NA,
-  posterior_means,
-  posterior_cov_matrix,
-  params_to_estimate = c(T, T, T, T, F, F),
+  parameter_means,
+  parameter_cov_matrix,
   infected_file,
   host_file,
   total_plants_file,
@@ -39,9 +38,7 @@ abc_validate(
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
   natural_dir = "NONE",
-  natural_kappa = 0,
   anthropogenic_dir = "NONE",
-  anthropogenic_kappa = 0,
   pesticide_duration = 0,
   pesticide_efficacy = 1,
   mask = NULL,
@@ -54,15 +51,13 @@ abc_validate(
 \arguments{
 \item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
 
-\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
+\item{number_of_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
 
 \item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
 
-\item{posterior_means}{the posterior means passed from the abc calibration function}
+\item{parameter_means}{the parameter means from the abc calibration function (posterior means)}
 
-\item{posterior_cov_matrix}{the posterior covariance matrix pass from the abc calibration function}
-
-\item{params_to_estimate}{A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
+\item{parameter_cov_matrix}{the parameter covariance matrix from the abc calibration function (posterior covairance matrix)}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -120,11 +115,7 @@ abc_validate(
 
 \item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
-\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12}
-
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
-
-\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
 

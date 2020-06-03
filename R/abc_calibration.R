@@ -18,7 +18,9 @@
 #' @param prior_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
 #' @param checks A list of the 4 starting check values in order of # of locations, total min distance, residual error, and # infected. default is (500,500000, 100000, 1000). Starting check values can play a role in speed of calibration and in success of calibration.
-#'
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
+#' 
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues calc extract rasterToPoints pointDistance
 #' @importFrom stats runif rnorm cov
 #' @importFrom doParallel registerDoParallel
@@ -440,8 +442,13 @@ abc_calibration <- function(infected_years_file,
       residual_diffs <- length(number_of_outputs)
       
       for (y in 1:nlayers(infection_years)) {
-        infected_sims[[y]][] <- data$infected[[y]]
-        infected_sim[] <- data$infected[[y]]
+        if (nlayers(infection_years) > 1) {
+          infected_sims[[y]][] <- data$infected[[y]]
+          infected_sim[] <- data$infected[[y]]
+        } else {
+          infected_sim[] <- data$infected[[y]]
+        }
+
         diff_raster <- infection_years[[y]] - infected_sim
         residual_diffs[[y]] <- sum(diff_raster[diff_raster > 0])
         
@@ -459,10 +466,16 @@ abc_calibration <- function(infected_years_file,
       }
 
       if (success_metric %in% c("number of locations and total distance", "number of locations, number of infections, and total distance")) {
-        dist_diffs <- round(sqrt(sum(dist_diffs^2)), digits = 0)
+        all_distances <- function(dist_diffs){
+          dist_diffs <- round(sqrt(sum(dist_diffs^2)), digits = 0)
+          return(dist_diffs)
+        }
+        dist_diffs <- lapply(dist_diffs, all_distances)
+        dist_diffs <- unlist(dist_diffs, recursive = TRUE, use.names = TRUE)
       } else {
         dist_diffs <- 0
       }
+      
       
       num_differences <- sqrt((num_infected_data - num_infected_simulated)^2)
       locs_diffs <- sqrt((num_locs_data - num_locs_simulated)^2)

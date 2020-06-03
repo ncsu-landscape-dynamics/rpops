@@ -7,13 +7,12 @@
 #'
 #' @inheritParams pops
 #' @param infected_years_file years of initial infection/infestation as individual locations of a pest or pathogen in raster format
-#' @param num_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
+#' @param number_of_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
 #' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).
-#' @param posterior_means the posterior means passed from the abc calibration function
-#' @param posterior_cov_matrix the posterior covariance matrix pass from the abc calibration function
-#' @param params_to_estimate A list of booleans specificing which parameters to estimate ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
+#' @param parameter_means the parameter means from the abc calibration function (posterior means)
+#' @param parameter_cov_matrix the parameter covariance matrix from the abc calibration function (posterior covairance matrix)
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm
@@ -30,7 +29,7 @@
 #' \dontrun{
 #' infected_years_file <- system.file("extdata", "SODexample", "initial_infection2005.tif", 
 #' package = "PoPS")
-#' num_iterations <- 100
+#' number_of_iterations <- 100
 #' number_of_cores <- NA
 #' 
 #' infected_file <- system.file("extdata", "SODexample", "initial_infection2004.tif", 
@@ -41,7 +40,7 @@
 #' package = "PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management2005.tif", package = "PoPS")
 #' 
-#' params <- abc_validate(infected_years_file, num_iterations, number_of_cores,
+#' params <- abc_validate(infected_years_file, number_of_iterations, number_of_cores,
 #' infected_file, host_file, total_plants_file, reproductive_rate = 1.0,
 #' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
@@ -56,11 +55,10 @@
 #' }
 #' 
 abc_validate <- function(infected_years_file, 
-                     num_iterations, 
+                     number_of_iterations, 
                      number_of_cores = NA,
-                     posterior_means,
-                     posterior_cov_matrix,
-                     params_to_estimate = c(T, T, T, T, F, F),
+                     parameter_means,
+                     parameter_cov_matrix,
                      infected_file, 
                      host_file, 
                      total_plants_file, 
@@ -89,9 +87,7 @@ abc_validate <- function(infected_years_file,
                      natural_kernel_type = "cauchy",
                      anthropogenic_kernel_type = "cauchy",
                      natural_dir = "NONE", 
-                     natural_kappa = 0, 
                      anthropogenic_dir = "NONE", 
-                     anthropogenic_kappa = 0, 
                      pesticide_duration = 0, 
                      pesticide_efficacy = 1.0,
                      mask = NULL, 
@@ -105,6 +101,14 @@ abc_validate <- function(infected_years_file,
   } else if (model_type == "SI" && latency_period > 0) {
     latency_period <- 0
   } 
+  
+  if (nrow(parameter_cov_matrix) != 6 | ncol(parameter_cov_matrix) != 6) {
+    return("parameter covariance matrix is not 6 x 6")
+  }
+  
+  if (length(parameter_means) != 6) {
+    return("parameter means is not a vector of length 6")
+  }
   
   metric_check <- metric_checks(success_metric)
   if (metric_check$checks_passed){
@@ -304,37 +308,21 @@ abc_validate <- function(infected_years_file,
   registerDoParallel(cl)
   
   
-  qa <- foreach::foreach (i = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "MASS")) %dopar% {
+  qa <- foreach::foreach (i = 1:number_of_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "MASS")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
-    parameters <- mvrnorm(1, posterior_means, posterior_cov_matrix)
-    while(parameters[1] <= 0 || parameters[2] <= 0) {
-      parameters <- mvrnorm(1, posterior_means, posterior_cov_matrix)
+    parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
+    while(parameters[1] < 0 || parameters[2] < 0) {
+      parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
     }
     reproductive_rate <- parameters[1]
     natural_distance_scale <- parameters[2]
-    if (params_to_estimate[3]) {
-      percent_natural_dispersal <- parameters[3]
-      if (percent_natural_dispersal > 1.000) {percent_natural_dispersal <- 1.000} 
-    } else {
-      percent_natural_dispersal <- 1.0
-    }
-    if (params_to_estimate[4]) {
-      anthropogenic_distance_scale <- parameters[4]
-    } else {
-      anthropogenic_distance_scale <- 0
-    }
-    if (params_to_estimate[5]) {
-      natural_kappa <- parameters[5]
-      if (natural_kappa <= 0.000) {natural_kappa <- 0}
-    } else {
-      natural_kappa <- natural_kappa
-    }
-    if (params_to_estimate[6]) {
-      anthropogenic_kappa <- parameters[6]
-      if (anthropogenic_kappa <= 0.000) {anthropogenic_kappa <- 0}
-    } else {
-      anthropogenic_kappa <- anthropogenic_kappa
-    }
+    percent_natural_dispersal <- parameters[3]
+    if (percent_natural_dispersal > 1.000) {percent_natural_dispersal <- 1.000} 
+    anthropogenic_distance_scale <- parameters[4]
+    natural_kappa <- parameters[5]
+    if (natural_kappa < 0.000) {natural_kappa <- 0}
+    anthropogenic_kappa <- parameters[6]
+    if (anthropogenic_kappa < 0.000) {anthropogenic_kappa <- 0}
     
     data <- PoPS::pops_model(random_seed = random_seed, 
                              use_lethal_temperature = use_lethal_temperature, 

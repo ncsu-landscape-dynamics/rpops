@@ -274,7 +274,7 @@ test_that("Bayesian checks report correct errors and return all rates as a data 
   expect_equal(bayesian_check$checks_passed, TRUE)
   expect_length(bayesian_check$rates, 4)
   expect_length(bayesian_check$posterior_rates, 2)
-  expect_lte(mean(bayesian_check$posterior_rates[,1]), 2.1)
+  expect_lte(weighted.mean(bayesian_check$posterior_rates[,1], bayesian_check$posterior_rates[,2]), 2.1)
   
 })
 
