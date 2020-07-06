@@ -127,20 +127,40 @@ List pops_model(int random_seed,
                 int latency_period = 0
 )
 {
-  // TODO no establishment_probability, establishment_stochasticity, or establishment_probability
-  // steps and use_treatments set later (set to 0 and false for now)
-  Config config = {random_seed, num_rows, num_cols, ew_res, ns_res, 0, true, true, 0.5, 
-  use_lethal_temperature, lethal_temperature, weather, reproductive_rate, model_type_, latency_period,
-  natural_kernel_type, natural_distance_scale, natural_dir, natural_kappa, use_anthropogenic_kernel,
-  percent_natural_dispersal, anthropogenic_kernel_type, anthropogenic_distance_scale, anthropogenic_dir,
-  anthropogenic_kappa, false, mortality_on, mortality_rate, mortality_time_lag};
-  
+  Config config;
+  config.natural_kernel_type = natural_kernel_type;
+  config.anthro_kernel_type = anthropogenic_kernel_type;
+  config.model_type = model_type_;
+  config.natural_direction = natural_dir;
+  config.anthro_direction = anthropogenic_dir;
+  config.random_seed = random_seed;
+  config.rows = num_rows;
+  config.cols = num_cols;
+  config.latency_period_steps = latency_period;
+  config.use_anthropogenic_kernel = use_anthropogenic_kernel;
+  config.anthro_kappa = anthropogenic_kappa;
+  config.anthro_scale = anthropogenic_distance_scale;
+  config.use_lethal_temperature = use_lethal_temperature;
+  config.lethal_temperature = lethal_temperature;
+  config.use_mortality = mortality_on;
+  config.mortality_rate = mortality_rate;
+  config.weather = weather;
+  config.reproductive_rate = reproductive_rate;
+  config.natural_scale = natural_distance_scale;
+  config.natural_kappa = natural_kappa;
+  config.percent_natural_dispersal = percent_natural_dispersal;
+  config.ew_res = ew_res;
+  config.ns_res = ns_res;
+  config.first_mortality_year = mortality_time_lag;
+
   std::vector<std::tuple<int, int>> outside_dispersers;
   TreatmentApplication treatment_application = treatment_app_enum_from_string(treatment_method);
-  pops::Date dd_start(start_date);
-  pops::Date dd_end(end_date);
-  Season season(season_month_start, season_month_end);
-  pops::Date dd_current(dd_start);
+  config.set_date_start(start_date);
+//   pops::Date dd_start(start_date);
+  config.set_date_end(end_date);
+  //   pops::Date dd_end(end_date);
+  config.set_season_start_end_month(season_month_start, season_month_end);
+//   Season season(season_month_start, season_month_end);
 
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
@@ -151,10 +171,6 @@ List pops_model(int random_seed,
   double area_infect;
   std::vector<double> area_infected;
 
-  if (output_frequency == "time_step") {
-    output_frequency = time_step;
-  }
-
   std::vector<IntegerMatrix> infected_vector;
   std::vector<IntegerMatrix> susceptible_vector;
   std::vector<IntegerMatrix> mortality_tracker_vector;
@@ -163,54 +179,29 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> total_host_vector;
   std::vector<IntegerMatrix> dispersers_vector;
 
-  StepUnit step_unit = step_unit_enum_from_string(time_step);
+  config.set_step_unit(time_step);
 
-  // Define simulation time step
-  Scheduler scheduler(dd_start, dd_end, step_unit, 1);
-  // set config.steps
-  config.steps = scheduler.get_num_steps();
-  // Define spread schedule
-  std::vector<bool> spread_schedule = scheduler.schedule_spread(season);
-  // Define spread rate schedule
-  std::vector<bool> spread_rate_schedule = scheduler.schedule_action_end_of_year();
-  // Define mortality schedule
-  std::vector<bool> mortality_schedule = scheduler.schedule_action_end_of_year();
-  // Define lethality schedule
-  std::vector<bool> lethality_schedule = scheduler.schedule_action_yearly(lethal_temperature_month, 1);
-  // Define output schedule
-  std::vector<bool> output_schedule;
-  if (output_frequency == "year") {
-    output_schedule = scheduler.schedule_action_end_of_year();
-  } else if (output_frequency == "month") {
-    output_schedule = scheduler.schedule_action_monthly();
-  } else if (output_frequency == "week") {
-    if (time_step == "day") {
-      output_schedule = scheduler.schedule_action_nsteps(7);
-    } else if (time_step == "week") {
-      output_schedule = scheduler.schedule_action_nsteps(1);
-    }
-  } else if (output_frequency == "day") {
-    output_schedule = scheduler.schedule_action_nsteps(1);
-  }
+  config.create_schedules();
 
-  Treatments<IntegerMatrix, NumericMatrix> treatments(scheduler);
+  Treatments<IntegerMatrix, NumericMatrix> treatments(config.scheduler());
   //config.use_treatments = false; set to false in constructor
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
     treatments.add_treatment(treatment_maps[t], pops::Date(treatment_dates[t]), pesticide_duration[t], treatment_application);
     config.use_treatments = true;
   }
 
-  unsigned count_lethal = get_number_of_scheduled_actions(lethality_schedule);
+  unsigned count_lethal = config.num_lethal();
   if (config.use_lethal_temperature && count_lethal > temperature.size()) {
     Rcerr << "Not enough years of temperature data" << std::endl;
   }
 
-  unsigned count_weather = get_number_of_scheduled_actions(spread_schedule);
+// TODO no call for this with spread_schedule in config.hpp
+  unsigned count_weather = get_number_of_scheduled_actions(config.spread_schedule());
   if (config.weather && count_weather > weather_coefficient.size()) {
     Rcerr << "Not enough indices of weather coefficient data" << std::endl;
   }
 
-  unsigned spread_rate_outputs = get_number_of_scheduled_actions(spread_rate_schedule);
+  unsigned spread_rate_outputs = config.rate_num_years();
   SpreadRate<IntegerMatrix> spreadrate(infected, config.ew_res, config.ns_res, spread_rate_outputs);
   // Define movement schedule  
   unsigned last_index = 0;
@@ -219,14 +210,17 @@ List pops_model(int random_seed,
   if (use_movements) {
     for (unsigned move = 0; move < movements_dates.size(); ++move) {
         pops::Date movement_date(movements_dates[move]);
-        move_scheduled = unsigned(scheduler.schedule_action_date(movement_date));
+        move_scheduled = unsigned(config.scheduler().schedule_action_date(movement_date));
         movement_schedule.push_back(move_scheduled);
     }
   }
+  
+  // have to keep this in for now until simulation.movement is added to model.hpp
+  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, num_rows, num_cols, model_type, latency_period);
 
   Model<IntegerMatrix, NumericMatrix, NumericMatrix> model(config);
   IntegerMatrix dispersers;
-  for (unsigned current_index = 0; current_index < config.steps; ++current_index) {
+  for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps(); ++current_index) {
 
     // if (all_infected(susceptible)) {
     //   Rcerr << "All suspectible hosts are infected!" << std::endl;
@@ -236,31 +230,30 @@ List pops_model(int random_seed,
     //   break;
     // }
     
-    if (spread_schedule[current_index]) {
+    if (config.spread_schedule()[current_index]) {
       dispersers(config.rows, config.cols);
     }
-    if (config.use_mortality && mortality_schedule[current_index]) {
+    if (config.use_mortality && config.mortality_schedule()[current_index]) {
       mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
       std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
     }
     // TODO pass in current_index as step to run_step?
-    model.run_step(current_index, spread_schedule, mortality_schedule, lethality_schedule,
-    spread_rate_schedule, count_weather, infected, susceptible, total_plants, dispersers, exposed, mortality_tracker_vector,
-    mortality, temperature, weather_coefficient, treatments, resistant, outside_dispersers,
-    spreadrate);
+    model.run_step(current_index, count_weather, infected, susceptible, total_plants,
+    dispersers, exposed, mortality_tracker_vector, mortality, temperature,
+    weather_coefficient, treatments, resistant, outside_dispersers, spreadrate);
 
-   if (spread_schedule[current_index]) {
+    if (config.spread_schedule()[current_index]) {
       total_dispersers += dispersers;
       if (use_movements) {
         last_index = simulation.movement(infected, susceptible, mortality_tracker, total_plants, current_index, last_index, movements, movement_schedule);
       }
     }
 
-    if (config.use_mortality && mortality_schedule[current_index]) {
+    if (config.use_mortality && config.mortality_schedule()[current_index]) {
       mortality_vector.push_back(Rcpp::clone(mortality));
     }
 
-    if (output_schedule[current_index]) {
+    if (config.output_schedule()[current_index]) {
       infected_vector.push_back(Rcpp::clone(infected));
       susceptible_vector.push_back(Rcpp::clone(susceptible));
       resistant_vector.push_back(Rcpp::clone(resistant));
@@ -276,9 +269,9 @@ List pops_model(int random_seed,
       total_dispersers(config.rows, config.cols);
     }
 
-    if (spread_rate_schedule[current_index]) {
+    if (config.spread_rate_schedule()[current_index]) {
       // leaving this line here (also in model.hpp) because without it simulation_year is unknown
-       unsigned simulation_year = simulation_step_to_action_step(spread_rate_schedule, current_index);
+      unsigned simulation_year = simulation_step_to_action_step(config.spread_rate_schedule(), current_index);
       spread_rates = spreadrate.yearly_rate(simulation_year);
       auto sr = to_array(spread_rates);
       spread_rates_vector.push_back(sr);
