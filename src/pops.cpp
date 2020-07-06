@@ -127,37 +127,20 @@ List pops_model(int random_seed,
                 int latency_period = 0
 )
 {
-  Config config;
+  // TODO no establishment_probability, establishment_stochasticity, or establishment_probability
+  // steps and use_treatments set later (set to 0 and false for now)
+  Config config = {random_seed, num_rows, num_cols, ew_res, ns_res, 0, true, true, 0.5, 
+  use_lethal_temperature, lethal_temperature, weather, reproductive_rate, model_type_, latency_period,
+  natural_kernel_type, natural_distance_scale, natural_dir, natural_kappa, use_anthropogenic_kernel,
+  percent_natural_dispersal, anthropogenic_kernel_type, anthropogenic_distance_scale, anthropogenic_dir,
+  anthropogenic_kappa, false, mortality_on, mortality_rate, mortality_time_lag};
+  
   std::vector<std::tuple<int, int>> outside_dispersers;
-  config.natural_kernel_type = natural_kernel_type;
-  config.anthro_kernel_type = anthropogenic_kernel_type;
   TreatmentApplication treatment_application = treatment_app_enum_from_string(treatment_method);
-  config.model_type = model_type_;
   pops::Date dd_start(start_date);
   pops::Date dd_end(end_date);
-  config.natural_direction = natural_dir;
-  config.anthro_direction = anthropogenic_dir;
   Season season(season_month_start, season_month_end);
   pops::Date dd_current(dd_start);
-  config.random_seed = random_seed;
-  config.rows = num_rows;
-  config.cols = num_cols;
-  config.latency_period_steps = latency_period;
-  config.use_anthropogenic_kernel = use_anthropogenic_kernel;
-  config.anthro_kappa = anthropogenic_kappa;
-  config.anthro_scale = anthropogenic_distance_scale;
-  config.use_lethal_temperature = use_lethal_temperature;
-  config.lethal_temperature = lethal_temperature;
-  config.use_mortality = mortality_on;
-  config.mortality_rate = mortality_rate;
-  config.weather = weather;
-  config.reproductive_rate = reproductive_rate;
-  config.natural_scale = natural_distance_scale;
-  config.natural_kappa = natural_kappa;
-  config.percent_natural_dispersal = percent_natural_dispersal;
-  config.ew_res = ew_res;
-  config.ns_res = ns_res;
-  config.first_mortality_year = mortality_time_lag;
 
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
@@ -184,6 +167,8 @@ List pops_model(int random_seed,
 
   // Define simulation time step
   Scheduler scheduler(dd_start, dd_end, step_unit, 1);
+  // set config.steps
+  config.steps = scheduler.get_num_steps();
   // Define spread schedule
   std::vector<bool> spread_schedule = scheduler.schedule_spread(season);
   // Define spread rate schedule
@@ -209,7 +194,7 @@ List pops_model(int random_seed,
   }
 
   Treatments<IntegerMatrix, NumericMatrix> treatments(scheduler);
-  config.use_treatments = false;
+  //config.use_treatments = false; set to false in constructor
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
     treatments.add_treatment(treatment_maps[t], pops::Date(treatment_dates[t]), pesticide_duration[t], treatment_application);
     config.use_treatments = true;
@@ -241,7 +226,7 @@ List pops_model(int random_seed,
 
   Model<IntegerMatrix, NumericMatrix, NumericMatrix> model(config);
   IntegerMatrix dispersers;
-  for (unsigned current_index = 0; current_index < scheduler.get_num_steps(); ++current_index) {
+  for (unsigned current_index = 0; current_index < config.steps; ++current_index) {
 
     // if (all_infected(susceptible)) {
     //   Rcerr << "All suspectible hosts are infected!" << std::endl;
