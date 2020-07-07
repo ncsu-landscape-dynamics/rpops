@@ -1,19 +1,13 @@
 #include <Rcpp.h>
-// change to use pops::model
 #include "model.hpp"
-//#include "simulation.hpp"
 #include "raster.hpp"
 #include "date.hpp"
-//#include "treatments.hpp"
-//#include "kernel.hpp"
 #include "kernel_types.hpp"
 #include "radial_kernel.hpp"
 #include "short_long_kernel.hpp"
-//#include "spread_rate.hpp"
 #include "statistics.hpp"
 #include "switch_kernel.hpp"
 #include "uniform_kernel.hpp"
-//#include "scheduling.hpp"
 #include <iostream>
 #include <vector>
 #include <tuple>
@@ -92,7 +86,6 @@ auto to_array(Tuple&& tuple)
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
-// TODO add in reduced stochasticity options?
 List pops_model(int random_seed, 
                 bool use_lethal_temperature, double lethal_temperature, int lethal_temperature_month,
                 IntegerMatrix infected,
@@ -156,11 +149,8 @@ List pops_model(int random_seed,
   std::vector<std::tuple<int, int>> outside_dispersers;
   TreatmentApplication treatment_application = treatment_app_enum_from_string(treatment_method);
   config.set_date_start(start_date);
-//   pops::Date dd_start(start_date);
   config.set_date_end(end_date);
-  //   pops::Date dd_end(end_date);
   config.set_season_start_end_month(season_month_start, season_month_end);
-//   Season season(season_month_start, season_month_end);
 
   std::vector<std::array<double,4>> spread_rates_vector;
   std::tuple<double,double,double,double> spread_rates;
@@ -184,7 +174,6 @@ List pops_model(int random_seed,
   config.create_schedules();
 
   Treatments<IntegerMatrix, NumericMatrix> treatments(config.scheduler());
-  //config.use_treatments = false; set to false in constructor
   for (unsigned t = 0; t < treatment_maps.size(); t++) {
     treatments.add_treatment(treatment_maps[t], pops::Date(treatment_dates[t]), pesticide_duration[t], treatment_application);
     config.use_treatments = true;
@@ -195,7 +184,7 @@ List pops_model(int random_seed,
     Rcerr << "Not enough years of temperature data" << std::endl;
   }
 
-// TODO no call for this with spread_schedule in config.hpp
+  // TODO no call for this with spread_schedule in config.hpp
   unsigned count_weather = get_number_of_scheduled_actions(config.spread_schedule());
   if (config.weather && count_weather > weather_coefficient.size()) {
     Rcerr << "Not enough indices of weather coefficient data" << std::endl;
@@ -216,7 +205,7 @@ List pops_model(int random_seed,
   }
   
   // have to keep this in for now until simulation.movement is added to model.hpp
-  Simulation<IntegerMatrix, NumericMatrix> simulation(random_seed, num_rows, num_cols, model_type, latency_period);
+  Simulation<IntegerMatrix, NumericMatrix> simulation(config.random_seed, config.rows, config.cols, model_type_from_string(config.model_type), config.latency_period_steps);
 
   Model<IntegerMatrix, NumericMatrix, NumericMatrix> model(config);
   IntegerMatrix dispersers;
@@ -237,7 +226,6 @@ List pops_model(int random_seed,
       mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
       std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
     }
-    // TODO pass in current_index as step to run_step?
     model.run_step(current_index, count_weather, infected, susceptible, total_plants,
     dispersers, exposed, mortality_tracker_vector, mortality, temperature,
     weather_coefficient, treatments, resistant, outside_dispersers, spreadrate);
