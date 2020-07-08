@@ -207,7 +207,7 @@ List pops_model(int random_seed,
   // have to keep this in for now until simulation.movement is added to model.hpp
   Simulation<IntegerMatrix, NumericMatrix> simulation(config.random_seed, config.rows, config.cols, model_type_from_string(config.model_type), config.latency_period_steps);
 
-  Model<IntegerMatrix, NumericMatrix, NumericMatrix> model(config);
+  Model<IntegerMatrix, NumericMatrix, int> model(config);
   IntegerMatrix dispersers;
   for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps(); ++current_index) {
 
