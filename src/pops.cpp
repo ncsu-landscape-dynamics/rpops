@@ -184,7 +184,6 @@ List pops_model(int random_seed,
     Rcerr << "Not enough years of temperature data" << std::endl;
   }
 
-  // TODO no call for this with spread_schedule in config.hpp
   unsigned count_weather = get_number_of_scheduled_actions(config.spread_schedule());
   if (config.weather && count_weather > weather_coefficient.size()) {
     Rcerr << "Not enough indices of weather coefficient data" << std::endl;
@@ -192,7 +191,6 @@ List pops_model(int random_seed,
 
   unsigned spread_rate_outputs = config.rate_num_years();
   SpreadRate<IntegerMatrix> spreadrate(infected, config.ew_res, config.ns_res, spread_rate_outputs);
-  // Define movement schedule  
   unsigned last_index = 0;
   unsigned move_scheduled;
   std::vector<unsigned> movement_schedule;
@@ -204,7 +202,6 @@ List pops_model(int random_seed,
     }
   }
   
-  // have to keep this in for now until simulation.movement is added to model.hpp
   Simulation<IntegerMatrix, NumericMatrix> simulation(config.random_seed, config.rows, config.cols, model_type_from_string(config.model_type), config.latency_period_steps);
 
   Model<IntegerMatrix, NumericMatrix, int> model(config);
@@ -253,12 +250,10 @@ List pops_model(int random_seed,
       number_infected.push_back(num_infected);
       area_infect = area_of_infected(infected, config.ew_res, config.ns_res);
       area_infected.push_back(area_infect);
-      // reinitialize total dispersers so each output isn't an accumulation of the previous output
       total_dispersers(config.rows, config.cols);
     }
 
     if (config.spread_rate_schedule()[current_index]) {
-      // leaving this line here (also in model.hpp) because without it simulation_year is unknown
       unsigned simulation_year = simulation_step_to_action_step(config.spread_rate_schedule(), current_index);
       spread_rates = spreadrate.yearly_rate(simulation_year);
       auto sr = to_array(spread_rates);
