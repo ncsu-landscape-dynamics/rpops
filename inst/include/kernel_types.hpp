@@ -23,8 +23,8 @@
  * This file contains general functionality shared in general by all
  * kernels.
  *
- * An alternative implementation would be for each class to mainain its
- * own enum of supported kernels, potentially creatng a hiearchy of
+ * An alternative implementation would be for each class to maintain its
+ * own enum of supported kernels, potentially creating a hierarchy of
  * kernel types and subtypes. This would avoid the need for a separate
  * header file such as this one due to all kernels potentially
  * depending on it which prevents us from having it in the same header
@@ -55,6 +55,7 @@ enum class DispersalKernelType
     Cauchy,  //!< Cauchy dispersal kernel
     Exponential,  //!< Exponential dispersal kernel
     Uniform,  //!< Random uniform dispersal kernel
+    DeterministicNeighbor,  //!< Deterministic immediate neighbor dispersal kernel
     None,  //!< No dispersal kernel (no spread)
 };
 
@@ -63,8 +64,7 @@ enum class DispersalKernelType
  * Throws an std::invalid_argument exception if the values was not
  * found or is not supported (which is the same thing).
  */
-inline
-DispersalKernelType kernel_type_from_string(const std::string& text)
+inline DispersalKernelType kernel_type_from_string(const std::string& text)
 {
     if (text == "cauchy")
         return DispersalKernelType::Cauchy;
@@ -72,24 +72,25 @@ DispersalKernelType kernel_type_from_string(const std::string& text)
         return DispersalKernelType::Exponential;
     else if (text == "uniform")
         return DispersalKernelType::Uniform;
-    else if (text == "none" || text == "None"
-             || text == "NONE" || text.empty())
+    else if (text == "deterministic-neighbor" || text == "deterministic_neighbor")
+        return DispersalKernelType::DeterministicNeighbor;
+    else if (text == "none" || text == "None" || text == "NONE" || text.empty())
         return DispersalKernelType::None;
     else
-        throw std::invalid_argument("kernel_type_from_string: Invalid"
-                                    " value '" + text +"' provided");
+        throw std::invalid_argument(
+            "kernel_type_from_string: Invalid"
+            " value '"
+            + text + "' provided");
 }
 
 /*! Overload which allows to pass C-style string which is nullptr (NULL)
  */
-inline
-DispersalKernelType kernel_type_from_string(const char* text)
+inline DispersalKernelType kernel_type_from_string(const char* text)
 {
     // call the string version
-    return kernel_type_from_string(text ? std::string(text)
-                                        : std::string());
+    return kernel_type_from_string(text ? std::string(text) : std::string());
 }
 
-} // namespace pops
+}  // namespace pops
 
-#endif // POPS_KERNEL_TYPES_HPP
+#endif  // POPS_KERNEL_TYPES_HPP

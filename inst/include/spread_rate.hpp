@@ -26,7 +26,6 @@ typedef std::tuple<int, int, int, int> BBoxInt;
 typedef std::tuple<double, double, double, double> BBoxFloat;
 typedef std::tuple<bool, bool, bool, bool> BBoxBool;
 
-
 /**
  * Class storing and computing yearly spread rate for one simulation.
  */
@@ -54,10 +53,14 @@ private:
         int n, s, e, w;
         bool bn = false, bs = false, be = false, bw = false;
         std::tie(n, s, e, w) = bbox;
-        if (n == 0) bn = true;
-        if (s == (height - 1)) bs = true;
-        if (w == 0) bw = true;
-        if (e == (width - 1)) be = true;
+        if (n == 0)
+            bn = true;
+        if (s == (height - 1))
+            bs = true;
+        if (w == 0)
+            bw = true;
+        if (e == (width - 1))
+            be = true;
 
         return std::make_tuple(bn, bs, be, bw);
     }
@@ -78,10 +81,14 @@ private:
                 auto value = raster(i, j);
                 if (value > 0) {
                     found = true;
-                    if (i < n) n = i;
-                    if (i > s) s = i;
-                    if (j > e) e = j;
-                    if (j < w) w = j;
+                    if (i < n)
+                        n = i;
+                    if (i > s)
+                        s = i;
+                    if (j > e)
+                        e = j;
+                    if (j < w)
+                        w = j;
                 }
             }
         }
@@ -103,16 +110,18 @@ private:
             return false;
         return true;
     }
+
 public:
     SpreadRate(const Raster& raster, double ew_res, double ns_res, unsigned num_years)
-        :
-          width(raster.cols()),
+        : width(raster.cols()),
           height(raster.rows()),
           west_east_resolution(ew_res),
           north_south_resolution(ns_res),
           num_years(num_years),
           boundaries(num_years + 1, std::make_tuple(0, 0, 0, 0)),
-          rates(num_years, std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan("")))
+          rates(
+              num_years,
+              std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan("")))
     {
         boundaries.at(0) = infection_boundary(raster);
     }
@@ -140,7 +149,8 @@ public:
         BBoxInt bbox = infection_boundary(raster);
         boundaries.at(simulation_year + 1) = bbox;
         if (!is_boundary_valid(bbox)) {
-            rates.at(simulation_year) = std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan(""));
+            rates.at(simulation_year) =
+                std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan(""));
             return;
         }
         int n1, n2, s1, s2, e1, e2, w1, w2;
@@ -153,10 +163,14 @@ public:
 
         bool bn, bs, be, bw;
         std::tie(bn, bs, be, bw) = is_out_of_bounds(bbox);
-        if (n_rate == 0 && bn) n_rate = std::nan("");
-        if (s_rate == 0 && bs) s_rate = std::nan("");
-        if (e_rate == 0 && be) e_rate = std::nan("");
-        if (w_rate == 0 && bw) w_rate = std::nan("");
+        if (n_rate == 0 && bn)
+            n_rate = std::nan("");
+        if (s_rate == 0 && bs)
+            s_rate = std::nan("");
+        if (e_rate == 0 && be)
+            e_rate = std::nan("");
+        if (w_rate == 0 && bw)
+            w_rate = std::nan("");
 
         rates.at(simulation_year) = std::make_tuple(n_rate, s_rate, e_rate, w_rate);
     }
@@ -168,14 +182,14 @@ public:
  * Checks if any rate is nan to not include it in the average.
  */
 template<typename Raster>
-BBoxFloat average_spread_rate(const std::vector<SpreadRate<Raster>>& rates, unsigned simulation_year)
+BBoxFloat average_spread_rate(
+    const std::vector<SpreadRate<Raster>>& rates, unsigned simulation_year)
 {
     // loop through stochastic runs
     double n, s, e, w;
     int size_n = 0, size_s = 0, size_e = 0, size_w = 0;
     double avg_n = 0, avg_s = 0, avg_e = 0, avg_w = 0;
-    for (unsigned i = 0; i < rates.size(); i++)
-    {
+    for (unsigned i = 0; i < rates.size(); i++) {
         std::tie(n, s, e, w) = rates[i].yearly_rate(simulation_year);
         if (!std::isnan(n)) {
             avg_n += n;
@@ -202,7 +216,5 @@ BBoxFloat average_spread_rate(const std::vector<SpreadRate<Raster>>& rates, unsi
     return std::make_tuple(avg_n, avg_s, avg_e, avg_w);
 }
 
-
-}
-#endif // POPS_SPREAD_RATE_HPP
-
+}  // namespace pops
+#endif  // POPS_SPREAD_RATE_HPP

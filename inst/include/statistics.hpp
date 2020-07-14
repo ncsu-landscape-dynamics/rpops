@@ -26,8 +26,8 @@ template<typename IntegerRaster>
 unsigned sum_of_infected(const IntegerRaster& infected)
 {
     unsigned sum = 0;
-    for (signed j = 0; j < infected.rows(); j++) {
-        for (signed k = 0; k < infected.cols(); k++) {
+    for (unsigned j = 0; j < infected.rows(); j++) {
+        for (unsigned k = 0; k < infected.cols(); k++) {
             sum += infected(j, k);
         }
     }
@@ -41,8 +41,8 @@ template<typename IntegerRaster>
 double area_of_infected(const IntegerRaster& infected, double ew_res, double ns_res)
 {
     unsigned cells = 0;
-    for (signed j = 0; j < infected.rows(); j++) {
-        for (signed k = 0; k < infected.cols(); k++) {
+    for (unsigned j = 0; j < infected.rows(); j++) {
+        for (unsigned k = 0; k < infected.cols(); k++) {
             if (infected(j, k) > 0)
                 cells++;
         }
@@ -50,6 +50,5 @@ double area_of_infected(const IntegerRaster& infected, double ew_res, double ns_
     return cells * ew_res * ns_res;
 }
 
-}
-#endif // POPS_STATISTICS_HPP
-
+}  // namespace pops
+#endif  // POPS_STATISTICS_HPP
