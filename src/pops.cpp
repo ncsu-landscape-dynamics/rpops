@@ -4,7 +4,7 @@
 #include "date.hpp"
 #include "kernel_types.hpp"
 #include "radial_kernel.hpp"
-#include "short_long_kernel.hpp"
+#include "natural_anthropogenic_kernel.hpp"
 #include "statistics.hpp"
 #include "switch_kernel.hpp"
 #include "uniform_kernel.hpp"
