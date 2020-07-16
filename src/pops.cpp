@@ -10,7 +10,6 @@
 #include "uniform_kernel.hpp"
 #include "treatments.hpp"
 #include "kernel.hpp"
-#include "short_long_kernel.hpp"
 #include "spread_rate.hpp"
 #include "scheduling.hpp"
 #include <iostream>
@@ -184,7 +183,6 @@ List pops_model(int random_seed,
     config.use_treatments = true;
   }
 
-  
   if (config.use_lethal_temperature) {
     if (config.num_lethal() > temperature.size()) {
       Rcerr << "Not enough years of temperature data" << std::endl;
