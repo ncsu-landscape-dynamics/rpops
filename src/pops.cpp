@@ -8,6 +8,11 @@
 #include "statistics.hpp"
 #include "switch_kernel.hpp"
 #include "uniform_kernel.hpp"
+#include "treatments.hpp"
+#include "kernel.hpp"
+#include "short_long_kernel.hpp"
+#include "spread_rate.hpp"
+#include "scheduling.hpp"
 #include <iostream>
 #include <vector>
 #include <tuple>
