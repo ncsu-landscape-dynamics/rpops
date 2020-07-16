@@ -184,9 +184,11 @@ List pops_model(int random_seed,
     config.use_treatments = true;
   }
 
-  unsigned count_lethal = config.num_lethal();
-  if (config.use_lethal_temperature && count_lethal > temperature.size()) {
-    Rcerr << "Not enough years of temperature data" << std::endl;
+  
+  if (config.use_lethal_temperature) {
+    if (config.num_lethal() > temperature.size()) {
+      Rcerr << "Not enough years of temperature data" << std::endl;
+    }
   }
 
   unsigned count_weather = get_number_of_scheduled_actions(config.spread_schedule());
