@@ -138,6 +138,7 @@ List pops_model(int random_seed,
   config.anthro_kappa = anthropogenic_kappa;
   config.anthro_scale = anthropogenic_distance_scale;
   config.use_lethal_temperature = use_lethal_temperature;
+  config.lethal_temperature_month = lethal_temperature_month;
   config.lethal_temperature = lethal_temperature;
   config.use_mortality = mortality_on;
   config.mortality_rate = mortality_rate;
