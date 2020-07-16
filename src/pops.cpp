@@ -125,36 +125,44 @@ List pops_model(int random_seed,
 )
 {
   Config config;
-  config.natural_kernel_type = natural_kernel_type;
-  config.anthro_kernel_type = anthropogenic_kernel_type;
-  config.model_type = model_type_;
-  config.natural_direction = natural_dir;
-  config.anthro_direction = anthropogenic_dir;
   config.random_seed = random_seed;
   config.rows = num_rows;
   config.cols = num_cols;
-  config.latency_period_steps = latency_period;
-  config.use_anthropogenic_kernel = use_anthropogenic_kernel;
-  config.anthro_kappa = anthropogenic_kappa;
-  config.anthro_scale = anthropogenic_distance_scale;
-  config.use_lethal_temperature = use_lethal_temperature;
-  config.lethal_temperature_month = lethal_temperature_month;
-  config.lethal_temperature = lethal_temperature;
-  config.use_mortality = mortality_on;
-  config.mortality_rate = mortality_rate;
-  config.weather = weather;
-  config.reproductive_rate = reproductive_rate;
-  config.natural_scale = natural_distance_scale;
-  config.natural_kappa = natural_kappa;
-  config.percent_natural_dispersal = percent_natural_dispersal;
   config.ew_res = ew_res;
   config.ns_res = ns_res;
+  // generate_stochasticity/establishment_stochasticity/establishment_probability
+  config.use_lethal_temperature = use_lethal_temperature;
+  config.lethal_temperature = lethal_temperature;
+  config.lethal_temperature_month = lethal_temperature_month;
+  config.weather = weather;
+  config.reproductive_rate = reproductive_rate;
+  config.model_type = model_type_;
+  config.latency_period_steps = latency_period;
+  config.natural_kernel_type = natural_kernel_type;
+  config.natural_scale = natural_distance_scale;
+  config.natural_direction = natural_dir;
+  config.natural_kappa = natural_kappa;
+
+  config.use_anthropogenic_kernel = use_anthropogenic_kernel;
+  config.percent_natural_dispersal = percent_natural_dispersal;
+  config.anthro_kernel_type = anthropogenic_kernel_type;
+  config.anthro_scale = anthropogenic_distance_scale;
+  config.anthro_direction = anthropogenic_dir;
+  config.anthro_kappa = anthropogenic_kappa;
+
+  // use_treatment set later
+  config.use_mortality = mortality_on;
+  config.mortality_rate = mortality_rate;
   config.first_mortality_year = mortality_time_lag;
+  config.output_frequency = output_frequency;
+  //output_frequency_n??
 
   std::vector<std::tuple<int, int>> outside_dispersers;
   TreatmentApplication treatment_application = treatment_app_enum_from_string(treatment_method);
   config.set_date_start(start_date);
   config.set_date_end(end_date);
+    config.set_step_unit(time_step);
+  //config.set_step_num_units(); 
   config.set_season_start_end_month(season_month_start, season_month_end);
 
   std::vector<std::array<double,4>> spread_rates_vector;
@@ -174,7 +182,6 @@ List pops_model(int random_seed,
   std::vector<IntegerMatrix> total_host_vector;
   std::vector<IntegerMatrix> dispersers_vector;
 
-  config.set_step_unit(time_step);
 
   config.create_schedules();
 
