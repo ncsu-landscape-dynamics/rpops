@@ -154,14 +154,17 @@ List pops_model(int random_seed,
   config.use_mortality = mortality_on;
   config.mortality_rate = mortality_rate;
   config.first_mortality_year = mortality_time_lag;
+  if (output_frequency == "time_step") {
+    output_frequency = time_step;
+  }
   config.output_frequency = output_frequency;
-  //output_frequency_n??
+  //output_frequency_n?
 
   std::vector<std::tuple<int, int>> outside_dispersers;
   TreatmentApplication treatment_application = treatment_app_enum_from_string(treatment_method);
   config.set_date_start(start_date);
   config.set_date_end(end_date);
-    config.set_step_unit(time_step);
+  config.set_step_unit(time_step);
   //config.set_step_num_units(); 
   config.set_season_start_end_month(season_month_start, season_month_end);
 
@@ -215,7 +218,8 @@ List pops_model(int random_seed,
     }
   }
   
-  Simulation<IntegerMatrix, NumericMatrix> simulation(config.random_seed, config.rows, config.cols, model_type_from_string(config.model_type), config.latency_period_steps);
+  Simulation<IntegerMatrix, NumericMatrix> simulation(config.random_seed, config.rows,
+    config.cols, model_type_from_string(config.model_type), config.latency_period_steps);
 
   Model<IntegerMatrix, NumericMatrix, int> model(config);
   IntegerMatrix dispersers;
@@ -236,14 +240,15 @@ List pops_model(int random_seed,
       mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
       std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
     }
-    model.run_step(current_index, count_weather, infected, susceptible, total_plants,
+    model.run_step(current_index, current_index, infected, susceptible, total_plants,
     dispersers, exposed, mortality_tracker_vector, mortality, temperature,
     weather_coefficient, treatments, resistant, outside_dispersers, spreadrate);
 
     if (config.spread_schedule()[current_index]) {
       total_dispersers += dispersers;
       if (use_movements) {
-        last_index = simulation.movement(infected, susceptible, mortality_tracker, total_plants, current_index, last_index, movements, movement_schedule);
+        last_index = simulation.movement(infected, susceptible, mortality_tracker,
+            total_plants, current_index, last_index, movements, movement_schedule);
       }
     }
 
