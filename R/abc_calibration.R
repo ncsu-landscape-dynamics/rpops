@@ -448,7 +448,11 @@ abc_calibration <- function(infected_years_file,
         } else {
           infected_sim[] <- data$infected[[y]]
         }
-
+        
+        if (!is.null(mask)){
+          infected_sim[is.na(mask)] <- 0
+        }
+        
         diff_raster <- infection_years[[y]] - infected_sim
         residual_diffs[[y]] <- sum(diff_raster[diff_raster > 0])
         
