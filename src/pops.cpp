@@ -158,14 +158,14 @@ List pops_model(int random_seed,
     output_frequency = time_step;
   }
   config.output_frequency = output_frequency;
-  //output_frequency_n?
+  config.output_frequency_n = 0;
 
   std::vector<std::tuple<int, int>> outside_dispersers;
   TreatmentApplication treatment_application = treatment_app_enum_from_string(treatment_method);
   config.set_date_start(start_date);
   config.set_date_end(end_date);
   config.set_step_unit(time_step);
-  //config.set_step_num_units(); 
+  config.set_step_num_units(1); 
   config.set_season_start_end_month(season_month_start, season_month_end);
 
   std::vector<std::array<double,4>> spread_rates_vector;
@@ -218,11 +218,10 @@ List pops_model(int random_seed,
     }
   }
   
-  Simulation<IntegerMatrix, NumericMatrix> simulation(config.random_seed, config.rows,
-    config.cols, model_type_from_string(config.model_type), config.latency_period_steps);
+  ModelType mt = model_type_from_string(config.model_type);
+  Simulation<IntegerMatrix, NumericMatrix> simulation(config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
 
   Model<IntegerMatrix, NumericMatrix, int> model(config);
-  IntegerMatrix dispersers;
   for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps(); ++current_index) {
 
     // if (all_infected(susceptible)) {
@@ -232,28 +231,23 @@ List pops_model(int random_seed,
     //   resistant_vector.push_back(Rcpp::clone(resistant));
     //   break;
     // }
+    IntegerMatrix dispersers(config.rows, config.cols);
+    mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
+    model.run_step(current_index, current_index, infected, susceptible, total_plants,
+                   dispersers, exposed, mortality_tracker_vector, mortality, temperature,
+                   weather_coefficient, treatments, resistant, outside_dispersers, spreadrate);
     
     if (config.spread_schedule()[current_index]) {
-      dispersers(config.rows, config.cols);
-    }
-    if (config.use_mortality && config.mortality_schedule()[current_index]) {
-      mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
-      std::fill(mortality_tracker.begin(), mortality_tracker.end(), 0);
-    }
-    model.run_step(current_index, current_index, infected, susceptible, total_plants,
-    dispersers, exposed, mortality_tracker_vector, mortality, temperature,
-    weather_coefficient, treatments, resistant, outside_dispersers, spreadrate);
-
-    if (config.spread_schedule()[current_index]) {
       total_dispersers += dispersers;
-      if (use_movements) {
-        last_index = simulation.movement(infected, susceptible, mortality_tracker,
-            total_plants, current_index, last_index, movements, movement_schedule);
-      }
     }
 
     if (config.use_mortality && config.mortality_schedule()[current_index]) {
       mortality_vector.push_back(Rcpp::clone(mortality));
+      if (use_movements) {
+        last_index = simulation.movement(infected, susceptible, mortality_tracker,
+                                        total_plants, current_index, last_index,
+                                        movements, movement_schedule);
+      }
     }
 
     if (config.output_schedule()[current_index]) {
