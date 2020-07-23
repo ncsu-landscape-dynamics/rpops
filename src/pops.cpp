@@ -239,15 +239,15 @@ List pops_model(int random_seed,
     
     if (config.spread_schedule()[current_index]) {
       total_dispersers += dispersers;
-    }
-
-    if (config.use_mortality && config.mortality_schedule()[current_index]) {
-      mortality_vector.push_back(Rcpp::clone(mortality));
       if (use_movements) {
         last_index = simulation.movement(infected, susceptible, mortality_tracker,
                                         total_plants, current_index, last_index,
                                         movements, movement_schedule);
       }
+    }
+
+    if (config.use_mortality && config.mortality_schedule()[current_index]) {
+      mortality_vector.push_back(Rcpp::clone(mortality));
     }
 
     if (config.output_schedule()[current_index]) {
