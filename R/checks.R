@@ -270,14 +270,14 @@ prior_checks <- function(priors) {
     priors <- matrix(priors, ncol = 2)
   } 
   
-  if (class(priors) %in% c("matrix", "data.frame") && ncol(priors) == 2) {
+  if (class(priors) %in% c("matrix", "data.frame") && base::ncol(priors) == 2) {
     if (class(priors) == "matrix" && nrow(priors) == 1) {
       start_priors <- priors[1]
       sd_priors <- priors[2]
-    } else if (class(priors) == "data.frame" && nrow(priors) == 1) {
+    } else if (class(priors) == "data.frame" && base::nrow(priors) == 1) {
       start_priors <- priors[[1]]
       sd_priors <- 0
-    } else if (class(priors) %in% c("matrix", "data.frame") && nrow(priors) > 1) {
+    } else if (class(priors) %in% c("matrix", "data.frame") && base::nrow(priors) > 1) {
       names(priors) <- c('var', 'prob')
       start_priors <- priors$var[priors$prob == max(priors$prob)]
       if(length(start_priors) > 1) {
@@ -324,7 +324,7 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
     names(params) <- c('params', 'prob')
   }
   calibration_count <- length(params)
-  calibrated_rates <- as.data.frame(table(params))
+  calibrated_rates <- base::as.data.frame(table(params))
   calibrated_rates$params <- as.numeric(as.character(calibrated_rates$params))
   calibrated_rates$prob <- round(calibrated_rates$Freq/calibration_count, digits = 3)
   
@@ -336,7 +336,7 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
                                    calibrated_probability = rep(0, length(seq(min_rate, max_rate, step_size))),
                                    posterior_probability = rep(0, length(seq(min_rate, max_rate, step_size))))
   
-  for (i in 1:nrow(rates)) {
+  for (i in 1:base::nrow(rates)) {
     if (length(priors$prob[priors$priors == rates$rate[i]]) > 0) {
       rates$prior_probability[i] <- priors$prob[priors$priors == rates$rate[i]]
     }
