@@ -193,7 +193,7 @@ public:
 
             for (int i = 0; i < rows_; i++) {
                 for (int j = 0; j < cols_; j++) {
-                    for (unsigned year_index = 0; year_index <= max_year_index;
+                    for (int year_index = 0; year_index <= max_year_index;
                          year_index++) {
                         int mortality_in_year_index = 0;
                         if (mortality_tracker_vector[year_index](i, j) > 0) {

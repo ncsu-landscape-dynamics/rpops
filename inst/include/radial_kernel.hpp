@@ -175,9 +175,9 @@ protected:
     DispersalKernelType dispersal_kernel_type_;
     std::cauchy_distribution<double> cauchy_distribution;
     std::exponential_distribution<double> exponential_distribution;
-    von_mises_distribution von_mises;
-    DeterministicDispersalKernel<IntegerRaster> deterministic_kernel;
     bool deterministic_;
+    DeterministicDispersalKernel<IntegerRaster> deterministic_kernel;
+    von_mises_distribution von_mises;
 
 public:
     RadialDispersalKernel(

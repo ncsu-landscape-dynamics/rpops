@@ -117,7 +117,7 @@ public:
         SpreadRate<IntegerRaster>& spread_rate  // out
     )
     {
-        unsigned mortality_simulation_year =
+        int mortality_simulation_year =
             simulation_step_to_action_step(config_.mortality_schedule(), step);
         // removal of dispersers due to lethal tempearture
         if (config_.use_lethal_temperature && config_.lethal_schedule()[step]) {
@@ -161,7 +161,7 @@ public:
                 if (mortality_simulation_year >= config_.first_mortality_year - 1) {
                     auto max_index =
                         mortality_simulation_year - (config_.first_mortality_year - 1);
-                    for (unsigned age = 0; age <= max_index; age++) {
+                    for (int age = 0; age <= max_index; age++) {
                         treatments.manage_mortality(step, mortality_tracker[age]);
                     }
                 }

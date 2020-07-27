@@ -114,11 +114,6 @@ class DeterministicDispersalKernel
 {
 protected:
     const IntegerRaster& dispersers_;
-    DispersalKernelType kernel_type_;
-    // the west-east resolution of the pixel
-    double east_west_resolution;
-    // the north-south resolution of the pixel
-    double north_south_resolution;
     // row/col position of middle cell
     int mid_row = 0;
     int mid_col = 0;
@@ -134,7 +129,12 @@ protected:
     Raster<double> probability_copy;
     CauchyDistribution cauchy;
     ExponentialDistribution exponential;
+    DispersalKernelType kernel_type_;
     double proportion_of_dispersers;
+    // the west-east resolution of the pixel
+    double east_west_resolution;
+    // the north-south resolution of the pixel
+    double north_south_resolution;
 
 public:
     DeterministicDispersalKernel(
