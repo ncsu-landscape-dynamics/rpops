@@ -234,6 +234,7 @@ test_that("Time checks report correct errors and return number of time steps, nu
 })
 
 test_that("Prior checks report correct errors and return reformatted priors, and mean and sd of priors for starting location for MCMC", {
+  skip_on_appveyor()
   priors <- 2.1
   prior_check <- prior_checks(priors)
   expect_equal(prior_check$checks_passed, FALSE)
@@ -257,6 +258,7 @@ test_that("Prior checks report correct errors and return reformatted priors, and
 })
 
 test_that("Bayesian checks report correct errors and return all rates as a data frame and posterior rates as a data frame", {
+  skip_on_appveyor()
   priors <- c(2.1, 0.2)
   prior_check <- prior_checks(priors)
   prior <- prior_check$priors

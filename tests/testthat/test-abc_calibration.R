@@ -100,7 +100,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
   
   expect_length(data$posterior_means, 6)
   expect_vector(data$posterior_means, ptype = double(), size = 6)
-  expect_match(class(data$posterior_cov_matrix), "matrix")
+  expect_is(data$posterior_cov_matrix, class = "matrix")
   expect_type(data$posterior_cov_matrix, "double")
   expect_equal(nrow(data$posterior_cov_matrix), 6)
   expect_equal(ncol(data$posterior_cov_matrix), 6)
@@ -120,7 +120,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a singl
   params_to_estimate <- c(T, T, T, T, F, F)  ### 1st: reproductive rates, 2nd: natural distance, 3rd: percent natural, 4tH: anthropogenic distance, 5th Natural Kappa, 6th anthropogenic kappa
   number_of_generations <- 6
   generation_size <- 10
-  checks = c(500, 60000, 900, 1000)
+  checks = c(1200, 90000, 900, 1000)
   infected_file <- system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   total_plants_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -211,7 +211,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a singl
   
   expect_length(data$posterior_means, 6)
   expect_vector(data$posterior_means, ptype = double(), size = 6)
-  expect_match(class(data$posterior_cov_matrix), "matrix")
+  expect_is(data$posterior_cov_matrix, class = "matrix")
   expect_type(data$posterior_cov_matrix, "double")
   expect_equal(nrow(data$posterior_cov_matrix), 6)
   expect_equal(ncol(data$posterior_cov_matrix), 6)
