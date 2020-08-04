@@ -1,4 +1,5 @@
 ## These functions are designed to improve data format checks and reduce copy and pasting of code across functions
+Sys.setenv("R_TESTS"="")
 
 initial_raster_checks <- function(x) {
   checks_passed <- TRUE
@@ -200,7 +201,7 @@ time_checks <- function(end_date, start_date, time_step, output_frequency) {
     failed_check <- "Time step must be one of 'week', 'month' or 'day'"
   }
   
-  if (checks_passed && (class(end_date) != "character" || class(start_date) != "character" || class(as.Date(end_date, format="%Y-%m-%d")) != "Date" || class(as.Date(start_date, format="%Y-%m-%d")) != "Date" || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d")))){
+  if (checks_passed && (!is(end_date, "character") || !is(start_date, "character") || !is(as.Date(end_date, format="%Y-%m-%d"), "Date") || !is(as.Date(start_date, format="%Y-%m-%d"), "Date") || is.na(as.Date(end_date, format="%Y-%m-%d")) || is.na(as.Date(start_date, format="%Y-%m-%d")))){
     checks_passed <- FALSE
     failed_check <- "End time and/or start time not of type numeric and/or in format YYYY-MM-DD"
   }
@@ -266,23 +267,23 @@ time_checks <- function(end_date, start_date, time_step, output_frequency) {
 prior_checks <- function(priors) {
   checks_passed <- TRUE
   
-  if (class(priors) == "numeric" && length(priors) == 2) {
+  if (is(priors, "numeric") && length(priors) == 2) {
     priors <- matrix(priors, ncol = 2)
   } 
   
-  if (class(priors) %in% c("matrix", "data.frame") && base::ncol(priors) == 2) {
-    if (class(priors) == "matrix" && nrow(priors) == 1) {
+  if ((is(priors, "data.frame") | is(priors,"matrix")) && ncol(priors) == 2) {
+    if (is(priors,"matrix") && base::nrow(priors) == 1) {
       start_priors <- priors[1]
       sd_priors <- priors[2]
-    } else if (class(priors) == "data.frame" && base::nrow(priors) == 1) {
+    } else if (is(priors, "data.frame") && nrow(priors) == 1) {
       start_priors <- priors[[1]]
       sd_priors <- 0
-    } else if (class(priors) %in% c("matrix", "data.frame") && base::nrow(priors) > 1) {
+    } else if ((is(priors, "data.frame") | is(priors,"matrix")) && base::nrow(priors) > 1) {
       names(priors) <- c('var', 'prob')
       start_priors <- priors$var[priors$prob == max(priors$prob)]
-      if(length(start_priors) > 1) {
+      if (length(start_priors) > 1) {
         start_priors <- mean(start_priors)
-      }
+      } 
       sd_priors <- sd(priors$var)
     }
   } else {
@@ -305,7 +306,7 @@ prior_checks <- function(priors) {
 bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior_weight, weight, step_size, bounds = c(0, Inf), round_to = 1, round_to_digits = 1) {
   checks_passed <- TRUE
   
-  if (class(prior) == "matrix" && nrow(prior) == 1) {
+  if ((is(prior, "matrix") && nrow(prior) == 1) || (is(prior, "numeric") && length(prior) == 1)) {
     priors <- round(rnorm(count, start_priors, sd_priors)/round_to, digits = round_to_digits)*round_to
     priors <- as.data.frame(table(priors))
     priors$priors <- as.numeric(as.character(priors$priors))
@@ -314,12 +315,12 @@ bayesian_checks <- function(prior, start_priors, sd_priors, params, count, prior
     priors$prob[priors$priors == bounds[1]] <- sum(priors$prob[priors$priors <= bounds[1]])
     priors <- priors[priors$prob > 0.000,]
     priors <- priors[priors$priors <= bounds[2] & priors$priors >= bounds[1],]
-  } else if (class(prior) %in% c("matrix", "data.frame") && nrow(prior) > 1) {
+  } else if ((is(priors, "data.frame") | is(priors,"matrix")) && nrow(prior) > 1) {
     priors <- prior[ , 1:2]
     names(priors) <- c('priors', 'prob')
-    
   }
-  if (class(params) == 'matrix') {
+  
+  if (is(params, 'matrix')) {
     params <- data.frame(params)
     names(params) <- c('params', 'prob')
   }
