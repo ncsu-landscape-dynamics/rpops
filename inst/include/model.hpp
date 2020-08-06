@@ -42,53 +42,20 @@ private:
     Config config_;
     DispersalKernelType natural_kernel;
     DispersalKernelType anthro_kernel;
-    RadialDispersalKernel<IntegerRaster> natural_radial_kernel;
-    RadialDispersalKernel<IntegerRaster> long_radial_kernel;
     UniformDispersalKernel uniform_kernel;
     DeterministicNeighborDispersalKernel natural_neighbor_kernel;
     DeterministicNeighborDispersalKernel anthro_neighbor_kernel;
-    SwitchDispersalKernel<IntegerRaster> natural_selectable_kernel;
-    SwitchDispersalKernel<IntegerRaster> anthro_selectable_kernel;
-    DispersalKernel<IntegerRaster> dispersal_kernel;
     Simulation<IntegerRaster, FloatRaster, RasterIndex> simulation_;
+    unsigned last_index{0};
 
 public:
     Model(const Config& config)
         : config_(config),
           natural_kernel(kernel_type_from_string(config.natural_kernel_type)),
           anthro_kernel(kernel_type_from_string(config.anthro_kernel_type)),
-          natural_radial_kernel(
-              config.ew_res,
-              config.ns_res,
-              natural_kernel,
-              config.natural_scale,
-              direction_from_string(config.natural_direction),
-              config.natural_kappa),
-          long_radial_kernel(
-              config.ew_res,
-              config.ns_res,
-              anthro_kernel,
-              config.anthro_scale,
-              direction_from_string(config.anthro_direction),
-              config.anthro_kappa),
           uniform_kernel(config.rows, config.cols),
           natural_neighbor_kernel(direction_from_string(config.natural_direction)),
           anthro_neighbor_kernel(direction_from_string(config.anthro_direction)),
-          natural_selectable_kernel(
-              natural_kernel,
-              natural_radial_kernel,
-              uniform_kernel,
-              natural_neighbor_kernel),
-          anthro_selectable_kernel(
-              anthro_kernel,
-              long_radial_kernel,
-              uniform_kernel,
-              anthro_neighbor_kernel),
-          dispersal_kernel(
-              natural_selectable_kernel,
-              anthro_selectable_kernel,
-              config.use_anthropogenic_kernel,
-              config.percent_natural_dispersal),
           simulation_(
               config.random_seed,
               config.rows,
@@ -96,7 +63,8 @@ public:
               model_type_from_string(config.model_type),
               config.latency_period_steps,
               config.generate_stochasticity,
-              config.establishment_stochasticity)
+              config.establishment_stochasticity,
+              config.movement_stochasticity)
     {}
 
     void run_step(
@@ -104,7 +72,7 @@ public:
         int weather_step,  // TODO: this should be schedule (?)
         IntegerRaster& infected,
         IntegerRaster& susceptible,
-        const IntegerRaster& total_plants,  // TODO: How it is with updating this?
+        IntegerRaster& total_hosts,  // TODO: How it is with updating this?
         IntegerRaster& dispersers,
         std::vector<IntegerRaster>& exposed,
         std::vector<IntegerRaster>& mortality_tracker,
@@ -114,9 +82,44 @@ public:
         Treatments<IntegerRaster, FloatRaster>& treatments,
         IntegerRaster& resistant,
         std::vector<std::tuple<int, int>>& outside_dispersers,  // out
-        SpreadRate<IntegerRaster>& spread_rate  // out
-    )
+        SpreadRate<IntegerRaster>& spread_rate,  // out
+        const std::vector<std::vector<int>> movements)
     {
+        RadialDispersalKernel<IntegerRaster> natural_radial_kernel(
+            config_.ew_res,
+            config_.ns_res,
+            natural_kernel,
+            config_.natural_scale,
+            direction_from_string(config_.natural_direction),
+            config_.natural_kappa,
+            config_.deterministic,
+            dispersers,
+            config_.dispersal_percentage);
+        RadialDispersalKernel<IntegerRaster> anthro_radial_kernel(
+            config_.ew_res,
+            config_.ns_res,
+            anthro_kernel,
+            config_.anthro_scale,
+            direction_from_string(config_.anthro_direction),
+            config_.anthro_kappa,
+            config_.deterministic,
+            dispersers,
+            config_.dispersal_percentage);
+        SwitchDispersalKernel<IntegerRaster> natural_selectable_kernel(
+            natural_kernel,
+            natural_radial_kernel,
+            uniform_kernel,
+            natural_neighbor_kernel);
+        SwitchDispersalKernel<IntegerRaster> anthro_selectable_kernel(
+            anthro_kernel,
+            anthro_radial_kernel,
+            uniform_kernel,
+            anthro_neighbor_kernel);
+        DispersalKernel<IntegerRaster> dispersal_kernel(
+            natural_selectable_kernel,
+            anthro_selectable_kernel,
+            config_.use_anthropogenic_kernel,
+            config_.percent_natural_dispersal);
         int mortality_simulation_year =
             simulation_step_to_action_step(config_.mortality_schedule(), step);
         // removal of dispersers due to lethal tempearture
@@ -137,6 +140,7 @@ public:
                 config_.weather,
                 weather_coefficients[weather_step],
                 config_.reproductive_rate);
+
             simulation_.disperse_and_infect(
                 step,
                 dispersers,
@@ -144,12 +148,23 @@ public:
                 exposed,
                 infected,
                 mortality_tracker[mortality_simulation_year],
-                total_plants,
+                total_hosts,
                 outside_dispersers,
                 config_.weather,
                 weather_coefficients[weather_step],
                 dispersal_kernel,
                 config_.establishment_probability);
+            if (config_.use_movements) {
+                last_index = simulation_.movement(
+                    infected,
+                    susceptible,
+                    mortality_tracker[mortality_simulation_year],
+                    total_hosts,
+                    step,
+                    last_index,
+                    movements,
+                    config_.movement_schedule);
+            }
         }
         // treatments
         if (config_.use_treatments) {

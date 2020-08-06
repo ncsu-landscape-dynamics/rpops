@@ -43,6 +43,8 @@ public:
     // Reduced stochasticity
     bool generate_stochasticity{true};
     bool establishment_stochasticity{true};
+    bool movement_stochasticity{true};
+    bool deterministic{false};
     double establishment_probability{0};
     // Temperature
     bool use_lethal_temperature{false};
@@ -70,6 +72,9 @@ public:
     bool use_mortality{false};
     double mortality_rate{0};
     int first_mortality_year{0};  // TODO: document that it starts at 1, not 0
+    bool use_movements{false};
+    std::vector<unsigned> movement_schedule;
+    double dispersal_percentage{0.99};
 
     std::string output_frequency;
     unsigned output_frequency_n;

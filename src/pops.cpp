@@ -140,6 +140,7 @@ List pops_model(
   if (output_frequency == "time_step") {
     output_frequency = time_step;
   }
+  config.use_movements = use_movements;
   config.output_frequency = output_frequency;
   config.output_frequency_n = 0;
 
@@ -193,15 +194,13 @@ List pops_model(
   unsigned spread_rate_outputs = config.rate_num_years();
   SpreadRate<IntegerMatrix> spreadrate(infected, config.ew_res, config.ns_res,
                                        spread_rate_outputs);
-  unsigned last_index = 0;
   unsigned move_scheduled;
-  std::vector<unsigned> movement_schedule;
-  if (use_movements) {
+  if (config.use_movements) {
     for (unsigned move = 0; move < movements_dates.size(); ++move) {
       pops::Date movement_date(movements_dates[move]);
       move_scheduled =
           unsigned(config.scheduler().schedule_action_date(movement_date));
-      movement_schedule.push_back(move_scheduled);
+      config.movement_schedule.push_back(move_scheduled);
     }
   }
 
@@ -226,15 +225,10 @@ List pops_model(
     model.run_step(current_index, current_index, infected, susceptible,
                    total_plants, dispersers, exposed, mortality_tracker_vector,
                    mortality, temperature, weather_coefficient, treatments,
-                   resistant, outside_dispersers, spreadrate);
+                   resistant, outside_dispersers, spreadrate, movements);
 
     if (config.spread_schedule()[current_index]) {
       total_dispersers += dispersers;
-      if (use_movements) {
-        last_index = simulation.movement(
-            infected, susceptible, mortality_tracker, total_plants,
-            current_index, last_index, movements, movement_schedule);
-      }
     }
 
     if (config.use_mortality && config.mortality_schedule()[current_index]) {
