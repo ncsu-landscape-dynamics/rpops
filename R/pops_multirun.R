@@ -114,7 +114,7 @@ pops_multirun <- function(infected_file,
   parameters <- data.frame(MASS::mvrnorm(number_of_iterations, parameter_means, parameter_cov_matrix))
   names(parameters) <- c('reproductive_rate', 'natural_dispersal_distance', 'percent_natural_dispersal', 'anthropogenic_dispersal_distance', 'natural kappa', 'anthropogenic kappa')
   while(any(parameters[,1] < 0) || any(parameters[,2] < 0)) {
-    parameters[parameters[,1] < 0 | parameters[,2] <= 0.] <- mvrnorm(nrow(parameters[parameters[,1] < 0 | parameters[,2] < 0,]), parameter_means, parameter_cov_matrix)
+    parameters[parameters[,1] < 0 | parameters[,2] <= 0,] <- mvrnorm(nrow(parameters[parameters[,1] < 0 | parameters[,2] < 0,]), parameter_means, parameter_cov_matrix)
   }
   reproductive_rate <- parameters[[1]]
   natural_distance_scale <- parameters[[2]]
