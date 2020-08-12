@@ -429,8 +429,26 @@ pops_multirun <- function(infected_file,
   single_run_out <- single_run
   susceptible_run_out <- susceptible_run
   
-  outputs <- list(probability, single_run_out, number_infecteds, infected_areas, west_rate, east_rate, south_rate, north_rate)
-  names(outputs) <- c('probability', 'single_run_out', 'number_infecteds', 'infected_areas', 'west_rate', 'east_rate', 'south_rate', 'north_rate')
+  raster_stacks_list <- list()
+  simulation_mean_stack <- stack()
+  simulation_sd_stack <- stack()
+  for (q in 1:nlayers(single_runs[[1]])){
+    raster_stacks <- stack()
+    for (j in 1:length(single_runs)) {
+      raster_stacks <- stack(raster_stacks, single_runs[[j]][[q]])
+    }
+    simulation_mean <- raster::calc(raster_stacks, mean)
+    simulation_sd <- raster::calc(raster_stacks, sd)
+    simulation_mean_stack <- stack(simulation_mean_stack, simulation_mean)
+    simulation_sd_stack <-stack(simulation_sd_stack, simulation_sd)
+  }
+
+  
+  # simulation_mean <- raster::calc(raster_stacks, mean)
+  # simulation_sd <- raster::calc(raster_stacks, sd)
+  
+  outputs <- list(probability, simulation_mean_stack, simulation_sd_stack, single_run_out, number_infecteds, infected_areas, west_rate, east_rate, south_rate, north_rate)
+  names(outputs) <- c('probability', 'simulation_mean', 'simulation_sd', 'single_run_out', 'number_infecteds', 'infected_areas', 'west_rate', 'east_rate', 'south_rate', 'north_rate')
   
   return(outputs)
   
