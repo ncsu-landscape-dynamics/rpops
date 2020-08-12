@@ -94,7 +94,8 @@ pops_multirun <- function(infected_file,
                           random_seed = NULL,
                           output_frequency = "year",
                           movements_file = "", 
-                          use_movements = FALSE){ 
+                          use_movements = FALSE,
+                          start_exposed = FALSE){ 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -296,6 +297,11 @@ pops_multirun <- function(infected_file,
     for (ex in 2:(latency_period + 1)) {
       exposed[[ex]] <- mortality_tracker
     }
+  }
+  
+  if (model_type == "SEI" & start_exposed) {
+    exposed[[latency_period + 1]] <- infected
+    infected <- mortality_tracker
   }
   
   years <- seq(year(start_date), year(end_date), 1)

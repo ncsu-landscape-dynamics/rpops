@@ -19,6 +19,8 @@
 #' @param treatment_efficacy The overall efficacy of the treatment
 #' @param species a list of the species names for naming outputs files must be the same length and infected_files
 #' @param direction_first boolean to indicate where or not direction is the first priortity in sorting (if false first sorting priority goes to the selection_method) 
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm median sd
@@ -107,7 +109,8 @@ auto_manage_nonsteering <- function(infected_files,
                                     points = points, 
                                     treatment_efficacy = 1, 
                                     species = c('species1'), 
-                                    direction_first = TRUE) { 
+                                    direction_first = TRUE,
+                                    start_exposed = FALSE) { 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -306,6 +309,11 @@ auto_manage_nonsteering <- function(infected_files,
     }
   }
   exposed_list <- list(exposed)
+  
+  if (model_type == "SEI" & start_exposed) {
+    exposed[[latency_period + 1]] <- infected
+    infected <- mortality_tracker
+  }
   
   if (length(infected_files) > 1) {
     for (z in 2:length(infected_files)) {

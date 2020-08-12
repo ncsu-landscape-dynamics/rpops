@@ -83,7 +83,8 @@ abc_calibration <- function(infected_years_file,
                       success_metric = "number of locations and total distance", 
                       output_frequency = "year",
                       movements_file = "", 
-                      use_movements = FALSE) { 
+                      use_movements = FALSE,
+                      start_exposed = FALSE) { 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -257,6 +258,11 @@ abc_calibration <- function(infected_years_file,
     for (ex in 2:(latency_period + 1)) {
       exposed[[ex]] <- mortality_tracker
     }
+  }
+  
+  if (model_type == "SEI" & start_exposed) {
+    exposed[[latency_period + 1]] <- infected
+    infected <- mortality_tracker
   }
   
   ## Load observed data on occurence
