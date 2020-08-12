@@ -380,8 +380,8 @@ abc_calibration <- function(infected_years_file,
     while (current_particles <= generation_size){
 
       if (current_bin == 1){
-        proposed_reproductive_rate <- round(runif(1, 0.055, 6), digits = 1)
-        proposed_natural_distance_scale <- round(runif(1, 20, 100), digits = 0)
+        proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
+        proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
         if (params_to_estimate[3]) {
           proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
         } else {

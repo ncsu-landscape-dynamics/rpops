@@ -250,6 +250,12 @@ List pops_model(int random_seed,
             treatments.manage_mortality(current_index, mortality_tracker_vector[l]);
           }
         }
+        
+        if (model_type == ModelType::SusceptibleExposedInfected && managed) {
+          for (unsigned e = 0; e < exposed.size(); e++){
+            treatments.manage_mortality(current_index, exposed[e]);
+          }
+        }
       }
 
       if (spread_schedule[current_index]) {
