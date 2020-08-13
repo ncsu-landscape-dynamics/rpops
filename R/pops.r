@@ -41,6 +41,7 @@
 #' @param model_type What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".
 #' @param parameter_means A vector of the means of the model parameters (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param parameter_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
+#' @param start_exposed Do your initial conditions start as exposed or infected (only used if model_type is "SEI")
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints crs rowColFromCell
 #' @importFrom Rcpp sourceCpp evalCpp
@@ -128,12 +129,13 @@ pops <- function(infected_file,
                  output_frequency = "year", 
                  movements_file = "", 
                  use_movements = FALSE,
+                 start_exposed = FALSE,
                  generate_stochasticity = FALSE,
                  establishment_stochasticity = FALSE,
                  movement_stochasticity = FALSE,
                  deterministic = FALSE,
                  establishment_probability = 0,
-                 dispersal_percentage = 0.99){ 
+                 dispersal_percentage = 0.99){
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -338,6 +340,11 @@ pops <- function(infected_file,
     for (ex in 2:(latency_period + 1)) {
       exposed[[ex]] <- mortality_tracker
     }
+  }
+  
+  if (model_type == "SEI" & start_exposed) {
+    exposed[[latency_period + 1]] <- infected
+    infected <- mortality_tracker
   }
   
   data <- PoPS::pops_model(random_seed = random_seed, 

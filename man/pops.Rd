@@ -41,7 +41,8 @@ pops(
   random_seed = NULL,
   output_frequency = "year",
   movements_file = "",
-  use_movements = FALSE
+  use_movements = FALSE,
+  start_exposed = FALSE
 )
 }
 \arguments{
@@ -118,6 +119,8 @@ pops(
 \item{movements_file}{this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
 
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
+
+\item{start_exposed}{Do your initial conditions start as exposed or infected (only used if model_type is "SEI")}
 }
 \value{
 list of infected and susceptible per year

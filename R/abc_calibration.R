@@ -84,12 +84,13 @@ abc_calibration <- function(infected_years_file,
                       output_frequency = "year",
                       movements_file = "", 
                       use_movements = FALSE,
+                      start_exposed = FALSE,
                       generate_stochasticity = FALSE,
                       establishment_stochasticity = FALSE,
                       movement_stochasticity = FALSE,
                       deterministic = FALSE,
                       establishment_probability = 0,
-                      dispersal_percentage = 0.99) { 
+                      dispersal_percentage = 0.99) {
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -265,6 +266,11 @@ abc_calibration <- function(infected_years_file,
     }
   }
   
+  if (model_type == "SEI" & start_exposed) {
+    exposed[[latency_period + 1]] <- infected
+    infected <- mortality_tracker
+  }
+  
   ## Load observed data on occurence
   infection_years <- stack(infected_years_file)
   infection_years[] <- as.integer(infection_years[])
@@ -386,8 +392,8 @@ abc_calibration <- function(infected_years_file,
     while (current_particles <= generation_size){
 
       if (current_bin == 1){
-        proposed_reproductive_rate <- round(runif(1, 0.055, 6), digits = 1)
-        proposed_natural_distance_scale <- round(runif(1, 20, 100), digits = 0)
+        proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
+        proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
         if (params_to_estimate[3]) {
           proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
         } else {
@@ -460,9 +466,13 @@ abc_calibration <- function(infected_years_file,
         } else {
           infected_sim[] <- data$infected[[y]]
         }
-
+        
+        if (!is.null(mask)){
+          infected_sim[is.na(mask)] <- 0
+        }
+        
         diff_raster <- infection_years[[y]] - infected_sim
-        residual_diffs[[y]] <- sum(diff_raster[diff_raster > 0])
+        residual_diffs[[y]] <- abs(sum(diff_raster[diff_raster != 0]))
         
         num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
         num_locs_simulated[[y]] <- sum(infected_sim[infected_sim > 0] > 0)

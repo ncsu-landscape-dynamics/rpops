@@ -252,6 +252,23 @@ List pops_model(
             move_scheduled =
                 unsigned(config.scheduler().schedule_action_date(movement_date));
             config.movement_schedule.push_back(move_scheduled);
+        
+        if (model_type == ModelType::SusceptibleExposedInfected && managed) {
+          for (unsigned e = 0; e < exposed.size(); e++){
+            treatments.manage_mortality(current_index, exposed[e]);
+          }
+        }
+      }
+
+      if (spread_schedule[current_index]) {
+        IntegerMatrix dispersers(num_rows, num_cols);
+        simulation.generate(dispersers, infected, weather, weather_coefficient[current_index], reproductive_rate);
+        total_dispersers += dispersers;
+        // dispersers_vector.push_back(Rcpp::clone(dispersers));
+        simulation.disperse_and_infect(current_index, dispersers, susceptible, exposed, infected, mortality_tracker, total_plants,
+                            outside_dispersers, weather, weather_coefficient[current_index], kernel);
+        if (use_movements) {
+          last_index = simulation.movement(infected, susceptible, mortality_tracker, total_plants, current_index, last_index, movements, movement_schedule);
         }
     }
 

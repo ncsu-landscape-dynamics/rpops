@@ -95,6 +95,7 @@ pops_multirun <- function(infected_file,
                           output_frequency = "year",
                           movements_file = "", 
                           use_movements = FALSE,
+                          start_exposed = FALSE,
                           generate_stochasticity = FALSE,
                           establishment_stochasticity = FALSE,
                           movement_stochasticity = FALSE,
@@ -120,7 +121,7 @@ pops_multirun <- function(infected_file,
   parameters <- data.frame(MASS::mvrnorm(number_of_iterations, parameter_means, parameter_cov_matrix))
   names(parameters) <- c('reproductive_rate', 'natural_dispersal_distance', 'percent_natural_dispersal', 'anthropogenic_dispersal_distance', 'natural kappa', 'anthropogenic kappa')
   while(any(parameters[,1] < 0) || any(parameters[,2] < 0)) {
-    parameters[parameters[,1] < 0 | parameters[,2] <= 0.] <- mvrnorm(nrow(parameters[parameters[,1] < 0 | parameters[,2] < 0,]), parameter_means, parameter_cov_matrix)
+    parameters[parameters[,1] < 0 | parameters[,2] <= 0,] <- mvrnorm(nrow(parameters[parameters[,1] < 0 | parameters[,2] < 0,]), parameter_means, parameter_cov_matrix)
   }
   reproductive_rate <- parameters[[1]]
   natural_distance_scale <- parameters[[2]]
@@ -304,6 +305,11 @@ pops_multirun <- function(infected_file,
     }
   }
   
+  if (model_type == "SEI" & start_exposed) {
+    exposed[[latency_period + 1]] <- infected
+    infected <- mortality_tracker
+  }
+  
   years <- seq(year(start_date), year(end_date), 1)
   rcl <- c(1, Inf, 1, 0, 0.99, NA)
   rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
@@ -441,8 +447,26 @@ pops_multirun <- function(infected_file,
   single_run_out <- single_run
   susceptible_run_out <- susceptible_run
   
-  outputs <- list(probability, single_run_out, number_infecteds, infected_areas, west_rate, east_rate, south_rate, north_rate)
-  names(outputs) <- c('probability', 'single_run_out', 'number_infecteds', 'infected_areas', 'west_rate', 'east_rate', 'south_rate', 'north_rate')
+  raster_stacks_list <- list()
+  simulation_mean_stack <- stack()
+  simulation_sd_stack <- stack()
+  for (q in 1:nlayers(single_runs[[1]])){
+    raster_stacks <- stack()
+    for (j in 1:length(single_runs)) {
+      raster_stacks <- stack(raster_stacks, single_runs[[j]][[q]])
+    }
+    simulation_mean <- raster::calc(raster_stacks, mean)
+    simulation_sd <- raster::calc(raster_stacks, sd)
+    simulation_mean_stack <- stack(simulation_mean_stack, simulation_mean)
+    simulation_sd_stack <-stack(simulation_sd_stack, simulation_sd)
+  }
+
+  
+  # simulation_mean <- raster::calc(raster_stacks, mean)
+  # simulation_sd <- raster::calc(raster_stacks, sd)
+  
+  outputs <- list(probability, simulation_mean_stack, simulation_sd_stack, single_run_out, number_infecteds, infected_areas, west_rate, east_rate, south_rate, north_rate)
+  names(outputs) <- c('probability', 'simulation_mean', 'simulation_sd', 'single_run_out', 'number_infecteds', 'infected_areas', 'west_rate', 'east_rate', 'south_rate', 'north_rate')
   
   return(outputs)
   
