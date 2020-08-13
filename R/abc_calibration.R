@@ -460,7 +460,7 @@ abc_calibration <- function(infected_years_file,
         }
         
         diff_raster <- infection_years[[y]] - infected_sim
-        residual_diffs[[y]] <- sum(diff_raster[diff_raster > 0])
+        residual_diffs[[y]] <- abs(sum(diff_raster[diff_raster != 0]))
         
         num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
         num_locs_simulated[[y]] <- sum(infected_sim[infected_sim > 0] > 0)
