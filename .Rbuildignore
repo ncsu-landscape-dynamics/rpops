@@ -39,3 +39,4 @@
 ^\.travis\.yml$
 ^pops\.travis\.yml$
 ^\codecov\.yml$
+^\.clang-format$
