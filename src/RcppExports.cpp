@@ -56,7 +56,13 @@ List pops_model(
     double anthropogenic_kappa,
     std::string output_frequency,
     std::string model_type_,
-    int latency_period);
+    int latency_period,
+    bool generate_stochasticity,
+    bool establishment_stochasticity,
+    bool movement_stochasticity,
+    bool deterministic,
+    double establishment_probability,
+    double dispersal_percentage);
 static SEXP _PoPS_pops_model_try(
     SEXP random_seedSEXP,
     SEXP use_lethal_temperatureSEXP,
@@ -104,7 +110,13 @@ static SEXP _PoPS_pops_model_try(
     SEXP anthropogenic_kappaSEXP,
     SEXP output_frequencySEXP,
     SEXP model_type_SEXP,
-    SEXP latency_periodSEXP)
+    SEXP latency_periodSEXP,
+    SEXP generate_stochasticitySEXP,
+    SEXP establishment_stochasticitySEXP,
+    SEXP movement_stochasticitySEXP,
+    SEXP deterministicSEXP,
+    SEXP establishment_probabilitySEXP,
+    SEXP dispersal_percentageSEXP)
 {
     BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -178,6 +190,12 @@ static SEXP _PoPS_pops_model_try(
         output_frequencySEXP);
     Rcpp::traits::input_parameter<std::string>::type model_type_(model_type_SEXP);
     Rcpp::traits::input_parameter<int>::type latency_period(latency_periodSEXP);
+    Rcpp::traits::input_parameter<bool>::type generate_stochasticity(generate_stochasticitySEXP);
+    Rcpp::traits::input_parameter<bool>::type establishment_stochasticity(establishment_stochasticitySEXP);
+    Rcpp::traits::input_parameter<bool>::type movement_stochasticity(movement_stochasticitySEXP);
+    Rcpp::traits::input_parameter<bool>::type deterministic(deterministicSEXP);
+    Rcpp::traits::input_parameter<double>::type establishment_probability(establishment_probabilitySEXP);
+    Rcpp::traits::input_parameter<double>::type dispersal_percentage(dispersal_percentageSEXP);
     rcpp_result_gen = Rcpp::wrap(pops_model(
         random_seed,
         use_lethal_temperature,
@@ -225,7 +243,13 @@ static SEXP _PoPS_pops_model_try(
         anthropogenic_kappa,
         output_frequency,
         model_type_,
-        latency_period));
+        latency_period,
+        generate_stochasticity,
+        establishment_stochasticity,
+        movement_stochasticity,
+        deterministic,
+        establishment_probability,
+        dispersal_percentage));
     return rcpp_result_gen;
     END_RCPP_RETURN_ERROR
 }
@@ -276,7 +300,13 @@ RcppExport SEXP _PoPS_pops_model(
     SEXP anthropogenic_kappaSEXP,
     SEXP output_frequencySEXP,
     SEXP model_type_SEXP,
-    SEXP latency_periodSEXP)
+    SEXP latency_periodSEXP,
+    SEXP generate_stochasticitySEXP,
+    SEXP establishment_stochasticitySEXP,
+    SEXP movement_stochasticitySEXP,
+    SEXP deterministicSEXP,
+    SEXP establishment_probabilitySEXP,
+    SEXP dispersal_percentageSEXP)
 {
     SEXP rcpp_result_gen;
     {
@@ -328,7 +358,13 @@ RcppExport SEXP _PoPS_pops_model(
             anthropogenic_kappaSEXP,
             output_frequencySEXP,
             model_type_SEXP,
-            latency_periodSEXP));
+            latency_periodSEXP,
+            generate_stochasticitySEXP,
+            establishment_stochasticitySEXP,
+            movement_stochasticitySEXP,
+            deterministicSEXP,
+            establishment_probabilitySEXP,
+            dispersal_percentageSEXP));
     }
     Rboolean rcpp_isInterrupt_gen = Rf_inherits(rcpp_result_gen, "interrupted-error");
     if (rcpp_isInterrupt_gen) {
@@ -355,7 +391,7 @@ static int _PoPS_RcppExport_validate(const char* sig)
     static std::set<std::string> signatures;
     if (signatures.empty()) {
         signatures.insert(
-            "List(*pops_model)(int,bool,double,int,IntegerMatrix,std::vector<IntegerMatrix>,IntegerMatrix,IntegerMatrix,bool,IntegerMatrix,IntegerMatrix,std::vector<NumericMatrix>,std::vector<std::string>,std::vector<int>,IntegerMatrix,bool,std::vector<std::vector<int>>,std::vector<std::string>,bool,std::vector<NumericMatrix>,std::vector<NumericMatrix>,double,double,int,int,std::string,double,double,int,int,int,std::string,std::string,std::string,std::string,std::string,bool,double,double,double,std::string,double,std::string,double,std::string,std::string,int)");
+            "List(*pops_model)(int,bool,double,int,IntegerMatrix,std::vector<IntegerMatrix>,IntegerMatrix,IntegerMatrix,bool,IntegerMatrix,IntegerMatrix,std::vector<NumericMatrix>,std::vector<std::string>,std::vector<int>,IntegerMatrix,bool,std::vector<std::vector<int>>,std::vector<std::string>,bool,std::vector<NumericMatrix>,std::vector<NumericMatrix>,double,double,int,int,std::string,double,double,int,int,int,std::string,std::string,std::string,std::string,std::string,bool,double,double,double,std::string,double,std::string,double,std::string,std::string,int,bool,bool,bool,bool,double,double)");
     }
     return signatures.find(sig) != signatures.end();
 }
