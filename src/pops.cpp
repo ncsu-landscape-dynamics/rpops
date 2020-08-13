@@ -140,7 +140,13 @@ List pops_model(
     double anthropogenic_kappa = 0,
     std::string output_frequency = "year",
     std::string model_type_ = "SI",
-    int latency_period = 0)
+    int latency_period = 0,
+    bool generate_stochasticity = false,
+    bool establishment_stochasticity = false,
+    bool movement_stochasticity = false,
+    bool deterministic = false,
+    double establishment_probability = 0,
+    double dispersal_percentage = 0.99)
 {
     Config config;
     config.random_seed = random_seed;
@@ -148,7 +154,12 @@ List pops_model(
     config.cols = num_cols;
     config.ew_res = ew_res;
     config.ns_res = ns_res;
-    // generate_stochasticity/establishment_stochasticity/establishment_probability
+
+    config.generate_stochasticity = generate_stochasticity;
+    config.establishment_stochasticity = establishment_stochasticity;
+    config.movement_stochasticity = movement_stochasticity;
+    config.deterministic = deterministic;
+    config.establishment_probability = establishment_probability;
     config.use_lethal_temperature = use_lethal_temperature;
     config.lethal_temperature = lethal_temperature;
     config.lethal_temperature_month = lethal_temperature_month;
@@ -176,6 +187,9 @@ List pops_model(
         output_frequency = time_step;
     }
     config.use_movements = use_movements;
+    //movement_schedule used later
+    
+    config.dispersal_percentage = dispersal_percentage;
     config.output_frequency = output_frequency;
     config.output_frequency_n = 0;
 

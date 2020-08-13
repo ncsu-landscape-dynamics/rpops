@@ -127,7 +127,13 @@ pops <- function(infected_file,
                  random_seed = NULL, 
                  output_frequency = "year", 
                  movements_file = "", 
-                 use_movements = FALSE){ 
+                 use_movements = FALSE,
+                 generate_stochasticity = FALSE,
+                 establishment_stochasticity = FALSE,
+                 movement_stochasticity = FALSE,
+                 deterministic = FALSE,
+                 establishment_probability = 0,
+                 dispersal_percentage = 0.99){ 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -380,7 +386,13 @@ pops <- function(infected_file,
                            anthropogenic_kappa = anthropogenic_kappa,
                            output_frequency = output_frequency, 
                            model_type_ = model_type,
-                           latency_period = latency_period
+                           latency_period = latency_period,
+                           generate_stochasticity = generate_stochasticity,
+                           establishment_stochasticity = establishment_stochasticity,
+                           movement_stochasticity = movement_stochasticity,
+                           deterministic = deterministic,
+                           establishment_probability = establishment_probability,
+                           dispersal_percentage = dispersal_percentage
   )
   
   return(data)
