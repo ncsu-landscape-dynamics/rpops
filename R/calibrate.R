@@ -18,6 +18,8 @@
 #' @param number_of_cores number of cores to use for calibration (defaults to the number of cores available on the machine) integer value >= 1
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). 
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers extent extension compareCRS getValues calc extract rasterToPoints
 #' @importFrom stats runif rnorm
@@ -80,11 +82,11 @@ calibrate <- function(infected_years_file,
                       output_frequency = "year",
                       movements_file = "", 
                       use_movements = FALSE,
-                      generate_stochasticity = FALSE,
-                      establishment_stochasticity = FALSE,
-                      movement_stochasticity = FALSE,
+                      generate_stochasticity = TRUE,
+                      establishment_stochasticity = TRUE,
+                      movement_stochasticity = TRUE,
                       deterministic = FALSE,
-                      establishment_probability = 0,
+                      establishment_probability = 0.5,
                       dispersal_percentage = 0.99) { 
   
   if (model_type == "SEI" && latency_period <= 0) {

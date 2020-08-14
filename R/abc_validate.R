@@ -96,11 +96,11 @@ abc_validate <- function(infected_years_file,
                      movements_file = "", 
                      use_movements = FALSE,
                      start_exposed = FALSE,
-                     generate_stochasticity = FALSE,
-                     establishment_stochasticity = FALSE,
-                     movement_stochasticity = FALSE,
+                     generate_stochasticity = TRUE,
+                     establishment_stochasticity = TRUE,
+                     movement_stochasticity = TRUE,
                      deterministic = FALSE,
-                     establishment_probability = 0,
+                     establishment_probability = 0.5,
                      dispersal_percentage = 0.99){
   
   if (model_type == "SEI" && latency_period <= 0) {

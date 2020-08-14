@@ -21,7 +21,11 @@
 #' @param direction_first boolean to indicate where or not direction is the first priortity in sorting (if false first sorting priority goes to the selection_method) 
 #' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
-#'
+#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions 
+#' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1
+#' @param natural_distance_scale distance scale parameter for natural range dispersal kernel numeric value > 0 
+#' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel numeric value > 0
+#' 
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm median sd
 #' @importFrom rlist list.append
@@ -111,11 +115,11 @@ auto_manage_nonsteering <- function(infected_files,
                                     species = c('species1'), 
                                     direction_first = TRUE,
                                     start_exposed = FALSE,
-                                    generate_stochasticity = FALSE,
-                                    establishment_stochasticity = FALSE,
-                                    movement_stochasticity = FALSE,
+                                    generate_stochasticity = TRUE,
+                                    establishment_stochasticity = TRUE,
+                                    movement_stochasticity = TRUE,
                                     deterministic = FALSE,
-                                    establishment_probability = 0,
+                                    establishment_probability = 0.5,
                                     dispersal_percentage = 0.99) {
   
   if (model_type == "SEI" && latency_period <= 0) {

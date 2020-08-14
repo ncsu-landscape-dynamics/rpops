@@ -141,9 +141,9 @@ List pops_model(
     std::string output_frequency = "year",
     std::string model_type_ = "SI",
     int latency_period = 0,
-    bool generate_stochasticity = false,
-    bool establishment_stochasticity = false,
-    bool movement_stochasticity = false,
+    bool generate_stochasticity = true,
+    bool establishment_stochasticity = true,
+    bool movement_stochasticity = true,
     bool deterministic = false,
     double establishment_probability = 0,
     double dispersal_percentage = 0.99)

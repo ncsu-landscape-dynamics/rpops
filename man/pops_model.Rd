@@ -51,7 +51,13 @@ pops_model(
   anthropogenic_kappa = 0,
   output_frequency = "year",
   model_type_ = "SI",
-  latency_period = 0L
+  latency_period = 0L,
+  generate_stochasticity = TRUE,
+  establishment_stochasticity = TRUE,
+  movement_stochasticity = TRUE,
+  deterministic = FALSE,
+  establishment_probability = 0,
+  dispersal_percentage = 0.99
 )
 }
 \arguments{
@@ -148,6 +154,18 @@ pops_model(
 \item{model_type_}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
 
 \item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
+
+\item{generate_stochasticity}{Boolean to indicate whether to use stochasticity in reproductive functions default is TRUE}
+
+\item{establishment_stochasticity}{Boolean to indicate whether to use stochasticity in establishment functions default is TRUE}
+
+\item{movement_stochasticity}{Boolean to indicate whether to use stochasticity in movement functions default is TRUE}
+
+\item{deterministic}{Boolean to indicate whether to use a deterministic dispersal kernel default is FALSE}
+
+\item{establishment_probability}{Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
+
+\item{dispersal_percentage}{Percentage of dispersal used to calculate the bounding box for deterministic dispersal}
 }
 \value{
 list of vector matrices of infected and suceptible hosts per simulated year
