@@ -395,13 +395,13 @@ pops_multirun <- function(infected_file,
   
   prediction <- probability_runs[[1]]
   prediction[prediction > 0] <- 0
-  infected_area <- data.frame(t(years))
-  infected_number <- data.frame(t(years))
-  west_rates <- data.frame(t(years))
-  east_rates <- data.frame(t(years))
-  south_rates <- data.frame(t(years))
-  north_rates <- data.frame(t(years))
-  max_values <- data.frame(t(years))
+  infected_area <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
+  infected_number <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
+  west_rates <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
+  east_rates <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
+  south_rates <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
+  north_rates <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
+  max_values <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
   
   for (i in 1:length(probability_runs)) {
     prediction <- prediction + probability_runs[[i]]
@@ -414,7 +414,6 @@ pops_multirun <- function(infected_file,
     north_rates[i,] <- rates[,1]
     max_values[i,] <- raster::maxValue(single_runs[[i]])
   }
-  
   
   probability <- (prediction/(length(probability_runs))) * 100
   
