@@ -59,7 +59,13 @@ auto_manage_nonsteering(
   treatment_efficacy = 1,
   species = c("species1"),
   direction_first = TRUE,
-  start_exposed = FALSE
+  start_exposed = FALSE,
+  generate_stochasticity = TRUE,
+  establishment_stochasticity = TRUE,
+  movement_stochasticity = TRUE,
+  deterministic = FALSE,
+  establishment_probability = 0.5,
+  dispersal_percentage = 0.99
 )
 }
 \arguments{
@@ -82,6 +88,8 @@ auto_manage_nonsteering(
 \item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
 
 \item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
+
+\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
 \item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)}
 
@@ -113,9 +121,15 @@ auto_manage_nonsteering(
 
 \item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
 
+\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1}
+
 \item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')}
+
+\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel numeric value > 0}
+
+\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel numeric value > 0}
 
 \item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
@@ -164,6 +178,18 @@ auto_manage_nonsteering(
 \item{direction_first}{boolean to indicate where or not direction is the first priortity in sorting (if false first sorting priority goes to the selection_method)}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected (only used if model_type is "SEI")}
+
+\item{generate_stochasticity}{Boolean to indicate whether to use stochasticity in reproductive functions default is TRUE}
+
+\item{establishment_stochasticity}{Boolean to indicate whether to use stochasticity in establishment functions default is TRUE}
+
+\item{movement_stochasticity}{Boolean to indicate whether to use stochasticity in movement functions default is TRUE}
+
+\item{deterministic}{Boolean to indicate whether to use a deterministic dispersal kernel default is FALSE}
+
+\item{establishment_probability}{Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
+
+\item{dispersal_percentage}{Percentage of dispersal used to calculate the bounding box for deterministic dispersal}
 }
 \value{
 list of infected and susceptible per year

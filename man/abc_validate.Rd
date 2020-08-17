@@ -46,7 +46,13 @@ abc_validate(
   output_frequency = "year",
   movements_file = "",
   use_movements = FALSE,
-  start_exposed = FALSE
+  start_exposed = FALSE,
+  generate_stochasticity = TRUE,
+  establishment_stochasticity = TRUE,
+  movement_stochasticity = TRUE,
+  deterministic = FALSE,
+  establishment_probability = 0.5,
+  dispersal_percentage = 0.99
 )
 }
 \arguments{
@@ -133,6 +139,18 @@ abc_validate(
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected (only used if model_type is "SEI")}
+
+\item{generate_stochasticity}{Boolean to indicate whether to use stochasticity in reproductive functions default is TRUE}
+
+\item{establishment_stochasticity}{Boolean to indicate whether to use stochasticity in establishment functions default is TRUE}
+
+\item{movement_stochasticity}{Boolean to indicate whether to use stochasticity in movement functions default is TRUE}
+
+\item{deterministic}{Boolean to indicate whether to use a deterministic dispersal kernel default is FALSE}
+
+\item{establishment_probability}{Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
+
+\item{dispersal_percentage}{Percentage of dispersal used to calculate the bounding box for deterministic dispersal}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run

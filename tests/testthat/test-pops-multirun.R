@@ -42,7 +42,7 @@ test_that("Multirun model outputs work", {
   parameter_means = c(0,21,1,500,0,0)
   parameter_cov_matrix = matrix(0, nrow = 6, ncol = 6)
   
-  data <- PoPS::pops_multirun(infected_file, 
+  data <- pops_multirun(infected_file, 
                               host_file, 
                               total_plants_file,
                               parameter_means,

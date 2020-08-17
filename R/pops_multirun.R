@@ -95,7 +95,13 @@ pops_multirun <- function(infected_file,
                           output_frequency = "year",
                           movements_file = "", 
                           use_movements = FALSE,
-                          start_exposed = FALSE){ 
+                          start_exposed = FALSE,
+                          generate_stochasticity = TRUE,
+                          establishment_stochasticity = TRUE,
+                          movement_stochasticity = TRUE,
+                          deterministic = FALSE,
+                          establishment_probability = 0.5,
+                          dispersal_percentage = 0.99){ 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -364,7 +370,13 @@ pops_multirun <- function(infected_file,
                        anthropogenic_kappa = anthropogenic_kappa[i],
                        output_frequency = output_frequency,
                        model_type_ = model_type,
-                       latency_period = latency_period
+                       latency_period = latency_period,
+                       generate_stochasticity = generate_stochasticity,
+                       establishment_stochasticity = establishment_stochasticity,
+                       movement_stochasticity = movement_stochasticity,
+                       deterministic = deterministic,
+                       establishment_probability = establishment_probability,
+                       dispersal_percentage = dispersal_percentage
     )
     
     comp_years <- raster::stack(lapply(1:length(data$infected), function(i) host))

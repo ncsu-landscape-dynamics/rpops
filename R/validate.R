@@ -11,6 +11,12 @@
 #' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
 #' @param success_metric Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).
+#' @param reproductive_rate number of spores or pest units produced by a single host under optimal weather conditions 
+#' @param percent_natural_dispersal  what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1
+#' @param natural_distance_scale distance scale parameter for natural range dispersal kernel numeric value > 0 
+#' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel numeric value > 0
+#' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm
@@ -96,7 +102,13 @@ validate <- function(infected_years_file,
                      success_metric = "quantity", 
                      output_frequency = "year",
                      movements_file = "", 
-                     use_movements = FALSE){ 
+                     use_movements = FALSE,
+                     generate_stochasticity = TRUE,
+                     establishment_stochasticity = TRUE,
+                     movement_stochasticity = TRUE,
+                     deterministic = FALSE,
+                     establishment_probability = 0.5,
+                     dispersal_percentage = 0.99){ 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -381,7 +393,13 @@ validate <- function(infected_years_file,
                              anthropogenic_kappa = anthropogenic_kappa,
                              output_frequency = output_frequency,
                              model_type_ = model_type,
-                             latency_period = latency_period
+                             latency_period = latency_period,
+                             generate_stochasticity = generate_stochasticity,
+                             establishment_stochasticity = establishment_stochasticity,
+                             movement_stochasticity = movement_stochasticity,
+                             deterministic = deterministic,
+                             establishment_probability = establishment_probability,
+                             dispersal_percentage = dispersal_percentage
     )
     
     comp_year <- raster(infected_file)

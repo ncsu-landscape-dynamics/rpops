@@ -15,7 +15,7 @@
 
 /*! \file kernel.hpp
  *
- * \brief Main entry point to dispersal kernel funcionality
+ * \brief Main entry point to dispersal kernel functionality
  *
  * This file contains convenient definitions or wrappers to be used
  * when using this library.
@@ -47,11 +47,11 @@
 #define POPS_KERNEL_HPP
 
 #include "switch_kernel.hpp"
-#include "short_long_kernel.hpp"
+#include "natural_anthropogenic_kernel.hpp"
 
 namespace pops {
 
-/*! Dispersal kernel supporting all available kernels for short and long
+/*! Dispersal kernel supporting all available kernels for natural and anthropogenic
  * distance spread.
  *
  * This is a typedef defining the main disperal kernel class in the PoPS
@@ -62,7 +62,7 @@ namespace pops {
  *                     kernel type
  *                    /           \
  *                   /             \
- *               short              long
+ *              natural        anthropogenic
  *             /   |   \          /   |   \
  *        radial uniform ...   radial uniform ...
  *        /  | \_____                 |
@@ -72,11 +72,14 @@ namespace pops {
  * The ellipses represent whatever the SwitchDispersalKernel and
  * RadialDispersalKernel classes support.
  *
- * See ShortLongDispersalKernel and SwitchDispersalKernel for further
+ * See NaturalAnthropogenicDispersalKernel and SwitchDispersalKernel for further
  * documentation.
  */
-typedef ShortLongDispersalKernel<SwitchDispersalKernel, SwitchDispersalKernel> DispersalKernel;
+template<typename IntegerRaster>
+using DispersalKernel = NaturalAnthropogenicDispersalKernel<
+    SwitchDispersalKernel<IntegerRaster>,
+    SwitchDispersalKernel<IntegerRaster>>;
 
-} // namespace pops
+}  // namespace pops
 
-#endif // POPS_KERNEL_HPP
+#endif  // POPS_KERNEL_HPP

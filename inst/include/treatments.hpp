@@ -28,11 +28,11 @@
 
 namespace pops {
 
-
 /**
  * @brief The enum to decide how treatment is applied
  */
-enum class TreatmentApplication {
+enum class TreatmentApplication
+{
     Ratio,  ///< A ratio is applied to all treated rasters
     AllInfectedInCell  ///< All infected individuals are removed, rest by ratio
 };
@@ -49,14 +49,15 @@ inline TreatmentApplication treatment_app_enum_from_string(const std::string& te
         {"ratio_to_all", TreatmentApplication::Ratio},
         {"ratio", TreatmentApplication::Ratio},
         {"all_infected_in_cell", TreatmentApplication::AllInfectedInCell},
-        {"all infected", TreatmentApplication::AllInfectedInCell}
-    };
+        {"all infected", TreatmentApplication::AllInfectedInCell}};
     try {
         return mapping.at(text);
     }
     catch (const std::out_of_range&) {
-        throw std::invalid_argument("treatment_application_enum_from_string:"
-                                    " Invalid value '" + text + "' provided");
+        throw std::invalid_argument(
+            "treatment_application_enum_from_string:"
+            " Invalid value '"
+            + text + "' provided");
     }
 }
 
@@ -80,8 +81,12 @@ public:
     virtual unsigned get_end() = 0;
     virtual bool should_start(unsigned step) = 0;
     virtual bool should_end(unsigned step) = 0;
-    virtual void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& resistant) = 0;
-    virtual void end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) = 0;
+    virtual void apply_treatment(
+        IntegerRaster& infected,
+        IntegerRaster& susceptible,
+        IntegerRaster& resistant) = 0;
+    virtual void
+    end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) = 0;
     virtual void apply_treatment_mortality(IntegerRaster& infected) = 0;
     virtual ~AbstractTreatment() {}
 };
@@ -98,18 +103,29 @@ protected:
     unsigned end_step_;
     FloatRaster map_;
     TreatmentApplication application_;
+
 public:
-    BaseTreatment(const FloatRaster& map, unsigned start,
-                  TreatmentApplication treatment_application):
-        start_step_(start), end_step_(start), map_(map),
-        application_(treatment_application)
+    BaseTreatment(
+        const FloatRaster& map,
+        unsigned start,
+        TreatmentApplication treatment_application)
+        : start_step_(start),
+          end_step_(start),
+          map_(map),
+          application_(treatment_application)
     {}
-    unsigned get_start() {return start_step_;}
-    unsigned get_end() {return end_step_;}
+    unsigned get_start()
+    {
+        return start_step_;
+    }
+    unsigned get_end()
+    {
+        return end_step_;
+    }
     void apply_treatment_mortality(IntegerRaster& infected) override
     {
-        for(signed i = 0; i < infected.rows(); i++)
-            for(signed j = 0; j < infected.cols(); j++) {
+        for (int i = 0; i < infected.rows(); i++)
+            for (int j = 0; j < infected.cols(); j++) {
                 if (application_ == TreatmentApplication::Ratio) {
                     infected(i, j) = infected(i, j) - (infected(i, j) * map_(i, j));
                 }
@@ -129,9 +145,11 @@ template<typename IntegerRaster, typename FloatRaster>
 class SimpleTreatment : public BaseTreatment<IntegerRaster, FloatRaster>
 {
 public:
-    SimpleTreatment(const FloatRaster& map, unsigned     start,
-                    TreatmentApplication treatment_application):
-        BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
+    SimpleTreatment(
+        const FloatRaster& map,
+        unsigned start,
+        TreatmentApplication treatment_application)
+        : BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
     {}
     bool should_start(unsigned step) override
     {
@@ -143,17 +161,21 @@ public:
     {
         return false;
     }
-    void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& ) override
+    void apply_treatment(
+        IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster&) override
     {
-        for(signed i = 0; i < infected.rows(); i++)
-            for(signed j = 0; j < infected.cols(); j++) {
+        for (int i = 0; i < infected.rows(); i++)
+            for (int j = 0; j < infected.cols(); j++) {
                 if (this->application_ == TreatmentApplication::Ratio) {
-                    infected(i, j) = infected(i, j) - (infected(i, j) * this->map_(i, j));
+                    infected(i, j) =
+                        infected(i, j) - (infected(i, j) * this->map_(i, j));
                 }
-                else if (this->application_ == TreatmentApplication::AllInfectedInCell) {
+                else if (
+                    this->application_ == TreatmentApplication::AllInfectedInCell) {
                     infected(i, j) = this->map_(i, j) ? 0 : infected(i, j);
                 }
-                susceptible(i, j) = susceptible(i, j) - (susceptible(i, j) * this->map_(i, j));
+                susceptible(i, j) =
+                    susceptible(i, j) - (susceptible(i, j) * this->map_(i, j));
             }
     }
     void end_treatment(IntegerRaster&, IntegerRaster&) override
@@ -172,9 +194,12 @@ template<typename IntegerRaster, typename FloatRaster>
 class PesticideTreatment : public BaseTreatment<IntegerRaster, FloatRaster>
 {
 public:
-    PesticideTreatment(const FloatRaster& map, unsigned start, unsigned end,
-                       TreatmentApplication treatment_application):
-        BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
+    PesticideTreatment(
+        const FloatRaster& map,
+        unsigned start,
+        unsigned end,
+        TreatmentApplication treatment_application)
+        : BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
     {
         this->end_step_ = end;
     }
@@ -191,29 +216,34 @@ public:
         return false;
     }
 
-    void apply_treatment(IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster& resistant) override
+    void apply_treatment(
+        IntegerRaster& infected,
+        IntegerRaster& susceptible,
+        IntegerRaster& resistant) override
     {
-        for(signed i = 0; i < infected.rows(); i++)
-            for(signed j = 0; j < infected.cols(); j++) {
-                int infected_resistant;
+        for (int i = 0; i < infected.rows(); i++)
+            for (int j = 0; j < infected.cols(); j++) {
+                int infected_resistant = 0;
                 int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
-                int current_resistant = resistant(i, j); 
+                int current_resistant = resistant(i, j);
                 if (this->application_ == TreatmentApplication::Ratio) {
                     infected_resistant = infected(i, j) * this->map_(i, j);
                 }
-                else if (this->application_ == TreatmentApplication::AllInfectedInCell) {
-                    infected_resistant = this->map_(i, j) ? infected(i, j): 0;
+                else if (
+                    this->application_ == TreatmentApplication::AllInfectedInCell) {
+                    infected_resistant = this->map_(i, j) ? infected(i, j) : 0;
                 }
                 infected(i, j) -= infected_resistant;
-                resistant(i, j) = infected_resistant + susceptible_resistant + current_resistant;
+                resistant(i, j) =
+                    infected_resistant + susceptible_resistant + current_resistant;
                 susceptible(i, j) -= susceptible_resistant;
             }
     }
     void end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) override
     {
-        for(signed i = 0; i < resistant.rows(); i++)
-            for(signed j = 0; j < resistant.cols(); j++) {
-                if (this->map_(i, j) > 0){
+        for (int i = 0; i < resistant.rows(); i++)
+            for (int j = 0; j < resistant.cols(); j++) {
+                if (this->map_(i, j) > 0) {
                     susceptible(i, j) += resistant(i, j);
                     resistant(i, j) = 0;
                 }
@@ -239,12 +269,12 @@ class Treatments
 private:
     std::vector<AbstractTreatment<IntegerRaster, FloatRaster>*> treatments;
     Scheduler scheduler_;
+
 public:
-    Treatments(const Scheduler &scheduler): scheduler_(scheduler) {}
+    Treatments(const Scheduler& scheduler) : scheduler_(scheduler) {}
     ~Treatments()
     {
-        for (auto item : treatments)
-        {
+        for (auto item : treatments) {
             delete item;
         }
     }
@@ -257,20 +287,27 @@ public:
      *
      * \param map treatment raster
      * \param start_date date when treatment is applied
-     * \param num_days for simple treatments should be 0, otherwise number of days host is resistant
-     * \param treatment_application if efficiency < 100% how should it be applied to infected/susceptible
-     * \param increase_by_step function to increase simulation step
+     * \param num_days for simple treatments should be 0, otherwise number of days host
+     * is resistant \param treatment_application if efficiency < 100% how should it be
+     * applied to infected/susceptible \param increase_by_step function to increase
+     * simulation step
      */
-    void add_treatment(const FloatRaster& map, const Date& start_date, int num_days, TreatmentApplication treatment_application)
+    void add_treatment(
+        const FloatRaster& map,
+        const Date& start_date,
+        int num_days,
+        TreatmentApplication treatment_application)
     {
         unsigned start = scheduler_.schedule_action_date(start_date);
         if (num_days == 0)
-            treatments.push_back(new SimpleTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application));
+            treatments.push_back(new SimpleTreatment<IntegerRaster, FloatRaster>(
+                map, start, treatment_application));
         else {
             Date end_date(start_date);
             end_date.add_days(num_days);
             unsigned end = scheduler_.schedule_action_date(end_date);
-            treatments.push_back(new PesticideTreatment<IntegerRaster, FloatRaster>(map, start, end, treatment_application));
+            treatments.push_back(new PesticideTreatment<IntegerRaster, FloatRaster>(
+                map, start, end, treatment_application));
         }
     }
     /*!
@@ -285,8 +322,11 @@ public:
      * \param resistant raster of resistant host
      * \return true if any management action was necessary
      */
-    bool manage(unsigned current, IntegerRaster& infected,
-                IntegerRaster& susceptible, IntegerRaster& resistant)
+    bool manage(
+        unsigned current,
+        IntegerRaster& infected,
+        IntegerRaster& susceptible,
+        IntegerRaster& resistant)
     {
         bool changed = false;
         for (unsigned i = 0; i < treatments.size(); i++) {
@@ -324,19 +364,17 @@ public:
      */
     void clear_after_step(unsigned step)
     {
-        for(auto& treatment : treatments)
-        {
-            if (treatment->get_start() > step)
-            {
+        for (auto& treatment : treatments) {
+            if (treatment->get_start() > step) {
                 delete treatment;
                 treatment = nullptr;
             }
         }
-        treatments.erase(std::remove(treatments.begin(), treatments.end(), nullptr),
-                         treatments.end());
+        treatments.erase(
+            std::remove(treatments.begin(), treatments.end(), nullptr),
+            treatments.end());
     }
 };
 
-}
-#endif // POPS_TREATMENTS_HPP
-
+}  // namespace pops
+#endif  // POPS_TREATMENTS_HPP

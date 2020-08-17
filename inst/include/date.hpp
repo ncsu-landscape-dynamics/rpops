@@ -15,7 +15,6 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-
 #ifndef POPS_DATE_HPP
 #define POPS_DATE_HPP
 
@@ -37,13 +36,12 @@ private:
     int month_;
     int day_;
     int day_in_month[2][13] = {
-        {0,31,28,31,30,31,30,31,31,30,31,30,31},
-        {0,31,29,31,30,31,30,31,31,30,31,30,31}
-    };
+        {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31},
+        {0, 31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}};
 
 public:
-    Date(const Date& d): year_(d.year_), month_(d.month_), day_(d.day_) {}
-    Date(int y, int m, int d): year_(y), month_(m), day_(d) {}
+    Date(const Date& d) : year_(d.year_), month_(d.month_), day_(d.day_) {}
+    Date(int y, int m, int d) : year_(y), month_(m), day_(d) {}
     Date(std::string date);
     inline void increased_by_days(int num_days);
     inline void increased_by_week();
@@ -62,17 +60,26 @@ public:
     inline bool is_last_day_of_month();
     inline bool is_last_week_of_month();
     inline bool is_leap_year();
-    int month() const { return month_; }
-    int year() const { return year_; }
-    int day() const { return day_; }
+    int month() const
+    {
+        return month_;
+    }
+    int year() const
+    {
+        return year_;
+    }
+    int day() const
+    {
+        return day_;
+    }
     inline int weeks_from_date(Date start);
-    inline friend std::ostream& operator<<(std::ostream& os, const Date &d);
-    inline friend bool operator> (const Date &d1, const Date &d2);
-    inline friend bool operator>= (const Date &d1, const Date &d2);
-    inline friend bool operator< (const Date &d1, const Date &d2);
-    inline friend bool operator<= (const Date &d1, const Date &d2);
-    inline friend bool operator== (const Date &d1, const Date &d2);
-    inline friend bool operator!= (const Date &d1, const Date &d2);
+    inline friend std::ostream& operator<<(std::ostream& os, const Date& d);
+    inline friend bool operator>(const Date& d1, const Date& d2);
+    inline friend bool operator>=(const Date& d1, const Date& d2);
+    inline friend bool operator<(const Date& d1, const Date& d2);
+    inline friend bool operator<=(const Date& d1, const Date& d2);
+    inline friend bool operator==(const Date& d1, const Date& d2);
+    inline friend bool operator!=(const Date& d1, const Date& d2);
 };
 
 /*!
@@ -92,11 +99,11 @@ Date::Date(std::string date)
     month_ = std::stoi(date.substr(0, pos));
     date.erase(0, pos + 1);
     day_ = std::stoi(date);
-    if (month_ <= 0 || month_ > 12 || day_> day_in_month[1][month_])
+    if (month_ <= 0 || month_ > 12 || day_ > day_in_month[1][month_])
         throw std::invalid_argument("Invalid date specified");
 }
 
-std::ostream& operator<<(std::ostream& os, const Date &d)
+std::ostream& operator<<(std::ostream& os, const Date& d)
 {
     os << d.year_ << '-' << d.month_ << '-' << d.day_;
     return os;
@@ -161,28 +168,30 @@ bool Date::is_last_day_of_year()
 
 bool Date::is_last_week_of_month()
 {
-  if (this->is_leap_year()){
-    if ((day_ + 7) >= day_in_month[1][month_])
-      return true;
-    return false;
-  } else {
-    if ((day_ + 7) >= day_in_month[0][month_])
-      return true;
-    return false;
-  }
+    if (this->is_leap_year()) {
+        if ((day_ + 7) >= day_in_month[1][month_])
+            return true;
+        return false;
+    }
+    else {
+        if ((day_ + 7) >= day_in_month[0][month_])
+            return true;
+        return false;
+    }
 }
 
 bool Date::is_last_day_of_month()
 {
-  if (this->is_leap_year()){
-    if (day_ == day_in_month[1][month_])
-      return true;
-    return false;
-  } else {
-    if (day_ == day_in_month[0][month_])
-      return true;
-    return false;
-  }
+    if (this->is_leap_year()) {
+        if (day_ == day_in_month[1][month_])
+            return true;
+        return false;
+    }
+    else {
+        if (day_ == day_in_month[0][month_])
+            return true;
+        return false;
+    }
 }
 
 Date Date::get_next_year_end()
@@ -200,9 +209,9 @@ bool Date::is_leap_year()
     return false;
 }
 
-bool operator> (const Date &d1, const Date &d2)
+bool operator>(const Date& d1, const Date& d2)
 {
-    if(d1.year_ < d2.year_)
+    if (d1.year_ < d2.year_)
         return false;
     else if (d1.year_ > d2.year_)
         return true;
@@ -220,14 +229,14 @@ bool operator> (const Date &d1, const Date &d2)
     }
 }
 
-bool operator<= (const Date &d1, const Date &d2)
+bool operator<=(const Date& d1, const Date& d2)
 {
     return !(d1 > d2);
 }
 
-bool operator< (const Date &d1, const Date &d2)
+bool operator<(const Date& d1, const Date& d2)
 {
-    if(d1.year_ > d2.year_)
+    if (d1.year_ > d2.year_)
         return false;
     else if (d1.year_ < d2.year_)
         return true;
@@ -245,19 +254,19 @@ bool operator< (const Date &d1, const Date &d2)
     }
 }
 
-bool operator>= (const Date &d1, const Date &d2)
+bool operator>=(const Date& d1, const Date& d2)
 {
     return !(d1 < d2);
 }
 
-bool operator== (const Date &d1, const Date &d2)
+bool operator==(const Date& d1, const Date& d2)
 {
     if (d1.year_ == d2.year_ && d1.month_ == d2.month_ && d1.day_ == d2.day_)
         return true;
     return false;
 }
 
-bool operator!= (const Date &d1, const Date &d2)
+bool operator!=(const Date& d1, const Date& d2)
 {
     if (d1 == d2)
         return false;
@@ -274,37 +283,37 @@ bool operator!= (const Date &d1, const Date &d2)
  */
 void Date::increased_by_days(int num_days)
 {
-  day_ += num_days;
-  if (this->is_leap_year()) {
-    if (month_ == 12 && day_ > (31 - (num_days + 1))) {
-      year_++;
-      month_ = 1;
-      day_ = 1;
+    day_ += num_days;
+    if (this->is_leap_year()) {
+        if (month_ == 12 && day_ > (31 - (num_days + 1))) {
+            year_++;
+            month_ = 1;
+            day_ = 1;
+        }
+        if (day_ > day_in_month[1][month_]) {
+            day_ = day_ - day_in_month[1][month_];
+            month_++;
+            if (month_ > 12) {
+                year_++;
+                month_ = 1;
+            }
+        }
     }
-    if (day_ > day_in_month[1][month_]) {
-      day_ = day_ - day_in_month[1][month_];
-      month_++;
-      if (month_ > 12) {
-        year_++;
-        month_ = 1;
-      }
+    else {
+        if (month_ == 12 && day_ > (31 - num_days)) {
+            year_++;
+            month_ = 1;
+            day_ = 1;
+        }
+        if (day_ > day_in_month[0][month_]) {
+            day_ = day_ - day_in_month[0][month_];
+            month_++;
+            if (month_ > 12) {
+                year_++;
+                month_ = 1;
+            }
+        }
     }
-  }
-  else {
-    if (month_ == 12 && day_ > (31 - num_days)) {
-      year_++;
-      month_ = 1;
-      day_ = 1;
-    }
-    if (day_ > day_in_month[0][month_]) {
-      day_ = day_ - day_in_month[0][month_];
-      month_++;
-      if (month_ > 12) {
-        year_++;
-        month_ = 1;
-      }
-    }
-  }
 }
 
 /*!
@@ -438,9 +447,7 @@ int Date::weeks_from_date(Date start)
 class Season
 {
 public:
-    Season(int start, int end)
-        : start_month_(start), end_month_(end)
-    {}
+    Season(int start, int end) : start_month_(start), end_month_(end) {}
     /*!
      * \brief Decides if a month is in season or not
      * \param month A month in year (1-12)
@@ -450,11 +457,12 @@ public:
     {
         return month >= start_month_ && month <= end_month_;
     }
+
 private:
     int start_month_;
     int end_month_;
 };
 
-} // namespace pops
+}  // namespace pops
 
-#endif // POPS_DATE_HPP
+#endif  // POPS_DATE_HPP

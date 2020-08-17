@@ -13,6 +13,7 @@
 ^src/pops/\.git$
 ^src/pops/\.travis\.yml$
 ^src/PoPS.dll$
+^src/.clang-format
 
 ^contributing_docs\.md$
 ^contributing_docs
@@ -30,6 +31,8 @@
 ^inst/cpp/pops/CITATION\.cff$
 ^inst/cpp/pops/\.git$
 ^inst/cpp/pops/\.travis\.yml$
+^inst/cpp/pops/.github
+^inst/cpp/pops/.clang-format
 ^test_date\.cpp$
 ^appveyor\.yml$
 ^codecov\.yml$
@@ -39,3 +42,4 @@
 ^\.travis\.yml$
 ^pops\.travis\.yml$
 ^\codecov\.yml$
+^\.clang-format$

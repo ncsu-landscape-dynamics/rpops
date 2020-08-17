@@ -42,6 +42,13 @@
 #' @param parameter_means A vector of the means of the model parameters (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param parameter_cov_matrix A covariance matrix from the previous years posterior parameter estimation ordered from (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
 #' @param start_exposed Do your initial conditions start as exposed or infected (only used if model_type is "SEI")
+#' @param generate_stochasticity Boolean to indicate whether to use stochasticity in reproductive functions default is TRUE
+#' @param establishment_stochasticity Boolean to indicate whether to use stochasticity in establishment functions default is TRUE
+#' @param movement_stochasticity Boolean to indicate whether to use stochasticity in movement functions default is TRUE
+#' @param deterministic Boolean to indicate whether to use a deterministic dispersal kernel default is FALSE
+#' @param establishment_probability Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)
+#' @param dispersal_percentage  Percentage of dispersal used to calculate the bounding box for deterministic dispersal
+#' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints crs rowColFromCell
 #' @importFrom Rcpp sourceCpp evalCpp
@@ -129,7 +136,13 @@ pops <- function(infected_file,
                  output_frequency = "year", 
                  movements_file = "", 
                  use_movements = FALSE,
-                 start_exposed = FALSE){ 
+                 start_exposed = FALSE,
+                 generate_stochasticity = TRUE,
+                 establishment_stochasticity = TRUE,
+                 movement_stochasticity = TRUE,
+                 deterministic = FALSE,
+                 establishment_probability = 0.5,
+                 dispersal_percentage = 0.99){
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -387,7 +400,13 @@ pops <- function(infected_file,
                            anthropogenic_kappa = anthropogenic_kappa,
                            output_frequency = output_frequency, 
                            model_type_ = model_type,
-                           latency_period = latency_period
+                           latency_period = latency_period,
+                           generate_stochasticity = generate_stochasticity,
+                           establishment_stochasticity = establishment_stochasticity,
+                           movement_stochasticity = movement_stochasticity,
+                           deterministic = deterministic,
+                           establishment_probability = establishment_probability,
+                           dispersal_percentage = dispersal_percentage
   )
   
   return(data)

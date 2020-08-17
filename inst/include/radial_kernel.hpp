@@ -19,6 +19,7 @@
 #ifndef POPS_RADIAL_KERNEL_HPP
 #define POPS_RADIAL_KERNEL_HPP
 
+#include "deterministic_kernel.hpp"
 #include "kernel_types.hpp"
 
 #include <cmath>
@@ -58,7 +59,7 @@ public:
         : mu(mu), kappa(kappa), distribution(0.0, 1.0)
     {}
     template<class Generator>
-    double operator ()(Generator& generator)
+    double operator()(Generator& generator)
     {
         double a, b, c, f, r, theta, u1, u2, u3, z;
 
@@ -88,6 +89,7 @@ public:
         }
         return theta;
     }
+
 private:
     double mu;
     double kappa;
@@ -118,8 +120,7 @@ enum class Direction
  * Throws an std::invalid_argument exception if the values was not
  * found or is not supported (which is the same thing).
  */
-inline
-Direction direction_from_string(const std::string& text)
+inline Direction direction_from_string(const std::string& text)
 {
     std::map<std::string, Direction> mapping{
         {"N", Direction::N},
@@ -133,25 +134,24 @@ Direction direction_from_string(const std::string& text)
         {"NONE", Direction::None},
         {"None", Direction::None},
         {"none", Direction::None},
-        {"", Direction::None}
-    };
+        {"", Direction::None}};
     try {
         return mapping.at(text);
     }
     catch (const std::out_of_range&) {
-        throw std::invalid_argument("direction_from_string: Invalid"
-                                    " value '" + text +"' provided");
+        throw std::invalid_argument(
+            "direction_from_string: Invalid"
+            " value '"
+            + text + "' provided");
     }
 }
 
 /*! Overload which allows to pass C-style string which is nullptr (NULL)
  */
-inline
-Direction direction_from_string(const char* text)
+inline Direction direction_from_string(const char* text)
 {
     // call the string version
-    return direction_from_string(text ? std::string(text)
-                                      : std::string());
+    return direction_from_string(text ? std::string(text) : std::string());
 }
 
 /*! Dispersal kernel providing all the radial kernels.
@@ -164,6 +164,7 @@ Direction direction_from_string(const char* text)
  * its implementation in the function call operator, and extend the
  * supports_kernel() function.
  */
+template<typename IntegerRaster>
 class RadialDispersalKernel
 {
 protected:
@@ -174,16 +175,22 @@ protected:
     DispersalKernelType dispersal_kernel_type_;
     std::cauchy_distribution<double> cauchy_distribution;
     std::exponential_distribution<double> exponential_distribution;
+    bool deterministic_;
+    DeterministicDispersalKernel<IntegerRaster> deterministic_kernel;
     von_mises_distribution von_mises;
+
 public:
-    RadialDispersalKernel(double ew_res, double ns_res,
-                          DispersalKernelType dispersal_kernel,
-                          double distance_scale,
-                          Direction dispersal_direction = Direction::None,
-                          double dispersal_direction_kappa = 0
-            )
-        :
-          east_west_resolution(ew_res),
+    RadialDispersalKernel(
+        double ew_res,
+        double ns_res,
+        DispersalKernelType dispersal_kernel,
+        double distance_scale,
+        Direction dispersal_direction = Direction::None,
+        double dispersal_direction_kappa = 0,
+        bool deterministic = false,
+        const IntegerRaster& dispersers = {{0}},
+        double dispersal_percentage = 0.99)
+        : east_west_resolution(ew_res),
           north_south_resolution(ns_res),
           dispersal_kernel_type_(dispersal_kernel),
           // Here we initialize all distributions,
@@ -192,11 +199,20 @@ public:
           // When lambda is higher, exponential gives less higher values,
           // so we do multiplicative inverse to behave like cauchy.
           exponential_distribution(1.0 / distance_scale),
+          deterministic_(deterministic),
+          deterministic_kernel(
+              dispersal_kernel,
+              dispersers,
+              dispersal_percentage,
+              ew_res,
+              ns_res,
+              distance_scale),
           // if no wind, then kappa is 0
           // TODO: change these two computations to standalone inline
           // functions (dir to rad and adjust kappa)
-          von_mises(static_cast<int>(dispersal_direction) * PI / 180,
-                    dispersal_direction == Direction::None ? 0 : dispersal_direction_kappa)
+          von_mises(
+              static_cast<int>(dispersal_direction) * PI / 180,
+              dispersal_direction == Direction::None ? 0 : dispersal_direction_kappa)
     {}
 
     /*! Generates a new position for the spread.
@@ -208,12 +224,14 @@ public:
      * current disperser. The generated position will be relative to it.
      */
     template<typename Generator>
-    std::tuple<int, int> operator() (Generator& generator, int row, int col)
+    std::tuple<int, int> operator()(Generator& generator, int row, int col)
     {
+        if (deterministic_) {
+            return deterministic_kernel(generator, row, col);
+        }
         double distance = 0;
         double theta = 0;
-
-        // switch in between the supported kernels
+        // switch between the supported kernels
         // generate the distance from cauchy distribution or cauchy mixture distribution
         if (dispersal_kernel_type_ == DispersalKernelType::Cauchy) {
             distance = std::abs(cauchy_distribution(generator));
@@ -224,9 +242,9 @@ public:
         else {
             // TODO: move this to constructor (fail fast)
             // not all allowed kernels will/are supported by this class
-            throw std::invalid_argument("Unsupported dispersal kernel type");
+            throw std::invalid_argument(
+                "RadialDispersalKernel: Unsupported dispersal kernel type");
         }
-
         theta = von_mises(generator);
 
         row -= round(distance * cos(theta) / north_south_resolution);
@@ -243,14 +261,12 @@ public:
     static bool supports_kernel(const DispersalKernelType type)
     {
         static const std::array<DispersalKernelType, 2> supports = {
-            DispersalKernelType::Cauchy,
-            DispersalKernelType::Exponential
-        };
+            DispersalKernelType::Cauchy, DispersalKernelType::Exponential};
         auto it = std::find(supports.cbegin(), supports.cend(), type);
         return it != supports.cend();
     }
 };
 
-} // namespace pops
+}  // namespace pops
 
-#endif // POPS_RADIAL_KERNEL_HPP
+#endif  // POPS_RADIAL_KERNEL_HPP

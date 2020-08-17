@@ -38,10 +38,10 @@ protected:
     int col_max_;
     std::uniform_int_distribution<> row_distribution;
     std::uniform_int_distribution<> col_distribution;
+
 public:
     UniformDispersalKernel(int row_max, int col_max)
-        :
-          row_max_(row_max),
+        : row_max_(row_max),
           col_max_(col_max),
           row_distribution(0, row_max),
           col_distribution(0, col_max)
@@ -54,7 +54,7 @@ public:
      * disperser thus *row* and *col* are unused.
      */
     template<typename Generator>
-    std::tuple<int, int> operator() (Generator& generator, int row, int col)
+    std::tuple<int, int> operator()(Generator& generator, int row, int col)
     {
         row = row_distribution(generator);
         col = col_distribution(generator);
@@ -70,6 +70,6 @@ public:
     }
 };
 
-} // namespace pops
+}  // namespace pops
 
-#endif // POPS_UNIFORM_KERNEL_HPP
+#endif  // POPS_UNIFORM_KERNEL_HPP
