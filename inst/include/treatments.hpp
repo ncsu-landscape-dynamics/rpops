@@ -83,6 +83,7 @@ public:
     virtual bool should_end(unsigned step) = 0;
     virtual void apply_treatment(
         IntegerRaster& infected,
+        std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
         IntegerRaster& resistant) = 0;
     virtual void
@@ -162,7 +163,10 @@ public:
         return false;
     }
     void apply_treatment(
-        IntegerRaster& infected, IntegerRaster& susceptible, IntegerRaster&) override
+        IntegerRaster& infected,
+        std::vector<IntegerRaster>& exposed,
+        IntegerRaster& susceptible,
+        IntegerRaster&) override
     {
         for (int i = 0; i < infected.rows(); i++)
             for (int j = 0; j < infected.cols(); j++) {
@@ -173,6 +177,15 @@ public:
                 else if (
                     this->application_ == TreatmentApplication::AllInfectedInCell) {
                     infected(i, j) = this->map_(i, j) ? 0 : infected(i, j);
+                }
+                for (auto& raster : exposed) {
+                    if (this->application_ == TreatmentApplication::Ratio) {
+                        raster(i, j) = raster(i, j) - (raster(i, j) * this->map_(i, j));
+                    }
+                    else if (
+                        this->application_ == TreatmentApplication::AllInfectedInCell) {
+                        raster(i, j) = this->map_(i, j) ? 0 : raster(i, j);
+                    }
                 }
                 susceptible(i, j) =
                     susceptible(i, j) - (susceptible(i, j) * this->map_(i, j));
@@ -218,12 +231,14 @@ public:
 
     void apply_treatment(
         IntegerRaster& infected,
+        std::vector<IntegerRaster>& exposed_vector,
         IntegerRaster& susceptible,
         IntegerRaster& resistant) override
     {
         for (int i = 0; i < infected.rows(); i++)
             for (int j = 0; j < infected.cols(); j++) {
                 int infected_resistant = 0;
+                int exposed_resistant_sum = 0;
                 int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
                 int current_resistant = resistant(i, j);
                 if (this->application_ == TreatmentApplication::Ratio) {
@@ -234,8 +249,20 @@ public:
                     infected_resistant = this->map_(i, j) ? infected(i, j) : 0;
                 }
                 infected(i, j) -= infected_resistant;
-                resistant(i, j) =
-                    infected_resistant + susceptible_resistant + current_resistant;
+                for (auto& exposed : exposed_vector) {
+                    int exposed_resistant = 0;
+                    if (this->application_ == TreatmentApplication::Ratio) {
+                        exposed_resistant = exposed(i, j) * this->map_(i, j);
+                    }
+                    else if (
+                        this->application_ == TreatmentApplication::AllInfectedInCell) {
+                        exposed_resistant = this->map_(i, j) ? exposed(i, j) : 0;
+                    }
+                    exposed(i, j) -= exposed_resistant;
+                    exposed_resistant_sum += exposed_resistant;
+                }
+                resistant(i, j) = infected_resistant + exposed_resistant_sum
+                                  + susceptible_resistant + current_resistant;
                 susceptible(i, j) -= susceptible_resistant;
             }
     }
@@ -325,13 +352,15 @@ public:
     bool manage(
         unsigned current,
         IntegerRaster& infected,
+        std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
         IntegerRaster& resistant)
     {
         bool changed = false;
         for (unsigned i = 0; i < treatments.size(); i++) {
             if (treatments[i]->should_start(current)) {
-                treatments[i]->apply_treatment(infected, susceptible, resistant);
+                treatments[i]->apply_treatment(
+                    infected, exposed, susceptible, resistant);
                 changed = true;
             }
             else if (treatments[i]->should_end(current)) {

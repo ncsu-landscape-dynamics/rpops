@@ -30,6 +30,7 @@
 #include "simulation.hpp"
 #include "kernel.hpp"
 #include "scheduling.hpp"
+#include "quarantine.hpp"
 
 #include <vector>
 
@@ -83,6 +84,8 @@ public:
         IntegerRaster& resistant,
         std::vector<std::tuple<int, int>>& outside_dispersers,  // out
         SpreadRate<IntegerRaster>& spread_rate,  // out
+        QuarantineEscape<IntegerRaster>& quarantine,  // out
+        const IntegerRaster& quarantine_areas,
         const std::vector<std::vector<int>> movements)
     {
         RadialDispersalKernel<IntegerRaster> natural_radial_kernel(
@@ -168,7 +171,8 @@ public:
         }
         // treatments
         if (config_.use_treatments) {
-            bool managed = treatments.manage(step, infected, susceptible, resistant);
+            bool managed =
+                treatments.manage(step, infected, exposed, susceptible, resistant);
             if (managed && config_.use_mortality) {
                 // same conditions as the mortality code below
                 // TODO: make the mortality timing available as a separate function in
@@ -208,6 +212,13 @@ public:
             unsigned simulation_year =
                 simulation_step_to_action_step(config_.spread_rate_schedule(), step);
             spread_rate.compute_yearly_spread_rate(infected, simulation_year);
+        }
+        // compute quarantine escape
+        if (config_.use_quarantine && config_.quarantine_schedule()[step]) {
+            unsigned action_step =
+                simulation_step_to_action_step(config_.quarantine_schedule(), step);
+            quarantine.infection_escape_quarantine(
+                infected, quarantine_areas, action_step);
         }
     }
 };
