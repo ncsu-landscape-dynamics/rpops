@@ -30,6 +30,7 @@
 #' @param anthropogenic_distance_scale distance scale parameter for anthropogenic range dispersal kernel numeric value > 0
 #' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
+#' @param quarantine_areas areas that are set as quarantined for computing escape from quarantine statistics.
 #' @return list of vector matrices of infected and suceptible hosts per simulated year
 #' @export
 #' 
