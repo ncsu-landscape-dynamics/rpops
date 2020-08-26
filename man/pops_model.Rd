@@ -88,6 +88,8 @@ pops_model(
 
 \item{mortality}{matrix to track cumulative mortality}
 
+\item{quarantine_areas}{areas that are set as quarantined for computing escape from quarantine statistics.}
+
 \item{treatment_maps}{list of matrices where treatment or management has occurred in a given year}
 
 \item{treatment_dates}{dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)}
@@ -155,6 +157,8 @@ pops_model(
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month', 'week', 'day' or 'time step')}
+
+\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to export model results.}
 
 \item{quarantine_frequency}{sets how often the quarantine statistics are calculating either ('year', 'month', 'week', 'day' or 'time step') (default is yearly)}
 
