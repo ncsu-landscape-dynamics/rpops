@@ -31,6 +31,8 @@
 #' @param natural_kappa sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param anthropogenic_kappa sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12
 #' @param quarantine_areas areas that are set as quarantined for computing escape from quarantine statistics.
+#' @param quarantine_frequency sets how often the quarantine statistics are calculating either ('year', 'month', 'week', 'day' or 'time step') (default is yearly)
+#' @param quarantine_frequency_n sets number units ('year', 'month', 'week', 'day' or 'time step') in which to calculate and export quarantine statistics.
 #' @return list of vector matrices of infected and suceptible hosts per simulated year
 #' @export
 #' 
