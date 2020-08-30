@@ -82,6 +82,7 @@ abc_calibration <- function(infected_years_file,
                       mask = NULL, 
                       success_metric = "number of locations and total distance", 
                       output_frequency = "year",
+                      output_frequency_n = 1,
                       movements_file = "", 
                       use_movements = FALSE,
                       start_exposed = FALSE,
@@ -90,7 +91,9 @@ abc_calibration <- function(infected_years_file,
                       movement_stochasticity = TRUE,
                       deterministic = FALSE,
                       establishment_probability = 0.5,
-                      dispersal_percentage = 0.99) {
+                      dispersal_percentage = 0.99,
+                      quarantine_areas_file = "",
+                      use_quarantine = FALSE) {
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -108,6 +111,8 @@ abc_calibration <- function(infected_years_file,
     number_of_time_steps <- time_check$number_of_time_steps
     number_of_years <- time_check$number_of_years
     number_of_outputs <- time_check$number_of_outputs
+    quarantine_frequency <- output_frequency
+    quarantine_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -282,6 +287,13 @@ abc_calibration <- function(infected_years_file,
     return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
   }
   
+  if (use_quarantine){
+    
+  } else {
+    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
+    quarantine_areas <- mortality_tracker
+  }
+  
   use_anthropogenic_kernel <- TRUE
   ## set the parameter function to only need the parameters that chanage
   param_func <- function(reproductive_rate, natural_distance_scale, anthropogenic_distance_scale, percent_natural_dispersal, natural_kappa, anthropogenic_kappa) {
@@ -297,6 +309,7 @@ abc_calibration <- function(infected_years_file,
                              mortality_on = mortality_on,
                              mortality_tracker = mortality_tracker,
                              mortality = mortality,
+                             quarantine_areas = quarantine_areas,
                              treatment_maps = treatment_maps,
                              treatment_dates = treatment_dates,
                              pesticide_duration = pesticide_duration,
@@ -331,6 +344,10 @@ abc_calibration <- function(infected_years_file,
                              anthropogenic_dir = anthropogenic_dir, 
                              anthropogenic_kappa = anthropogenic_kappa,
                              output_frequency = output_frequency,
+                             output_frequency_n = output_frequency_n,
+                             quarantine_frequency = quarantine_frequency,
+                             quarantine_frequency_n = quarantine_frequency_n,
+                             use_quarantine = use_quarantine,
                              model_type_ = model_type,
                              latency_period = latency_period,
                              generate_stochasticity = generate_stochasticity,
@@ -537,7 +554,7 @@ abc_calibration <- function(infected_years_file,
         proposed_particles <- proposed_particles + 1
       }
       acc_rate <- current_particles/proposed_particles
-      print(paste("The current generation is ", current_bin, " and the current particle is ", current_particles, " and the current acceptance rate is ", acc_rate, sep = ""))
+      # print(paste("The current generation is ", current_bin, " and the current particle is ", current_particles, " and the current acceptance rate is ", acc_rate, sep = ""))
     }
     
     start_index <- current_bin * generation_size - generation_size + 1

@@ -101,6 +101,7 @@ auto_manage_nonsteering <- function(infected_files,
                                     pesticide_efficacy = 1.0,
                                     random_seed = NULL, 
                                     output_frequency = "year",
+                                    output_frequency_n = 1,
                                     movements_file = "", 
                                     use_movements = FALSE,
                                     cost_per_meter_sq = 1.37, 
@@ -120,7 +121,9 @@ auto_manage_nonsteering <- function(infected_files,
                                     movement_stochasticity = TRUE,
                                     deterministic = FALSE,
                                     establishment_probability = 0.5,
-                                    dispersal_percentage = 0.99) {
+                                    dispersal_percentage = 0.99,
+                                    quarantine_areas_file = "",
+                                    use_quarantine = FALSE) {
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -138,6 +141,8 @@ auto_manage_nonsteering <- function(infected_files,
     number_of_time_steps <- time_check$number_of_time_steps
     number_of_years <- time_check$number_of_years
     number_of_outputs <- time_check$number_of_outputs
+    quarantine_frequency <- output_frequency
+    quarantine_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -331,6 +336,13 @@ auto_manage_nonsteering <- function(infected_files,
     }
   }
   
+  if (use_quarantine){
+    
+  } else {
+    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
+    quarantine_areas <- mortality_tracker
+  }
+  
   years <- seq(year(start_date), year(end_date), 1)
   
   ## management module information
@@ -415,6 +427,7 @@ auto_manage_nonsteering <- function(infected_files,
                            mortality_on = mortality_on,
                            mortality_tracker = mortality_tracker,
                            mortality = mortality,
+                           quarantine_areas = quarantine_areas,
                            treatment_maps = treatment_maps,
                            treatment_dates = treatment_dates,
                            pesticide_duration = pesticide_duration,
@@ -449,6 +462,10 @@ auto_manage_nonsteering <- function(infected_files,
                            anthropogenic_dir = anthropogenic_dir[[i]],
                            anthropogenic_kappa = anthropogenic_kappa[[i]],
                            output_frequency = output_frequency,
+                           output_frequency_n = output_frequency_n,
+                           quarantine_frequency = quarantine_frequency,
+                           quarantine_frequency_n = quarantine_frequency_n,
+                           use_quarantine = use_quarantine,
                            model_type_ = model_type,
                            latency_period = latency_period,
                            generate_stochasticity = generate_stochasticity,

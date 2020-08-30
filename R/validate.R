@@ -101,6 +101,7 @@ validate <- function(infected_years_file,
                      mask = NULL, 
                      success_metric = "quantity", 
                      output_frequency = "year",
+                     output_frequency_n = 1,
                      movements_file = "", 
                      use_movements = FALSE,
                      generate_stochasticity = TRUE,
@@ -108,7 +109,9 @@ validate <- function(infected_years_file,
                      movement_stochasticity = TRUE,
                      deterministic = FALSE,
                      establishment_probability = 0.5,
-                     dispersal_percentage = 0.99){ 
+                     dispersal_percentage = 0.99,
+                     quarantine_areas_file = "",
+                     use_quarantine = FALSE){ 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -133,6 +136,8 @@ validate <- function(infected_years_file,
     number_of_time_steps <- time_check$number_of_time_steps
     number_of_years <- time_check$number_of_years
     number_of_outputs <- time_check$number_of_outputs
+    quarantine_frequency <- output_frequency
+    quarantine_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -337,6 +342,13 @@ validate <- function(infected_years_file,
     return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
   }
   
+  if (use_quarantine){
+    
+  } else {
+    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
+    quarantine_areas <- mortality_tracker
+  }
+  
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
@@ -350,7 +362,8 @@ validate <- function(infected_years_file,
     random_seed <- round(stats::runif(1, 1, 1000000))
     data <- PoPS::pops_model(random_seed = random_seed, 
                              use_lethal_temperature = use_lethal_temperature, 
-                             lethal_temperature = lethal_temperature, lethal_temperature_month = lethal_temperature_month,
+                             lethal_temperature = lethal_temperature, 
+                             lethal_temperature_month = lethal_temperature_month,
                              infected = infected,
                              exposed = exposed,
                              susceptible = susceptible,
@@ -358,6 +371,7 @@ validate <- function(infected_years_file,
                              mortality_on = mortality_on,
                              mortality_tracker = mortality_tracker,
                              mortality = mortality,
+                             quarantine_areas = quarantine_areas,
                              treatment_maps = treatment_maps,
                              treatment_dates = treatment_dates,
                              pesticide_duration = pesticide_duration,
@@ -373,7 +387,7 @@ validate <- function(infected_years_file,
                              num_rows = num_rows, 
                              num_cols = num_cols,
                              time_step = time_step, 
-                             reproductive_rate = reproductive_rate[i],
+                             reproductive_rate = reproductive_rate,
                              mortality_rate = mortality_rate, 
                              mortality_time_lag = mortality_time_lag,
                              season_month_start = season_month_start, 
@@ -384,14 +398,18 @@ validate <- function(infected_years_file,
                              natural_kernel_type = natural_kernel_type, 
                              anthropogenic_kernel_type = anthropogenic_kernel_type, 
                              use_anthropogenic_kernel = use_anthropogenic_kernel, 
-                             percent_natural_dispersal = percent_natural_dispersal[i],
-                             natural_distance_scale = natural_distance_scale[i], 
-                             anthropogenic_distance_scale = anthropogenic_distance_scale[i], 
+                             percent_natural_dispersal = percent_natural_dispersal,
+                             natural_distance_scale = natural_distance_scale, 
+                             anthropogenic_distance_scale = anthropogenic_distance_scale, 
                              natural_dir = natural_dir, 
                              natural_kappa = natural_kappa,
                              anthropogenic_dir = anthropogenic_dir, 
                              anthropogenic_kappa = anthropogenic_kappa,
                              output_frequency = output_frequency,
+                             output_frequency_n = output_frequency_n,
+                             quarantine_frequency = quarantine_frequency,
+                             quarantine_frequency_n = quarantine_frequency_n,
+                             use_quarantine = use_quarantine,
                              model_type_ = model_type,
                              latency_period = latency_period,
                              generate_stochasticity = generate_stochasticity,
