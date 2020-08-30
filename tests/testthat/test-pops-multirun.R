@@ -49,8 +49,6 @@ test_that("Multirun model outputs work", {
   establishment_probability <- 0.5
   dispersal_percentage <- 0.99
   quarantine_areas_file <- ""
-  quarantine_frequency <- "year"
-  quarantine_frequency_n <- 1
   use_quarantine <- FALSE
   output_frequency_n <- 1
   
@@ -102,8 +100,6 @@ test_that("Multirun model outputs work", {
                         establishment_probability,
                         dispersal_percentage,
                         quarantine_areas_file,
-                        quarantine_frequency,
-                        quarantine_frequency_n,
                         use_quarantine)
   
   expect_equal(length(data), 10)

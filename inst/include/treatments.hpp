@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <stdexcept>
 
 namespace pops {
 

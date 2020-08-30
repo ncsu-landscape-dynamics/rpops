@@ -55,8 +55,6 @@ test_that("ABC validation has correctly formatted returns with multiple output c
   establishment_probability <- 0.5
   dispersal_percentage <- 0.99
   quarantine_areas_file <- ""
-  quarantine_frequency <- "year"
-  quarantine_frequency_n <- 1
   use_quarantine <- FALSE
   
   data <- abc_validate(infected_years_file, 
@@ -109,8 +107,6 @@ test_that("ABC validation has correctly formatted returns with multiple output c
                        establishment_probability,
                        dispersal_percentage,
                        quarantine_areas_file,
-                       quarantine_frequency,
-                       quarantine_frequency_n,
                        use_quarantine)
   
   expect_s3_class(data, "data.frame")
@@ -187,8 +183,6 @@ test_that("ABC validation has correctly formatted returns and runs with a single
   establishment_probability <- 0.5
   dispersal_percentage <- 0.99
   quarantine_areas_file <- ""
-  quarantine_frequency <- "year"
-  quarantine_frequency_n <- 1
   use_quarantine <- FALSE
   output_frequency_n <- 1
   
@@ -242,8 +236,6 @@ test_that("ABC validation has correctly formatted returns and runs with a single
                        establishment_probability,
                        dispersal_percentage,
                        quarantine_areas_file,
-                       quarantine_frequency,
-                       quarantine_frequency_n,
                        use_quarantine)
   
   expect_s3_class(data, "data.frame")

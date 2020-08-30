@@ -107,8 +107,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
                           establishment_probability = 0.5,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
-                          quarantine_frequency = "year",
-                          quarantine_frequency_n = 1,
                           use_quarantine = FALSE)
   
   expect_length(data$posterior_means, 6)
