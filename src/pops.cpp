@@ -11,6 +11,7 @@
 #include "switch_kernel.hpp"
 #include "treatments.hpp"
 #include "uniform_kernel.hpp"
+#include "quarantine.hpp"
 #include <Rcpp.h>
 #include <fstream>
 #include <iostream>
@@ -26,6 +27,7 @@ using std::cerr;
 using std::cout;
 using std::endl;
 using std::string;
+using std::to_string;
 
 using namespace Rcpp;
 using namespace pops;
@@ -90,6 +92,24 @@ auto to_array(Tuple&& tuple)
     return to_array(std::forward<Tuple>(tuple), make_indices<Tuple>());
 }
 
+std::string quarantine_enum_to_string(QuarantineDirection type) {
+    switch(type) {
+    case QuarantineDirection::N:
+        return "N";
+    case QuarantineDirection::S:
+        return "S";
+    case QuarantineDirection::E:
+        return "E";
+    case QuarantineDirection::W:
+        return "W";
+    case QuarantineDirection::None:
+        return "None";
+    default:
+        return "Invalid animal";
+    }
+}
+
+
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
@@ -105,6 +125,7 @@ List pops_model(
     bool mortality_on,
     IntegerMatrix mortality_tracker,
     IntegerMatrix mortality,
+    IntegerMatrix quarantine_areas,
     std::vector<NumericMatrix> treatment_maps,
     std::vector<std::string> treatment_dates,
     std::vector<int> pesticide_duration,
@@ -139,6 +160,10 @@ List pops_model(
     std::string anthropogenic_dir = "NONE",
     double anthropogenic_kappa = 0,
     std::string output_frequency = "year",
+    int output_frequency_n = 1,
+    std::string quarantine_frequency = "year",
+    int quarantine_frequency_n = 1,
+    bool use_quarantine = false,
     std::string model_type_ = "SI",
     int latency_period = 0,
     bool generate_stochasticity = true,
@@ -191,7 +216,10 @@ List pops_model(
 
     config.dispersal_percentage = dispersal_percentage;
     config.output_frequency = output_frequency;
-    config.output_frequency_n = 0;
+    config.output_frequency_n = output_frequency_n;
+    config.quarantine_frequency = quarantine_frequency;
+    config.quarantine_frequency_n = quarantine_frequency_n;
+    config.use_quarantine = use_quarantine;
 
     std::vector<std::tuple<int, int>> outside_dispersers;
     TreatmentApplication treatment_application =
@@ -254,7 +282,24 @@ List pops_model(
             config.movement_schedule.push_back(move_scheduled);
         }
     }
-
+    
+    unsigned quarantine_outputs;
+    if (config.use_quarantine) {
+        quarantine_outputs = config.quarantine_num_steps();
+    } 
+    else {
+        quarantine_outputs = 0;
+    }
+    
+    QuarantineEscape<IntegerMatrix> quarantine(
+            quarantine_areas, ew_res, ns_res, quarantine_outputs);
+    bool quarantine_escape;
+    std::vector<bool> quarantine_escapes;
+    int escape_dist;
+    std::vector<int> escape_dists;
+    QuarantineDirection escape_direction;
+    std::vector<std::string> escape_directions;
+    
     ModelType mt = model_type_from_string(config.model_type);
     Simulation<IntegerMatrix, NumericMatrix> simulation(
         config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
@@ -288,6 +333,8 @@ List pops_model(
             resistant,
             outside_dispersers,
             spreadrate,
+            quarantine,
+            quarantine_areas,
             movements);
 
         if (config.spread_schedule()[current_index]) {
@@ -320,6 +367,15 @@ List pops_model(
             auto sr = to_array(spread_rates);
             spread_rates_vector.push_back(sr);
         }
+        
+        if (config.use_quarantine && config.quarantine_schedule()[current_index]) {
+            quarantine_escape = quarantine.escaped(current_index);
+            escape_dist = quarantine.distance(current_index);
+            escape_direction = quarantine.direction(current_index);
+            quarantine_escapes.push_back(quarantine_escape);
+            escape_dists.push_back(escape_dist);
+            escape_directions.push_back(quarantine_enum_to_string(escape_direction));
+        }
     }
 
     return List::create(
@@ -332,5 +388,8 @@ List pops_model(
         _["number_infected"] = number_infected,
         _["area_infected"] = area_infected,
         _["total_hosts"] = total_host_vector,
-        _["propogules"] = dispersers_vector);
+        _["propogules"] = dispersers_vector,
+        _["quarantine_escape"] = quarantine_escapes,
+        _["quarantine_escape_distance"] = escape_dists,
+        _["quarantine_escape_directions"] = escape_directions);
 }
