@@ -288,7 +288,13 @@ abc_calibration <- function(infected_years_file,
   }
   
   if (use_quarantine){
-    
+    quarantine_check <- secondary_raster_checks(quarantine_areas_file, host)
+    if (quarantine_check$checks_passed) {
+      quarantine_areas <- quarantine_check$raster
+      quarantine_areas <- raster::as.matrix(quarantine_areas)
+    } else {
+      return(quarantine_check$failed_check)
+    }
   } else {
     # set quarantine areas to all zeros (meaning no quarantine areas are considered)
     quarantine_areas <- mortality_tracker
