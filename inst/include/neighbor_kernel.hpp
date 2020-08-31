@@ -18,6 +18,7 @@
 
 #include "kernel_types.hpp"
 #include "radial_kernel.hpp"
+#include "utils.hpp"
 
 namespace pops {
 
@@ -60,6 +61,7 @@ public:
     template<typename Generator>
     std::tuple<int, int> operator()(Generator& generator, int row, int col)
     {
+        UNUSED(generator);  // Deterministic does not need random numbers.
         switch (direction_) {
         case Direction::E:
             col += 1;
@@ -96,10 +98,12 @@ public:
         return std::make_tuple(row, col);
     }
 
-    /*! Enum value is defined, so this always returns false.
+    /*! \copybrief RadialDispersalKernel::supports_kernel()
      */
     static bool supports_kernel(const DispersalKernelType type)
     {
+        if (type == DispersalKernelType::DeterministicNeighbor)
+            return true;
         return false;
     }
 };

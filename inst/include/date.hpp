@@ -44,6 +44,7 @@ public:
     Date(const Date& d) : year_(d.year_), month_(d.month_), day_(d.day_) {}
     Date(int y, int m, int d) : year_(y), month_(m), day_(d) {}
     Date(std::string date);
+    Date& operator=(const Date&) = default;
     inline void increased_by_days(int num_days);
     inline void increased_by_week();
     inline void increased_by_month();

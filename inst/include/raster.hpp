@@ -88,8 +88,12 @@ for_each_zip(InputIt1 first1, InputIt1 last1, InputIt2 first2, BinaryOperation f
  * scalars using `std::common_type`, i.e. `a * b` where `a` is an
  * integral raster type and `b` is a floating raster type produce
  * a floating raster type.
+ *
+ * The Index template parameter is an signed or unsigned integer used for
+ * indexing of rows and columns. The default value is int because signed
+ * indices is the modern C++ practice and int is used in Rcpp.
  */
-template<typename Number, typename Index = unsigned>
+template<typename Number, typename Index = int>
 class Raster
 {
 protected:

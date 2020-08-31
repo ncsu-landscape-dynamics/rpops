@@ -27,7 +27,7 @@ typedef std::tuple<double, double, double, double> BBoxFloat;
 typedef std::tuple<bool, bool, bool, bool> BBoxBool;
 
 /**
- * Class storing and computing yearly spread rate for one simulation.
+ * Class storing and computing step spread rate for one simulation.
  */
 template<typename Raster>
 class SpreadRate
@@ -39,7 +39,7 @@ private:
     double west_east_resolution;
     // the north-south resolution of the pixel
     double north_south_resolution;
-    unsigned num_years;
+    unsigned num_steps;
     std::vector<BBoxInt> boundaries;
     std::vector<BBoxFloat> rates;
 
@@ -112,15 +112,15 @@ private:
     }
 
 public:
-    SpreadRate(const Raster& raster, double ew_res, double ns_res, unsigned num_years)
+    SpreadRate(const Raster& raster, double ew_res, double ns_res, unsigned num_steps)
         : width(raster.cols()),
           height(raster.rows()),
           west_east_resolution(ew_res),
           north_south_resolution(ns_res),
-          num_years(num_years),
-          boundaries(num_years + 1, std::make_tuple(0, 0, 0, 0)),
+          num_steps(num_steps),
+          boundaries(num_steps + 1, std::make_tuple(0, 0, 0, 0)),
           rates(
-              num_years,
+              num_steps,
               std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan("")))
     {
         boundaries.at(0) = infection_boundary(raster);
@@ -131,9 +131,9 @@ public:
     /**
      * Returns rate for certain year of simulation
      */
-    const BBoxFloat& yearly_rate(unsigned simulation_year) const
+    const BBoxFloat& step_rate(unsigned step) const
     {
-        return rates[simulation_year];
+        return rates[step];
     }
 
     /**
@@ -144,17 +144,17 @@ public:
      * If spread rate is zero and the bbox is touching the edge,
      * that means spread is out of bounds and rate is set to NaN.
      */
-    void compute_yearly_spread_rate(const Raster& raster, unsigned simulation_year)
+    void compute_step_spread_rate(const Raster& raster, unsigned step)
     {
         BBoxInt bbox = infection_boundary(raster);
-        boundaries.at(simulation_year + 1) = bbox;
+        boundaries.at(step + 1) = bbox;
         if (!is_boundary_valid(bbox)) {
-            rates.at(simulation_year) =
+            rates.at(step) =
                 std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan(""));
             return;
         }
         int n1, n2, s1, s2, e1, e2, w1, w2;
-        std::tie(n1, s1, e1, w1) = boundaries.at(simulation_year);
+        std::tie(n1, s1, e1, w1) = boundaries.at(step);
         std::tie(n2, s2, e2, w2) = bbox;
         double n_rate = ((n1 - n2) * north_south_resolution);
         double s_rate = ((s2 - s1) * north_south_resolution);
@@ -172,7 +172,7 @@ public:
         if (w_rate == 0 && bw)
             w_rate = std::nan("");
 
-        rates.at(simulation_year) = std::make_tuple(n_rate, s_rate, e_rate, w_rate);
+        rates.at(step) = std::make_tuple(n_rate, s_rate, e_rate, w_rate);
     }
 };
 
@@ -182,15 +182,15 @@ public:
  * Checks if any rate is nan to not include it in the average.
  */
 template<typename Raster>
-BBoxFloat average_spread_rate(
-    const std::vector<SpreadRate<Raster>>& rates, unsigned simulation_year)
+BBoxFloat
+average_spread_rate(const std::vector<SpreadRate<Raster>>& rates, unsigned step)
 {
     // loop through stochastic runs
     double n, s, e, w;
     int size_n = 0, size_s = 0, size_e = 0, size_w = 0;
     double avg_n = 0, avg_s = 0, avg_e = 0, avg_w = 0;
     for (unsigned i = 0; i < rates.size(); i++) {
-        std::tie(n, s, e, w) = rates[i].yearly_rate(simulation_year);
+        std::tie(n, s, e, w) = rates[i].step_rate(step);
         if (!std::isnan(n)) {
             avg_n += n;
             size_n++;
