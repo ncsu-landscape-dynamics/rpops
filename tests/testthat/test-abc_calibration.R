@@ -96,8 +96,18 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
                           mask, 
                           success_metric, 
                           output_frequency,
+                          output_frequency_n =1,
                           movements_file, 
-                          use_movements)
+                          use_movements,
+                          start_exposed = FALSE,
+                          generate_stochasticity = TRUE,
+                          establishment_stochasticity = TRUE,
+                          movement_stochasticity = TRUE,
+                          deterministic = FALSE,
+                          establishment_probability = 0.5,
+                          dispersal_percentage = 0.99,
+                          quarantine_areas_file = "",
+                          use_quarantine = FALSE)
   
   expect_length(data$posterior_means, 6)
   expect_vector(data$posterior_means, ptype = double(), size = 6)

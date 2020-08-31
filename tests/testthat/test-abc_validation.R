@@ -40,12 +40,22 @@ test_that("ABC validation has correctly formatted returns with multiple output c
   mask <- NULL
   success_metric <- "quantity and configuration"
   output_frequency <- "week"
+  output_frequency_n  <- 1
   movements_file = ""
   use_movements = FALSE
   percent_natural_dispersal <- 1.0
   anthropogenic_distance_scale <- 0.0
   number_of_iterations = 10
   number_of_cores = 2
+  start_exposed <- FALSE
+  generate_stochasticity <- TRUE
+  establishment_stochasticity <- TRUE
+  movement_stochasticity <- TRUE
+  deterministic <- FALSE
+  establishment_probability <- 0.5
+  dispersal_percentage <- 0.99
+  quarantine_areas_file <- ""
+  use_quarantine <- FALSE
   
   data <- abc_validate(infected_years_file, 
                        number_of_iterations, 
@@ -56,7 +66,7 @@ test_that("ABC validation has correctly formatted returns with multiple output c
                        host_file, 
                        total_plants_file, 
                        temp, 
-                       temperature_coefficient_file, 
+                       temperature_coefficient_fil, 
                        precip, 
                        precipitation_coefficient_file, 
                        model_type,
@@ -86,8 +96,18 @@ test_that("ABC validation has correctly formatted returns with multiple output c
                        mask, 
                        success_metric, 
                        output_frequency,
+                       output_frequency_n,
                        movements_file, 
-                       use_movements)
+                       use_movements,
+                       start_exposed,
+                       generate_stochasticity,
+                       establishment_stochasticity,
+                       movement_stochasticity,
+                       deterministic,
+                       establishment_probability,
+                       dispersal_percentage,
+                       quarantine_areas_file,
+                       use_quarantine)
   
   expect_s3_class(data, "data.frame")
   expect_length(data, 13)
@@ -107,7 +127,7 @@ test_that("ABC validation has correctly formatted returns with multiple output c
 })
 
 
-test_that("ABC calibration has correctly formatted returns and runs with a single output comparison", {
+test_that("ABC validation has correctly formatted returns and runs with a single output comparison", {
   infected_years_file <- system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
   number_of_observations <- 68    ### This is the number of infected cells - just make sure it's consistent across years 
   parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
@@ -155,6 +175,16 @@ test_that("ABC calibration has correctly formatted returns and runs with a singl
   anthropogenic_distance_scale <- 0.0
   number_of_iterations = 10
   number_of_cores = 2
+  start_exposed <- FALSE
+  generate_stochasticity <- TRUE
+  establishment_stochasticity <- TRUE
+  movement_stochasticity <- TRUE
+  deterministic <- FALSE
+  establishment_probability <- 0.5
+  dispersal_percentage <- 0.99
+  quarantine_areas_file <- ""
+  use_quarantine <- FALSE
+  output_frequency_n <- 1
   
   data <- abc_validate(infected_years_file, 
                        number_of_iterations, 
@@ -165,7 +195,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a singl
                        host_file, 
                        total_plants_file, 
                        temp, 
-                       temperature_coefficient_file, 
+                       temperature_coefficient_fil, 
                        precip, 
                        precipitation_coefficient_file, 
                        model_type,
@@ -195,8 +225,18 @@ test_that("ABC calibration has correctly formatted returns and runs with a singl
                        mask, 
                        success_metric, 
                        output_frequency,
+                       output_frequency_n,
                        movements_file, 
-                       use_movements)
+                       use_movements,
+                       start_exposed,
+                       generate_stochasticity,
+                       establishment_stochasticity,
+                       movement_stochasticity,
+                       deterministic,
+                       establishment_probability,
+                       dispersal_percentage,
+                       quarantine_areas_file,
+                       use_quarantine)
   
   expect_s3_class(data, "data.frame")
   expect_length(data, 13)

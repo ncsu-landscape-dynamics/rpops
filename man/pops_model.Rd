@@ -16,6 +16,7 @@ pops_model(
   mortality_on,
   mortality_tracker,
   mortality,
+  quarantine_areas,
   treatment_maps,
   treatment_dates,
   pesticide_duration,
@@ -50,6 +51,10 @@ pops_model(
   anthropogenic_dir = "NONE",
   anthropogenic_kappa = 0,
   output_frequency = "year",
+  output_frequency_n = 1L,
+  quarantine_frequency = "year",
+  quarantine_frequency_n = 1L,
+  use_quarantine = FALSE,
   model_type_ = "SI",
   latency_period = 0L,
   generate_stochasticity = TRUE,
@@ -82,6 +87,8 @@ pops_model(
 \item{mortality_tracker}{matrix of 0's to track mortality per year}
 
 \item{mortality}{matrix to track cumulative mortality}
+
+\item{quarantine_areas}{areas that are set as quarantined for computing escape from quarantine statistics.}
 
 \item{treatment_maps}{list of matrices where treatment or management has occurred in a given year}
 
@@ -149,7 +156,15 @@ pops_model(
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+\item{output_frequency}{sets when outputs occur either ('year', 'month', 'week', 'day' or 'time step')}
+
+\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to export model results.}
+
+\item{quarantine_frequency}{sets how often the quarantine statistics are calculating either ('year', 'month', 'week', 'day' or 'time step') (default is yearly)}
+
+\item{quarantine_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to calculate and export quarantine statistics.}
+
+\item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)}
 
 \item{model_type_}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
 

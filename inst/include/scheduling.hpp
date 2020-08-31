@@ -403,7 +403,7 @@ unsigned get_number_of_scheduled_actions(const std::vector<bool>& action_schedul
  * simulation step (e.g., frequency is weekly, but simulation runs every 2 weeks).
  * If frequency is empty string, empty output schedule is returned.
  */
-inline std::vector<bool> output_schedule_from_string(
+inline std::vector<bool> schedule_from_string(
     const Scheduler& scheduler, const std::string& frequency, unsigned n = 0)
 {
     StepUnit sim_unit;

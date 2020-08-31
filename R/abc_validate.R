@@ -55,53 +55,56 @@
 #' }
 #' 
 abc_validate <- function(infected_years_file, 
-                     number_of_iterations, 
-                     number_of_cores = NA,
-                     parameter_means,
-                     parameter_cov_matrix,
-                     infected_file, 
-                     host_file, 
-                     total_plants_file, 
-                     temp = FALSE, 
-                     temperature_coefficient_file = "", 
-                     precip = FALSE, 
-                     precipitation_coefficient_file = "", 
-                     model_type = "SI",
-                     latency_period = 0,
-                     time_step = "month",
-                     season_month_start = 1, 
-                     season_month_end = 12, 
-                     start_date = '2008-01-01', 
-                     end_date = '2008-12-31',  
-                     use_lethal_temperature = FALSE, 
-                     temperature_file = "",
-                     lethal_temperature = -12.87, 
-                     lethal_temperature_month = 1,
-                     mortality_on = FALSE, 
-                     mortality_rate = 0, 
-                     mortality_time_lag = 0, 
-                     management = FALSE, 
-                     treatment_dates = c(0), 
-                     treatments_file = "",
-                     treatment_method = "ratio",
-                     natural_kernel_type = "cauchy",
-                     anthropogenic_kernel_type = "cauchy",
-                     natural_dir = "NONE", 
-                     anthropogenic_dir = "NONE", 
-                     pesticide_duration = 0, 
-                     pesticide_efficacy = 1.0,
-                     mask = NULL, 
-                     success_metric = "quantity", 
-                     output_frequency = "year",
-                     movements_file = "", 
-                     use_movements = FALSE,
-                     start_exposed = FALSE,
-                     generate_stochasticity = TRUE,
-                     establishment_stochasticity = TRUE,
-                     movement_stochasticity = TRUE,
-                     deterministic = FALSE,
-                     establishment_probability = 0.5,
-                     dispersal_percentage = 0.99){
+                         number_of_iterations, 
+                         number_of_cores = NA,
+                         parameter_means,
+                         parameter_cov_matrix,
+                         infected_file, 
+                         host_file, 
+                         total_plants_file, 
+                         temp = FALSE, 
+                         temperature_coefficient_file = "", 
+                         precip = FALSE, 
+                         precipitation_coefficient_file = "", 
+                         model_type = "SI",
+                         latency_period = 0,
+                         time_step = "month",
+                         season_month_start = 1, 
+                         season_month_end = 12, 
+                         start_date = '2008-01-01', 
+                         end_date = '2008-12-31',  
+                         use_lethal_temperature = FALSE, 
+                         temperature_file = "",
+                         lethal_temperature = -12.87, 
+                         lethal_temperature_month = 1,
+                         mortality_on = FALSE, 
+                         mortality_rate = 0, 
+                         mortality_time_lag = 0, 
+                         management = FALSE, 
+                         treatment_dates = c(0), 
+                         treatments_file = "",
+                         treatment_method = "ratio",
+                         natural_kernel_type = "cauchy",
+                         anthropogenic_kernel_type = "cauchy",
+                         natural_dir = "NONE", 
+                         anthropogenic_dir = "NONE", 
+                         pesticide_duration = 0, 
+                         pesticide_efficacy = 1.0,
+                         mask = NULL, 
+                         success_metric = "quantity", 
+                         output_frequency = "year",
+                         output_frequency_n = 1,
+                         movements_file = "", 
+                         use_movements = FALSE,
+                         start_exposed = FALSE,
+                         generate_stochasticity = TRUE,
+                         establishment_stochasticity = TRUE,
+                         movement_stochasticity = TRUE,
+                         deterministic = FALSE,
+                         establishment_probability = 0.5,
+                         dispersal_percentage = 0.99,
+                         quarantine_areas_file = "",
+                         use_quarantine = FALSE){
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -134,6 +137,8 @@ abc_validate <- function(infected_years_file,
     number_of_time_steps <- time_check$number_of_time_steps
     number_of_years <- time_check$number_of_years
     number_of_outputs <- time_check$number_of_outputs
+    quarantine_frequency <- output_frequency
+    quarantine_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -311,6 +316,19 @@ abc_validate <- function(infected_years_file,
     return(paste("The infection years file must have enough layers to match the number of outputs from the model. The number of layers of your infected year file is", num_layers_infected_years, "and the number of outputs is", number_of_time_steps))
   }
   
+  if (use_quarantine){
+    quarantine_check <- secondary_raster_checks(quarantine_areas_file, host)
+    if (quarantine_check$checks_passed) {
+      quarantine_areas <- quarantine_check$raster
+      quarantine_areas <- raster::as.matrix(quarantine_areas)
+    } else {
+      return(quarantine_check$failed_check)
+    }
+  } else {
+    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
+    quarantine_areas <- mortality_tracker
+  }
+  
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
@@ -347,6 +365,7 @@ abc_validate <- function(infected_years_file,
                              mortality_on = mortality_on,
                              mortality_tracker = mortality_tracker,
                              mortality = mortality,
+                             quarantine_areas = quarantine_areas,
                              treatment_maps = treatment_maps,
                              treatment_dates = treatment_dates,
                              pesticide_duration = pesticide_duration,
@@ -367,7 +386,8 @@ abc_validate <- function(infected_years_file,
                              mortality_time_lag = mortality_time_lag,
                              season_month_start = season_month_start, 
                              season_month_end = season_month_end,
-                             start_date = start_date, end_date = end_date,
+                             start_date = start_date, 
+                             end_date = end_date,
                              treatment_method = treatment_method,
                              natural_kernel_type = natural_kernel_type, 
                              anthropogenic_kernel_type = anthropogenic_kernel_type, 
@@ -375,10 +395,15 @@ abc_validate <- function(infected_years_file,
                              percent_natural_dispersal = percent_natural_dispersal,
                              natural_distance_scale = natural_distance_scale, 
                              anthropogenic_distance_scale = anthropogenic_distance_scale, 
-                             natural_dir = natural_dir, natural_kappa = natural_kappa,
+                             natural_dir = natural_dir, 
+                             natural_kappa = natural_kappa,
                              anthropogenic_dir = anthropogenic_dir, 
                              anthropogenic_kappa = anthropogenic_kappa,
                              output_frequency = output_frequency,
+                             output_frequency_n = output_frequency_n,
+                             quarantine_frequency = quarantine_frequency,
+                             quarantine_frequency_n = quarantine_frequency_n,
+                             use_quarantine = use_quarantine,
                              model_type_ = model_type,
                              latency_period = latency_period,
                              generate_stochasticity = generate_stochasticity,

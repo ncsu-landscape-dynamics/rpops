@@ -34,7 +34,8 @@
 #' @param pesticide_duration how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)
 #' @param random_seed sets the random seed for the simulation used for reproducibility
-#' @param output_frequency sets when outputs occur either ('year', 'month' or 'time step')
+#' @param output_frequency sets when outputs occur either ('year', 'month', 'week', 'day' or 'time step')
+#' @param output_frequency_n sets number units ('year', 'month', 'week', 'day' or 'time step') in which to export model results.
 #' @param movements_file this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.
 #' @param use_movements this is a boolean to turn on use of the movement module.
 #' @param latency_period How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.
@@ -48,6 +49,8 @@
 #' @param deterministic Boolean to indicate whether to use a deterministic dispersal kernel default is FALSE
 #' @param establishment_probability Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)
 #' @param dispersal_percentage  Percentage of dispersal used to calculate the bounding box for deterministic dispersal
+#' @param quarantine_areas_file path to raster file with quarantine boundaries used in calculating likelihood of quarantine escape if use_quarantine is TRUE
+#' @param use_quarantine boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints crs rowColFromCell
@@ -56,6 +59,7 @@
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom utils read.csv 
 #' @importFrom sp SpatialPointsDataFrame CRS spTransform
+#' @importFrom  methods is
 #' @return list of infected and susceptible per year
 #' @export
 #'
@@ -133,7 +137,8 @@ pops <- function(infected_file,
                  pesticide_duration = c(0), 
                  pesticide_efficacy = 1.0,
                  random_seed = NULL, 
-                 output_frequency = "year", 
+                 output_frequency = "year",
+                 output_frequency_n = 1,
                  movements_file = "", 
                  use_movements = FALSE,
                  start_exposed = FALSE,
@@ -142,7 +147,9 @@ pops <- function(infected_file,
                  movement_stochasticity = TRUE,
                  deterministic = FALSE,
                  establishment_probability = 0.5,
-                 dispersal_percentage = 0.99){
+                 dispersal_percentage = 0.99,
+                 quarantine_areas_file = "",
+                 use_quarantine = FALSE){
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -189,6 +196,8 @@ pops <- function(infected_file,
     number_of_time_steps <- time_check$number_of_time_steps
     number_of_years <- time_check$number_of_years
     number_of_outputs <- time_check$number_of_outputs
+    quarantine_frequency <- output_frequency
+    quarantine_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -354,6 +363,19 @@ pops <- function(infected_file,
     infected <- mortality_tracker
   }
   
+  if (use_quarantine){
+    quarantine_check <- secondary_raster_checks(quarantine_areas_file, host)
+    if (quarantine_check$checks_passed) {
+      quarantine_areas <- quarantine_check$raster
+      quarantine_areas <- raster::as.matrix(quarantine_areas)
+    } else {
+      return(quarantine_check$failed_check)
+    }
+  } else {
+    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
+    quarantine_areas <- mortality_tracker
+  }
+  
   data <- PoPS::pops_model(random_seed = random_seed, 
                            use_lethal_temperature = use_lethal_temperature, 
                            lethal_temperature = lethal_temperature, 
@@ -365,6 +387,7 @@ pops <- function(infected_file,
                            mortality_on = mortality_on,
                            mortality_tracker = mortality_tracker,
                            mortality = mortality,
+                           quarantine_areas = quarantine_areas,
                            treatment_maps = treatment_maps,
                            treatment_dates = treatment_dates,
                            pesticide_duration = pesticide_duration,
@@ -398,7 +421,11 @@ pops <- function(infected_file,
                            natural_kappa = natural_kappa,
                            anthropogenic_dir = anthropogenic_dir, 
                            anthropogenic_kappa = anthropogenic_kappa,
-                           output_frequency = output_frequency, 
+                           output_frequency = output_frequency,
+                           output_frequency_n = output_frequency_n,
+                           quarantine_frequency = quarantine_frequency,
+                           quarantine_frequency_n = quarantine_frequency_n,
+                           use_quarantine = use_quarantine,
                            model_type_ = model_type,
                            latency_period = latency_period,
                            generate_stochasticity = generate_stochasticity,

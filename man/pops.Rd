@@ -40,6 +40,7 @@ pops(
   pesticide_efficacy = 1,
   random_seed = NULL,
   output_frequency = "year",
+  output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
   start_exposed = FALSE,
@@ -48,7 +49,9 @@ pops(
   movement_stochasticity = TRUE,
   deterministic = FALSE,
   establishment_probability = 0.5,
-  dispersal_percentage = 0.99
+  dispersal_percentage = 0.99,
+  quarantine_areas_file = "",
+  use_quarantine = FALSE
 )
 }
 \arguments{
@@ -120,7 +123,9 @@ pops(
 
 \item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
-\item{output_frequency}{sets when outputs occur either ('year', 'month' or 'time step')}
+\item{output_frequency}{sets when outputs occur either ('year', 'month', 'week', 'day' or 'time step')}
+
+\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to export model results.}
 
 \item{movements_file}{this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
 
@@ -139,6 +144,10 @@ pops(
 \item{establishment_probability}{Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
 
 \item{dispersal_percentage}{Percentage of dispersal used to calculate the bounding box for deterministic dispersal}
+
+\item{quarantine_areas_file}{path to raster file with quarantine boundaries used in calculating likelihood of quarantine escape if use_quarantine is TRUE}
+
+\item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)}
 }
 \value{
 list of infected and susceptible per year

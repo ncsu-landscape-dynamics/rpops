@@ -31,7 +31,7 @@ test_that("Multirun model outputs work", {
   anthropogenic_dir <- "NONE"
   pesticide_duration <- c(0)
   pesticide_efficacy <- 1.0
-  random_seed = NULL
+  random_seed <- NULL
   output_frequency = "year"
   movements_file <- ""
   use_movements <- FALSE
@@ -39,48 +39,68 @@ test_that("Multirun model outputs work", {
   number_of_cores <- 2
   model_type <- "SI"
   latency_period <- 0
-  parameter_means = c(0,21,1,500,0,0)
-  parameter_cov_matrix = matrix(0, nrow = 6, ncol = 6)
+  parameter_means <- c(0,21,1,500,0,0)
+  parameter_cov_matrix<- matrix(0, nrow = 6, ncol = 6)
+  start_exposed <- FALSE
+  generate_stochasticity <- TRUE
+  establishment_stochasticity <- TRUE
+  movement_stochasticity <- TRUE
+  deterministic <- FALSE
+  establishment_probability <- 0.5
+  dispersal_percentage <- 0.99
+  quarantine_areas_file <- ""
+  use_quarantine <- FALSE
+  output_frequency_n <- 1
   
   data <- pops_multirun(infected_file, 
-                              host_file, 
-                              total_plants_file,
-                              parameter_means,
-                              parameter_cov_matrix,
-                              temp, 
-                              temperature_coefficient_file, 
-                              precip, 
-                              precipitation_coefficient_file,
-                              model_type, 
-                              latency_period,
-                              time_step, 
-                              season_month_start, 
-                              season_month_end, 
-                              start_date, 
-                              end_date, 
-                              use_lethal_temperature,
-                              temperature_file,
-                              lethal_temperature, 
-                              lethal_temperature_month,
-                              mortality_on, 
-                              mortality_rate, 
-                              mortality_time_lag, 
-                              management, 
-                              treatment_dates, 
-                              treatments_file,
-                              treatment_method,
-                              natural_kernel_type, 
-                              anthropogenic_kernel_type,
-                              natural_dir, 
-                              anthropogenic_dir, 
-                              number_of_iterations, 
-                              number_of_cores,
-                              pesticide_duration,
-                              pesticide_efficacy,
-                              random_seed,
-                              output_frequency,
-                              movements_file, 
-                              use_movements)
+                        host_file, 
+                        total_plants_file,
+                        parameter_means,
+                        parameter_cov_matrix,
+                        temp, 
+                        temperature_coefficient_file, 
+                        precip, 
+                        precipitation_coefficient_file,
+                        model_type, 
+                        latency_period,
+                        time_step, 
+                        season_month_start, 
+                        season_month_end, 
+                        start_date, 
+                        end_date, 
+                        use_lethal_temperature,
+                        temperature_file,
+                        lethal_temperature, 
+                        lethal_temperature_month,
+                        mortality_on, 
+                        mortality_rate, 
+                        mortality_time_lag, 
+                        management, 
+                        treatment_dates, 
+                        treatments_file,
+                        treatment_method,
+                        natural_kernel_type, 
+                        anthropogenic_kernel_type,
+                        natural_dir, 
+                        anthropogenic_dir, 
+                        number_of_iterations, 
+                        number_of_cores,
+                        pesticide_duration,
+                        pesticide_efficacy,
+                        random_seed,
+                        output_frequency,
+                        output_frequency_n,
+                        movements_file, 
+                        use_movements,
+                        start_exposed,
+                        generate_stochasticity,
+                        establishment_stochasticity,
+                        movement_stochasticity,
+                        deterministic,
+                        establishment_probability,
+                        dispersal_percentage,
+                        quarantine_areas_file,
+                        use_quarantine)
   
   expect_equal(length(data), 10)
   expect_equal(as.matrix(data$single_run_out[[1]]), as.matrix(raster(infected_file)))
