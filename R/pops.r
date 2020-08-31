@@ -49,7 +49,7 @@
 #' @param deterministic Boolean to indicate whether to use a deterministic dispersal kernel default is FALSE
 #' @param establishment_probability Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)
 #' @param dispersal_percentage  Percentage of dispersal used to calculate the bounding box for deterministic dispersal
-#' @param quarantine_areas_file A geopackage (or other format with spatial polygons) used in calculating likelihood of quarantine escape if use_quarantine is TRUE
+#' @param quarantine_areas_file path to raster file with quarantine boundaries used in calculating likelihood of quarantine escape if use_quarantine is TRUE
 #' @param use_quarantine boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)
 #' 
 #' @useDynLib PoPS, .registration = TRUE
@@ -364,7 +364,13 @@ pops <- function(infected_file,
   }
   
   if (use_quarantine){
-    
+    quarantine_check <- secondary_raster_checks(quarantine_areas_file, host)
+    if (quarantine_check$checks_passed) {
+      quarantine_areas <- quarantine_check$raster
+      quarantine_areas <- raster::as.matrix(quarantine_areas)
+    } else {
+      return(quarantine_check$failed_check)
+    }
   } else {
     # set quarantine areas to all zeros (meaning no quarantine areas are considered)
     quarantine_areas <- mortality_tracker

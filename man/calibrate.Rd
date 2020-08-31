@@ -172,7 +172,7 @@ calibrate(
 
 \item{dispersal_percentage}{Percentage of dispersal used to calculate the bounding box for deterministic dispersal}
 
-\item{quarantine_areas_file}{A geopackage (or other format with spatial polygons) used in calculating likelihood of quarantine escape if use_quarantine is TRUE}
+\item{quarantine_areas_file}{path to raster file with quarantine boundaries used in calculating likelihood of quarantine escape if use_quarantine is TRUE}
 
 \item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)}
 }

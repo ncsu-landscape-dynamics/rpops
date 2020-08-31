@@ -541,26 +541,3 @@ parameter_checks <- function(n, parameter_means, parameter_cov_matrix) {
     return(outs)
   }
 }
-
-quarantine_checks <- function() {
-  checks_passed <- TRUE
-  
-  if (nrow(parameter_cov_matrix) != 6 | ncol(parameter_cov_matrix) != 6) {
-    checks_passed <- FALSE
-    failed_check <- "parameter covariance matrix is not 6 x 6" 
-  }
-  
-  if(checks_passed) {
-    parameters <- data.frame(MASS::mvrnorm(n, parameter_means, parameter_cov_matrix))
-  }
-  
-  if (checks_passed) {
-    outs <- list(checks_passed, parameters)
-    names(outs) <- c('checks_passed', 'parameters')
-    return(outs)
-  } else {
-    outs <- list(checks_passed, failed_check)
-    names(outs) <- c('checks_passed', 'failed_check')
-    return(outs)
-  }
-}

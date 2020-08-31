@@ -304,6 +304,19 @@ pops_multirun <- function(infected_file,
   resistant <- mortality_tracker
   exposed <- list(mortality_tracker)
   
+  if (use_quarantine){
+    quarantine_check <- secondary_raster_checks(quarantine_areas_file, host)
+    if (quarantine_check$checks_passed) {
+      quarantine_areas <- quarantine_check$raster
+      quarantine_areas <- raster::as.matrix(quarantine_areas)
+    } else {
+      return(quarantine_check$failed_check)
+    }
+  } else {
+    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
+    quarantine_areas <- mortality_tracker
+  }
+  
   if (latency_period > 1){
     for (ex in 2:(latency_period + 1)) {
       exposed[[ex]] <- mortality_tracker
@@ -315,16 +328,9 @@ pops_multirun <- function(infected_file,
     infected <- mortality_tracker
   }
   
-  years <- seq(year(start_date), year(end_date), 1)
+  # years <- seq(year(start_date), year(end_date), 1)
   rcl <- c(1, Inf, 1, 0, 0.99, NA)
   rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
-  
-  if (use_quarantine){
-    
-  } else {
-    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
-    quarantine_areas <- mortality_tracker
-  }
   
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
@@ -459,9 +465,9 @@ pops_multirun <- function(infected_file,
       north_rates[i,] <- rates[,1]
     }
     ## add quarantine here
-    if (!is.null(quarantine_escape_runs[[i]])) {
+    if (use_quarantine & length(quarantine_escape_runs[[i]]) == nlayers(probability_runs[[i]])) {
       escape_probability <- escape_probability + quarantine_escape_runs[[i]]
-      quarantine_escapes[i,] <- quarantine_escape_runs[[i]]
+      # quarantine_escapes[i,] <- quarantine_escape_runs[[i]]
       quarantine_escape_distances <- quarantine_escape_distance_runs[[i]]
       quarantine_escape_directions <- quarantine_escape_directions_runs[[i]]
     }
@@ -477,6 +483,16 @@ pops_multirun <- function(infected_file,
   south_rate <- round(sapply(south_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
   north_rate <- round(sapply(north_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
   ## add quarantine here
+  if (use_quarantine) {
+    escape_probability <- escape_probability/length(probability_runs) * 100
+    north_distance_to_quarantine <- 0
+  } else {
+    escape_probability <- data.frame(t(rep(NA, nlayers(probability_runs[[1]]))))
+    north_distance_to_quarantine <- data.frame(t(rep(NA, nlayers(probability_runs[[1]]))))
+    south_distance_to_quarantine <- data.frame(t(rep(NA, nlayers(probability_runs[[1]]))))
+    east_distance_to_quarantine <- data.frame(t(rep(NA, nlayers(probability_runs[[1]]))))
+    west_distance_to_quarantine <- data.frame(t(rep(NA, nlayers(probability_runs[[1]]))))
+  }
   
   
   which_median <- function(x) raster::which.min(abs(x - median(x)))
