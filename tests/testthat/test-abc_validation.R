@@ -6,7 +6,7 @@ test_that("ABC validation has correctly formatted returns with multiple output c
   parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
   infected_file <- system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
-  total_plants_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  total_populations_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
   temp <- FALSE
   temperature_coefficient_file <- ""
   precip <- FALSE
@@ -56,6 +56,7 @@ test_that("ABC validation has correctly formatted returns with multiple output c
   dispersal_percentage <- 0.99
   quarantine_areas_file <- ""
   use_quarantine <- FALSE
+  use_spreadrates <- FALSE
   
   data <- abc_validate(infected_years_file, 
                        number_of_iterations, 
@@ -64,7 +65,7 @@ test_that("ABC validation has correctly formatted returns with multiple output c
                        parameter_cov_matrix,
                        infected_file, 
                        host_file, 
-                       total_plants_file, 
+                       total_populations_file, 
                        temp, 
                        temperature_coefficient_fil, 
                        precip, 
@@ -107,7 +108,8 @@ test_that("ABC validation has correctly formatted returns with multiple output c
                        establishment_probability,
                        dispersal_percentage,
                        quarantine_areas_file,
-                       use_quarantine)
+                       use_quarantine,
+                       use_spreadrates)
   
   expect_s3_class(data, "data.frame")
   expect_length(data, 13)
@@ -135,7 +137,7 @@ test_that("ABC validation has correctly formatted returns and runs with a single
   checks = c(500, 60000, 900, 1000)
   infected_file <- system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
-  total_plants_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  total_populations_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
   temp <- FALSE
   temperature_coefficient_file <- ""
   precip <- FALSE
@@ -185,6 +187,7 @@ test_that("ABC validation has correctly formatted returns and runs with a single
   quarantine_areas_file <- ""
   use_quarantine <- FALSE
   output_frequency_n <- 1
+  use_spreadrates <- FALSE
   
   data <- abc_validate(infected_years_file, 
                        number_of_iterations, 
@@ -193,7 +196,7 @@ test_that("ABC validation has correctly formatted returns and runs with a single
                        parameter_cov_matrix,
                        infected_file, 
                        host_file, 
-                       total_plants_file, 
+                       total_populations_file, 
                        temp, 
                        temperature_coefficient_fil, 
                        precip, 
@@ -236,7 +239,8 @@ test_that("ABC validation has correctly formatted returns and runs with a single
                        establishment_probability,
                        dispersal_percentage,
                        quarantine_areas_file,
-                       use_quarantine)
+                       use_quarantine,
+                       use_spreadrates)
   
   expect_s3_class(data, "data.frame")
   expect_length(data, 13)
