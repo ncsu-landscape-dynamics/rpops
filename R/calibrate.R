@@ -48,7 +48,7 @@ calibrate <- function(infected_years_file,
                       prior_anthropogenic_distance_scale = c(1000,0),
                       infected_file, 
                       host_file, 
-                      total_plants_file, 
+                      total_populations_file, 
                       temp = FALSE, 
                       temperature_coefficient_file = "", 
                       precip = FALSE, 
@@ -90,7 +90,8 @@ calibrate <- function(infected_years_file,
                       establishment_probability = 0.5,
                       dispersal_percentage = 0.99,
                       quarantine_areas_file = "",
-                      use_quarantine = FALSE) { 
+                      use_quarantine = FALSE,
+                      use_spreadrates = FALSE) { 
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -117,6 +118,8 @@ calibrate <- function(infected_years_file,
     number_of_outputs <- time_check$number_of_outputs
     quarantine_frequency <- output_frequency
     quarantine_frequency_n <- output_frequency_n
+    spreadrate_frequency <- output_frequency
+    spreadrate_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -181,14 +184,14 @@ calibrate <- function(infected_years_file,
     return(host_check$failed_check)
   }
   
-  total_plants_check <- secondary_raster_checks(total_plants_file, infected)
-  if (total_plants_check$checks_passed) {
-    total_plants <- total_plants_check$raster
-    if (raster::nlayers(total_plants) > 1) {
-      total_plants <- output_from_raster_mean_and_sd(total_plants)
+  total_populations_check <- secondary_raster_checks(total_populations_file, infected)
+  if (total_populations_check$checks_passed) {
+    total_populations <- total_populations_check$raster
+    if (raster::nlayers(total_populations) > 1) {
+      total_populations <- output_from_raster_mean_and_sd(total_populations)
     }
   } else {
-    return(total_plants_check$failed_check)
+    return(total_populations_check$failed_check)
   }
   
   susceptible <- host - infected
@@ -308,7 +311,7 @@ calibrate <- function(infected_years_file,
   
   infected <- as.matrix(infected)
   susceptible <- as.matrix(susceptible)
-  total_plants <- as.matrix(total_plants)
+  total_populations <- as.matrix(total_populations)
   mortality_tracker <- as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
@@ -358,7 +361,7 @@ calibrate <- function(infected_years_file,
                              infected = infected,
                              exposed = exposed,
                              susceptible = susceptible,
-                             total_plants = total_plants,
+                             total_populations = total_populations,
                              mortality_on = mortality_on,
                              mortality_tracker = mortality_tracker,
                              mortality = mortality,
@@ -401,6 +404,9 @@ calibrate <- function(infected_years_file,
                              quarantine_frequency = quarantine_frequency,
                              quarantine_frequency_n = quarantine_frequency_n,
                              use_quarantine = use_quarantine,
+                             spreadrate_frequency = spreadrate_frequency,
+                             spreadrate_frequency_n = spreadrate_frequency_n,
+                             use_spreadrates = use_spreadrates,
                              model_type_ = model_type,
                              latency_period = latency_period,
                              generate_stochasticity = generate_stochasticity,

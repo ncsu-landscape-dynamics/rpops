@@ -82,6 +82,9 @@ public:
     double dispersal_percentage{0.99};
     std::string output_frequency;
     unsigned output_frequency_n;
+    bool use_spreadrates{true};
+    std::string spreadrate_frequency;
+    unsigned spreadrate_frequency_n;
 
     void create_schedules()
     {
@@ -94,7 +97,9 @@ public:
         if (use_lethal_temperature)
             lethal_schedule_ =
                 scheduler_.schedule_action_yearly(lethal_temperature_month, 1);
-        spread_rate_schedule_ = scheduler_.schedule_action_end_of_year();
+        if (use_spreadrates)
+            spread_rate_schedule_ = schedule_from_string(
+                scheduler_, spreadrate_frequency, spreadrate_frequency_n);
         if (use_quarantine)
             quarantine_schedule_ = schedule_from_string(
                 scheduler_, quarantine_frequency, quarantine_frequency_n);
@@ -138,6 +143,9 @@ public:
 
     const std::vector<bool>& spread_rate_schedule() const
     {
+        if (!use_spreadrates)
+            throw std::logic_error(
+                "spread_rate_schedule() not available when use_spreadrates is false");
         if (!schedules_created_)
             throw std::logic_error(
                 "Schedules were not created before calling spread_rate_schedule()");
@@ -182,11 +190,14 @@ public:
         return get_number_of_scheduled_actions(lethal_schedule_);
     }
 
-    unsigned rate_num_years()
+    unsigned rate_num_steps()
     {
+        if (!use_spreadrates)
+            throw std::logic_error(
+                "rate_num_steps() not available when use_spreadrates is false");
         if (!schedules_created_)
             throw std::logic_error(
-                "Schedules were not created before calling rate_num_years()");
+                "Schedules were not created before calling rate_num_steps()");
         return get_number_of_scheduled_actions(spread_rate_schedule_);
     }
 
@@ -194,10 +205,10 @@ public:
     {
         if (!use_quarantine)
             throw std::logic_error(
-                "quarantine_num_years() not available when use_quarantine is false");
+                "quarantine_num_steps() not available when use_quarantine is false");
         if (!schedules_created_)
             throw std::logic_error(
-                "Schedules were not created before calling quarantine_num_years()");
+                "Schedules were not created before calling quarantine_num_steps()");
         return get_number_of_scheduled_actions(quarantine_schedule_);
     }
 

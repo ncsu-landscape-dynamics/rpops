@@ -263,8 +263,6 @@ std::vector<DistDir> distance_direction_to_quarantine(
 {
     bool escape;
     DistDir distdir;
-    double dist;
-    QuarantineDirection dir;
     std::vector<DistDir> distances_directions;
     for (const auto& item : escape_infos) {
         std::tie(escape, distdir) = item.escape_info(step);

@@ -21,6 +21,7 @@
 
 #include "raster.hpp"
 #include "kernel_types.hpp"
+#include "utils.hpp"
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -199,6 +200,7 @@ public:
     template<class Generator>
     std::tuple<int, int> operator()(Generator& generator, int row, int col)
     {
+        UNUSED(generator);  // Deterministic does not need random numbers.
         if (kernel_type_ != DispersalKernelType::Cauchy
             && kernel_type_ != DispersalKernelType::Exponential) {
             throw std::invalid_argument(

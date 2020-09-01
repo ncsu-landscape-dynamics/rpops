@@ -3,17 +3,17 @@ context("test-abc_calibration")
 test_that("ABC calibration has correctly formatted returns with multiple output comparisons", {
   skip_on_appveyor()
   infected_years_file <- system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
-  number_of_observations <- 68    ### This is the number of infected cells - just make sure it's consistent across years 
+  number_of_observations <- 68    ### This is the number of infected cells - just make sure it's consistent across years
   prior_number_of_observations <- 0
   prior_means <- c(0, 0, 0, 0, 0, 0)    ### leave as 0 for now, means that you are giving them no weight
   prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
   params_to_estimate <- c(T, T, T, T, F, F)  ### 1st: reproductive rates, 2nd: natural distance, 3rd: percent natural, 4tH: anthropogenic distance, 5th Natural Kappa, 6th anthropogenic kappa
-  number_of_generations <- 6
+  number_of_generations <- 4
   generation_size <- 10
   checks = c(1200, 100000, 900, 1000)
   infected_file <- system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
-  total_plants_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  total_populations_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
   temp <- FALSE
   temperature_coefficient_file <- ""
   precip <- FALSE
@@ -51,53 +51,54 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
   use_movements = FALSE
   percent_natural_dispersal <- 1.0
   anthropogenic_distance_scale <- 0.0
-  
-  data <- abc_calibration(infected_years_file, 
-                          number_of_observations, 
+
+  data <- abc_calibration(infected_years_file,
+                          number_of_observations,
                           prior_number_of_observations,
-                          prior_means, prior_cov_matrix, 
+                          prior_means, 
+                          prior_cov_matrix,
                           params_to_estimate,
                           number_of_generations,
                           generation_size,
                           checks,
-                          infected_file, 
-                          host_file, 
-                          total_plants_file, 
-                          temp, 
-                          temperature_coefficient_file, 
-                          precip, 
+                          infected_file,
+                          host_file,
+                          total_populations_file,
+                          temp,
+                          temperature_coefficient_file,
+                          precip,
                           precipitation_coefficient_file,
                           model_type,
                           latency_period,
-                          time_step, 
-                          season_month_start, 
-                          season_month_end, 
-                          start_date, 
-                          end_date, 
-                          use_lethal_temperature, 
+                          time_step,
+                          season_month_start,
+                          season_month_end,
+                          start_date,
+                          end_date,
+                          use_lethal_temperature,
                           temperature_file,
-                          lethal_temperature, 
+                          lethal_temperature,
                           lethal_temperature_month,
-                          mortality_on, 
-                          mortality_rate, 
-                          mortality_time_lag, 
-                          management, 
-                          treatment_dates, 
+                          mortality_on,
+                          mortality_rate,
+                          mortality_time_lag,
+                          management,
+                          treatment_dates,
                           treatments_file,
                           treatment_method,
-                          natural_kernel_type, 
+                          natural_kernel_type,
                           anthropogenic_kernel_type,
-                          natural_dir, 
-                          natural_kappa, 
-                          anthropogenic_dir, 
+                          natural_dir,
+                          natural_kappa,
+                          anthropogenic_dir,
                           anthropogenic_kappa,
-                          pesticide_duration, 
+                          pesticide_duration,
                           pesticide_efficacy,
-                          mask, 
-                          success_metric, 
+                          mask,
+                          success_metric,
                           output_frequency,
                           output_frequency_n =1,
-                          movements_file, 
+                          movements_file,
                           use_movements,
                           start_exposed = FALSE,
                           generate_stochasticity = TRUE,
@@ -107,8 +108,9 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
                           establishment_probability = 0.5,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
-                          use_quarantine = FALSE)
-  
+                          use_quarantine = FALSE,
+                          use_spreadrates = FALSE)
+
   expect_length(data$posterior_means, 6)
   expect_vector(data$posterior_means, ptype = double(), size = 6)
   expect_is(data$posterior_cov_matrix, class = "matrix")
@@ -118,7 +120,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
   expect_type(data$total_number_of_observations, "double")
   expect_equal(data$total_number_of_observations, number_of_observations)
   expect_equal(nrow(data$raw_calibration_data), number_of_generations*generation_size)
-  
+
 })
 
 
@@ -134,7 +136,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
 #   checks = c(1200, 90000, 900, 1000)
 #   infected_file <- system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
 #   host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
-#   total_plants_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+#   total_populations_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
 #   temp <- FALSE
 #   temperature_coefficient_file <- ""
 #   precip <- FALSE
@@ -183,7 +185,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output 
 #                           checks,
 #                           infected_file, 
 #                           host_file, 
-#                           total_plants_file, 
+#                           total_populations_file, 
 #                           temp, 
 #                           temperature_coefficient_file, 
 #                           precip, 

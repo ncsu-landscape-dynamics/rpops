@@ -10,7 +10,7 @@ validate(
   number_of_cores = NA,
   infected_file,
   host_file,
-  total_plants_file,
+  total_populations_file,
   temp = FALSE,
   temperature_coefficient_file = "",
   precip = FALSE,
@@ -58,7 +58,8 @@ validate(
   establishment_probability = 0.5,
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
-  use_quarantine = FALSE
+  use_quarantine = FALSE,
+  use_spreadrates = FALSE
 )
 }
 \arguments{
@@ -72,7 +73,7 @@ validate(
 
 \item{host_file}{path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)}
 
-\item{total_plants_file}{path to raster file with number of total plants}
+\item{total_populations_file}{path to raster file with number of total populations of all hosts and non-hosts (must be only hosts if using movement)}
 
 \item{temp}{boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)}
 
@@ -112,7 +113,7 @@ validate(
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur in years integer >= 1}
 
-\item{management}{boolean to allow use of managemnet (TRUE or FALSE)}
+\item{management}{boolean to allow use of management (TRUE or FALSE)}
 
 \item{treatment_dates}{dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)}
 
@@ -168,7 +169,9 @@ validate(
 
 \item{quarantine_areas_file}{path to raster file with quarantine boundaries used in calculating likelihood of quarantine escape if use_quarantine is TRUE}
 
-\item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)}
+\item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a raster file indicating the quarantine areas (default = FALSE)}
+
+\item{use_spreadrates}{boolean to indicate whether or not to calculate spread rates}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run

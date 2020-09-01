@@ -121,7 +121,7 @@ List pops_model(
     IntegerMatrix infected,
     std::vector<IntegerMatrix> exposed,
     IntegerMatrix susceptible,
-    IntegerMatrix total_plants,
+    IntegerMatrix total_populations,
     bool mortality_on,
     IntegerMatrix mortality_tracker,
     IntegerMatrix mortality,
@@ -164,6 +164,9 @@ List pops_model(
     std::string quarantine_frequency = "year",
     int quarantine_frequency_n = 1,
     bool use_quarantine = false,
+    std::string spreadrate_frequency = "year",
+    int spreadrate_frequency_n = 1,
+    bool use_spreadrates = false,
     std::string model_type_ = "SI",
     int latency_period = 0,
     bool generate_stochasticity = true,
@@ -220,6 +223,9 @@ List pops_model(
     config.quarantine_frequency = quarantine_frequency;
     config.quarantine_frequency_n = quarantine_frequency_n;
     config.use_quarantine = use_quarantine;
+    config.spreadrate_frequency = spreadrate_frequency;
+    config.spreadrate_frequency_n = spreadrate_frequency_n;
+    config.use_spreadrates = use_spreadrates;
 
     std::vector<std::tuple<int, int>> outside_dispersers;
     TreatmentApplication treatment_application =
@@ -244,7 +250,7 @@ List pops_model(
     std::vector<IntegerMatrix> mortality_tracker_vector;
     std::vector<IntegerMatrix> mortality_vector;
     std::vector<IntegerMatrix> resistant_vector;
-    std::vector<IntegerMatrix> total_host_vector;
+    std::vector<IntegerMatrix> total_populations_vector;
     std::vector<IntegerMatrix> dispersers_vector;
 
     config.create_schedules();
@@ -270,7 +276,13 @@ List pops_model(
         Rcerr << "Not enough indices of weather coefficient data" << std::endl;
     }
 
-    unsigned spread_rate_outputs = config.rate_num_years();
+    unsigned spread_rate_outputs;
+    if (config.use_spreadrates) {
+        spread_rate_outputs = config.rate_num_steps();
+    }
+    else {
+        spread_rate_outputs = 0;
+    }
     SpreadRate<IntegerMatrix> spreadrate(
         infected, config.ew_res, config.ns_res, spread_rate_outputs);
     unsigned move_scheduled;
@@ -319,16 +331,15 @@ List pops_model(
         mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         model.run_step(
             current_index,
-            current_index,
             infected,
             susceptible,
-            total_plants,
+            total_populations,
             dispersers,
             exposed,
             mortality_tracker_vector,
             mortality,
             temperature,
-            weather_coefficient,
+            weather_coefficient[current_index],
             treatments,
             resistant,
             outside_dispersers,
@@ -349,7 +360,7 @@ List pops_model(
             infected_vector.push_back(Rcpp::clone(infected));
             susceptible_vector.push_back(Rcpp::clone(susceptible));
             resistant_vector.push_back(Rcpp::clone(resistant));
-            total_host_vector.push_back(Rcpp::clone(total_plants));
+            total_populations_vector.push_back(Rcpp::clone(total_populations));
             dispersers_vector.push_back(Rcpp::clone(total_dispersers));
             // exposed_vector = Rcpp::clone(exposed);
 
@@ -360,10 +371,10 @@ List pops_model(
             total_dispersers(config.rows, config.cols);
         }
 
-        if (config.spread_rate_schedule()[current_index]) {
-            unsigned simulation_year = simulation_step_to_action_step(
+        if (config.use_spreadrates && config.spread_rate_schedule()[current_index]) {
+            unsigned simulation_step = simulation_step_to_action_step(
                 config.spread_rate_schedule(), current_index);
-            spread_rates = spreadrate.yearly_rate(simulation_year);
+            spread_rates = spreadrate.step_rate(simulation_step);
             auto sr = to_array(spread_rates);
             spread_rates_vector.push_back(sr);
         }
@@ -387,7 +398,7 @@ List pops_model(
         _["rates"] = spread_rates_vector,
         _["number_infected"] = number_infected,
         _["area_infected"] = area_infected,
-        _["total_hosts"] = total_host_vector,
+        _["total_populations"] = total_populations_vector,
         _["propogules"] = dispersers_vector,
         _["quarantine_escape"] = quarantine_escapes,
         _["quarantine_escape_distance"] = escape_dists,

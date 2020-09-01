@@ -42,12 +42,12 @@
 #' infected_files <-  system.file("extdata", "SODexample", "initial_infection2001.tif", 
 #' package = "PoPS")
 #' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
-#' total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
+#' total_populations_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
 #' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "
 #' PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
 #' 
-#' data <- pops(infected_files, host_file, total_plants_file, reproductive_rate = 1.0,
+#' data <- pops(infected_files, host_file, total_populations_file, reproductive_rate = 1.0,
 #' use_lethal_temperature = FALSE, temp = TRUE, precip = FALSE, management = TRUE, 
 #' mortality_on = TRUE, temperature_file = "", temperature_coefficient_file, 
 #' precipitation_coefficient_file ="", treatments_file,
@@ -62,7 +62,7 @@
 #' 
 auto_manage_nonsteering <- function(infected_files, 
                                     host_file, 
-                                    total_plants_file, 
+                                    total_populations_file, 
                                     temp = FALSE, 
                                     temperature_coefficient_file = "", 
                                     precip = FALSE, 
@@ -123,7 +123,8 @@ auto_manage_nonsteering <- function(infected_files,
                                     establishment_probability = 0.5,
                                     dispersal_percentage = 0.99,
                                     quarantine_areas_file = "",
-                                    use_quarantine = FALSE) {
+                                    use_quarantine = FALSE,
+                                    use_spreadrates = FALSE) {
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -143,6 +144,8 @@ auto_manage_nonsteering <- function(infected_files,
     number_of_outputs <- time_check$number_of_outputs
     quarantine_frequency <- output_frequency
     quarantine_frequency_n <- output_frequency_n
+    spreadrate_frequency <- output_frequency
+    spreadrate_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -180,14 +183,14 @@ auto_manage_nonsteering <- function(infected_files,
     return(host_check$failed_check)
   }
   
-  total_plants_check <- secondary_raster_checks(total_plants_file, infected)
-  if (total_plants_check$checks_passed) {
-    total_plants <- total_plants_check$raster
-    if (raster::nlayers(total_plants) > 1) {
-      total_plants <- output_from_raster_mean_and_sd(total_plants)
+  total_populations_check <- secondary_raster_checks(total_populations_file, infected)
+  if (total_populations_check$checks_passed) {
+    total_populations <- total_populations_check$raster
+    if (raster::nlayers(total_populations) > 1) {
+      total_populations <- output_from_raster_mean_and_sd(total_populations)
     }
   } else {
-    return(total_plants_check$failed_check)
+    return(total_populations_check$failed_check)
   }
   
   infected_speci <- infected
@@ -312,7 +315,7 @@ auto_manage_nonsteering <- function(infected_files,
   mortality_tracker <- infected[[1]]
   raster::values(mortality_tracker) <- 0
   
-  total_plants <- raster::as.matrix(total_plants)
+  total_populations <- raster::as.matrix(total_populations)
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
@@ -429,7 +432,7 @@ auto_manage_nonsteering <- function(infected_files,
                            infected = infected_species[[i]],
                            exposed = exposed[[i]],
                            susceptible = susceptible_species[[i]],
-                           total_plants = total_plants,
+                           total_populations = total_populations,
                            mortality_on = mortality_on,
                            mortality_tracker = mortality_tracker,
                            mortality = mortality,
@@ -472,6 +475,9 @@ auto_manage_nonsteering <- function(infected_files,
                            quarantine_frequency = quarantine_frequency,
                            quarantine_frequency_n = quarantine_frequency_n,
                            use_quarantine = use_quarantine,
+                           spreadrate_frequency = spreadrate_frequency,
+                           spreadrate_frequency_n = spreadrate_frequency_n,
+                           use_spreadrates = use_spreadrates,
                            model_type_ = model_type,
                            latency_period = latency_period,
                            generate_stochasticity = generate_stochasticity,

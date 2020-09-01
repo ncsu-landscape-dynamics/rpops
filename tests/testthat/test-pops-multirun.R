@@ -3,7 +3,7 @@ context("test-pops-multirun")
 test_that("Multirun model outputs work", {
   infected_file <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  total_plants_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  total_populations_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   temperature_file <- ""
   temperature_coefficient_file <- ""
   precipitation_coefficient_file <-""
@@ -51,10 +51,11 @@ test_that("Multirun model outputs work", {
   quarantine_areas_file <- ""
   use_quarantine <- FALSE
   output_frequency_n <- 1
+  use_spreadrates <- TRUE
   
   data <- pops_multirun(infected_file, 
                         host_file, 
-                        total_plants_file,
+                        total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
                         temp, 
@@ -100,7 +101,8 @@ test_that("Multirun model outputs work", {
                         establishment_probability,
                         dispersal_percentage,
                         quarantine_areas_file,
-                        use_quarantine)
+                        use_quarantine,
+                        use_spreadrates)
   
   expect_equal(length(data), 10)
   expect_equal(as.matrix(data$single_run_out[[1]]), as.matrix(raster(infected_file)))
