@@ -12,7 +12,7 @@ pops_model(
   infected,
   exposed,
   susceptible,
-  total_plants,
+  total_populations,
   mortality_on,
   mortality_tracker,
   mortality,
@@ -55,6 +55,9 @@ pops_model(
   quarantine_frequency = "year",
   quarantine_frequency_n = 1L,
   use_quarantine = FALSE,
+  spreadrate_frequency = "year",
+  spreadrate_frequency_n = 1L,
+  use_spreadrates = FALSE,
   model_type_ = "SI",
   latency_period = 0L,
   generate_stochasticity = TRUE,
@@ -80,7 +83,7 @@ pops_model(
 
 \item{susceptible}{matrix of susceptible hosts}
 
-\item{total_plants}{matrix of total plants}
+\item{total_populations}{matrix of total populations}
 
 \item{mortality_on}{boolean to turn host mortality on and off (TRUE or FALSE)}
 
@@ -160,11 +163,17 @@ pops_model(
 
 \item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to export model results.}
 
-\item{quarantine_frequency}{sets how often the quarantine statistics are calculating either ('year', 'month', 'week', 'day' or 'time step') (default is yearly)}
+\item{quarantine_frequency}{sets how often the quarantine statistics are calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)}
 
 \item{quarantine_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to calculate and export quarantine statistics.}
 
-\item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)}
+\item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a raster file indicating the quarantine areas (default = FALSE)}
+
+\item{spreadrate_frequency}{sets how often the spread rate statistics are calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)}
+
+\item{spreadrate_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to calculate and export spread rate statistics.}
+
+\item{use_spreadrates}{boolean to indicate whether or not to calculate spread rates}
 
 \item{model_type_}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
 

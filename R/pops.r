@@ -6,7 +6,7 @@
 #'
 #' @param infected_file path to raster file with initial infections 
 #' @param host_file path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)
-#' @param total_plants_file path to raster file with number of total plants
+#' @param total_populations_file path to raster file with number of total populations of all hosts and non-hosts (must be only hosts if using movement)
 #' @param temp boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)
 #' @param temperature_coefficient_file path to raster file with temperature coefficient data for the timestep and number of years specified
 #' @param precip boolean that allows the use of precipitation coefficients to modify spread (TRUE or FALSE)
@@ -23,7 +23,7 @@
 #' @param mortality_on  boolean to turn host mortality on and off (TRUE or FALSE)
 #' @param mortality_rate rate at which mortality occurs value between 0 and 1 
 #' @param mortality_time_lag time lag from infection until mortality can occur in years integer >= 1
-#' @param management boolean to allow use of managemnet (TRUE or FALSE)
+#' @param management boolean to allow use of management (TRUE or FALSE)
 #' @param treatment_dates dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)
 #' @param treatments_file path to raster file with treatment data by dates (needs to be the same length as treatment_dates and pesticide_duration)
 #' @param treatment_method what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.
@@ -50,7 +50,8 @@
 #' @param establishment_probability Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)
 #' @param dispersal_percentage  Percentage of dispersal used to calculate the bounding box for deterministic dispersal
 #' @param quarantine_areas_file path to raster file with quarantine boundaries used in calculating likelihood of quarantine escape if use_quarantine is TRUE
-#' @param use_quarantine boolean to indicate whether or not there is a quarantine area if TRUE must pass in a file with polygons (geopackage or shapefile) indicating the quarantine areas (default = FALSE)
+#' @param use_quarantine boolean to indicate whether or not there is a quarantine area if TRUE must pass in a raster file indicating the quarantine areas (default = FALSE)
+#' @param use_spreadrates boolean to indicate whether or not to calculate spread rates
 #' 
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc extract rasterToPoints crs rowColFromCell
@@ -68,7 +69,7 @@
 #' infected_file <-  system.file("extdata", "SODexample", "initial_infection2001.tif", 
 #' package = "PoPS")
 #' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
-#' total_plants_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
+#' total_populations_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
 #' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "
 #' PoPS")
 #' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
@@ -76,7 +77,7 @@
 #' data <- pops(
 #' infected_file, 
 #' host_file, 
-#' total_plants_file,
+#' total_populations_file,
 #' use_lethal_temperature = FALSE, 
 #' temp = TRUE, precip = FALSE, 
 #' management = TRUE, 
@@ -105,7 +106,7 @@
 #' 
 pops <- function(infected_file, 
                  host_file, 
-                 total_plants_file, 
+                 total_populations_file, 
                  parameter_means,
                  parameter_cov_matrix,
                  temp = FALSE, 
@@ -149,7 +150,8 @@ pops <- function(infected_file,
                  establishment_probability = 0.5,
                  dispersal_percentage = 0.99,
                  quarantine_areas_file = "",
-                 use_quarantine = FALSE){
+                 use_quarantine = FALSE,
+                 use_spreadrates = FALSE){
   
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -198,6 +200,8 @@ pops <- function(infected_file,
     number_of_outputs <- time_check$number_of_outputs
     quarantine_frequency <- output_frequency
     quarantine_frequency_n <- output_frequency_n
+    spreadrate_frequency <- output_frequency
+    spreadrate_frequency_n <- output_frequency_n
   } else {
     return(time_check$failed_check)
   }
@@ -226,14 +230,14 @@ pops <- function(infected_file,
     return(host_check$failed_check)
   }
   
-  total_plants_check <- secondary_raster_checks(total_plants_file, infected)
-  if (total_plants_check$checks_passed) {
-    total_plants <- total_plants_check$raster
-    if (raster::nlayers(total_plants) > 1) {
-      total_plants <- output_from_raster_mean_and_sd(total_plants)
+  total_populations_check <- secondary_raster_checks(total_populations_file, infected)
+  if (total_populations_check$checks_passed) {
+    total_populations <- total_populations_check$raster
+    if (raster::nlayers(total_populations) > 1) {
+      total_populations <- output_from_raster_mean_and_sd(total_populations)
     }
   } else {
-    return(total_plants_check$failed_check)
+    return(total_populations_check$failed_check)
   }
   
   susceptible <- host - infected
@@ -346,7 +350,7 @@ pops <- function(infected_file,
   
   infected <- raster::as.matrix(infected)
   susceptible <- raster::as.matrix(susceptible)
-  total_plants <- raster::as.matrix(total_plants)
+  total_populations <- raster::as.matrix(total_populations)
   mortality_tracker <- raster::as.matrix(mortality_tracker)
   mortality <- mortality_tracker
   resistant <- mortality_tracker
@@ -383,7 +387,7 @@ pops <- function(infected_file,
                            infected = infected,
                            exposed = exposed,
                            susceptible = susceptible,
-                           total_plants = total_plants,
+                           total_populations = total_populations,
                            mortality_on = mortality_on,
                            mortality_tracker = mortality_tracker,
                            mortality = mortality,
@@ -426,6 +430,9 @@ pops <- function(infected_file,
                            quarantine_frequency = quarantine_frequency,
                            quarantine_frequency_n = quarantine_frequency_n,
                            use_quarantine = use_quarantine,
+                           spreadrate_frequency = spreadrate_frequency,
+                           spreadrate_frequency_n = spreadrate_frequency_n,
+                           use_spreadrates = use_spreadrates,
                            model_type_ = model_type,
                            latency_period = latency_period,
                            generate_stochasticity = generate_stochasticity,
