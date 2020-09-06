@@ -10,7 +10,6 @@ r:
   
 cache: packages
 sudo: required
-use_devtools: true
 
 addons:
   apt:
@@ -29,11 +28,6 @@ addons:
 
 r_packages:
   - covr
-
-install:
-  - Rscript -e 'if (!require('devtools')) install.packages('devtools')'
-  - Rscript -e 'devtools::install_deps(dep = T)'
-
 
 script:
   - R CMD build .
