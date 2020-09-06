@@ -1,10 +1,7 @@
 # R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 language: r
 r:
-  - 3.3
-  - 3.4
-  - 3.5
-  - 3.6
+  - oldrel
   - release
   - devel
   
@@ -34,4 +31,3 @@ script:
 
 after_success:
   - tar -C .. --xf $PKG_TARBALL
-  - Rscript -e 'covr::codecov()'
