@@ -1,46 +1,39 @@
+# R for travis: see documentation at https://docs.travis-ci.com/user/languages/r
 language: r
+r:
+  - 3.3
+  - 3.4
+  - 3.5
+  - 3.6
+  - release
+  - devel
+  
 cache: packages
 sudo: required
-latex: false
-fortran: false
 
 env: _R_CHECK_CRAN_INCOMING_=FALSE
 
-matrix:
-  include:
-    - r: 3.3
-      warnings_are_errors: false
-    - r: 3.4
-      warnings_are_errors: false
-    - r: 3.5
-      warnings_are_errors: true
-    - r: 3.6
-      warnings_are_errors: true
-    - r: release
-      warnings_are_errors: false
-      after_success:
-        - Rscript -e 'library(covr); codecov()'
-    - r: devel
-      warnings_are_errors: false
-
-before_install:
-  - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
-  - sudo apt-get update -qq
-  - sudo aptitude install -y gdal-bin
-  - sudo aptitude install -y libgdal1-dev
-  - sudo aptitude install -y libproj-dev
-  - sudo apt-get install libudunits2-dev
-  - sudo apt-get install libssh2-1-dev
-  - R -e 'install.packages("devtools")'
-  - R -e 'install.packages("covr")'
-  - Rscript -e 'update.packages(ask = FALSE)'
+addons:
+  apt:
+    update: true
+    sources:
+      - sourceline: 'ppa:ubuntugis/ppa'
+      - sourceline: 'ppa:ubuntu-toolchain-r/test'
+    packages:
+      - libudunits2-dev
+      - libproj-dev
+      - libgeos-dev
+      - libgdal-dev
+      - libgsl0-dev
+      - bwidget
+      - gcc
 
 r_packages:
   - covr
 
 install:
-  - Rscript -e "if (!require('devtools')) install.packages('devtools')"
-  - Rscript -e "devtools::install_deps(dep = TRUE)"
+  - Rscript -e 'if (!require('devtools')) install.packages('devtools')'
+  - Rscript -e 'devtools::install_deps(dep = T)'
 
 env: 
   global:
