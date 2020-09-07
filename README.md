@@ -65,7 +65,7 @@ cat('Sys.setenv(BINPREF = "C:/Rtools/mingw_$(WIN)/bin/")',
 ## Contributing
 
 
-Please see the [pops-core](https://github.com/ncsu-landscape-dynamics/pops-core#readme) repository for contributing best practices and release policies. Other than that, just open pull requests against this repo. We suggest following [Style Guide from hadley](http://adv-r.had.co.nz/Style.html) for R code.
+Please see the [pops-core](https://github.com/ncsu-landscape-dynamics/pops-core#readme) repository for contributing best practices and release policies. Other than that, just open pull requests against this repo. We suggest following the [Style Guide from Hadley](http://adv-r.had.co.nz/Style.html) for R code.
 
 ## Authors and contributors
 
