@@ -39,7 +39,7 @@ jobs:
         with:
           r-version: ${{ matrix.config.r }}
           
-      - uses: r-lib/actions/setup-pandoc@master
+      - uses: r-lib/actions/setup-r@master
         
       - name: Brew and macOS config
         if: runner.os == 'macOS'
