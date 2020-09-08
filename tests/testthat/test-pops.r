@@ -384,6 +384,37 @@ test_that("Treatments apply no matter what time step", {
   }
 })
 
+test_that("Pesticide treatments apply no matter what time step", {
+  infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+  temperature_file = system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
+  start_date = "2009-01-01"
+  end_date = "2009-12-31"
+  treatments_file = system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
+  pesticide_duration <- c(120)
+  pesticide_efficacy <- 1.0
+  parameter_means <- c(0,21,1,500,0,0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  dates <- seq.Date(as.Date(start_date), as.Date("2009-06-30"), by = "days")
+
+  for (i in 1:length(dates)) {
+    data <- pops(infected_file = infected_file, host_file = host_file, total_populations_file = host_file, management  = TRUE, treatment_dates = c( as.character(dates[i])), treatments_file = treatments_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date, pesticide_duration = pesticide_duration, pesticide_efficacy = pesticide_efficacy)
+    expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
+    expect_equal(data$susceptible[[1]], as.matrix(raster(host_file)))
+  }
+  
+  pesticide_duration <- c(120)
+  pesticide_efficacy <- 0.5
+  
+  for (i in 1:length(dates)) {
+    data <- pops(infected_file = infected_file, host_file = host_file, total_populations_file = host_file, management  = TRUE, treatment_dates = c( as.character(dates[i])), treatments_file = treatments_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date, pesticide_duration = pesticide_duration, pesticide_efficacy = pesticide_efficacy)
+    expect_equal(data$infected[[1]], matrix(c(3,0,0,0),ncol = 2, nrow = 2))
+    expect_equal(data$susceptible[[1]], matrix(c(12,6,14,15),ncol = 2, nrow = 2))
+  }
+  
+})
+
 test_that("Changing the output frequency returns the correct number of outputs", {
   infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
@@ -466,3 +497,4 @@ test_that("Outputs occur with non-full year date range for all time step output 
   data <- pops(output_frequency = "time_step", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 182)
 })
+
