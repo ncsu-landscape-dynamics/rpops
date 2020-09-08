@@ -116,6 +116,7 @@ abc_calibration <- function(infected_years_file,
     quarantine_frequency_n <- output_frequency_n
     spreadrate_frequency <- output_frequency
     spreadrate_frequency_n <- output_frequency_n
+    output_frequency <- time_check$output_frequency
   } else {
     return(time_check$failed_check)
   }

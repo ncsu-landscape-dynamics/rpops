@@ -371,6 +371,7 @@ List pops_model(
             total_dispersers(config.rows, config.cols);
         }
 
+        // update spread rate outputs if they are used and scheduled for that time step
         if (config.use_spreadrates && config.spread_rate_schedule()[current_index]) {
             unsigned simulation_step = simulation_step_to_action_step(
                 config.spread_rate_schedule(), current_index);
@@ -379,6 +380,7 @@ List pops_model(
             spread_rates_vector.push_back(sr);
         }
         
+        // update quarantine outputs if they are used and scheduled for that time step
         if (config.use_quarantine && config.quarantine_schedule()[current_index]) {
             quarantine_escape = quarantine.escaped(current_index);
             escape_dist = quarantine.distance(current_index);
