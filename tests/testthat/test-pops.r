@@ -392,22 +392,41 @@ test_that("Changing the output frequency returns the correct number of outputs",
   treatment_date = start_date
   parameter_means = c(0,21,1,500,0,0)
   parameter_cov_matrix = matrix(0, nrow = 6, ncol = 6)
-
+  
+  data <- pops(output_frequency = "year", time_step = "month", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+  
   data <- pops(output_frequency = "year", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 1)
-
+  
+  data <- pops(output_frequency = "year", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+  
   data <- pops(output_frequency = "month", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 12)
+  
+  data <- pops(output_frequency = "month", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 12)
   
   data <- pops(output_frequency = "week", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 52)
   
+  data <- pops(output_frequency = "week", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 52)
+  
   data <- pops(output_frequency = "day", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(data, "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
-
+  
+  data <- pops(output_frequency = "day", time_step = "month", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(data, "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+  
+  data <- pops(output_frequency = "week", time_step = "month", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(data, "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+  
   data <- pops(output_frequency = "day", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 364)
   
   data <- pops(output_frequency = "time_step", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 364)
 })
+
