@@ -31,7 +31,7 @@ validate(
   mortality_rate = 0,
   mortality_time_lag = 0,
   management = FALSE,
-  treatment_dates = c(0),
+  treatment_dates = c(""),
   treatments_file = "",
   treatment_method = "ratio",
   percent_natural_dispersal = 1,

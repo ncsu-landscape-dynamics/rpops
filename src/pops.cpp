@@ -35,18 +35,6 @@ using namespace pops;
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins(cpp11)]]
 
-bool all_infected(IntegerMatrix susceptible)
-{
-    bool allInfected = true;
-    for (int j = 0; j < susceptible.rows(); j++) {
-        for (int k = 0; k < susceptible.cols(); k++) {
-            if (susceptible(j, k) > 0)
-                allInfected = false;
-        }
-    }
-    return allInfected;
-}
-
 template<int... Indices>
 struct indices
 {
@@ -320,13 +308,6 @@ List pops_model(
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
 
-        // if (all_infected(susceptible)) {
-        //   Rcerr << "All suspectible hosts are infected!" << std::endl;
-        //   infected_vector.push_back(Rcpp::clone(infected));
-        //   susceptible_vector.push_back(Rcpp::clone(susceptible));
-        //   resistant_vector.push_back(Rcpp::clone(resistant));
-        //   break;
-        // }
         IntegerMatrix dispersers(config.rows, config.cols);
         mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         model.run_step(
