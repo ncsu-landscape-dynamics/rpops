@@ -43,3 +43,4 @@
 ^pops\.travis\.yml$
 ^\codecov\.yml$
 ^\.clang-format$
+^\.github$
