@@ -105,7 +105,7 @@ std::string quarantine_enum_to_string(QuarantineDirection type) {
     case QuarantineDirection::None:
         return "None";
     default:
-        return "Invalid animal";
+        return "Invalid direction";
     }
 }
 
@@ -382,9 +382,11 @@ List pops_model(
         
         // update quarantine outputs if they are used and scheduled for that time step
         if (config.use_quarantine && config.quarantine_schedule()[current_index]) {
-            quarantine_escape = quarantine.escaped(current_index);
-            escape_dist = quarantine.distance(current_index);
-            escape_direction = quarantine.direction(current_index);
+            unsigned quarantine_step = simulation_step_to_action_step(
+                config.quarantine_schedule(), current_index);
+            quarantine_escape = quarantine.escaped(quarantine_step);
+            escape_dist = quarantine.distance(quarantine_step);
+            escape_direction = quarantine.direction(quarantine_step);
             quarantine_escapes.push_back(quarantine_escape);
             escape_dists.push_back(escape_dist);
             escape_directions.push_back(quarantine_enum_to_string(escape_direction));

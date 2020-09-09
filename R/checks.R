@@ -235,9 +235,13 @@ time_checks <- function(end_date, start_date, time_step, output_frequency) {
     } else if (time_step == "day") {
       number_of_time_steps <- ceiling(lubridate::time_length(duration, "day"))
     }
-    
+
     number_of_years <- ceiling(lubridate::time_length(duration, "year"))
-    
+
+    if (output_frequency == "time_step") {
+      output_frequency <- time_step
+    }
+
     if (output_frequency == "week") {
       number_of_outputs <- ceiling(lubridate::time_length(duration, "week"))
     } else if (output_frequency == "month") {
@@ -249,7 +253,7 @@ time_checks <- function(end_date, start_date, time_step, output_frequency) {
     } else if (output_frequency == "time_step") {
       number_of_outputs <- number_of_time_steps
     }
-    
+
     if (output_frequency == "year" && time_step == "day" && number_of_time_steps < 365){
       output_frequency <- "final_step"
     } else if (output_frequency == "year" && time_step == "week" && number_of_time_steps < 52) {
