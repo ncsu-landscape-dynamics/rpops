@@ -35,18 +35,6 @@ using namespace pops;
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins(cpp11)]]
 
-bool all_infected(IntegerMatrix susceptible)
-{
-    bool allInfected = true;
-    for (int j = 0; j < susceptible.rows(); j++) {
-        for (int k = 0; k < susceptible.cols(); k++) {
-            if (susceptible(j, k) > 0)
-                allInfected = false;
-        }
-    }
-    return allInfected;
-}
-
 template<int... Indices>
 struct indices
 {
@@ -105,7 +93,7 @@ std::string quarantine_enum_to_string(QuarantineDirection type) {
     case QuarantineDirection::None:
         return "None";
     default:
-        return "Invalid animal";
+        return "Invalid direction";
     }
 }
 
@@ -320,13 +308,6 @@ List pops_model(
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
 
-        // if (all_infected(susceptible)) {
-        //   Rcerr << "All suspectible hosts are infected!" << std::endl;
-        //   infected_vector.push_back(Rcpp::clone(infected));
-        //   susceptible_vector.push_back(Rcpp::clone(susceptible));
-        //   resistant_vector.push_back(Rcpp::clone(resistant));
-        //   break;
-        // }
         IntegerMatrix dispersers(config.rows, config.cols);
         mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         model.run_step(
@@ -371,6 +352,7 @@ List pops_model(
             total_dispersers(config.rows, config.cols);
         }
 
+        // update spread rate outputs if they are used and scheduled for that time step
         if (config.use_spreadrates && config.spread_rate_schedule()[current_index]) {
             unsigned simulation_step = simulation_step_to_action_step(
                 config.spread_rate_schedule(), current_index);
@@ -379,10 +361,13 @@ List pops_model(
             spread_rates_vector.push_back(sr);
         }
         
+        // update quarantine outputs if they are used and scheduled for that time step
         if (config.use_quarantine && config.quarantine_schedule()[current_index]) {
-            quarantine_escape = quarantine.escaped(current_index);
-            escape_dist = quarantine.distance(current_index);
-            escape_direction = quarantine.direction(current_index);
+            unsigned quarantine_step = simulation_step_to_action_step(
+                config.quarantine_schedule(), current_index);
+            quarantine_escape = quarantine.escaped(quarantine_step);
+            escape_dist = quarantine.distance(quarantine_step);
+            escape_direction = quarantine.direction(quarantine_step);
             quarantine_escapes.push_back(quarantine_escape);
             escape_dists.push_back(escape_dist);
             escape_directions.push_back(quarantine_enum_to_string(escape_direction));

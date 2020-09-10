@@ -36,7 +36,7 @@ abc_calibration(
   mortality_rate = 0,
   mortality_time_lag = 0,
   management = FALSE,
-  treatment_dates = c("2008-01-01"),
+  treatment_dates = c(""),
   treatments_file = "",
   treatment_method = "ratio",
   natural_kernel_type = "cauchy",

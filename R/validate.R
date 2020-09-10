@@ -84,7 +84,7 @@ validate <- function(infected_years_file,
                      mortality_rate = 0, 
                      mortality_time_lag = 0, 
                      management = FALSE,
-                     treatment_dates = c(0),
+                     treatment_dates = c(''),
                      treatments_file = "",
                      treatment_method = "ratio",
                      percent_natural_dispersal = 1.0,
@@ -137,6 +137,7 @@ validate <- function(infected_years_file,
     number_of_time_steps <- time_check$number_of_time_steps
     number_of_years <- time_check$number_of_years
     number_of_outputs <- time_check$number_of_outputs
+    output_frequency <- time_check$output_frequency
     quarantine_frequency <- output_frequency
     quarantine_frequency_n <- output_frequency_n
     spreadrate_frequency <- output_frequency
@@ -280,6 +281,7 @@ validate <- function(infected_years_file,
     treatment_map <- host
     raster::values(treatment_map) <- 0
     treatment_maps <- list(raster::as.matrix(treatment_map))
+    treatment_dates <- c(start_date)
   }
   
   ew_res <- raster::xres(susceptible)

@@ -384,7 +384,38 @@ test_that("Treatments apply no matter what time step", {
   }
 })
 
-test_that("Changing the output frequency returns the correct number of outputs", {
+test_that("Pesticide treatments apply no matter what time step", {
+  infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  coefficient_file = system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+  temperature_file = system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
+  start_date = "2009-01-01"
+  end_date = "2009-12-31"
+  treatments_file = system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
+  pesticide_duration <- c(120)
+  pesticide_efficacy <- 1.0
+  parameter_means <- c(0,21,1,500,0,0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  dates <- seq.Date(as.Date(start_date), as.Date("2009-06-30"), by = "days")
+
+  for (i in 1:length(dates)) {
+    data <- pops(infected_file = infected_file, host_file = host_file, total_populations_file = host_file, management  = TRUE, treatment_dates = c( as.character(dates[i])), treatments_file = treatments_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date, pesticide_duration = pesticide_duration, pesticide_efficacy = pesticide_efficacy)
+    expect_equal(data$infected[[1]], matrix(0,ncol = 2, nrow = 2))
+    expect_equal(data$susceptible[[1]], as.matrix(raster(host_file)))
+  }
+  
+  pesticide_duration <- c(120)
+  pesticide_efficacy <- 0.5
+  
+  for (i in 1:length(dates)) {
+    data <- pops(infected_file = infected_file, host_file = host_file, total_populations_file = host_file, management  = TRUE, treatment_dates = c( as.character(dates[i])), treatments_file = treatments_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date, pesticide_duration = pesticide_duration, pesticide_efficacy = pesticide_efficacy)
+    expect_equal(data$infected[[1]], matrix(c(3,0,0,0),ncol = 2, nrow = 2))
+    expect_equal(data$susceptible[[1]], matrix(c(12,6,14,15),ncol = 2, nrow = 2))
+  }
+  
+})
+
+test_that("Changing the output frequency returns the correct number of outputs and output statistics", {
   infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date = "2009-01-01"
@@ -392,22 +423,197 @@ test_that("Changing the output frequency returns the correct number of outputs",
   treatment_date = start_date
   parameter_means = c(0,21,1,500,0,0)
   parameter_cov_matrix = matrix(0, nrow = 6, ncol = 6)
-
+  
+  data <- pops(output_frequency = "year", time_step = "month", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+  
   data <- pops(output_frequency = "year", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 1)
-
+  
+  data <- pops(output_frequency = "year", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+  
   data <- pops(output_frequency = "month", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 12)
+  
+  data <- pops(output_frequency = "month", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 12)
   
   data <- pops(output_frequency = "week", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 52)
   
+  data <- pops(output_frequency = "week", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 52)
+  
   data <- pops(output_frequency = "day", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(data, "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
-
+  
+  data <- pops(output_frequency = "day", time_step = "month", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(data, "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+  
+  data <- pops(output_frequency = "week", time_step = "month", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(data, "Output frequency is more frequent than time_step. The minimum output_frequency you can use is the time_step of your simulation. You can set the output_frequency to 'time_step' to default to most frequent output possible")
+  
   data <- pops(output_frequency = "day", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 364)
   
   data <- pops(output_frequency = "time_step", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
   expect_equal(length(data$infected), 364)
+})
+
+test_that("Outputs occur with non-full year date range for all time step output frequency combinations", {
+  infected_file = system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file = system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date = "2009-05-01"
+  end_date = "2009-10-29"
+  treatment_date = start_date
+  parameter_means = c(0,21,1,500,0,0)
+  parameter_cov_matrix = matrix(0, nrow = 6, ncol = 6)
+  
+  data <- pops(output_frequency = "year", time_step = "month", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+  
+  data <- pops(output_frequency = "year", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+  
+  data <- pops(output_frequency = "year", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 1)
+  
+  data <- pops(output_frequency = "month", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 5)
+  
+  data <- pops(output_frequency = "month", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 5)
+  
+  data <- pops(output_frequency = "week", time_step = "week", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 26)
+  
+  data <- pops(output_frequency = "week", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 26)
+  
+  data <- pops(output_frequency = "day", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 182)
+  
+  data <- pops(output_frequency = "time_step", time_step = "day", treatment_date = start_date, infected_file = infected_file, host_file = host_file, total_populations_file = host_file, parameter_means = parameter_means, parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, end_date = end_date)
+  expect_equal(length(data$infected), 182)
+})
+
+test_that("Quarantine and spread rates work at all timings", {
+  infected_file = system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
+  host_file = system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  start_date = "2009-01-01"
+  end_date = "2009-12-31"
+  treatment_date = start_date
+  parameter_means = c(0,21,1,500,0,0)
+  parameter_cov_matrix = matrix(0, nrow = 6, ncol = 6)
+  quarantine_areas_file <- system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
+    
+  data <- pops(output_frequency = "year", time_step = "month", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 1)
+  expect_equal(length(data$quarantine_escape), 1)
+  expect_equal(length(data$quarantine_escape_distance), 1)
+  expect_equal(length(data$quarantine_escape_directions), 1)
+  expect_equal(length(data$rates), 1)
+  
+  data <- pops(output_frequency = "year", time_step = "week", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 1)
+  expect_equal(length(data$quarantine_escape), 1)
+  expect_equal(length(data$quarantine_escape_distance), 1)
+  expect_equal(length(data$quarantine_escape_directions), 1)
+  expect_equal(length(data$rates), 1)
+  
+  data <- pops(output_frequency = "year", time_step = "day", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 1)
+  expect_equal(length(data$quarantine_escape), 1)
+  expect_equal(length(data$quarantine_escape_distance), 1)
+  expect_equal(length(data$quarantine_escape_directions), 1)
+  expect_equal(length(data$rates), 1)
+  
+  data <- pops(output_frequency = "month", time_step = "week", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 12)
+  expect_equal(length(data$quarantine_escape), 12)
+  expect_equal(length(data$quarantine_escape_distance), 12)
+  expect_equal(length(data$quarantine_escape_directions), 12)
+  expect_equal(length(data$rates), 12)
+  
+  data <- pops(output_frequency = "month", time_step = "day",  treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 12)
+  expect_equal(length(data$quarantine_escape), 12)
+  expect_equal(length(data$quarantine_escape_distance), 12)
+  expect_equal(length(data$quarantine_escape_directions), 12)
+  expect_equal(length(data$rates), 12)
+  
+  data <- pops(output_frequency = "week", time_step = "week", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 52)
+  expect_equal(length(data$quarantine_escape), 52)
+  expect_equal(length(data$quarantine_escape_distance), 52)
+  expect_equal(length(data$quarantine_escape_directions), 52)
+  expect_equal(length(data$rates), 52)
+  
+  data <- pops(output_frequency = "week", time_step = "day", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 52)
+  expect_equal(length(data$quarantine_escape), 52)
+  expect_equal(length(data$quarantine_escape_distance), 52)
+  expect_equal(length(data$quarantine_escape_directions), 52)
+  expect_equal(length(data$rates), 52)
+
+  data <- pops(output_frequency = "day", time_step = "day", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 364)
+  expect_equal(length(data$quarantine_escape), 364)
+  expect_equal(length(data$quarantine_escape_distance), 364)
+  expect_equal(length(data$quarantine_escape_directions), 364)
+  expect_equal(length(data$rates), 364)
+  
+  data <- pops(output_frequency = "time_step", time_step = "day", treatment_date = start_date, 
+               infected_file = infected_file, host_file = host_file, 
+               total_populations_file = host_file, parameter_means = parameter_means, 
+               parameter_cov_matrix = parameter_cov_matrix, start_date = start_date, 
+               end_date = end_date, use_quarantine = TRUE, 
+               use_spreadrates = TRUE, quarantine_areas_file = quarantine_areas_file)
+  expect_equal(length(data$infected), 364)
+  expect_equal(length(data$quarantine_escape), 364)
+  expect_equal(length(data$quarantine_escape_distance), 364)
+  expect_equal(length(data$quarantine_escape_directions), 364)
+  expect_equal(length(data$rates), 364)
+  
 })
