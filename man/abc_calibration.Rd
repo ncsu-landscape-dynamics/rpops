@@ -192,7 +192,3 @@ calibration uses this metric to determine if an MCMC run is kept either because 
 despite being worse. We recommend running calibration for at least 10,000 iterations but even more will provide a better result. 
 If the model converges and doesn't improve for awhile it will exist calibration prior to reaching the total number of iterations specified.
 }
-\examples{
-\dontrun{
-}
-}

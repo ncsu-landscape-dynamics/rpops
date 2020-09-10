@@ -32,10 +32,7 @@
 #' @return a dataframe of the variables saved and their success metrics for each run
 #' 
 #' @export 
-#'
-#' @examples
-#' \dontrun{
-#' }
+
 
 calibrate <- function(infected_years_file, 
                       num_iterations, 
