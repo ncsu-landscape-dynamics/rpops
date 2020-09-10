@@ -366,6 +366,8 @@ auto_manage <- function(infected_files,
 
   treatment_speci <- raster()
   
+  i <- p <- y <- NULL
+  
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {

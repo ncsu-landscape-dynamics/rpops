@@ -389,6 +389,8 @@ auto_manage_nonsteering <- function(infected_files,
   
   points <- data.frame(i = as.integer(1), j = ncol(infected[[1]]))
   
+  i <- p <- y <- NULL
+  
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
