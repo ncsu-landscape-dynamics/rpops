@@ -1,14 +1,19 @@
 #' PoPS (Pest or Pathogen Spread) model Multiple Runs
-#' 
-#' A dynamic species distribution model for pest or pathogen spread in forest or agricultural ecosystems. The model is process based
-#' meaning that it uses understanding of the effect of weather on reproduction and survival of the pest/pathogen in order to forecast
-#' spread of the pest/pathogen into the future. 
+#'
+#' A dynamic species distribution model for pest or pathogen spread in forest or
+#'  agricultural ecosystems. The model is process based meaning that it uses
+#'  understanding of the effect of weather on reproduction and survival of the
+#' pest/pathogen in order to forecast spread of the pest/pathogen into the
+#' future.
 #'
 #' @inheritParams pops
-#' @param number_of_iterations how many iterations do you want to run to allow the calibration to converge at least 10 
-#' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1
+#' @param number_of_iterations how many iterations do you want to run to allow
+#' the calibration to converge at least 10
+#' @param number_of_cores enter how many cores you want to use (default = NA).
+#' If not set uses the # of CPU cores - 1. must be an integer >= 1
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify cellStats nlayers calc extract rasterToPoints
+#' @importFrom raster raster values as.matrix xres yres stack reclassify
+#' cellStats nlayers calc extract rasterToPoints
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -18,83 +23,45 @@
 #' @return list of infected and susceptible per year
 #' @export
 #'
-#' @examples
-#' \dontrun{
-#' infected_file <-  system.file("extdata", "SODexample", "initial_infection2001.tif", 
-#' package = "PoPS")
-#' host_file <- system.file("extdata", "SODexample", "host.tif", package = "PoPS")
-#' total_populations_file <- system.file("extdata", "SODexample", "all_plants.tif", package = "PoPS")
-#' temperature_coefficient_file <- system.file("extdata", "SODexample", "weather.tif", package = "
-#' PoPS")
-#' treatments_file <- system.file("extdata", "SODexample", "management.tif", package = "PoPS")
-#' 
-#' data <- pops(infected_file, 
-#' host_file, 
-#' total_populations_file, 
-#' use_lethal_temperature = FALSE, 
-#' temp = TRUE, precip = FALSE, 
-#' management = TRUE, 
-#' mortality_on = TRUE, 
-#' temperature_file = "", 
-#' temperature_coefficient_file, 
-#' precipitation_coefficient_file ="", 
-#' treatments_file,
-#' season_month_start = 1, 
-#' season_month_end = 12,
-#' time_step = "week",
-#' start_date = '2001-01-01', 
-#' end_date = 2005-12-31', 
-#' treatment_dates = c(2001,2002,2003,2004,2005),
-#' natural_kernel_type = "cauchy", 
-#' lethal_temperature = -12.87, 
-#' lethal_temperature_month = 1,
-#' mortality_rate = 0.05, 
-#' mortality_time_lag = 2,
-#' treatment_date = 12, 
-#' natural_dir = "NONE", 
-#' kappa = 0, 
-#' random_seed = NULL)
-#' }
-#' 
-pops_multirun <- function(infected_file, 
-                          host_file, 
+pops_multirun <- function(infected_file,
+                          host_file,
                           total_populations_file,
                           parameter_means,
                           parameter_cov_matrix,
-                          temp = FALSE, 
-                          temperature_coefficient_file = "", 
-                          precip = FALSE, 
+                          temp = FALSE,
+                          temperature_coefficient_file = "",
+                          precip = FALSE,
                           precipitation_coefficient_file = "",
-                          model_type = "SI", 
+                          model_type = "SI",
                           latency_period = 0,
-                          time_step = "month", 
-                          season_month_start = 1, 
-                          season_month_end = 12, 
-                          start_date = '2008-01-01', 
-                          end_date = '2008-12-31', 
+                          time_step = "month",
+                          season_month_start = 1,
+                          season_month_end = 12,
+                          start_date = '2008-01-01',
+                          end_date = '2008-12-31',
                           use_lethal_temperature = FALSE,
                           temperature_file = "",
-                          lethal_temperature = -12.87, 
+                          lethal_temperature = -12.87,
                           lethal_temperature_month = 1,
-                          mortality_on = FALSE, 
-                          mortality_rate = 0, 
-                          mortality_time_lag = 0, 
-                          management = FALSE, 
-                          treatment_dates = c(''), 
+                          mortality_on = FALSE,
+                          mortality_rate = 0,
+                          mortality_time_lag = 0,
+                          management = FALSE,
+                          treatment_dates = c(''),
                           treatments_file = "",
                           treatment_method = "ratio",
-                          natural_kernel_type = "cauchy", 
+                          natural_kernel_type = "cauchy",
                           anthropogenic_kernel_type = "cauchy",
-                          natural_dir = "NONE", 
-                          anthropogenic_dir = "NONE", 
-                          number_of_iterations = 100, 
+                          natural_dir = "NONE",
+                          anthropogenic_dir = "NONE",
+                          number_of_iterations = 100,
                           number_of_cores = NA,
                           pesticide_duration = 0,
                           pesticide_efficacy = 1.0,
                           random_seed = NULL,
                           output_frequency = "year",
                           output_frequency_n = 1,
-                          movements_file = "", 
+                          movements_file = "",
                           use_movements = FALSE,
                           start_exposed = FALSE,
                           generate_stochasticity = TRUE,
@@ -105,23 +72,23 @@ pops_multirun <- function(infected_file,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
                           use_quarantine = FALSE,
-                          use_spreadrates = FALSE){ 
-  
+                          use_spreadrates = FALSE){
+
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
   } else if (model_type == "SI" && latency_period > 0) {
     latency_period <- 0
-  } 
-  
-  
+  }
+
+
   if (nrow(parameter_cov_matrix) != 6 | ncol(parameter_cov_matrix) != 6) {
     return("parameter covariance matrix is not 6 x 6")
   }
-  
+
   if (length(parameter_means) != 6) {
     return("parameter means is not a vector of length 6")
   }
-  
+
   parameters <- data.frame(MASS::mvrnorm(number_of_iterations, parameter_means, parameter_cov_matrix))
   names(parameters) <- c('reproductive_rate', 'natural_dispersal_distance', 'percent_natural_dispersal', 'anthropogenic_dispersal_distance', 'natural kappa', 'anthropogenic kappa')
   while(any(parameters[,1] < 0) || any(parameters[,2] < 0)) {
@@ -130,24 +97,24 @@ pops_multirun <- function(infected_file,
   reproductive_rate <- parameters[[1]]
   natural_distance_scale <- parameters[[2]]
   percent_natural_dispersal <- parameters[[3]]
-  if (any(percent_natural_dispersal > 1.000)) {percent_natural_dispersal[percent_natural_dispersal > 1.00] <- 1.000} 
+  if (any(percent_natural_dispersal > 1.000)) {percent_natural_dispersal[percent_natural_dispersal > 1.00] <- 1.000}
   anthropogenic_distance_scale <- parameters[[4]]
   natural_kappa <- parameters[[5]]
   if (any(natural_kappa < 0.000)) {natural_kappa[natural_kappa < 0.000] <- 0}
   anthropogenic_kappa <- parameters[[6]]
   if (any(anthropogenic_kappa < 0.000)) {anthropogenic_kappa[anthropogenic_kappa < 0.000] <- 0}
-  
+
   if (any(percent_natural_dispersal < 1.0)) {
     use_anthropogenic_kernel <- TRUE
   } else {
     use_anthropogenic_kernel <- FALSE
   }
-  
+
   treatment_metric_check <- treatment_metric_checks(treatment_method)
   if (!treatment_metric_check$checks_passed) {
     return(treatment_metric_check$failed_check)
   }
-  
+
   time_check <- time_checks(end_date, start_date, time_step, output_frequency)
   if(time_check$checks_passed) {
     number_of_time_steps <- time_check$number_of_time_steps
@@ -161,7 +128,7 @@ pops_multirun <- function(infected_file,
   } else {
     return(time_check$failed_check)
   }
-  
+
   infected_check <- initial_raster_checks(infected_file)
   if (infected_check$checks_passed) {
     infected <- infected_check$raster
@@ -171,7 +138,7 @@ pops_multirun <- function(infected_file,
   } else {
     return(infected_check$failed_check)
   }
-  
+
   host_check <- secondary_raster_checks(host_file, infected)
   if (host_check$checks_passed) {
     host <- host_check$raster
@@ -181,7 +148,7 @@ pops_multirun <- function(infected_file,
   } else {
     return(host_check$failed_check)
   }
-  
+
   total_populations_check <- secondary_raster_checks(total_populations_file, infected)
   if (total_populations_check$checks_passed) {
     total_populations <- total_populations_check$raster
@@ -191,10 +158,10 @@ pops_multirun <- function(infected_file,
   } else {
     return(total_populations_check$failed_check)
   }
-  
+
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
-  
+
   if (use_movements) {
     movements_check <- movement_checks(movements_file, infected, start_date, end_date)
     if (movements_check$checks_passed) {
@@ -208,7 +175,7 @@ pops_multirun <- function(infected_file,
     movements <- list(0,0,0,0,0)
     movements_dates <- start_date
   }
-  
+
   if (use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(temperature_file, infected)
     if (temperature_check$checks_passed) {
@@ -216,7 +183,7 @@ pops_multirun <- function(infected_file,
     } else {
       return(temperature_check$failed_check)
     }
-    
+
     temperature <- list(raster::as.matrix(temperature_stack[[1]]))
     for(i in 2:number_of_years) {
       temperature[[i]] <- raster::as.matrix(temperature_stack[[i]])
@@ -226,7 +193,7 @@ pops_multirun <- function(infected_file,
     raster::values(temperature) <- 1
     temperature <- list(raster::as.matrix(temperature))
   }
-  
+
   weather <- FALSE
   if (temp == TRUE) {
     temperature_coefficient_check <- secondary_raster_checks(temperature_coefficient_file, infected)
@@ -235,7 +202,7 @@ pops_multirun <- function(infected_file,
     } else {
       return(temperature_coefficient_check$failed_check)
     }
-    
+
     weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (precip ==TRUE){
@@ -245,7 +212,7 @@ pops_multirun <- function(infected_file,
       } else {
         return(precipitation_coefficient_check$failed_check)
       }
-      
+
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if(precip == TRUE){
@@ -255,11 +222,11 @@ pops_multirun <- function(infected_file,
     } else {
       return(precipitation_coefficient_check$failed_check)
     }
-    
+
     weather <- TRUE
     weather_coefficient_stack <- precipitation_coefficient
   }
-  
+
   if (weather == TRUE){
     # weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
@@ -271,7 +238,7 @@ pops_multirun <- function(infected_file,
     raster::values(weather_coefficient) <- 1
     weather_coefficient <- list(raster::as.matrix(weather_coefficient))
   }
-  
+
   if (management == TRUE) {
     treatments_check <- secondary_raster_checks(treatments_file, infected)
     if (treatments_check$checks_passed) {
@@ -279,7 +246,7 @@ pops_multirun <- function(infected_file,
     } else {
       return(treatments_check$failed_check)
     }
-    
+
     treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy)
     if (treatment_check$checks_passed) {
       treatment_maps <- treatment_check$treatment_maps
@@ -292,15 +259,15 @@ pops_multirun <- function(infected_file,
     treatment_maps <- list(raster::as.matrix(treatment_map))
     treatment_dates <- c(start_date)
   }
-  
+
   ew_res <- raster::xres(susceptible)
   ns_res <- raster::yres(susceptible)
   num_cols <- raster::ncol(susceptible)
   num_rows <- raster::nrow(susceptible)
-  
+
   mortality_tracker <- infected
   raster::values(mortality_tracker) <- 0
-  
+
   infected <- raster::as.matrix(infected)
   susceptible <- raster::as.matrix(susceptible)
   total_populations <- raster::as.matrix(total_populations)
@@ -308,7 +275,7 @@ pops_multirun <- function(infected_file,
   mortality <- mortality_tracker
   resistant <- mortality_tracker
   exposed <- list(mortality_tracker)
-  
+
   if (use_quarantine){
     quarantine_check <- secondary_raster_checks(quarantine_areas_file, host)
     if (quarantine_check$checks_passed) {
@@ -321,22 +288,22 @@ pops_multirun <- function(infected_file,
     # set quarantine areas to all zeros (meaning no quarantine areas are considered)
     quarantine_areas <- mortality_tracker
   }
-  
+
   if (latency_period > 1){
     for (ex in 2:(latency_period + 1)) {
       exposed[[ex]] <- mortality_tracker
     }
   }
-  
+
   if (model_type == "SEI" & start_exposed) {
     exposed[[latency_period + 1]] <- infected
     infected <- mortality_tracker
   }
-  
+
   # years <- seq(year(start_date), year(end_date), 1)
   rcl <- c(1, Inf, 1, 0, 0.99, NA)
   rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
-  
+
   if (is.na(number_of_cores) || number_of_cores > parallel::detectCores()) {
     core_count <- parallel::detectCores() - 1
   } else {
@@ -344,12 +311,12 @@ pops_multirun <- function(infected_file,
   }
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
-  
+
   infected_stack <- foreach::foreach(i = 1:number_of_iterations, .combine = c, .packages = c("raster", "PoPS")) %dopar% {
     random_seed <- round(stats::runif(1, 1, 1000000))
-    data <- PoPS::pops_model(random_seed = random_seed, 
-                             use_lethal_temperature = use_lethal_temperature, 
-                             lethal_temperature = lethal_temperature, 
+    data <- PoPS::pops_model(random_seed = random_seed,
+                             use_lethal_temperature = use_lethal_temperature,
+                             lethal_temperature = lethal_temperature,
                              lethal_temperature_month = lethal_temperature_month,
                              infected = infected,
                              exposed = exposed,
@@ -363,34 +330,34 @@ pops_multirun <- function(infected_file,
                              treatment_dates = treatment_dates,
                              pesticide_duration = pesticide_duration,
                              resistant = resistant,
-                             use_movements = use_movements, 
+                             use_movements = use_movements,
                              movements = movements,
                              movements_dates = movements_dates,
                              weather = weather,
                              temperature = temperature,
                              weather_coefficient = weather_coefficient,
-                             ew_res = ew_res, 
-                             ns_res = ns_res, 
-                             num_rows = num_rows, 
+                             ew_res = ew_res,
+                             ns_res = ns_res,
+                             num_rows = num_rows,
                              num_cols = num_cols,
-                             time_step = time_step, 
+                             time_step = time_step,
                              reproductive_rate = reproductive_rate[i],
-                             mortality_rate = mortality_rate, 
+                             mortality_rate = mortality_rate,
                              mortality_time_lag = mortality_time_lag,
-                             season_month_start = season_month_start, 
+                             season_month_start = season_month_start,
                              season_month_end = season_month_end,
-                             start_date = start_date, 
+                             start_date = start_date,
                              end_date = end_date,
                              treatment_method = treatment_method,
-                             natural_kernel_type = natural_kernel_type, 
-                             anthropogenic_kernel_type = anthropogenic_kernel_type, 
-                             use_anthropogenic_kernel = use_anthropogenic_kernel, 
+                             natural_kernel_type = natural_kernel_type,
+                             anthropogenic_kernel_type = anthropogenic_kernel_type,
+                             use_anthropogenic_kernel = use_anthropogenic_kernel,
                              percent_natural_dispersal = percent_natural_dispersal[i],
-                             natural_distance_scale = natural_distance_scale[i], 
-                             anthropogenic_distance_scale = anthropogenic_distance_scale[i], 
-                             natural_dir = natural_dir, 
+                             natural_distance_scale = natural_distance_scale[i],
+                             anthropogenic_distance_scale = anthropogenic_distance_scale[i],
+                             natural_dir = natural_dir,
                              natural_kappa = natural_kappa[i],
-                             anthropogenic_dir = anthropogenic_dir, 
+                             anthropogenic_dir = anthropogenic_dir,
                              anthropogenic_kappa = anthropogenic_kappa[i],
                              output_frequency = output_frequency,
                              output_frequency_n = output_frequency_n,
@@ -409,15 +376,15 @@ pops_multirun <- function(infected_file,
                              establishment_probability = establishment_probability,
                              dispersal_percentage = dispersal_percentage
     )
-    
+
     comp_years <- raster::stack(lapply(1:length(data$infected), function(i) host))
     susceptible_runs <- raster::stack(lapply(1:length(data$infected), function(i) host))
-    
+
     for (q in 1:raster::nlayers(comp_years)) {
       comp_years[[q]] <- data$infected[[q]]
       susceptible_runs[[q]] <- data$susceptible[[q]]
     }
-    
+
     number_infected <- data$number_infected
     spread_rate <- data$rates
     infected_area <- data$area_infected
@@ -429,11 +396,11 @@ pops_multirun <- function(infected_file,
     quarantine_escape_distance <- data$quarantine_escape_distance
     # quarantine_escape_direction <- data$quarantine_escape_direction
     quarantine_escape_direction <- 0
-    
+
     infected_stack <- comp_years
     data <- list(single_run, infected_stack, number_infected, susceptible_runs, infected_area, spread_rate, quarantine_escape, quarantine_escape_distance, quarantine_escape_direction)
   }
-  
+
   stopCluster(cl)
   single_runs <- infected_stack[seq(1,length(infected_stack),9)]
   probability_runs <- infected_stack[seq(2,length(infected_stack),9)]
@@ -445,7 +412,7 @@ pops_multirun <- function(infected_file,
   quarantine_escape_runs <- infected_stack[seq(7,length(infected_stack),9)]
   quarantine_escape_distance_runs <- infected_stack[seq(8,length(infected_stack),9)]
   quarantine_escape_directions_runs <- infected_stack[seq(9,length(infected_stack),9)]
-  
+
   prediction <- probability_runs[[1]]
   prediction[prediction > 0] <- 0
   escape_probability <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
@@ -460,7 +427,7 @@ pops_multirun <- function(infected_file,
   quarantine_escapes <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
   quarantine_escape_distances <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
   quarantine_escape_directions <- data.frame(t(rep(0, nlayers(probability_runs[[1]]))))
-  
+
   for (i in 1:length(probability_runs)) {
     prediction <- prediction + probability_runs[[i]]
     infected_number[i,] <- number_infected_runs[[i]]
@@ -481,9 +448,9 @@ pops_multirun <- function(infected_file,
     }
     max_values[i,] <- raster::maxValue(single_runs[[i]])
   }
-  
+
   probability <- (prediction/(length(probability_runs))) * 100
-  
+
   infected_areas <- round(sapply(infected_area, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
   number_infecteds <- round(sapply(infected_number, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
   west_rate <- round(sapply(west_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
@@ -501,18 +468,18 @@ pops_multirun <- function(infected_file,
     east_distance_to_quarantine <- data.frame(t(rep(NA, nlayers(probability_runs[[1]]))))
     west_distance_to_quarantine <- data.frame(t(rep(NA, nlayers(probability_runs[[1]]))))
   }
-  
-  
+
+
   which_median <- function(x) raster::which.min(abs(x - median(x)))
-  
+
   median_run_index <- which_median(infected_number[[1]])
-  
+
   single_run <- single_runs[[median_run_index]]
   susceptible_run <- susceptible_runs[[median_run_index]]
-  
+
   single_run_out <- single_run
   susceptible_run_out <- susceptible_run
-  
+
   raster_stacks_list <- list()
   simulation_mean_stack <- stack()
   simulation_sd_stack <- stack()
@@ -527,14 +494,14 @@ pops_multirun <- function(infected_file,
     simulation_sd_stack <-stack(simulation_sd_stack, simulation_sd)
   }
 
-  
+
   # simulation_mean <- raster::calc(raster_stacks, mean)
   # simulation_sd <- raster::calc(raster_stacks, sd)
-  
+
   outputs <- list(probability, simulation_mean_stack, simulation_sd_stack, single_run_out, number_infecteds, infected_areas, west_rate, east_rate, south_rate, north_rate)
   names(outputs) <- c('probability', 'simulation_mean', 'simulation_sd', 'single_run_out', 'number_infecteds', 'infected_areas', 'west_rate', 'east_rate', 'south_rate', 'north_rate')
-  
+
   return(outputs)
-  
+
 }
 
