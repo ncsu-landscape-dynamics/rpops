@@ -166,25 +166,6 @@ abc_validate <- function(infected_years_file,
                       .packages = c("raster", "PoPS", "foreach", "MASS")
                      ) %dopar% {
     config$random_seed <- round(stats::runif(1, 1, 1000000))
-    parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
-    while (parameters[1] < 0 || parameters[2] < 0) {
-      parameters <- mvrnorm(1, parameter_means, parameter_cov_matrix)
-    }
-    config$reproductive_rate <- parameters[1]
-    config$natural_distance_scale <- parameters[2]
-    config$percent_natural_dispersal <- parameters[3]
-    if (config$percent_natural_dispersal > 1.000) {
-      config$percent_natural_dispersal <- 1.000
-      }
-    config$anthropogenic_distance_scale <- parameters[4]
-    config$natural_kappa <- parameters[5]
-    if (config$natural_kappa < 0.000) {
-      config$natural_kappa <- 0
-      }
-    config$anthropogenic_kappa <- parameters[6]
-    if (config$anthropogenic_kappa < 0.000) {
-      config$anthropogenic_kappa <- 0
-      }
 
     data <- pops_model(random_seed = config$random_seed,
                        use_lethal_temperature = config$use_lethal_temperature,
@@ -214,7 +195,7 @@ abc_validate <- function(infected_years_file,
                        num_rows = config$num_rows,
                        num_cols = config$num_cols,
                        time_step = config$time_step,
-                       reproductive_rate = config$reproductive_rate,
+                       reproductive_rate = config$reproductive_rate[i],
                        mortality_rate = config$mortality_rate,
                        mortality_time_lag = config$mortality_time_lag,
                        season_month_start = config$season_month_start,
@@ -228,14 +209,15 @@ abc_validate <- function(infected_years_file,
                        use_anthropogenic_kernel =
                          config$use_anthropogenic_kernel,
                        percent_natural_dispersal =
-                         config$percent_natural_dispersal,
-                       natural_distance_scale = config$natural_distance_scale,
+                         config$percent_natural_dispersal[i],
+                       natural_distance_scale =
+                         config$natural_distance_scale[i],
                        anthropogenic_distance_scale =
-                         config$anthropogenic_distance_scale,
+                         config$anthropogenic_distance_scale[i],
                        natural_dir = config$natural_dir,
-                       natural_kappa = config$natural_kappa,
+                       natural_kappa = config$natural_kappa[i],
                        anthropogenic_dir = config$anthropogenic_dir,
-                       anthropogenic_kappa = config$anthropogenic_kappa,
+                       anthropogenic_kappa = config$anthropogenic_kappa[i],
                        output_frequency = config$output_frequency,
                        output_frequency_n = config$output_frequency_n,
                        quarantine_frequency = config$quarantine_frequency,
