@@ -228,6 +228,10 @@ pops <- function(infected_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  # added number of iterations to config to avoid multiple if else statemnts
+  # in configuration function used to determine number of draws from parameter
+  # distribution
+  config$number_of_iterations <- 2
   # add function name for use in configuration function to skip
   # function specific specifc configurations namely for validation and
   # calibration.
@@ -267,7 +271,7 @@ pops <- function(infected_file,
                      num_rows = config$num_rows,
                      num_cols = config$num_cols,
                      time_step = config$time_step,
-                     reproductive_rate = config$reproductive_rate,
+                     reproductive_rate = config$reproductive_rate[1],
                      mortality_rate = config$mortality_rate,
                      mortality_time_lag = config$mortality_time_lag,
                      season_month_start = config$season_month_start,
@@ -281,14 +285,14 @@ pops <- function(infected_file,
                      use_anthropogenic_kernel =
                        config$use_anthropogenic_kernel,
                      percent_natural_dispersal =
-                       config$percent_natural_dispersal,
-                     natural_distance_scale = config$natural_distance_scale,
+                       config$percent_natural_dispersal[1],
+                     natural_distance_scale = config$natural_distance_scale[1],
                      anthropogenic_distance_scale =
-                       config$anthropogenic_distance_scale,
+                       config$anthropogenic_distance_scale[1],
                      natural_dir = config$natural_dir,
-                     natural_kappa = config$natural_kappa,
+                     natural_kappa = config$natural_kappa[1],
                      anthropogenic_dir = config$anthropogenic_dir,
-                     anthropogenic_kappa = config$anthropogenic_kappa,
+                     anthropogenic_kappa = config$anthropogenic_kappa[1],
                      output_frequency = config$output_frequency,
                      output_frequency_n = config$output_frequency_n,
                      quarantine_frequency = config$quarantine_frequency,
