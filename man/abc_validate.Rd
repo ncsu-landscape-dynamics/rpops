@@ -2,7 +2,8 @@
 % Please edit documentation in R/abc_validate.R
 \name{abc_validate}
 \alias{abc_validate}
-\title{Validates the accuracy of the calibrated reproductive rate and dispersal scales of the pops model.}
+\title{Validates the accuracy of the calibrated reproductive rate and dispersal
+scales of the pops model.}
 \usage{
 abc_validate(
   infected_years_file,
@@ -60,15 +61,20 @@ abc_validate(
 )
 }
 \arguments{
-\item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
+\item{infected_years_file}{years of initial infection/infestation as
+individual locations of a pest or pathogen in raster format}
 
-\item{number_of_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
+\item{number_of_iterations}{how many iterations do you want to run to allow
+the calibration to converge at least 10}
 
-\item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
+\item{number_of_cores}{enter how many cores you want to use (default = NA).
+If not set uses the # of CPU cores - 1. must be an integer >= 1}
 
-\item{parameter_means}{the parameter means from the abc calibration function (posterior means)}
+\item{parameter_means}{the parameter means from the abc calibration function
+(posterior means)}
 
-\item{parameter_cov_matrix}{the parameter covariance matrix from the abc calibration function (posterior covairance matrix)}
+\item{parameter_cov_matrix}{the parameter covariance matrix from the abc
+calibration function (posterior covairance matrix)}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -173,9 +179,13 @@ is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
 disease or killing the pest (if this is 0.70 then when applied it
 successfully treats 70 percent of the plants or animals)}
 
-\item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
+\item{mask}{Raster file used to provide a mask to remove 0's that are not
+true negatives from comparisons (e.g. mask out lakes and oceans from statics
+if modeling terrestrial species).}
 
-\item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
+\item{success_metric}{Choose which success metric to use for calibration.
+Choices are "quantity", "quantity and configuration", "residual error" and
+"odds ratio". Default is "quantity"}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day' or 'time step')}
@@ -221,11 +231,13 @@ quarantine areas (default = FALSE)}
 spread rates}
 }
 \value{
-a dataframe of the variables saved and their success metrics for each run
+a dataframe of the variables saved and their success metrics for
+each run
 }
 \description{
-This function uses the quantity, allocation, and configuration disagreement to validate the model
-across the landscape using the parameters from the calibrate function. Ideally the model is calibrated
-with 2 or more years of data and validated for the last year or if you have 6 or more years of data 
+This function uses the quantity, allocation, and configuration disagreement
+to validate the model across the landscape using the parameters from the
+calibrate function. Ideally the model is calibrated with 2 or more years of
+data and validated for the last year or if you have 6 or more years of data
 then the model can be validated for the final 2 years.
 }
