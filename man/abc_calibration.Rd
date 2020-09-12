@@ -265,7 +265,8 @@ quarantine areas (default = FALSE)}
 spread rates}
 }
 \value{
-a dataframe of the variables saved and their success metrics for each run
+a dataframe of the variables saved and their success metrics for
+each run
 }
 \description{
 Approximate Bayesian Computation is used to estimate the reproductive rate
