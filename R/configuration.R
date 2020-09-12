@@ -19,6 +19,7 @@ configuration <- function(config) {
     return(config)
   }
 
+  # ensures latent period is correct for type of model selected
   if (config$model_type == "SEI" && config$latency_period <= 0) {
     config$failure <-
       "Model type is set to SEI but the latency period is less than 1"
@@ -27,6 +28,7 @@ configuration <- function(config) {
     config$latency_period <- 0
   }
 
+  # ensure correct treatment method
   if (!config$treatment_method %in% c("ratio", "all infected")) {
     config$failure <-
       "treatment method is not one of the valid treatment options"
@@ -51,45 +53,6 @@ configuration <- function(config) {
     config$spreadrate_frequency_n <- config$output_frequency_n
   } else {
     config$failure <- time_check$failed_check
-  }
-
-  if (nrow(config$parameter_cov_matrix) != 6 |
-      ncol(config$parameter_cov_matrix) != 6) {
-    config$failure <- "parameter covariance matrix is not 6 x 6"
-    return(config)
-  }
-
-  if (length(config$parameter_means) != 6) {
-    config$failure <- "parameter means is not a vector of length 6"
-    return(config)
-  }
-
-  parameters <- MASS::mvrnorm(1, config$parameter_means,
-                              config$parameter_cov_matrix)
-  while (parameters[1] < 0 || parameters[2] < 0) {
-    parameters <- mvrnorm(1, config$parameter_means,
-                          config$parameter_cov_matrix)
-  }
-  config$reproductive_rate <- parameters[1]
-  config$natural_distance_scale <- parameters[2]
-  config$percent_natural_dispersal <- parameters[3]
-  if (config$percent_natural_dispersal > 1.000) {
-    config$percent_natural_dispersal <- 1.000
-    }
-  config$anthropogenic_distance_scale <- parameters[4]
-  config$natural_kappa <- parameters[5]
-  if (config$natural_kappa < 0.000) {
-    config$natural_kappa <- 0
-    }
-  config$anthropogenic_kappa <- parameters[6]
-  if (config$anthropogenic_kappa < 0.000) {
-    config$anthropogenic_kappa <- 0
-    }
-
-  if (config$percent_natural_dispersal < 1.0) {
-    config$use_anthropogenic_kernel <- TRUE
-  } else {
-    config$use_anthropogenic_kernel <- FALSE
   }
 
   infected_check <- initial_raster_checks(config$infected_file)
@@ -295,5 +258,97 @@ configuration <- function(config) {
   config$exposed <- exposed
   config$infected <- infected
 
+  if (config$function_name %in% c("validate", "multirun")) {
+    if (is.na(config$number_of_cores) ||
+        config$number_of_cores > parallel::detectCores()) {
+      core_count <- parallel::detectCores() - 1
+    } else {
+      core_count <- config$number_of_cores
+    }
+    config$core_count <- core_count
+  }
+
+  if (config$function_name %in% c("validate", "pops", "multirun")) {
+
+    if (nrow(config$parameter_cov_matrix) != 6 |
+        ncol(config$parameter_cov_matrix) != 6) {
+      config$failure <- "parameter covariance matrix is not 6 x 6"
+      return(config)
+    }
+
+    if (length(config$parameter_means) != 6) {
+      config$failure <- "parameter means is not a vector of length 6"
+      return(config)
+    }
+
+    parameters <- MASS::mvrnorm(config$number_of_iterations,
+                                config$parameter_means,
+                                config$parameter_cov_matrix)
+    while (any(parameters[, 1] < 0 |
+               parameters[, 2] < 0 |
+               parameters[, 3] > 1 |
+               parameters[, 3] < 0 |
+               parameters[, 4] < 0 |
+               parameters[, 5] < 0 |
+               parameters[, 6] < 0)) {
+      config$number_of_draws <- nrow(parameters[parameters[, 1] < 0 |
+                                                parameters[, 2] < 0 |
+                                                parameters[, 3] > 1 |
+                                                parameters[, 3] < 0 |
+                                                parameters[, 4] < 0 |
+                                                parameters[, 5] < 0 |
+                                                parameters[, 6] < 0, ])
+      parameters <- MASS::mvrnorm(config$number_of_draws,
+                                  config$parameter_means,
+                                  config$parameter_cov_matrix)
+    }
+    config$reproductive_rate <- parameters[, 1]
+    config$natural_distance_scale <- parameters[, 2]
+    config$percent_natural_dispersal <- parameters[, 3]
+    config$anthropogenic_distance_scale <- parameters[, 4]
+    config$natural_kappa <- parameters[, 5]
+    config$anthropogenic_kappa <- parameters[, 6]
+
+    if (config$percent_natural_dispersal[1] < 1.0) {
+      config$use_anthropogenic_kernel <- TRUE
+    } else {
+      config$use_anthropogenic_kernel <- FALSE
+    }
+  }
+
+
+  if (config$function_name %in% c("validate", "calibrate")) {
+    config$use_anthropogenic_kernel <- TRUE
+
+    # Load observed data on occurence
+    infection_years <- stack(config$infected_years_file)
+    infection_years[] <- as.integer(infection_years[])
+    # Get rid of NA values to make comparisons
+    infection_years <-
+      raster::reclassify(infection_years,
+                         matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
+    config$num_layers_infected_years <- raster::nlayers(infection_years)
+
+    if (config$num_layers_infected_years < config$number_of_outputs) {
+      config$failure <-
+      paste("The infection years file must have enough layers to match the
+            number of outputs from the model. The number of layers of your
+            infected year file is", config$num_layers_infected_years, "and the
+            number of outputs is", config$number_of_time_steps)
+      return(config)
+    }
+    config$infection_years <- infection_years
+  }
+
+  if (config$function_name %in% c("validate")) {
+    metric_check <- metric_checks(config$success_metric)
+    if (metric_check$checks_passed) {
+      config$configuration <- metric_check$configuration
+    } else {
+      config$failure <- metric_check$failed_check
+      return(config)
+    }
+  }
+
   return(config)
-}
+  }
