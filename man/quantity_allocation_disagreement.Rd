@@ -14,27 +14,22 @@ quantity_allocation_disagreement(
 \arguments{
 \item{reference}{the binary (0 or 1) raster with ground truth data}
 
-\item{comparison}{the binary (0 or 1) raster with simulated data to be compared to ground truth}
+\item{comparison}{the binary (0 or 1) raster with simulated data to be
+compared to ground truth}
 
-\item{configuration}{Set to true if you want to use configuration disagreement for comparing model runs. Default is FALSE.}
+\item{configuration}{Set to true if you want to use configuration
+disagreement for comparing model runs. Default is FALSE.}
 
-\item{mask}{Used to provide a mask to remove 0's that are not true negatives from comparisons.}
+\item{mask}{Used to provide a mask to remove 0's that are not true
+negatives from comparisons.}
 }
 \value{
-A data frame with spatial configuration metrics. Particularly quantity, allocation, and 
-total disagreement,  omission and comission, and directional disagreement where directional disagreement.
+A data frame with spatial configuration metrics. Particularly
+quantity, allocation, and total disagreement,  omission and comission, and
+directional disagreement where directional disagreement.
 }
 \description{
-Uses quantity and allocation disagreement metrics by Pontius and Millones (2014) and 
-omission and comission errors of comparing a modeled raster dataset to a reference raster 
-datatset.
-}
-\examples{
-\dontrun{
-library(raster)
-reference <- raster(matrix(1, ncol = 2, nrow = 2))
-reference[1,1] <- 0
-comparison <- raster(matrix(1, ncol = 2, nrow = 2))
-quantity_allocation_disagreement(reference, comparison)
-}
+Uses quantity and allocation disagreement metrics by Pontius and Millones
+(2014) and omission and comission errors of comparing a modeled raster
+dataset to a reference raster datatset.
 }

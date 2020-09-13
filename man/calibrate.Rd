@@ -85,99 +85,154 @@ calibrate(
 
 \item{infected_file}{path to raster file with initial infections}
 
-\item{host_file}{path to raster files with number of hosts and standard deviation on those estimates can be based in 3 formats (a single file with number of hosts, a single file with 2 layers number of hosts and standard deviation, or two files 1 with number of hosts and the other with standard deviation of those estimates)}
+\item{host_file}{path to raster files with number of hosts and standard
+deviation on those estimates can be based in 3 formats (a single file with
+number of hosts, a single file with 2 layers number of hosts and standard
+deviation, or two files 1 with number of hosts and the other with standard
+deviation of those estimates)}
 
-\item{total_populations_file}{path to raster file with number of total populations of all hosts and non-hosts (must be only hosts if using movement)}
+\item{total_populations_file}{path to raster file with number of total
+populations of all hosts and non-hosts (must be only hosts if using movement)}
 
-\item{temp}{boolean that allows the use of temperature coefficients to modify spread (TRUE or FALSE)}
+\item{temp}{boolean that allows the use of temperature coefficients to
+modify spread (TRUE or FALSE)}
 
-\item{temperature_coefficient_file}{path to raster file with temperature coefficient data for the timestep and number of years specified}
+\item{temperature_coefficient_file}{path to raster file with temperature
+coefficient data for the timestep and number of years specified}
 
-\item{precip}{boolean that allows the use of precipitation coefficients to modify spread (TRUE or FALSE)}
+\item{precip}{boolean that allows the use of precipitation coefficients to
+modify spread (TRUE or FALSE)}
 
-\item{precipitation_coefficient_file}{path to raster file with precipitation coefficient data for the timestep and number of years specified}
+\item{precipitation_coefficient_file}{path to raster file with precipitation
+coefficient data for the timestep and number of years specified}
 
-\item{model_type}{What type of model most represents your sysetm. Options are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default value is "SI".}
+\item{model_type}{What type of model most represents your sysetm. Options
+are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
+(Susceptible - Infected/Infested). Default value is "SI".}
 
-\item{latency_period}{How many times steps does it take to for exposed populations become infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
+\item{latency_period}{How many times steps does it take to for exposed
+populations become infected/infested. This is an integer value and must be
+greater than 0 if model type is SEI.}
 
-\item{time_step}{how often should spread occur options: ('day', 'week', 'month')}
+\item{time_step}{how often should spread occur options: ('day', 'week',
+'month')}
 
-\item{season_month_start}{when does spread first start occurring in the year for your pest or pathogen (integer value between 1 and 12)}
+\item{season_month_start}{when does spread first start occurring in the year
+for your pest or pathogen (integer value between 1 and 12)}
 
-\item{season_month_end}{when does spread end during the year for your pest or pathogen (integer value between 1 and 12)}
+\item{season_month_end}{when does spread end during the year for your pest
+or pathogen (integer value between 1 and 12)}
 
 \item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
 
 \item{end_date}{date to end the simulation with format ('YYYY_MM_DD')}
 
-\item{use_lethal_temperature}{a boolean to answer the question: does your pest or pathogen have a temperature at which it cannot survive? (TRUE or FALSE)}
+\item{use_lethal_temperature}{a boolean to answer the question: does your
+pest or pathogen have a temperature at which it cannot survive?
+(TRUE or FALSE)}
 
-\item{temperature_file}{path to raster file with temperature data for minimum temperature}
+\item{temperature_file}{path to raster file with temperature data for
+minimum temperature}
 
-\item{lethal_temperature}{the temperature in degrees C at which lethal temperature related mortality occurs for your pest or pathogen (-50 and 60)}
+\item{lethal_temperature}{the temperature in degrees C at which lethal
+temperature related mortality occurs for your pest or pathogen (-50 and 60)}
 
-\item{lethal_temperature_month}{the month in which lethal temperature related mortality occurs for your pest or pathogen integer value between 1 and 12}
+\item{lethal_temperature_month}{the month in which lethal temperature
+related mortality occurs for your pest or pathogen integer value between 1
+and 12}
 
-\item{mortality_on}{boolean to turn host mortality on and off (TRUE or FALSE)}
+\item{mortality_on}{boolean to turn host mortality on and off
+(TRUE or FALSE)}
 
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
-\item{mortality_time_lag}{time lag from infection until mortality can occur in years integer >= 1}
+\item{mortality_time_lag}{time lag from infection until mortality can occur
+in years integer >= 1}
 
 \item{management}{boolean to allow use of management (TRUE or FALSE)}
 
-\item{treatment_dates}{dates in which to apply treatment list with format ('YYYY_MM_DD') (needs to be the same length as treatment_file and pesticide_duration)}
+\item{treatment_dates}{dates in which to apply treatment list with format
+('YYYY_MM_DD') (needs to be the same length as treatment_file and
+pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates (needs to be the same length as treatment_dates and pesticide_duration)}
+\item{treatments_file}{path to raster file with treatment data by dates
+(needs to be the same length as treatment_dates and pesticide_duration)}
 
-\item{treatment_method}{what method to use when applying treatment one of ("ratio" or "all infected"). ratio removes a portion of all infected and susceptibles, all infected removes all infected a portion of susceptibles.}
+\item{treatment_method}{what method to use when applying treatment one of
+("ratio" or "all infected"). ratio removes a portion of all infected and
+susceptibles, all infected removes all infected a portion of susceptibles.}
 
-\item{natural_kernel_type}{what type of dispersal kernel should be used for natural dispersal can be ('cauchy', 'exponential')}
+\item{natural_kernel_type}{what type of dispersal kernel should be used for
+natural dispersal can be ('cauchy', 'exponential')}
 
-\item{anthropogenic_kernel_type}{what type of dispersal kernel should be used for anthropogenic dispersal can be ('cauchy', 'exponential')}
+\item{anthropogenic_kernel_type}{what type of dispersal kernel should be
+used for anthropogenic dispersal can be ('cauchy', 'exponential')}
 
-\item{natural_dir}{sets the predominate direction of natural dispersal usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
+\item{natural_dir}{sets the predominate direction of natural dispersal
+usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
+'NONE')}
 
 \item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{anthropogenic_dir}{sets the predominate direction of anthropogenic dispersal usually due to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
+\item{anthropogenic_dir}{sets the predominate direction of anthropogenic
+dispersal usually due to human movement typically over long distances (e.g.
+nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
+'SE', 'E', 'NE', 'NONE')}
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine, etc..) last before the host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
+\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine,
+etc..) last before the host is susceptible again. If value is 0 treatment
+is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
+ same length as treatment_dates and treatment_file)}
 
-\item{pesticide_efficacy}{how effictive is the pesticide at preventing the disease or killing the pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or animals)}
+\item{pesticide_efficacy}{how effictive is the pesticide at preventing the
+disease or killing the pest (if this is 0.70 then when applied it
+successfully treats 70 percent of the plants or animals)}
 
 \item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
 
 \item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
 
-\item{output_frequency}{sets when outputs occur either ('year', 'month', 'week', 'day' or 'time step')}
+\item{output_frequency}{sets when outputs occur either ('year', 'month',
+'week', 'day' or 'time step')}
 
-\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day' or 'time step') in which to export model results.}
+\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day'
+or 'time step') in which to export model results.}
 
-\item{movements_file}{this is a csv file with columns lon_from, lat_from, lon_to, lat_to, number of animals, and date.}
+\item{movements_file}{this is a csv file with columns lon_from, lat_from,
+lon_to, lat_to, number of animals, and date.}
 
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
 
-\item{generate_stochasticity}{Boolean to indicate whether to use stochasticity in reproductive functions default is TRUE}
+\item{generate_stochasticity}{Boolean to indicate whether to use
+stochasticity in reproductive functions default is TRUE}
 
-\item{establishment_stochasticity}{Boolean to indicate whether to use stochasticity in establishment functions default is TRUE}
+\item{establishment_stochasticity}{Boolean to indicate whether to use
+stochasticity in establishment functions default is TRUE}
 
-\item{movement_stochasticity}{Boolean to indicate whether to use stochasticity in movement functions default is TRUE}
+\item{movement_stochasticity}{Boolean to indicate whether to use
+stochasticity in movement functions default is TRUE}
 
-\item{deterministic}{Boolean to indicate whether to use a deterministic dispersal kernel default is FALSE}
+\item{deterministic}{Boolean to indicate whether to use a deterministic
+dispersal kernel default is FALSE}
 
-\item{establishment_probability}{Threshold to determine establishment if establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
+\item{establishment_probability}{Threshold to determine establishment if
+establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
 
-\item{dispersal_percentage}{Percentage of dispersal used to calculate the bounding box for deterministic dispersal}
+\item{dispersal_percentage}{Percentage of dispersal used to calculate the
+bounding box for deterministic dispersal}
 
-\item{quarantine_areas_file}{path to raster file with quarantine boundaries used in calculating likelihood of quarantine escape if use_quarantine is TRUE}
+\item{quarantine_areas_file}{path to raster file with quarantine boundaries
+used in calculating likelihood of quarantine escape if use_quarantine is
+TRUE}
 
-\item{use_quarantine}{boolean to indicate whether or not there is a quarantine area if TRUE must pass in a raster file indicating the quarantine areas (default = FALSE)}
+\item{use_quarantine}{boolean to indicate whether or not there is a
+quarantine area if TRUE must pass in a raster file indicating the
+quarantine areas (default = FALSE)}
 
-\item{use_spreadrates}{boolean to indicate whether or not to calculate spread rates}
+\item{use_spreadrates}{boolean to indicate whether or not to calculate
+spread rates}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run
@@ -188,8 +243,4 @@ accuracy is gauged using a custom quantity allocation disagreement function to a
 calibration uses this metric to determine if an MCMC run is kept either because it improves the results or randomly gets kept 
 despite being worse. We recommend running calibration for at least 10,000 iterations but even more will provide a better result. 
 If the model converges and doesn't improve for awhile it will exist calibration prior to reaching the total number of iterations specified.
-}
-\examples{
-\dontrun{
-}
 }
