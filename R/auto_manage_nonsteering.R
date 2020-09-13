@@ -403,11 +403,11 @@ auto_manage_nonsteering <- function(infected_files,
     susceptible_speci <- susceptible_speci_2
     susceptible_species <- susceptible_species_2
 
-    run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %do% {
+    run_years <- foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %do% {
 
 
       print("start")
-      treatment <- treatmentAuto(rasts = infected_speci, rasts2 = susceptible_speci,
+      treatment <- treatment_auto(rasts = infected_speci, rasts2 = susceptible_speci,
                                  method = selection_method, priority = selection_priority,
                                  number_of_locations = num_cells, points = points,
                                  treatment_efficacy = treatment_efficacy,
@@ -608,8 +608,26 @@ auto_manage_nonsteering <- function(infected_files,
     names(north_rates) <- species
     names(south_rates) <- species
 
-    outputs <- list(infecteds, susceptibles, number_infecteds, infected_areas, west_rates, east_rates, north_rates, south_rates, treatments)
-    names(outputs) <- c('infecteds', 'susceptibles', 'number_infecteds', 'infected_areas', 'west_rates', 'east_rates', 'north_rates', 'south_rates', 'treatments')
+    outputs <-
+      list(infecteds,
+           susceptibles,
+           number_infecteds,
+           infected_areas,
+           west_rates,
+           east_rates,
+           north_rates,
+           south_rates,
+           treatments)
+    names(outputs) <-
+      c('infecteds',
+        'susceptibles',
+        'number_infecteds',
+        'infected_areas',
+        'west_rates',
+        'east_rates',
+        'north_rates',
+        'south_rates',
+        'treatments')
 
     outputs
   }

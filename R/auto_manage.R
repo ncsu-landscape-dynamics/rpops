@@ -156,7 +156,7 @@ auto_manage <- function(infected_files,
   }
 
   multispecies_check <- multispecies_checks(species, infected_files, reproductive_rate, percent_natural_dispersal, natural_kernel_type, anthropogenic_kernel_type,
-                                  natural_distance_scale, anthropogenic_distance_scale, natural_dir, natural_kappa, anthropogenic_dir, anthropogenic_kappa)
+                                            natural_distance_scale, anthropogenic_distance_scale, natural_dir, natural_kappa, anthropogenic_dir, anthropogenic_kappa)
   if (!multispecies_check$checks_passed){
     return(percent_check$failed_check)
   }
@@ -385,7 +385,7 @@ auto_manage <- function(infected_files,
       }
     }
     print("start")
-    treatment <- treatmentAuto(rasts = infected_speci, rasts2 = susceptible_speci,
+    treatment <- treatment_auto(rasts = infected_speci, rasts2 = susceptible_speci,
                                method = selection_method, priority = selection_priority,
                                number_of_locations = num_cells, points = points,
                                treatment_efficacy = treatment_efficacy,
