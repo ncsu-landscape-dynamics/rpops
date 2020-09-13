@@ -156,9 +156,10 @@ abc_validate <- function(infected_years_file,
     return(config$failure)
   }
 
+  i <- NULL
+
   cl <- makeCluster(config$core_count)
   registerDoParallel(cl)
-
 
   qa <-
     foreach::foreach(i = 1:number_of_iterations,

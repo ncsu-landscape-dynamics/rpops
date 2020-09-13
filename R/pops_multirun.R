@@ -137,6 +137,8 @@ pops_multirun <- function(infected_file,
     return(config$failure)
   }
 
+  i <- NULL
+
   cl <- makeCluster(config$core_count)
   registerDoParallel(cl)
 
@@ -342,11 +344,11 @@ pops_multirun <- function(infected_file,
     escape_probability <- escape_probability / length(probability_runs) * 100
 
     if (
-      length(quarantine_escape_distances[quarantine_escape_directions == 'N']) >
+      length(quarantine_escape_distances[quarantine_escape_directions == "N"]) >
       0) {
       north_distance_to_quarantine <-
         round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == 'N'],
+          quarantine_escape_distances[quarantine_escape_directions == "N"],
           function(x) c("Mean" = mean(x, na.rm = TRUE),
                         "Stand dev" = sd(x))), digits = 0)
     } else {
@@ -355,11 +357,11 @@ pops_multirun <- function(infected_file,
     }
 
     if (
-      length(quarantine_escape_distances[quarantine_escape_directions == 'S']) >
+      length(quarantine_escape_distances[quarantine_escape_directions == "S"]) >
       0) {
       south_distance_to_quarantine <-
         round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == 'S'],
+          quarantine_escape_distances[quarantine_escape_directions == "S"],
           function(x) c("Mean" = mean(x, na.rm = TRUE),
                         "Stand dev" = sd(x, na.rm = TRUE))), digits = 0)
     } else {
@@ -368,11 +370,11 @@ pops_multirun <- function(infected_file,
     }
 
     if (
-      length(quarantine_escape_distances[quarantine_escape_directions == 'E']) >
+      length(quarantine_escape_distances[quarantine_escape_directions == "E"]) >
       0) {
       east_distance_to_quarantine <-
         round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == 'E'],
+          quarantine_escape_distances[quarantine_escape_directions == "E"],
           function(x) c("Mean" = mean(x, na.rm = TRUE),
                         "Stand dev" = sd(x))), digits = 0)
     } else {
@@ -381,11 +383,11 @@ pops_multirun <- function(infected_file,
     }
 
     if (
-      length(quarantine_escape_distances[quarantine_escape_directions == 'W']) >
+      length(quarantine_escape_distances[quarantine_escape_directions == "W"]) >
       0) {
       west_distance_to_quarantine <-
         round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == 'W'],
+          quarantine_escape_distances[quarantine_escape_directions == "W"],
           function(x) c("Mean" = mean(x, na.rm = TRUE),
                         "Stand dev" = sd(x))), digits = 0)
     } else {
