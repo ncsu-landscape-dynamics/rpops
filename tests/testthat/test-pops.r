@@ -728,6 +728,7 @@ test_that(
                       coefficient_file)$infected[[1]],
                raster::as.matrix(raster::raster(infected_file)))
 
+  skip_on_appveyor()
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
