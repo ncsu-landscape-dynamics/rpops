@@ -258,6 +258,9 @@ configuration <- function(config) {
   config$exposed <- exposed
   config$infected <- infected
 
+  config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
+  config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
+
   if (config$function_name %in% c("validate", "multirun")) {
     if (is.na(config$number_of_cores) ||
         config$number_of_cores > parallel::detectCores()) {
@@ -309,13 +312,12 @@ configuration <- function(config) {
     config$natural_kappa <- parameters[, 5]
     config$anthropogenic_kappa <- parameters[, 6]
 
-    if (config$percent_natural_dispersal[1] < 1.0) {
+    if (any(config$percent_natural_dispersal < 1.0)) {
       config$use_anthropogenic_kernel <- TRUE
     } else {
       config$use_anthropogenic_kernel <- FALSE
     }
   }
-
 
   if (config$function_name %in% c("validate", "calibrate")) {
     config$use_anthropogenic_kernel <- TRUE
