@@ -2,12 +2,15 @@
 % Please edit documentation in R/validate.R
 \name{validate}
 \alias{validate}
-\title{Validates the accuracy of the calibrated reproductive rate and dispersal scales of the pops model.}
+\title{Validates the accuracy of the calibrated reproductive rate and dispersal
+scales of the pops model.}
 \usage{
 validate(
   infected_years_file,
-  num_iterations,
+  number_of_iterations,
   number_of_cores = NA,
+  parameter_means,
+  parameter_cov_matrix,
   infected_file,
   host_file,
   total_populations_file,
@@ -18,7 +21,6 @@ validate(
   model_type = "SI",
   latency_period = 0,
   time_step = "month",
-  reproductive_rate = 3,
   season_month_start = 1,
   season_month_end = 12,
   start_date = "2008-01-01",
@@ -34,15 +36,10 @@ validate(
   treatment_dates = c(""),
   treatments_file = "",
   treatment_method = "ratio",
-  percent_natural_dispersal = 1,
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
-  natural_distance_scale = 21,
-  anthropogenic_distance_scale = 0,
   natural_dir = "NONE",
-  natural_kappa = 0,
   anthropogenic_dir = "NONE",
-  anthropogenic_kappa = 0,
   pesticide_duration = 0,
   pesticide_efficacy = 1,
   mask = NULL,
@@ -51,6 +48,7 @@ validate(
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
+  start_exposed = FALSE,
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
@@ -63,11 +61,20 @@ validate(
 )
 }
 \arguments{
-\item{infected_years_file}{years of initial infection/infestation as individual locations of a pest or pathogen in raster format}
+\item{infected_years_file}{years of initial infection/infestation as
+individual locations of a pest or pathogen in raster format}
 
-\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge at least 10}
+\item{number_of_iterations}{how many iterations do you want to run to allow
+the calibration to converge at least 10}
 
-\item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the # of CPU cores - 1. must be an integer >= 1}
+\item{number_of_cores}{enter how many cores you want to use (default = NA).
+If not set uses the # of CPU cores - 1. must be an integer >= 1}
+
+\item{parameter_means}{the parameter means from the abc calibration function
+(posterior means)}
+
+\item{parameter_cov_matrix}{the parameter covariance matrix from the abc
+calibration function (posterior covairance matrix)}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -102,8 +109,6 @@ greater than 0 if model type is SEI.}
 
 \item{time_step}{how often should spread occur options: ('day', 'week',
 'month')}
-
-\item{reproductive_rate}{number of spores or pest units produced by a single host under optimal weather conditions}
 
 \item{season_month_start}{when does spread first start occurring in the year
 for your pest or pathogen (integer value between 1 and 12)}
@@ -150,30 +155,20 @@ pesticide_duration)}
 ("ratio" or "all infected"). ratio removes a portion of all infected and
 susceptibles, all infected removes all infected a portion of susceptibles.}
 
-\item{percent_natural_dispersal}{what percentage of dispersal is natural range versus anthropogenic range value between 0 and 1}
-
 \item{natural_kernel_type}{what type of dispersal kernel should be used for
 natural dispersal can be ('cauchy', 'exponential')}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
 used for anthropogenic dispersal can be ('cauchy', 'exponential')}
 
-\item{natural_distance_scale}{distance scale parameter for natural range dispersal kernel numeric value > 0}
-
-\item{anthropogenic_distance_scale}{distance scale parameter for anthropogenic range dispersal kernel numeric value > 0}
-
 \item{natural_dir}{sets the predominate direction of natural dispersal
 usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
 'NONE')}
-
-\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic
 dispersal usually due to human movement typically over long distances (e.g.
 nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
 'SE', 'E', 'NE', 'NONE')}
-
-\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{pesticide_duration}{how long does the pestcide (herbicide, vaccine,
 etc..) last before the host is susceptible again. If value is 0 treatment
@@ -184,9 +179,13 @@ is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
 disease or killing the pest (if this is 0.70 then when applied it
 successfully treats 70 percent of the plants or animals)}
 
-\item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
+\item{mask}{Raster file used to provide a mask to remove 0's that are not
+true negatives from comparisons (e.g. mask out lakes and oceans from statics
+if modeling terrestrial species).}
 
-\item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
+\item{success_metric}{Choose which success metric to use for calibration.
+Choices are "quantity", "quantity and configuration", "residual error" and
+"odds ratio". Default is "quantity"}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day' or 'time step')}
@@ -198,6 +197,9 @@ or 'time step') in which to export model results.}
 lon_to, lat_to, number of animals, and date.}
 
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
+
+\item{start_exposed}{Do your initial conditions start as exposed or infected
+(only used if model_type is "SEI")}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use
 stochasticity in reproductive functions default is TRUE}
@@ -229,11 +231,13 @@ quarantine areas (default = FALSE)}
 spread rates}
 }
 \value{
-a dataframe of the variables saved and their success metrics for each run
+a dataframe of the variables saved and their success metrics for
+each run
 }
 \description{
-This function uses the quantity, allocation, and configuration disagreement to validate the model
-across the landscape using the parameters from the calibrate function. Ideally the model is calibrated
-with 2 or more years of data and validated for the last year or if you have 6 or more years of data 
+This function uses the quantity, allocation, and configuration disagreement
+to validate the model across the landscape using the parameters from the
+calibrate function. Ideally the model is calibrated with 2 or more years of
+data and validated for the last year or if you have 6 or more years of data
 then the model can be validated for the final 2 years.
 }

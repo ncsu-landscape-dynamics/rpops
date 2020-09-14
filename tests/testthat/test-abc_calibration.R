@@ -11,7 +11,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
   prior_means <- c(0, 0, 0, 0, 0, 0)
   prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
   params_to_estimate <- c(T, T, T, T, F, F)
-  number_of_generations <- 4
+  number_of_generations <- 3
   generation_size <- 10
   checks <- c(1200, 100000, 900, 1000)
   infected_file <-
@@ -70,7 +70,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
   dispersal_percentage <- 0.99
   quarantine_areas_file <- ""
   use_quarantine <- FALSE
-  output_frequency_n <- 1
   use_spreadrates <- FALSE
 
   data <- abc_calibration(infected_years_file,
@@ -118,19 +117,19 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                           mask,
                           success_metric,
                           output_frequency,
-                          output_frequency_n = 1,
+                          output_frequency_n,
                           movements_file,
                           use_movements,
-                          start_exposed = FALSE,
-                          generate_stochasticity = TRUE,
-                          establishment_stochasticity = TRUE,
-                          movement_stochasticity = TRUE,
-                          deterministic = FALSE,
-                          establishment_probability = 0.5,
-                          dispersal_percentage = 0.99,
-                          quarantine_areas_file = "",
-                          use_quarantine = FALSE,
-                          use_spreadrates = FALSE)
+                          start_exposed,
+                          generate_stochasticity,
+                          establishment_stochasticity,
+                          movement_stochasticity,
+                          deterministic,
+                          establishment_probability,
+                          dispersal_percentage,
+                          quarantine_areas_file,
+                          use_quarantine,
+                          use_spreadrates)
 
   expect_length(data$posterior_means, 6)
   expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -157,9 +156,9 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
-            number_of_generations <- 4
+            number_of_generations <- 3
             generation_size <- 10
-            checks <- c(1200, 90000, 900, 1000)
+            checks <- c(1700, 140000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -202,6 +201,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             mask <- NULL
             success_metric <- "number of locations and total distance"
             output_frequency <- "year"
+            output_frequency_n <- 1
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
@@ -265,19 +265,19 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                                     mask,
                                     success_metric,
                                     output_frequency,
-                                    output_frequency_n = 1,
+                                    output_frequency_n ,
                                     movements_file,
                                     use_movements,
-                                    start_exposed = FALSE,
-                                    generate_stochasticity = TRUE,
-                                    establishment_stochasticity = TRUE,
-                                    movement_stochasticity = TRUE,
-                                    deterministic = FALSE,
-                                    establishment_probability = 0.5,
-                                    dispersal_percentage = 0.99,
-                                    quarantine_areas_file = "",
-                                    use_quarantine = FALSE,
-                                    use_spreadrates = FALSE)
+                                    start_exposed,
+                                    generate_stochasticity ,
+                                    establishment_stochasticity,
+                                    movement_stochasticity,
+                                    deterministic,
+                                    establishment_probability,
+                                    dispersal_percentage,
+                                    quarantine_areas_file,
+                                    use_quarantine,
+                                    use_spreadrates)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
