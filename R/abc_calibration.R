@@ -552,25 +552,29 @@ abc_calibration <- function(infected_years_file,
     anthro_dis_scale <- anthro_dis_scale[anthro_dis_scale[, 1] < 1.000, ]
     anthropogenic_distance_scale_generation <-
       as.data.frame(table(anthro_dis_scale[, 2]))
+    names(reproductive_rate_generation) <- c("var1", "freq")
+    names(natural_distance_scale_generation) <- c("var1", "freq")
+    names(percent_natural_dispersal_generation) <- c("var1", "freq")
+    names(anthropogenic_distance_scale_generation) <- c("var1", "freq")
 
-    reproductive_rate_generation$Freq <-
-      reproductive_rate_generation$Freq / generation_size
-    natural_distance_scale_generation$Freq <-
-      natural_distance_scale_generation$Freq / generation_size
-    percent_natural_dispersal_generation$Freq <-
-      percent_natural_dispersal_generation$Freq / generation_size
-    anthropogenic_distance_scale_generation$Freq <-
-      anthropogenic_distance_scale_generation$Freq /
+    reproductive_rate_generation$freq <-
+      reproductive_rate_generation$freq / generation_size
+    natural_distance_scale_generation$freq <-
+      natural_distance_scale_generation$freq / generation_size
+    percent_natural_dispersal_generation$freq <-
+      percent_natural_dispersal_generation$freq / generation_size
+    anthropogenic_distance_scale_generation$freq <-
+      anthropogenic_distance_scale_generation$freq /
       nrow(anthro_dis_scale[anthro_dis_scale[, 1] < 1.000, ])
 
-    reproductive_rate_generation$Var1 <-
-      as.numeric(as.character(reproductive_rate_generation$Var1))
-    natural_distance_scale_generation$Var1 <-
-      as.numeric(as.character(natural_distance_scale_generation$Var1))
-    percent_natural_dispersal_generation$Var1 <-
-      as.numeric(as.character(percent_natural_dispersal_generation$Var1))
-    anthropogenic_distance_scale_generation$Var1 <-
-      as.numeric(as.character(anthropogenic_distance_scale_generation$Var1))
+    reproductive_rate_generation$var1 <-
+      as.numeric(as.character(reproductive_rate_generation$var1))
+    natural_distance_scale_generation$var1 <-
+      as.numeric(as.character(natural_distance_scale_generation$var1))
+    percent_natural_dispersal_generation$var1 <-
+      as.numeric(as.character(percent_natural_dispersal_generation$var1))
+    anthropogenic_distance_scale_generation$var1 <-
+      as.numeric(as.character(anthropogenic_distance_scale_generation$var1))
 
     current_particles <- 1
     proposed_particles <- 1
