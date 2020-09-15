@@ -3,9 +3,7 @@ context("test-validate")
 test_that(
   "Validation has correctly formatted returns with multiple output
   comparisons", {
-    library(foreach)
-    library(doParallel)
-    library(PoPS)
+    skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_years.tif",
         package = "PoPS"
@@ -173,9 +171,7 @@ test_that(
 test_that(
   "Validation has correctly formatted returns and runs with a
   single output comparison", {
-    library(foreach)
-    library(doParallel)
-    library(PoPS)
+    skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif",
         package = "PoPS"

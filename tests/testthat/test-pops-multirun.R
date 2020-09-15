@@ -1,9 +1,7 @@
 context("test-pops-multirun")
 
 test_that("Multirun model outputs work", {
-  library(foreach)
-  library(doParallel)
-  library(PoPS)
+  skip_on_os("windows")
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file <-
