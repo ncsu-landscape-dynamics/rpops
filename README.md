@@ -2,9 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check)
-![lint](https://github.com/ncsu-landscape-dynamics/rpops/workflows/lint/badge.svg) (https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3Alint)
+[![lint](https://github.com/ncsu-landscape-dynamics/rpops/workflows/lint/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3Alint)
 [![Build Status](https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=master)](https://travis-ci.org/ncsu-landscape-dynamics/rpops)
-[![Build status](https://ci.appveyor.com/api/projects/status/pixncc1jo7gtu0wx/branch/master?svg=true)](https://ci.appveyor.com/project/ChrisJones687/rpops/branch/master)
 [![codecov](https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/master/graph/badge.svg)](https://codecov.io/gh/ncsu-landscape-dynamics/rpops)
   <!-- badges: end -->
 
