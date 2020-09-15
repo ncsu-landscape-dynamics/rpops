@@ -323,7 +323,7 @@ configuration <- function(config) {
     config$use_anthropogenic_kernel <- TRUE
 
     # Load observed data on occurence
-    infection_years <- stack(config$infected_years_file)
+    infection_years <- raster::stack(config$infected_years_file)
     infection_years[] <- as.integer(infection_years[])
     # Get rid of NA values to make comparisons
     infection_years <-
@@ -342,7 +342,9 @@ configuration <- function(config) {
     config$infection_years <- infection_years
   }
 
-  if (config$function_name %in% c("validate")) {
+  if (config$function_name %in% c("validate") |
+      (config$function_name %in% c("calibrate") &&
+       config$calibration_method == "MCMC")) {
     metric_check <- metric_checks(config$success_metric)
     if (metric_check$checks_passed) {
       config$configuration <- metric_check$configuration
