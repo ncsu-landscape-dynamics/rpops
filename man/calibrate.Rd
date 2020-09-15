@@ -6,14 +6,14 @@
 \usage{
 calibrate(
   infected_years_file,
-  num_iterations,
-  number_of_cores = NA,
   number_of_observations,
   prior_number_of_observations,
-  prior_reproductive_rate,
-  prior_natural_distance_scale,
-  prior_percent_natural_dispersal = c(1, 0),
-  prior_anthropogenic_distance_scale = c(1000, 0),
+  prior_means,
+  prior_cov_matrix,
+  params_to_estimate = c(T, T, T, T, F, F),
+  number_of_generations = 7,
+  generation_size = 1000,
+  checks = c(500, 5e+05, 1e+05, 1000),
   infected_file,
   host_file,
   total_populations_file,
@@ -48,11 +48,12 @@ calibrate(
   pesticide_duration = c(0),
   pesticide_efficacy = 1,
   mask = NULL,
-  success_metric = "quantity",
+  success_metric = "number of locations and total distance",
   output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
+  start_exposed = FALSE,
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
@@ -61,27 +62,49 @@ calibrate(
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
   use_quarantine = FALSE,
-  use_spreadrates = FALSE
+  use_spreadrates = FALSE,
+  calibration_method = "ABC",
+  number_of_cores = 1,
+  number_of_iterations = 1e+05
 )
 }
 \arguments{
-\item{infected_years_file}{Raster file with years of initial infection/infestation as individual locations of a pest or pathogen}
+\item{infected_years_file}{Raster file with years of initial
+infection/infestation as individual locations of a pest or pathogen}
 
-\item{num_iterations}{how many iterations do you want to run to allow the calibration to converge (recommend a minimum of at least 100,000 but preferably 1 million).}
+\item{number_of_observations}{the number of observations used for this
+calibartion}
 
-\item{number_of_cores}{number of cores to use for calibration (defaults to the number of cores available on the machine) integer value >= 1}
+\item{prior_number_of_observations}{the number of total observations from
+previous calibrations used to weight the posterior distributions (if this is
+a new calibration this value takes the form of a prior weight (0 - 1))}
 
-\item{number_of_observations}{the number of observations used for this calibartion}
+\item{prior_means}{A vector of the means of your parameters you are
+estimating in order from (reproductive_rate, natural_dispersal_distance,
+percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
+and anthropogenic kappa)}
 
-\item{prior_number_of_observations}{the number of total observations from previous calibrations used to weight the posterior distributions (if this is a new calibration this value takes the form of a prior weight (0 - 1))}
+\item{prior_cov_matrix}{A covariance matrix from the previous years
+posterior parameter estimation ordered from (reproductive_rate,
+natural_dispersal_distance, percent_natural_dispersal,
+anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
 
-\item{prior_reproductive_rate}{the prior reproductive rate for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
+\item{params_to_estimate}{A list of booleans specificing which parameters to
+estimate ordered from (reproductive_rate, natural_dispersal_distance,
+percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
+and anthropogenic kappa)}
 
-\item{prior_natural_distance_scale}{the prior natural distance scale for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
+\item{number_of_generations}{the number of generations to use to decrease
+the uncertainty in the parameter estimation (too many and it will take a
+long time, too few and your parameter sets will be too wide)}
 
-\item{prior_percent_natural_dispersal}{the prior percent natural distance for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
+\item{generation_size}{how many accepted parameter sets should occur in each
+generation}
 
-\item{prior_anthropogenic_distance_scale}{the prior anthropogenic distance scale for MCMC calibration as a list with mean and standard deviation ( e.g. c(mean, sd)) with mean and sd being numeric values or as a 2-column matrix with value and probability as columns probabilites must sum to 1}
+\item{checks}{A list of the 4 starting check values in order of # of
+locations, total min distance, residual error, and # infected. default is
+(500,500000, 100000, 1000). Starting check values can play a role in speed
+of calibration and in success of calibration.}
 
 \item{infected_file}{path to raster file with initial infections}
 
@@ -172,14 +195,16 @@ used for anthropogenic dispersal can be ('cauchy', 'exponential')}
 usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
 'NONE')}
 
-\item{natural_kappa}{sets the strength of the natural direction in the von-mises distribution numeric value between 0.01 and 12}
+\item{natural_kappa}{sets the strength of the natural direction in the
+von-mises distribution numeric value between 0.01 and 12}
 
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic
 dispersal usually due to human movement typically over long distances (e.g.
 nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
 'SE', 'E', 'NE', 'NONE')}
 
-\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction in the von-mises distribution numeric value between 0.01 and 12}
+\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction
+in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{pesticide_duration}{how long does the pestcide (herbicide, vaccine,
 etc..) last before the host is susceptible again. If value is 0 treatment
@@ -190,9 +215,16 @@ is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
 disease or killing the pest (if this is 0.70 then when applied it
 successfully treats 70 percent of the plants or animals)}
 
-\item{mask}{Raster file used to provide a mask to remove 0's that are not true negatives from comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species).}
+\item{mask}{Raster file used to provide a mask to remove 0's that are not
+true negatives from comparisons (e.g. mask out lakes and oceans from statics
+if modeling terrestrial species).}
 
-\item{success_metric}{Choose which success metric to use for calibration. Choices are "quantity", "quantity and configuration", "residual error" and "odds ratio". Default is "quantity"}
+\item{success_metric}{Choose which success metric to use for calibration.
+Choices are "number of locations", "number of locations and total distance",
+"number of locations, number of infections, and total distance", or
+"residual error" for 'ABC" method. Choices are "quantity", "quantity and
+configuration", "residual error" and "odds ratio" for the 'MCMC' method.
+Default is "number of locations and total distance"}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day' or 'time step')}
@@ -204,6 +236,9 @@ or 'time step') in which to export model results.}
 lon_to, lat_to, number of animals, and date.}
 
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
+
+\item{start_exposed}{Do your initial conditions start as exposed or infected
+(only used if model_type is "SEI")}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use
 stochasticity in reproductive functions default is TRUE}
@@ -233,14 +268,32 @@ quarantine areas (default = FALSE)}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
+
+\item{calibration_method}{choose which method of calibration to use either
+'ABC' (Approximate Bayesian Computation) or 'MCMC' (Markov Chain Monte Carlo
+Approximation)}
+
+\item{number_of_cores}{number of cores to use for calibration (defaults to
+the number of cores available on the machine) integer value >= 1}
+
+\item{number_of_iterations}{how many iterations do you want to run to allow
+the calibration to converge (recommend a minimum of at least 100,000 but
+preferably 1 million).}
 }
 \value{
-a dataframe of the variables saved and their success metrics for each run
+a dataframe of the variables saved and their success metrics for
+each run
 }
 \description{
-Markov Chain Monte Carlo approximation is used to estimate the reproductive rate and the short distance scale parameters. Model 
-accuracy is gauged using a custom quantity allocation disagreement function to assess accuracy of spatial configuration. The 
-calibration uses this metric to determine if an MCMC run is kept either because it improves the results or randomly gets kept 
-despite being worse. We recommend running calibration for at least 10,000 iterations but even more will provide a better result. 
-If the model converges and doesn't improve for awhile it will exist calibration prior to reaching the total number of iterations specified.
+Either Approximate Bayesian Computation or Markov Chain Monte Carlo
+Approximation is used to estimate relevant model parameters. Model accuracy
+is gauged using a custom quantity allocation disagreement function to assess
+accuracy of spatial configuration. We test number of predictions, number of
+predicted locations, cumulative distance to nearest infection. The
+calibration uses these metrics to determine if a run is kept if it is under
+a threshold. either because it improves the results or randomly gets kept
+despite being worse. We recommend running calibration for at least 10,000
+iterations but even more will provide a better result. If the model converges
+and doesn't improve for awhile it will exist calibration prior to reaching
+the total number of iterations specified.
 }
