@@ -352,5 +352,16 @@ configuration <- function(config) {
     }
   }
 
+  if (config$function_name %in% c("calibrate") &&
+      config$calibration_method == "ABC") {
+    config$num_particles <-
+      config$number_of_generations * config$generation_size
+
+    config$total_particles <- 1
+    config$current_particles <- 1
+    config$proposed_particles <- 1
+    config$current_bin <- 1
+  }
+
   return(config)
   }

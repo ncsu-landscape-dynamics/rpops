@@ -72,6 +72,7 @@ config$output_frequency <- "week"
 config$output_frequency_n <- 1
 config$number_of_iterations <- 2
 config$number_of_cores <- 1
+config$calibration_method <- "ABC"
 config$failure <- NULL
 config$function_name <- "pops"
 
