@@ -64,7 +64,6 @@ calibrate(
   use_quarantine = FALSE,
   use_spreadrates = FALSE,
   calibration_method = "ABC",
-  number_of_cores = 1,
   number_of_iterations = 1e+05
 )
 }
@@ -272,9 +271,6 @@ spread rates}
 \item{calibration_method}{choose which method of calibration to use either
 'ABC' (Approximate Bayesian Computation) or 'MCMC' (Markov Chain Monte Carlo
 Approximation)}
-
-\item{number_of_cores}{number of cores to use for calibration (defaults to
-the number of cores available on the machine) integer value >= 1}
 
 \item{number_of_iterations}{how many iterations do you want to run to allow
 the calibration to converge (recommend a minimum of at least 100,000 but

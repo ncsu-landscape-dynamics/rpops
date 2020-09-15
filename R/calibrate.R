@@ -60,8 +60,6 @@
 #' @param number_of_iterations how many iterations do you want to run to allow
 #' the calibration to converge (recommend a minimum of at least 100,000 but
 #' preferably 1 million).
-#' @param number_of_cores number of cores to use for calibration (defaults to
-#' the number of cores available on the machine) integer value >= 1
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
 #' cellStats nlayers extent extension compareCRS getValues calc extract
@@ -139,8 +137,8 @@ calibrate <- function(infected_years_file,
                       use_quarantine = FALSE,
                       use_spreadrates = FALSE,
                       calibration_method = "ABC",
-                      number_of_cores = 1,
                       number_of_iterations = 100000) {
+
   config <- c()
   config$infected_years_file <- infected_years_file
   config$number_of_observations <- number_of_observations
@@ -201,6 +199,7 @@ calibrate <- function(infected_years_file,
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
   config$calibration_method <- calibration_method
+  config$number_of_iterations <- number_of_iterations
   # add function name for use in configuration function to skip
   # function specific specifc configurations namely for validation and
   # calibration.
@@ -597,7 +596,42 @@ calibrate <- function(infected_years_file,
 
   } else if (config$calibration_method == "MCMC") {
 
-    comp_year <- raster(config$infected_file)
+    proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
+    proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
+    if (config$params_to_estimate[3]) {
+      proposed_percent_natural_dispersal <-
+        round(runif(1, 0.93, 1), digits = 3)
+    } else {
+      proposed_percent_natural_dispersal <- 1.0
+    }
+    if (config$params_to_estimate[4]) {
+      proposed_anthropogenic_distance_scale <-
+        round(runif(1, 30, 80), digits = 0) * 100
+    } else {
+      proposed_anthropogenic_distance_scale <- 0
+    }
+    if (config$params_to_estimate[5]) {
+      proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
+    } else {
+      proposed_natural_kappa <- natural_kappa
+    }
+    if (config$params_to_estimate[6]) {
+      proposed_anthropogenic_kappa <- round(runif(1, 0, 5), digits = 1)
+    } else {
+      proposed_anthropogenic_kappa <- anthropogenic_kappa
+    }
+
+    data <-
+      param_func(
+        proposed_reproductive_rate,
+        proposed_natural_distance_scale,
+        proposed_anthropogenic_distance_scale,
+        proposed_percent_natural_dispersal,
+        proposed_natural_kappa,
+        proposed_anthropogenic_kappa
+      )
+
+    comp_year <- raster::raster(config$infected_file)
     all_disagreement <-
       foreach(
         q = seq_len(length(data$infected)),
@@ -609,13 +643,24 @@ calibrate <- function(infected_years_file,
         quantity_allocation_disagreement(
           config$infection_years[[q]],
           comp_year,
-          configuration,
-          mask
+          config$configuration,
+          config$mask
         )
       }
 
-    cl <- makeCluster(config$core_count)
-    registerDoParallel(cl)
+    ## save current state of the system
+    current <- best <-
+      data.frame(t(all_disagreement),
+                 reproductive_rate = proposed_reproductive_rate,
+                 natural_distance_scale = proposed_natural_distance_scale,
+                 anthropogenic_distance_scale =
+                   proposed_anthropogenic_distance_scale,
+                 percent_natural_dispersal = proposed_percent_natural_dispersal,
+                 natural_kappa = proposed_natural_kappa,
+                 anthropogenic_kappa = proposed_anthropogenic_kappa
+      )
+
+    i <- NULL
 
     proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
     proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
@@ -642,196 +687,208 @@ calibrate <- function(infected_years_file,
       proposed_anthropogenic_kappa <- anthropogenic_kappa
     }
 
-    ## save current state of the system
-    current <- best <-
-      data.frame(t(all_disagreement),
-                 reproductive_rate = proposed_reproductive_rate,
-                 natural_distance_scale = proposed_natural_distance_scale,
-                 anthropogenic_distance_scale =
-                   proposed_anthropogenic_distance_scale,
-                 percent_natural_dispersal = proposed_percent_natural_dispersal,
-                 natural_kappa = proposed_natural_kappa,
-                 anthropogenic_kappa = proposed_anthropogenic_kappa
-      )
-
     params <-
-      foreach(icount(config$number_of_iterations),
-              .combine = rbind,
-              .packages = c("raster", "PoPS", "foreach", "iterators"),
-              .inorder = TRUE
-      ) %do% {
-        average_disagreements_odds_ratio <-
-          foreach(
-            p = 1:10,
-            .combine = rbind,
-            .packages = c("raster", "PoPS", "foreach"),
-            .final = colMeans
-          ) %dopar% {
-            data <-
-              param_func(
-                proposed_reproductive_rate,
-                proposed_natural_distance_scale,
-                proposed_anthropogenic_distance_scale,
-                proposed_percent_natural_dispersal,
-                proposed_natural_kappa,
-                proposed_anthropogenic_kappa
-              )
+      data.frame(quantity_disagreement = rep(0, config$number_of_iterations),
+                 allocation_disagreement = rep(0, config$number_of_iterations),
+                 total_disagreement = rep(0, config$number_of_iterations),
+                 configuration_disagreement =
+                   rep(0, config$number_of_iterations),
+                 omission = rep(0, config$number_of_iterations),
+                 commission = rep(0, config$number_of_iterations),
+                 true_positives = rep(0, config$number_of_iterations),
+                 true_negatives = rep(0, config$number_of_iterations),
+                 odds_ratio = rep(0, config$number_of_iterations),
+                 residual_error = rep(0, config$number_of_iterations),
+                 true_infected = rep(0, config$number_of_iterations),
+                 simulated_infected = rep(0, config$number_of_iterations),
+                 infected_difference = rep(0, config$number_of_iterations),
+                 reproductive_rate = rep(0, config$number_of_iterations),
+                 natural_distance_scale = rep(0, config$number_of_iterations),
+                 anthropogenic_distance_scale =
+                   rep(0, config$number_of_iterations),
+                 percent_natural_dispersa = rep(0, config$number_of_iterations),
+                 natural_kappa = rep(0, config$number_of_iterations),
+                 anthropogenic_kappa = rep(0, config$number_of_iterations))
 
-            # set up comparison
-            all_disagreement <-
-              foreach(
-                q = seq_len(length(data$infected)),
-                .combine = rbind,
-                .packages = c("raster", "PoPS"),
-                .final = colSums
-              ) %dopar% {
-                comp_year[] <- data$infected[[q]]
-                quantity_allocation_disagreement(
-                  config$infection_years[[q]],
-                  comp_year,
-                  configuration,
-                  mask
-                )
-              }
+    for (i in seq_len(config$number_of_iterations)) {
 
-            all_disagreement
-          }
+      data <-
+        param_func(
+          proposed_reproductive_rate,
+          proposed_natural_distance_scale,
+          proposed_anthropogenic_distance_scale,
+          proposed_percent_natural_dispersal,
+          proposed_natural_kappa,
+          proposed_anthropogenic_kappa
+        )
 
-        proposed <-
-          data.frame(t(average_disagreements_odds_ratio),
-                     reproductive_rate = proposed_reproductive_rate,
-                     natural_distance_scale = proposed_natural_distance_scale,
-                     anthropogenic_distance_scale =
-                       proposed_anthropogenic_distance_scale,
-                     percent_natural_dispersal = proposed_percent_natural_dispersal,
-                     natural_kappa = proposed_natural_kappa,
-                     anthropogenic_kappa = proposed_anthropogenic_kappa
+      # set up comparison
+      comp_year <- raster::raster(config$infected_file)
+      all_disagreement <-
+        foreach(
+          q = seq_len(length(data$infected)),
+          .combine = rbind,
+          .packages = c("raster", "PoPS"),
+          .final = colSums
+        ) %do% {
+          comp_year[] <- data$infected[[q]]
+          quantity_allocation_disagreement(
+            config$infection_years[[q]],
+            comp_year,
+            config$configuration,
+            config$mask
           )
-
-        # make sure no proposed statistics are 0 or the calculation fails
-        # instead set them all to the lowest possible non-zero value
-        if (proposed$allocation_disagreement == 0) {
-          proposed$allocation_disagreement <- 1
-        }
-        if (proposed$quantity_disagreement == 0) {
-          proposed$quantity_disagreement <- 1
-        }
-        if (proposed$total_disagreement == 0) {
-          proposed$total_disagreement <- 1
-        }
-        if (proposed$configuration_disagreement == 0) {
-          proposed$configuration_disagreement <- 0.01
-        }
-        if (proposed$residual_error == 0) {
-          proposed$residual_error <- 1
-        }
-        # Set up tests for to see if new variable is an improvement in
-        # performance metrics
-        quantity_test <-
-          min(1, current$quantity_disagreement / proposed$quantity_disagreement)
-        configuration_test <-
-          min(1, current$configuration_disagreement /
-                proposed$configuration_disagreement)
-        # odds ratio is treated differently than all the other metrics as it is
-        # the only one where higher numbers means better model performance
-        oddsratio_test <-
-          min(1, proposed$odds_ratio / current$odds_ratio)
-        residual_error_test <-
-          min(1, current$residual_error / proposed$residual_error)
-
-        quantity_pass <- runif(1) <= quantity_test
-        configuration_pass <- runif(1) <= configuration_test
-        oddsratio_pass <- runif(1) <= oddsratio_test
-        residual_error_pass <- runif(1) <= residual_error_test
-
-        proposed_accepted <- FALSE
-        if (success_metric == "quantity" & quantity_pass) {
-          proposed_accepted <- TRUE
-        } else if (success_metric == "quantity and configuration" &
-                   quantity_pass &
-                   configuration_pass) {
-          proposed_accepted <- TRUE
-        } else if (success_metric == "odds ratio" & oddsratio_pass) {
-          proposed_accepted <- TRUE
-        } else if (success_metric == "residual error" & residual_error_pass) {
-          proposed_accepted <- TRUE
-        } else {
-          return("Success metric must be one of 'quantity', 'quantity and
-                 configuration', 'residual error', or 'odds ratio'")
         }
 
-        if (proposed_accepted) {
-          current <- proposed
-          if (current$quantity_disagreement <= best$quantity_disagreement) {
-            best <- current
-          }
-        }
+      proposed <-
+        data.frame(t(all_disagreement),
+                   reproductive_rate = proposed_reproductive_rate,
+                   natural_distance_scale = proposed_natural_distance_scale,
+                   anthropogenic_distance_scale =
+                     proposed_anthropogenic_distance_scale,
+                   percent_natural_dispersal = proposed_percent_natural_dispersal,
+                   natural_kappa = proposed_natural_kappa,
+                   anthropogenic_kappa = proposed_anthropogenic_kappa
+        )
 
-        param <- current
-        proposed_reproductive_rate <- 0
-        while (proposed_reproductive_rate <= 0) {
-          proposed_reproductive_rate <-
-            round(rnorm(1, mean = best$reproductive_rate,
-                        sd = best$reproductive_rate / 10), digits = 1)
-        }
-
-        proposed_natural_distance_scale <- 0
-        while (proposed_natural_distance_scale <= 0) {
-          proposed_natural_distance_scale <-
-            round(rnorm(1, mean = best$natural_distance_scale,
-                        sd = best$natural_distance_scale / 10), digits = 0)
-        }
-
-        if (config$params_to_estimate[3]) {
-          proposed_percent_natural_dispersal <- 0
-          while (proposed_percent_natural_dispersal <= 0 ||
-                 proposed_percent_natural_dispersal > 1.000) {
-            proposed_percent_natural_dispersal <-
-              round(rnorm(1, mean = best$percent_natural_dispersal,
-                          sd = best$percent_natural_dispersal / 20), digits = 3)
-          }
-        } else {
-          proposed_percent_natural_dispersal <- 1.0
-        }
-        if (config$params_to_estimate[4]) {
-          proposed_anthropogenic_distance_scale <- 0
-          while (proposed_anthropogenic_distance_scale <= 0) {
-            proposed_anthropogenic_distance_scale <-
-              round(rnorm(1, mean = best$anthropogenic_distance_scale,
-                          sd = best$anthropogenic_distance_scale / 10),
-                    digits = 0) * 10
-          }
-        } else {
-          proposed_anthropogenic_distance_scale <- 0
-        }
-        if (config$params_to_estimate[5]) {
-          proposed_natural_kappa <- 0
-          while (proposed_natural_kappa <= 0 ||
-                 proposed_natural_kappa > 1.000) {
-            proposed_natural_kappa <-
-              round(rnorm(1, mean = best$natural_kappa,
-                          sd = best$natural_kappa / 20), digits = 3)
-          }
-        } else {
-          proposed_natural_kappa <- natural_kappa
-        }
-        if (config$params_to_estimate[6]) {
-          proposed_anthropogenic_kappa <- 0
-          while (proposed_anthropogenic_kappa <= 0 ||
-                 proposed_anthropogenic_kappa > 1.000) {
-            proposed_anthropogenic_kappa <-
-              round(rnorm(1, mean = best$anthropogenic_kappa,
-                          sd = best$anthropogenic_kappa / 20), digits = 3)
-          }
-        } else {
-          proposed_anthropogenic_kappa <- anthropogenic_kappa
-        }
-
-        param
+      # make sure no proposed statistics are 0 or the calculation fails
+      # instead set them all to the lowest possible non-zero value
+      if (proposed$allocation_disagreement == 0) {
+        proposed$allocation_disagreement <- 1
       }
-    stopCluster(cl)
-    calibrated_means <- colMeans(params[5001:end_index, 1:6])
-    calibrated_cov_matrix <- cov(params[5001:end_index, 1:6])
+      if (proposed$quantity_disagreement == 0) {
+        proposed$quantity_disagreement <- 1
+      }
+      if (proposed$total_disagreement == 0) {
+        proposed$total_disagreement <- 1
+      }
+      if (proposed$configuration_disagreement == 0) {
+        proposed$configuration_disagreement <- 0.01
+      }
+      if (proposed$residual_error == 0) {
+        proposed$residual_error <- 1
+      }
+      # Set up tests for to see if new variable is an improvement in
+      # performance metrics
+      quantity_test <-
+        min(1, current$quantity_disagreement / proposed$quantity_disagreement)
+      configuration_test <-
+        min(1, current$configuration_disagreement /
+              proposed$configuration_disagreement)
+      # odds ratio is treated differently than all the other metrics as it is
+      # the only one where higher numbers means better model performance
+      oddsratio_test <-
+        min(1, proposed$odds_ratio / current$odds_ratio)
+      residual_error_test <-
+        min(1, current$residual_error / proposed$residual_error)
+
+      quantity_pass <- runif(1) <= quantity_test
+      configuration_pass <- runif(1) <= configuration_test
+      oddsratio_pass <- runif(1) <= oddsratio_test
+      residual_error_pass <- runif(1) <= residual_error_test
+
+      proposed_accepted <- FALSE
+      if (success_metric == "quantity" & quantity_pass) {
+        proposed_accepted <- TRUE
+      } else if (success_metric == "quantity and configuration" &
+                 quantity_pass &
+                 configuration_pass) {
+        proposed_accepted <- TRUE
+      } else if (success_metric == "odds ratio" & oddsratio_pass) {
+        proposed_accepted <- TRUE
+      } else if (success_metric == "residual error" & residual_error_pass) {
+        proposed_accepted <- TRUE
+      } else {
+        return("Success metric must be one of 'quantity', 'quantity and
+                 configuration', 'residual error', or 'odds ratio'")
+      }
+
+      if (proposed_accepted) {
+        current <- proposed
+        if (current$quantity_disagreement <= best$quantity_disagreement) {
+          best <- current
+        }
+      }
+
+      param <- current
+      proposed_reproductive_rate <- 0
+      while (proposed_reproductive_rate <= 0) {
+        proposed_reproductive_rate <-
+          round(rnorm(1, mean = best$reproductive_rate,
+                      sd = best$reproductive_rate / 10), digits = 1)
+      }
+
+      proposed_natural_distance_scale <- 0
+      while (proposed_natural_distance_scale <= 0) {
+        proposed_natural_distance_scale <-
+          round(rnorm(1, mean = best$natural_distance_scale,
+                      sd = best$natural_distance_scale / 10), digits = 0)
+      }
+
+      if (config$params_to_estimate[3]) {
+        proposed_percent_natural_dispersal <- 0
+        while (proposed_percent_natural_dispersal < 0.95 ||
+               proposed_percent_natural_dispersal > 1.000) {
+          proposed_percent_natural_dispersal <-
+            round(rnorm(1, mean = best$percent_natural_dispersal,
+                        sd = best$percent_natural_dispersal / 20), digits = 3)
+        }
+      } else {
+        proposed_percent_natural_dispersal <- 1.0
+      }
+
+      if (config$params_to_estimate[4]) {
+        proposed_anthropogenic_distance_scale <- 0
+        while (proposed_anthropogenic_distance_scale <= 0) {
+          proposed_anthropogenic_distance_scale <-
+            round(rnorm(1, mean = best$anthropogenic_distance_scale,
+                        sd = best$anthropogenic_distance_scale / 10),
+                  digits = 0) * 10
+        }
+      } else {
+        proposed_anthropogenic_distance_scale <- 0
+      }
+
+      if (config$params_to_estimate[5]) {
+        proposed_natural_kappa <- 0
+        while (proposed_natural_kappa <= 0 ||
+               proposed_natural_kappa > 1.000) {
+          proposed_natural_kappa <-
+            round(rnorm(1, mean = best$natural_kappa,
+                        sd = best$natural_kappa / 20), digits = 3)
+        }
+      } else {
+        proposed_natural_kappa <- natural_kappa
+      }
+
+      if (config$params_to_estimate[6]) {
+        proposed_anthropogenic_kappa <- 0
+        while (proposed_anthropogenic_kappa <= 0 ||
+               proposed_anthropogenic_kappa > 1.000) {
+          proposed_anthropogenic_kappa <-
+            round(rnorm(1, mean = best$anthropogenic_kappa,
+                        sd = best$anthropogenic_kappa / 20), digits = 3)
+        }
+      } else {
+        proposed_anthropogenic_kappa <- anthropogenic_kappa
+      }
+
+      print(i)
+      params[i, ] <- param
+    }
+
+    if (config$number_of_iterations > 10000) {
+      start_index <- 5000
+    } else {
+      start_index <- number_of_iterations / 2
+    }
+
+    calibrated_means <-
+      colMeans(params[start_index:config$number_of_iterations, 14:19])
+    calibrated_cov_matrix <-
+      cov(params[start_index:config$number_of_iterations, 14:19])
+
+    parameters_kept <- params
   } else {
     return("Calibration method must be one of 'ABC' or 'MCMC'")
   }
