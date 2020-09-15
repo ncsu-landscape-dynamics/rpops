@@ -68,7 +68,6 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
 #' @importFrom parallel makeCluster stopCluster detectCores
-#' @importFrom iterators icount
 #' @importFrom lubridate interval time_length
 #' @importFrom MASS mvrnorm
 #'
@@ -496,7 +495,7 @@ calibrate <- function(infected_years_file,
             diff_checks <- TRUE
           }
         } else if (success_metric ==
-                   "number of locations, number of infections, and total distance"
+                "number of locations, number of infections, and total distance"
         ) {
           if (locs_diff <= locs_check &&
               dist_diff <= dist_check && num_difference <= inf_check) {
@@ -633,7 +632,7 @@ calibrate <- function(infected_years_file,
 
     comp_year <- raster::raster(config$infected_file)
     all_disagreement <-
-      foreach(
+      foreach::foreach(
         q = seq_len(length(data$infected)),
         .combine = rbind,
         .packages = c("raster", "PoPS"),
@@ -660,33 +659,6 @@ calibrate <- function(infected_years_file,
                  anthropogenic_kappa = proposed_anthropogenic_kappa
       )
 
-    i <- NULL
-
-    proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
-    proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
-    if (config$params_to_estimate[3]) {
-      proposed_percent_natural_dispersal <-
-        round(runif(1, 0.93, 1), digits = 3)
-    } else {
-      proposed_percent_natural_dispersal <- 1.0
-    }
-    if (config$params_to_estimate[4]) {
-      proposed_anthropogenic_distance_scale <-
-        round(runif(1, 30, 80), digits = 0) * 100
-    } else {
-      proposed_anthropogenic_distance_scale <- 0
-    }
-    if (config$params_to_estimate[5]) {
-      proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
-    } else {
-      proposed_natural_kappa <- natural_kappa
-    }
-    if (config$params_to_estimate[6]) {
-      proposed_anthropogenic_kappa <- round(runif(1, 0, 5), digits = 1)
-    } else {
-      proposed_anthropogenic_kappa <- anthropogenic_kappa
-    }
-
     params <-
       data.frame(quantity_disagreement = rep(0, config$number_of_iterations),
                  allocation_disagreement = rep(0, config$number_of_iterations),
@@ -712,6 +684,70 @@ calibrate <- function(infected_years_file,
 
     for (i in seq_len(config$number_of_iterations)) {
 
+      proposed_reproductive_rate <- 0
+      while (proposed_reproductive_rate <= 0) {
+        proposed_reproductive_rate <-
+          round(rnorm(1, mean = current$reproductive_rate,
+                      sd = current$reproductive_rate / 10), digits = 1)
+      }
+
+      proposed_natural_distance_scale <- 0
+      while (proposed_natural_distance_scale <= 0) {
+        proposed_natural_distance_scale <-
+          round(rnorm(1, mean = current$natural_distance_scale,
+                      sd = current$natural_distance_scale / 10), digits = 0)
+      }
+
+      if (config$params_to_estimate[3]) {
+        proposed_percent_natural_dispersal <- 0
+        while (proposed_percent_natural_dispersal < 0.95 ||
+               proposed_percent_natural_dispersal >= 1) {
+          proposed_percent_natural_dispersal <-
+            round(rnorm(1, mean = current$percent_natural_dispersal,
+                        sd = current$percent_natural_dispersal / 20),
+                  digits = 3)
+        }
+      } else {
+        proposed_percent_natural_dispersal <- 1.0
+      }
+
+      if (config$params_to_estimate[4]) {
+        proposed_anthropogenic_distance_scale <- 0
+        while (proposed_anthropogenic_distance_scale <= 0 |
+               proposed_anthropogenic_distance_scale > 80000) {
+          proposed_anthropogenic_distance_scale <-
+            round(rnorm(1, mean = current$anthropogenic_distance_scale,
+                        sd = current$anthropogenic_distance_scale / 20),
+                  digits = 0)
+        }
+      } else {
+        proposed_anthropogenic_distance_scale <- 0
+      }
+
+      if (config$params_to_estimate[5]) {
+        proposed_natural_kappa <- 0
+        while (proposed_natural_kappa <= 0 ||
+               proposed_natural_kappa > 1.000) {
+          proposed_natural_kappa <-
+            round(rnorm(1, mean = current$natural_kappa,
+                        sd = current$natural_kappa / 20), digits = 3)
+        }
+      } else {
+        proposed_natural_kappa <- natural_kappa
+      }
+
+      if (config$params_to_estimate[6]) {
+        proposed_anthropogenic_kappa <- 0
+        while (proposed_anthropogenic_kappa <= 0 ||
+               proposed_anthropogenic_kappa > 1.000) {
+          proposed_anthropogenic_kappa <-
+            round(rnorm(1, mean = current$anthropogenic_kappa,
+                        sd = current$anthropogenic_kappa / 20), digits = 3)
+        }
+      } else {
+        proposed_anthropogenic_kappa <- anthropogenic_kappa
+      }
+
       data <-
         param_func(
           proposed_reproductive_rate,
@@ -725,7 +761,7 @@ calibrate <- function(infected_years_file,
       # set up comparison
       comp_year <- raster::raster(config$infected_file)
       all_disagreement <-
-        foreach(
+        foreach::foreach(
           q = seq_len(length(data$infected)),
           .combine = rbind,
           .packages = c("raster", "PoPS"),
@@ -746,7 +782,8 @@ calibrate <- function(infected_years_file,
                    natural_distance_scale = proposed_natural_distance_scale,
                    anthropogenic_distance_scale =
                      proposed_anthropogenic_distance_scale,
-                   percent_natural_dispersal = proposed_percent_natural_dispersal,
+                   percent_natural_dispersal =
+                     proposed_percent_natural_dispersal,
                    natural_kappa = proposed_natural_kappa,
                    anthropogenic_kappa = proposed_anthropogenic_kappa
         )
@@ -811,67 +848,6 @@ calibrate <- function(infected_years_file,
       }
 
       param <- current
-      proposed_reproductive_rate <- 0
-      while (proposed_reproductive_rate <= 0) {
-        proposed_reproductive_rate <-
-          round(rnorm(1, mean = best$reproductive_rate,
-                      sd = best$reproductive_rate / 10), digits = 1)
-      }
-
-      proposed_natural_distance_scale <- 0
-      while (proposed_natural_distance_scale <= 0) {
-        proposed_natural_distance_scale <-
-          round(rnorm(1, mean = best$natural_distance_scale,
-                      sd = best$natural_distance_scale / 10), digits = 0)
-      }
-
-      if (config$params_to_estimate[3]) {
-        proposed_percent_natural_dispersal <- 0
-        while (proposed_percent_natural_dispersal < 0.95 ||
-               proposed_percent_natural_dispersal > 1.000) {
-          proposed_percent_natural_dispersal <-
-            round(rnorm(1, mean = best$percent_natural_dispersal,
-                        sd = best$percent_natural_dispersal / 20), digits = 3)
-        }
-      } else {
-        proposed_percent_natural_dispersal <- 1.0
-      }
-
-      if (config$params_to_estimate[4]) {
-        proposed_anthropogenic_distance_scale <- 0
-        while (proposed_anthropogenic_distance_scale <= 0) {
-          proposed_anthropogenic_distance_scale <-
-            round(rnorm(1, mean = best$anthropogenic_distance_scale,
-                        sd = best$anthropogenic_distance_scale / 10),
-                  digits = 0) * 10
-        }
-      } else {
-        proposed_anthropogenic_distance_scale <- 0
-      }
-
-      if (config$params_to_estimate[5]) {
-        proposed_natural_kappa <- 0
-        while (proposed_natural_kappa <= 0 ||
-               proposed_natural_kappa > 1.000) {
-          proposed_natural_kappa <-
-            round(rnorm(1, mean = best$natural_kappa,
-                        sd = best$natural_kappa / 20), digits = 3)
-        }
-      } else {
-        proposed_natural_kappa <- natural_kappa
-      }
-
-      if (config$params_to_estimate[6]) {
-        proposed_anthropogenic_kappa <- 0
-        while (proposed_anthropogenic_kappa <= 0 ||
-               proposed_anthropogenic_kappa > 1.000) {
-          proposed_anthropogenic_kappa <-
-            round(rnorm(1, mean = best$anthropogenic_kappa,
-                        sd = best$anthropogenic_kappa / 20), digits = 3)
-        }
-      } else {
-        proposed_anthropogenic_kappa <- anthropogenic_kappa
-      }
 
       print(i)
       params[i, ] <- param
@@ -889,6 +865,7 @@ calibrate <- function(infected_years_file,
       cov(params[start_index:config$number_of_iterations, 14:19])
 
     parameters_kept <- params
+
   } else {
     return("Calibration method must be one of 'ABC' or 'MCMC'")
   }
