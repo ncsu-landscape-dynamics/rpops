@@ -282,9 +282,8 @@ spread rates}
 list of infected and susceptible per year
 }
 \description{
-A dynamic species distribution model for pest or pathogen spread in forest
-or agricultural ecosystems. The model is process based meaning that it uses
-understanding of the effect of weather on reproduction and survival of the
-pest/pathogen in order to forecastspread of the pest/pathogen into the
-future.
+This function allows for treating multiple species with the same management
+strategy. Was designed for multiple lineages of the same species that share
+common hosts and are in the same study area. This function is designed with
+computation steering based on Petrasova et al. (2020).
 }

@@ -226,9 +226,13 @@ spread rates}
 list of infected and susceptible per year
 }
 \description{
-A dynamic species distribution model for pest or pathogen spread in forest or
- agricultural ecosystems. The model is process based meaning that it uses
- understanding of the effect of weather on reproduction and survival of the
-pest/pathogen in order to forecast spread of the pest/pathogen into the
-future.
+A dynamic species distribution model for pest or pathogen spread in forest
+or agricultural ecosystems. The model is process based meaning that it uses
+understanding of the effect of weather and other environmental factors on
+reproduction and survival of the pest/pathogen in order to forecast spread
+of the pest/pathogen into the future. Run multiple stochasitic simulations,
+propogating uncertainty in parameters, initial conditions, and drivers.
+The model is process based meaning that it uses understanding of the effect
+of weather on reproduction and survival of the pest/pathogen in order to
+forecast spread of the pest/pathogen into the future.
 }
