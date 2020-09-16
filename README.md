@@ -11,7 +11,7 @@
 
 This is the R package for simulating spread of pests and pathogens. The package is an R package with multiple functions built around the PoPS (Pest or Pathogen Spread) model implemented in the C++ library maintained in the [PoPS Core Repository](https://github.com/ncsu-landscape-dynamics/pops-core). 
 
-PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes. The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use r.pops.spread(https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
+PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes. The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use [r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
 
 ## How to cite
 
