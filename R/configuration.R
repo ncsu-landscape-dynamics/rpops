@@ -301,9 +301,17 @@ configuration <- function(config) {
                                                 parameters[, 4] < 0 |
                                                 parameters[, 5] < 0 |
                                                 parameters[, 6] < 0, ])
-      parameters <- MASS::mvrnorm(config$number_of_draws,
-                                  config$parameter_means,
-                                  config$parameter_cov_matrix)
+
+      parameters[parameters[, 1] < 0 |
+                   parameters[, 2] < 0 |
+                   parameters[, 3] > 1 |
+                   parameters[, 3] < 0 |
+                   parameters[, 4] < 0 |
+                   parameters[, 5] < 0 |
+                   parameters[, 6] < 0, ] <-
+        MASS::mvrnorm(config$number_of_draws,
+                      config$parameter_means,
+                      config$parameter_cov_matrix)
     }
     config$reproductive_rate <- parameters[, 1]
     config$natural_distance_scale <- parameters[, 2]
