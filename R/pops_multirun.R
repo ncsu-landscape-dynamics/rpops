@@ -22,8 +22,7 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
-#' @importFrom iterators icount
-#' @importFrom lubridate interval time_length year
+#' @importFrom lubridate interval time_length mdy %within%
 #' @return list of infected and susceptible per year
 #' @export
 #'

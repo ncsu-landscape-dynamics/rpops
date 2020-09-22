@@ -31,8 +31,7 @@
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
-#' @importFrom iterators icount
-#' @importFrom lubridate interval time_length
+#' @importFrom lubridate interval time_length mdy %within%
 #'
 #' @return a dataframe of the variables saved and their success metrics for
 #' each run
