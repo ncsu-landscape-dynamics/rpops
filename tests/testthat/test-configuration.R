@@ -76,9 +76,32 @@ config$calibration_method <- "ABC"
 config$failure <- NULL
 config$function_name <- "pops"
 
-test_that("configuration returns proper errors", {
+test_that("Configuration returns proper values when no errors present", {
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
+  config$parameter_means <- c(0.2, 20, 0.99, 6000, 0, 0)
+  config$parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0.1)
+  config$function_name <- "multirun"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+})
 
+test_that("configuration returns proper errors", {
+  config$model_type <- "SEID"
+  config <- configuration(config)
+  expect_equal(config$failure,
+               "Model type is not a valid type options are 'SI' or 'SEI'")
+
+  config$model_type <- "SEI"
+  config$latency_period <- 0
+  config <- configuration(config)
+  expect_equal(config$failure,
+               "Model type is set to SEI but the latency period is less than 1")
+
+  config$latency_period <- 1
+  config$treatment_method <- "everything"
+  config <- configuration(config)
+  expect_equal(config$failure,
+               "treatment method is not one of the valid treatment options")
 })

@@ -315,6 +315,9 @@ configuration <- function(config) {
                                                 parameters[, 4] < 0 |
                                                 parameters[, 5] < 0 |
                                                 parameters[, 6] < 0, ])
+      if (is.null(config$number_of_draws)) {
+        config$number_of_draws <- 1
+      }
 
       parameters[parameters[, 1] < 0 |
                    parameters[, 2] < 0 |
