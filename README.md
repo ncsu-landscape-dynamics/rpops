@@ -51,20 +51,15 @@ you are using for example:
 
 ## How to install
 
-Install Rtools(https://cran.r-project.org/bin/windows/Rtools/) if not already installed. 
+Install Rtools(https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
+running the code below and changing the ref to match the latest semantic version
+or the specific version that you are looking to install.
 ```R
 install.packages("devtools")
 library(devtools)
-devtools::install_github("ncsu-landscape-dynamics/rpops")
+devtools::install_github("ncsu-landscape-dynamics/rpops", ref = "v1.0.2")
 library(PoPS)
 
-## if you get an error that says it failed check use:
-Sys.getenv("BINPREF")
-## should return "C:/Rtools/mingw_$(WIN)/bin/"
-## if not run the command below
-cat('Sys.setenv(BINPREF = "C:/Rtools/mingw_$(WIN)/bin/")',
-    file = file.path(Sys.getenv("HOME"), ".Rprofile"), 
-    sep = "\n", append = FALSE)
 ```
 
 ## Contributing

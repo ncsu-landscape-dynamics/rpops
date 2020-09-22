@@ -55,6 +55,7 @@ configuration <- function(config) {
     config$failure <- time_check$failed_check
   }
 
+  # check that initial raster file exists
   infected_check <- initial_raster_checks(config$infected_file)
   if (infected_check$checks_passed) {
     infected <- infected_check$raster
@@ -66,17 +67,20 @@ configuration <- function(config) {
     return(config)
   }
 
+  # check that host raster has the same crs, resolution, and extent
   host_check <- secondary_raster_checks(config$host_file, infected)
   if (host_check$checks_passed) {
     host <- host_check$raster
     if (raster::nlayers(host) > 1) {
       host <- output_from_raster_mean_and_sd(host)
     }
+    config$host <- host
   } else {
     config$failure <- host_check$failed_check
     return(config)
   }
 
+  # check that total populations raster has the same crs, resolution, and extent
   total_populations_check <- secondary_raster_checks(
     config$total_populations_file, infected)
   if (total_populations_check$checks_passed) {
@@ -91,7 +95,7 @@ configuration <- function(config) {
 
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
-
+  # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(
       config$temperature_file, infected)
@@ -114,6 +118,7 @@ configuration <- function(config) {
 
   config$temperature <- temperature
 
+  # check that temp and precip rasters have the same crs, resolution, and extent
   config$weather <- FALSE
   if (config$temp == TRUE) {
     temperature_coefficient_check <- secondary_raster_checks(
@@ -201,6 +206,7 @@ configuration <- function(config) {
   config$num_cols <- raster::ncol(susceptible)
   config$num_rows <- raster::nrow(susceptible)
 
+  # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <- movement_checks(config$movements_file, infected,
                                        config$start_date, config$end_date)
@@ -238,6 +244,7 @@ configuration <- function(config) {
     infected <- mortality_tracker
   }
 
+  # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
     quarantine_check <- secondary_raster_checks(
       config$quarantine_areas_file, host)
@@ -258,10 +265,16 @@ configuration <- function(config) {
   config$exposed <- exposed
   config$infected <- infected
 
-  config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
+  if (config$function_name == "sensitivity") {
+    config$rcl <- c(0.10, Inf, 1, 0, 0.10, 0)
+    config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
+  } else {
+    config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
+    config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
+  }
 
-  if (config$function_name %in% c("validate", "multirun")) {
+
+  if (config$function_name %in% c("validate", "multirun", "sensitivity")) {
     if (is.na(config$number_of_cores) ||
         config$number_of_cores > parallel::detectCores()) {
       core_count <- parallel::detectCores() - 1
@@ -271,7 +284,8 @@ configuration <- function(config) {
     config$core_count <- core_count
   }
 
-  if (config$function_name %in% c("validate", "pops", "multirun")) {
+  if (config$function_name %in%
+      c("validate", "pops", "multirun", "sensitivity")) {
 
     if (nrow(config$parameter_cov_matrix) != 6 |
         ncol(config$parameter_cov_matrix) != 6) {
@@ -301,9 +315,20 @@ configuration <- function(config) {
                                                 parameters[, 4] < 0 |
                                                 parameters[, 5] < 0 |
                                                 parameters[, 6] < 0, ])
-      parameters <- MASS::mvrnorm(config$number_of_draws,
-                                  config$parameter_means,
-                                  config$parameter_cov_matrix)
+      if (is.null(config$number_of_draws)) {
+        config$number_of_draws <- 1
+      }
+
+      parameters[parameters[, 1] < 0 |
+                   parameters[, 2] < 0 |
+                   parameters[, 3] > 1 |
+                   parameters[, 3] < 0 |
+                   parameters[, 4] < 0 |
+                   parameters[, 5] < 0 |
+                   parameters[, 6] < 0, ] <-
+        MASS::mvrnorm(config$number_of_draws,
+                      config$parameter_means,
+                      config$parameter_cov_matrix)
     }
     config$reproductive_rate <- parameters[, 1]
     config$natural_distance_scale <- parameters[, 2]
