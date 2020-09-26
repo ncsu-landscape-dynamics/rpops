@@ -212,6 +212,7 @@ configuration <- function(config) {
                                        config$start_date, config$end_date)
     if (movements_check$checks_passed) {
       config$movements <- movements_check$movements
+      config$movements_r <- movements_check$movements_r
       config$movements_dates <- movements_check$movements_dates
     } else {
       config$failure <- movements_check$failed_check

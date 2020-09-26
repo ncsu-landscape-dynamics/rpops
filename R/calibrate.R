@@ -138,6 +138,7 @@ calibrate <- function(infected_years_file,
                       calibration_method = "ABC",
                       number_of_iterations = 100000) {
 
+  # add all data to config list
   config <- c()
   config$infected_years_file <- infected_years_file
   config$number_of_observations <- number_of_observations
@@ -205,13 +206,16 @@ calibrate <- function(infected_years_file,
   config$function_name <- "calibrate"
   config$failure <- NULL
 
+  # call configuration function to perform data checks and transform data into
+  # format used in pops c++
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
     return(config$failure)
   }
 
-  ## set the parameter function to only need the parameters that chanage
+  # set the parameter function to only need the parameters that chanage so that
+  # each call to param func needs to pass in the parameters being calibrated
   param_func <-
     function(reproductive_rate,
              natural_distance_scale,
@@ -294,10 +298,13 @@ calibrate <- function(infected_years_file,
       return(data)
     }
 
+  # Check which calibration method is being used either Approximate Bayesian
+  # Computation or Markov Chain Monte Carlo.
   if (config$calibration_method == "ABC") {
+    # set up data structures for storing results
     parameters_kept <- matrix(ncol = 10, nrow = config$num_particles)
-    acc_rate <- 1
-    acc_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
+    acceptance_rate <- 1
+    acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
     infected_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
     locs_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
     dist_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
@@ -333,17 +340,28 @@ calibrate <- function(infected_years_file,
     if (length(total_infections) > config$number_of_outputs) {
       total_infections <- total_infections[1:config$number_of_outputs]
     }
+    # assign thresholds for summary static values to be compared to the
+    # difference between the observed and simulated data
+    locs_check <- config$checks[1] # number of locations
+    dist_check <- config$checks[2] # minimum spatial distance
+    res_error_check <- config$checks[3] # residual error used when observations
+    # are very accurate with very few areas not sampled
+    inf_check <- config$checks[4] # number of pests found (either infected trees
+    # or pests)
 
-    locs_check <- config$checks[1]
-    dist_check <- config$checks[2]
-    res_error_check <- config$checks[3]
-    inf_check <- config$checks[4]
+    # create raster data structures for storing simulated data for comparison
     infected_sims <- config$infection_years
     infected_sim <- config$infection_years[[1]]
 
+    # loop through until all generations are complete
     while (config$current_bin <= config$number_of_generations) {
+      # loop until all # of parameter sets kept equals the generation size
       while (config$current_particles <= config$generation_size) {
 
+        # draw a set of proposed parameters if current generation is 1 draw from
+        # a uniform distribution otherwise draw from a multivarite normal
+        # distribution with mean and covariance matrix based on the previous
+        # generation values
         if (config$current_bin == 1) {
           proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
           proposed_natural_distance_scale <-
@@ -371,6 +389,8 @@ calibrate <- function(infected_years_file,
             proposed_anthropogenic_kappa <- anthropogenic_kappa
           }
         } else {
+          # draw from the multivariate normal distribution and ensure that
+          # parameters are within their allowed range
           proposed_parameters <-
             mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           while (proposed_parameters[1] < 0 |
@@ -391,6 +411,7 @@ calibrate <- function(infected_years_file,
           proposed_anthropogenic_kappa <- proposed_parameters[6]
         }
 
+        # run the model with the proposed parameter set
         data <-
           param_func(
             proposed_reproductive_rate,
@@ -401,8 +422,7 @@ calibrate <- function(infected_years_file,
             proposed_anthropogenic_kappa
           )
 
-        # calculate comparison metrics for simulation data (still need to add in
-        # configuration metrics to this)
+        # create holding data structures for running comparison
         num_infected_simulated <- c()
         num_infected_simulated <- length(config$number_of_outputs)
         num_locs_simulated <- c()
@@ -414,6 +434,9 @@ calibrate <- function(infected_years_file,
         residual_diffs <- c()
         residual_diffs <- length(config$number_of_outputs)
 
+        # calculate comparison metrics for simulation data for each time step in
+        # the simulation
+        ## To DO add in configuration metrics to this)
         for (y in seq_len(nlayers(config$infection_years))) {
           if (nlayers(config$infection_years) > 1) {
             infected_sims[[y]][] <- data$infected[[y]]
@@ -426,10 +449,13 @@ calibrate <- function(infected_years_file,
             infected_sim[is.na(config$mask)] <- 0
           }
 
+          # calculate residual error for each time step
           diff_raster <- config$infection_years[[y]] - infected_sim
           residual_diffs[[y]] <- abs(sum(diff_raster[diff_raster != 0]))
 
+          # calculate number of infection in the simulation
           num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
+
           num_locs_simulated[[y]] <- sum(infected_sim[infected_sim > 0] > 0)
           if (success_metric %in%
               c(
@@ -481,6 +507,7 @@ calibrate <- function(infected_years_file,
         residual_diff <- sum(residual_diffs)
         dist_diff <- sum(dist_diffs)
 
+        # Check
         diff_checks <- FALSE
         if (success_metric == "number of locations and total distance") {
           if (locs_diff <= locs_check && dist_diff <= dist_check) {
@@ -526,14 +553,14 @@ calibrate <- function(infected_years_file,
         } else {
           config$proposed_particles <- config$proposed_particles + 1
         }
-        acc_rate <- config$current_particles / config$proposed_particles
-        acc_rate_info <-
+        acceptance_rate <- config$current_particles / config$proposed_particles
+        acceptance_rate_info <-
           paste("The current generation is ", config$current_bin, " and the
             current particle is ", config$current_particles,
-                " and the current acceptance rate is ", acc_rate,
+                " and the current acceptance rate is ", acceptance_rate,
                 sep = ""
           )
-        print(acc_rate_info)
+        print(acceptance_rate_info)
       }
 
       start_index <- config$current_bin * generation_size - generation_size + 1
@@ -578,7 +605,7 @@ calibrate <- function(infected_years_file,
 
       config$current_particles <- 1
       config$proposed_particles <- 1
-      acc_rates[config$current_bin] <- acc_rate
+      acceptance_rates[config$current_bin] <- acceptance_rate
       infected_checks[config$current_bin] <- inf_check
       locs_checks[config$current_bin] <- locs_check
       dist_checks[config$current_bin] <- dist_check
