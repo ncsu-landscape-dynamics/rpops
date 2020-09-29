@@ -1,6 +1,20 @@
-# This function is designed to be a single input and output for parsing
-# and outputting all checks for all functions
-Sys.setenv("R_TESTS" = "")
+#' PoPS (configuration
+#'
+#' Function for with a single input and output list for parsing, transforming, 
+#' and performing all checks for all functions to run the pops c++ model 
+#'
+#' @param config list of all data necessary used to set up c++ model
+#'
+#' @importFrom raster raster values as.matrix xres yres stack reclassify
+#' cellStats nlayers calc extract rasterToPoints
+#' @importFrom stats runif rnorm median sd
+#' @importFrom doParallel registerDoParallel
+#' @importFrom foreach  registerDoSEQ %dopar%
+#' @importFrom parallel makeCluster stopCluster detectCores
+#' @importFrom lubridate interval time_length mdy %within%
+#' @return list of infected and susceptible per year
+#' @export
+#'
 
 configuration <- function(config) {
 
@@ -95,6 +109,7 @@ configuration <- function(config) {
 
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
+  
   # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(
@@ -212,7 +227,6 @@ configuration <- function(config) {
                                        config$start_date, config$end_date)
     if (movements_check$checks_passed) {
       config$movements <- movements_check$movements
-      config$movements_r <- movements_check$movements_r
       config$movements_dates <- movements_check$movements_dates
     } else {
       config$failure <- movements_check$failed_check
