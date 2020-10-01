@@ -130,6 +130,7 @@ List pops_model(
     int num_cols,
     std::string time_step,
     double reproductive_rate,
+    std::vector<std::vector<int>>& spatial_indices,
     double mortality_rate = 0.0,
     int mortality_time_lag = 2,
     int season_month_start = 1,
@@ -329,7 +330,8 @@ List pops_model(
             spreadrate,
             quarantine,
             quarantine_areas,
-            movements);
+            movements,
+            spatial_indices);
 
         if (config.spread_schedule()[current_index]) {
             total_dispersers += dispersers;
