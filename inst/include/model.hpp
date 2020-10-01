@@ -130,7 +130,8 @@ public:
         SpreadRate<IntegerRaster>& spread_rate,  // out
         QuarantineEscape<IntegerRaster>& quarantine,  // out
         const IntegerRaster& quarantine_areas,
-        const std::vector<std::vector<int>> movements)
+        const std::vector<std::vector<int>> movements,
+        const std::vector<std::vector<int>>& spatial_indices)
     {
         RadialDispersalKernel<IntegerRaster> natural_radial_kernel(
             config_.ew_res,
@@ -177,7 +178,8 @@ public:
                 infected,
                 susceptible,
                 temperatures[lethal_step],
-                config_.lethal_temperature);
+                config_.lethal_temperature,
+                spatial_indices);
         }
         // actual spread
         if (config_.spread_schedule()[step]) {
@@ -186,7 +188,8 @@ public:
                 infected,
                 config_.weather,
                 weather_coefficient,
-                config_.reproductive_rate);
+                config_.reproductive_rate,
+                spatial_indices);
 
             simulation_.disperse_and_infect(
                 step,
@@ -249,7 +252,8 @@ public:
                 mortality_simulation_year,
                 config_.first_mortality_year - 1,
                 died,
-                mortality_tracker);
+                mortality_tracker,
+                spatial_indices);
         }
         // compute spread rate
         if (config_.use_spreadrates && config_.spread_rate_schedule()[step]) {
