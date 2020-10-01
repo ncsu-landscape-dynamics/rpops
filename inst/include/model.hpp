@@ -203,6 +203,7 @@ public:
                 config_.weather,
                 weather_coefficient,
                 dispersal_kernel,
+                spatial_indices,
                 config_.establishment_probability);
             if (config_.use_movements) {
                 last_index = simulation_.movement(

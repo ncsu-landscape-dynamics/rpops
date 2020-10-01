@@ -102,7 +102,9 @@ configuration <- function(config) {
                                     spatial = TRUE)
   suitable_cells <- extract(suitable, suitable_points, cellnumbers = TRUE)[,1]
   suitable_row <- rowFromCell(suitable, suitable_cells)
+  suitable_row <- suitable_row - 1
   suitable_col <- colFromCell(suitable, suitable_cells)
+  suitable_col <- suitable_col - 1
   config$spatial_indices <- data.frame(row = suitable_row, col = suitable_col)
   
   # check that total populations raster has the same crs, resolution, and extent

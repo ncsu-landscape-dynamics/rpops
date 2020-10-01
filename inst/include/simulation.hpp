@@ -425,50 +425,52 @@ public:
         bool weather,
         const FloatRaster& weather_coefficient,
         DispersalKernel& dispersal_kernel,
+        const std::vector<std::vector<int>>& spatial_indices,
         double establishment_probability = 0.5)
     {
         std::uniform_real_distribution<double> distribution_uniform(0.0, 1.0);
         int row;
         int col;
 
-        for (int i = 0; i < rows_; i++) {
-            for (int j = 0; j < cols_; j++) {
-                if (dispersers(i, j) > 0) {
-                    for (int k = 0; k < dispersers(i, j); k++) {
-                        std::tie(row, col) = dispersal_kernel(generator_, i, j);
-
-                        if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
-                            // export dispersers dispersed outside of modeled area
-                            outside_dispersers.emplace_back(std::make_tuple(row, col));
-                            continue;
-                        }
-                        if (susceptible(row, col) > 0) {
-                            double probability_of_establishment =
-                                (double)(susceptible(row, col))
-                                / total_populations(row, col);
-                            double establishment_tester = 1 - establishment_probability;
-                            if (establishment_stochasticity_)
-                                establishment_tester = distribution_uniform(generator_);
-
-                            if (weather)
-                                probability_of_establishment *=
-                                    weather_coefficient(i, j);
-                            if (establishment_tester < probability_of_establishment) {
-                                exposed_or_infected(row, col) += 1;
-                                susceptible(row, col) -= 1;
-                                if (model_type_ == ModelType::SusceptibleInfected) {
-                                    mortality_tracker(row, col) += 1;
-                                }
-                                else if (
+        for (unsigned i = 0; i < spatial_indices.size(); i++) {
+            auto spatial_index = spatial_indices[i];
+            int row_index = spatial_index[0];
+            int col_index = spatial_index[1];
+            if (dispersers(row_index, col_index) > 0) {
+                for (int k = 0; k < dispersers(row_index, col_index); k++) {
+                    std::tie(row, col) = dispersal_kernel(generator_, row_index, col_index);
+                    
+                    if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
+                        // export dispersers dispersed outside of modeled area
+                        outside_dispersers.emplace_back(std::make_tuple(row, col));
+                        continue;
+                    }
+                    if (susceptible(row, col) > 0) {
+                        double probability_of_establishment =
+                            (double)(susceptible(row, col))
+                        / total_populations(row, col);
+                        double establishment_tester = 1 - establishment_probability;
+                        if (establishment_stochasticity_)
+                            establishment_tester = distribution_uniform(generator_);
+                        
+                        if (weather)
+                            probability_of_establishment *=
+                                weather_coefficient(row_index, col_index);
+                        if (establishment_tester < probability_of_establishment) {
+                            exposed_or_infected(row, col) += 1;
+                            susceptible(row, col) -= 1;
+                            if (model_type_ == ModelType::SusceptibleInfected) {
+                                mortality_tracker(row, col) += 1;
+                            }
+                            else if (
                                     model_type_
-                                    == ModelType::SusceptibleExposedInfected) {
-                                    // no-op
-                                }
-                                else {
-                                    throw std::runtime_error(
+                                == ModelType::SusceptibleExposedInfected) {
+                                // no-op
+                            }
+                            else {
+                                throw std::runtime_error(
                                         "Unknown ModelType value in "
                                         "Simulation::disperse()");
-                                }
                             }
                         }
                     }
@@ -589,6 +591,7 @@ public:
         bool weather,
         const FloatRaster& weather_coefficient,
         DispersalKernel& dispersal_kernel,
+        const std::vector<std::vector<int>>& spatial_indices,
         double establishment_probability = 0.5)
     {
         auto* infected_or_exposed = &infected;
@@ -607,6 +610,7 @@ public:
             weather,
             weather_coefficient,
             dispersal_kernel,
+            spatial_indices,
             establishment_probability);
         if (model_type_ == ModelType::SusceptibleExposedInfected) {
             this->infect_exposed(step, exposed, infected, mortality_tracker);
