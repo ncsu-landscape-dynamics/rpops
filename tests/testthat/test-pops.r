@@ -1116,7 +1116,6 @@ test_that("SEI model works as intended", {
   parameter_means <- c(0.4, 21, 1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
-
   data <-
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -1147,9 +1146,78 @@ test_that("SEI model works as intended", {
          time_step = time_step,
          treatment_dates = treatment_dates)
 
-  expect_equal(all(data2$exposed[[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(data2$exposed[[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-  expect_equal(all(data2$exposed[[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
+  expect_equal(all(data2$exposed[[1]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[1]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[1]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[2]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[2]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[2]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[3]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[3]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[3]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[4]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[4]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[4]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[5]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[5]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[5]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[6]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[6]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[6]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[7]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[7]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[7]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[8]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[8]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[8]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[9]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[9]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[9]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[10]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[10]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[10]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[11]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[11]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[11]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[12]][[1]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[12]][[2]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
+  expect_equal(all(data2$exposed[[12]][[3]] >= matrix(0, ncol = 2, nrow = 2)),
+               TRUE)
 
   expect_equal(all(data$susceptible[[1]] <= data2$susceptible[[1]]), TRUE)
   expect_equal(all(data$susceptible[[2]] <= data2$susceptible[[1]]), TRUE)

@@ -240,6 +240,8 @@ List pops_model(
     std::vector<IntegerMatrix> resistant_vector;
     std::vector<IntegerMatrix> total_populations_vector;
     std::vector<IntegerMatrix> dispersers_vector;
+    std::vector<IntegerMatrix> exposed_v;
+    std::vector<std::vector<IntegerMatrix>> exposed_vector;
 
     config.create_schedules();
 
@@ -343,7 +345,20 @@ List pops_model(
             resistant_vector.push_back(Rcpp::clone(resistant));
             total_populations_vector.push_back(Rcpp::clone(total_populations));
             dispersers_vector.push_back(Rcpp::clone(total_dispersers));
-            // exposed_vector = Rcpp::clone(exposed);
+            
+            if (config.model_type == "SEI") {
+                exposed_v.clear();
+                
+                for (unsigned e = 0; e < exposed.size(); e++) {
+                    exposed_v.push_back(Rcpp::clone(exposed[e]));
+                }
+            }
+            else {
+                exposed_v = exposed;
+            }
+
+            // exposed_v = exposed;
+            exposed_vector.push_back(exposed_v);
 
             num_infected = sum_of_infected(infected);
             number_infected.push_back(num_infected);
@@ -376,7 +391,7 @@ List pops_model(
 
     return List::create(
         _["infected"] = infected_vector,
-        _["exposed"] = exposed,
+        _["exposed"] = exposed_vector,
         _["susceptible"] = susceptible_vector,
         _["resistant"] = resistant_vector,
         _["mortality"] = mortality_vector,
