@@ -6,7 +6,7 @@
 #' @param config list of all data necessary used to set up c++ model
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints
+#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -94,6 +94,17 @@ configuration <- function(config) {
     return(config)
   }
 
+  suitable <- host + infected
+  suitable_points <- rasterToPoints(suitable,
+                                    fun = function(x) {
+                                      x > 0
+                                    },
+                                    spatial = TRUE)
+  suitable_cells <- extract(suitable, suitable_points, cellnumbers = TRUE)[,1]
+  suitable_row <- rowFromCell(suitable, suitable_cells)
+  suitable_col <- colFromCell(suitable, suitable_cells)
+  config$spatial_indices <- data.frame(row = suitable_row, col = suitable_col)
+  
   # check that total populations raster has the same crs, resolution, and extent
   total_populations_check <- secondary_raster_checks(
     config$total_populations_file, infected)

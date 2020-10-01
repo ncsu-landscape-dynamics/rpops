@@ -121,7 +121,7 @@
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc
-#' extract rasterToPoints crs rowColFromCell
+#' extract rasterToPoints crs rowColFromCell rowFromCell colFromCell
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
 #' @importFrom lubridate interval time_length mdy %within%

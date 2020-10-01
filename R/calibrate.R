@@ -63,7 +63,7 @@
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
 #' cellStats nlayers extent extension compareCRS getValues calc extract
-#' rasterToPoints pointDistance
+#' rasterToPoints pointDistance rowFromCell colFromCell
 #' @importFrom stats runif rnorm cov
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach

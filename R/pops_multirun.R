@@ -17,7 +17,7 @@
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints
+#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%

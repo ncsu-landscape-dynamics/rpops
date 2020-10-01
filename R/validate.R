@@ -26,7 +26,7 @@
 #' calibration function (posterior covairance matrix)
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints
+#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
