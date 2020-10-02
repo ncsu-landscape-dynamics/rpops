@@ -260,15 +260,20 @@ public:
         if (config_.use_spreadrates && config_.spread_rate_schedule()[step]) {
             unsigned rates_step =
                 simulation_step_to_action_step(config_.spread_rate_schedule(), step);
-            spread_rate.compute_step_spread_rate(infected, rates_step,
-                                                 spatial_indices);
+            spread_rate.compute_step_spread_rate(
+                infected, 
+                rates_step,
+                spatial_indices);
         }
         // compute quarantine escape
         if (config_.use_quarantine && config_.quarantine_schedule()[step]) {
             unsigned action_step =
                 simulation_step_to_action_step(config_.quarantine_schedule(), step);
             quarantine.infection_escape_quarantine(
-                infected, quarantine_areas, action_step);
+                infected, 
+                quarantine_areas, 
+                action_step,
+                spatial_indices);
         }
     }
 };

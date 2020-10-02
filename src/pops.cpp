@@ -295,7 +295,7 @@ List pops_model(
     }
     
     QuarantineEscape<IntegerMatrix> quarantine(
-            quarantine_areas, ew_res, ns_res, quarantine_outputs);
+            quarantine_areas, ew_res, ns_res, quarantine_outputs, spatial_indices);
     bool quarantine_escape;
     std::vector<bool> quarantine_escapes;
     int escape_dist;

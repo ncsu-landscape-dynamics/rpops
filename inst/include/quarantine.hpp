@@ -71,36 +71,39 @@ private:
      * Different quarantine areas are represented by different integers.
      * 0 in the raster means no quarantine area.
      */
-    void quarantine_boundary(const IntegerRaster& quarantine_areas)
+    void quarantine_boundary(
+            const IntegerRaster& quarantine_areas,
+            const std::vector<std::vector<int>>& spatial_indices)
     {
         int n, s, e, w;
         int idx = 0;
-        for (int i = 0; i < height_; i++) {
-            for (int j = 0; j < width_; j++) {
-                auto value = quarantine_areas(i, j);
-                if (value > 0) {
-                    auto search = boundary_id_idx_map.find(value);
-                    int bidx;
-                    if (search == boundary_id_idx_map.end()) {
-                        boundary_id_idx_map.insert(std::make_pair(value, idx));
-                        boundaries.push_back(
-                            std::make_tuple(height_ - 1, 0, 0, width_ - 1));
-                        bidx = idx;
-                        ++idx;
-                    }
-                    else
-                        bidx = search->second;
-                    std::tie(n, s, e, w) = boundaries.at(bidx);
-                    if (i < n)
-                        n = i;
-                    if (i > s)
-                        s = i;
-                    if (j > e)
-                        e = j;
-                    if (j < w)
-                        w = j;
-                    boundaries.at(bidx) = std::make_tuple(n, s, e, w);
+        for (unsigned i = 0; i < spatial_indices.size(); i++) {
+            auto spatial_index = spatial_indices[i];
+            int row_index = spatial_index[0];
+            int col_index = spatial_index[1];
+            auto value = quarantine_areas(row_index, col_index);
+            if (value > 0) {
+                auto search = boundary_id_idx_map.find(value);
+                int bidx;
+                if (search == boundary_id_idx_map.end()) {
+                    boundary_id_idx_map.insert(std::make_pair(value, idx));
+                    boundaries.push_back(
+                        std::make_tuple(height_ - 1, 0, 0, width_ - 1));
+                    bidx = idx;
+                    ++idx;
                 }
+                else
+                    bidx = search->second;
+                std::tie(n, s, e, w) = boundaries.at(bidx);
+                if (row_index < n)
+                    n = row_index;
+                if (row_index > s)
+                    s = row_index;
+                if (col_index > e)
+                    e = col_index;
+                if (col_index < w)
+                    w = col_index;
+                boundaries.at(bidx) = std::make_tuple(n, s, e, w);
             }
         }
     }
@@ -143,7 +146,8 @@ public:
         const IntegerRaster& quarantine_areas,
         double ew_res,
         double ns_res,
-        unsigned num_steps)
+        unsigned num_steps,
+        const std::vector<std::vector<int>>& spatial_indices)
         : width_(quarantine_areas.cols()),
           height_(quarantine_areas.rows()),
           west_east_resolution_(ew_res),
@@ -156,7 +160,7 @@ public:
                   std::make_tuple(
                       std::numeric_limits<double>::max(), QuarantineDirection::None)))
     {
-        quarantine_boundary(quarantine_areas);
+        quarantine_boundary(quarantine_areas, spatial_indices);
     }
 
     QuarantineEscape() = delete;
@@ -169,15 +173,18 @@ public:
     void infection_escape_quarantine(
         const IntegerRaster& infected,
         const IntegerRaster& quarantine_areas,
-        unsigned step)
+        unsigned step,
+        const std::vector<std::vector<int>>& spatial_indices)
     {
         DistDir min_dist_dir = std::make_tuple(
             std::numeric_limits<double>::max(), QuarantineDirection::None);
-        for (int i = 0; i < height_; i++) {
-            for (int j = 0; j < width_; j++) {
-                if (!infected(i, j))
+        for (unsigned i = 0; i < spatial_indices.size(); i++) {
+            auto spatial_index = spatial_indices[i];
+            int row_index = spatial_index[0];
+            int col_index = spatial_index[1];
+                if (!infected(row_index, col_index))
                     continue;
-                int area = quarantine_areas(i, j);
+                int area = quarantine_areas(row_index, col_index);
                 if (area == 0) {
                     escape_dist_dirs.at(step) = std::make_tuple(
                         true, std::make_tuple(std::nan(""), QuarantineDirection::None));
@@ -186,11 +193,10 @@ public:
                 double dist;
                 QuarantineDirection dir;
                 int bindex = boundary_id_idx_map[area];
-                std::tie(dist, dir) = closest_direction(i, j, boundaries.at(bindex));
+                std::tie(dist, dir) = closest_direction(row_index, col_index, boundaries.at(bindex));
                 if (dist < std::get<0>(min_dist_dir)) {
                     min_dist_dir = std::make_tuple(dist, dir);
                 }
-            }
         }
         escape_dist_dirs.at(step) = std::make_tuple(false, min_dist_dir);
     }
