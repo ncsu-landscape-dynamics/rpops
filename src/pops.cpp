@@ -275,7 +275,7 @@ List pops_model(
         spread_rate_outputs = 0;
     }
     SpreadRate<IntegerMatrix> spreadrate(
-        infected, config.ew_res, config.ns_res, spread_rate_outputs);
+        infected, config.ew_res, config.ns_res, spread_rate_outputs, spatial_indices);
     unsigned move_scheduled;
     if (config.use_movements) {
         for (unsigned move = 0; move < movements_dates.size(); ++move) {
@@ -362,9 +362,12 @@ List pops_model(
             // exposed_v = exposed;
             exposed_vector.push_back(exposed_v);
 
-            num_infected = sum_of_infected(infected);
+            num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
-            area_infect = area_of_infected(infected, config.ew_res, config.ns_res);
+            area_infect = area_of_infected(infected, 
+                                           config.ew_res, 
+                                           config.ns_res, 
+                                           spatial_indices);
             area_infected.push_back(area_infect);
             total_dispersers(config.rows, config.cols);
         }
