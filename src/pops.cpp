@@ -407,5 +407,6 @@ List pops_model(
         _["propogules"] = dispersers_vector,
         _["quarantine_escape"] = quarantine_escapes,
         _["quarantine_escape_distance"] = escape_dists,
-        _["quarantine_escape_directions"] = escape_directions);
+        _["quarantine_escape_directions"] = escape_directions,
+        _["spatial_indices"] = spatial_indices);
 }
