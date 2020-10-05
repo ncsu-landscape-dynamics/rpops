@@ -72,8 +72,8 @@ private:
      * 0 in the raster means no quarantine area.
      */
     void quarantine_boundary(
-            const IntegerRaster& quarantine_areas,
-            const std::vector<std::vector<int>>& spatial_indices)
+        const IntegerRaster& quarantine_areas,
+        const std::vector<std::vector<int>>& spatial_indices)
     {
         int n, s, e, w;
         int idx = 0;
@@ -182,21 +182,22 @@ public:
             auto spatial_index = spatial_indices[i];
             int row_index = spatial_index[0];
             int col_index = spatial_index[1];
-                if (!infected(row_index, col_index))
-                    continue;
-                int area = quarantine_areas(row_index, col_index);
-                if (area == 0) {
-                    escape_dist_dirs.at(step) = std::make_tuple(
-                        true, std::make_tuple(std::nan(""), QuarantineDirection::None));
-                    return;
-                }
-                double dist;
-                QuarantineDirection dir;
-                int bindex = boundary_id_idx_map[area];
-                std::tie(dist, dir) = closest_direction(row_index, col_index, boundaries.at(bindex));
-                if (dist < std::get<0>(min_dist_dir)) {
-                    min_dist_dir = std::make_tuple(dist, dir);
-                }
+            if (!infected(row_index, col_index))
+                continue;
+            int area = quarantine_areas(row_index, col_index);
+            if (area == 0) {
+                escape_dist_dirs.at(step) = std::make_tuple(
+                    true, std::make_tuple(std::nan(""), QuarantineDirection::None));
+                return;
+            }
+            double dist;
+            QuarantineDirection dir;
+            int bindex = boundary_id_idx_map[area];
+            std::tie(dist, dir) =
+                closest_direction(row_index, col_index, boundaries.at(bindex));
+            if (dist < std::get<0>(min_dist_dir)) {
+                min_dist_dir = std::make_tuple(dist, dir);
+            }
         }
         escape_dist_dirs.at(step) = std::make_tuple(false, min_dist_dir);
     }

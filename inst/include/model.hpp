@@ -219,8 +219,8 @@ public:
         }
         // treatments
         if (config_.use_treatments) {
-            bool managed =
-                treatments.manage(step, infected, exposed, susceptible, resistant, spatial_indices);
+            bool managed = treatments.manage(
+                step, infected, exposed, susceptible, resistant, spatial_indices);
             if (managed && config_.use_mortality) {
                 // same conditions as the mortality code below
                 // TODO: make the mortality timing available as a separate function in
@@ -229,7 +229,8 @@ public:
                     auto max_index =
                         mortality_simulation_year - (config_.first_mortality_year - 1);
                     for (int age = 0; age <= max_index; age++) {
-                        treatments.manage_mortality(step, mortality_tracker[age], spatial_indices);
+                        treatments.manage_mortality(
+                            step, mortality_tracker[age], spatial_indices);
                     }
                 }
             }
@@ -260,20 +261,14 @@ public:
         if (config_.use_spreadrates && config_.spread_rate_schedule()[step]) {
             unsigned rates_step =
                 simulation_step_to_action_step(config_.spread_rate_schedule(), step);
-            spread_rate.compute_step_spread_rate(
-                infected, 
-                rates_step,
-                spatial_indices);
+            spread_rate.compute_step_spread_rate(infected, rates_step, spatial_indices);
         }
         // compute quarantine escape
         if (config_.use_quarantine && config_.quarantine_schedule()[step]) {
             unsigned action_step =
                 simulation_step_to_action_step(config_.quarantine_schedule(), step);
             quarantine.infection_escape_quarantine(
-                infected, 
-                quarantine_areas, 
-                action_step,
-                spatial_indices);
+                infected, quarantine_areas, action_step, spatial_indices);
         }
     }
 };

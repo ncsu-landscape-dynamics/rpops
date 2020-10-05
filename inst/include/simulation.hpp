@@ -208,15 +208,16 @@ public:
                 auto spatial_index = spatial_indices[i];
                 int row_index = spatial_index[0];
                 int col_index = spatial_index[1];
-                for (int year_index = 0; year_index <= max_year_index;
-                year_index++) {
+                for (int year_index = 0; year_index <= max_year_index; year_index++) {
                     int mortality_in_year_index = 0;
-                    if (mortality_tracker_vector[year_index](row_index, col_index) > 0) {
+                    if (mortality_tracker_vector[year_index](row_index, col_index)
+                        > 0) {
                         mortality_in_year_index =
                             mortality_rate
-                        * mortality_tracker_vector[year_index](row_index, col_index);
+                            * mortality_tracker_vector[year_index](
+                                row_index, col_index);
                         mortality_tracker_vector[year_index](row_index, col_index) -=
-                        mortality_in_year_index;
+                            mortality_in_year_index;
                         mortality(row_index, col_index) += mortality_in_year_index;
                         mortality_current_year += mortality_in_year_index;
                         if (infected(row_index, col_index) > 0) {
@@ -352,7 +353,8 @@ public:
             int col_index = spatial_index[1];
             if (infected(row_index, col_index) > 0) {
                 if (weather)
-                    lambda = reproductive_rate * weather_coefficient(row_index, col_index);
+                    lambda =
+                        reproductive_rate * weather_coefficient(row_index, col_index);
                 int dispersers_from_cell = 0;
                 if (dispersers_stochasticity_) {
                     std::poisson_distribution<int> distribution(lambda);
@@ -438,8 +440,9 @@ public:
             int col_index = spatial_index[1];
             if (dispersers(row_index, col_index) > 0) {
                 for (int k = 0; k < dispersers(row_index, col_index); k++) {
-                    std::tie(row, col) = dispersal_kernel(generator_, row_index, col_index);
-                    
+                    std::tie(row, col) =
+                        dispersal_kernel(generator_, row_index, col_index);
+
                     if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
                         // export dispersers dispersed outside of modeled area
                         outside_dispersers.emplace_back(std::make_tuple(row, col));
@@ -448,11 +451,11 @@ public:
                     if (susceptible(row, col) > 0) {
                         double probability_of_establishment =
                             (double)(susceptible(row, col))
-                        / total_populations(row, col);
+                            / total_populations(row, col);
                         double establishment_tester = 1 - establishment_probability;
                         if (establishment_stochasticity_)
                             establishment_tester = distribution_uniform(generator_);
-                        
+
                         if (weather)
                             probability_of_establishment *=
                                 weather_coefficient(row_index, col_index);
@@ -463,14 +466,13 @@ public:
                                 mortality_tracker(row, col) += 1;
                             }
                             else if (
-                                    model_type_
-                                == ModelType::SusceptibleExposedInfected) {
+                                model_type_ == ModelType::SusceptibleExposedInfected) {
                                 // no-op
                             }
                             else {
                                 throw std::runtime_error(
-                                        "Unknown ModelType value in "
-                                        "Simulation::disperse()");
+                                    "Unknown ModelType value in "
+                                    "Simulation::disperse()");
                             }
                         }
                     }

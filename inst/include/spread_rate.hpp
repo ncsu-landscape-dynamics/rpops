@@ -69,8 +69,8 @@ private:
      * north, south, east, west coordinates (as number of rows/cols),
      * If there is no infection, sets -1 to all directions.
      */
-    BBoxInt infection_boundary(const Raster& raster,
-                               const std::vector<std::vector<int>>& spatial_indices)
+    BBoxInt infection_boundary(
+        const Raster& raster, const std::vector<std::vector<int>>& spatial_indices)
     {
         int n = height - 1;
         int s = 0;
@@ -114,8 +114,12 @@ private:
     }
 
 public:
-    SpreadRate(const Raster& raster, double ew_res, double ns_res, unsigned num_steps,
-               const std::vector<std::vector<int>>& spatial_indices)
+    SpreadRate(
+        const Raster& raster,
+        double ew_res,
+        double ns_res,
+        unsigned num_steps,
+        const std::vector<std::vector<int>>& spatial_indices)
         : width(raster.cols()),
           height(raster.rows()),
           west_east_resolution(ew_res),
@@ -147,8 +151,10 @@ public:
      * If spread rate is zero and the bbox is touching the edge,
      * that means spread is out of bounds and rate is set to NaN.
      */
-    void compute_step_spread_rate(const Raster& raster, unsigned step,
-                                  const std::vector<std::vector<int>>& spatial_indices)
+    void compute_step_spread_rate(
+        const Raster& raster,
+        unsigned step,
+        const std::vector<std::vector<int>>& spatial_indices)
     {
         BBoxInt bbox = infection_boundary(raster, spatial_indices);
         boundaries.at(step + 1) = bbox;
