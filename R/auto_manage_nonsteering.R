@@ -8,7 +8,7 @@
 #' @inheritParams pops
 #' @param infected_files file path to the infected species files for the start
 #' of the simulation
-#' @param num_iterations how many iterations do you want to run to allow the
+#' @param number_of_iterations how many iterations do you want to run to allow the
 #' calibration to converge at least 10
 #' @param number_of_cores enter how many cores you want to use (default = NA).
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
@@ -32,18 +32,6 @@
 #' @param direction_first boolean to indicate where or not direction is the
 #' first priortity in sorting (if false first sorting priority goes to the
 #' selection_method)
-#' @param anthropogenic_kappa sets the strength of the anthropogenic direction
-#' in the von-mises distribution numeric value between 0.01 and 12
-#' @param natural_kappa sets the strength of the natural direction in the
-#' von-mises distribution numeric value between 0.01 and 12
-#' @param reproductive_rate number of spores or pest units produced by a single
-#' host under optimal weather conditions
-#' @param percent_natural_dispersal  what percentage of dispersal is natural
-#' range versus anthropogenic range value between 0 and 1
-#' @param natural_distance_scale distance scale parameter for natural range
-#' dispersal kernel numeric value > 0
-#' @param anthropogenic_distance_scale distance scale parameter for
-#' anthropogenic range dispersal kernel numeric value > 0
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
 #' cellStats nlayers calc extract rasterToPoints
@@ -67,7 +55,6 @@ auto_manage_nonsteering <- function(infected_files,
                                     model_type = "SI",
                                     latency_period = 0,
                                     time_step = "month",
-                                    reproductive_rate = 3.0,
                                     season_month_start = 1,
                                     season_month_end = 12,
                                     start_date = '2008-01-01',
@@ -83,16 +70,11 @@ auto_manage_nonsteering <- function(infected_files,
                                     treatment_dates = c(""),
                                     treatments_file = "",
                                     treatment_method = "ratio",
-                                    percent_natural_dispersal = 1.0,
                                     natural_kernel_type = "cauchy",
                                     anthropogenic_kernel_type = "cauchy",
-                                    natural_distance_scale = 21,
-                                    anthropogenic_distance_scale = 0.0,
                                     natural_dir = "NONE",
-                                    natural_kappa = 0,
                                     anthropogenic_dir = "NONE",
-                                    anthropogenic_kappa = 0,
-                                    num_iterations = 100,
+                                    number_of_iterations = 100,
                                     number_of_cores = NA,
                                     pesticide_duration = 0,
                                     pesticide_efficacy = 1.0,
@@ -122,6 +104,82 @@ auto_manage_nonsteering <- function(infected_files,
                                     quarantine_areas_file = "",
                                     use_quarantine = FALSE,
                                     use_spreadrates = FALSE) {
+
+  config <- c()
+  config$random_seed <- random_seed
+  config$infected_years_file <- infected_years_file
+  config$number_of_observations <- number_of_observations
+  config$prior_number_of_observations <- prior_number_of_observations
+  config$prior_means <- prior_means
+  config$prior_cov_matrix <- prior_cov_matrix
+  config$params_to_estimate <- params_to_estimate
+  config$number_of_generations <- number_of_generations
+  config$generation_size <- generation_size
+  config$checks <- checks
+  config$infected_file <- infected_file
+  config$host_file <- host_file
+  config$total_populations_file <- total_populations_file
+  config$parameter_means <- parameter_means
+  config$parameter_cov_matrix <- parameter_cov_matrix
+  config$temp <- temp
+  config$temperature_coefficient_file <- temperature_coefficient_file
+  config$precip <- precip
+  config$precipitation_coefficient_file <- precipitation_coefficient_file
+  config$model_type <- model_type
+  config$latency_period <- latency_period
+  config$time_step <- time_step
+  config$season_month_start <- season_month_start
+  config$season_month_end <- season_month_end
+  config$start_date <- start_date
+  config$end_date <- end_date
+  config$use_lethal_temperature <- use_lethal_temperature
+  config$temperature_file <- temperature_file
+  config$lethal_temperature <- lethal_temperature
+  config$lethal_temperature_month <- lethal_temperature_month
+  config$mortality_on <- mortality_on
+  config$mortality_rate <- mortality_rate
+  config$mortality_time_lag <- mortality_time_lag
+  config$management <- management
+  config$treatment_dates <- treatment_dates
+  config$treatments_file <- treatments_file
+  config$treatment_method <- treatment_method
+  config$natural_kernel_type <- natural_kernel_type
+  config$anthropogenic_kernel_type <- anthropogenic_kernel_type
+  config$natural_dir <- natural_dir
+  config$natural_kappa <- natural_kappa
+  config$anthropogenic_dir <- anthropogenic_dir
+  config$anthropogenic_kappa <- anthropogenic_kappa
+  config$pesticide_duration <- pesticide_duration
+  config$pesticide_efficacy <- pesticide_efficacy
+  config$output_frequency <- output_frequency
+  config$output_frequency_n <- output_frequency_n
+  config$movements_file <- movements_file
+  config$use_movements <- use_movements
+  config$start_exposed <- start_exposed
+  config$generate_stochasticity <- generate_stochasticity
+  config$establishment_stochasticity <- establishment_stochasticity
+  config$movement_stochasticity <- movement_stochasticity
+  config$deterministic <- deterministic
+  config$establishment_probability <- establishment_probability
+  config$dispersal_percentage <- dispersal_percentage
+  config$quarantine_areas_file <- quarantine_areas_file
+  config$use_quarantine <- use_quarantine
+  config$use_spreadrates <- use_spreadrates
+  config$percent_natural_dispersal <- percent_natural_dispersal
+  config$anthropogenic_distance_scale <- anthropogenic_distance_scale
+  config$number_of_iterations <- number_of_iterations
+  config$number_of_cores <- number_of_cores
+  # add function name for use in configuration function to skip
+  # function specific specifc configurations namely for validation and
+  # calibration.
+  config$function_name <- "auto-manage"
+  config$failure <- NULL
+
+  config <- configuration(config)
+
+  if (!is.null(config$failure)) {
+    return(config$failure)
+  }
 
   if (model_type == "SEI" && latency_period <= 0) {
     return("Model type is set to SEI but the latency period is less than 1")
@@ -273,10 +331,10 @@ auto_manage_nonsteering <- function(infected_files,
     weather_coefficient_stack <- precipitation_coefficient
   }
 
-  if (weather == TRUE){
+  if (weather == TRUE) {
     # weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
     weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
-    for(h in 2:number_of_time_steps) {
+    for (h in 2:number_of_time_steps) {
       weather_coefficient[[h]] <- raster::as.matrix(weather_coefficient_stack[[h]])
     }
   } else {
@@ -358,7 +416,7 @@ auto_manage_nonsteering <- function(infected_files,
   buffer_cells <- buffer/ew_res
   years_simulated <- length(years)
 
-  random_seeds <- round(stats::runif(num_iterations, 1, 1000000))
+  random_seeds <- round(stats::runif(number_of_iterations, 1, 1000000))
 
   ## preallocate data frames and lists
   s <- paste("sim_", years,sep = "")
@@ -396,7 +454,7 @@ auto_manage_nonsteering <- function(infected_files,
   cl <- makeCluster(core_count)
   registerDoParallel(cl)
 
-  runs <- foreach(p = 1:num_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %dopar% {
+  runs <- foreach(p = 1:number_of_iterations, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate", "rlist")) %dopar% {
     infected_speci <- infected_speci_2
     infected_species <- infected_species_2
     susceptible_speci <- susceptible_speci_2
