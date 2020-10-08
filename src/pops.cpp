@@ -130,7 +130,7 @@ List pops_model(
     int num_cols,
     std::string time_step,
     double reproductive_rate,
-    std::vector<std::vector<int>>& spatial_indices,
+    std::vector<std::vector<int>> spatial_indices,
     double mortality_rate = 0.0,
     int mortality_time_lag = 2,
     int season_month_start = 1,
@@ -285,15 +285,15 @@ List pops_model(
             config.movement_schedule.push_back(move_scheduled);
         }
     }
-    
+
     unsigned quarantine_outputs;
     if (config.use_quarantine) {
         quarantine_outputs = config.quarantine_num_steps();
-    } 
+    }
     else {
         quarantine_outputs = 0;
     }
-    
+
     QuarantineEscape<IntegerMatrix> quarantine(
             quarantine_areas, ew_res, ns_res, quarantine_outputs, spatial_indices);
     bool quarantine_escape;
@@ -302,7 +302,7 @@ List pops_model(
     std::vector<int> escape_dists;
     QuarantineDirection escape_direction;
     std::vector<std::string> escape_directions;
-    
+
     ModelType mt = model_type_from_string(config.model_type);
     Simulation<IntegerMatrix, NumericMatrix> simulation(
         config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
@@ -347,10 +347,10 @@ List pops_model(
             resistant_vector.push_back(Rcpp::clone(resistant));
             total_populations_vector.push_back(Rcpp::clone(total_populations));
             dispersers_vector.push_back(Rcpp::clone(total_dispersers));
-            
+
             if (config.model_type == "SEI") {
                 exposed_v.clear();
-                
+
                 for (unsigned e = 0; e < exposed.size(); e++) {
                     exposed_v.push_back(Rcpp::clone(exposed[e]));
                 }
@@ -364,9 +364,9 @@ List pops_model(
 
             num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
-            area_infect = area_of_infected(infected, 
-                                           config.ew_res, 
-                                           config.ns_res, 
+            area_infect = area_of_infected(infected,
+                                           config.ew_res,
+                                           config.ns_res,
                                            spatial_indices);
             area_infected.push_back(area_infect);
             total_dispersers(config.rows, config.cols);
@@ -380,7 +380,7 @@ List pops_model(
             auto sr = to_array(spread_rates);
             spread_rates_vector.push_back(sr);
         }
-        
+
         // update quarantine outputs if they are used and scheduled for that time step
         if (config.use_quarantine && config.quarantine_schedule()[current_index]) {
             unsigned quarantine_step = simulation_step_to_action_step(
