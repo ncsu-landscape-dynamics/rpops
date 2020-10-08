@@ -570,39 +570,6 @@ calibrate <- function(infected_years_file,
         colMeans(parameters_kept[start_index:end_index, 1:6])
       config$parameter_cov_matrix <-
         cov(parameters_kept[start_index:end_index, 1:6])
-      reproductive_rate_generation <-
-        as.data.frame(table(parameters_kept[start_index:end_index, 1]))
-      natural_distance_scale_generation <-
-        as.data.frame(table(parameters_kept[start_index:end_index, 2]))
-      percent_natural_dispersal_generation <-
-        as.data.frame(table(parameters_kept[start_index:end_index, 3]))
-      anthro_dis_scale <- parameters_kept[start_index:end_index, 3:4]
-      anthro_dis_scale <- anthro_dis_scale[anthro_dis_scale[, 1] < 1.000, ]
-      anthropogenic_distance_scale_generation <-
-        as.data.frame(table(anthro_dis_scale[, 2]))
-      names(reproductive_rate_generation) <- c("var1", "freq")
-      names(natural_distance_scale_generation) <- c("var1", "freq")
-      names(percent_natural_dispersal_generation) <- c("var1", "freq")
-      names(anthropogenic_distance_scale_generation) <- c("var1", "freq")
-
-      reproductive_rate_generation$freq <-
-        reproductive_rate_generation$freq / generation_size
-      natural_distance_scale_generation$freq <-
-        natural_distance_scale_generation$freq / generation_size
-      percent_natural_dispersal_generation$freq <-
-        percent_natural_dispersal_generation$freq / generation_size
-      anthropogenic_distance_scale_generation$freq <-
-        anthropogenic_distance_scale_generation$freq /
-        nrow(anthro_dis_scale[anthro_dis_scale[, 1] < 1.000, ])
-
-      reproductive_rate_generation$var1 <-
-        as.numeric(as.character(reproductive_rate_generation$var1))
-      natural_distance_scale_generation$var1 <-
-        as.numeric(as.character(natural_distance_scale_generation$var1))
-      percent_natural_dispersal_generation$var1 <-
-        as.numeric(as.character(percent_natural_dispersal_generation$var1))
-      anthropogenic_distance_scale_generation$var1 <-
-        as.numeric(as.character(anthropogenic_distance_scale_generation$var1))
 
       config$current_particles <- 1
       config$proposed_particles <- 1
