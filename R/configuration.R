@@ -1,7 +1,7 @@
 #' PoPS (configuration
 #'
-#' Function for with a single input and output list for parsing, transforming, 
-#' and performing all checks for all functions to run the pops c++ model 
+#' Function for with a single input and output list for parsing, transforming,
+#' and performing all checks for all functions to run the pops c++ model
 #'
 #' @param config list of all data necessary used to set up c++ model
 #'
@@ -109,7 +109,7 @@ configuration <- function(config) {
 
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
-  
+
   # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {
     temperature_check <- secondary_raster_checks(
