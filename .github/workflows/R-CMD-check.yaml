@@ -58,13 +58,13 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
+          remotes::install_deps(dependencies = TRUE, type = "binary")
         shell: Rscript {0}
 
-      - name: Install rgdal from source
-        if: runner.os == 'macOS'
-        run: install.packages("rgdal", type = "source")
-        shell: Rscript {0}
+      # - name: Install rgdal from source
+      #   if: runner.os == 'macOS'
+      #   run: install.packages("rgdal", type = "source")
+      #   shell: Rscript {0}
 
       - name: Check
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-multiarch"), error_on = "warning")
