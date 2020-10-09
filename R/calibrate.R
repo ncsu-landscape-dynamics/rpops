@@ -453,7 +453,7 @@ calibrate <- function(infected_years_file,
 
           # calculate residual error for each time step
           diff_raster <- config$infection_years[[y]] - infected_sim
-          residual_differences[[y]] <- abs(sum(diff_raster[diff_raster != 0]))
+          residual_differences[[y]] <- sum(diff_raster[diff_raster != 0])
 
           # calculate number of infection in the simulation
           num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
