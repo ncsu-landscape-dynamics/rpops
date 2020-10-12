@@ -1,6 +1,19 @@
 # These functions are designed to reduce code complexity and the need to copy
 # and past code across main functions
 
+# Uncertainty propagation for raster data sets
+
+output_from_raster_mean_and_sd <- function(x) {
+  x[[1]] <- reclassify(x[[1]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[2]] <- reclassify(x[[2]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  fun <- function(x) {
+    round(rnorm(1, mean = x[1], sd = x[2]), digits = 0)
+  }
+  x2 <- suppressWarnings(calc(x, fun))
+  return(x2)
+}
+
+# function for getting all infected loctions
 get_all_infected <- function(rast, direction = 4) {
   p <- rasterToPoints(rast,
                       fun = function(x) {
@@ -39,14 +52,14 @@ get_all_infected <- function(rast, direction = 4) {
   return(infections)
 }
 
-
+# returns the foci of infestation for a raster grid
 get_foci <- function(rast) {
   indexes <- get_all_infected(rast)
   center <- data.frame(i = floor(mean(indexes$i)), j = floor(mean(indexes$j)))
   return(center)
 }
 
-
+# returns the border of the infected area for a raster grid
 get_infection_border <- function(rast) {
   s <- get_all_infected(rast)
   min_max_col <-
@@ -95,7 +108,8 @@ get_infection_border <- function(rast) {
   return(borders)
 }
 
-## options for get
+# returns the distances of points from either the Foci, the Border, or a set of
+# points
 get_infection_distances <- function(rast, method = "Foci", points = c()) {
   infections <- get_all_infected(rast)
   if (method == "Foci") {
@@ -123,6 +137,8 @@ get_infection_distances <- function(rast, method = "Foci", points = c()) {
   return(infections)
 }
 
+# returns a set of treatments for a group of species infestations based on
+# multiple rules
 treatment_auto <- function(rasts,
                            rasts2,
                            method = "Foci",
@@ -134,7 +150,7 @@ treatment_auto <- function(rasts,
                            direction_first = TRUE,
                            treatment_priority = "equal",
                           treatment_rank = c(0)) {
-  ## get distances and groups and group size
+  # get distances and groups and group size
   if (method == "Points") {
     points <- points
   }
