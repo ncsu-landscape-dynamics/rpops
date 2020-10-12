@@ -565,8 +565,7 @@ multispecies_checks <- function(species,
     length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and anthropogenic_kernel_type must be
-    equal"
+      "Length of list for infected_files and anthropogenic_kernel_type must be equal"
   }
 
   if (checks_passed && length(natural_dir) != length(infected_files)) {
