@@ -35,10 +35,10 @@ jobs:
       - name: Install dependencies
         run: |
           install.packages(c("remotes"))
-          remotes::install_deps(dependencies = TRUE)
+          remotes::install_deps(dependencies = TRUE, type = "binary")
           remotes::install_cran("lintr")
         shell: Rscript {0}
 
       - name: Lint
-        run: lintr::lint_package()
+        run: lintr::lint_package(linters = lintr::with_defaults(cyclocomp_linter = NULL, object_length_linter = NULL))
         shell: Rscript {0}

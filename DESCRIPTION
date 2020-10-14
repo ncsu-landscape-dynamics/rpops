@@ -12,10 +12,8 @@ Authors@R: c(
 Depends: R (>= 3.3.0)
 Imports: 
     raster,
-    rgdal,
     Rcpp (>= 0.12.19),
     stats,
-    devtools,
     foreach,
     parallel,
     doParallel,
@@ -27,6 +25,7 @@ Imports:
     utils,
     MASS,
     methods,
+    rgdal,
     igraph
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
@@ -37,8 +36,7 @@ SystemRequirements:
     C++11,
     GNU make
 Suggests: 
-    testthat,
-    covr
+    testthat
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1

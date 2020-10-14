@@ -3,6 +3,7 @@
 export(auto_manage)
 export(auto_manage_nonsteering)
 export(calibrate)
+export(configuration)
 export(pops)
 export(pops_model)
 export(pops_multirun)

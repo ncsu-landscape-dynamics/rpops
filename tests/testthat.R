@@ -1,4 +1,5 @@
 library(testthat)
+library(raster)
 library(PoPS)
 
-test_check("PoPS")
+testthat::test_check("PoPS")
