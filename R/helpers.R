@@ -13,39 +13,28 @@ output_from_raster_mean_and_sd <- function(x) {
   return(x2)
 }
 
-# function for getting all infected loctions
+# function for getting all infected locations based on rook or queens rule for
+# assessing clusters of infections.
 get_all_infected <- function(rast, direction = 4) {
+  # get infections as points
   p <- rasterToPoints(rast,
                       fun = function(x) {
                         x > 0
                         },
                       spatial = TRUE)
   infections <- data.frame(extract(rast, p, cellnumbers = TRUE))
-  if (direction == 4) {
-    cellnumbersb <-
-      data.frame(extract(rast, p, buf = xres(rast), cellnumbers = TRUE))
-  } else if (direction == 8) {
-    cellnumbersb <-
-      data.frame(extract(rast, p, buf = 1.5 * xres(rast), cellnumbers = TRUE))
+  if (direction %in% c(4, 8)) {
+    infections$i <- raster::colFromCell(rast, infections$cells)
+    infections$j <- raster::rowFromCell(rast, infections$cells)
+    r <- raster::clump(rast, direction = direction)
+    infections$group <- extract(r, p)
   } else {
     return("direction should be either of 4 or 8")
   }
-  infections$i <- infections$cells %/% ncol(rast) + 1
-  infections$j <- infections$cells %% ncol(rast)
-  infections$group <- seq(1, nrow(infections), 1)
-  cell_cols <- seq(1, ncol(cellnumbersb) - 1, 2)
-  for (i in cell_cols) {
-    infections$group[infections$cells %in% cellnumbersb[, i]] <-
-      min(infections$group[infections$cells %in% cellnumbersb[, i]])
 
-  }
-  groups <- unique(infections$group)
-  group_map <- seq(1, length(groups), 1)
-  for (m in seq_len(length(groups))) {
-    infections$group_size[infections$group == groups[m]] <-
-      nrow(infections[infections$group == groups[m], ])
-    infections$group[infections$group == groups[m]] <- group_map[m]
-
+  groups <- data.frame(table(infections$group))
+  for (m in seq_len(nrow(groups))) {
+    infections$group_size[infections$group == groups$Var1[m]] <- groups$Freq[m]
   }
   names(infections) <-
     c("cell_number", "detections", "i", "j", "group", "group_size")
