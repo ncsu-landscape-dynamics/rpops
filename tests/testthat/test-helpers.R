@@ -66,14 +66,66 @@ test_that("Get all infected returns all infected locations", {
 })
 
 
+test_that("Get all infected returns all infected locations", {
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[1]]
+  foci <- get_foci(infected)
+  expect_equal(foci$i, 1)
+  expect_equal(foci$j, 1)
+
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[2]]
+  foci <- get_foci(infected)
+  expect_equal(foci$i, 5)
+  expect_equal(foci$j, 3)
+
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[3]]
+  foci <- get_foci(infected)
+  expect_equal(foci$i, 9)
+  expect_equal(foci$j, 5)
+
+})
+
 # treatment_auto
 
 # get_infection_distances
 
 # get_infection_border
+test_that("Get all infected returns all infected locations", {
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[1]]
+  border <- get_infection_border(infected)
+  expect_equal(border$i, 1)
+  expect_equal(border$j, 1)
+  expect_equal(nrow(border), 1)
 
-# get_foci
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[2]]
+  border <- get_infection_border(infected)
+  expect_equal(nrow(border), 4)
 
-# get_all_infected
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[3]]
+  border <- get_infection_border(infected)
+  expect_equal(nrow(border), 22)
+
+})
+
+
+
+
 
 # output_from_raster_mean_and_sd
