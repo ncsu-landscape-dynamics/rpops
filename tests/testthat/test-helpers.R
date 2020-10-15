@@ -40,7 +40,7 @@ test_that("Get all infected returns all infected locations", {
   infected <- infected[[2]]
   test <- get_all_infected(infected, direction = 4)
   expect_equal(nrow(test), 4)
-  expect_equal(unique(test$group), 4)
+  expect_equal(length(unique(test$group)), 4)
   expect_equal(max(test$group_size), 1)
 
   infected_file <-
@@ -50,7 +50,7 @@ test_that("Get all infected returns all infected locations", {
   test <- get_all_infected(infected, direction = 4)
   expect_equal(nrow(test), sum(infected[infected > 0] > 0))
   expect_equal(sum(test$detections), sum(infected[infected >0]))
-  expect_equal(unique(test$group), 3)
+  expect_equal(length(unique(test$group)), 3)
   expect_equal(max(test$group_size), 16)
 
   infected_file <-
@@ -60,7 +60,7 @@ test_that("Get all infected returns all infected locations", {
   test <- get_all_infected(infected, direction = 8)
   expect_equal(nrow(test), sum(infected[infected > 0] > 0))
   expect_equal(sum(test$detections), sum(infected[infected >0]))
-  expect_equal(unique(test$group), 2)
+  expect_equal(length(unique(test$group)), 2)
   expect_equal(max(test$group_size), 16)
 
 })
@@ -93,11 +93,6 @@ test_that("Get all infected returns all infected locations", {
 
 })
 
-# treatment_auto
-
-# get_infection_distances
-
-# get_infection_border
 test_that("Get all infected returns all infected locations", {
   infected_file <-
     system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
@@ -124,8 +119,69 @@ test_that("Get all infected returns all infected locations", {
 
 })
 
+test_that("Get all infected returns all infected locations", {
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[1]]
+  distances <- get_infection_distances(infected, method = "Foci", points = c())
+  expect_equal(distances$distance, 0)
+  expect_equal(nrow(distances), 1)
 
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[1]]
+  distances <- get_infection_distances(infected, method = "Border", points = c())
+  expect_equal(distances$distance, 0)
+  expect_equal(nrow(distances), 1)
 
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[2]]
+  distances <- get_infection_distances(infected, method = "Foci", points = c())
+  expect_equal(nrow(distances), 4)
+  expect_equal(all(distances$distance > 1), TRUE)
 
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[2]]
+  distances <- get_infection_distances(infected, method = "Border", points = c())
+  expect_equal(nrow(distances), 4)
+  expect_equal(all(distances$distance == 0), TRUE)
+
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[3]]
+  distances <- get_infection_distances(infected, method = "Foci", points = c())
+  expect_equal(nrow(distances), sum(infected[infected > 0] > 0))
+  expect_equal(all(distances$distance > 0), TRUE)
+
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[3]]
+  distances <- get_infection_distances(infected, method = "Border", points = c())
+  expect_equal(nrow(distances), sum(infected[infected > 0] > 0))
+  expect_equal(nrow(distances[distances$distance == 0,]), 22)
+  expect_equal(nrow(distances[distances$distance > 0,]), 3)
+
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[3]]
+  distances <-
+    get_infection_distances(infected,
+                            method = "Points",
+                            points = data.frame(i = 1, j = 1))
+  expect_equal(nrow(distances), sum(infected[infected > 0] > 0))
+  expect_equal(nrow(distances[distances$distance > 0,]), 25)
+
+})
+
+# treatment_auto
 
 # output_from_raster_mean_and_sd
