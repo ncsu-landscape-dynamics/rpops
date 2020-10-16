@@ -34,7 +34,7 @@
 #' selection_method)
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints
+#' cellStats nlayers calc extract rasterToPoints clump
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -157,6 +157,7 @@ auto_manage <- function(infected_files,
   config$use_spreadrates <- use_spreadrates
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
+  config$species <- species
   # add function name for use in configuration function to skip
   # function specific specifc configurations namely for validation and
   # calibration.
@@ -169,74 +170,6 @@ auto_manage <- function(infected_files,
     return(config$failure)
   }
 
-  if (model_type == "SEI" && latency_period <= 0) {
-    return("Model type is set to SEI but the latency period is less than 1")
-  } else if (model_type == "SI" && latency_period > 0) {
-    latency_period <- 0
-  }
-
-  treatment_metric_check <- treatment_metric_checks(treatment_method)
-  if (!treatment_metric_check$checks_passed) {
-    return(treatment_metric_check$failed_check)
-  }
-
-  time_check <- time_checks(end_date, start_date, time_step, output_frequency)
-  if(time_check$checks_passed) {
-    number_of_time_steps <- time_check$number_of_time_steps
-    number_of_years <- time_check$number_of_years
-    number_of_outputs <- time_check$number_of_outputs
-    output_frequency <- time_check$output_frequency
-    quarantine_frequency <- output_frequency
-    quarantine_frequency_n <- output_frequency_n
-    spreadrate_frequency <- output_frequency
-    spreadrate_frequency_n <- output_frequency_n
-  } else {
-    return(time_check$failed_check)
-  }
-
-  percent_check <- percent_checks(percent_natural_dispersal)
-  if (percent_check$checks_passed){
-    use_anthropogenic_kernel <- percent_check$use_anthropogenic_kernel
-  } else {
-    return(percent_check$failed_check)
-  }
-
-  multispecies_check <- multispecies_checks(species, infected_files, reproductive_rate, percent_natural_dispersal, natural_kernel_type, anthropogenic_kernel_type,
-                                            natural_distance_scale, anthropogenic_distance_scale, natural_dir, natural_kappa, anthropogenic_dir, anthropogenic_kappa)
-  if (!multispecies_check$checks_passed){
-    return(percent_check$failed_check)
-  }
-
-  infected_check <- initial_raster_checks(infected_files)
-  if (infected_check$checks_passed) {
-    infected <- infected_check$raster
-    # if (raster::nlayers(infected) > 1) {
-    #   infected <- output_from_raster_mean_and_sd(infected)
-    # }
-  } else {
-    return(infected_check$failed_check)
-  }
-
-  host_check <- secondary_raster_checks(host_file, infected)
-  if (host_check$checks_passed) {
-    host <- host_check$raster
-    if (raster::nlayers(host) > 1) {
-      host <- output_from_raster_mean_and_sd(host)
-    }
-  } else {
-    return(host_check$failed_check)
-  }
-
-  total_populations_check <- secondary_raster_checks(total_populations_file, infected)
-  if (total_populations_check$checks_passed) {
-    total_populations <- total_populations_check$raster
-    if (raster::nlayers(total_populations) > 1) {
-      total_populations <- output_from_raster_mean_and_sd(total_populations)
-    }
-  } else {
-    return(total_populations_check$failed_check)
-  }
-
   infected_speci <- infected
   susceptible_speci <- stack()
   for (r in 1:length(infected_files)) {
@@ -247,19 +180,6 @@ auto_manage <- function(infected_files,
     susceptible_speci <- stack(susceptible_speci, susceptible)
   }
 
-  if (use_movements) {
-    movements_check <- movement_checks(movements_file, infected, start_date, end_date)
-    if (movements_check$checks_passed) {
-      movements <- movements_check$movements
-      movements_dates <- movements_check$movements_dates
-      movements_r <- movements_check$movements_r
-    } else {
-      return(movements_check$failed_check)
-    }
-  } else {
-    movements <- list(0,0,0,0,0)
-    movements_dates <- start_date
-  }
 
   infected_species <- list(as.matrix(infected_speci[[1]]))
   susceptible_species <- list(as.matrix(susceptible_speci[[1]]))
@@ -267,139 +187,6 @@ auto_manage <- function(infected_files,
     infected_species[[u]] <- as.matrix(infected_speci[[u]])
     susceptible_species[[u]] <- as.matrix(susceptible_speci[[u]])
   }
-
-  if (use_lethal_temperature == TRUE) {
-    temperature_check <- secondary_raster_checks(temperature_file, infected)
-    if (temperature_check$checks_passed) {
-      temperature_stack <- temperature_check$raster
-    } else {
-      return(temperature_check$failed_check)
-    }
-
-    temperature <- list(raster::as.matrix(temperature_stack[[1]]))
-    for(o in 2:number_of_years) {
-      temperature[[o]] <- raster::as.matrix(temperature_stack[[o]])
-    }
-  } else {
-    temperature <- host
-    raster::values(temperature) <- 1
-    temperature <- list(raster::as.matrix(temperature))
-  }
-
-  weather <- FALSE
-  if (temp == TRUE) {
-    temperature_coefficient_check <- secondary_raster_checks(temperature_coefficient_file, infected)
-    if (temperature_coefficient_check$checks_passed) {
-      temperature_coefficient <- temperature_coefficient_check$raster
-    } else {
-      return(temperature_coefficient_check$failed_check)
-    }
-
-    weather <- TRUE
-    weather_coefficient_stack <- temperature_coefficient
-    if (precip ==TRUE){
-      precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
-      if (precipitation_coefficient_check$checks_passed) {
-        precipitation_coefficient <- precipitation_coefficient_check$raster
-      } else {
-        return(precipitation_coefficient_check$failed_check)
-      }
-
-      weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
-    }
-  } else if(precip == TRUE){
-    precipitation_coefficient_check <- secondary_raster_checks(precipitation_coefficient_file, infected)
-    if (precipitation_coefficient_check$checks_passed) {
-      precipitation_coefficient <- precipitation_coefficient_check$raster
-    } else {
-      return(precipitation_coefficient_check$failed_check)
-    }
-
-    weather <- TRUE
-    weather_coefficient_stack <- precipitation_coefficient
-  }
-
-  if (weather == TRUE){
-    # weather_coefficient_stack <- raster::reclassify(weather_coefficient_stack, matrix(c(NA,0), ncol = 2, byrow = TRUE), right = NA)
-    weather_coefficient <- list(raster::as.matrix(weather_coefficient_stack[[1]]))
-    for(h in 2:number_of_time_steps) {
-      weather_coefficient[[h]] <- raster::as.matrix(weather_coefficient_stack[[h]])
-    }
-  } else {
-    weather_coefficient <- host
-    raster::values(weather_coefficient) <- 1
-    weather_coefficient <- list(raster::as.matrix(weather_coefficient))
-  }
-
-  if (management == TRUE) {
-    treatments_check <- secondary_raster_checks(treatments_file, infected)
-    if (treatments_check$checks_passed) {
-      treatment_stack <- treatments_check$raster
-    } else {
-      return(treatments_check$failed_check)
-    }
-
-    treatment_check <- treatment_checks(treatment_stack, treatments_file, pesticide_duration, treatment_dates, pesticide_efficacy)
-    if (treatment_check$checks_passed) {
-      treatment_maps <- treatment_check$treatment_maps
-    } else {
-      return(treatment_check$failed_check)
-    }
-  } else {
-    treatment_map <- host
-    raster::values(treatment_map) <- 0
-    treatment_maps <- list(raster::as.matrix(treatment_map))
-    treatment_dates <- c(start_date)
-  }
-
-  ew_res <- raster::xres(susceptible)
-  ns_res <- raster::yres(susceptible)
-  num_cols <- raster::ncol(susceptible)
-  num_rows <- raster::nrow(susceptible)
-
-  mortality_tracker <- infected[[1]]
-  raster::values(mortality_tracker) <- 0
-
-  total_populations <- raster::as.matrix(total_populations)
-  mortality_tracker <- raster::as.matrix(mortality_tracker)
-  mortality <- mortality_tracker
-  resistant <- mortality_tracker
-  exposed <- list(mortality_tracker)
-
-  if (latency_period > 1){
-    for (ex in 2:(latency_period + 1)) {
-      exposed[[ex]] <- mortality_tracker
-    }
-  }
-  exposed_list <- list(exposed)
-
-  if (length(infected_files) > 1) {
-    for (z in 2:length(infected_files)) {
-      exposed_list[[z]] <- exposed
-    }
-  }
-
-  if (model_type == "SEI" & start_exposed) {
-    exposed[[latency_period + 1]] <- infected
-    infected <- mortality_tracker
-  }
-
-  if (use_quarantine){
-    quarantine_check <- secondary_raster_checks(quarantine_areas_file, host)
-    if (quarantine_check$checks_passed) {
-      quarantine_areas <- quarantine_check$raster
-      quarantine_areas <- raster::as.matrix(quarantine_areas)
-    } else {
-      return(quarantine_check$failed_check)
-    }
-  } else {
-    # set quarantine areas to all zeros (meaning no quarantine areas are considered)
-    quarantine_areas <- mortality_tracker
-  }
-
-  years <- seq(year(start_date), year(end_date), 1)
-  rcl <- c(1, Inf, 1, 0, 0.99, NA)
-  rclmat <- matrix(rcl, ncol=3, byrow=TRUE)
 
   ## management module information
   num_cells <- round((budget/cost_per_meter_sq)/(ew_res*ns_res))
