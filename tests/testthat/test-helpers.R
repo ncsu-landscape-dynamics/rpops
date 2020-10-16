@@ -222,6 +222,7 @@ test_that("Automated treatment location selection", {
                                direction_first = TRUE,
                                treatment_priority = "equal",
                                treatment_rank = c(0))
+  expect_equal(sum(treatments[treatments > 0]), number_of_locations + 0.5)
 
   number_of_locations <- 5
   treatments <- treatment_auto(infected,
@@ -235,6 +236,7 @@ test_that("Automated treatment location selection", {
                                direction_first = TRUE,
                                treatment_priority = "equal",
                                treatment_rank = c(0))
+  expect_equal(sum(treatments[treatments > 0]), number_of_locations)
 
 
   host_file <-
@@ -260,7 +262,7 @@ test_that("Automated treatment location selection", {
                                direction_first = TRUE,
                                treatment_priority = "ranked",
                                treatment_rank = c(2,1))
-  expect_equal()
+  expect_equal(sum(treatments[treatments > 0]), number_of_locations)
 
 })
 
