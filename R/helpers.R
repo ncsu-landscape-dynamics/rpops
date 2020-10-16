@@ -138,7 +138,7 @@ treatment_auto <- function(rasts,
                            buffer_cells = 1.5,
                            direction_first = TRUE,
                            treatment_priority = "equal",
-                          treatment_rank = c(0)) {
+                           treatment_rank = c(0)) {
   # get distances and groups and group size
   if (method == "Points") {
     points <- points
@@ -154,13 +154,14 @@ treatment_auto <- function(rasts,
                          indices = rep(1, raster::nlayers(rasts2)),
                          fun = sum)
   } else if (treatment_priority == "ranked") {
-    if (all(treatment_rank == c(1, 0))) {
-      rasts <- rasts
-      rasts2 <- rasts2
-    } else if (all(treatment_rank == c(0, 1))) {
-      rasts <- stack(rasts[[2]], rasts[[1]])
-      rasts2 <- stack(rasts2[[2]], rasts2[[1]])
+    raste <- stack()
+    raste2 <- stack()
+    for (r in seq_len(length(treatment_rank))) {
+      raste <- stack(raste, rasts[[match(r, treatment_rank)]])
+      raste2 <- stack(raste2, rasts2[[match(r, treatment_rank)]])
     }
+    rasts <- raste
+    rasts2 <- raste2
   }
 
   total_infs <- c(0)
@@ -181,8 +182,8 @@ treatment_auto <- function(rasts,
       infections <-
         get_infection_distances(rast = rast, method = method, points = points)
       infections$host <- 0
-      for (p in seq_len(length(infections))) {
-        infections$host <- rast2[infections$i[p], infections$j[p]]
+      for (p in seq_len(nrow(infections))) {
+        infections$host[p] <- rast2[infections$i[p], infections$j[p]]
       }
 
       if (priority == "group size") {
@@ -221,6 +222,8 @@ treatment_auto <- function(rasts,
             j <- managed_group$j[m]
             i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
             j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
+            i_s <- i_s[i_s > 0]
+            j_s <- j_s[j_s > 0]
             for (s in seq_len(length(i_s))) {
               for (n in seq_len(length(j_s))) {
                 if (treatment[i_s[s], j_s[n]] < 1 &
@@ -285,6 +288,8 @@ treatment_auto <- function(rasts,
           }
           i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
           j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
+          i_s <- i_s[i_s > 0]
+          j_s <- j_s[j_s > 0]
           for (s in seq_len(length(i_s))) {
             for (n in seq_len(length(j_s))) {
               if (cells_treated >= number_of_locations) {
@@ -339,6 +344,8 @@ treatment_auto <- function(rasts,
           }
           i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
           j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
+          i_s <- i_s[i_s > 0]
+          j_s <- j_s[j_s > 0]
           for (s in seq_len(length(i_s))) {
             for (n in seq_len(length(j_s))) {
               if (cells_treated >= number_of_locations) {

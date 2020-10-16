@@ -182,6 +182,85 @@ test_that("Get all infected returns all infected locations", {
 
 })
 
+test_that("Raster mean and sd returns a raster from the mean and sd", {
+
+  host_file <-
+    system.file("extdata", "simple20x20", "host_w_sd.tif", package = "PoPS")
+  host <- stack(host_file)
+  hosts <- output_from_raster_mean_and_sd(host)
+  hosts2 <- output_from_raster_mean_and_sd(host)
+  expect_true(any(hosts[hosts > host[[1]]] > 0))
+  expect_true(any(hosts[hosts == host[[1]]] > 0))
+  expect_true(any(hosts[hosts < host[[1]]] > 0))
+  expect_true(any(hosts2[hosts2 > host[[1]]] > 0))
+  expect_true(any(hosts2[hosts2 == host[[1]]] > 0))
+  expect_true(any(hosts2[hosts2 < host[[1]]] > 0))
+
+})
+
 # treatment_auto
 
-# output_from_raster_mean_and_sd
+test_that("Automated treatment location selection", {
+
+  host_file <-
+    system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
+  host <- stack(host_file)
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected <- infected[[3]]
+  number_of_locations <- 2
+
+  treatments <- treatment_auto(infected,
+                               host,
+                               method = "Foci",
+                               priority = "group size",
+                               number_of_locations = number_of_locations,
+                               points = c(),
+                               treatment_efficacy = 1,
+                               buffer_cells = 1.5,
+                               direction_first = TRUE,
+                               treatment_priority = "equal",
+                               treatment_rank = c(0))
+
+  number_of_locations <- 5
+  treatments <- treatment_auto(infected,
+                               host,
+                               method = "Points",
+                               priority = "host",
+                               number_of_locations = number_of_locations,
+                               points = data.frame(i = 1, j = 1),
+                               treatment_efficacy = 1,
+                               buffer_cells = 1.5,
+                               direction_first = TRUE,
+                               treatment_priority = "equal",
+                               treatment_rank = c(0))
+
+
+  host_file <-
+    system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
+  host <- stack(host_file)
+  infected_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected <- stack(infected_file)
+  infected1 <- infected[[3]]
+  infected2 <- infected[[2]]
+  infecteds <- stack(infected1, infected2)
+  hosts <- stack(host, host)
+  number_of_locations <- 7
+
+  treatments <- treatment_auto(infecteds,
+                               hosts,
+                               method = "Border",
+                               priority = "infected",
+                               number_of_locations = number_of_locations,
+                               points = c(),
+                               treatment_efficacy = 1,
+                               buffer_cells = 1,
+                               direction_first = TRUE,
+                               treatment_priority = "ranked",
+                               treatment_rank = c(2,1))
+  expect_equal()
+
+})
+
