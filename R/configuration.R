@@ -453,5 +453,16 @@ configuration <- function(config) {
     config$current_bin <- 1
   }
 
+  if (config$function_name == "auto-manage") {
+    ## management module information
+    config$num_cells <-
+      round((config$budget / config$cost_per_meter_sq) /
+              (config$ew_res * config$ns_res))
+    config$buffer_cells <- config$buffer/config$ew_res
+    config$years_simulated <- length(config$years)
+
+  }
+
+
   return(config)
   }

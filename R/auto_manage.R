@@ -180,7 +180,6 @@ auto_manage <- function(infected_files,
     susceptible_speci <- stack(susceptible_speci, susceptible)
   }
 
-
   infected_species <- list(as.matrix(infected_speci[[1]]))
   susceptible_species <- list(as.matrix(susceptible_speci[[1]]))
   for(u in 2:nlayers(infected_speci)) {
@@ -188,14 +187,10 @@ auto_manage <- function(infected_files,
     susceptible_species[[u]] <- as.matrix(susceptible_speci[[u]])
   }
 
-  ## management module information
-  num_cells <- round((budget/cost_per_meter_sq)/(ew_res*ns_res))
-  buffer_cells <- buffer/ew_res
-  years_simulated <- length(years)
+  config$random_seeds <-
+    round(stats::runif(config$number_of_iterations, 1, 1000000))
 
-  random_seeds <- round(stats::runif(number_of_iterations, 1, 1000000))
-
-  treatment_speci <- raster()
+  # treatment_speci <- raster()
 
   i <- p <- y <- NULL
 
@@ -205,18 +200,18 @@ auto_manage <- function(infected_files,
     core_count <- number_of_cores
   }
 
-  run_years <-   foreach(y = 1:years_simulated, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate")) %do% {
+  run_years <-   foreach(y = 1:config$number_of_outputs, .combine = rbind, .packages = c("raster", "PoPS", "foreach", "lubridate")) %do% {
 
-    if (treatment_priority == "equal") {
-      treatment_speci <- raster::stackApply(infected_speci, indices = rep(1, raster::nlayers(infected_speci)), fun = sum)
-      print("works")
-    } else if (treatment_priority == "ranked") {
-      for (m in 1:raster::nlayers(infected_speci)) {
-        if (treatment_rank[[m]]) {
-          treatment_speci <- infected_speci[[m]]
-        }
-      }
-    }
+    # if (treatment_priority == "equal") {
+    #   treatment_speci <- raster::stackApply(infected_speci, indices = rep(1, raster::nlayers(infected_speci)), fun = sum)
+    #   print("works")
+    # } else if (treatment_priority == "ranked") {
+    #   for (m in 1:raster::nlayers(infected_speci)) {
+    #     if (treatment_rank[[m]]) {
+    #       treatment_speci <- infected_speci[[m]]
+    #     }
+    #   }
+    # }
     print("start")
     treatment <- treatment_auto(rasts = infected_speci, rasts2 = susceptible_speci,
                                method = selection_method, priority = selection_priority,
@@ -411,7 +406,7 @@ auto_manage <- function(infected_files,
 
     start_date <- paste(year(start_date) + 1, "-01", "-01", sep = "")
     end_date <- end_date
-    if (y < years_simulated) {
+    if (y < config$number_of_outputs) {
       years <- seq(year(start_date), year(end_date), 1)
     } else {
       years <- c(year(start_date))
@@ -445,18 +440,18 @@ auto_manage <- function(infected_files,
     east_rats <- list()
     north_rats <- list()
     south_rats <- list()
-    for (l in 1:years_simulated) {
-      year_names[l] <- paste(years - years_simulated - 1 + l)
+    for (l in 1:config$number_of_outputs) {
+      year_names[l] <- paste(years - config$number_of_outputs - 1 + l)
       infecs[[l]] <- run_years[[l]][[sp]][[1]]
-      susceps[[l]] <- run_years[[l + years_simulated]][[sp]][[1]]
-      probs[[l]] <- run_years[[l + years_simulated * 2]][[sp]][[1]]
-      number_infects[[l]] <- run_years[[l + years_simulated * 3]][[sp]][[1]]
-      infected_ars[[l]] <- run_years[[l + years_simulated * 4]][[sp]][[1]]
-      west_rats[[l]] <- run_years[[l + years_simulated * 5]][[sp]][[1]]
-      east_rats[[l]] <- run_years[[l + years_simulated * 6]][[sp]][[1]]
-      north_rats[[l]] <- run_years[[l + years_simulated * 7]][[sp]][[1]]
-      south_rats[[l]] <- run_years[[l + years_simulated * 8]][[sp]][[1]]
-      treatments[[l]] <- run_years[[l + years_simulated * 9]][[1]]
+      susceps[[l]] <- run_years[[l + config$number_of_outputs]][[sp]][[1]]
+      probs[[l]] <- run_years[[l + config$number_of_outputs * 2]][[sp]][[1]]
+      number_infects[[l]] <- run_years[[l + config$number_of_outputs * 3]][[sp]][[1]]
+      infected_ars[[l]] <- run_years[[l + config$number_of_outputs * 4]][[sp]][[1]]
+      west_rats[[l]] <- run_years[[l + config$number_of_outputs * 5]][[sp]][[1]]
+      east_rats[[l]] <- run_years[[l + config$number_of_outputs * 6]][[sp]][[1]]
+      north_rats[[l]] <- run_years[[l + config$number_of_outputs * 7]][[sp]][[1]]
+      south_rats[[l]] <- run_years[[l + config$number_of_outputs * 8]][[sp]][[1]]
+      treatments[[l]] <- run_years[[l + config$number_of_outputs * 9]][[1]]
     }
     names(infecs) <- year_names
     names(susceps) <- year_names
