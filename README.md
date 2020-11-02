@@ -51,7 +51,7 @@ you are using for example:
 
 ## How to install
 
-Install Rtools(https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
+Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
 running the code below and changing the ref to match the latest semantic version
 or the specific version that you are looking to install.
 ```R
