@@ -60,7 +60,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE
@@ -363,7 +363,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE

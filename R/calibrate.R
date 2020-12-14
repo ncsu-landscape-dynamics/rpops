@@ -377,7 +377,7 @@ calibrate <- function(infected_years_file,
             proposed_anthropogenic_distance_scale <-
               round(runif(1, 30, 80), digits = 0) * 100
           } else {
-            proposed_anthropogenic_distance_scale <- 0
+            proposed_anthropogenic_distance_scale <- 0.1
           }
           if (params_to_estimate[5]) {
             proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
@@ -602,7 +602,7 @@ calibrate <- function(infected_years_file,
       proposed_anthropogenic_distance_scale <-
         round(runif(1, 30, 80), digits = 0) * 100
     } else {
-      proposed_anthropogenic_distance_scale <- 0
+      proposed_anthropogenic_distance_scale <- 0.1
     }
     if (config$params_to_estimate[5]) {
       proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
