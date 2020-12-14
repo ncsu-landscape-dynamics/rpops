@@ -1,6 +1,6 @@
 #' PoPS (configuration
 #'
-#' Function for with a single input and output list for parsing, transforming,
+#' Function with a single input and output list for parsing, transforming,
 #' and performing all checks for all functions to run the pops c++ model
 #'
 #' @param config list of all data necessary used to set up c++ model
