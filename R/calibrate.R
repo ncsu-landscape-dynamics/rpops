@@ -394,11 +394,11 @@ calibrate <- function(infected_years_file,
           # parameters are within their allowed range
           proposed_parameters <-
             mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
-          while (proposed_parameters[1] < 0 |
-                 proposed_parameters[2] < 0 |
+          while (proposed_parameters[1] <= 0 |
+                 proposed_parameters[2] <= 0 |
                  proposed_parameters[3] > 1 |
                  proposed_parameters[3] < 0 |
-                 proposed_parameters[4] < 0 |
+                 proposed_parameters[4] <= 0 |
                  proposed_parameters[5] < 0 |
                  proposed_parameters[6] < 0) {
             proposed_parameters <-
