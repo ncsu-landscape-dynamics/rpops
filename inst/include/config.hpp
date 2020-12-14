@@ -66,6 +66,7 @@ public:
     double anthro_scale;
     std::string anthro_direction;
     double anthro_kappa;
+    double shape{1.0};
     // Treatments
     bool use_treatments{false};
     // Mortality

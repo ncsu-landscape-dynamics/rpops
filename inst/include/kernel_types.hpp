@@ -56,6 +56,14 @@ enum class DispersalKernelType
     Exponential,  //!< Exponential dispersal kernel
     Uniform,  //!< Random uniform dispersal kernel
     DeterministicNeighbor,  //!< Deterministic immediate neighbor dispersal kernel
+    PowerLaw,  //!< Power law dispersal kernel
+    HyperbolicSecant,  //!< Hyperbolic secant dispersal kernel
+    Gamma,  //!< Gamma dispersal kernel
+    ExponentialPower,  //!< Exponential power dispersal kernel
+    Weibull,  //!< Weibull dispersal kernel
+    Normal,  //!< Normal dispersal kernel
+    LogNormal,  //!< Log-normal dispersal kernel
+    Logistic,  //!< Logistic dispersal kernel
     None,  //!< No dispersal kernel (no spread)
 };
 
@@ -66,14 +74,43 @@ enum class DispersalKernelType
  */
 inline DispersalKernelType kernel_type_from_string(const std::string& text)
 {
-    if (text == "cauchy")
+    if (text == "cauchy" || text == "Cauchy")
         return DispersalKernelType::Cauchy;
-    else if (text == "exponential")
+    else if (text == "exponential" || text == "Exponential")
         return DispersalKernelType::Exponential;
-    else if (text == "uniform")
+    else if (text == "uniform" || text == "Uniform")
         return DispersalKernelType::Uniform;
-    else if (text == "deterministic-neighbor" || text == "deterministic_neighbor")
+    else if (
+        text == "deterministic neighbor" || text == "deterministic-neighbor"
+        || text == "Deterministic-neighbor" || text == "Deterministic-Neighbor"
+        || text == "Deterministic neighbor" || text == "Deterministic Neighbor")
         return DispersalKernelType::DeterministicNeighbor;
+    else if (
+        text == "power law" || text == "power-law" || text == "Power-law"
+        || text == "Power-Law" || text == "Power Law" || text == "Power law")
+        return DispersalKernelType::PowerLaw;
+    else if (
+        text == "hyperbolic secant" || text == "hyperbolic-secant"
+        || text == "Hyperbolic-secant" || text == "Hyperbolic-Secant"
+        || text == "Hyperbolic secant" || text == "Hyperbolic Secant")
+        return DispersalKernelType::HyperbolicSecant;
+    else if (text == "gamma" || text == "Gamma")
+        return DispersalKernelType::Gamma;
+    else if (
+        text == "exponential power" || text == "exponential-power"
+        || text == "Exponential-power" || text == "Exponential-Power"
+        || text == "Exponential power" || text == "Exponential Power")
+        return DispersalKernelType::ExponentialPower;
+    else if (text == "weibull" || text == "Weibull")
+        return DispersalKernelType::Weibull;
+    else if (text == "normal" || text == "Normal")
+        return DispersalKernelType::Normal;
+    else if (
+        text == "log normal" || text == "log-normal" || text == "Log-normal"
+        || text == "Log-Normal" || text == "Log normal" || text == "Log Normal")
+        return DispersalKernelType::LogNormal;
+    else if (text == "logistic" || text == "Logistic")
+        return DispersalKernelType::Logistic;
     else if (text == "none" || text == "None" || text == "NONE" || text.empty())
         return DispersalKernelType::None;
     else

@@ -169,24 +169,23 @@ public:
      * @param susceptible Currently susceptible hosts
      * @param temperature Spatially explicit temperature
      * @param lethal_temperature temperature at which lethal conditions occur
-     * @param spatial_indices used to run model only where host are known to occur
+     * @param suitable_cells used to run model only where host are known to occur
      */
     void remove(
         IntegerRaster& infected,
         IntegerRaster& susceptible,
         const FloatRaster& temperature,
         double lethal_temperature,
-        const std::vector<std::vector<int>>& spatial_indices)
+        const std::vector<std::vector<int>>& suitable_cells)
     {
-        for (unsigned i = 0; i < spatial_indices.size(); i++) {
-            auto spatial_index = spatial_indices[i];
-            int row_index = spatial_index[0];
-            int col_index = spatial_index[1];
-            if (temperature(row_index, col_index) < lethal_temperature) {
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (temperature(i, j) < lethal_temperature) {
                 // move infested/infected host back to susceptible pool
-                susceptible(row_index, col_index) += infected(row_index, col_index);
+                susceptible(i, j) += infected(i, j);
                 // remove all infestation/infection in the infected class
-                infected(row_index, col_index) = 0;
+                infected(i, j) = 0;
             }
         }
     }
@@ -198,30 +197,26 @@ public:
         int first_mortality_year,
         IntegerRaster& mortality,
         std::vector<IntegerRaster>& mortality_tracker_vector,
-        const std::vector<std::vector<int>>& spatial_indices)
+        const std::vector<std::vector<int>>& suitable_cells)
     {
         if (current_year >= (first_mortality_year)) {
             int mortality_current_year = 0;
             int max_year_index = current_year - first_mortality_year;
 
-            for (unsigned i = 0; i < spatial_indices.size(); i++) {
-                auto spatial_index = spatial_indices[i];
-                int row_index = spatial_index[0];
-                int col_index = spatial_index[1];
+            for (auto indices : suitable_cells) {
+                int i = indices[0];
+                int j = indices[1];
                 for (int year_index = 0; year_index <= max_year_index; year_index++) {
                     int mortality_in_year_index = 0;
-                    if (mortality_tracker_vector[year_index](row_index, col_index)
-                        > 0) {
+                    if (mortality_tracker_vector[year_index](i, j) > 0) {
                         mortality_in_year_index =
-                            mortality_rate
-                            * mortality_tracker_vector[year_index](
-                                row_index, col_index);
-                        mortality_tracker_vector[year_index](row_index, col_index) -=
+                            mortality_rate * mortality_tracker_vector[year_index](i, j);
+                        mortality_tracker_vector[year_index](i, j) -=
                             mortality_in_year_index;
-                        mortality(row_index, col_index) += mortality_in_year_index;
+                        mortality(i, j) += mortality_in_year_index;
                         mortality_current_year += mortality_in_year_index;
-                        if (infected(row_index, col_index) > 0) {
-                            infected(row_index, col_index) -= mortality_in_year_index;
+                        if (infected(i, j) > 0) {
+                            infected(i, j) -= mortality_in_year_index;
                         }
                     }
                 }
@@ -344,31 +339,29 @@ public:
         bool weather,
         const FloatRaster& weather_coefficient,
         double reproductive_rate,
-        const std::vector<std::vector<int>>& spatial_indices)
+        const std::vector<std::vector<int>>& suitable_cells)
     {
         double lambda = reproductive_rate;
-        for (unsigned i = 0; i < spatial_indices.size(); i++) {
-            auto spatial_index = spatial_indices[i];
-            int row_index = spatial_index[0];
-            int col_index = spatial_index[1];
-            if (infected(row_index, col_index) > 0) {
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (infected(i, j) > 0) {
                 if (weather)
-                    lambda =
-                        reproductive_rate * weather_coefficient(row_index, col_index);
+                    lambda = reproductive_rate * weather_coefficient(i, j);
                 int dispersers_from_cell = 0;
                 if (dispersers_stochasticity_) {
                     std::poisson_distribution<int> distribution(lambda);
-                    for (int k = 0; k < infected(row_index, col_index); k++) {
+                    for (int k = 0; k < infected(i, j); k++) {
                         dispersers_from_cell += distribution(generator_);
                     }
                 }
                 else {
-                    dispersers_from_cell = lambda * infected(row_index, col_index);
+                    dispersers_from_cell = lambda * infected(i, j);
                 }
-                dispersers(row_index, col_index) = dispersers_from_cell;
+                dispersers(i, j) = dispersers_from_cell;
             }
             else {
-                dispersers(row_index, col_index) = 0;
+                dispersers(i, j) = 0;
             }
         }
     }
@@ -427,22 +420,19 @@ public:
         bool weather,
         const FloatRaster& weather_coefficient,
         DispersalKernel& dispersal_kernel,
-        const std::vector<std::vector<int>>& spatial_indices,
+        const std::vector<std::vector<int>>& suitable_cells,
         double establishment_probability = 0.5)
     {
         std::uniform_real_distribution<double> distribution_uniform(0.0, 1.0);
         int row;
         int col;
 
-        for (unsigned i = 0; i < spatial_indices.size(); i++) {
-            auto spatial_index = spatial_indices[i];
-            int row_index = spatial_index[0];
-            int col_index = spatial_index[1];
-            if (dispersers(row_index, col_index) > 0) {
-                for (int k = 0; k < dispersers(row_index, col_index); k++) {
-                    std::tie(row, col) =
-                        dispersal_kernel(generator_, row_index, col_index);
-
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (dispersers(i, j) > 0) {
+                for (int k = 0; k < dispersers(i, j); k++) {
+                    std::tie(row, col) = dispersal_kernel(generator_, i, j);
                     if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
                         // export dispersers dispersed outside of modeled area
                         outside_dispersers.emplace_back(std::make_tuple(row, col));
@@ -457,8 +447,7 @@ public:
                             establishment_tester = distribution_uniform(generator_);
 
                         if (weather)
-                            probability_of_establishment *=
-                                weather_coefficient(row_index, col_index);
+                            probability_of_establishment *= weather_coefficient(i, j);
                         if (establishment_tester < probability_of_establishment) {
                             exposed_or_infected(row, col) += 1;
                             susceptible(row, col) -= 1;
@@ -593,7 +582,7 @@ public:
         bool weather,
         const FloatRaster& weather_coefficient,
         DispersalKernel& dispersal_kernel,
-        const std::vector<std::vector<int>>& spatial_indices,
+        const std::vector<std::vector<int>>& suitable_cells,
         double establishment_probability = 0.5)
     {
         auto* infected_or_exposed = &infected;
@@ -612,7 +601,7 @@ public:
             weather,
             weather_coefficient,
             dispersal_kernel,
-            spatial_indices,
+            suitable_cells,
             establishment_probability);
         if (model_type_ == ModelType::SusceptibleExposedInfected) {
             this->infect_exposed(step, exposed, infected, mortality_tracker);

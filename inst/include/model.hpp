@@ -131,7 +131,7 @@ public:
         QuarantineEscape<IntegerRaster>& quarantine,  // out
         const IntegerRaster& quarantine_areas,
         const std::vector<std::vector<int>> movements,
-        const std::vector<std::vector<int>>& spatial_indices)
+        const std::vector<std::vector<int>>& suitable_cells)
     {
         RadialDispersalKernel<IntegerRaster> natural_radial_kernel(
             config_.ew_res,
@@ -140,9 +140,7 @@ public:
             config_.natural_scale,
             direction_from_string(config_.natural_direction),
             config_.natural_kappa,
-            config_.deterministic,
-            dispersers,
-            config_.dispersal_percentage);
+            config_.shape);
         RadialDispersalKernel<IntegerRaster> anthro_radial_kernel(
             config_.ew_res,
             config_.ns_res,
@@ -150,19 +148,37 @@ public:
             config_.anthro_scale,
             direction_from_string(config_.anthro_direction),
             config_.anthro_kappa,
-            config_.deterministic,
+            config_.shape);
+        DeterministicDispersalKernel<IntegerRaster> natural_deterministic_kernel(
+            natural_kernel,
             dispersers,
-            config_.dispersal_percentage);
+            config_.dispersal_percentage,
+            config_.ew_res,
+            config_.ns_res,
+            config_.natural_scale,
+            config_.shape);
+        DeterministicDispersalKernel<IntegerRaster> anthro_deterministic_kernel(
+            anthro_kernel,
+            dispersers,
+            config_.dispersal_percentage,
+            config_.ew_res,
+            config_.ns_res,
+            config_.anthro_scale,
+            config_.shape);
         SwitchDispersalKernel<IntegerRaster> natural_selectable_kernel(
             natural_kernel,
             natural_radial_kernel,
+            natural_deterministic_kernel,
             uniform_kernel,
-            natural_neighbor_kernel);
+            natural_neighbor_kernel,
+            config_.deterministic);
         SwitchDispersalKernel<IntegerRaster> anthro_selectable_kernel(
             anthro_kernel,
             anthro_radial_kernel,
+            anthro_deterministic_kernel,
             uniform_kernel,
-            anthro_neighbor_kernel);
+            anthro_neighbor_kernel,
+            config_.deterministic);
         DispersalKernel<IntegerRaster> dispersal_kernel(
             natural_selectable_kernel,
             anthro_selectable_kernel,
@@ -179,7 +195,7 @@ public:
                 susceptible,
                 temperatures[lethal_step],
                 config_.lethal_temperature,
-                spatial_indices);
+                suitable_cells);
         }
         // actual spread
         if (config_.spread_schedule()[step]) {
@@ -189,7 +205,7 @@ public:
                 config_.weather,
                 weather_coefficient,
                 config_.reproductive_rate,
-                spatial_indices);
+                suitable_cells);
 
             simulation_.disperse_and_infect(
                 step,
@@ -203,7 +219,7 @@ public:
                 config_.weather,
                 weather_coefficient,
                 dispersal_kernel,
-                spatial_indices,
+                suitable_cells,
                 config_.establishment_probability);
             if (config_.use_movements) {
                 last_index = simulation_.movement(
@@ -220,7 +236,7 @@ public:
         // treatments
         if (config_.use_treatments) {
             bool managed = treatments.manage(
-                step, infected, exposed, susceptible, resistant, spatial_indices);
+                step, infected, exposed, susceptible, resistant, suitable_cells);
             if (managed && config_.use_mortality) {
                 // same conditions as the mortality code below
                 // TODO: make the mortality timing available as a separate function in
@@ -230,7 +246,7 @@ public:
                         mortality_simulation_year - (config_.first_mortality_year - 1);
                     for (int age = 0; age <= max_index; age++) {
                         treatments.manage_mortality(
-                            step, mortality_tracker[age], spatial_indices);
+                            step, mortality_tracker[age], suitable_cells);
                     }
                 }
             }
@@ -255,20 +271,20 @@ public:
                 config_.first_mortality_year - 1,
                 died,
                 mortality_tracker,
-                spatial_indices);
+                suitable_cells);
         }
         // compute spread rate
         if (config_.use_spreadrates && config_.spread_rate_schedule()[step]) {
             unsigned rates_step =
                 simulation_step_to_action_step(config_.spread_rate_schedule(), step);
-            spread_rate.compute_step_spread_rate(infected, rates_step, spatial_indices);
+            spread_rate.compute_step_spread_rate(infected, rates_step, suitable_cells);
         }
         // compute quarantine escape
         if (config_.use_quarantine && config_.quarantine_schedule()[step]) {
             unsigned action_step =
                 simulation_step_to_action_step(config_.quarantine_schedule(), step);
             quarantine.infection_escape_quarantine(
-                infected, quarantine_areas, action_step, spatial_indices);
+                infected, quarantine_areas, action_step, suitable_cells);
         }
     }
 };

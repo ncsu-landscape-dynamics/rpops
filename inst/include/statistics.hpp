@@ -24,14 +24,13 @@ namespace pops {
  */
 template<typename IntegerRaster>
 unsigned sum_of_infected(
-    const IntegerRaster& infected, const std::vector<std::vector<int>>& spatial_indices)
+    const IntegerRaster& infected, const std::vector<std::vector<int>>& suitable_cells)
 {
     unsigned sum = 0;
-    for (unsigned i = 0; i < spatial_indices.size(); i++) {
-        auto spatial_index = spatial_indices[i];
-        int row_index = spatial_index[0];
-        int col_index = spatial_index[1];
-        sum += infected(row_index, col_index);
+    for (auto indices : suitable_cells) {
+        int i = indices[0];
+        int j = indices[1];
+        sum += infected(i, j);
     }
     return sum;
 }
@@ -44,14 +43,13 @@ double area_of_infected(
     const IntegerRaster& infected,
     double ew_res,
     double ns_res,
-    const std::vector<std::vector<int>>& spatial_indices)
+    const std::vector<std::vector<int>>& suitable_cells)
 {
     unsigned cells = 0;
-    for (unsigned i = 0; i < spatial_indices.size(); i++) {
-        auto spatial_index = spatial_indices[i];
-        int row_index = spatial_index[0];
-        int col_index = spatial_index[1];
-        if (infected(row_index, col_index) > 0)
+    for (auto indices : suitable_cells) {
+        int i = indices[0];
+        int j = indices[1];
+        if (infected(i, j) > 0)
             cells++;
     }
     return cells * ew_res * ns_res;
