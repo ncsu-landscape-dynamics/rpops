@@ -307,9 +307,10 @@ calibrate <- function(infected_years_file,
     acceptance_rate <- 1
     acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
     infected_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
-    locs_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
-    dist_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
-    res_error_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
+    location_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
+    distance_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
+    residual_error_checks <-
+      matrix(ncol = 1, nrow = config$number_of_generations)
 
     # calculate comparison metrics for input data (still need to add in
     # configuration metrics to this)
@@ -343,12 +344,12 @@ calibrate <- function(infected_years_file,
     }
     # assign thresholds for summary static values to be compared to the
     # difference between the observed and simulated data
-    locs_check <- config$checks[1] # number of locations
-    dist_check <- config$checks[2] # minimum spatial distance
-    res_error_check <- config$checks[3] # residual error used when observations
-    # are very accurate with very few areas not sampled
-    inf_check <- config$checks[4] # number of pests found (either infected trees
-    # or pests)
+    location_check <- config$checks[1] # number of locations
+    distance_check <- config$checks[2] # minimum spatial distance
+    residual_error_check <- config$checks[3] # residual error used when
+    # observations are very accurate with very few areas not sampled
+    infected_check <- config$checks[4] # number of pests found (either infected
+    # trees or pests)
 
     # create raster data structures for storing simulated data for comparison
     infected_sims <- config$infection_years
@@ -431,9 +432,10 @@ calibrate <- function(infected_years_file,
         infected_sim_points <-
           vector(mode = "list", length = config$number_of_outputs)
         dist <- vector(mode = "list", length = config$number_of_outputs)
-        dist_diffs <- vector(mode = "list", length = config$number_of_outputs)
-        residual_diffs <- c()
-        residual_diffs <- length(config$number_of_outputs)
+        distance_differences <-
+          vector(mode = "list", length = config$number_of_outputs)
+        residual_differences <- c()
+        residual_differences <- length(config$number_of_outputs)
 
         # calculate comparison metrics for simulation data for each time step in
         # the simulation
@@ -452,7 +454,7 @@ calibrate <- function(infected_years_file,
 
           # calculate residual error for each time step
           diff_raster <- config$infection_years[[y]] - infected_sim
-          residual_diffs[[y]] <- abs(sum(diff_raster[diff_raster != 0]))
+          residual_differences[[y]] <- sum(diff_raster[diff_raster != 0])
 
           # calculate number of infection in the simulation
           num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
@@ -477,9 +479,9 @@ calibrate <- function(infected_years_file,
                             lonlat = FALSE
               )
             if (class(dist) == "matrix") {
-              dist_diffs[[y]] <- apply(dist[[y]], 2, min)
+              distance_differences[[y]] <- apply(dist[[y]], 2, min)
             } else {
-              dist_diffs[[y]] <- dist[[y]]
+              distance_differences[[y]] <- dist[[y]]
             }
           }
         }
@@ -490,43 +492,47 @@ calibrate <- function(infected_years_file,
               "number of locations, number of infections, and total distance"
             )
         ) {
-          all_distances <- function(dist_diffs) {
-            dist_diffs <- round(sqrt(sum(dist_diffs^2)), digits = 0)
-            return(dist_diffs)
+          all_distances <- function(distance_differences) {
+            distance_differences <-
+              round(sqrt(sum(distance_differences^2)), digits = 0)
+            return(distance_differences)
           }
-          dist_diffs <- lapply(dist_diffs, all_distances)
-          dist_diffs <- unlist(dist_diffs, recursive = TRUE, use.names = TRUE)
+          distance_differences <- lapply(distance_differences, all_distances)
+          distance_differences <-
+            unlist(distance_differences, recursive = TRUE, use.names = TRUE)
         } else {
-          dist_diffs <- 0
+          distance_differences <- 0
         }
 
-        num_differences <- sqrt((num_infected_data - num_infected_simulated)^2)
-        locs_diffs <- sqrt((num_locs_data - num_locs_simulated)^2)
+        number_infected_differences <- sqrt((num_infected_data - num_infected_simulated)^2)
+        location_differences <- sqrt((num_locs_data - num_locs_simulated)^2)
 
-        num_difference <- sum(num_differences)
-        locs_diff <- sum(locs_diffs)
-        residual_diff <- sum(residual_diffs)
-        dist_diff <- sum(dist_diffs)
+        number_infected_difference <- sum(number_infected_differences)
+        location_difference <- sum(location_differences)
+        residual_difference <- sum(residual_differences)
+        distance_difference <- sum(distance_differences)
 
         # Check
         diff_checks <- FALSE
         if (success_metric == "number of locations and total distance") {
-          if (locs_diff <= locs_check && dist_diff <= dist_check) {
+          if (location_difference <= location_check &&
+              distance_difference <= distance_check) {
             diff_checks <- TRUE
           }
         } else if (success_metric == "number of locations") {
-          if (locs_diff <= locs_check) {
+          if (location_difference <= location_check) {
             diff_checks <- TRUE
           }
         } else if (success_metric == "residual error") {
-          if (residual_diff <= res_error_check) {
+          if (residual_difference <= residual_error_check) {
             diff_checks <- TRUE
           }
         } else if (success_metric ==
                 "number of locations, number of infections, and total distance"
         ) {
-          if (locs_diff <= locs_check &&
-              dist_diff <= dist_check && num_difference <= inf_check) {
+          if (location_difference <= location_check &&
+              distance_difference <= distance_check &&
+              number_infected_difference <= infected_check) {
             diff_checks <- TRUE
           }
         } else {
@@ -543,10 +549,10 @@ calibrate <- function(infected_years_file,
               proposed_anthropogenic_distance_scale,
               proposed_natural_kappa,
               proposed_anthropogenic_kappa,
-              num_difference,
-              locs_diff,
-              dist_diff,
-              residual_diff
+              number_infected_difference,
+              location_difference,
+              distance_difference,
+              residual_difference
             )
           config$current_particles <- config$current_particles + 1
           config$total_particles <- config$total_particles + 1
@@ -574,14 +580,14 @@ calibrate <- function(infected_years_file,
       config$current_particles <- 1
       config$proposed_particles <- 1
       acceptance_rates[config$current_bin] <- acceptance_rate
-      infected_checks[config$current_bin] <- inf_check
-      locs_checks[config$current_bin] <- locs_check
-      dist_checks[config$current_bin] <- dist_check
-      res_error_checks[config$current_bin] <- res_error_check
-      inf_check <- median(parameters_kept[start_index:end_index, 7])
-      locs_check <- median(parameters_kept[start_index:end_index, 8])
-      dist_check <- median(parameters_kept[start_index:end_index, 9])
-      res_error_check <- median(parameters_kept[start_index:end_index, 10])
+      infected_checks[config$current_bin] <- infected_check
+      location_checks[config$current_bin] <- location_check
+      distance_checks[config$current_bin] <- distance_check
+      residual_error_checks[config$current_bin] <- residual_error_check
+      infected_check <- median(parameters_kept[start_index:end_index, 7])
+      location_check <- median(parameters_kept[start_index:end_index, 8])
+      distance_check <- median(parameters_kept[start_index:end_index, 9])
+      residual_error_check <- median(parameters_kept[start_index:end_index, 10])
       config$current_bin <- config$current_bin + 1
     }
 
