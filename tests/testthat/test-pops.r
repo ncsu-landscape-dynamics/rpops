@@ -133,7 +133,8 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
 
 })
 
-test_that("Model stops if parameters are of the wrong type and/or dimension", {
+test_that("Model stops if time and date parameters are of the wrong type and/or
+          dimension", {
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file <-
