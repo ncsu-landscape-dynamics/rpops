@@ -5,8 +5,8 @@ config$infected_years_file <-
   system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
 config$number_of_observations <- 68
 config$prior_number_of_observations <- 0
-config$prior_means <- c(0, 0, 0, 0, 0, 0)
-config$prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
+config$prior_means <- c(1, 1, 0.99, 1000, 0, 0)
+config$prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0.1)
 config$params_to_estimate <- c(T, T, T, T, F, F)
 config$number_of_generations <- 4
 config$generation_size <- 10
@@ -18,8 +18,8 @@ config$host_file <-
   system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
 config$total_populations_file <-
   system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-config$parameter_means <- c(0, 0, 0, 0, 0, 0)
-config$parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
+config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0)
+config$parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0.1)
 config$temp <- FALSE
 config$temperature_coefficient_file <- ""
 config$precip <- FALSE
@@ -85,6 +85,309 @@ test_that("Configuration returns proper values when no errors present", {
   config$function_name <- "multirun"
   config <- configuration(config)
   expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "cauchy"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Cauchy"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "exponential"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+  config$natural_kernel_type <- "Exponential"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "uniform"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Uniform"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+  config$natural_kernel_type <- "deterministic neighbor"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "deterministic-neighbor"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "power law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "power-law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Power-law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Power-Law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Power Law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Power law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "hyperbolic secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "hyperbolic-secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Hyperbolic-secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Hyperbolic-Secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Hyperbolic secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Hyperbolic Secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "gamma"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Gamma"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "exponential power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "exponential-power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Exponential-power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Exponential-Power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Exponential power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "weibull"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Weibull"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "log normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "log-normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Log-normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Log-Normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Log normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Log Normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "logistic"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$natural_kernel_type <- "Logistic"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "cauchy"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Cauchy"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "exponential"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Exponential"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "uniform"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Uniform"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "deterministic neighbor"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "deterministic-neighbor"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "power law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "power-law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Power-law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Power-Law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Power Law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Power law"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "hyperbolic secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "hyperbolic-secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Hyperbolic-secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Hyperbolic-Secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Hyperbolic secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Hyperbolic Secant"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "gamma"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Gamma"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "exponential power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "exponential-power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Exponential-power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Exponential-Power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Exponential power"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "weibull"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Weibull"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "log normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "log-normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Log-normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Log-Normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Log normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Log Normal"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "logistic"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$anthropogenic_kernel_type <- "Logistic"
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
 })
 
 test_that("configuration returns proper errors", {
@@ -104,4 +407,21 @@ test_that("configuration returns proper errors", {
   config <- configuration(config)
   expect_equal(config$failure,
                "treatment method is not one of the valid treatment options")
+
+  config$natural_kernel_type <- "hello"
+  config <- configuration(config)
+  expect_equal(
+    config$failure,
+    "Natural kernel type not one of 'cauchy', 'exponential',
+      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
+      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'")
+
+  config$natural_kernel_type <- "cauchy"
+  config$anthropogenic_kernel_type <- "good-bye"
+  config <- configuration(config)
+  expect_equal(
+    config$failure,
+    "Anthropogenic kernel type not one of 'cauchy', 'exponential',
+      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
+      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'")
 })
