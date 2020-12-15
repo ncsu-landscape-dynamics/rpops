@@ -504,7 +504,8 @@ calibrate <- function(infected_years_file,
           distance_differences <- 0
         }
 
-        number_infected_differences <- sqrt((num_infected_data - num_infected_simulated)^2)
+        number_infected_differences <-
+          sqrt((num_infected_data - num_infected_simulated)^2)
         location_differences <- sqrt((num_locs_data - num_locs_simulated)^2)
 
         number_infected_difference <- sum(number_infected_differences)
