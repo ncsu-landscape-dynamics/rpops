@@ -408,6 +408,7 @@ test_that("configuration returns proper errors", {
   expect_equal(config$failure,
                "treatment method is not one of the valid treatment options")
 
+  config$treatment_method <- "ratio"
   config$natural_kernel_type <- "hello"
   config <- configuration(config)
   expect_equal(
