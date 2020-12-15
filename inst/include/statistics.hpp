@@ -23,13 +23,14 @@ namespace pops {
  * from all cells of a raster.
  */
 template<typename IntegerRaster>
-unsigned sum_of_infected(const IntegerRaster& infected)
+unsigned sum_of_infected(
+    const IntegerRaster& infected, const std::vector<std::vector<int>>& suitable_cells)
 {
     unsigned sum = 0;
-    for (int j = 0; j < infected.rows(); j++) {
-        for (int k = 0; k < infected.cols(); k++) {
-            sum += infected(j, k);
-        }
+    for (auto indices : suitable_cells) {
+        int i = indices[0];
+        int j = indices[1];
+        sum += infected(i, j);
     }
     return sum;
 }
@@ -38,14 +39,18 @@ unsigned sum_of_infected(const IntegerRaster& infected)
  * of cell > 0 times cell size.
  */
 template<typename IntegerRaster>
-double area_of_infected(const IntegerRaster& infected, double ew_res, double ns_res)
+double area_of_infected(
+    const IntegerRaster& infected,
+    double ew_res,
+    double ns_res,
+    const std::vector<std::vector<int>>& suitable_cells)
 {
     unsigned cells = 0;
-    for (int j = 0; j < infected.rows(); j++) {
-        for (int k = 0; k < infected.cols(); k++) {
-            if (infected(j, k) > 0)
-                cells++;
-        }
+    for (auto indices : suitable_cells) {
+        int i = indices[0];
+        int j = indices[1];
+        if (infected(i, j) > 0)
+            cells++;
     }
     return cells * ew_res * ns_res;
 }

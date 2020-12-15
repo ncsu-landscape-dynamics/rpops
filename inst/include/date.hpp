@@ -62,6 +62,7 @@ public:
     inline bool is_last_day_of_month();
     inline bool is_last_week_of_month();
     inline bool is_leap_year();
+    inline std::string to_string();
     int month() const
     {
         return month_;
@@ -434,13 +435,36 @@ void Date::subtract_days(unsigned n)
  */
 int Date::weeks_from_date(Date start)
 {
-
     int week = 0;
     while (start <= *this) {
         week++;
         start.increased_by_week();
     }
     return week - 1;
+}
+
+/*!
+ * Returns the current date as a string
+ * Will be replaced by C++20 format function
+ * \param Date, current date
+ * \return String, current date as string
+ */
+std::string Date::to_string()
+{
+    std::string date = std::to_string(year_) + "-";
+    if (month_ < 10) {
+        date += "0" + std::to_string(month_) + "-";
+    }
+    else {
+        date += std::to_string(month_) + "-";
+    }
+    if (day_ < 10) {
+        date += "0" + std::to_string(day_);
+    }
+    else {
+        date += std::to_string(day_);
+    }
+    return date;
 }
 
 /*!

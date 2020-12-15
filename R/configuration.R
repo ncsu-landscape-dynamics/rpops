@@ -1,12 +1,12 @@
 #' PoPS (configuration
 #'
-#' Function for with a single input and output list for parsing, transforming,
+#' Function with a single input and output list for parsing, transforming,
 #' and performing all checks for all functions to run the pops c++ model
 #'
 #' @param config list of all data necessary used to set up c++ model
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints
+#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -93,6 +93,31 @@ configuration <- function(config) {
     config$failure <- host_check$failed_check
     return(config)
   }
+
+  suitable <- host + infected
+  suitable_points <- rasterToPoints(suitable,
+                                    fun = function(x) {
+                                      x > 0
+                                    },
+                                    spatial = TRUE)
+  suitable_cells <- extract(suitable, suitable_points, cellnumbers = TRUE)[, 1]
+  suitable_row <- rowFromCell(suitable, suitable_cells)
+  suitable_row <- suitable_row - 1
+  suitable_row <- as.integer(suitable_row)
+  suitable_col <- colFromCell(suitable, suitable_cells)
+  suitable_col <- suitable_col - 1
+  suitable_col <- as.integer(suitable_col)
+  spatial_indices2 <- data.frame(row = suitable_row, col = suitable_col)
+  spatial_indices2 <- unname(spatial_indices2)
+  spatial_indices2 <- as.matrix(spatial_indices2)
+  spatial_indices <- list()
+  # movements_date
+  for (i in seq_len(nrow(spatial_indices2))) {
+    spatial_indices[[i]] <- spatial_indices2[i, 1:2]
+  }
+
+  spatial_indices <- unname(spatial_indices)
+  config$spatial_indices <- spatial_indices
 
   # check that total populations raster has the same crs, resolution, and extent
   total_populations_check <- secondary_raster_checks(

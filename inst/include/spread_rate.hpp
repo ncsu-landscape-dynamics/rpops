@@ -16,15 +16,13 @@
 #ifndef POPS_SPREAD_RATE_HPP
 #define POPS_SPREAD_RATE_HPP
 
+#include "utils.hpp"
+
 #include <tuple>
 #include <vector>
 #include <cmath>
 
 namespace pops {
-
-typedef std::tuple<int, int, int, int> BBoxInt;
-typedef std::tuple<double, double, double, double> BBoxFloat;
-typedef std::tuple<bool, bool, bool, bool> BBoxBool;
 
 /**
  * Class storing and computing step spread rate for one simulation.
@@ -69,27 +67,28 @@ private:
      * north, south, east, west coordinates (as number of rows/cols),
      * If there is no infection, sets -1 to all directions.
      */
-    BBoxInt infection_boundary(const Raster& raster)
+    BBoxInt infection_boundary(
+        const Raster& raster, const std::vector<std::vector<int>>& suitable_cells)
     {
         int n = height - 1;
         int s = 0;
         int e = 0;
         int w = width - 1;
         bool found = false;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                auto value = raster(i, j);
-                if (value > 0) {
-                    found = true;
-                    if (i < n)
-                        n = i;
-                    if (i > s)
-                        s = i;
-                    if (j > e)
-                        e = j;
-                    if (j < w)
-                        w = j;
-                }
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            auto value = raster(i, j);
+            if (value > 0) {
+                found = true;
+                if (i < n)
+                    n = i;
+                if (i > s)
+                    s = i;
+                if (j > e)
+                    e = j;
+                if (j < w)
+                    w = j;
             }
         }
         if (found)
@@ -112,7 +111,12 @@ private:
     }
 
 public:
-    SpreadRate(const Raster& raster, double ew_res, double ns_res, unsigned num_steps)
+    SpreadRate(
+        const Raster& raster,
+        double ew_res,
+        double ns_res,
+        unsigned num_steps,
+        const std::vector<std::vector<int>>& suitable_cells)
         : width(raster.cols()),
           height(raster.rows()),
           west_east_resolution(ew_res),
@@ -123,7 +127,7 @@ public:
               num_steps,
               std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan("")))
     {
-        boundaries.at(0) = infection_boundary(raster);
+        boundaries.at(0) = infection_boundary(raster, suitable_cells);
     }
 
     SpreadRate() = delete;
@@ -144,9 +148,12 @@ public:
      * If spread rate is zero and the bbox is touching the edge,
      * that means spread is out of bounds and rate is set to NaN.
      */
-    void compute_step_spread_rate(const Raster& raster, unsigned step)
+    void compute_step_spread_rate(
+        const Raster& raster,
+        unsigned step,
+        const std::vector<std::vector<int>>& suitable_cells)
     {
-        BBoxInt bbox = infection_boundary(raster);
+        BBoxInt bbox = infection_boundary(raster, suitable_cells);
         boundaries.at(step + 1) = bbox;
         if (!is_boundary_valid(bbox)) {
             rates.at(step) =

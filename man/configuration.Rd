@@ -13,6 +13,6 @@ configuration(config)
 list of infected and susceptible per year
 }
 \description{
-Function for with a single input and output list for parsing, transforming,
+Function with a single input and output list for parsing, transforming,
 and performing all checks for all functions to run the pops c++ model
 }

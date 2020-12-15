@@ -60,7 +60,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE
@@ -361,7 +361,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE
@@ -376,6 +376,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             output_frequency_n <- 1
             use_spreadrates <- FALSE
             calibration_method <- "ABC"
+            number_of_iterations <- 10
+
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -512,7 +514,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE

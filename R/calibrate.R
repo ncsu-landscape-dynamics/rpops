@@ -63,7 +63,7 @@
 #'
 #' @importFrom raster raster values as.matrix xres yres stack reclassify
 #' cellStats nlayers extent extension compareCRS getValues calc extract
-#' rasterToPoints pointDistance
+#' rasterToPoints pointDistance rowFromCell colFromCell
 #' @importFrom stats runif rnorm cov
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
@@ -254,6 +254,7 @@ calibrate <- function(infected_years_file,
         num_cols = config$num_cols,
         time_step = config$time_step,
         reproductive_rate = reproductive_rate,
+        spatial_indices = config$spatial_indices,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
         season_month_start = config$season_month_start,
@@ -377,7 +378,7 @@ calibrate <- function(infected_years_file,
             proposed_anthropogenic_distance_scale <-
               round(runif(1, 30, 80), digits = 0) * 100
           } else {
-            proposed_anthropogenic_distance_scale <- 0
+            proposed_anthropogenic_distance_scale <- 0.1
           }
           if (params_to_estimate[5]) {
             proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
@@ -394,11 +395,11 @@ calibrate <- function(infected_years_file,
           # parameters are within their allowed range
           proposed_parameters <-
             mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
-          while (proposed_parameters[1] < 0 |
-                 proposed_parameters[2] < 0 |
+          while (proposed_parameters[1] <= 0 |
+                 proposed_parameters[2] <= 0 |
                  proposed_parameters[3] > 1 |
                  proposed_parameters[3] < 0 |
-                 proposed_parameters[4] < 0 |
+                 proposed_parameters[4] <= 0 |
                  proposed_parameters[5] < 0 |
                  proposed_parameters[6] < 0) {
             proposed_parameters <-
@@ -607,7 +608,7 @@ calibrate <- function(infected_years_file,
       proposed_anthropogenic_distance_scale <-
         round(runif(1, 30, 80), digits = 0) * 100
     } else {
-      proposed_anthropogenic_distance_scale <- 0
+      proposed_anthropogenic_distance_scale <- 0.1
     }
     if (config$params_to_estimate[5]) {
       proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)

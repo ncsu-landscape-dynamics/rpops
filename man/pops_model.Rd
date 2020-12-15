@@ -33,6 +33,7 @@ pops_model(
   num_cols,
   time_step,
   reproductive_rate,
+  spatial_indices,
   mortality_rate = 0,
   mortality_time_lag = 2L,
   season_month_start = 1L,
@@ -121,7 +122,7 @@ is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
 \item{movements}{a matrix with columns lon_from, lat_from, lon_to, lat_to,
 number of animals, and date.}
 
-\item{movements_dates}{this is a list of dates passeed as strings in the
+\item{movements_dates}{this is a list of dates passed as strings in the
 format 'YYYY-MM-DD'}
 
 \item{weather}{Boolean that is true if weather is used}
@@ -144,6 +145,8 @@ against lethal temperature}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single
 host under optimal weather conditions}
+
+\item{spatial_indices}{list of all spatial locations with suitable hosts}
 
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
@@ -224,7 +227,7 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
 
-\item{model_type_}{What type of model most represents your sysetm. Options
+\item{model_type_}{What type of model most represents your system. Options
 are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 (Susceptible - Infected/Infested). Default value is "SI".}
 
@@ -251,7 +254,7 @@ establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
 bounding box for deterministic dispersal}
 }
 \value{
-list of vector matrices of infected and suceptible hosts per
+list of vector matrices of infected and susceptible hosts per
 simulated year
 }
 \description{

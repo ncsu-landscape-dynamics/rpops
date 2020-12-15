@@ -86,10 +86,15 @@ public:
         IntegerRaster& infected,
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
-        IntegerRaster& resistant) = 0;
-    virtual void
-    end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) = 0;
-    virtual void apply_treatment_mortality(IntegerRaster& infected) = 0;
+        IntegerRaster& resistant,
+        const std::vector<std::vector<int>>& spatial_indeices) = 0;
+    virtual void end_treatment(
+        IntegerRaster& susceptible,
+        IntegerRaster& resistant,
+        const std::vector<std::vector<int>>& spatial_indeices) = 0;
+    virtual void apply_treatment_mortality(
+        IntegerRaster& infected,
+        const std::vector<std::vector<int>>& spatial_indeices) = 0;
     virtual ~AbstractTreatment() {}
 };
 
@@ -124,17 +129,20 @@ public:
     {
         return end_step_;
     }
-    void apply_treatment_mortality(IntegerRaster& infected) override
+    void apply_treatment_mortality(
+        IntegerRaster& infected,
+        const std::vector<std::vector<int>>& suitable_cells) override
     {
-        for (int i = 0; i < infected.rows(); i++)
-            for (int j = 0; j < infected.cols(); j++) {
-                if (application_ == TreatmentApplication::Ratio) {
-                    infected(i, j) = infected(i, j) - (infected(i, j) * map_(i, j));
-                }
-                else if (application_ == TreatmentApplication::AllInfectedInCell) {
-                    infected(i, j) = map_(i, j) ? 0 : infected(i, j);
-                }
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (application_ == TreatmentApplication::Ratio) {
+                infected(i, j) = infected(i, j) - (infected(i, j) * map_(i, j));
             }
+            else if (application_ == TreatmentApplication::AllInfectedInCell) {
+                infected(i, j) = map_(i, j) ? 0 : infected(i, j);
+            }
+        }
     }
 };
 
@@ -167,32 +175,33 @@ public:
         IntegerRaster& infected,
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
-        IntegerRaster&) override
+        IntegerRaster&,
+        const std::vector<std::vector<int>>& suitable_cells) override
     {
-        for (int i = 0; i < infected.rows(); i++)
-            for (int j = 0; j < infected.cols(); j++) {
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (this->application_ == TreatmentApplication::Ratio) {
+                infected(i, j) = infected(i, j) - (infected(i, j) * this->map_(i, j));
+            }
+            else if (this->application_ == TreatmentApplication::AllInfectedInCell) {
+                infected(i, j) = this->map_(i, j) ? 0 : infected(i, j);
+            }
+            for (auto& raster : exposed) {
                 if (this->application_ == TreatmentApplication::Ratio) {
-                    infected(i, j) =
-                        infected(i, j) - (infected(i, j) * this->map_(i, j));
+                    raster(i, j) = raster(i, j) - (raster(i, j) * this->map_(i, j));
                 }
                 else if (
                     this->application_ == TreatmentApplication::AllInfectedInCell) {
-                    infected(i, j) = this->map_(i, j) ? 0 : infected(i, j);
+                    raster(i, j) = this->map_(i, j) ? 0 : raster(i, j);
                 }
-                for (auto& raster : exposed) {
-                    if (this->application_ == TreatmentApplication::Ratio) {
-                        raster(i, j) = raster(i, j) - (raster(i, j) * this->map_(i, j));
-                    }
-                    else if (
-                        this->application_ == TreatmentApplication::AllInfectedInCell) {
-                        raster(i, j) = this->map_(i, j) ? 0 : raster(i, j);
-                    }
-                }
-                susceptible(i, j) =
-                    susceptible(i, j) - (susceptible(i, j) * this->map_(i, j));
             }
+            susceptible(i, j) =
+                susceptible(i, j) - (susceptible(i, j) * this->map_(i, j));
+        }
     }
-    void end_treatment(IntegerRaster&, IntegerRaster&) override
+    void end_treatment(
+        IntegerRaster&, IntegerRaster&, const std::vector<std::vector<int>>&) override
     {
         return;
     }
@@ -234,48 +243,53 @@ public:
         IntegerRaster& infected,
         std::vector<IntegerRaster>& exposed_vector,
         IntegerRaster& susceptible,
-        IntegerRaster& resistant) override
+        IntegerRaster& resistant,
+        const std::vector<std::vector<int>>& suitable_cells) override
     {
-        for (int i = 0; i < infected.rows(); i++)
-            for (int j = 0; j < infected.cols(); j++) {
-                int infected_resistant = 0;
-                int exposed_resistant_sum = 0;
-                int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
-                int current_resistant = resistant(i, j);
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            int infected_resistant = 0;
+            int exposed_resistant_sum = 0;
+            int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
+            int current_resistant = resistant(i, j);
+            if (this->application_ == TreatmentApplication::Ratio) {
+                infected_resistant = infected(i, j) * this->map_(i, j);
+            }
+            else if (this->application_ == TreatmentApplication::AllInfectedInCell) {
+                infected_resistant = this->map_(i, j) ? infected(i, j) : 0;
+            }
+            infected(i, j) -= infected_resistant;
+            for (auto& exposed : exposed_vector) {
+                int exposed_resistant = 0;
                 if (this->application_ == TreatmentApplication::Ratio) {
-                    infected_resistant = infected(i, j) * this->map_(i, j);
+                    exposed_resistant = exposed(i, j) * this->map_(i, j);
                 }
                 else if (
                     this->application_ == TreatmentApplication::AllInfectedInCell) {
-                    infected_resistant = this->map_(i, j) ? infected(i, j) : 0;
+                    exposed_resistant = this->map_(i, j) ? exposed(i, j) : 0;
                 }
-                infected(i, j) -= infected_resistant;
-                for (auto& exposed : exposed_vector) {
-                    int exposed_resistant = 0;
-                    if (this->application_ == TreatmentApplication::Ratio) {
-                        exposed_resistant = exposed(i, j) * this->map_(i, j);
-                    }
-                    else if (
-                        this->application_ == TreatmentApplication::AllInfectedInCell) {
-                        exposed_resistant = this->map_(i, j) ? exposed(i, j) : 0;
-                    }
-                    exposed(i, j) -= exposed_resistant;
-                    exposed_resistant_sum += exposed_resistant;
-                }
-                resistant(i, j) = infected_resistant + exposed_resistant_sum
-                                  + susceptible_resistant + current_resistant;
-                susceptible(i, j) -= susceptible_resistant;
+                exposed(i, j) -= exposed_resistant;
+                exposed_resistant_sum += exposed_resistant;
             }
+            resistant(i, j) = infected_resistant + exposed_resistant_sum
+                              + susceptible_resistant + current_resistant;
+            susceptible(i, j) -= susceptible_resistant;
+        }
     }
-    void end_treatment(IntegerRaster& susceptible, IntegerRaster& resistant) override
+    void end_treatment(
+        IntegerRaster& susceptible,
+        IntegerRaster& resistant,
+        const std::vector<std::vector<int>>& suitable_cells) override
     {
-        for (int i = 0; i < resistant.rows(); i++)
-            for (int j = 0; j < resistant.cols(); j++) {
-                if (this->map_(i, j) > 0) {
-                    susceptible(i, j) += resistant(i, j);
-                    resistant(i, j) = 0;
-                }
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (this->map_(i, j) > 0) {
+                susceptible(i, j) += resistant(i, j);
+                resistant(i, j) = 0;
             }
+        }
     }
 };
 
@@ -355,17 +369,18 @@ public:
         IntegerRaster& infected,
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
-        IntegerRaster& resistant)
+        IntegerRaster& resistant,
+        const std::vector<std::vector<int>>& suitable_cells)
     {
         bool changed = false;
         for (unsigned i = 0; i < treatments.size(); i++) {
             if (treatments[i]->should_start(current)) {
                 treatments[i]->apply_treatment(
-                    infected, exposed, susceptible, resistant);
+                    infected, exposed, susceptible, resistant, suitable_cells);
                 changed = true;
             }
             else if (treatments[i]->should_end(current)) {
-                treatments[i]->end_treatment(susceptible, resistant);
+                treatments[i]->end_treatment(susceptible, resistant, suitable_cells);
                 changed = true;
             }
         }
@@ -377,12 +392,15 @@ public:
      * \param infected raster of infected host
      * \return true if any management action was necessary
      */
-    bool manage_mortality(unsigned current, IntegerRaster& infected)
+    bool manage_mortality(
+        unsigned current,
+        IntegerRaster& infected,
+        const std::vector<std::vector<int>>& suitable_cells)
     {
         bool applied = false;
         for (unsigned i = 0; i < treatments.size(); i++)
             if (treatments[i]->should_start(current)) {
-                treatments[i]->apply_treatment_mortality(infected);
+                treatments[i]->apply_treatment_mortality(infected, suitable_cells);
                 applied = true;
             }
         return applied;

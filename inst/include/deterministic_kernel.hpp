@@ -22,13 +22,16 @@
 #include "raster.hpp"
 #include "kernel_types.hpp"
 #include "utils.hpp"
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-#ifndef PI
-#define PI M_PI
-#endif
+#include "hyperbolic_secant_kernel.hpp"
+#include "logistic_kernel.hpp"
+#include "exponential_power_kernel.hpp"
+#include "exponential_kernel.hpp"
+#include "cauchy_kernel.hpp"
+#include "gamma_kernel.hpp"
+#include "lognormal_kernel.hpp"
+#include "normal_kernel.hpp"
+#include "weibull_kernel.hpp"
+#include "power_law_kernel.hpp"
 
 namespace pops {
 
@@ -38,69 +41,11 @@ using std::exp;
 using std::log;
 using std::ceil;
 using std::abs;
+using std::sqrt;
 
 /*!
- * Cauchy distribution
- * Includes probability density function and inverse cumulative distribution function
- * pdf returns the probability that the variate has the value x
- * icdf returns the upper range that encompasses x percent of the distribution (e.g for
- * 99% input .99)
- */
-class CauchyDistribution
-{
-public:
-    CauchyDistribution(double scale) : s(scale) {}
-
-    double pdf(double x)
-    {
-        return 1 / ((s * M_PI) * (1 + (pow(x / s, 2))));
-    }
-    // Inverse cdf (quantile function)
-    double icdf(double x)
-    {
-        return s * tan(M_PI * (x - 0.5));
-    }
-
-private:
-    // scale parameter - 1 for standard
-    double s;
-};
-
-/*!
- * Exponential distribution
- * Includes probability density function and inverse cumulative distribution function
- * pdf returns the probability that the variate has the value x
- * icdf returns the upper range that encompasses x percent of the distribution (e.g for
- * 99% input 0.99)
- */
-class ExponentialDistribution
-{
-public:
-    ExponentialDistribution(double scale) : beta(scale) {}
-    // assumes mu is 0 which is traditionally accepted
-    double pdf(double x)
-    {
-        return (1 / beta) * (exp(-x / beta));
-    }
-    // Inverse cdf (quantile function)
-    double icdf(double x)
-    {
-        if (beta == 1) {
-            return -log(1 - x);
-        }
-        else {
-            return -beta * log(1 - x);
-        }
-    }
-
-private:
-    // scale parameter - 1 for standard
-    // equal to 1/lambda
-    double beta;
-};
-
-/*!
- * Dispersal kernel for deterministic spread to cell with highest probability of spread
+ * Dispersal kernel for deterministic spread to cell with highest probability of
+ * spread
  *
  * Dispersal Kernel type determines use of Exponential or Cauchy distribution
  * to find probability.
@@ -128,8 +73,17 @@ protected:
     double max_distance{0};
     Raster<double> probability;
     Raster<double> probability_copy;
-    CauchyDistribution cauchy;
-    ExponentialDistribution exponential;
+    CauchyKernel cauchy;
+    ExponentialKernel exponential;
+    WeibullKernel weibull;
+    LogNormalKernel log_normal;
+    NormalKernel normal;
+    HyperbolicSecantKernel hyperbolic_secant;
+    PowerLawKernel power_law;
+    LogisticKernel logistic;
+    GammaKernel gamma;
+    ExponentialPowerKernel exponential_power;
+
     DispersalKernelType kernel_type_;
     double proportion_of_dispersers;
     // the west-east resolution of the pixel
@@ -144,10 +98,19 @@ public:
         double dispersal_percentage,
         double ew_res,
         double ns_res,
-        double distance_scale)
+        double distance_scale,
+        double shape = 1.0)
         : dispersers_(dispersers),
           cauchy(distance_scale),
           exponential(distance_scale),
+          weibull(distance_scale, shape),
+          log_normal(distance_scale),
+          normal(distance_scale),
+          hyperbolic_secant(distance_scale),
+          power_law(distance_scale, shape),
+          logistic(distance_scale),
+          gamma(distance_scale, shape),
+          exponential_power(distance_scale, shape),
           kernel_type_(dispersal_kernel),
           east_west_resolution(ew_res),
           north_south_resolution(ns_res)
@@ -160,6 +123,30 @@ public:
         }
         else if (kernel_type_ == DispersalKernelType::Exponential) {
             max_distance = exponential.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::Weibull) {
+            max_distance = weibull.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::Normal) {
+            max_distance = normal.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::LogNormal) {
+            max_distance = log_normal.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::HyperbolicSecant) {
+            max_distance = hyperbolic_secant.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::PowerLaw) {
+            max_distance = power_law.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::Logistic) {
+            max_distance = logistic.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::Gamma) {
+            max_distance = gamma.icdf(dispersal_percentage);
+        }
+        else if (kernel_type_ == DispersalKernelType::ExponentialPower) {
+            max_distance = exponential_power.icdf(dispersal_percentage);
         }
         number_of_columns = ceil(max_distance / east_west_resolution) * 2 + 1;
         number_of_rows = ceil(max_distance / north_south_resolution) * 2 + 1;
@@ -181,6 +168,30 @@ public:
                 else if (kernel_type_ == DispersalKernelType::Exponential) {
                     probability(i, j) = abs(exponential.pdf(distance_to_center));
                 }
+                else if (kernel_type_ == DispersalKernelType::Weibull) {
+                    probability(i, j) = abs(weibull.pdf(distance_to_center));
+                }
+                else if (kernel_type_ == DispersalKernelType::Normal) {
+                    probability(i, j) = abs(normal.pdf(distance_to_center));
+                }
+                else if (kernel_type_ == DispersalKernelType::LogNormal) {
+                    probability(i, j) = abs(log_normal.pdf(distance_to_center));
+                }
+                else if (kernel_type_ == DispersalKernelType::PowerLaw) {
+                    probability(i, j) = abs(power_law.pdf(distance_to_center));
+                }
+                else if (kernel_type_ == DispersalKernelType::HyperbolicSecant) {
+                    probability(i, j) = abs(hyperbolic_secant.pdf(distance_to_center));
+                }
+                else if (kernel_type_ == DispersalKernelType::Logistic) {
+                    probability(i, j) = abs(logistic.pdf(distance_to_center));
+                }
+                else if (kernel_type_ == DispersalKernelType::Gamma) {
+                    probability(i, j) = abs(gamma.pdf(distance_to_center));
+                }
+                else if (kernel_type_ == DispersalKernelType::ExponentialPower) {
+                    probability(i, j) = abs(exponential_power.pdf(distance_to_center));
+                }
                 sum += probability(i, j);
             }
         }
@@ -190,8 +201,9 @@ public:
 
     /*! Generates a new position for the spread.
      *
-     *  Creates a copy of the probability matrix to mark where dispersers are assigned.
-     *  New window created any time a new cell is selected from simulation.disperse
+     *  Creates a copy of the probability matrix to mark where dispersers are
+     * assigned. New window created any time a new cell is selected from
+     * simulation.disperse
      *
      *  Selects next row/col value based on the cell with the highest probability
      *  in the window.
@@ -202,7 +214,15 @@ public:
     {
         UNUSED(generator);  // Deterministic does not need random numbers.
         if (kernel_type_ != DispersalKernelType::Cauchy
-            && kernel_type_ != DispersalKernelType::Exponential) {
+            && kernel_type_ != DispersalKernelType::Exponential
+            && kernel_type_ != DispersalKernelType::Weibull
+            && kernel_type_ != DispersalKernelType::Normal
+            && kernel_type_ != DispersalKernelType::LogNormal
+            && kernel_type_ != DispersalKernelType::HyperbolicSecant
+            && kernel_type_ != DispersalKernelType::PowerLaw
+            && kernel_type_ != DispersalKernelType::Logistic
+            && kernel_type_ != DispersalKernelType::Gamma
+            && kernel_type_ != DispersalKernelType::ExponentialPower) {
             throw std::invalid_argument(
                 "DeterministicDispersalKernel: Unsupported dispersal kernel type");
         }
@@ -232,14 +252,37 @@ public:
             }
         }
 
-        // subtracting 1/number of dispersers ensures we always move the same proportion
-        // of the individuals to each cell no matter how many are dispersing
+        // subtracting 1/number of dispersers ensures we always move the same
+        // proportion of the individuals to each cell no matter how many are
+        // dispersing
         probability_copy(max_prob_row, max_prob_col) -= proportion_of_dispersers;
         prev_row = row;
         prev_col = col;
 
         // return values in terms of actual location
         return std::make_tuple(row + row_movement, col + col_movement);
+    }
+
+    /*! Returns true if the kernel class support a given kernel type
+     *
+     * \warning This function is experimental and may be removed or
+     * changed at any time.
+     */
+    static bool supports_kernel(const DispersalKernelType type)
+    {
+        static const std::array<DispersalKernelType, 10> supports = {
+            DispersalKernelType::Cauchy,
+            DispersalKernelType::Exponential,
+            DispersalKernelType::Weibull,
+            DispersalKernelType::Normal,
+            DispersalKernelType::LogNormal,
+            DispersalKernelType::PowerLaw,
+            DispersalKernelType::HyperbolicSecant,
+            DispersalKernelType::Gamma,
+            DispersalKernelType::ExponentialPower,
+            DispersalKernelType::Logistic};
+        auto it = std::find(supports.cbegin(), supports.cend(), type);
+        return it != supports.cend();
     }
 };
 

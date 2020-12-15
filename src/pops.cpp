@@ -35,69 +35,6 @@ using namespace pops;
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins(cpp11)]]
 
-template<int... Indices>
-struct indices
-{
-    using next = indices<Indices..., sizeof...(Indices)>;
-};
-
-template<int Size>
-struct build_indices
-{
-    using type = typename build_indices<Size - 1>::type::next;
-};
-
-template<>
-struct build_indices<0>
-{
-    using type = indices<>;
-};
-
-template<typename T>
-using Bare = typename std::remove_cv<typename std::remove_reference<T>::type>::type;
-
-template<typename Tuple>
-constexpr typename build_indices<std::tuple_size<Bare<Tuple>>::value>::type
-make_indices()
-{
-    return {};
-}
-
-template<typename Tuple, int... Indices>
-std::array<
-    typename std::tuple_element<0, Bare<Tuple>>::type,
-    std::tuple_size<Bare<Tuple>>::value>
-to_array(Tuple&& tuple, indices<Indices...>)
-{
-    using std::get;
-    return {{get<Indices>(std::forward<Tuple>(tuple))...}};
-}
-
-template<typename Tuple>
-auto to_array(Tuple&& tuple)
-    -> decltype(to_array(std::declval<Tuple>(), make_indices<Tuple>()))
-{
-    return to_array(std::forward<Tuple>(tuple), make_indices<Tuple>());
-}
-
-std::string quarantine_enum_to_string(QuarantineDirection type) {
-    switch(type) {
-    case QuarantineDirection::N:
-        return "N";
-    case QuarantineDirection::S:
-        return "S";
-    case QuarantineDirection::E:
-        return "E";
-    case QuarantineDirection::W:
-        return "W";
-    case QuarantineDirection::None:
-        return "None";
-    default:
-        return "Invalid direction";
-    }
-}
-
-
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
@@ -130,6 +67,7 @@ List pops_model(
     int num_cols,
     std::string time_step,
     double reproductive_rate,
+    std::vector<std::vector<int>> spatial_indices,
     double mortality_rate = 0.0,
     int mortality_time_lag = 2,
     int season_month_start = 1,
@@ -274,7 +212,7 @@ List pops_model(
         spread_rate_outputs = 0;
     }
     SpreadRate<IntegerMatrix> spreadrate(
-        infected, config.ew_res, config.ns_res, spread_rate_outputs);
+        infected, config.ew_res, config.ns_res, spread_rate_outputs, spatial_indices);
     unsigned move_scheduled;
     if (config.use_movements) {
         for (unsigned move = 0; move < movements_dates.size(); ++move) {
@@ -284,24 +222,24 @@ List pops_model(
             config.movement_schedule.push_back(move_scheduled);
         }
     }
-    
+
     unsigned quarantine_outputs;
     if (config.use_quarantine) {
         quarantine_outputs = config.quarantine_num_steps();
-    } 
+    }
     else {
         quarantine_outputs = 0;
     }
-    
+
     QuarantineEscape<IntegerMatrix> quarantine(
-            quarantine_areas, ew_res, ns_res, quarantine_outputs);
+            quarantine_areas, ew_res, ns_res, quarantine_outputs, spatial_indices);
     bool quarantine_escape;
     std::vector<bool> quarantine_escapes;
     int escape_dist;
     std::vector<int> escape_dists;
-    QuarantineDirection escape_direction;
+    Direction escape_direction;
     std::vector<std::string> escape_directions;
-    
+
     ModelType mt = model_type_from_string(config.model_type);
     Simulation<IntegerMatrix, NumericMatrix> simulation(
         config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
@@ -329,7 +267,8 @@ List pops_model(
             spreadrate,
             quarantine,
             quarantine_areas,
-            movements);
+            movements,
+            spatial_indices);
 
         if (config.spread_schedule()[current_index]) {
             total_dispersers += dispersers;
@@ -345,10 +284,10 @@ List pops_model(
             resistant_vector.push_back(Rcpp::clone(resistant));
             total_populations_vector.push_back(Rcpp::clone(total_populations));
             dispersers_vector.push_back(Rcpp::clone(total_dispersers));
-            
+
             if (config.model_type == "SEI") {
                 exposed_v.clear();
-                
+
                 for (unsigned e = 0; e < exposed.size(); e++) {
                     exposed_v.push_back(Rcpp::clone(exposed[e]));
                 }
@@ -360,9 +299,12 @@ List pops_model(
             // exposed_v = exposed;
             exposed_vector.push_back(exposed_v);
 
-            num_infected = sum_of_infected(infected);
+            num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
-            area_infect = area_of_infected(infected, config.ew_res, config.ns_res);
+            area_infect = area_of_infected(infected,
+                                           config.ew_res,
+                                           config.ns_res,
+                                           spatial_indices);
             area_infected.push_back(area_infect);
             total_dispersers(config.rows, config.cols);
         }
@@ -375,7 +317,7 @@ List pops_model(
             auto sr = to_array(spread_rates);
             spread_rates_vector.push_back(sr);
         }
-        
+
         // update quarantine outputs if they are used and scheduled for that time step
         if (config.use_quarantine && config.quarantine_schedule()[current_index]) {
             unsigned quarantine_step = simulation_step_to_action_step(
@@ -402,5 +344,6 @@ List pops_model(
         _["propogules"] = dispersers_vector,
         _["quarantine_escape"] = quarantine_escapes,
         _["quarantine_escape_distance"] = escape_dists,
-        _["quarantine_escape_directions"] = escape_directions);
+        _["quarantine_escape_directions"] = escape_directions,
+        _["spatial_indices"] = spatial_indices);
 }

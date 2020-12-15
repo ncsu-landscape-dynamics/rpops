@@ -121,7 +121,7 @@
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom raster raster values as.matrix xres yres stack extent calc
-#' extract rasterToPoints crs rowColFromCell
+#' extract rasterToPoints crs rowColFromCell rowFromCell colFromCell
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
 #' @importFrom lubridate interval time_length mdy %within%
@@ -274,6 +274,7 @@ pops <- function(infected_file,
                      num_cols = config$num_cols,
                      time_step = config$time_step,
                      reproductive_rate = config$reproductive_rate[1],
+                     spatial_indices = config$spatial_indices,
                      mortality_rate = config$mortality_rate,
                      mortality_time_lag = config$mortality_time_lag,
                      season_month_start = config$season_month_start,
