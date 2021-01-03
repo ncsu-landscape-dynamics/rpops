@@ -1103,9 +1103,11 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "exponential")
 
-  expect_equal(all(data$infected[[1]] >=
-    raster::as.matrix(raster::raster(infected_file))),
-  TRUE)
+  infecteds <- data$infected[[1]]
+  expect_equal(all(infecteds >=
+                     raster::as.matrix(raster::raster(infected_file))),
+               TRUE)
+  expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
   data <- pops(infected_file = infected_file,
                host_file = host_file,
@@ -1191,11 +1193,8 @@ test_that("All kernel types lead to spread", {
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
-  ## currently not working
   # doesn't disperse outside of originally infected cell
-  # unsupported in radial kernel
-  parameter_means <- c(0.5, 6, 1, 500, 0, 0)
-  # parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  # parameter_means <- c(0.5, 50, 1, 500, 0, 0)
 
   data <- pops(infected_file = infected_file,
                host_file = host_file,
@@ -1209,7 +1208,7 @@ test_that("All kernel types lead to spread", {
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
-  # crashes r
+  # bad array when icdf is available
   data <- pops(infected_file = infected_file,
                host_file = host_file,
                total_populations_file = host_file,
