@@ -85,9 +85,9 @@ public:
         double beta = 1.0 / theta;
         for (int i = 0; i < alpha; i++) {
             // tgamma = (i-1)! used since c++ has no factorial in std lib
-            sum += pow(beta * x, i) / std::tgamma(i + 1);
+            sum += (1.0 / std::tgamma(i + 1)) * exp(-beta * x) * pow(beta * x, i);
         }
-        return 1 - sum * exp(-beta * x);
+        return 1 - sum;
     }
 
     /*!
@@ -110,7 +110,7 @@ public:
         LogNormalKernel lognormal(1);
         double guess = lognormal.icdf(x);
         double check = cdf(guess);
-        double numiterations = 500;  // will need to adjust this
+        double numiterations = 1000;  // will need to adjust this
         double precision = 0.001;  // will need to adjust this
         for (int i = 0; i < numiterations; i++) {
             if (check < (x - precision) || check > (x + precision)) {
@@ -118,16 +118,19 @@ public:
                 // if dif is positive guess is greater than needed
                 // if dif is negative guess is less than needed
                 double past_guess = guess;
-                double derivative = (check - x) / pdf(guess);
+                double derivative = dif / pdf(guess);
                 // limit size of next guess
                 guess = std::max(guess / 10, std::min(guess * 10, guess - derivative));
                 check = cdf(guess);
                 // Check if we went to far and need to backtrack
-                for (int j = 0; j < 10; j++) {
-                    if (std::abs(dif) < std::abs(check - x)) {
-                        past_guess = guess;
-                        guess = (guess + past_guess) / 2.0;
-                        check = cdf(guess);
+                int count = 0;
+                bool run = true;
+                while ((std::abs(dif) < std::abs(check - x)) && run) {
+                    guess = (guess + past_guess) / 2.0;
+                    check = cdf(guess);
+                    count++;
+                    if (count > 20) {
+                        run = false;
                     }
                 }
             }
