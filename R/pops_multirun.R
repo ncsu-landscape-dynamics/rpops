@@ -420,6 +420,8 @@ pops_multirun <- function(infected_file,
 
   simulation_mean_stack <- stack()
   simulation_sd_stack <- stack()
+  simulation_min_stack <- stack()
+  simulation_max_stack <- stack()
   for (q in seq_len(nlayers(single_runs[[1]]))) {
     raster_stacks <- stack()
     for (j in seq_len(length(single_runs))) {
@@ -427,14 +429,20 @@ pops_multirun <- function(infected_file,
     }
     simulation_mean <- raster::calc(raster_stacks, mean)
     simulation_sd <- raster::calc(raster_stacks, sd)
+    simulation_min <- raster::calc(raster_stacks, min)
+    simulation_max <- raster::calc(raster_stacks, max)
     simulation_mean_stack <- stack(simulation_mean_stack, simulation_mean)
     simulation_sd_stack <- stack(simulation_sd_stack, simulation_sd)
+    simulation_min_stack <- stack(simulation_min_stack, simulation_min)
+    simulation_max_stack <- stack(simulation_max_stack, simulation_max)
   }
 
   outputs <-
     list(probability,
          simulation_mean_stack,
          simulation_sd_stack,
+         simulation_min_stack,
+         simulation_max_stack,
          single_run,
          susceptible_run,
          number_infecteds,
@@ -453,6 +461,8 @@ pops_multirun <- function(infected_file,
     c("probability",
       "simulation_mean",
       "simulation_sd",
+      "simulation_min",
+      "simulation_max",
       "single_run",
       "susceptible_run",
       "number_infecteds",
