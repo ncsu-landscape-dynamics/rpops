@@ -108,7 +108,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
+  expect_equal(length(data), 18)
   expect_equal(as.matrix(data$single_run[[1]]),
                as.matrix(raster(infected_file)))
   expect_equal(as.matrix(data$susceptible_run[[1]]),
@@ -181,7 +181,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
+  expect_equal(length(data), 18)
   expect_equal(as.matrix(data$single_run[[1]]),
                as.matrix(raster(infected_file)))
   expect_equal(as.matrix(data$susceptible_run[[1]]),
@@ -257,7 +257,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
+  expect_equal(length(data), 18)
   expect_equal(as.matrix(data$single_run[[1]]),
                as.matrix(raster(infected_file)))
   expect_equal(as.matrix(data$susceptible_run[[1]]),
@@ -330,7 +330,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
+  expect_equal(length(data), 18)
   expect_equal(as.matrix(data$single_run[[1]]),
                as.matrix(raster(infected_file)))
   expect_equal(as.matrix(data$susceptible_run[[1]]),
