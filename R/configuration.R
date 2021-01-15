@@ -12,12 +12,11 @@
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
-#' @importFrom aws.s3 s3read_using
+#' @importFrom aws.s3 head_object save_object
 #'
 #' @return config list with all data ready for pops C++ or error message
 #'
 #' @export
-#'
 
 configuration <- function(config) {
 
