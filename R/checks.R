@@ -2,12 +2,19 @@
 # and pasting of code across functions
 Sys.setenv("R_TESTS" = "")
 
-initial_raster_checks <- function(x) {
+initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
   checks_passed <- TRUE
 
-  if (!all(file.exists(x))) {
-    checks_passed <- FALSE
-    failed_check <- "file does not exist"
+  if (use_s3) {
+    if (!aws.s3::head_object(x, bucket)) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
+  } else {
+    if (!all(file.exists(x))) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
   }
 
   if (checks_passed && !all((raster::extension(x) %in%
@@ -17,12 +24,16 @@ initial_raster_checks <- function(x) {
   }
 
   if (checks_passed) {
-    r <- raster::stack(x)
+    if (use_s3) {
+      save_file = aws.s3::save_object(object = x, bucket = bucket, file = x, check_region = FALSE)
+      r <- raster::stack(x)
+    } else {
+      r <- raster::stack(x)
+    }
     r <- raster::reclassify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
       right = NA
     )
   }
-
 
   if (checks_passed) {
     outs <- list(checks_passed, r)
@@ -37,12 +48,19 @@ initial_raster_checks <- function(x) {
 
 # adds checks to test for raster extent, resolution, and crs x2 being the
 # raster already through initial checks for comparison
-secondary_raster_checks <- function(x, x2) {
+secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
   checks_passed <- TRUE
 
-  if (!all(file.exists(x))) {
-    checks_passed <- FALSE
-    failed_check <- "file does not exist"
+  if (use_s3) {
+    if (!aws.s3::head_object(x, bucket)) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
+  } else {
+    if (!all(file.exists(x))) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
   }
 
   if (checks_passed && !all((raster::extension(x) %in%
@@ -52,7 +70,12 @@ secondary_raster_checks <- function(x, x2) {
   }
 
   if (checks_passed) {
-    r <- raster::stack(x)
+    if (use_s3) {
+      save_file = aws.s3::save_object(object = x, bucket = bucket, file = x, check_region = FALSE)
+      r <- raster::stack(x)
+    } else {
+      r <- raster::stack(x)
+    }
     r2 <- raster::reclassify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
       right = NA
     )
