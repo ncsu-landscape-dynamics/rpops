@@ -12,9 +12,11 @@
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
-#' @return list of infected and susceptible per year
-#' @export
+#' @importFrom aws.s3 head_object save_object
 #'
+#' @return config list with all data ready for pops C++ or error message
+#'
+#' @export
 
 configuration <- function(config) {
 
@@ -70,7 +72,12 @@ configuration <- function(config) {
   }
 
   # check that initial raster file exists
-  infected_check <- initial_raster_checks(config$infected_file)
+  if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    infected_check <-
+      initial_raster_checks(config$infected_file, config$use_s3, config$bucket)
+  } else {
+    infected_check <- initial_raster_checks(config$infected_file)
+  }
   if (infected_check$checks_passed) {
     infected <- infected_check$raster
     if (raster::nlayers(infected) > 1) {
@@ -82,7 +89,12 @@ configuration <- function(config) {
   }
 
   # check that host raster has the same crs, resolution, and extent
-  host_check <- secondary_raster_checks(config$host_file, infected)
+  if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    host_check <-
+      secondary_raster_checks(config$host_file, infected, config$use_s3, config$bucket)
+  } else {
+    host_check <- secondary_raster_checks(config$host_file, infected)
+  }
   if (host_check$checks_passed) {
     host <- host_check$raster
     if (raster::nlayers(host) > 1) {
@@ -120,6 +132,13 @@ configuration <- function(config) {
   config$spatial_indices <- spatial_indices
 
   # check that total populations raster has the same crs, resolution, and extent
+  if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    total_populations_check <-
+      secondary_raster_checks(config$total_populations_file, infected, config$use_s3, config$bucket)
+  } else {
+    total_populations_check <-
+      secondary_raster_checks(config$total_populations_file, infected)
+  }
   total_populations_check <- secondary_raster_checks(
     config$total_populations_file, infected)
   if (total_populations_check$checks_passed) {
@@ -137,8 +156,13 @@ configuration <- function(config) {
 
   # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {
-    temperature_check <- secondary_raster_checks(
-      config$temperature_file, infected)
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      temperature_check <-
+        secondary_raster_checks(config$temperature_file, infected, config$use_s3, config$bucket)
+    } else {
+      temperature_check <-
+        secondary_raster_checks(config$temperature_file, infected)
+    }
     if (temperature_check$checks_passed) {
       temperature_stack <- temperature_check$raster
     } else {
@@ -161,8 +185,13 @@ configuration <- function(config) {
   # check that temp and precip rasters have the same crs, resolution, and extent
   config$weather <- FALSE
   if (config$temp == TRUE) {
-    temperature_coefficient_check <- secondary_raster_checks(
-      config$temperature_coefficient_file, infected)
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      temperature_coefficient_check <-
+        secondary_raster_checks(config$temperature_coefficient_file, infected, config$use_s3, config$bucket)
+    } else {
+      temperature_coefficient_check <-
+        secondary_raster_checks(config$temperature_coefficient_file, infected)
+    }
     if (temperature_coefficient_check$checks_passed) {
       temperature_coefficient <- temperature_coefficient_check$raster
     } else {
@@ -173,8 +202,13 @@ configuration <- function(config) {
     config$weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (config$precip == TRUE) {
-      precipitation_coefficient_check <- secondary_raster_checks(
-        config$precipitation_coefficient_file, infected)
+      if (config$function_name %in% c("casestudy_creation", "model_api")) {
+        precipitation_coefficient_check <-
+          secondary_raster_checks(config$precipitation_coefficient_file, infected, config$use_s3, config$bucket)
+      } else {
+        precipitation_coefficient_check <-
+          secondary_raster_checks(config$precipitation_coefficient_file, infected)
+      }
       if (precipitation_coefficient_check$checks_passed) {
         precipitation_coefficient <- precipitation_coefficient_check$raster
       } else {
@@ -186,8 +220,13 @@ configuration <- function(config) {
         precipitation_coefficient
     }
   } else if (config$precip == TRUE) {
-    precipitation_coefficient_check <- secondary_raster_checks(
-      config$precipitation_coefficient_file, infected)
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      precipitation_coefficient_check <-
+        secondary_raster_checks(config$precipitation_coefficient_file, infected, config$use_s3, config$bucket)
+    } else {
+      precipitation_coefficient_check <-
+        secondary_raster_checks(config$precipitation_coefficient_file, infected)
+    }
     if (precipitation_coefficient_check$checks_passed) {
       precipitation_coefficient <- precipitation_coefficient_check$raster
     } else {
@@ -215,8 +254,14 @@ configuration <- function(config) {
   config$weather_coefficient <- weather_coefficient
 
   if (config$management == TRUE) {
-    treatments_check <- secondary_raster_checks(config$treatments_file,
-                                                infected)
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      treatments_check <-
+        secondary_raster_checks(config$treatments_file, infected, config$use_s3, config$bucket)
+    } else {
+      treatments_check <-
+        secondary_raster_checks(config$treatments_file,infected)
+    }
+
     if (treatments_check$checks_passed) {
       treatment_stack <- treatments_check$raster
     } else {
@@ -286,8 +331,14 @@ configuration <- function(config) {
 
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
-    quarantine_check <- secondary_raster_checks(
-      config$quarantine_areas_file, host)
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      quarantine_check <-
+        secondary_raster_checks(config$quarantine_areas_file, infected, config$use_s3, config$bucket)
+    } else {
+      quarantine_check <-
+        secondary_raster_checks(config$quarantine_areas_file, host)
+    }
+
     if (quarantine_check$checks_passed) {
       quarantine_areas <- quarantine_check$raster
       config$quarantine_areas <- raster::as.matrix(quarantine_areas)

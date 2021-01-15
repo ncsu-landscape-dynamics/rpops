@@ -25,6 +25,7 @@ Imports:
     utils,
     MASS,
     methods,
+    aws.s3,
     rgdal
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
