@@ -139,8 +139,6 @@ configuration <- function(config) {
     total_populations_check <-
       secondary_raster_checks(config$total_populations_file, infected)
   }
-  total_populations_check <- secondary_raster_checks(
-    config$total_populations_file, infected)
   if (total_populations_check$checks_passed) {
     total_populations <- total_populations_check$raster
     if (raster::nlayers(total_populations) > 1) {
@@ -376,7 +374,7 @@ configuration <- function(config) {
   }
 
   if (config$function_name %in%
-      c("validate", "pops", "multirun", "sensitivity")) {
+      c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")) {
 
     if (nrow(config$parameter_cov_matrix) != 6 |
         ncol(config$parameter_cov_matrix) != 6) {
