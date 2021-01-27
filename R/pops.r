@@ -120,8 +120,8 @@
 #' spread rates
 #'
 #' @useDynLib PoPS, .registration = TRUE
-#' @importFrom raster raster values as.matrix xres yres stack extent calc
-#' extract rasterToPoints crs rowColFromCell rowFromCell colFromCell
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom  stats runif
 #' @importFrom lubridate interval time_length mdy %within%
