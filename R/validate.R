@@ -25,8 +25,8 @@
 #' @param parameter_cov_matrix the parameter covariance matrix from the abc
 #' calibration function (posterior covairance matrix)
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -163,7 +163,7 @@ validate <- function(infected_years_file,
     foreach::foreach(
       i = 1:number_of_iterations,
       .combine = rbind,
-      .packages = c("raster", "PoPS", "foreach", "MASS")
+      .packages = c("terra", "PoPS", "foreach", "MASS")
     ) %dopar% {
       config$random_seed <- round(stats::runif(1, 1, 1000000))
 
@@ -241,14 +241,14 @@ validate <- function(infected_years_file,
         dispersal_percentage = config$dispersal_percentage
       )
 
-      comp_year <- raster(config$infected_file)
+      comp_year <- terra::rast(config$infected_file)
       all_disagreement <-
         foreach(
           q = seq_len(length(data$infected)), .combine = rbind,
           .packages = c("raster", "PoPS", "foreach"),
           .final = colSums
-        ) %dopar% {
-          comp_year[] <- data$infected[[q]]
+        ) %do% {
+          terra::values(comp_year) <- data$infected[[q]]
           quantity_allocation_disagreement(
             config$infection_years[[q]],
             comp_year,
