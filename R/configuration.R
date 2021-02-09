@@ -9,6 +9,7 @@
 #' cellStats  calc extract
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
+#' rowColFromCell global
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -503,6 +504,12 @@ configuration <- function(config) {
     config$proposed_particles <- 1
     config$current_bin <- 1
   }
+
+  config$crs <- terra::crs(config$host)
+  config$xmax <- terra::xmax(config$host)
+  config$xmin <- terra::xmin(config$host)
+  config$ymax <- terra::ymax(config$host)
+  config$ymin <- terra::ymin(config$host)
 
   return(config)
   }
