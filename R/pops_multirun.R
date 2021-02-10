@@ -20,7 +20,7 @@
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
-#' @importFrom foreach  registerDoSEQ %dopar%
+#' @importFrom foreach  registerDoSEQ %dopar% %do%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
 #' @return list of infected and susceptible per year
