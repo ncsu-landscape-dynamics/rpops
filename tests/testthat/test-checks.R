@@ -77,7 +77,7 @@ test_that("Initial raster checks report correct errors and return a raster", {
                resolution_error)
 
   host_file <-
-    system.file("extdata", "simple2x2", "total_plants_with_crs.tif",
+    system.file("extdata", "simple2x2", "critical_temp_diff_crs.tif",
                 package = "PoPS")
   host <- secondary_raster_checks(host_file, infected)
   expect_equal(host$checks_passed, FALSE)
