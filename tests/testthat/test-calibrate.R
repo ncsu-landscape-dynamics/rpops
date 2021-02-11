@@ -13,7 +13,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(1200, 100000, 900, 1000)
+            checks <- c(12000, 10000000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -27,7 +27,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             temperature_coefficient_file <- ""
             precip <- FALSE
             precipitation_coefficient_file <- ""
-            model_type <- "SEI"
+            model_type <- "SI"
             latency_period <- 14
             time_step <- "week"
             season_month_start <- 1
@@ -163,7 +163,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, F, F, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(1200, 100000, 900, 100000)
+            checks <- c(12000, 10000000, 900, 70000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -177,7 +177,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             temperature_coefficient_file <- ""
             precip <- FALSE
             precipitation_coefficient_file <- ""
-            model_type <- "SEI"
+            model_type <- "SI"
             latency_period <- 14
             time_step <- "week"
             season_month_start <- 1
@@ -195,7 +195,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
             treatment_method <- "ratio"
-            natural_kernel_type <- "exponential"
+            natural_kernel_type <- "cauchy"
             anthropogenic_kernel_type <- "cauchy"
             natural_dir <- "NONE"
             natural_kappa <- 0
