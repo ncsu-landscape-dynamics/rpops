@@ -594,7 +594,7 @@ calibrate <- function(infected_years_file,
 
   } else if (config$calibration_method == "MCMC") {
 
-    proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
+    proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
     proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
     if (config$params_to_estimate[3]) {
       proposed_percent_natural_dispersal <-
@@ -684,14 +684,14 @@ calibrate <- function(infected_years_file,
     for (i in seq_len(config$number_of_iterations)) {
 
       proposed_reproductive_rate <- 0
-      while (proposed_reproductive_rate <= 0) {
+      while (proposed_reproductive_rate <= 0.1) {
         proposed_reproductive_rate <-
           round(rnorm(1, mean = current$reproductive_rate,
                       sd = current$reproductive_rate / 10), digits = 1)
       }
 
       proposed_natural_distance_scale <- 0
-      while (proposed_natural_distance_scale <= 0) {
+      while (proposed_natural_distance_scale <= 0.1) {
         proposed_natural_distance_scale <-
           round(rnorm(1, mean = current$natural_distance_scale,
                       sd = current$natural_distance_scale / 10), digits = 0)
@@ -699,7 +699,7 @@ calibrate <- function(infected_years_file,
 
       if (config$params_to_estimate[3]) {
         proposed_percent_natural_dispersal <- 0
-        while (proposed_percent_natural_dispersal < 0.95 ||
+        while (proposed_percent_natural_dispersal < 0.93 ||
                proposed_percent_natural_dispersal >= 1) {
           proposed_percent_natural_dispersal <-
             round(rnorm(1, mean = current$percent_natural_dispersal,
@@ -712,8 +712,8 @@ calibrate <- function(infected_years_file,
 
       if (config$params_to_estimate[4]) {
         proposed_anthropogenic_distance_scale <- 0
-        while (proposed_anthropogenic_distance_scale <= 0 |
-               proposed_anthropogenic_distance_scale > 80000) {
+        while (proposed_anthropogenic_distance_scale <= 0.01 |
+               proposed_anthropogenic_distance_scale > 100000) {
           proposed_anthropogenic_distance_scale <-
             round(rnorm(1, mean = current$anthropogenic_distance_scale,
                         sd = current$anthropogenic_distance_scale / 20),
@@ -726,7 +726,7 @@ calibrate <- function(infected_years_file,
       if (config$params_to_estimate[5]) {
         proposed_natural_kappa <- 0
         while (proposed_natural_kappa <= 0 ||
-               proposed_natural_kappa > 1.000) {
+               proposed_natural_kappa > 4.000) {
           proposed_natural_kappa <-
             round(rnorm(1, mean = current$natural_kappa,
                         sd = current$natural_kappa / 20), digits = 3)
@@ -738,7 +738,7 @@ calibrate <- function(infected_years_file,
       if (config$params_to_estimate[6]) {
         proposed_anthropogenic_kappa <- 0
         while (proposed_anthropogenic_kappa <= 0 ||
-               proposed_anthropogenic_kappa > 1.000) {
+               proposed_anthropogenic_kappa > 4.000) {
           proposed_anthropogenic_kappa <-
             round(rnorm(1, mean = current$anthropogenic_kappa,
                         sd = current$anthropogenic_kappa / 20), digits = 3)
