@@ -13,7 +13,7 @@
 #' negatives from comparisons.
 #'
 #' @importFrom landscapemetrics lsm_c_np lsm_c_enn_mn lsm_c_para_mn lsm_c_lpi
-#' @importFrom raster cellsFromExtent xres ncol nrow yres extent
+#' @importFrom terra cells xres ncol nrow yres ext compareGeom
 #'
 #' @return A data frame with spatial configuration metrics. Particularly
 #' quantity, allocation, and total disagreement,  omission and comission, and

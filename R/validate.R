@@ -164,9 +164,9 @@ validate <- function(infected_years_file,
       i = 1:number_of_iterations,
       .combine = rbind,
       .packages = c("terra", "PoPS", "foreach", "MASS")
-    ) %dopar% {
-      config$random_seed <- round(stats::runif(1, 1, 1000000))
+    ) %do% {
 
+      config$random_seed <- round(stats::runif(1, 1, 1000000))
       data <- pops_model(
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
@@ -245,7 +245,7 @@ validate <- function(infected_years_file,
       all_disagreement <-
         foreach(
           q = seq_len(length(data$infected)), .combine = rbind,
-          .packages = c("raster", "PoPS", "foreach"),
+          .packages = c("terra", "PoPS", "foreach"),
           .final = colSums
         ) %do% {
           terra::values(comp_year) <- data$infected[[q]]
