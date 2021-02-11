@@ -561,7 +561,7 @@ test_that("Input raster resolutions, extents, and crs all match", {
   expect_equal(pops(infected_file = infected_file,
                     host_file =
                       system.file("extdata", "simple2x2",
-                                  "total_plants_with_crs.tif",
+                                  "critical_temp_diff_crs.tif",
                                   package = "PoPS"),
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
@@ -571,14 +571,14 @@ test_that("Input raster resolutions, extents, and crs all match", {
                     host_file = host_file,
                     total_populations_file =
                       system.file("extdata", "simple2x2",
-                                  "total_plants_with_crs.tif",
+                                  "critical_temp_diff_crs.tif",
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                crs_error)
   expect_equal(pops(infected_file =
                       system.file("extdata", "simple2x2",
-                                  "total_plants_with_crs.tif",
+                                  "critical_temp_diff_crs.tif",
                                   package = "PoPS"),
                     host_file = host_file,
                     total_populations_file = host_file,
