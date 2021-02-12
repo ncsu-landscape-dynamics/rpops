@@ -394,7 +394,8 @@ calibrate <- function(infected_years_file,
           # draw from the multivariate normal distribution and ensure that
           # parameters are within their allowed range
           proposed_parameters <-
-            mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
+            MASS::mvrnorm(1, config$parameter_means,
+                          config$parameter_cov_matrix)
           while (proposed_parameters[1] <= 0 |
                  proposed_parameters[2] <= 0 |
                  proposed_parameters[3] > 1 |
@@ -403,7 +404,8 @@ calibrate <- function(infected_years_file,
                  proposed_parameters[5] < 0 |
                  proposed_parameters[6] < 0) {
             proposed_parameters <-
-              mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
+              MASS::mvrnorm(1, config$parameter_means,
+                            config$parameter_cov_matrix)
           }
           proposed_reproductive_rate <- proposed_parameters[1]
           proposed_natural_distance_scale <- proposed_parameters[2]
@@ -539,7 +541,7 @@ calibrate <- function(infected_years_file,
                distance', 'number of locations', and 'residual error'")
         }
 
-        if (diff_checks) {
+        if (diff_checks & config$total_particles <= config$num_particles) {
           parameters_kept[config$total_particles, ] <-
             c(
               proposed_reproductive_rate,
