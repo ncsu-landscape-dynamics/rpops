@@ -596,17 +596,26 @@ calibrate <- function(infected_years_file,
 
   } else if (config$calibration_method == "MCMC") {
 
+    if (success_metric %in%
+        c("quantity", "quantity and configuration",
+          "odds ratio", "residual error")) {
+      proposed_accepted <- TRUE
+    } else {
+      return("Success metric must be one of 'quantity', 'quantity and
+                 configuration', 'residual error', or 'odds ratio'")
+    }
+
     proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
     proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
     if (config$params_to_estimate[3]) {
       proposed_percent_natural_dispersal <-
-        round(runif(1, 0.93, 1), digits = 3)
+        round(runif(1, 0.93, 1.000), digits = 3)
     } else {
       proposed_percent_natural_dispersal <- 1.0
     }
     if (config$params_to_estimate[4]) {
       proposed_anthropogenic_distance_scale <-
-        round(runif(1, 30, 80), digits = 0) * 100
+        round(runif(1, 30, 100), digits = 0) * 100
     } else {
       proposed_anthropogenic_distance_scale <- 0.1
     }
@@ -693,7 +702,7 @@ calibrate <- function(infected_years_file,
       }
 
       proposed_natural_distance_scale <- 0
-      while (proposed_natural_distance_scale <= 0.1) {
+      while (proposed_natural_distance_scale <= 1) {
         proposed_natural_distance_scale <-
           round(rnorm(1, mean = current$natural_distance_scale,
                       sd = current$natural_distance_scale / 10), digits = 0)
@@ -714,7 +723,7 @@ calibrate <- function(infected_years_file,
 
       if (config$params_to_estimate[4]) {
         proposed_anthropogenic_distance_scale <- 0
-        while (proposed_anthropogenic_distance_scale <= 0.01 |
+        while (proposed_anthropogenic_distance_scale <= 1 |
                proposed_anthropogenic_distance_scale > 100000) {
           proposed_anthropogenic_distance_scale <-
             round(rnorm(1, mean = current$anthropogenic_distance_scale,
@@ -837,8 +846,7 @@ calibrate <- function(infected_years_file,
       } else if (success_metric == "residual error" & residual_error_pass) {
         proposed_accepted <- TRUE
       } else {
-        return("Success metric must be one of 'quantity', 'quantity and
-                 configuration', 'residual error', or 'odds ratio'")
+        proposed_accepted <- FALSE
       }
 
       if (proposed_accepted) {
