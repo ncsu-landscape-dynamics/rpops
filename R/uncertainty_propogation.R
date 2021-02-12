@@ -1,12 +1,12 @@
 ## Uncertainty propogation checks and passing
 
 output_from_raster_mean_and_sd <- function(x) {
-  x[[1]] <- reclassify(x[[1]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
-  x[[2]] <- reclassify(x[[2]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[1]] <- terra::classify(x[[1]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[2]] <- terra::classify(x[[2]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
   fun <- function(x) {
     round(rnorm(1, mean = x[1], sd = x[2]), digits = 0)
   }
-  x2 <- suppressWarnings(calc(x, fun))
+  x2 <- suppressWarnings(terra::app(x, fun))
   return(x2)
 }
 
