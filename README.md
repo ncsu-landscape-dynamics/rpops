@@ -1,4 +1,4 @@
-# PoPS (Pest or Pathogen Spread) Model R Wrapper <img src="man/PoPS_Logo.png" align="right" width="14%" />
+# PoPS (Pest or Pathogen Spread) R <img src="man/PoPS_GIF_transparent.gif" align="right" width="15%" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check)
@@ -51,7 +51,7 @@ you are using for example:
 
 ## How to install
 
-Install Rtools(https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
+Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
 running the code below and changing the ref to match the latest semantic version
 or the specific version that you are looking to install.
 ```R

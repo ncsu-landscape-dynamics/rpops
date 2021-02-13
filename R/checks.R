@@ -2,27 +2,39 @@
 # and pasting of code across functions
 Sys.setenv("R_TESTS" = "")
 
-initial_raster_checks <- function(x) {
+initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
   checks_passed <- TRUE
 
-  if (!all(file.exists(x))) {
-    checks_passed <- FALSE
-    failed_check <- "file does not exist"
+  if (use_s3) {
+    if (!aws.s3::head_object(x, bucket)) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
+  } else {
+    if (!all(file.exists(x))) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
   }
 
-  if (checks_passed && !all((raster::extension(x) %in%
-    c(".grd", ".tif", ".img")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in%
+    c("grd", "tif", "img")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.grd', '.tif', '.img'"
   }
 
   if (checks_passed) {
-    r <- raster::stack(x)
-    r <- raster::reclassify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
+    if (use_s3) {
+      aws.s3::save_object(object = x, bucket = bucket,
+                          file = x, check_region = FALSE)
+      r <- terra::rast(x)
+    } else {
+      r <- terra::rast(x)
+    }
+    r <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
       right = NA
     )
   }
-
 
   if (checks_passed) {
     outs <- list(checks_passed, r)
@@ -37,47 +49,60 @@ initial_raster_checks <- function(x) {
 
 # adds checks to test for raster extent, resolution, and crs x2 being the
 # raster already through initial checks for comparison
-secondary_raster_checks <- function(x, x2) {
+secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
   checks_passed <- TRUE
 
-  if (!all(file.exists(x))) {
-    checks_passed <- FALSE
-    failed_check <- "file does not exist"
+  if (use_s3) {
+    if (!aws.s3::head_object(x, bucket)) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
+  } else {
+    if (!all(file.exists(x))) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
   }
 
-  if (checks_passed && !all((raster::extension(x) %in%
-    c(".grd", ".tif", ".img")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in%
+    c("grd", "tif", "img")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.grd', '.tif', '.img'"
   }
 
   if (checks_passed) {
-    r <- raster::stack(x)
-    r2 <- raster::reclassify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
+    if (use_s3) {
+      aws.s3::save_object(object = x, bucket = bucket,
+                          file = x, check_region = FALSE)
+      r <- terra::rast(x)
+    } else {
+      r <- terra::rast(x)
+    }
+    r2 <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
       right = NA
     )
-    if (!(raster::extent(r2) == raster::extent(r))) {
-      raster::extent(r2) <- raster::extent(r)
+    if (!(terra::ext(r2) == terra::ext(r))) {
+      terra::ext(r2) <- terra::ext(r)
     }
     r <- r2
   }
 
-  if (checks_passed && !(raster::extent(x2) == raster::extent(r))) {
+  if (checks_passed && !(terra::ext(x2) == terra::ext(r))) {
     checks_passed <- FALSE
     failed_check <-
       "Extents of input rasters do not match. Ensure that all of your input
     rasters have the same extent"
   }
 
-  if (checks_passed && !(raster::xres(x2) == raster::xres(r) &&
-    raster::yres(x2) == raster::yres(r))) {
+  if (checks_passed && !(terra::xres(x2) == terra::xres(r) &&
+    terra::yres(x2) == terra::yres(r))) {
     checks_passed <- FALSE
     failed_check <-
       "Resolution of input rasters do not match. Ensure that all of your input
     rasters have the same resolution"
   }
 
-  if (checks_passed && !raster::compareCRS(r, x2)) {
+  if (checks_passed && !(terra::crs(r) == terra::crs(x2))) {
     checks_passed <- FALSE
     failed_check <-
       "Coordinate reference system (crs) of input rasters do not match. Ensure
@@ -117,18 +142,23 @@ treatment_checks <- function(treatment_stack,
   if (checks_passed) {
     if (pesticide_duration[1] > 0) {
       treatment_maps <-
-        list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+        list(terra::as.matrix(treatment_stack[[1]] * pesticide_efficacy,
+             wide = TRUE))
     } else {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+      treatment_maps <- list(terra::as.matrix(treatment_stack[[1]],
+                                              wide = TRUE))
     }
 
-    if (raster::nlayers(treatment_stack) >= 2) {
-      for (i in 2:raster::nlayers(treatment_stack)) {
+    if (terra::nlyr(treatment_stack) >= 2) {
+      for (i in 2:terra::nlyr(treatment_stack)) {
         if (pesticide_duration[i] > 0) {
           treatment_maps[[i]] <-
-            raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
+            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy,
+                                  wide = TRUE))
         } else {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
+          treatment_maps[[i]] <-
+            list(terra::as.matrix(treatment_stack[[i]],
+                                  wide = TRUE))
         }
       }
     }
@@ -737,7 +767,7 @@ movement_checks <- function(x, rast, start_date, end_date) {
     failed_check <- "file does not exist"
   }
 
-  if (checks_passed && !all((raster::extension(x) %in% c(".csv", ".txt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% c(".csv", ".txt")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.csv' or '.txt'"
   }
@@ -755,8 +785,8 @@ movement_checks <- function(x, rast, start_date, end_date) {
     )
     movement_from <- spTransform(movement_from, CRSobj = crs(rast))
     movement_to <- spTransform(movement_to, CRSobj = crs(rast))
-    cell_from <- raster::extract(rast, movement_from, cellnumbers = TRUE)
-    cell_to <- raster::extract(rast, movement_to, cellnumbers = TRUE)
+    cell_from <- terra::extract(rast, movement_from, cellnumbers = TRUE)
+    cell_to <- terra::extract(rast, movement_to, cellnumbers = TRUE)
     rowcol_from <- rowColFromCell(rast, cell_from[, 1])
     rowcol_to <- rowColFromCell(rast, cell_to[, 1])
     movements <- data.frame(

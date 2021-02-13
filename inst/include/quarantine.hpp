@@ -24,26 +24,17 @@
 #include <sstream>
 #include <iomanip>
 
+#include "utils.hpp"
+
 namespace pops {
 
-/*! Quarantine direction
- */
-enum class QuarantineDirection
+std::ostream& operator<<(std::ostream& os, const Direction& obj)
 {
-    N = 0,  //!< North
-    E = 90,  //!< East
-    S = 180,  //!< South
-    W = 270,  //!< West
-    None  //!< Escaped
-};
-std::ostream& operator<<(std::ostream& os, const QuarantineDirection& obj)
-{
-    os << static_cast<std::underlying_type<QuarantineDirection>::type>(obj);
+    os << static_cast<std::underlying_type<Direction>::type>(obj);
     return os;
 }
 
-typedef std::tuple<int, int, int, int> BBoxInt;
-typedef std::tuple<double, QuarantineDirection> DistDir;
+typedef std::tuple<double, Direction> DistDir;
 typedef std::tuple<bool, DistDir> EscapeDistDir;
 typedef std::vector<EscapeDistDir> EscapeDistDirs;
 
@@ -71,36 +62,38 @@ private:
      * Different quarantine areas are represented by different integers.
      * 0 in the raster means no quarantine area.
      */
-    void quarantine_boundary(const IntegerRaster& quarantine_areas)
+    void quarantine_boundary(
+        const IntegerRaster& quarantine_areas,
+        const std::vector<std::vector<int>>& suitable_cells)
     {
         int n, s, e, w;
         int idx = 0;
-        for (int i = 0; i < height_; i++) {
-            for (int j = 0; j < width_; j++) {
-                auto value = quarantine_areas(i, j);
-                if (value > 0) {
-                    auto search = boundary_id_idx_map.find(value);
-                    int bidx;
-                    if (search == boundary_id_idx_map.end()) {
-                        boundary_id_idx_map.insert(std::make_pair(value, idx));
-                        boundaries.push_back(
-                            std::make_tuple(height_ - 1, 0, 0, width_ - 1));
-                        bidx = idx;
-                        ++idx;
-                    }
-                    else
-                        bidx = search->second;
-                    std::tie(n, s, e, w) = boundaries.at(bidx);
-                    if (i < n)
-                        n = i;
-                    if (i > s)
-                        s = i;
-                    if (j > e)
-                        e = j;
-                    if (j < w)
-                        w = j;
-                    boundaries.at(bidx) = std::make_tuple(n, s, e, w);
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            auto value = quarantine_areas(i, j);
+            if (value > 0) {
+                auto search = boundary_id_idx_map.find(value);
+                int bidx;
+                if (search == boundary_id_idx_map.end()) {
+                    boundary_id_idx_map.insert(std::make_pair(value, idx));
+                    boundaries.push_back(
+                        std::make_tuple(height_ - 1, 0, 0, width_ - 1));
+                    bidx = idx;
+                    ++idx;
                 }
+                else
+                    bidx = search->second;
+                std::tie(n, s, e, w) = boundaries.at(bidx);
+                if (i < n)
+                    n = i;
+                if (i > s)
+                    s = i;
+                if (j > e)
+                    e = j;
+                if (j < w)
+                    w = j;
+                boundaries.at(bidx) = std::make_tuple(n, s, e, w);
             }
         }
     }
@@ -121,19 +114,19 @@ private:
         DistDir closest;
         if ((i - n) * north_south_resolution_ < mindist) {
             mindist = (i - n) * north_south_resolution_;
-            closest = std::make_tuple(mindist, QuarantineDirection::N);
+            closest = std::make_tuple(mindist, Direction::N);
         }
         if ((s - i) * north_south_resolution_ < mindist) {
             mindist = (s - i) * north_south_resolution_;
-            closest = std::make_tuple(mindist, QuarantineDirection::S);
+            closest = std::make_tuple(mindist, Direction::S);
         }
         if ((e - j) * west_east_resolution_ < mindist) {
             mindist = (e - j) * west_east_resolution_;
-            closest = std::make_tuple(mindist, QuarantineDirection::E);
+            closest = std::make_tuple(mindist, Direction::E);
         }
         if ((j - w) * west_east_resolution_ < mindist) {
             mindist = (j - w) * west_east_resolution_;
-            closest = std::make_tuple(mindist, QuarantineDirection::W);
+            closest = std::make_tuple(mindist, Direction::W);
         }
         return closest;
     }
@@ -143,7 +136,8 @@ public:
         const IntegerRaster& quarantine_areas,
         double ew_res,
         double ns_res,
-        unsigned num_steps)
+        unsigned num_steps,
+        const std::vector<std::vector<int>>& suitable_cells)
         : width_(quarantine_areas.cols()),
           height_(quarantine_areas.rows()),
           west_east_resolution_(ew_res),
@@ -153,10 +147,9 @@ public:
               num_steps,
               std::make_tuple(
                   false,
-                  std::make_tuple(
-                      std::numeric_limits<double>::max(), QuarantineDirection::None)))
+                  std::make_tuple(std::numeric_limits<double>::max(), Direction::None)))
     {
-        quarantine_boundary(quarantine_areas);
+        quarantine_boundary(quarantine_areas, suitable_cells);
     }
 
     QuarantineEscape() = delete;
@@ -169,27 +162,29 @@ public:
     void infection_escape_quarantine(
         const IntegerRaster& infected,
         const IntegerRaster& quarantine_areas,
-        unsigned step)
+        unsigned step,
+        const std::vector<std::vector<int>>& suitable_cells)
     {
-        DistDir min_dist_dir = std::make_tuple(
-            std::numeric_limits<double>::max(), QuarantineDirection::None);
-        for (int i = 0; i < height_; i++) {
-            for (int j = 0; j < width_; j++) {
-                if (!infected(i, j))
-                    continue;
-                int area = quarantine_areas(i, j);
-                if (area == 0) {
-                    escape_dist_dirs.at(step) = std::make_tuple(
-                        true, std::make_tuple(std::nan(""), QuarantineDirection::None));
-                    return;
-                }
-                double dist;
-                QuarantineDirection dir;
-                int bindex = boundary_id_idx_map[area];
-                std::tie(dist, dir) = closest_direction(i, j, boundaries.at(bindex));
-                if (dist < std::get<0>(min_dist_dir)) {
-                    min_dist_dir = std::make_tuple(dist, dir);
-                }
+
+        DistDir min_dist_dir =
+            std::make_tuple(std::numeric_limits<double>::max(), Direction::None);
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (!infected(i, j))
+                continue;
+            int area = quarantine_areas(i, j);
+            if (area == 0) {
+                escape_dist_dirs.at(step) = std::make_tuple(
+                    true, std::make_tuple(std::nan(""), Direction::None));
+                return;
+            }
+            double dist;
+            Direction dir;
+            int bindex = boundary_id_idx_map[area];
+            std::tie(dist, dir) = closest_direction(i, j, boundaries.at(bindex));
+            if (dist < std::get<0>(min_dist_dir)) {
+                min_dist_dir = std::make_tuple(dist, dir);
             }
         }
         escape_dist_dirs.at(step) = std::make_tuple(false, min_dist_dir);
@@ -226,7 +221,7 @@ public:
      * Returns the direction (N, S, E, W, None) of the minimum distance to quarantine
      * boundary bbox. Returns None if infection already escaped.
      */
-    QuarantineDirection direction(unsigned step) const
+    Direction direction(unsigned step) const
     {
         auto dist_dir = std::get<1>(escape_dist_dirs.at(step));
         return std::get<1>(dist_dir);
@@ -295,7 +290,7 @@ std::string write_quarantine_escape(
         std::vector<DistDir> dists_dirs =
             distance_direction_to_quarantine(escape_infos, step);
         double dist;
-        QuarantineDirection dir;
+        Direction dir;
         for (unsigned i = 0; i < dists_dirs.size(); i++) {
             std::tie(dist, dir) = dists_dirs.at(i);
             if (std::isnan(dist))

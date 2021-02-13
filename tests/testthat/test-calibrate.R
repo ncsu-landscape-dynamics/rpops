@@ -13,7 +13,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(1200, 100000, 900, 1000)
+            checks <- c(12000, 100000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -27,7 +27,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             temperature_coefficient_file <- ""
             precip <- FALSE
             precipitation_coefficient_file <- ""
-            model_type <- "SEI"
+            model_type <- "SI"
             latency_period <- 14
             time_step <- "week"
             season_month_start <- 1
@@ -60,7 +60,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE
@@ -163,7 +163,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, F, F, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(1200, 100000, 900, 100000)
+            checks <- c(12000, 100000, 900, 70000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -177,7 +177,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             temperature_coefficient_file <- ""
             precip <- FALSE
             precipitation_coefficient_file <- ""
-            model_type <- "SEI"
+            model_type <- "SI"
             latency_period <- 14
             time_step <- "week"
             season_month_start <- 1
@@ -195,7 +195,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
             treatment_method <- "ratio"
-            natural_kernel_type <- "exponential"
+            natural_kernel_type <- "cauchy"
             anthropogenic_kernel_type <- "cauchy"
             natural_dir <- "NONE"
             natural_kappa <- 0
@@ -361,7 +361,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE
@@ -376,6 +376,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             output_frequency_n <- 1
             use_spreadrates <- FALSE
             calibration_method <- "ABC"
+            number_of_iterations <- 10
+
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -422,11 +424,11 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               mask,
                               success_metric,
                               output_frequency,
-                              output_frequency_n ,
+                              output_frequency_n,
                               movements_file,
                               use_movements,
                               start_exposed,
-                              generate_stochasticity ,
+                              generate_stochasticity,
                               establishment_stochasticity,
                               movement_stochasticity,
                               deterministic,
@@ -512,7 +514,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             movements_file <- ""
             use_movements <- FALSE
             percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.0
+            anthropogenic_distance_scale <- 0.1
             number_of_iterations <- 10
             number_of_cores <- 2
             start_exposed <- FALSE

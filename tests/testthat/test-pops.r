@@ -561,7 +561,7 @@ test_that("Input raster resolutions, extents, and crs all match", {
   expect_equal(pops(infected_file = infected_file,
                     host_file =
                       system.file("extdata", "simple2x2",
-                                  "total_plants_with_crs.tif",
+                                  "critical_temp_diff_crs.tif",
                                   package = "PoPS"),
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
@@ -571,14 +571,14 @@ test_that("Input raster resolutions, extents, and crs all match", {
                     host_file = host_file,
                     total_populations_file =
                       system.file("extdata", "simple2x2",
-                                  "total_plants_with_crs.tif",
+                                  "critical_temp_diff_crs.tif",
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                crs_error)
   expect_equal(pops(infected_file =
                       system.file("extdata", "simple2x2",
-                                  "total_plants_with_crs.tif",
+                                  "critical_temp_diff_crs.tif",
                                   package = "PoPS"),
                     host_file = host_file,
                     total_populations_file = host_file,
@@ -670,7 +670,7 @@ test_that(
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
-               raster::as.matrix(raster::raster(infected_file)))
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
@@ -682,7 +682,7 @@ test_that(
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
-               raster::as.matrix(raster::raster(infected_file)))
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
@@ -691,7 +691,7 @@ test_that(
                     temp = TRUE,
                     temperature_coefficient_file =
                       coefficient_file)$infected[[1]],
-               raster::as.matrix(raster::raster(infected_file)))
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
@@ -700,7 +700,7 @@ test_that(
                     precip = TRUE,
                     precipitation_coefficient_file =
                       coefficient_file)$infected[[1]],
-               raster::as.matrix(raster::raster(infected_file)))
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
@@ -711,7 +711,7 @@ test_that(
                     precip = TRUE,
                     precipitation_coefficient_file =
                       coefficient_file)$infected[[1]],
-               raster::as.matrix(raster::raster(infected_file)))
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
@@ -726,7 +726,7 @@ test_that(
                     precip = TRUE,
                     precipitation_coefficient_file =
                       coefficient_file)$infected[[1]],
-               raster::as.matrix(raster::raster(infected_file)))
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
 
   skip_on_appveyor()
   expect_equal(
@@ -740,7 +740,7 @@ test_that(
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
          time_step = "week")$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file)))
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -752,7 +752,7 @@ test_that(
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
          time_step = "week")$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file)))
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -768,7 +768,7 @@ test_that(
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
          time_step = "week")$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file)))
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -788,7 +788,7 @@ test_that(
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
          time_step = "week")$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file)))
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
 
   expect_equal(
     pops(infected_file = infected_file,
@@ -797,11 +797,12 @@ test_that(
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
          temp = TRUE,
+         time_step = "day",
          temperature_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_days.tif",
                        package = "PoPS"))$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file, time_step = "day")))
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -812,8 +813,9 @@ test_that(
          precipitation_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_days.tif",
-                       package = "PoPS"))$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file, time_step = "day")))
+                       package = "PoPS"),
+         time_step = "day")$infected[[1]],
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -829,7 +831,7 @@ test_that(
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_days.tif", package = "PoPS"),
          time_step = "day")$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file)))
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -849,7 +851,7 @@ test_that(
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_days.tif", package = "PoPS"),
          time_step = "day")$infected[[1]],
-    raster::as.matrix(raster::raster(infected_file)))
+    terra::as.matrix(terra::rast(infected_file), wide = TRUE))
 
 })
 
@@ -1024,7 +1026,7 @@ test_that("Infected results are greater than initial infected", {
                         parameter_means = parameter_means,
                         parameter_cov_matrix = parameter_cov_matrix
                         )$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
   expect_equal(all(
     pops(infected_file = infected_file,
@@ -1035,7 +1037,7 @@ test_that("Infected results are greater than initial infected", {
          total_populations_file = host_file,
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix)$infected[[1]] >=
-      raster::as.matrix(raster::raster(infected_file))),
+      terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
     TRUE)
 
 })

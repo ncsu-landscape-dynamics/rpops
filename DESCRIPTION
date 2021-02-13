@@ -12,6 +12,7 @@ Authors@R: c(
 Depends: R (>= 3.3.0)
 Imports: 
     raster,
+    terra,
     Rcpp (>= 0.12.19),
     stats,
     foreach,
@@ -26,7 +27,8 @@ Imports:
     MASS,
     methods,
     rgdal,
-    igraph
+    igraph,
+    aws.s3
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 URL: http://www.github.com/ncsu-landscape-dynamics/rpops

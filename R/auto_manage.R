@@ -33,8 +33,8 @@
 #' first priortity in sorting (if false first sorting priority goes to the
 #' selection_method)
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints clump
+#' @importFrom raster raster values as.matrix xres yres stack reclassify clump
+#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -260,6 +260,7 @@ auto_manage <- function(infected_files,
                            num_cols = num_cols,
                            time_step = time_step,
                            reproductive_rate = reproductive_rate[[i]],
+                           spatial_indices = config$spatial_indices,
                            mortality_rate = mortality_rate,
                            mortality_time_lag = mortality_time_lag,
                            season_month_start = season_month_start,

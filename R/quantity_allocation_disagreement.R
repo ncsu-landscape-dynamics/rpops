@@ -13,7 +13,7 @@
 #' negatives from comparisons.
 #'
 #' @importFrom landscapemetrics lsm_c_np lsm_c_enn_mn lsm_c_para_mn lsm_c_lpi
-#' @importFrom raster cellsFromExtent xres ncol nrow yres extent
+#' @importFrom terra cells xres ncol nrow yres ext compareGeom
 #'
 #' @return A data frame with spatial configuration metrics. Particularly
 #' quantity, allocation, and total disagreement,  omission and comission, and
@@ -23,15 +23,13 @@
 #'
 quantity_allocation_disagreement <-
   function(reference, comparison, configuration = FALSE, mask = NULL) {
-    if (is.null(mask)) {
-
-    } else {
+    if (!is.null(mask)) {
       reference[is.na(mask)] <- NA
       comparison[is.na(mask)] <- NA
     }
     # test that the comparison raster is the same extent, resolution, and crs as
     # the reference to ensure that they can be compared accurately
-    raster::compareRaster(reference, comparison)
+    terra::compareGeom(reference, comparison)
     # save initial reference and comparison to use for residual error
     # calculation and then reclassify the original reference and comparison to
     # binary values for other classifications as we are only concerned with
@@ -41,8 +39,8 @@ quantity_allocation_disagreement <-
     ref <- reference
     rcl <- c(1, Inf, 1, 0, 0.99, 0)
     rclmat <- matrix(rcl, ncol = 3, byrow = TRUE)
-    reference <- reclassify(reference, rclmat)
-    comparison <- reclassify(comparison, rclmat)
+    reference <- terra::classify(reference, rclmat)
+    comparison <- terra::classify(comparison, rclmat)
 
     if (configuration == TRUE) {
       # calculate number of infected patches
@@ -180,7 +178,7 @@ quantity_allocation_disagreement <-
     output$total_disagreement <- total_disagreement
     output$configuration_disagreement <- configuration_disagreement
     output$odds_ratio <- odds_ratio
-    output$residual_error <- cellStats(abs(ref - comp), "sum")
+    output$residual_error <- terra::global(abs(ref - comp), "sum")
     output$true_infected <- positives_in_reference
     output$simulated_infected <- positives_in_comparison
     output$infected_difference <-

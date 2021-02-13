@@ -10,9 +10,9 @@ configuration(config)
 \item{config}{list of all data necessary used to set up c++ model}
 }
 \value{
-list of infected and susceptible per year
+config list with all data ready for pops C++ or error message
 }
 \description{
-Function for with a single input and output list for parsing, transforming,
+Function with a single input and output list for parsing, transforming,
 and performing all checks for all functions to run the pops c++ model
 }

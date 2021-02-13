@@ -108,12 +108,12 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
-  expect_equal(as.matrix(data$single_run[[1]]),
-               as.matrix(raster(infected_file)))
-  expect_equal(as.matrix(data$susceptible_run[[1]]),
+  expect_equal(length(data), 18)
+  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
                matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
-  expect_equal(as.matrix(data$probability[[1]]),
+  expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
   expect_equal(data$number_infecteds[[2]], 0)
@@ -181,12 +181,12 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
-  expect_equal(as.matrix(data$single_run[[1]]),
-               as.matrix(raster(infected_file)))
-  expect_equal(as.matrix(data$susceptible_run[[1]]),
+  expect_equal(length(data), 18)
+  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
                matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
-  expect_equal(as.matrix(data$probability[[1]]),
+  expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
   expect_equal(data$number_infecteds[[2]], 0)
@@ -257,12 +257,12 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
-  expect_equal(as.matrix(data$single_run[[1]]),
-               as.matrix(raster(infected_file)))
-  expect_equal(as.matrix(data$susceptible_run[[1]]),
+  expect_equal(length(data), 18)
+  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
                matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
-  expect_equal(as.matrix(data$probability[[1]]),
+  expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
   expect_equal(data$number_infecteds[[2]], 0)
@@ -330,12 +330,12 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 16)
-  expect_equal(as.matrix(data$single_run[[1]]),
-               as.matrix(raster(infected_file)))
-  expect_equal(as.matrix(data$susceptible_run[[1]]),
+  expect_equal(length(data), 18)
+  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
                matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
-  expect_equal(as.matrix(data$probability[[1]]),
+  expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
   expect_equal(data$number_infecteds[[2]], 0)

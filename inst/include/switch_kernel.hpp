@@ -17,6 +17,7 @@
 #define POPS_SWITCH_KERNEL_HPP
 
 #include "radial_kernel.hpp"
+#include "deterministic_kernel.hpp"
 #include "uniform_kernel.hpp"
 #include "neighbor_kernel.hpp"
 #include "kernel_types.hpp"
@@ -38,22 +39,28 @@ class SwitchDispersalKernel
 protected:
     DispersalKernelType dispersal_kernel_type_;
     RadialDispersalKernel<IntegerRaster> radial_kernel_;
+    DeterministicDispersalKernel<IntegerRaster> deterministic_kernel_;
     UniformDispersalKernel uniform_kernel_;
     DeterministicNeighborDispersalKernel deterministic_neighbor_kernel_;
+    bool deterministic_;
 
 public:
     SwitchDispersalKernel(
         const DispersalKernelType& dispersal_kernel_type,
         const RadialDispersalKernel<IntegerRaster>& radial_kernel,
+        const DeterministicDispersalKernel<IntegerRaster>& deterministic_kernel,
         const UniformDispersalKernel& uniform_kernel,
         const DeterministicNeighborDispersalKernel& deterministic_neighbor_kernel =
-            DeterministicNeighborDispersalKernel(Direction::None))
+            DeterministicNeighborDispersalKernel(Direction::None),
+        const bool deterministic = false)
         : dispersal_kernel_type_(dispersal_kernel_type),
           // Here we initialize all kernels,
           // although we won't use all of them.
           radial_kernel_(radial_kernel),
+          deterministic_kernel_(deterministic_kernel),
           uniform_kernel_(uniform_kernel),
-          deterministic_neighbor_kernel_(deterministic_neighbor_kernel)
+          deterministic_neighbor_kernel_(deterministic_neighbor_kernel),
+          deterministic_(deterministic)
     {}
 
     /*! \copydoc RadialDispersalKernel::operator()()
@@ -68,6 +75,9 @@ public:
         else if (dispersal_kernel_type_ == DispersalKernelType::DeterministicNeighbor) {
             return deterministic_neighbor_kernel_(generator, row, col);
         }
+        else if (deterministic_) {
+            return deterministic_kernel_(generator, row, col);
+        }
         else {
             return radial_kernel_(generator, row, col);
         }
@@ -77,12 +87,16 @@ public:
      */
     static bool supports_kernel(const DispersalKernelType type)
     {
-        if (type == DispersalKernelType::Uniform)
+        if (type == DispersalKernelType::Uniform) {
             return true;
-        if (type == DispersalKernelType::DeterministicNeighbor)
+        }
+        else if (type == DispersalKernelType::DeterministicNeighbor) {
             return true;
-        else
+        }
+        // Radial and Deterministic support the same kernel types
+        else {
             return RadialDispersalKernel<IntegerRaster>::supports_kernel(type);
+        }
     }
 };
 
