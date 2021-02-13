@@ -13,7 +13,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(12000, 10000000, 900, 1000)
+            checks <- c(12000, 100000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -163,7 +163,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, F, F, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(12000, 10000000, 900, 70000)
+            checks <- c(12000, 100000, 900, 70000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")

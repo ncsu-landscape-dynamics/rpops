@@ -330,10 +330,12 @@ calibrate <- function(infected_years_file,
             "number of locations and total distance",
             "number of locations, number of infections, and total distance"
           )) {
-        infected_data_points[[y]] <-
+        infected_data_point <-
           terra::as.points(inf_year, crs = terra::crs(inf_year),
-                           fun = function(x) { x > 0},
                            spatial = TRUE)
+        names(infected_data_point) <- "data"
+        infected_data_points[[y]] <-
+          infected_data_point[infected_data_point$data > 0]
         }
     }
 
@@ -359,7 +361,6 @@ calibrate <- function(infected_years_file,
     while (config$current_bin <= config$number_of_generations) {
       # loop until all # of parameter sets kept equals the generation size
       while (config$current_particles <= config$generation_size) {
-
         # draw a set of proposed parameters if current generation is 1 draw from
         # a uniform distribution otherwise draw from a multivarite normal
         # distribution with mean and covariance matrix based on the previous
@@ -396,11 +397,11 @@ calibrate <- function(infected_years_file,
           proposed_parameters <-
             MASS::mvrnorm(1, config$parameter_means,
                           config$parameter_cov_matrix)
-          while (proposed_parameters[1] <= 0 |
-                 proposed_parameters[2] <= 0 |
-                 proposed_parameters[3] > 1 |
-                 proposed_parameters[3] < 0 |
-                 proposed_parameters[4] <= 0 |
+          while (proposed_parameters[1] < 0.1 |
+                 proposed_parameters[2] < 0.1 |
+                 proposed_parameters[3] > 1.00 |
+                 proposed_parameters[3] <= 0.92 |
+                 proposed_parameters[4] < 0.1 |
                  proposed_parameters[5] < 0 |
                  proposed_parameters[6] < 0) {
             proposed_parameters <-
@@ -456,7 +457,7 @@ calibrate <- function(infected_years_file,
 
           # calculate residual error for each time step
           diff_raster <- config$infection_years[[y]] - infected_sim
-          residual_differences[[y]] <- sum(diff_raster[diff_raster != 0])
+          residual_differences[[y]] <- sum(diff_raster[!is.na(diff_raster)])
 
           # calculate number of infection in the simulation
           num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
@@ -468,17 +469,17 @@ calibrate <- function(infected_years_file,
                 "number of locations, number of infections, and total distance"
               )
           ) {
-            infected_sim_points[[y]] <-
+            infected_sim_point <-
               terra::as.points(infected_sim, crs = crs(infected_sim),
-                             fun = function(x) {
-                               x > 0
-                             },
-                             spatial = TRUE
-              )
+                               spatial = TRUE)
+            names(infected_sim_point) <- "data"
+            infected_sim_points[[y]] <-
+              infected_sim_point[infected_sim_point$data > 0]
+
             dist[[y]] <-
               terra::distance(infected_sim_points[[y]],
                             infected_data_points[[y]])
-            if (class(dist) == "matrix") {
+            if (is(dist[[y]], "matrix")) {
               distance_differences[[y]] <- apply(dist[[y]], 2, min)
             } else {
               distance_differences[[y]] <- dist[[y]]
