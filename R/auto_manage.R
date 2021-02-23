@@ -33,8 +33,9 @@
 #' first priortity in sorting (if false first sorting priority goes to the
 #' selection_method)
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify clump
-#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
+#' @importFrom terra global rast xres yres classify extract ext as.points ncol
+#' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
+#' crs app patches
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
