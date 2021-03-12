@@ -66,7 +66,10 @@ pops_model(
   movement_stochasticity = TRUE,
   deterministic = FALSE,
   establishment_probability = 0,
-  dispersal_percentage = 0.99
+  dispersal_percentage = 0.99,
+  use_overpopulation_movements = FALSE,
+  overpopulation_percentage = 0,
+  leaving_percentage = 0
 )
 }
 \arguments{

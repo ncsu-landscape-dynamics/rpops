@@ -75,7 +75,10 @@ pops_multirun <- function(infected_file,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
                           use_quarantine = FALSE,
-                          use_spreadrates = FALSE) {
+                          use_spreadrates = FALSE,
+                          use_overpopulation_movements = FALSE,
+                          overpopulation_percentage = 0,
+                          leaving_percentage = 0) {
 
   config <- c()
   config$random_seed <- random_seed

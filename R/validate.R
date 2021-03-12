@@ -89,7 +89,10 @@ validate <- function(infected_years_file,
                      dispersal_percentage = 0.99,
                      quarantine_areas_file = "",
                      use_quarantine = FALSE,
-                     use_spreadrates = FALSE) {
+                     use_spreadrates = FALSE,
+                     use_overpopulation_movements = FALSE,
+                     overpopulation_percentage = 0,
+                     leaving_percentage = 0) {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file

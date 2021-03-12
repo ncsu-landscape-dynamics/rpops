@@ -54,7 +54,10 @@ pops_multirun(
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
   use_quarantine = FALSE,
-  use_spreadrates = FALSE
+  use_spreadrates = FALSE,
+  use_overpopulation_movements = FALSE,
+  overpopulation_percentage = 0,
+  leaving_percentage = 0
 )
 }
 \arguments{
@@ -221,6 +224,14 @@ quarantine areas (default = FALSE)}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
+
+\item{use_overpopulation_movements}{boolean to indicate whether to use
+the overpopulation pest movement module}
+
+\item{overpopulation_percentage}{percentage of occupied hosts when the cell
+is considered to be overpopulated}
+
+\item{leaving_percentage}{percentage pests leaving an overpopulated cell}
 }
 \value{
 list of infected and susceptible per year

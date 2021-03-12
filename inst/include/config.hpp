@@ -86,6 +86,9 @@ public:
     bool use_spreadrates{true};
     std::string spreadrate_frequency;
     unsigned spreadrate_frequency_n;
+    bool use_overpopulation_movements{false};
+    double overpopulation_percentage{0};
+    double leaving_percentage{0};
 
     void create_schedules()
     {

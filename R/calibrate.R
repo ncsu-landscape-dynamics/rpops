@@ -135,6 +135,9 @@ calibrate <- function(infected_years_file,
                       quarantine_areas_file = "",
                       use_quarantine = FALSE,
                       use_spreadrates = FALSE,
+                      use_overpopulation_movements = FALSE,
+                      overpopulation_percentage = 0,
+                      leaving_percentage = 0,
                       calibration_method = "ABC",
                       number_of_iterations = 100000) {
 

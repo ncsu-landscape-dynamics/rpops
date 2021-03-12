@@ -100,7 +100,10 @@ List pops_model(
     bool movement_stochasticity = true,
     bool deterministic = false,
     double establishment_probability = 0,
-    double dispersal_percentage = 0.99)
+    double dispersal_percentage = 0.99,
+    bool use_overpopulation_movements = false,
+    double overpopulation_percentage = 0,
+    double leaving_percentage = 0)
 {
     Config config;
     config.random_seed = random_seed;
@@ -152,6 +155,9 @@ List pops_model(
     config.spreadrate_frequency = spreadrate_frequency;
     config.spreadrate_frequency_n = spreadrate_frequency_n;
     config.use_spreadrates = use_spreadrates;
+    config.use_overpopulation_movements = use_overpopulation_movements;
+    config.overpopulation_percentage = overpopulation_percentage;
+    config.leaving_percentage = leaving_percentage;
 
     std::vector<std::tuple<int, int>> outside_dispersers;
     TreatmentApplication treatment_application =

@@ -118,6 +118,11 @@
 #' quarantine areas (default = FALSE)
 #' @param use_spreadrates boolean to indicate whether or not to calculate
 #' spread rates
+#' @param use_overpopulation_movements boolean to indicate whether to use
+#' the overpopulation pest movement module
+#' @param overpopulation_percentage percentage of occupied hosts when the cell
+#' is considered to be overpopulated
+#' @param leaving_percentage percentage pests leaving an overpopulated cell
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -179,7 +184,10 @@ pops <- function(infected_file,
                  dispersal_percentage = 0.99,
                  quarantine_areas_file = "",
                  use_quarantine = FALSE,
-                 use_spreadrates = FALSE) {
+                 use_spreadrates = FALSE,
+                 use_overpopulation_movements = FALSE,
+                 overpopulation_percentage = 0,
+                 leaving_percentage = 0) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -230,6 +238,9 @@ pops <- function(infected_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  config$use_overpopulation_movements <- use_overpopulation_movements
+  config$overpopulation_percentage <- overpopulation_percentage
+  config$leaving_percentage <- leaving_percentage
   # added number of iterations to config to avoid multiple if else statemnts
   # in configuration function used to determine number of draws from parameter
   # distribution
@@ -314,7 +325,10 @@ pops <- function(infected_file,
                      deterministic = config$deterministic,
                      establishment_probability =
                        config$establishment_probability,
-                     dispersal_percentage = config$dispersal_percentage
+                     dispersal_percentage = config$dispersal_percentage,
+                     use_overpopulation_movements = config$use_overpopulation_movements,
+                     overpopulation_percentage = config$overpopulation_percentage,
+                     leaving_percentage = config$leaving_percentage
   )
 
   return(data)
