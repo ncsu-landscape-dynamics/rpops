@@ -331,8 +331,7 @@ calibrate <- function(infected_years_file,
             "number of locations, number of infections, and total distance"
           )) {
         infected_data_point <-
-          terra::as.points(inf_year, crs = terra::crs(inf_year),
-                           spatial = TRUE)
+          terra::as.points(inf_year)
         names(infected_data_point) <- "data"
         infected_data_points[[y]] <-
           infected_data_point[infected_data_point$data > 0]
@@ -470,8 +469,7 @@ calibrate <- function(infected_years_file,
               )
           ) {
             infected_sim_point <-
-              terra::as.points(infected_sim, crs = crs(infected_sim),
-                               spatial = TRUE)
+              terra::as.points(infected_sim)
             names(infected_sim_point) <- "data"
             infected_sim_points[[y]] <-
               infected_sim_point[infected_sim_point$data > 0]
