@@ -247,8 +247,8 @@ test_that("Automated treatment location selection", {
   infected <- terra::rast(infected_file)
   infected1 <- infected[[3]]
   infected2 <- infected[[2]]
-  infecteds <- terra::rast(infected1, infected2)
-  hosts <- terra::rast(host, host)
+  infecteds <- c(infected1, infected2)
+  hosts <- c(host, host)
   number_of_locations <- 7
 
   treatments <- treatment_auto(infecteds,

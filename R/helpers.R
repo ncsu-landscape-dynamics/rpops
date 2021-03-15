@@ -1,8 +1,8 @@
 # These functions are designed to reduce code complexity and the need to copy
 # and past code across main functions
 
-# Uncertainty propagation for raster data sets
-
+# Uncertainty propagation for raster data sets, expects a spatRaster with 2
+# layers (mean and standard deviation)
 output_from_raster_mean_and_sd <- function(x) {
   x[[1]] <- terra::classify(x[[1]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
   x[[2]] <- terra::classify(x[[2]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
@@ -20,33 +20,43 @@ get_all_infected <- function(rast, direction = 4) {
   p <- terra::as.points(rast, spatial = TRUE)
   names(p) <- "data"
   p <- p[p$data > 0]
-  infections <- data.frame(extract(rast, p, cellnumbers = TRUE))
+  infections <- data.frame(terra::extract(rast, p, cells = TRUE))
+  infections <- infections[ , 2:3]
+  names(infections) <- c("detections", "cells")
+  # added until terra::patches released
+  rast2 <- raster::raster(rast)
+  rast2[] <- terra::values(rast)
   if (direction %in% c(4, 8)) {
     infections$i <- terra::colFromCell(rast, infections$cells)
     infections$j <- terra::rowFromCell(rast, infections$cells)
-    r <- raster::clump(rast, direction = direction)
-    infections$group <- extract(r, p)
+    # added until terra::patches released
+    r <- raster::clump(rast2, direction = direction)
+    r <- terra::patches(rast, direction = direction)
+    r2 <- rast(r)
+    infections$group <- terra::extract(r2, p)$clumps
   } else {
     return("direction should be either of 4 or 8")
   }
 
+  infections$group_size <- 0
   groups <- data.frame(table(infections$group))
+  groups$Var1 <- as.numeric(groups$Var1)
   for (m in seq_len(nrow(groups))) {
     infections$group_size[infections$group == groups$Var1[m]] <- groups$Freq[m]
   }
   names(infections) <-
-    c("cell_number", "detections", "i", "j", "group", "group_size")
+    c("detections", "cell_number", "i", "j", "group", "group_size")
   return(infections)
 }
 
-# returns the foci of infestation for a raster grid
+# returns the foci of infestation for a spatRaster Object
 get_foci <- function(rast) {
   indexes <- get_all_infected(rast)
   center <- data.frame(i = floor(mean(indexes$i)), j = floor(mean(indexes$j)))
   return(center)
 }
 
-# returns the border of the infected area for a raster grid
+# returns the border of the infected area for a spatRaster
 get_infection_border <- function(rast) {
   s <- get_all_infected(rast)
   min_max_col <-
@@ -144,19 +154,19 @@ treatment_auto <- function(rasts,
 
   if (treatment_priority == "equal") {
     rasts <-
-      raster::stackApply(rasts,
-                         indices = rep(1, raster::nlayers(rasts)),
-                         fun = sum)
+      terra::tapp(rasts,
+                  index = rep(1, terra::nlyr(rasts)),
+                  fun = sum)
     rasts2 <-
-      raster::stackApply(rasts2,
-                         indices = rep(1, raster::nlayers(rasts2)),
-                         fun = sum)
+      terra::tapp(rasts2,
+                  index = rep(1, terra::nlyr(rasts2)),
+                  fun = sum)
   } else if (treatment_priority == "ranked") {
-    raste <- stack()
-    raste2 <- stack()
+    raste <- rast()
+    raste2 <- rast()
     for (r in seq_len(length(treatment_rank))) {
-      raste <- stack(raste, rasts[[match(r, treatment_rank)]])
-      raste2 <- stack(raste2, rasts2[[match(r, treatment_rank)]])
+      raste <- c(raste, rasts[[match(r, treatment_rank)]])
+      raste2 <- c(raste2, rasts2[[match(r, treatment_rank)]])
     }
     rasts <- raste
     rasts2 <- raste2
@@ -166,7 +176,8 @@ treatment_auto <- function(rasts,
   cells_treated <- 0
   treatment <- rasts
   treatment[] <- 0
-  for (q in 1:nlayers(rasts)) {
+  names(treatment) <- treatment
+  for (q in 1:terra::nlyr(rasts)) {
     rast <- rasts[[q]]
     rast2 <- rasts2[[q]]
     total_infs[q] <- sum(rast[rast > 0] > 0)
@@ -203,7 +214,7 @@ treatment_auto <- function(rasts,
             i <- managed_group$i[m]
             j <- managed_group$j[m]
             if (treatment[i, j] < 1 & (rast[i, j] | rast2[i, j])) {
-              value <- min(1, treatment[i, j] + 1)
+              value <- min(1, treatment[i, j]$treatment + 1)
               if (value > treatment[i, j]) {
                 cells_treated <- cells_treated + value - treatment[i, j]
               } else {
@@ -229,7 +240,7 @@ treatment_auto <- function(rasts,
                   if (abs(i - i_s[s]) > buffer_cells |
                       abs(j - j_s[n]) > buffer_cells) {
                     value <-
-                      min(1, treatment[i_s[s], j_s[n]] +
+                      min(1, treatment[i_s[s], j_s[n]]$treatment +
                             (buffer_cells - floor(buffer_cells)))
                     if (value > treatment[i_s[s], j_s[n]]) {
                       cells_treated <-
@@ -298,7 +309,7 @@ treatment_auto <- function(rasts,
                 if (abs(i - i_s[s]) > buffer_cells |
                     abs(j - j_s[n]) > buffer_cells) {
                   value <-
-                    min(1, treatment[i_s[s], j_s[n]] +
+                    min(1, treatment[i_s[s], j_s[n]]$treatment +
                           (buffer_cells - floor(buffer_cells)))
                   if (value > treatment[i_s[s], j_s[n]]) {
                     cells_treated <-
@@ -354,7 +365,7 @@ treatment_auto <- function(rasts,
                 if (abs(i - i_s[s]) > buffer_cells |
                     abs(j - j_s[n]) > buffer_cells) {
                   value <-
-                    min(1, treatment[i_s[s], j_s[n]] +
+                    min(1, treatment[i_s[s], j_s[n]]$treatment +
                           (buffer_cells - floor(buffer_cells)))
                   if (value > treatment[i_s[s], j_s[n]]) {
                     cells_treated <-
