@@ -134,7 +134,7 @@ quantity_allocation_disagreement <-
     positives_in_reference <- sum(reference[!is.na(reference)] == 1)
     positives_in_comparison <- sum(comparison[!is.na(reference)] == 1)
 
-    ## calculate confusion matrix for accurracy assessment
+    ## calculate confusion matrix for accuracy assessment
     true_positive <- sum(comparison[reference == 1] == 1)
     false_positive <- sum(comparison[reference == 0] == 1)
     false_negative <- sum(comparison[reference == 1] == 0)
