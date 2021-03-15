@@ -159,11 +159,9 @@ configuration <- function(config) {
   }
 
   suitable <- host + infected
-  suitable_points <- terra::as.points(suitable,
-                                    fun = function(x) {
-                                      x > 0
-                                    },
-                                    spatial = TRUE)
+  suitable_points <- terra::as.points(suitable, spatial = TRUE)
+  names(suitable_points) <- "data"
+  suitable_points <- suitable_points[suitable_points$data > 0]
   suitable_cells <-
     terra::extract(suitable, suitable_points, cellnumbers = TRUE)[, 1]
   suitable_row <- terra::rowFromCell(suitable, suitable_cells)
