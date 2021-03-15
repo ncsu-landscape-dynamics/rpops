@@ -159,7 +159,7 @@ configuration <- function(config) {
   }
 
   suitable <- host + infected
-  suitable_points <- terra::as.points(suitable, spatial = TRUE)
+  suitable_points <- terra::as.points(suitable)
   names(suitable_points) <- "data"
   suitable_points <- suitable_points[suitable_points$data > 0]
   suitable_cells <-
@@ -308,9 +308,8 @@ configuration <- function(config) {
   } else {
     weather_coefficient <- host
     terra::values(weather_coefficient) <- 1
-    weather_coefficient <- list(terra::as.matrix(weather_coefficient,
-                                       ncol = terra::ncol(weather_coefficient),
-                                       nrow = terra::nrow(weather_coefficient)))
+    weather_coefficient <- list(terra::as.matrix(weather_coefficient, 
+                                                 wide = TRUE))
   }
 
   config$weather_coefficient <- weather_coefficient
