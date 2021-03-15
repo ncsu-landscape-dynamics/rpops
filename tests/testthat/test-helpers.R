@@ -48,8 +48,8 @@ test_that("Get all infected returns all infected locations", {
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   test <- get_all_infected(infected, direction = 4)
-  expect_equal(nrow(test), sum(infected[infected > 0] > 0))
-  expect_equal(sum(test$detections), sum(infected[infected >0]))
+  expect_equal(nrow(test), sum(values(infected > 0)))
+  expect_equal(sum(test$detections), sum(values(infected)))
   expect_equal(length(unique(test$group)), 3)
   expect_equal(max(test$group_size), 16)
 
@@ -58,15 +58,15 @@ test_that("Get all infected returns all infected locations", {
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   test <- get_all_infected(infected, direction = 8)
-  expect_equal(nrow(test), sum(infected[infected > 0] > 0))
-  expect_equal(sum(test$detections), sum(infected[infected >0]))
+  expect_equal(nrow(test), sum(values(infected > 0)))
+  expect_equal(sum(test$detections), sum(values(infected)))
   expect_equal(length(unique(test$group)), 2)
   expect_equal(max(test$group_size), 16)
 
 })
 
 
-test_that("Get all infected returns all infected locations", {
+test_that("Get foci returns the foci of the ", {
   infected_file <-
     system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
   infected <- terra::rast(infected_file)
@@ -93,7 +93,7 @@ test_that("Get all infected returns all infected locations", {
 
 })
 
-test_that("Get all infected returns all infected locations", {
+test_that("Get infection border returns the infection border", {
   infected_file <-
     system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
   infected <- terra::rast(infected_file)
@@ -157,7 +157,7 @@ test_that("Get all infected returns all infected locations", {
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   distances <- get_infection_distances(infected, method = "Foci", points = c())
-  expect_equal(nrow(distances), sum(infected[infected > 0] > 0))
+  expect_equal(nrow(distances), sum(values(infected > 0)))
   expect_equal(all(distances$distance > 0), TRUE)
 
   infected_file <-
@@ -165,7 +165,7 @@ test_that("Get all infected returns all infected locations", {
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   distances <- get_infection_distances(infected, method = "Border", points = c())
-  expect_equal(nrow(distances), sum(infected[infected > 0] > 0))
+  expect_equal(nrow(distances), sum(values(infected > 0)))
   expect_equal(nrow(distances[distances$distance == 0,]), 22)
   expect_equal(nrow(distances[distances$distance > 0,]), 3)
 
@@ -177,7 +177,7 @@ test_that("Get all infected returns all infected locations", {
     get_infection_distances(infected,
                             method = "Points",
                             points = data.frame(i = 1, j = 1))
-  expect_equal(nrow(distances), sum(infected[infected > 0] > 0))
+  expect_equal(nrow(distances), sum(values(infected > 0)))
   expect_equal(nrow(distances[distances$distance > 0,]), 25)
 
 })
@@ -209,7 +209,7 @@ test_that("Automated treatment location selection", {
     system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
-  number_of_locations <- 2
+  number_of_locations <- 3
 
   treatments <- treatment_auto(infected,
                                host,
@@ -222,7 +222,7 @@ test_that("Automated treatment location selection", {
                                direction_first = TRUE,
                                treatment_priority = "equal",
                                treatment_rank = c(0))
-  expect_equal(sum(treatments[treatments > 0]), number_of_locations + 0.5)
+  expect_equal(sum(values(treatments > 0)), number_of_locations)
 
   number_of_locations <- 5
   treatments <- treatment_auto(infected,
@@ -262,7 +262,6 @@ test_that("Automated treatment location selection", {
                                direction_first = TRUE,
                                treatment_priority = "ranked",
                                treatment_rank = c(2,1))
-  expect_equal(sum(treatments[treatments > 0]), number_of_locations)
+  expect_equal(sum(values(treatments > 0)), number_of_locations)
 
 })
-

@@ -17,23 +17,21 @@ output_from_raster_mean_and_sd <- function(x) {
 # assessing clusters of infections.
 get_all_infected <- function(rast, direction = 4) {
   # get infections as points
-  p <- terra::as.points(rast, spatial = TRUE)
+  p <- terra::as.points(rast)
+  rast <-
+    terra::classify(rast,
+                    matrix(c(0, NA), ncol = 2, byrow = TRUE), right = NA)
+  names(rast) <- "group"
   names(p) <- "data"
   p <- p[p$data > 0]
   infections <- data.frame(terra::extract(rast, p, cells = TRUE))
   infections <- infections[ , 2:3]
   names(infections) <- c("detections", "cells")
-  # added until terra::patches released
-  rast2 <- raster::raster(rast)
-  rast2[] <- terra::values(rast)
   if (direction %in% c(4, 8)) {
     infections$i <- terra::colFromCell(rast, infections$cells)
     infections$j <- terra::rowFromCell(rast, infections$cells)
-    # added until terra::patches released
-    r <- raster::clump(rast2, direction = direction)
     r <- terra::patches(rast, direction = direction)
-    r2 <- rast(r)
-    infections$group <- terra::extract(r2, p)$clumps
+    infections$group <- terra::extract(r, p)$group
   } else {
     return("direction should be either of 4 or 8")
   }
@@ -162,11 +160,16 @@ treatment_auto <- function(rasts,
                   index = rep(1, terra::nlyr(rasts2)),
                   fun = sum)
   } else if (treatment_priority == "ranked") {
-    raste <- rast()
-    raste2 <- rast()
     for (r in seq_len(length(treatment_rank))) {
-      raste <- c(raste, rasts[[match(r, treatment_rank)]])
-      raste2 <- c(raste2, rasts2[[match(r, treatment_rank)]])
+      if (r == 1) {
+        raste <- rast(rasts[[match(r, treatment_rank)]])
+        values(raste) <- terra::values(rasts[[match(r, treatment_rank)]])
+        raste2 <- rast(rasts2[[match(r, treatment_rank)]])
+        values(raste2) <- terra::values(rasts2[[match(r, treatment_rank)]])
+      } else if (r > 1) {
+        raste <- c(raste, rasts[[match(r, treatment_rank)]])
+        raste2 <- c(raste2, rasts2[[match(r, treatment_rank)]])
+      }
     }
     rasts <- raste
     rasts2 <- raste2
@@ -174,7 +177,7 @@ treatment_auto <- function(rasts,
 
   total_infs <- c(0)
   cells_treated <- 0
-  treatment <- rasts
+  treatment <- rasts[[1]]
   treatment[] <- 0
   names(treatment) <- treatment
   for (q in 1:terra::nlyr(rasts)) {
@@ -186,7 +189,7 @@ treatment_auto <- function(rasts,
       cells_treated <- cells_treated
     }
 
-    if (total_infs[q] > 0 && cells_treated < number_of_locations) {
+    if (total_infs[q] > 0 && cells_treated[[1]] < number_of_locations) {
 
       infections <-
         get_infection_distances(rast = rast, method = method, points = points)
@@ -237,6 +240,9 @@ treatment_auto <- function(rasts,
               for (n in seq_len(length(j_s))) {
                 if (treatment[i_s[s], j_s[n]] < 1 &
                     (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
+                  if (cells_treated >= number_of_locations) {
+                    break
+                  }
                   if (abs(i - i_s[s]) > buffer_cells |
                       abs(j - j_s[n]) > buffer_cells) {
                     value <-
@@ -251,14 +257,14 @@ treatment_auto <- function(rasts,
                     treatment[i_s[s], j_s[n]] <- value
                   } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
                     if (treatment[i_s[s], j_s[n]] < 1) {
+                      if (cells_treated >= number_of_locations) {
+                        break
+                      }
                       cells_treated <-
                         cells_treated + (1 - treatment[i_s[s], j_s[n]])
                       treatment[i_s[s], j_s[n]] <- 1
                     }
                   }
-                  if (cells_treated >= number_of_locations) {
-                    break
-                    }
                 }
                 if (cells_treated >= number_of_locations) {
                   break
@@ -394,7 +400,6 @@ treatment_auto <- function(rasts,
                or "infected"')
       }
     }
-    print(q)
   }
   treatment <- treatment[[1]]
 
