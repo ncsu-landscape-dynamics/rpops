@@ -16,10 +16,10 @@ jobs:
 
       - uses: r-lib/actions/setup-r@master
 
-      - name: install rgdal
+      - name: install gdal
         run: |
-          brew install pkg-config
-          brew install gdal
+          rm '/usr/local/bin/gfortran'
+          brew install pkg-config gdal proj geos
 
       - name: Query dependencies
         run: |
