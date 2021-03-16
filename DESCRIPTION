@@ -12,7 +12,7 @@ Authors@R: c(
 Depends: R (>= 3.3.0)
 Imports: 
     raster,
-    terra,
+    terra (>= 1.1-7),
     Rcpp (>= 0.12.19),
     stats,
     foreach,
