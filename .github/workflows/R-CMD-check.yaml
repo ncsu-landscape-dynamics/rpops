@@ -55,6 +55,13 @@ jobs:
             libgeos-dev \
             libproj-dev
 
+      - name: Install system dependencies
+        if: runner.os == 'macOS'
+        run: |
+          # install spatial dependencies
+          rm '/usr/local/bin/gfortran'
+          brew install pkg-config gdal proj geos
+
       - name: Install dependencies
         if: runner.os == 'macOS'
         run: |
