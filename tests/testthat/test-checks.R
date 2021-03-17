@@ -423,38 +423,38 @@ test_that("Bayesian MNN checks work properly", {
 test_that("Multispecies checks return erros if any of the inputs aren't the
           same length", {
 
-  infected_files = c("", "")
-  host_file = c("", "")
-  total_populations_file = c("", "")
-  parameter_means = c("", "")
-  parameter_cov_matrix = c("", "")
-  temp = c(FALSE, FALSE)
-  temperature_coefficient_file = c("", "")
-  precip = c(FALSE, FALSE)
-  precipitation_coefficient_file = c("", "")
-  model_type = c("SI", "SI")
-  latency_period = c(0, 0)
-  time_step = c("month", "month")
-  season_month_start = c(1, 1)
-  season_month_end = c(12, 12)
-  use_lethal_temperature = c(FALSE, FALSE)
-  temperature_file = c("", "")
-  lethal_temperature = c(1, 1)
-  lethal_temperature_month = c(1, 1)
-  mortality_on = c(FALSE, FALSE)
-  mortality_rate = c(0.05, 0.05)
-  mortality_time_lag = c(1, 1)
-  natural_kernel_type = c("cauchy", "cauchy")
-  anthropogenic_kernel_type = c("cauchy", "cauchy")
-  natural_dir = c("NONE", "NONE")
-  anthropogenic_dir = c("NONE", "NONE")
-  movements_file = c("", "")
-  use_movements = c(FALSE, FALSE)
-  start_exposed = c(TRUE, TRUE)
-  quarantine_areas_file = c("", "")
-  use_quarantine = c(TRUE, TRUE)
-  use_spreadrates = c(TRUE, TRUE)
-  species = c('species1', 'species2')
+  infected_files <- c("", "")
+  host_file <- c("", "")
+  total_populations_file <- c("", "")
+  parameter_means <- c("", "")
+  parameter_cov_matrix <- c("", "")
+  temp <- c(FALSE, FALSE)
+  temperature_coefficient_file <- c("", "")
+  precip <- c(FALSE, FALSE)
+  precipitation_coefficient_file <- c("", "")
+  model_type <- c("SI", "SI")
+  latency_period <- c(0, 0)
+  time_step <- c("month", "month")
+  season_month_start <- c(1, 1)
+  season_month_end <- c(12, 12)
+  use_lethal_temperature <- c(FALSE, FALSE)
+  temperature_file <- c("", "")
+  lethal_temperature <- c(1, 1)
+  lethal_temperature_month <- c(1, 1)
+  mortality_on <- c(FALSE, FALSE)
+  mortality_rate <- c(0.05, 0.05)
+  mortality_time_lag <- c(1, 1)
+  natural_kernel_type <- c("cauchy", "cauchy")
+  anthropogenic_kernel_type <- c("cauchy", "cauchy")
+  natural_dir <- c("NONE", "NONE")
+  anthropogenic_dir <- c("NONE", "NONE")
+  movements_file <- c("", "")
+  use_movements <- c(FALSE, FALSE)
+  start_exposed <- c(TRUE, TRUE)
+  quarantine_areas_file <- c("", "")
+  use_quarantine <- c(TRUE, TRUE)
+  use_spreadrates <- c(TRUE, TRUE)
+  species <- c("species1", "species2")
 
   multispecies_check <-
     multispecies_checks(species,
@@ -477,7 +477,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -492,7 +492,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
 
   expect_equal(multispecies_check$checks_passed, TRUE)
 
-  infected_files = c("")
+  infected_files <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -514,7 +514,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -531,8 +531,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
   expect_equal(multispecies_check$failed_check,
                "Length of list for species and infected_files must be equal")
 
-  infected_files = c("", "")
-  host_file = c("")
+  infected_files <- c("", "")
+  host_file <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -554,7 +554,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -570,8 +570,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
   expect_equal(multispecies_check$failed_check,
                "Length of list for infected_files and host_file must be equal")
 
-  host_file = c("", "")
-  total_populations_file = c("")
+  host_file <- c("", "")
+  total_populations_file <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -593,7 +593,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -610,8 +610,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and total_populations_file must be equal")
 
-  total_populations_file = c("", "")
-  parameter_means = c("")
+  total_populations_file <- c("", "")
+  parameter_means <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -633,7 +633,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -650,8 +650,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for parameter_means and infected_files must be equal")
 
-  parameter_means = c("", "")
-  parameter_cov_matrix = c("")
+  parameter_means <- c("", "")
+  parameter_cov_matrix <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -673,7 +673,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -690,8 +690,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for parameter_cov_matrix and infected_files must be equal")
 
-  parameter_cov_matrix = c("", "")
-  temp = c(FALSE)
+  parameter_cov_matrix <- c("", "")
+  temp <- c(FALSE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -713,7 +713,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -729,8 +729,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
   expect_equal(multispecies_check$failed_check,
                "Length of list for infected_files and temp must be equal")
 
-  temp = c(FALSE, FALSE)
-  temperature_coefficient_file = c("")
+  temp <- c(FALSE, FALSE)
+  temperature_coefficient_file <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -752,7 +752,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -769,8 +769,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and temperature_coefficient_file must be equal")
 
-  temperature_coefficient_file = c("", "")
-  precip = c(FALSE)
+  temperature_coefficient_file <- c("", "")
+  precip <- c(FALSE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -792,7 +792,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -808,8 +808,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
   expect_equal(multispecies_check$failed_check,
                "Length of list for infected_files and precip must be equal")
 
-  precip = c(FALSE, FALSE)
-  precipitation_coefficient_file = c("")
+  precip <- c(FALSE, FALSE)
+  precipitation_coefficient_file <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -831,7 +831,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -848,8 +848,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and precipitation_coefficient_file must be equal")
 
-  precipitation_coefficient_file = c("", "")
-  model_type = c("SI")
+  precipitation_coefficient_file <- c("", "")
+  model_type <- c("SI")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -871,7 +871,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -887,8 +887,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
   expect_equal(multispecies_check$failed_check,
                "Length of list for model_type and infected_files must be equal")
 
-  model_type = c("SI", "SI")
-  latency_period = c(0)
+  model_type <- c("SI", "SI")
+  latency_period <- c(0)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -910,7 +910,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -927,8 +927,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and latency_period must be equal")
 
-  latency_period = c(0, 0)
-  time_step = c("month")
+  latency_period <- c(0, 0)
+  time_step <- c("month")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -950,7 +950,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -966,8 +966,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
   expect_equal(multispecies_check$failed_check,
                "Length of list for infected_files and time_step must be equal")
 
-  time_step = c("month", "month")
-  season_month_start = c(1)
+  time_step <- c("month", "month")
+  season_month_start <- c(1)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -989,7 +989,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1006,8 +1006,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and season_month_start must be equal")
 
-  season_month_start = c(1, 1)
-  season_month_end = c(12)
+  season_month_start <- c(1, 1)
+  season_month_end <- c(12)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1029,7 +1029,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1046,8 +1046,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and season_month_end must be equal")
 
-  season_month_end = c(12, 12)
-  use_lethal_temperature = c(FALSE)
+  season_month_end <- c(12, 12)
+  use_lethal_temperature <- c(FALSE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1069,7 +1069,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1086,8 +1086,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and use_lethal_temperature must be equal")
 
-  use_lethal_temperature = c(FALSE, FALSE)
-  temperature_file = c("")
+  use_lethal_temperature <- c(FALSE, FALSE)
+  temperature_file <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1109,7 +1109,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1126,8 +1126,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and temperature_file must be equal")
 
-  temperature_file = c("", "")
-  lethal_temperature = c(1)
+  temperature_file <- c("", "")
+  lethal_temperature <- c(1)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1149,7 +1149,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1166,8 +1166,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and lethal_temperature must be equal")
 
-  lethal_temperature = c(1, 1)
-  lethal_temperature_month = c(1)
+  lethal_temperature <- c(1, 1)
+  lethal_temperature_month <- c(1)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1189,7 +1189,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1206,8 +1206,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and lethal_temperature_month must be equal")
 
-  lethal_temperature_month = c(1, 1)
-  mortality_on = c(FALSE)
+  lethal_temperature_month <- c(1, 1)
+  mortality_on <- c(FALSE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1229,7 +1229,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1246,8 +1246,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and mortality_on must be equal")
 
-  mortality_on = c(FALSE, FALSE)
-  mortality_rate = c(0.05)
+  mortality_on <- c(FALSE, FALSE)
+  mortality_rate <- c(0.05)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1269,7 +1269,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1286,8 +1286,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and mortality_rate must be equal")
 
-  mortality_rate = c(0.05, 0.05)
-  mortality_time_lag = c(1)
+  mortality_rate <- c(0.05, 0.05)
+  mortality_time_lag <- c(1)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1309,7 +1309,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1326,8 +1326,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and mortality_time_lag must be equal")
 
-  mortality_time_lag = c(1, 1)
-  natural_kernel_type = c("cauchy")
+  mortality_time_lag <- c(1, 1)
+  natural_kernel_type <- c("cauchy")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1349,7 +1349,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1366,8 +1366,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and natural_kernel_type must be equal")
 
-  natural_kernel_type = c("cauchy", "cauchy")
-  anthropogenic_kernel_type = c("cauchy")
+  natural_kernel_type <- c("cauchy", "cauchy")
+  anthropogenic_kernel_type <- c("cauchy")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1389,7 +1389,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1406,8 +1406,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and anthropogenic_kernel_type must be equal")
 
-  anthropogenic_kernel_type = c("cauchy", "cauchy")
-  natural_dir = c("NONE")
+  anthropogenic_kernel_type <- c("cauchy", "cauchy")
+  natural_dir <- c("NONE")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1429,7 +1429,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1446,8 +1446,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and natural_dir must be equal")
 
-  natural_dir = c("NONE", "NONE")
-  anthropogenic_dir = c("NONE")
+  natural_dir <- c("NONE", "NONE")
+  anthropogenic_dir <- c("NONE")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1469,7 +1469,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1486,8 +1486,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and anthropogenic_dir must be equal")
 
-  anthropogenic_dir = c("NONE", "NONE")
-  movements_file = c("")
+  anthropogenic_dir <- c("NONE", "NONE")
+  movements_file <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1509,7 +1509,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1526,8 +1526,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and movements_file must be equal")
 
-  movements_file = c("", "")
-  use_movements = c(FALSE)
+  movements_file <- c("", "")
+  use_movements <- c(FALSE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1549,7 +1549,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1566,8 +1566,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and use_movements must be equal")
 
-  use_movements = c(FALSE, FALSE)
-  start_exposed = c(TRUE)
+  use_movements <- c(FALSE, FALSE)
+  start_exposed <- c(TRUE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1589,7 +1589,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1606,8 +1606,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and start_exposed must be equal")
 
-  start_exposed = c(TRUE, TRUE)
-  quarantine_areas_file = c("")
+  start_exposed <- c(TRUE, TRUE)
+  quarantine_areas_file <- c("")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1629,7 +1629,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1646,8 +1646,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and quarantine_areas_file must be equal")
 
-  quarantine_areas_file = c("", "")
-  use_quarantine = c(TRUE)
+  quarantine_areas_file <- c("", "")
+  use_quarantine <- c(TRUE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1669,7 +1669,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1686,8 +1686,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and use_quarantine must be equal")
 
-  use_quarantine = c(TRUE, TRUE)
-  use_spreadrates = c(TRUE)
+  use_quarantine <- c(TRUE, TRUE)
+  use_spreadrates <- c(TRUE)
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1709,7 +1709,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,
@@ -1726,8 +1726,8 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
     multispecies_check$failed_check,
     "Length of list for infected_files and use_spreadrates must be equal")
 
-  use_spreadrates = c(TRUE, TRUE)
-  species = c('species1')
+  use_spreadrates <- c(TRUE, TRUE)
+  species <- c("species1")
   multispecies_check <-
     multispecies_checks(species,
                         infected_files,
@@ -1749,7 +1749,7 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         season_month_start,
                         season_month_end,
                         use_lethal_temperature,
-                        temperature_file ,
+                        temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
                         mortality_on,

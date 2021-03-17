@@ -257,7 +257,7 @@ pops_multirun <- function(infected_file,
   exposed_runs <- infected_stack[seq(10, length(infected_stack), 10)]
 
   prediction <- probability_runs[[1]]
-  for(w in seq_len(length(prediction))) {
+  for (w in seq_len(length(prediction))) {
     prediction[[w]] <- 0
   }
   escape_probability <-
@@ -310,7 +310,7 @@ pops_multirun <- function(infected_file,
   }
 
   probability <- prediction
-  for(w in seq_len(length(prediction))) {
+  for (w in seq_len(length(prediction))) {
     probability[[w]] <- (prediction[[w]] / (length(probability_runs))) * 100
   }
 
@@ -395,7 +395,8 @@ pops_multirun <- function(infected_file,
     }
 
   } else {
-    escape_probability <- data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+    escape_probability <-
+      data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
     north_distance_to_quarantine <-
       data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
     south_distance_to_quarantine <-
@@ -429,7 +430,7 @@ pops_multirun <- function(infected_file,
     }
     raster_stacks2 <- do.call(cbind, raster_stacks)
     raster_stacks2 <-
-      array(raster_stacks2, dim=c(dim(raster_stacks[[1]]),
+      array(raster_stacks2, dim = c(dim(raster_stacks[[1]]),
                                   length(raster_stacks)))
     sim_mean <-
       round(apply(raster_stacks2, c(1, 2), mean, na.rm = TRUE), digits = 0)
@@ -446,25 +447,25 @@ pops_multirun <- function(infected_file,
     simulation_median <- simulation_mean
     simulation_susceptible <- simulation_mean
     terra::values(simulation_mean) <- sim_mean
-    names(simulation_mean) <- 'mean'
+    names(simulation_mean) <- "mean"
 
     terra::values(simulation_sd) <- sim_sd
-    names(simulation_sd) <- 'sd'
+    names(simulation_sd) <- "sd"
 
-    terra::values(simulation_max ) <- max_run[[q]]
-    names(simulation_max ) <- 'max'
+    terra::values(simulation_max) <- max_run[[q]]
+    names(simulation_max) <- "max"
 
     terra::values(simulation_min) <- min_run[[q]]
-    names(simulation_min) <- 'min'
+    names(simulation_min) <- "min"
 
     terra::values(simulation_median) <- single_run[[q]]
-    names(simulation_median) <- 'median'
+    names(simulation_median) <- "median"
 
     terra::values(simulation_probability) <- probability[[q]]
-    names(simulation_probability) <- 'probability'
+    names(simulation_probability) <- "probability"
 
     terra::values(simulation_susceptible) <- susceptible_run[[q]]
-    names(simulation_susceptible) <- 'susceptible'
+    names(simulation_susceptible) <- "susceptible"
 
     if (q == 1) {
       simulation_mean_stack <- simulation_mean
@@ -492,6 +493,7 @@ pops_multirun <- function(infected_file,
          simulation_max_stack,
          single_run,
          susceptible_run,
+         exposed_run,
          number_infecteds,
          infected_areas,
          west_rate,
@@ -512,6 +514,7 @@ pops_multirun <- function(infected_file,
       "simulation_max",
       "single_run",
       "susceptible_run",
+      "exposed_run",
       "number_infecteds",
       "infected_areas",
       "west_rate",

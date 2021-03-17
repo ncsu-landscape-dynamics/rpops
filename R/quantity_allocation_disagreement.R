@@ -74,13 +74,15 @@ quantity_allocation_disagreement <-
         enn_mn_ref <- 0
       }
 
-      if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 && np_comp > 1) {
+      if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 &&
+          np_comp > 1) {
         enn_mn_comp <-
           landscapemetrics::lsm_c_enn_mn(comparison,
             directions = 8,
             verbose = TRUE
           )$value[2]
-      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 && np_comp <= 1) {
+      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 &&
+                 np_comp <= 1) {
         enn_mn_comp <- 0
       }
 

@@ -4,8 +4,10 @@
 # Uncertainty propagation for raster data sets, expects a spatRaster with 2
 # layers (mean and standard deviation)
 output_from_raster_mean_and_sd <- function(x) {
-  x[[1]] <- terra::classify(x[[1]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
-  x[[2]] <- terra::classify(x[[2]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[1]] <- terra::classify(x[[1]],
+                            matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[2]] <- terra::classify(x[[2]],
+                            matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
   fun <- function(x) {
     round(rnorm(1, mean = x[1], sd = x[2]), digits = 0)
   }
@@ -25,7 +27,7 @@ get_all_infected <- function(rast, direction = 4) {
   names(p) <- "data"
   p <- p[p$data > 0]
   infections <- data.frame(terra::extract(rast, p, cells = TRUE))
-  infections <- infections[ , 2:3]
+  infections <- infections[, 2:3]
   names(infections) <- c("detections", "cells")
   if (direction %in% c(4, 8)) {
     infections$i <- terra::colFromCell(rast, infections$cells)
@@ -165,7 +167,8 @@ treatment_auto <- function(rasts,
         raste <- rast(rasts[[match(r, treatment_rank)]])
         terra::values(raste) <- terra::values(rasts[[match(r, treatment_rank)]])
         raste2 <- rast(rasts2[[match(r, treatment_rank)]])
-        terra::values(raste2) <- terra::values(rasts2[[match(r, treatment_rank)]])
+        terra::values(raste2) <-
+          terra::values(rasts2[[match(r, treatment_rank)]])
       } else if (r > 1) {
         raste <- c(raste, rasts[[match(r, treatment_rank)]])
         raste2 <- c(raste2, rasts2[[match(r, treatment_rank)]])

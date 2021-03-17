@@ -47,7 +47,7 @@ configuration <- function(config) {
                           config$season_month_start,
                           config$season_month_end,
                           config$use_lethal_temperature,
-                          config$temperature_file ,
+                          config$temperature_file,
                           config$lethal_temperature,
                           config$lethal_temperature_month,
                           config$mortality_on,
@@ -59,7 +59,7 @@ configuration <- function(config) {
                           config$quarantine_areas_file,
                           config$use_quarantine,
                           config$use_spreadrates)
-    if (!multispecies_check$checks_passed){
+    if (!multispecies_check$checks_passed) {
       config$failure <- multispecies_check$failed_check
       return(config)
     }
@@ -308,7 +308,7 @@ configuration <- function(config) {
   } else {
     weather_coefficient <- host
     terra::values(weather_coefficient) <- 1
-    weather_coefficient <- list(terra::as.matrix(weather_coefficient, 
+    weather_coefficient <- list(terra::as.matrix(weather_coefficient,
                                                  wide = TRUE))
   }
 
@@ -555,7 +555,7 @@ configuration <- function(config) {
     config$num_cells <-
       round((config$budget / config$cost_per_meter_sq) /
               (config$ew_res * config$ns_res))
-    config$buffer_cells <- config$buffer/config$ew_res
+    config$buffer_cells <- config$buffer / config$ew_res
     config$years_simulated <- length(config$years)
 
   }

@@ -14,7 +14,8 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(test$group_size, 1)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_single.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   test <- get_all_infected(infected, direction = 4)
   expect_equal(nrow(test), 393)
@@ -22,8 +23,10 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(unique(test$group_size), 393)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
+
   infected <- infected[[1]]
   test <- get_all_infected(infected, direction = 4)
   expect_equal(nrow(test), 1)
@@ -35,7 +38,8 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(test$group_size, 1)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[2]]
   test <- get_all_infected(infected, direction = 4)
@@ -44,7 +48,8 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(max(test$group_size), 1)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   test <- get_all_infected(infected, direction = 4)
@@ -54,7 +59,8 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(max(test$group_size), 16)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   test <- get_all_infected(infected, direction = 8)
@@ -68,7 +74,8 @@ test_that("Get all infected returns all infected locations", {
 
 test_that("Get foci returns the foci of the ", {
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[1]]
   foci <- get_foci(infected)
@@ -76,7 +83,8 @@ test_that("Get foci returns the foci of the ", {
   expect_equal(foci$j, 1)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[2]]
   foci <- get_foci(infected)
@@ -84,7 +92,8 @@ test_that("Get foci returns the foci of the ", {
   expect_equal(foci$j, 3)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   foci <- get_foci(infected)
@@ -95,7 +104,8 @@ test_that("Get foci returns the foci of the ", {
 
 test_that("Get infection border returns the infection border", {
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[1]]
   border <- get_infection_border(infected)
@@ -104,14 +114,16 @@ test_that("Get infection border returns the infection border", {
   expect_equal(nrow(border), 1)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[2]]
   border <- get_infection_border(infected)
   expect_equal(nrow(border), 4)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   border <- get_infection_border(infected)
@@ -121,7 +133,8 @@ test_that("Get infection border returns the infection border", {
 
 test_that("Get all infected returns all infected locations", {
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[1]]
   distances <- get_infection_distances(infected, method = "Foci", points = c())
@@ -129,15 +142,18 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(nrow(distances), 1)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[1]]
-  distances <- get_infection_distances(infected, method = "Border", points = c())
+  distances <-
+    get_infection_distances(infected, method = "Border", points = c())
   expect_equal(distances$distance, 0)
   expect_equal(nrow(distances), 1)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[2]]
   distances <- get_infection_distances(infected, method = "Foci", points = c())
@@ -145,15 +161,18 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(all(distances$distance > 1), TRUE)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[2]]
-  distances <- get_infection_distances(infected, method = "Border", points = c())
+  distances <-
+    get_infection_distances(infected, method = "Border", points = c())
   expect_equal(nrow(distances), 4)
   expect_equal(all(distances$distance == 0), TRUE)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   distances <- get_infection_distances(infected, method = "Foci", points = c())
@@ -161,16 +180,19 @@ test_that("Get all infected returns all infected locations", {
   expect_equal(all(distances$distance > 0), TRUE)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
-  distances <- get_infection_distances(infected, method = "Border", points = c())
+  distances <-
+    get_infection_distances(infected, method = "Border", points = c())
   expect_equal(nrow(distances), sum(values(infected > 0)))
-  expect_equal(nrow(distances[distances$distance == 0,]), 22)
-  expect_equal(nrow(distances[distances$distance > 0,]), 3)
+  expect_equal(nrow(distances[distances$distance == 0, ]), 22)
+  expect_equal(nrow(distances[distances$distance > 0, ]), 3)
 
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   distances <-
@@ -178,7 +200,7 @@ test_that("Get all infected returns all infected locations", {
                             method = "Points",
                             points = data.frame(i = 1, j = 1))
   expect_equal(nrow(distances), sum(values(infected > 0)))
-  expect_equal(nrow(distances[distances$distance > 0,]), 25)
+  expect_equal(nrow(distances[distances$distance > 0, ]), 25)
 
 })
 
@@ -206,7 +228,8 @@ test_that("Automated treatment location selection", {
     system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   host <- terra::rast(host_file)
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   number_of_locations <- 3
@@ -243,7 +266,8 @@ test_that("Automated treatment location selection", {
     system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   host <- terra::rast(host_file)
   infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS")
   infected <- terra::rast(infected_file)
   infected1 <- infected[[3]]
   infected2 <- infected[[2]]
@@ -261,7 +285,7 @@ test_that("Automated treatment location selection", {
                                buffer_cells = 1,
                                direction_first = TRUE,
                                treatment_priority = "ranked",
-                               treatment_rank = c(2,1))
+                               treatment_rank = c(2, 1))
   expect_equal(sum(values(treatments > 0)), number_of_locations)
 
 })
