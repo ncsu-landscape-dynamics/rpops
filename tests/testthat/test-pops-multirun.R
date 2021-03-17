@@ -1,7 +1,7 @@
 context("test-pops-multirun")
 
 test_that("Multirun model outputs work", {
-  skip_on_os("windows")
+  # skip_on_os("windows")
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file <-
@@ -108,7 +108,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 18)
+  expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -119,14 +119,14 @@ test_that("Multirun model outputs work", {
   expect_equal(data$number_infecteds[[2]], 0)
   expect_equal(data$infected_areas[[1]], 900)
   expect_equal(data$infected_areas[[2]], 0)
-  expect_equal(is.nan(data$west_rate[[1]]), T)
-  expect_equal(is.na(data$west_rate[[2]]), T)
+  expect_equal(data$west_rate[[1]], 0)
+  expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
   expect_equal(data$east_rate[[2]], 0)
   expect_equal(data$south_rate[[1]], 0)
   expect_equal(data$south_rate[[2]], 0)
-  expect_equal(is.nan(data$north_rate[[1]]), T)
-  expect_equal(is.na(data$north_rate[[2]]), T)
+  expect_equal(data$north_rate[[1]], 0)
+  expect_equal(data$north_rate[[2]], 0)
 
   output_frequency <- "month"
 
@@ -181,7 +181,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 18)
+  expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -192,14 +192,14 @@ test_that("Multirun model outputs work", {
   expect_equal(data$number_infecteds[[2]], 0)
   expect_equal(data$infected_areas[[1]], 900)
   expect_equal(data$infected_areas[[2]], 0)
-  expect_equal(is.nan(data$west_rate[[1]]), T)
-  expect_equal(is.na(data$west_rate[[2]]), T)
+  expect_equal(data$west_rate[[1]], 0)
+  expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
   expect_equal(data$east_rate[[2]], 0)
   expect_equal(data$south_rate[[1]], 0)
   expect_equal(data$south_rate[[2]], 0)
-  expect_equal(is.nan(data$north_rate[[1]]), T)
-  expect_equal(is.na(data$north_rate[[2]]), T)
+  expect_equal(data$north_rate[[1]], 0)
+  expect_equal(data$north_rate[[2]], 0)
 
   output_frequency <- "year"
   quarantine_areas_file <-
@@ -257,7 +257,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 18)
+  expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -268,14 +268,14 @@ test_that("Multirun model outputs work", {
   expect_equal(data$number_infecteds[[2]], 0)
   expect_equal(data$infected_areas[[1]], 900)
   expect_equal(data$infected_areas[[2]], 0)
-  expect_equal(is.nan(data$west_rate[[1]]), T)
-  expect_equal(is.na(data$west_rate[[2]]), T)
+  expect_equal(data$west_rate[[1]], 0)
+  expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
   expect_equal(data$east_rate[[2]], 0)
   expect_equal(data$south_rate[[1]], 0)
   expect_equal(data$south_rate[[2]], 0)
-  expect_equal(is.nan(data$north_rate[[1]]), T)
-  expect_equal(is.na(data$north_rate[[2]]), T)
+  expect_equal(data$north_rate[[1]], 0)
+  expect_equal(data$north_rate[[2]], 0)
 
   output_frequency <- "month"
 
@@ -330,7 +330,7 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-  expect_equal(length(data), 18)
+  expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -341,13 +341,13 @@ test_that("Multirun model outputs work", {
   expect_equal(data$number_infecteds[[2]], 0)
   expect_equal(data$infected_areas[[1]], 900)
   expect_equal(data$infected_areas[[2]], 0)
-  expect_equal(is.nan(data$west_rate[[1]]), T)
-  expect_equal(is.na(data$west_rate[[2]]), T)
+  expect_equal(data$west_rate[[1]], 0)
+  expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
   expect_equal(data$east_rate[[2]], 0)
   expect_equal(data$south_rate[[1]], 0)
   expect_equal(data$south_rate[[2]], 0)
-  expect_equal(is.nan(data$north_rate[[1]]), T)
-  expect_equal(is.na(data$north_rate[[2]]), T)
+  expect_equal(data$north_rate[[1]], 0)
+  expect_equal(data$north_rate[[2]], 0)
 
 })

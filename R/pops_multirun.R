@@ -149,7 +149,7 @@ pops_multirun <- function(infected_file,
   infected_stack <-
     foreach::foreach(i = seq_len(config$number_of_iterations),
                      .combine = c,
-                     .packages = c("PoPS", "terra")) %do% {
+                     .packages = c("PoPS", "terra")) %dopar% {
 
     config$random_seed <- round(stats::runif(1, 1, 1000000))
     data <- PoPS::pops_model(random_seed = config$random_seed,
@@ -352,7 +352,7 @@ pops_multirun <- function(infected_file,
                         "Stand dev" = sd(x))), digits = 0)
     } else {
       north_distance_to_quarantine <-
-        data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+        data.frame(t(rep(NA, length(probability_runs[[1]]))))
     }
 
     if (
@@ -365,7 +365,7 @@ pops_multirun <- function(infected_file,
                         "Stand dev" = sd(x, na.rm = TRUE))), digits = 0)
     } else {
       south_distance_to_quarantine <-
-        data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+        data.frame(t(rep(NA, length(probability_runs[[1]]))))
     }
 
     if (
@@ -378,7 +378,7 @@ pops_multirun <- function(infected_file,
                         "Stand dev" = sd(x))), digits = 0)
     } else {
       east_distance_to_quarantine <-
-        data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+        data.frame(t(rep(NA, length(probability_runs[[1]]))))
     }
 
     if (
@@ -391,20 +391,20 @@ pops_multirun <- function(infected_file,
                         "Stand dev" = sd(x))), digits = 0)
     } else {
       west_distance_to_quarantine <-
-        data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+        data.frame(t(rep(NA, length(probability_runs[[1]]))))
     }
 
   } else {
     escape_probability <-
-      data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+      data.frame(t(rep(NA, length(probability_runs[[1]]))))
     north_distance_to_quarantine <-
-      data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+      data.frame(t(rep(NA, length(probability_runs[[1]]))))
     south_distance_to_quarantine <-
-      data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+      data.frame(t(rep(NA, length(probability_runs[[1]]))))
     east_distance_to_quarantine <-
-      data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+      data.frame(t(rep(NA, length(probability_runs[[1]]))))
     west_distance_to_quarantine <-
-      data.frame(t(rep(NA, terra::nlyr(probability_runs[[1]]))))
+      data.frame(t(rep(NA, length(probability_runs[[1]]))))
   }
 
   which_median <- function(x) raster::which.min(abs(x - median(x)))
