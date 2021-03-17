@@ -30,7 +30,7 @@ get_all_infected <- function(rast, direction = 4) {
   if (direction %in% c(4, 8)) {
     infections$i <- terra::colFromCell(rast, infections$cells)
     infections$j <- terra::rowFromCell(rast, infections$cells)
-    r <- terra::patches(rast, direction = direction)
+    r <- terra::patches(rast, direction = direction, zeroAsNA = TRUE)
     infections$group <- terra::extract(r, p)$group
   } else {
     return("direction should be either of 4 or 8")
@@ -163,9 +163,9 @@ treatment_auto <- function(rasts,
     for (r in seq_len(length(treatment_rank))) {
       if (r == 1) {
         raste <- rast(rasts[[match(r, treatment_rank)]])
-        values(raste) <- terra::values(rasts[[match(r, treatment_rank)]])
+        terra::values(raste) <- terra::values(rasts[[match(r, treatment_rank)]])
         raste2 <- rast(rasts2[[match(r, treatment_rank)]])
-        values(raste2) <- terra::values(rasts2[[match(r, treatment_rank)]])
+        terra::values(raste2) <- terra::values(rasts2[[match(r, treatment_rank)]])
       } else if (r > 1) {
         raste <- c(raste, rasts[[match(r, treatment_rank)]])
         raste2 <- c(raste2, rasts2[[match(r, treatment_rank)]])
