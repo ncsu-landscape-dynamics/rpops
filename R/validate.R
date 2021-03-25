@@ -164,7 +164,7 @@ validate <- function(infected_years_file,
       i = 1:number_of_iterations,
       .combine = rbind,
       .packages = c("terra", "PoPS", "foreach", "MASS")
-    ) %do% {
+    ) %dopar% {
 
       config$random_seed <- round(stats::runif(1, 1, 1000000))
       data <- pops_model(
@@ -241,16 +241,19 @@ validate <- function(infected_years_file,
         dispersal_percentage = config$dispersal_percentage
       )
 
-      comp_year <- terra::rast(config$infected_file)
+
       all_disagreement <-
         foreach(
           q = seq_len(length(data$infected)), .combine = rbind,
           .packages = c("terra", "PoPS", "foreach"),
           .final = colSums
         ) %do% {
+          comp_year <- terra::rast(config$infected_file)
+          reference <- terra::rast(config$infected_file)
           terra::values(comp_year) <- data$infected[[q]]
+          terra::values(reference) <- config$infection_years2[[q]]
           quantity_allocation_disagreement(
-            config$infection_years[[q]],
+            reference,
             comp_year,
             config$configuration,
             config$mask

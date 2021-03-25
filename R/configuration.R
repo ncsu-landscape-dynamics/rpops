@@ -223,10 +223,13 @@ configuration <- function(config) {
 
     temperature <- list(terra::as.matrix(temperature_stack[[1]],
                                          wide = TRUE))
-    for (i in 2:config$number_of_years) {
-      temperature[[i]] <- terra::as.matrix(temperature_stack[[i]],
-                                           wide = TRUE)
+    if (nlyr(temperature_stack) > 1) {
+      for (i in 2:config$number_of_years) {
+        temperature[[i]] <- terra::as.matrix(temperature_stack[[i]],
+                                             wide = TRUE)
+      }
     }
+ 
   } else {
     temperature <- host
     terra::values(temperature) <- 1
@@ -343,7 +346,7 @@ configuration <- function(config) {
     }
   } else {
     treatment_map <- host
-    terra::values(treatment_map) <- 0
+    treatment_map[] <- 0
     config$treatment_maps <- list(terra::as.matrix(treatment_map,
                                                    wide = TRUE))
     config$treatment_dates <- c(config$start_date)
@@ -524,7 +527,17 @@ configuration <- function(config) {
             number of outputs is", config$number_of_time_steps)
       return(config)
     }
+    
+    infection_years2 <- list(terra::as.matrix(infection_years[[1]],
+                                         wide = TRUE))
+    if (nlyr(infection_years) > 1) {
+      for (i in 2:nlyr(infection_years)) {
+        infection_years2[[i]] <- terra::as.matrix(infection_years[[i]],
+                                             wide = TRUE)
+      }
+    }
     config$infection_years <- infection_years
+    config$infection_years2 <- infection_years2
   }
 
   if (config$function_name %in% c("validate") |
