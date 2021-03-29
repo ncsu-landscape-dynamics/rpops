@@ -229,7 +229,7 @@ configuration <- function(config) {
                                              wide = TRUE)
       }
     }
- 
+
   } else {
     temperature <- host
     terra::values(temperature) <- 1
@@ -303,7 +303,7 @@ configuration <- function(config) {
     weather_coefficient <- list(terra::as.matrix(
       weather_coefficient_stack[[1]],
       wide = TRUE))
-    for (i in 2:config$number_of_time_steps) {
+    for (i in 2:terra::nlyr(weather_coefficient_stack)) {
       weather_coefficient[[i]] <- terra::as.matrix(
         weather_coefficient_stack[[i]],
         wide = TRUE)
@@ -527,7 +527,7 @@ configuration <- function(config) {
             number of outputs is", config$number_of_time_steps)
       return(config)
     }
-    
+
     infection_years2 <- list(terra::as.matrix(infection_years[[1]],
                                          wide = TRUE))
     if (nlyr(infection_years) > 1) {
