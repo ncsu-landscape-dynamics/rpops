@@ -136,7 +136,8 @@ calibrate <- function(infected_years_file,
                       use_quarantine = FALSE,
                       use_spreadrates = FALSE,
                       calibration_method = "ABC",
-                      number_of_iterations = 100000) {
+                      number_of_iterations = 100000,
+                      verbose = FALSE) {
 
   # add all data to config list
   config <- c()
@@ -564,11 +565,13 @@ calibrate <- function(infected_years_file,
         }
         acceptance_rate <- config$current_particles / config$proposed_particles
         acceptance_rate_info <-
-          paste("The current generation is ", config$current_bin, " and the
-            current particle is ", config$current_particles,
-                " and the current acceptance rate is ", acceptance_rate,
+          paste("current generation: ", config$current_bin,
+                "current particle: ", config$current_particles,
+                "current acceptance rate: ", acceptance_rate,
                 sep = "")
-        print(acceptance_rate_info)
+        if (verbose) {
+          print(acceptance_rate_info)
+        }
       }
 
       start_index <- config$current_bin * generation_size - generation_size + 1
@@ -858,8 +861,9 @@ calibrate <- function(infected_years_file,
       }
 
       param <- current
-
-      print(i)
+      if (verbose) {
+        print(i)
+      }
       params[i, ] <- param
     }
 
