@@ -323,16 +323,15 @@ calibrate <- function(infected_years_file,
 
     for (y in seq_len(terra::nlyr(config$infection_years))) {
       inf_year <- config$infection_years[[y]]
-      num_infected_data[[y]] <- sum(inf_year[inf_year > 0])
-      num_locs_data[[y]] <- sum(inf_year[inf_year > 0] > 0)
+      num_infected_data[[y]] <- sum(terra::values(inf_year))
+      num_locs_data[[y]] <- sum(terra::values(inf_year) > 0)
       if (success_metric %in%
           c(
             "number of locations and total distance",
             "number of locations, number of infections, and total distance"
           )) {
         infected_data_point <-
-          terra::as.points(inf_year, crs = terra::crs(inf_year),
-                           spatial = TRUE)
+          terra::as.points(inf_year)
         names(infected_data_point) <- "data"
         infected_data_points[[y]] <-
           infected_data_point[infected_data_point$data > 0]
@@ -457,12 +456,13 @@ calibrate <- function(infected_years_file,
 
           # calculate residual error for each time step
           diff_raster <- config$infection_years[[y]] - infected_sim
-          residual_differences[[y]] <- sum(diff_raster[!is.na(diff_raster)])
+          residual_differences[[y]] <-
+            sum(terra::values(diff_raster), na.rm = TRUE)
 
           # calculate number of infection in the simulation
-          num_infected_simulated[[y]] <- sum(infected_sim[infected_sim > 0])
+          num_infected_simulated[[y]] <- sum(terra::values(infected_sim))
 
-          num_locs_simulated[[y]] <- sum(infected_sim[infected_sim > 0] > 0)
+          num_locs_simulated[[y]] <- sum(terra::values(infected_sim) > 0)
           if (success_metric %in%
               c(
                 "number of locations and total distance",
@@ -470,8 +470,7 @@ calibrate <- function(infected_years_file,
               )
           ) {
             infected_sim_point <-
-              terra::as.points(infected_sim, crs = crs(infected_sim),
-                               spatial = TRUE)
+              terra::as.points(infected_sim)
             names(infected_sim_point) <- "data"
             infected_sim_points[[y]] <-
               infected_sim_point[infected_sim_point$data > 0]

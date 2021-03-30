@@ -5,6 +5,11 @@ test_that(
   same!", {
   comp <- terra::rast(matrix(1, nrow = 2, ncol = 2))
   ref <- terra::rast(matrix(1, nrow = 2, ncol = 2))
+  comparison <- comp
+  reference <- ref
+  configuration = FALSE
+  mask = NULL
+
   data <- quantity_allocation_disagreement(ref, comp)
   expect_equal(data$quantity_disagreement, 0)
   expect_equal(data$allocation_disagreement, 0)
@@ -107,6 +112,10 @@ test_that("Check that configuration disagreement works", {
   mask <- terra::rast(matrix(0, nrow = 2, ncol = 2))
   mask[1, 2] <- NA
   mask[2, 2] <- NA
+  comparison <- comp
+  reference <- ref
+  configuration = TRUE
+
   data <-
     quantity_allocation_disagreement(ref,
                                      comp,
@@ -130,4 +139,3 @@ test_that("Check that configuration disagreement works", {
   expect_equal(data$odds_ratio, 1)
   expect_gte(data$configuration_disagreement, 0)
 })
-

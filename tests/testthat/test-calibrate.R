@@ -2,7 +2,6 @@ context("test-calibrate")
 
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons", {
-            skip_on_appveyor()
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")

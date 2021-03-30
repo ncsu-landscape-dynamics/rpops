@@ -1596,7 +1596,8 @@ test_that("Pesticide treatments apply no matter what time step", {
            pesticide_duration = pesticide_duration,
            pesticide_efficacy = pesticide_efficacy)
     expect_equal(data$infected[[1]], matrix(0, ncol = 2, nrow = 2))
-    expect_equal(data$susceptible[[1]], as.matrix(raster(host_file)))
+    expect_equal(data$susceptible[[1]],
+                 terra::as.matrix(terra::rast(host_file), wide = TRUE))
   }
 
   pesticide_duration <- c(120)

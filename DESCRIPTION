@@ -1,5 +1,5 @@
 Package: PoPS
-Version: 1.0.0
+Version: 1.0.3
 Title: Pest or Pathogen Spread Model
 Description: A generalized stochastic geospatial model for pest or pathogen spread in 
     forest and agricultural systems.
@@ -11,8 +11,8 @@ Authors@R: c(
     )
 Depends: R (>= 3.3.0)
 Imports: 
-    raster,
-    terra,
+    raster (>= 3.3-7),
+    terra (>= 1.1-7),
     Rcpp (>= 0.12.19),
     stats,
     foreach,
@@ -26,8 +26,9 @@ Imports:
     utils,
     MASS,
     methods,
-    aws.s3,
-    rgdal
+    rgdal,
+    igraph,
+    aws.s3
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 URL: http://www.github.com/ncsu-landscape-dynamics/rpops

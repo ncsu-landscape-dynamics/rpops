@@ -47,7 +47,7 @@ jobs:
           RHUB_PLATFORM: linux-x86_64-ubuntu-gcc
         run: |
           # install spatial dependencies
-          sudo add-apt-repository ppa:ubuntugis/ppa
+          sudo add-apt-repository ppa:ubuntugis/ubuntugis-unstable
           sudo apt update
           sudo apt install \
             libudunits2-dev \
@@ -55,11 +55,19 @@ jobs:
             libgeos-dev \
             libproj-dev
 
+      - name: Install system dependencies
+        if: runner.os == 'macOS'
+        run: |
+          # install spatial dependencies
+          rm '/usr/local/bin/gfortran'
+          brew install pkg-config gdal proj geos
+
       - name: Install dependencies
         if: runner.os == 'macOS'
         run: |
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
+          remotes::install_github("rspatial/terra")
         shell: Rscript {0}
 
       - name: Install dependencies
@@ -67,6 +75,7 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
+          remotes::install_github("rspatial/terra")
         shell: Rscript {0}
 
       - name: Install dependencies
@@ -74,6 +83,7 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
+          remotes::install_github("rspatial/terra")
         shell: Rscript {0}
 
       # - name: Install rgdal from source
