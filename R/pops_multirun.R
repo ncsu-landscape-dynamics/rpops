@@ -130,6 +130,7 @@ pops_multirun <- function(infected_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  overpopulation_config = c()
   overpopulation_config$use_overpopulation_movements <- use_overpopulation_movements
   overpopulation_config$overpopulation_percentage <- overpopulation_percentage
   overpopulation_config$leaving_percentage <- leaving_percentage
