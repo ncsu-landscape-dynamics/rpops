@@ -68,9 +68,7 @@ inline Direction direction_from_string(const std::string& text)
     }
     catch (const std::out_of_range&) {
         throw std::invalid_argument(
-            "direction_from_string: Invalid"
-            " value '"
-            + text + "' provided");
+            "direction_from_string: Invalid value '" + text + "' provided");
     }
 }
 

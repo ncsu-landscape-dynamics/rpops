@@ -92,6 +92,25 @@ protected:
     double north_south_resolution;
 
 public:
+    /**
+     * @brief DeterministicDispersalKernel constructor
+     *
+     * When an unsupported (invalid) kernel type is passed as *dispersal_kernel*,
+     * std::invalid_argument is thrown when the function call operator is used,
+     * i.e., it is accepted by the constructor. This is to allow for constuction
+     * of invalid, but unused kernels which are created as a part of larger kernels.
+     *
+     * The reference *dispersers* is later used to obtain the current counts of
+     * dispersers.
+     *
+     * @param dispersal_kernel Type of kernel to be used
+     * @param dispersers Reference to a dispersers raster
+     * @param dispersal_percentage Percentage used to compute the kernel size
+     * @param ew_res East-west resolution
+     * @param ns_res North-south resolution
+     * @param distance_scale Scale parameter for the kernels
+     * @param shape Shape parameter for the kernels
+     */
     DeterministicDispersalKernel(
         DispersalKernelType dispersal_kernel,
         const IntegerRaster& dispersers,
