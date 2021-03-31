@@ -103,7 +103,8 @@ List pops_model(
     double dispersal_percentage = 0.99,
     bool use_overpopulation_movements = false,
     double overpopulation_percentage = 0,
-    double leaving_percentage = 0)
+    double leaving_percentage = 0,
+    double leaving_scale_coefficient = 1)
 {
     Config config;
     config.random_seed = random_seed;

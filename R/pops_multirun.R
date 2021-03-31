@@ -78,7 +78,8 @@ pops_multirun <- function(infected_file,
                           use_spreadrates = FALSE,
                           use_overpopulation_movements = FALSE,
                           overpopulation_percentage = 0,
-                          leaving_percentage = 0) {
+                          leaving_percentage = 0,
+                          leaving_scale_coefficient = 1) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -129,6 +130,10 @@ pops_multirun <- function(infected_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  config$use_overpopulation_movements <- use_overpopulation_movements
+  config$overpopulation_percentage <- overpopulation_percentage
+  config$leaving_percentage <- leaving_percentage
+  config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
   # add function name for use in configuration function to skip
@@ -225,7 +230,11 @@ pops_multirun <- function(infected_file,
                        deterministic = config$deterministic,
                        establishment_probability =
                          config$establishment_probability,
-                       dispersal_percentage = config$dispersal_percentage
+                       dispersal_percentage = config$dispersal_percentage,
+                       use_overpopulation_movements = config$use_overpopulation_movements,
+                       overpopulation_percentage = config$overpopulation_percentage,
+                       leaving_percentage = config$leaving_percentage,
+                       leaving_scale_coefficient = config$leaving_scale_coefficient
     )
 
     run <- c()
