@@ -127,7 +127,9 @@ treatment_checks <- function(treatment_stack,
                              pesticide_efficacy) {
   checks_passed <- TRUE
 
-  if (checks_passed && length(treatments_file) != length(treatment_dates)) {
+  if (checks_passed
+    && terra::nlyr(treatment_stack)
+    != length(treatment_dates)) {
     checks_passed <- FALSE
     failed_check <-
       "Length of list for treatment dates and treatments_file must be equal"
