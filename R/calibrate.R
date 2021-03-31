@@ -60,6 +60,8 @@
 #' @param number_of_iterations how many iterations do you want to run to allow
 #' the calibration to converge (recommend a minimum of at least 100,000 but
 #' preferably 1 million).
+#' @param verbose Boolean with true printing current status of calibration,
+#' (e.g. the current generation, current particle, and the acceptance rate).
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
