@@ -39,6 +39,7 @@ using namespace pops;
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 List pops_model(
+    List overpopulation_config,
     int random_seed,
     bool use_lethal_temperature,
     double lethal_temperature,
@@ -100,11 +101,7 @@ List pops_model(
     bool movement_stochasticity = true,
     bool deterministic = false,
     double establishment_probability = 0,
-    double dispersal_percentage = 0.99,
-    bool use_overpopulation_movements = false,
-    double overpopulation_percentage = 0,
-    double leaving_percentage = 0,
-    double leaving_scale_coefficient = 1)
+    double dispersal_percentage = 0.99)
 {
     Config config;
     config.random_seed = random_seed;
@@ -156,9 +153,10 @@ List pops_model(
     config.spreadrate_frequency = spreadrate_frequency;
     config.spreadrate_frequency_n = spreadrate_frequency_n;
     config.use_spreadrates = use_spreadrates;
-    config.use_overpopulation_movements = use_overpopulation_movements;
-    config.overpopulation_percentage = overpopulation_percentage;
-    config.leaving_percentage = leaving_percentage;
+    config.use_overpopulation_movements = overpopulation_config["use_overpopulation_movements"];
+    config.overpopulation_percentage = overpopulation_config["overpopulation_percentage"];
+    config.leaving_percentage = overpopulation_config["leaving_percentage"];
+    config.leaving_scale_coefficient = overpopulation_config["leaving_scale_coefficient"];
 
     std::vector<std::tuple<int, int>> outside_dispersers;
     TreatmentApplication treatment_application =
