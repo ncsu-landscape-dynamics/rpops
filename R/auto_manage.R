@@ -105,7 +105,8 @@ auto_manage <- function(infected_files,
                         dispersal_percentage = 0.99,
                         quarantine_areas_file = "",
                         use_quarantine = FALSE,
-                        use_spreadrates = FALSE) {
+                        use_spreadrates = FALSE,
+                        exposed_file = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -159,6 +160,7 @@ auto_manage <- function(infected_files,
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
   config$species <- species
+  config$exposed_file <- exposed_file
   # add function name for use in configuration function to skip
   # function specific specifc configurations namely for validation and
   # calibration.

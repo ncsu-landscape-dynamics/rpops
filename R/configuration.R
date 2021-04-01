@@ -120,6 +120,7 @@ configuration <- function(config) {
     config$spreadrate_frequency_n <- config$output_frequency_n
   } else {
     config$failure <- time_check$failed_check
+    return(config)
   }
 
   # check that initial raster file exists
@@ -375,17 +376,8 @@ configuration <- function(config) {
 
   mortality_tracker <- infected
   terra::values(mortality_tracker) <- 0
-
-  infected <- terra::as.matrix(infected,
-                               wide = TRUE)
-  config$susceptible <- terra::as.matrix(susceptible,
-                                         wide = TRUE)
-  config$total_populations <- terra::as.matrix(total_populations,
-                                               wide = TRUE)
   mortality_tracker <- terra::as.matrix(mortality_tracker,
                                         wide = TRUE)
-  config$mortality <- mortality_tracker
-  config$resistant <- mortality_tracker
   exposed <- list(mortality_tracker)
 
   if (config$model_type == "SEI" & config$latency_period > 1) {
@@ -395,9 +387,34 @@ configuration <- function(config) {
   }
 
   if (config$model_type == "SEI" & config$start_exposed) {
-    exposed[[config$latency_period + 1]] <- infected
-    infected <- mortality_tracker
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      exposed_check <-
+        secondary_raster_checks(config$exposed_file, infected,
+                                config$use_s3, config$bucket)
+    } else {
+      exposed_check <- secondary_raster_checks(config$exposed_file, infected)
+    }
+    if (exposed_check$checks_passed) {
+      exposed2 <- exposed_check$raster
+      susceptible <- susceptible - exposed2
+      susceptible[susceptible < 0] <- 0
+      exposed[[config$latency_period + 1]] <-
+        terra::as.matrix(exposed2, wide = TRUE)
+    } else {
+      config$failure <- exposed_check$failed_check
+      return(config)
+    }
   }
+
+  infected <- terra::as.matrix(infected,
+                               wide = TRUE)
+  config$susceptible <- terra::as.matrix(susceptible,
+                                         wide = TRUE)
+  config$total_populations <- terra::as.matrix(total_populations,
+                                               wide = TRUE)
+
+  config$mortality <- mortality_tracker
+  config$resistant <- mortality_tracker
 
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {

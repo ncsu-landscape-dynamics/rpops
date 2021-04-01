@@ -75,7 +75,8 @@ pops_multirun <- function(infected_file,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
                           use_quarantine = FALSE,
-                          use_spreadrates = FALSE) {
+                          use_spreadrates = FALSE,
+                          exposed_file = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -133,6 +134,7 @@ pops_multirun <- function(infected_file,
   # calibration.
   config$function_name <- "multirun"
   config$failure <- NULL
+  config$exposed_file <- exposed_file
 
   config <- configuration(config)
 
