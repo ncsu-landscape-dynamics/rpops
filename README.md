@@ -53,7 +53,7 @@ you are using for example:
 
 Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
 running the code below and changing the ref to match the latest semantic version
-or the specific version that you are looking to install. PoPS requires [terra](https://github.com/rspatial/terra) version 1.17 or higher which isn't on the CRAN yet.
+or the specific version that you are looking to install. PoPS requires [terra](https://github.com/rspatial/terra) version 1.1-7 or higher which isn't on the CRAN yet.
 ```R
 install.packages("devtools")
 library(devtools)
