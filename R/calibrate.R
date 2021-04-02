@@ -62,6 +62,7 @@
 #' preferably 1 million).
 #' @param verbose Boolean with true printing current status of calibration,
 #' (e.g. the current generation, current particle, and the acceptance rate).
+#' Defaults if FALSE.
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -570,6 +571,11 @@ calibrate <- function(infected_years_file,
           paste("current generation: ", config$current_bin,
                 "current particle: ", config$current_particles,
                 "current acceptance rate: ", acceptance_rate,
+                "current location difference (c1):", location_difference,
+                "current distance difference (c2): ", distance_difference,
+                "current residual difference (c3): ", residual_difference,
+                "current number infected difference (c4): ",
+                number_infected_difference,
                 sep = "")
         if (verbose) {
           print(acceptance_rate_info)

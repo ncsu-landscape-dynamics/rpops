@@ -278,7 +278,8 @@ the calibration to converge (recommend a minimum of at least 100,000 but
 preferably 1 million).}
 
 \item{verbose}{Boolean with true printing current status of calibration,
-(e.g. the current generation, current particle, and the acceptance rate).}
+(e.g. the current generation, current particle, and the acceptance rate).
+Defaults if FALSE.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for
