@@ -89,7 +89,8 @@ validate <- function(infected_years_file,
                      dispersal_percentage = 0.99,
                      quarantine_areas_file = "",
                      use_quarantine = FALSE,
-                     use_spreadrates = FALSE) {
+                     use_spreadrates = FALSE,
+                     exposed_file = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -148,6 +149,7 @@ validate <- function(infected_years_file,
   # calibration.
   config$function_name <- "validate"
   config$failure <- NULL
+  config$exposed_file <- exposed_file
 
   config <- configuration(config)
 
@@ -253,7 +255,7 @@ validate <- function(infected_years_file,
           reference <- terra::rast(config$infected_file)
           terra::values(comp_year) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
-          ad <- 
+          ad <-
             quantity_allocation_disagreement(reference,
                                              comp_year,
                                              config$configuration,

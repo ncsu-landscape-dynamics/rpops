@@ -136,7 +136,8 @@ calibrate <- function(infected_years_file,
                       use_quarantine = FALSE,
                       use_spreadrates = FALSE,
                       calibration_method = "ABC",
-                      number_of_iterations = 100000) {
+                      number_of_iterations = 100000,
+                      exposed_file = "") {
 
   # add all data to config list
   config <- c()
@@ -200,6 +201,7 @@ calibrate <- function(infected_years_file,
   config$use_spreadrates <- use_spreadrates
   config$calibration_method <- calibration_method
   config$number_of_iterations <- number_of_iterations
+  config$exposed_file <- exposed_file
   # add function name for use in configuration function to skip
   # function specific specifc configurations namely for validation and
   # calibration.

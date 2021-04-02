@@ -52,7 +52,8 @@ pops(
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
   use_quarantine = FALSE,
-  use_spreadrates = FALSE
+  use_spreadrates = FALSE,
+  exposed_file = ""
 )
 }
 \arguments{
@@ -137,8 +138,9 @@ in years integer >= 1}
 ('YYYY_MM_DD') (needs to be the same length as treatment_file and
 pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates
-(needs to be the same length as treatment_dates and pesticide_duration)}
+\item{treatments_file}{path to raster files with treatment data by dates.
+Needs to be a list of files the same length as treatment_dates and
+pesticide_duration.}
 
 \item{treatment_method}{what method to use when applying treatment one of
 ("ratio" or "all infected"). ratio removes a portion of all infected and
@@ -183,7 +185,8 @@ lon_to, lat_to, number of animals, and date.}
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected
-(only used if model_type is "SEI")}
+(only used if model_type is "SEI"). Default False. If this is TRUE need to
+have both an infected_file (this can be a raster of all 0's) and exposed_file}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use
 stochasticity in reproductive functions default is TRUE}
@@ -213,6 +216,8 @@ quarantine areas (default = FALSE)}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
+
+\item{exposed_file}{a file with the exposed for the current}
 }
 \value{
 list of infected and susceptible per year
