@@ -29,7 +29,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
     total_populations_file =  host_file,
     parameter_means = parameter_means,
     parameter_cov_matrix = parameter_cov_matrix),
-    "file is not one of '.grd', '.tif', '.img'")
+    "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file = "",
                     total_populations_file =  host_file,
@@ -43,7 +43,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file = "",
@@ -57,7 +57,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -75,7 +75,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -93,7 +93,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -111,7 +111,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -129,7 +129,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
 
 })
 

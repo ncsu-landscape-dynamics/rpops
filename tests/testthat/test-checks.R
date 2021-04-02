@@ -11,7 +11,7 @@ test_that("Initial raster checks report correct errors and return a raster", {
   infected <- initial_raster_checks(infected_file)
   expect_equal(infected$checks_passed, FALSE)
   expect_equal(infected$failed_check,
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
 
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
@@ -44,7 +44,7 @@ test_that("Initial raster checks report correct errors and return a raster", {
   host <- secondary_raster_checks(host_file, infected)
   expect_equal(host$checks_passed, FALSE)
   expect_equal(host$failed_check,
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
 
   host_file <-
     system.file("extdata", "simple5x5", "total_plants.tif", package = "PoPS")

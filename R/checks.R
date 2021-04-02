@@ -18,9 +18,9 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
   }
 
   if (checks_passed && !all((tools::file_ext(x) %in%
-    c("grd", "tif", "img")))) {
+    c("grd", "tif", "img", "vrt")))) {
     checks_passed <- FALSE
-    failed_check <- "file is not one of '.grd', '.tif', '.img'"
+    failed_check <- "file is not one of '.grd', '.tif', '.img', or '.vrt'"
   }
 
   if (checks_passed) {
@@ -67,7 +67,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
   if (checks_passed && !all((tools::file_ext(x) %in%
     c("grd", "tif", "img")))) {
     checks_passed <- FALSE
-    failed_check <- "file is not one of '.grd', '.tif', '.img'"
+    failed_check <- "file is not one of '.grd', '.tif', '.img', or '.vrt'"
   }
 
   if (checks_passed) {
