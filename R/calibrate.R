@@ -60,6 +60,9 @@
 #' @param number_of_iterations how many iterations do you want to run to allow
 #' the calibration to converge (recommend a minimum of at least 100,000 but
 #' preferably 1 million).
+#' @param verbose Boolean with true printing current status of calibration,
+#' (e.g. the current generation, current particle, and the acceptance rate).
+#' Defaults if FALSE.
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -137,7 +140,8 @@ calibrate <- function(infected_years_file,
                       use_spreadrates = FALSE,
                       calibration_method = "ABC",
                       number_of_iterations = 100000,
-                      exposed_file = "") {
+                      exposed_file = "",
+                      verbose = FALSE) {
 
   # add all data to config list
   config <- c()
@@ -565,11 +569,18 @@ calibrate <- function(infected_years_file,
         }
         acceptance_rate <- config$current_particles / config$proposed_particles
         acceptance_rate_info <-
-          paste("The current generation is ", config$current_bin, " and the
-            current particle is ", config$current_particles,
-                " and the current acceptance rate is ", acceptance_rate,
+          paste("current generation: ", config$current_bin,
+                "current particle: ", config$current_particles,
+                "current acceptance rate: ", acceptance_rate,
+                "current location difference (c1):", location_difference,
+                "current distance difference (c2): ", distance_difference,
+                "current residual difference (c3): ", residual_difference,
+                "current number infected difference (c4): ",
+                number_infected_difference,
                 sep = "")
-        print(acceptance_rate_info)
+        if (verbose) {
+          print(acceptance_rate_info)
+        }
       }
 
       start_index <- config$current_bin * generation_size - generation_size + 1
@@ -859,8 +870,9 @@ calibrate <- function(infected_years_file,
       }
 
       param <- current
-
-      print(i)
+      if (verbose) {
+        print(i)
+      }
       params[i, ] <- param
     }
 

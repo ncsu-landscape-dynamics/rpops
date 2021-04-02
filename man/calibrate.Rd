@@ -65,7 +65,8 @@ calibrate(
   use_spreadrates = FALSE,
   calibration_method = "ABC",
   number_of_iterations = 1e+05,
-  exposed_file = ""
+  exposed_file = "",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -280,6 +281,11 @@ the calibration to converge (recommend a minimum of at least 100,000 but
 preferably 1 million).}
 
 \item{exposed_file}{a file with the exposed for the current}
+
+\item{verbose}{Boolean with true printing current status of calibration,
+(e.g. the current generation, current particle, and the acceptance rate).
+Defaults if FALSE.}
+
 }
 \value{
 a dataframe of the variables saved and their success metrics for
