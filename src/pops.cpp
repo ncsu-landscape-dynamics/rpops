@@ -38,7 +38,7 @@ using namespace pops;
 // [[Rcpp::interfaces(r, cpp)]]
 // [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
-List pops_model(
+List pops_model_cpp(
     int random_seed,
     bool use_lethal_temperature,
     double lethal_temperature,
