@@ -32,6 +32,7 @@
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
+#' @importFrom MASS mvrnorm
 #'
 #' @return a dataframe of the variables saved and their success metrics for
 #' each run
@@ -88,7 +89,8 @@ validate <- function(infected_years_file,
                      dispersal_percentage = 0.99,
                      quarantine_areas_file = "",
                      use_quarantine = FALSE,
-                     use_spreadrates = FALSE) {
+                     use_spreadrates = FALSE,
+                     exposed_file = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -147,6 +149,7 @@ validate <- function(infected_years_file,
   # calibration.
   config$function_name <- "validate"
   config$failure <- NULL
+  config$exposed_file <- exposed_file
 
   config <- configuration(config)
 
@@ -163,8 +166,8 @@ validate <- function(infected_years_file,
     foreach::foreach(
       i = 1:number_of_iterations,
       .combine = rbind,
-      .packages = c("terra", "PoPS", "foreach", "MASS")
-    ) %do% {
+      .packages = c("terra", "PoPS", "foreach")
+    ) %dopar% {
 
       config$random_seed <- round(stats::runif(1, 1, 1000000))
       data <- pops_model(
@@ -241,23 +244,25 @@ validate <- function(infected_years_file,
         dispersal_percentage = config$dispersal_percentage
       )
 
-      comp_year <- terra::rast(config$infected_file)
+
       all_disagreement <-
         foreach(
           q = seq_len(length(data$infected)), .combine = rbind,
-          .packages = c("terra", "PoPS", "foreach"),
+          .packages = c("terra", "PoPS"),
           .final = colSums
         ) %do% {
+          comp_year <- terra::rast(config$infected_file)
+          reference <- terra::rast(config$infected_file)
           terra::values(comp_year) <- data$infected[[q]]
-          quantity_allocation_disagreement(
-            config$infection_years[[q]],
-            comp_year,
-            config$configuration,
-            config$mask
-          )
+          terra::values(reference) <- config$infection_years2[[q]]
+          ad <-
+            quantity_allocation_disagreement(reference,
+                                             comp_year,
+                                             config$configuration,
+                                             config$mask)
         }
 
-      data.frame(t(all_disagreement))
+      to.qa <- data.frame(t(all_disagreement))
     }
 
   parallel::stopCluster(cl)

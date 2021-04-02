@@ -23,14 +23,62 @@
 
 configuration <- function(config) {
 
+  # Check that all data has same length if using multiple species currently
+  # only implemented for auto manage
+  if (config$function_name == "auto-manage") {
+    multispecies_check <-
+      multispecies_checks(config$species,
+                          config$infected_files,
+                          config$parameter_means,
+                          config$parameter_cov_matrix,
+                          config$natural_kernel_type,
+                          config$anthropogenic_kernel_type,
+                          config$natural_dir,
+                          config$anthropogenic_dir,
+                          config$model_type,
+                          config$host_file,
+                          config$total_populations_file,
+                          config$temp,
+                          config$temperature_coefficient_file,
+                          config$precip,
+                          config$precipitation_coefficient_file,
+                          config$latency_period,
+                          config$time_step,
+                          config$season_month_start,
+                          config$season_month_end,
+                          config$use_lethal_temperature,
+                          config$temperature_file,
+                          config$lethal_temperature,
+                          config$lethal_temperature_month,
+                          config$mortality_on,
+                          config$mortality_rate,
+                          config$mortality_time_lag,
+                          config$movements_file,
+                          config$use_movements,
+                          config$start_exposed,
+                          config$quarantine_areas_file,
+                          config$use_quarantine,
+                          config$use_spreadrates)
+    if (!multispecies_check$checks_passed) {
+      config$failure <- multispecies_check$failed_check
+      return(config)
+    }
+  }
+
   # ensures correct model type
   if (config$model_type %in%
-      c("SEI", "susceptible-exposed-infected", "susceptible_exposed_infected",
-        "Susceptible-Exposed-Infected", "Susceptible_Exposed_Infected")) {
+      c("SEI",
+        "susceptible-exposed-infected",
+        "susceptible_exposed_infected",
+        "Susceptible-Exposed-Infected",
+        "Susceptible_Exposed_Infected")) {
     config$model_type <- "SEI"
   } else if (config$model_type %in%
-             c("SI", "susceptible-infected", "susceptible_infected",
-               "Susceptible-Infected", "Susceptible_Infected")) {
+             c("SI",
+               "susceptible-infected",
+               "susceptible_infected",
+               "Susceptible-Infected",
+               "Susceptible_Infected")) {
     config$model_type <- "SI"
   } else {
     config$failure <-
@@ -72,6 +120,7 @@ configuration <- function(config) {
     config$spreadrate_frequency_n <- config$output_frequency_n
   } else {
     config$failure <- time_check$failed_check
+    return(config)
   }
 
   # check that initial raster file exists
@@ -111,11 +160,9 @@ configuration <- function(config) {
   }
 
   suitable <- host + infected
-  suitable_points <- terra::as.points(suitable,
-                                    fun = function(x) {
-                                      x > 0
-                                    },
-                                    spatial = TRUE)
+  suitable_points <- terra::as.points(suitable)
+  names(suitable_points) <- "data"
+  suitable_points <- suitable_points[suitable_points$data > 0]
   suitable_cells <-
     terra::extract(suitable, suitable_points, cellnumbers = TRUE)[, 1]
   suitable_row <- terra::rowFromCell(suitable, suitable_cells)
@@ -177,10 +224,13 @@ configuration <- function(config) {
 
     temperature <- list(terra::as.matrix(temperature_stack[[1]],
                                          wide = TRUE))
-    for (i in 2:config$number_of_years) {
-      temperature[[i]] <- terra::as.matrix(temperature_stack[[i]],
-                                           wide = TRUE)
+    if (nlyr(temperature_stack) > 1) {
+      for (i in 2:config$number_of_years) {
+        temperature[[i]] <- terra::as.matrix(temperature_stack[[i]],
+                                             wide = TRUE)
+      }
     }
+
   } else {
     temperature <- host
     terra::values(temperature) <- 1
@@ -254,7 +304,7 @@ configuration <- function(config) {
     weather_coefficient <- list(terra::as.matrix(
       weather_coefficient_stack[[1]],
       wide = TRUE))
-    for (i in 2:config$number_of_time_steps) {
+    for (i in 2:terra::nlyr(weather_coefficient_stack)) {
       weather_coefficient[[i]] <- terra::as.matrix(
         weather_coefficient_stack[[i]],
         wide = TRUE)
@@ -263,8 +313,7 @@ configuration <- function(config) {
     weather_coefficient <- host
     terra::values(weather_coefficient) <- 1
     weather_coefficient <- list(terra::as.matrix(weather_coefficient,
-                                       ncol = terra::ncol(weather_coefficient),
-                                       nrow = terra::nrow(weather_coefficient)))
+                                                 wide = TRUE))
   }
 
   config$weather_coefficient <- weather_coefficient
@@ -298,7 +347,7 @@ configuration <- function(config) {
     }
   } else {
     treatment_map <- host
-    terra::values(treatment_map) <- 0
+    treatment_map[] <- 0
     config$treatment_maps <- list(terra::as.matrix(treatment_map,
                                                    wide = TRUE))
     config$treatment_dates <- c(config$start_date)
@@ -327,17 +376,8 @@ configuration <- function(config) {
 
   mortality_tracker <- infected
   terra::values(mortality_tracker) <- 0
-
-  infected <- terra::as.matrix(infected,
-                               wide = TRUE)
-  config$susceptible <- terra::as.matrix(susceptible,
-                                         wide = TRUE)
-  config$total_populations <- terra::as.matrix(total_populations,
-                                               wide = TRUE)
   mortality_tracker <- terra::as.matrix(mortality_tracker,
                                         wide = TRUE)
-  config$mortality <- mortality_tracker
-  config$resistant <- mortality_tracker
   exposed <- list(mortality_tracker)
 
   if (config$model_type == "SEI" & config$latency_period > 1) {
@@ -347,9 +387,34 @@ configuration <- function(config) {
   }
 
   if (config$model_type == "SEI" & config$start_exposed) {
-    exposed[[config$latency_period + 1]] <- infected
-    infected <- mortality_tracker
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      exposed_check <-
+        secondary_raster_checks(config$exposed_file, infected,
+                                config$use_s3, config$bucket)
+    } else {
+      exposed_check <- secondary_raster_checks(config$exposed_file, infected)
+    }
+    if (exposed_check$checks_passed) {
+      exposed2 <- exposed_check$raster
+      susceptible <- susceptible - exposed2
+      susceptible[susceptible < 0] <- 0
+      exposed[[config$latency_period + 1]] <-
+        terra::as.matrix(exposed2, wide = TRUE)
+    } else {
+      config$failure <- exposed_check$failed_check
+      return(config)
+    }
   }
+
+  infected <- terra::as.matrix(infected,
+                               wide = TRUE)
+  config$susceptible <- terra::as.matrix(susceptible,
+                                         wide = TRUE)
+  config$total_populations <- terra::as.matrix(total_populations,
+                                               wide = TRUE)
+
+  config$mortality <- mortality_tracker
+  config$resistant <- mortality_tracker
 
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
@@ -479,7 +544,17 @@ configuration <- function(config) {
             number of outputs is", config$number_of_time_steps)
       return(config)
     }
+
+    infection_years2 <- list(terra::as.matrix(infection_years[[1]],
+                                         wide = TRUE))
+    if (nlyr(infection_years) > 1) {
+      for (i in 2:nlyr(infection_years)) {
+        infection_years2[[i]] <- terra::as.matrix(infection_years[[i]],
+                                             wide = TRUE)
+      }
+    }
     config$infection_years <- infection_years
+    config$infection_years2 <- infection_years2
   }
 
   if (config$function_name %in% c("validate") |
@@ -503,6 +578,16 @@ configuration <- function(config) {
     config$current_particles <- 1
     config$proposed_particles <- 1
     config$current_bin <- 1
+  }
+
+  if (config$function_name == "auto-manage") {
+    ## management module information
+    config$num_cells <-
+      round((config$budget / config$cost_per_meter_sq) /
+              (config$ew_res * config$ns_res))
+    config$buffer_cells <- config$buffer / config$ew_res
+    config$years_simulated <- length(config$years)
+
   }
 
   config$crs <- terra::crs(config$host)

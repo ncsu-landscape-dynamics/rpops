@@ -8,6 +8,8 @@ auto_manage(
   infected_files,
   host_file,
   total_populations_file,
+  parameter_means,
+  parameter_cov_matrix,
   temp = FALSE,
   temperature_coefficient_file = "",
   precip = FALSE,
@@ -15,7 +17,6 @@ auto_manage(
   model_type = "SI",
   latency_period = 0,
   time_step = "month",
-  reproductive_rate = 3,
   season_month_start = 1,
   season_month_end = 12,
   start_date = "2008-01-01",
@@ -31,16 +32,11 @@ auto_manage(
   treatment_dates = c(""),
   treatments_file = "",
   treatment_method = "ratio",
-  percent_natural_dispersal = 1,
   natural_kernel_type = "cauchy",
   anthropogenic_kernel_type = "cauchy",
-  natural_distance_scale = 21,
-  anthropogenic_distance_scale = 0,
   natural_dir = "NONE",
-  natural_kappa = 0,
   anthropogenic_dir = "NONE",
-  anthropogenic_kappa = 0,
-  num_iterations = 100,
+  number_of_iterations = 100,
   number_of_cores = NA,
   pesticide_duration = 0,
   pesticide_efficacy = 1,
@@ -69,7 +65,8 @@ auto_manage(
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
   use_quarantine = FALSE,
-  use_spreadrates = FALSE
+  use_spreadrates = FALSE,
+  exposed_file = ""
 )
 }
 \arguments{
@@ -84,6 +81,15 @@ deviation of those estimates)}
 
 \item{total_populations_file}{path to raster file with number of total
 populations of all hosts and non-hosts (must be only hosts if using movement)}
+
+\item{parameter_means}{A vector of the means of the model parameters
+(reproductive_rate, natural_dispersal_distance, percent_natural_dispersal,
+anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
+
+\item{parameter_cov_matrix}{A covariance matrix from the previous years
+posterior parameter estimation ordered from (reproductive_rate,
+natural_dispersal_distance, percent_natural_dispersal,
+anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
 
 \item{temp}{boolean that allows the use of temperature coefficients to
 modify spread (TRUE or FALSE)}
@@ -107,9 +113,6 @@ greater than 0 if model type is SEI.}
 
 \item{time_step}{how often should spread occur options: ('day', 'week',
 'month')}
-
-\item{reproductive_rate}{number of spores or pest units produced by a
-single host under optimal weather conditions}
 
 \item{season_month_start}{when does spread first start occurring in the year
 for your pest or pathogen (integer value between 1 and 12)}
@@ -149,15 +152,13 @@ in years integer >= 1}
 ('YYYY_MM_DD') (needs to be the same length as treatment_file and
 pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates
-(needs to be the same length as treatment_dates and pesticide_duration)}
+\item{treatments_file}{path to raster files with treatment data by dates.
+Needs to be a list of files the same length as treatment_dates and
+pesticide_duration.}
 
 \item{treatment_method}{what method to use when applying treatment one of
 ("ratio" or "all infected"). ratio removes a portion of all infected and
 susceptibles, all infected removes all infected a portion of susceptibles.}
-
-\item{percent_natural_dispersal}{what percentage of dispersal is natural
-range versus anthropogenic range value between 0 and 1}
 
 \item{natural_kernel_type}{what type of dispersal kernel should be used for
 natural dispersal can be ('cauchy', 'exponential')}
@@ -165,28 +166,16 @@ natural dispersal can be ('cauchy', 'exponential')}
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
 used for anthropogenic dispersal can be ('cauchy', 'exponential')}
 
-\item{natural_distance_scale}{distance scale parameter for natural range
-dispersal kernel numeric value > 0}
-
-\item{anthropogenic_distance_scale}{distance scale parameter for
-anthropogenic range dispersal kernel numeric value > 0}
-
 \item{natural_dir}{sets the predominate direction of natural dispersal
 usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
 'NONE')}
-
-\item{natural_kappa}{sets the strength of the natural direction in the
-von-mises distribution numeric value between 0.01 and 12}
 
 \item{anthropogenic_dir}{sets the predominate direction of anthropogenic
 dispersal usually due to human movement typically over long distances (e.g.
 nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
 'SE', 'E', 'NE', 'NONE')}
 
-\item{anthropogenic_kappa}{sets the strength of the anthropogenic direction
-in the von-mises distribution numeric value between 0.01 and 12}
-
-\item{num_iterations}{how many iterations do you want to run to allow the
+\item{number_of_iterations}{how many iterations do you want to run to allow the
 calibration to converge at least 10}
 
 \item{number_of_cores}{enter how many cores you want to use (default = NA).
@@ -242,12 +231,13 @@ one of "group size", "host", or "infected"}
 \item{species}{a list of the species names for naming outputs files must be
 the same length and infected_files}
 
-\item{direction_first}{boolean to indicate where or not direction is the
+\item{direction_first}{boolean to indicate if direction is the
 first priortity in sorting (if false first sorting priority goes to the
 selection_method)}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected
-(only used if model_type is "SEI")}
+(only used if model_type is "SEI"). Default False. If this is TRUE need to
+have both an infected_file (this can be a raster of all 0's) and exposed_file}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use
 stochasticity in reproductive functions default is TRUE}
@@ -277,6 +267,8 @@ quarantine areas (default = FALSE)}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
+
+\item{exposed_file}{a file with the exposed for the current}
 }
 \value{
 list of infected and susceptible per year

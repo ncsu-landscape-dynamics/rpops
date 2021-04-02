@@ -529,16 +529,36 @@ bayesian_mnn_checks <- function(prior_means,
 
 multispecies_checks <- function(species,
                                 infected_files,
-                                reproductive_rate,
-                                percent_natural_dispersal,
+                                parameter_means,
+                                parameter_cov_matrix,
                                 natural_kernel_type,
                                 anthropogenic_kernel_type,
-                                natural_distance_scale,
-                                anthropogenic_distance_scale,
                                 natural_dir,
-                                natural_kappa,
                                 anthropogenic_dir,
-                                anthropogenic_kappa) {
+                                model_type,
+                                host_file,
+                                total_populations_file,
+                                temp,
+                                temperature_coefficient_file,
+                                precip,
+                                precipitation_coefficient_file,
+                                latency_period,
+                                time_step,
+                                season_month_start,
+                                season_month_end,
+                                use_lethal_temperature,
+                                temperature_file,
+                                lethal_temperature,
+                                lethal_temperature_month,
+                                mortality_on,
+                                mortality_rate,
+                                mortality_time_lag,
+                                movements_file,
+                                use_movements,
+                                start_exposed,
+                                quarantine_areas_file,
+                                use_quarantine,
+                                use_spreadrates) {
   checks_passed <- TRUE
 
   if (checks_passed && length(species) != length(infected_files)) {
@@ -547,18 +567,22 @@ multispecies_checks <- function(species,
       "Length of list for species and infected_files must be equal"
   }
 
-  if (checks_passed && length(reproductive_rate) != length(infected_files)) {
+  if (checks_passed && length(parameter_means) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and reproductive_rate must be equal"
+      "Length of list for parameter_means and infected_files must be equal"
   }
 
-  if (checks_passed && length(percent_natural_dispersal) !=
-    length(infected_files)) {
+  if (checks_passed && length(parameter_cov_matrix) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and percent_natural_dispersal must be
-    equal"
+      "Length of list for parameter_cov_matrix and infected_files must be equal"
+  }
+
+  if (checks_passed && length(model_type) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for model_type and infected_files must be equal"
   }
 
   if (checks_passed && length(natural_kernel_type) != length(infected_files)) {
@@ -571,23 +595,7 @@ multispecies_checks <- function(species,
     length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and anthropogenic_kernel_type must be
-    equal"
-  }
-
-  if (checks_passed && length(natural_distance_scale) !=
-    length(infected_files)) {
-    checks_passed <- FALSE
-    failed_check <-
-    "Length of list for infected_files and natural_distance_scale must be equal"
-  }
-
-  if (checks_passed && length(anthropogenic_distance_scale) !=
-    length(infected_files)) {
-    checks_passed <- FALSE
-    failed_check <-
-    "Length of list for infected_files and anthropogenic_distance_scale must be
-    equal"
+      "Length of list for infected_files and anthropogenic_kernel_type must be equal"
   }
 
   if (checks_passed && length(natural_dir) != length(infected_files)) {
@@ -596,22 +604,148 @@ multispecies_checks <- function(species,
       "Length of list for infected_files and natural_dir must be equal"
   }
 
-  if (checks_passed && length(natural_kappa) != length(infected_files)) {
-    checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and natural_kappa must be equal"
-  }
-
   if (checks_passed && length(anthropogenic_dir) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
       "Length of list for infected_files and anthropogenic_dir must be equal"
   }
 
-  if (checks_passed && length(anthropogenic_kappa) != length(infected_files)) {
+  if (checks_passed && length(host_file) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and anthropogenic_kappa must be equal"
+      "Length of list for infected_files and host_file must be equal"
+  }
+
+  if (checks_passed && length(total_populations_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and total_populations_file must be equal"
+  }
+
+  if (checks_passed && length(temp) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and temp must be equal"
+  }
+
+  if (checks_passed && length(temperature_coefficient_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and temperature_coefficient_file must be equal"
+  }
+
+  if (checks_passed && length(precip) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and precip must be equal"
+  }
+
+  if (checks_passed && length(precipitation_coefficient_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and precipitation_coefficient_file must be equal"
+  }
+
+  if (checks_passed && length(latency_period) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and latency_period must be equal"
+  }
+
+  if (checks_passed && length(time_step) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and time_step must be equal"
+  }
+
+  if (checks_passed && length(season_month_start) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and season_month_start must be equal"
+  }
+
+  if (checks_passed && length(season_month_end) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and season_month_end must be equal"
+  }
+
+  if (checks_passed && length(use_lethal_temperature) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_lethal_temperature must be equal"
+  }
+
+  if (checks_passed && length(temperature_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and temperature_file must be equal"
+  }
+
+  if (checks_passed && length(lethal_temperature) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and lethal_temperature must be equal"
+  }
+
+  if (checks_passed && length(lethal_temperature_month) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and lethal_temperature_month must be equal"
+  }
+
+  if (checks_passed && length(mortality_on) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and mortality_on must be equal"
+  }
+
+  if (checks_passed && length(mortality_rate) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and mortality_rate must be equal"
+  }
+
+  if (checks_passed && length(mortality_time_lag) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and mortality_time_lag must be equal"
+  }
+
+  if (checks_passed && length(movements_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and movements_file must be equal"
+  }
+
+  if (checks_passed && length(use_movements) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_movements must be equal"
+  }
+
+  if (checks_passed && length(start_exposed) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and start_exposed must be equal"
+  }
+
+  if (checks_passed && length(quarantine_areas_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and quarantine_areas_file must be equal"
+  }
+
+  if (checks_passed && length(use_quarantine) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_quarantine must be equal"
+  }
+
+  if (checks_passed && length(use_spreadrates) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_spreadrates must be equal"
   }
 
   if (checks_passed) {
