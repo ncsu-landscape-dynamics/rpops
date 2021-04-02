@@ -65,7 +65,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
   }
 
   if (checks_passed && !all((tools::file_ext(x) %in%
-    c("grd", "tif", "img")))) {
+    c("grd", "tif", "img", "vrt")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.grd', '.tif', '.img', or '.vrt'"
   }
@@ -102,7 +102,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     rasters have the same resolution"
   }
 
-  if (checks_passed && !(terra::crs(r) == terra::crs(x2))) {
+  if (checks_passed && !terra::compareGeom(r, x2)) {
     checks_passed <- FALSE
     failed_check <-
       "Coordinate reference system (crs) of input rasters do not match. Ensure
