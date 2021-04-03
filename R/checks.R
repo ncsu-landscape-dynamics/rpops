@@ -102,11 +102,17 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     rasters have the same resolution"
   }
 
-  if (checks_passed && !terra::compareGeom(r, x2)) {
-    checks_passed <- FALSE
-    failed_check <-
-      "Coordinate reference system (crs) of input rasters do not match. Ensure
+  if (checks_passed) {
+    crs1 <- terra::crs(r, describe = TRUE)
+    crs2 <- terra::crs(x2, describe = TRUE)
+    if (is.na(crs1$EPSG)) {crs1$EPSG <- "1"}
+    if (is.na(crs2$EPSG)) {crs2$EPSG <- "1"}
+    if (!(crs1$EPSG == crs2$EPSG)) {
+      checks_passed <- FALSE
+      failed_check <-
+        "Coordinate reference system (crs) of input rasters do not match. Ensure
     that all of your input rasters have the same crs"
+    }
   }
 
   if (checks_passed) {
