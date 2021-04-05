@@ -141,7 +141,7 @@ calibrate <- function(infected_years_file,
                       calibration_method = "ABC",
                       number_of_iterations = 100000,
                       exposed_file = "",
-                      verbose = FALSE) {
+                      verbose = TRUE) {
 
   # add all data to config list
   config <- c()
