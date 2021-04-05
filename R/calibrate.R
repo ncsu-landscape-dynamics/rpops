@@ -568,18 +568,25 @@ calibrate <- function(infected_years_file,
           config$proposed_particles <- config$proposed_particles + 1
         }
         acceptance_rate <- config$current_particles / config$proposed_particles
-        acceptance_rate_info <-
-          paste("generation:", config$current_bin,
-                "particle:", config$current_particles,
-                "acceptance rate:", acceptance_rate,
-                "location difference (c1):", location_difference,
-                "distance difference (c2):", distance_difference,
-                "residual difference (c3):", residual_difference,
-                "number infected difference (c4):",
-                number_infected_difference,
-                sep = " ")
+        acceptance_rate_info <- paste(
+                            "generation:                     ",
+                            config$current_bin,
+                            "\nparticle:                       ",
+                            config$current_particles,
+                            "\nacceptance rate:                ",
+                            format(acceptance_rate, digits = 5),
+                            "\nlocation difference (c1):       ",
+                            location_difference,
+                            "\ndistance difference (c2):       ",
+                            distance_difference,
+                            "\nresidual difference (c3):       ",
+                            residual_difference,
+                            "\nnumber infected difference (c4):",
+                            number_infected_difference,
+                            "\n\n",
+                            sep = " ")
         if (verbose) {
-          print(acceptance_rate_info)
+          cat(acceptance_rate_info)
         }
       }
 
