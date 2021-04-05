@@ -68,7 +68,6 @@ List pops_model_cpp(
     std::string time_step,
     double reproductive_rate,
     std::vector<std::vector<int>> spatial_indices,
-    List overpopulation_config,
     double mortality_rate = 0.0,
     int mortality_time_lag = 2,
     int season_month_start = 1,
@@ -102,8 +101,8 @@ List pops_model_cpp(
     bool deterministic = false,
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
-    bool use_overpopulation_movements = false
-    )
+    bool use_overpopulation_movements = false,
+    List overpopulation_config = List::create())
 {
     Config config;
     config.random_seed = random_seed;
