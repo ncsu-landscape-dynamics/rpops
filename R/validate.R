@@ -93,7 +93,8 @@ validate <- function(infected_years_file,
                      use_overpopulation_movements = FALSE,
                      overpopulation_percentage = 0,
                      leaving_percentage = 0,
-                     leaving_scale_coefficient = 1) {
+                     leaving_scale_coefficient = 1,
+                     exposed_file = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
