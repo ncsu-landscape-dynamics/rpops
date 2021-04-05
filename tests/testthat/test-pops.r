@@ -29,7 +29,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
     total_populations_file =  host_file,
     parameter_means = parameter_means,
     parameter_cov_matrix = parameter_cov_matrix),
-    "file is not one of '.grd', '.tif', '.img'")
+    "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file = "",
                     total_populations_file =  host_file,
@@ -43,7 +43,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file = "",
@@ -57,7 +57,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -75,7 +75,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -93,7 +93,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -111,7 +111,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
   expect_equal(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -129,7 +129,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file is not one of '.grd', '.tif', '.img'")
+               "file is not one of '.grd', '.tif', '.img', or '.vrt'")
 
 })
 
@@ -1228,6 +1228,34 @@ test_that("SEI model works as intended", {
   expect_equal(all(data$infected[[1]] >= data2$infected[[1]]), TRUE)
   expect_equal(all(data$infected[[2]] >= data2$infected[[1]]), TRUE)
   expect_equal(all(data$infected[[3]] >= data2$infected[[1]]), TRUE)
+
+  start_exposed <- TRUE
+  exposed_file <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  model_type <- "SEI"
+  data3 <-
+    pops(infected_file = infected_file,
+         host_file = host_file,
+         total_populations_file = host_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         random_seed = 42,
+         start_date = start_date,
+         end_date = end_date,
+         model_type = model_type,
+         latency_period = latency_period,
+         output_frequency = output_frequency,
+         time_step = time_step,
+         treatment_dates = treatment_dates,
+         start_exposed = start_exposed,
+         exposed_file = exposed_file)
+
+  expect_equal(all(data3$susceptible[[1]] <= data2$susceptible[[1]]), TRUE)
+  expect_equal(all(data3$susceptible[[2]] <= data2$susceptible[[1]]), TRUE)
+  expect_equal(all(data3$susceptible[[3]] <= data2$susceptible[[1]]), TRUE)
+
+  expect_equal(all(data3$infected[[1]] >= data2$infected[[1]]), TRUE)
+  expect_equal(all(data3$infected[[2]] >= data2$infected[[1]]), TRUE)
+  expect_equal(all(data3$infected[[3]] >= data2$infected[[1]]), TRUE)
 
 })
 

@@ -21,13 +21,10 @@ Imports:
     iterators,
     landscapemetrics,
     lubridate,
-    rlist,
     sp,
     utils,
     MASS,
     methods,
-    rgdal,
-    igraph,
     aws.s3
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
@@ -38,7 +35,10 @@ SystemRequirements:
     C++11,
     GNU make
 Suggests: 
-    testthat
+    testthat,
+    rgdal,
+    igraph,
+    rlist
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1

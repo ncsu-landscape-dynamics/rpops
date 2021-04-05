@@ -142,6 +142,7 @@ pops_multirun <- function(infected_file,
   # calibration.
   config$function_name <- "multirun"
   config$failure <- NULL
+  config$exposed_file <- exposed_file
 
   config <- configuration(config)
 

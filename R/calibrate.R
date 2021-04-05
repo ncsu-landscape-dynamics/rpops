@@ -60,6 +60,9 @@
 #' @param number_of_iterations how many iterations do you want to run to allow
 #' the calibration to converge (recommend a minimum of at least 100,000 but
 #' preferably 1 million).
+#' @param verbose Boolean with true printing current status of calibration,
+#' (e.g. the current generation, current particle, and the acceptance rate).
+#' Defaults if FALSE.
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -140,7 +143,9 @@ calibrate <- function(infected_years_file,
                       leaving_percentage = 0,
                       leaving_scale_coefficient = 1,
                       calibration_method = "ABC",
-                      number_of_iterations = 100000) {
+                      number_of_iterations = 100000,
+                      exposed_file = "",
+                      verbose = FALSE) {
 
   # add all data to config list
   config <- c()
@@ -209,6 +214,7 @@ calibrate <- function(infected_years_file,
   overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$calibration_method <- calibration_method
   config$number_of_iterations <- number_of_iterations
+  config$exposed_file <- exposed_file
   # add function name for use in configuration function to skip
   # function specific specific configurations namely for validation and
   # calibration.
@@ -573,11 +579,18 @@ calibrate <- function(infected_years_file,
         }
         acceptance_rate <- config$current_particles / config$proposed_particles
         acceptance_rate_info <-
-          paste("The current generation is ", config$current_bin, " and the
-            current particle is ", config$current_particles,
-                " and the current acceptance rate is ", acceptance_rate,
-                sep = "")
-        print(acceptance_rate_info)
+          paste("generation:", config$current_bin,
+                "particle:", config$current_particles,
+                "acceptance rate:", acceptance_rate,
+                "location difference (c1):", location_difference,
+                "distance difference (c2):", distance_difference,
+                "residual difference (c3):", residual_difference,
+                "number infected difference (c4):",
+                number_infected_difference,
+                sep = " ")
+        if (verbose) {
+          print(acceptance_rate_info)
+        }
       }
 
       start_index <- config$current_bin * generation_size - generation_size + 1
@@ -867,8 +880,9 @@ calibrate <- function(infected_years_file,
       }
 
       param <- current
-
-      print(i)
+      if (verbose) {
+        print(i)
+      }
       params[i, ] <- param
     }
 

@@ -109,7 +109,8 @@ auto_manage <- function(infected_files,
                         use_overpopulation_movements = FALSE,
                         overpopulation_percentage = 0,
                         leaving_percentage = 0,
-                        leaving_scale_coefficient = 1) {
+                        leaving_scale_coefficient = 1,
+                        exposed_file = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -172,6 +173,7 @@ auto_manage <- function(infected_files,
   overpopulation_config$overpopulation_percentage <- overpopulation_percentage
   overpopulation_config$leaving_percentage <- leaving_percentage
   overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
+  config$exposed_file <- exposed_file
   # add function name for use in configuration function to skip
   # function specific specific configurations namely for validation and
   # calibration.

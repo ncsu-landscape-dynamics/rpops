@@ -69,7 +69,8 @@ auto_manage(
   use_overpopulation_movements = FALSE,
   overpopulation_percentage = 0,
   leaving_percentage = 0,
-  leaving_scale_coefficient = 1
+  leaving_scale_coefficient = 1,
+  exposed_file = ""
 )
 }
 \arguments{
@@ -155,8 +156,9 @@ in years integer >= 1}
 ('YYYY_MM_DD') (needs to be the same length as treatment_file and
 pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates
-(needs to be the same length as treatment_dates and pesticide_duration)}
+\item{treatments_file}{path to raster files with treatment data by dates.
+Needs to be a list of files the same length as treatment_dates and
+pesticide_duration.}
 
 \item{treatment_method}{what method to use when applying treatment one of
 ("ratio" or "all infected"). ratio removes a portion of all infected and
@@ -238,7 +240,8 @@ first priortity in sorting (if false first sorting priority goes to the
 selection_method)}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected
-(only used if model_type is "SEI")}
+(only used if model_type is "SEI"). Default False. If this is TRUE need to
+have both an infected_file (this can be a raster of all 0's) and exposed_file}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use
 stochasticity in reproductive functions default is TRUE}
@@ -280,6 +283,8 @@ is considered to be overpopulated}
 
 \item{leaving_scale_coefficient}{coefficient to multiply scale parameter of
 the natural kernel (if applicable)}
+
+\item{exposed_file}{a file with the exposed for the current}
 }
 \value{
 list of infected and susceptible per year
