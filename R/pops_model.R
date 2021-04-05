@@ -127,7 +127,16 @@ pops_model <-
                movement_stochasticity = TRUE,
                deterministic = FALSE,
                establishment_probability = 0,
-               dispersal_percentage = 0.99) {
+               dispersal_percentage = 0.99,
+               use_overpopulation_movements = FALSE,
+               overpopulation_percentage = 0.0,
+               leaving_percentage = 0.0,
+               leaving_scale_coefficient = 1.0) {
+
+    overpopulation_config = numeric()
+    overpopulation_config$overpopulation_percentage <- overpopulation_percentage
+    overpopulation_config$leaving_percentage <- leaving_percentage
+    overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
 
     data <-
       pops_model_cpp(random_seed = random_seed,
@@ -197,7 +206,9 @@ pops_model <-
                      deterministic = deterministic,
                      establishment_probability =
                        establishment_probability,
-                     dispersal_percentage = dispersal_percentage
+                     dispersal_percentage = dispersal_percentage,
+                     #overpopulation_config = overpopulation_config,
+                     use_overpopulation_movements = use_overpopulation_movements
     )
 
   }

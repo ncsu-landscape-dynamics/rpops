@@ -168,11 +168,6 @@ auto_manage <- function(infected_files,
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
   config$species <- species
-  overpopulation_config = c()
-  overpopulation_config$use_overpopulation_movements <- use_overpopulation_movements
-  overpopulation_config$overpopulation_percentage <- overpopulation_percentage
-  overpopulation_config$leaving_percentage <- leaving_percentage
-  overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$exposed_file <- exposed_file
   # add function name for use in configuration function to skip
   # function specific specific configurations namely for validation and
@@ -309,7 +304,10 @@ auto_manage <- function(infected_files,
                            deterministic = deterministic,
                            establishment_probability = establishment_probability,
                            dispersal_percentage = dispersal_percentage,
-                           overpopulation_config = overpopulation_config
+                           use_overpopulation_movements = use_overpopulation_movements,
+                           overpopulation_percentage = overpopulation_percentage,
+                           leaving_percentage = leaving_percentage,
+                           leaving_scale_coefficient = leaving_scale_coefficient
         )
 
         infected_runs <- raster::stack(lapply(1:length(data$infected), function(x) host))

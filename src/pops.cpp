@@ -102,7 +102,8 @@ List pops_model_cpp(
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
     bool use_overpopulation_movements = false,
-    const NumericVector& overpopulation_config = NumericVector::create())
+    NumericVector overpopulation_config = NumericVector::create()
+    )
 {
     Config config;
     config.random_seed = random_seed;

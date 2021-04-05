@@ -249,11 +249,6 @@ pops <- function(infected_file,
   config$overpopulation_percentage <- overpopulation_percentage
   config$leaving_percentage <- leaving_percentage
   config$leaving_scale_coefficient <- leaving_scale_coefficient
-  overpopulation_config = c()
-  overpopulation_config$use_overpopulation_movements <- use_overpopulation_movements
-  overpopulation_config$overpopulation_percentage <- overpopulation_percentage
-  overpopulation_config$leaving_percentage <- leaving_percentage
-  overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
   # added number of iterations to config to avoid multiple if else statements
   # in configuration function used to determine number of draws from parameter
   # distribution
@@ -340,7 +335,10 @@ pops <- function(infected_file,
                      establishment_probability =
                        config$establishment_probability,
                      dispersal_percentage = config$dispersal_percentage,
-                     overpopulation_config = overpopulation_config
+                     use_overpopulation_movements = config$use_overpopulation_movements,
+                     overpopulation_percentage = config$overpopulation_percentage,
+                     leaving_percentage = config$leaving_percentage,
+                     leaving_scale_coefficient = config$leaving_scale_coefficient
   )
 
   return(data)
