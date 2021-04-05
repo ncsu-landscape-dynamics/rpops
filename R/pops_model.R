@@ -133,7 +133,8 @@ pops_model <-
                leaving_percentage = 0.0,
                leaving_scale_coefficient = 1.0) {
 
-    overpopulation_config = numeric()
+    # List of overpopulation parameters of type double
+    overpopulation_config = c()
     overpopulation_config$overpopulation_percentage <- overpopulation_percentage
     overpopulation_config$leaving_percentage <- leaving_percentage
     overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
