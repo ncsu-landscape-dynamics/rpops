@@ -207,8 +207,8 @@ pops_model <-
                      establishment_probability =
                        establishment_probability,
                      dispersal_percentage = dispersal_percentage,
-                     #overpopulation_config = overpopulation_config,
-                     use_overpopulation_movements = use_overpopulation_movements
+                     use_overpopulation_movements = use_overpopulation_movements,
+                     overpopulation_config = overpopulation_config
     )
 
   }
