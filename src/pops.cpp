@@ -102,7 +102,7 @@ List pops_model_cpp(
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
     bool use_overpopulation_movements = false,
-    List overpopulation_config = List::create())
+    Nullable<List> overpopulation_config = R_NilValue)
 {
     Config config;
     config.random_seed = random_seed;
@@ -155,10 +155,11 @@ List pops_model_cpp(
     config.spreadrate_frequency_n = spreadrate_frequency_n;
     config.use_spreadrates = use_spreadrates;
     config.use_overpopulation_movements = use_overpopulation_movements;
-    if (use_overpopulation_movements) {
-        config.overpopulation_percentage = overpopulation_config["overpopulation_percentage"];
-        config.leaving_percentage = overpopulation_config["leaving_percentage"];
-        config.leaving_scale_coefficient = overpopulation_config["leaving_scale_coefficient"];
+    if (use_overpopulation_movements && overpopulation_config.isNotNull()) {
+        List over_config(overpopulation_config);
+        config.overpopulation_percentage = over_config["overpopulation_percentage"];
+        config.leaving_percentage = over_config["leaving_percentage"];
+        config.leaving_scale_coefficient = over_config["leaving_scale_coefficient"];
     }
 
     std::vector<std::tuple<int, int>> outside_dispersers;
