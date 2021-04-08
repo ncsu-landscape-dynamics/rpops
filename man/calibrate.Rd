@@ -66,7 +66,7 @@ calibrate(
   calibration_method = "ABC",
   number_of_iterations = 1e+05,
   exposed_file = "",
-  verbose = FALSE
+  verbose = TRUE
 )
 }
 \arguments{
@@ -285,7 +285,6 @@ preferably 1 million).}
 \item{verbose}{Boolean with true printing current status of calibration,
 (e.g. the current generation, current particle, and the acceptance rate).
 Defaults if FALSE.}
-
 }
 \value{
 a dataframe of the variables saved and their success metrics for
