@@ -17,7 +17,7 @@
  */
 
 /*!
- * Macro to mark unused variables (including paramters) and silence the warning
+ * Macro to mark unused variables (including parameters) and silence the warning
  * while documenting that it is intentionally unused.
  *
  * It is recommended to also document why the variable is unused, but left in the code.

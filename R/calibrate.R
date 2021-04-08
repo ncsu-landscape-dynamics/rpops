@@ -138,6 +138,10 @@ calibrate <- function(infected_years_file,
                       quarantine_areas_file = "",
                       use_quarantine = FALSE,
                       use_spreadrates = FALSE,
+                      use_overpopulation_movements = FALSE,
+                      overpopulation_percentage = 0,
+                      leaving_percentage = 0,
+                      leaving_scale_coefficient = 1,
                       calibration_method = "ABC",
                       number_of_iterations = 100000,
                       exposed_file = "",
@@ -203,11 +207,15 @@ calibrate <- function(infected_years_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  config$use_overpopulation_movements <- use_overpopulation_movements
+  config$overpopulation_percentage <- overpopulation_percentage
+  config$leaving_percentage <- leaving_percentage
+  config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$calibration_method <- calibration_method
   config$number_of_iterations <- number_of_iterations
   config$exposed_file <- exposed_file
   # add function name for use in configuration function to skip
-  # function specific specifc configurations namely for validation and
+  # function specific specific configurations namely for validation and
   # calibration.
   config$function_name <- "calibrate"
   config$failure <- NULL
@@ -220,7 +228,7 @@ calibrate <- function(infected_years_file,
     return(config$failure)
   }
 
-  # set the parameter function to only need the parameters that chanage so that
+  # set the parameter function to only need the parameters that change so that
   # each call to param func needs to pass in the parameters being calibrated
   param_func <-
     function(reproductive_rate,
@@ -300,7 +308,11 @@ calibrate <- function(infected_years_file,
         deterministic = config$deterministic,
         establishment_probability =
           config$establishment_probability,
-        dispersal_percentage = config$dispersal_percentage
+        dispersal_percentage = config$dispersal_percentage,
+        use_overpopulation_movements = config$use_overpopulation_movements,
+        overpopulation_percentage = config$overpopulation_percentage,
+        leaving_percentage = config$leaving_percentage,
+        leaving_scale_coefficient = config$leaving_scale_coefficient
       )
       return(data)
     }

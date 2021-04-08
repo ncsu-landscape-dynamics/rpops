@@ -470,6 +470,113 @@ public:
         }
     }
 
+    /** Move overflowing pest population to other hosts.
+     *
+     * When the number of pests (pest population) is too high, part of them moves
+     * to a different location. Number of infected/infested hosts is considered to be
+     * the number of pests (groups of pest) in a raster cell.
+     *
+     * The movement happens in two stages. First, all the leaving pests are identified
+     * and removed from the source cells. Second, the move to the target cells is
+     * performed. This means that even if the resulting number of pests in the target
+     * cell is considered too high, it is left as is and the move is performed the next
+     * time this function is called.
+     *
+     * If the pests (pest population) cannot be accommodated in the target cell due to
+     * the insufficient number of susceptible hosts, the excessive pests die.
+     *
+     * @param[in,out] susceptible Susceptible hosts
+     * @param[in,out] infected Infected hosts
+     * @param[in] total_hosts All hosts
+     * @param[in,out] outside_dispersers Dispersers escaping the rasters
+     * @param dispersal_kernel Dispersal kernel to move dispersers (pests)
+     * @param overpopulation_percentage Percentage of occupied hosts when the cell is
+     *        considered to be overpopulated
+     * @param leaving_percentage Percentage pests leaving an overpopulated cell
+     *
+     * @note Exposed hosts do not count towards total number of pest,
+     *       i.e., *total_host* is assumed to be S + E in SEI model.
+     * @note Mortality is not supported by this function, i.e., the mortality rasters
+     *       are not modified while the infected are.
+     */
+    template<typename DispersalKernel>
+    void move_overpopulated_pests(
+        IntegerRaster& susceptible,
+        IntegerRaster& infected,
+        const IntegerRaster& total_hosts,
+        std::vector<std::tuple<int, int>>& outside_dispersers,
+        DispersalKernel& dispersal_kernel,
+        const std::vector<std::vector<int>>& suitable_cells,
+        double overpopulation_percentage,
+        double leaving_percentage)
+    {
+        struct Move
+        {
+            RasterIndex row;
+            RasterIndex col;
+            int count;
+        };
+        std::vector<Move> moves;
+
+        // Identify the moves. Remove from source cells.
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            int original_count = infected(i, j);
+            // No move with only one infected host (one unit).
+            if (original_count <= 1)
+                continue;
+            // r = I / (I + S)
+            // r = I / (I + S + E_1 + E_2 + ...)
+            double ratio = original_count / double(total_hosts(i, j));
+            if (ratio >= overpopulation_percentage) {
+                int row;
+                int col;
+                std::tie(row, col) = dispersal_kernel(generator_, i, j);
+                // for leaving_percentage == 0.5
+                // 2 infected -> 1 leaving
+                // 3 infected -> 1 leaving
+                int leaving = original_count * leaving_percentage;
+                susceptible(i, j) += leaving;
+                infected(i, j) -= leaving;
+                if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
+                    // Collect pests dispersed outside of modeled area.
+                    outside_dispersers.reserve(outside_dispersers.size() + leaving);
+                    for (int pest = 0; pest < leaving; ++pest)
+                        outside_dispersers.emplace_back(row, col);
+                    continue;
+                }
+                // Doing the move here would create inconsistent results as some
+                // target cells would be evaluated after the moved pest arrived,
+                // possibly triggering another move.
+                // So, instead, we just collect them and apply later. (The pest is in
+                // the air when in the moves vector.)
+                moves.push_back(Move({row, col, leaving}));
+            }
+        }
+        // Perform the moves to target cells.
+        for (const auto& move : moves) {
+            RasterIndex row = move.row;
+            RasterIndex col = move.col;
+            int leaving = move.count;
+            // The target cell can accept all.
+            if (susceptible(row, col) >= leaving) {
+                susceptible(row, col) -= leaving;
+                infected(row, col) += leaving;
+            }
+            // More pests than the target cell can accept.
+            // This can happen if there is simply not enough S hosts to accomodate all
+            // the pests moving from the source or if multiple sources end up in the
+            // same target cell and there is not enough S hosts to accomodate all of
+            // them. The pests just disappear in both cases.
+            else {
+                leaving = susceptible(row, col);
+                susceptible(row, col) -= leaving;
+                infected(row, col) += leaving;
+            }
+        }
+    }
+
     /** Infect exposed hosts (E to I transition in the SEI model)
      *
      * Applicable to SEI model, no-operation otherwise, i.e., parameters

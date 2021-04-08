@@ -66,7 +66,11 @@ pops_model(
   movement_stochasticity = TRUE,
   deterministic = FALSE,
   establishment_probability = 0,
-  dispersal_percentage = 0.99
+  dispersal_percentage = 0.99,
+  use_overpopulation_movements = FALSE,
+  overpopulation_percentage = 0,
+  leaving_percentage = 0,
+  leaving_scale_coefficient = 1
 )
 }
 \arguments{
@@ -252,6 +256,18 @@ establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
 
 \item{dispersal_percentage}{Percentage of dispersal used to calculate the
 bounding box for deterministic dispersal}
+
+\item{use_overpopulation_movements}{boolean to indicate whether to use
+the overpopulation pest movement module (driven by the natural kernel with
+its scale parameter modified by a coefficient)}
+
+\item{overpopulation_percentage}{percentage of occupied hosts when the cell
+is considered to be overpopulated}
+
+\item{leaving_percentage}{percentage of pests leaving an overpopulated cell}
+
+\item{leaving_scale_coefficient}{coefficient to multiply scale parameter of
+the natural kernel (if applicable)}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

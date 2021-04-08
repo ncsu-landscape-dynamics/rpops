@@ -106,6 +106,10 @@ auto_manage <- function(infected_files,
                         quarantine_areas_file = "",
                         use_quarantine = FALSE,
                         use_spreadrates = FALSE,
+                        use_overpopulation_movements = FALSE,
+                        overpopulation_percentage = 0,
+                        leaving_percentage = 0,
+                        leaving_scale_coefficient = 1,
                         exposed_file = "") {
 
   config <- c()
@@ -157,12 +161,16 @@ auto_manage <- function(infected_files,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  config$use_overpopulation_movements <- use_overpopulation_movements
+  config$overpopulation_percentage <- overpopulation_percentage
+  config$leaving_percentage <- leaving_percentage
+  config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
   config$species <- species
   config$exposed_file <- exposed_file
   # add function name for use in configuration function to skip
-  # function specific specifc configurations namely for validation and
+  # function specific specific configurations namely for validation and
   # calibration.
   config$function_name <- "auto-manage"
   config$failure <- NULL
@@ -295,7 +303,11 @@ auto_manage <- function(infected_files,
                            movement_stochasticity = movement_stochasticity,
                            deterministic = deterministic,
                            establishment_probability = establishment_probability,
-                           dispersal_percentage = dispersal_percentage
+                           dispersal_percentage = dispersal_percentage,
+                           use_overpopulation_movements = use_overpopulation_movements,
+                           overpopulation_percentage = overpopulation_percentage,
+                           leaving_percentage = leaving_percentage,
+                           leaving_scale_coefficient = leaving_scale_coefficient
         )
 
         infected_runs <- raster::stack(lapply(1:length(data$infected), function(x) host))

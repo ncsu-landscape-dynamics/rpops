@@ -90,6 +90,10 @@ validate <- function(infected_years_file,
                      quarantine_areas_file = "",
                      use_quarantine = FALSE,
                      use_spreadrates = FALSE,
+                     use_overpopulation_movements = FALSE,
+                     overpopulation_percentage = 0,
+                     leaving_percentage = 0,
+                     leaving_scale_coefficient = 1,
                      exposed_file = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
@@ -142,6 +146,10 @@ validate <- function(infected_years_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  config$use_overpopulation_movements <- use_overpopulation_movements
+  config$overpopulation_percentage <- overpopulation_percentage
+  config$leaving_percentage <- leaving_percentage
+  config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
   # add function name for use in configuration function to skip
@@ -241,7 +249,11 @@ validate <- function(infected_years_file,
         deterministic = config$deterministic,
         establishment_probability =
           config$establishment_probability,
-        dispersal_percentage = config$dispersal_percentage
+        dispersal_percentage = config$dispersal_percentage,
+        use_overpopulation_movements = config$use_overpopulation_movements,
+        overpopulation_percentage = config$overpopulation_percentage,
+        leaving_percentage = config$leaving_percentage,
+        leaving_scale_coefficient = config$leaving_scale_coefficient
       )
 
 

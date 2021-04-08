@@ -58,6 +58,10 @@ validate(
   quarantine_areas_file = "",
   use_quarantine = FALSE,
   use_spreadrates = FALSE,
+  use_overpopulation_movements = FALSE,
+  overpopulation_percentage = 0,
+  leaving_percentage = 0,
+  leaving_scale_coefficient = 1,
   exposed_file = ""
 )
 }
@@ -232,6 +236,18 @@ quarantine areas (default = FALSE)}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
+
+\item{use_overpopulation_movements}{boolean to indicate whether to use
+the overpopulation pest movement module (driven by the natural kernel with
+its scale parameter modified by a coefficient)}
+
+\item{overpopulation_percentage}{percentage of occupied hosts when the cell
+is considered to be overpopulated}
+
+\item{leaving_percentage}{percentage of pests leaving an overpopulated cell}
+
+\item{leaving_scale_coefficient}{coefficient to multiply scale parameter of
+the natural kernel (if applicable)}
 
 \item{exposed_file}{a file with the exposed for the current}
 }

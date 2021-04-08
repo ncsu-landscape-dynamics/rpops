@@ -5,7 +5,7 @@
 #' understanding of the effect of weather and other environmental factors on
 #' reproduction and survival of the pest/pathogen in order to forecast spread
 #' of the pest/pathogen into the future. This function performs a single
-#' stochastic realisation of the model and is predmoninately used for automated
+#' stochastic realisation of the model and is predominantly used for automated
 #' tests.
 #'
 #' @param infected_file path to raster file with initial infections
@@ -120,6 +120,14 @@
 #' quarantine areas (default = FALSE)
 #' @param use_spreadrates boolean to indicate whether or not to calculate
 #' spread rates
+#' @param use_overpopulation_movements boolean to indicate whether to use
+#' the overpopulation pest movement module (driven by the natural kernel with
+#' its scale parameter modified by a coefficient)
+#' @param overpopulation_percentage percentage of occupied hosts when the cell
+#' is considered to be overpopulated
+#' @param leaving_percentage percentage of pests leaving an overpopulated cell
+#' @param leaving_scale_coefficient coefficient to multiply scale parameter of
+#' the natural kernel (if applicable)
 #' @param exposed_file a file with the exposed for the current
 #'
 #' @useDynLib PoPS, .registration = TRUE
@@ -183,6 +191,10 @@ pops <- function(infected_file,
                  quarantine_areas_file = "",
                  use_quarantine = FALSE,
                  use_spreadrates = FALSE,
+                 use_overpopulation_movements = FALSE,
+                 overpopulation_percentage = 0,
+                 leaving_percentage = 0,
+                 leaving_scale_coefficient = 1,
                  exposed_file = "") {
 
   config <- c()
@@ -234,12 +246,16 @@ pops <- function(infected_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
-  # added number of iterations to config to avoid multiple if else statemnts
+  config$use_overpopulation_movements <- use_overpopulation_movements
+  config$overpopulation_percentage <- overpopulation_percentage
+  config$leaving_percentage <- leaving_percentage
+  config$leaving_scale_coefficient <- leaving_scale_coefficient
+  # added number of iterations to config to avoid multiple if else statements
   # in configuration function used to determine number of draws from parameter
   # distribution
   config$number_of_iterations <- 2
   # add function name for use in configuration function to skip
-  # function specific specifc configurations namely for validation and
+  # function specific specific configurations namely for validation and
   # calibration.
   config$function_name <- "pops"
   config$failure <- NULL
@@ -319,7 +335,11 @@ pops <- function(infected_file,
                      deterministic = config$deterministic,
                      establishment_probability =
                        config$establishment_probability,
-                     dispersal_percentage = config$dispersal_percentage
+                     dispersal_percentage = config$dispersal_percentage,
+                     use_overpopulation_movements = config$use_overpopulation_movements,
+                     overpopulation_percentage = config$overpopulation_percentage,
+                     leaving_percentage = config$leaving_percentage,
+                     leaving_scale_coefficient = config$leaving_scale_coefficient
   )
 
   return(data)

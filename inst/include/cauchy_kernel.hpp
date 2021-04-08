@@ -40,7 +40,8 @@ public:
     CauchyKernel(double scale) : s(scale), cauchy_distribution(0, s)
     {
         if (scale <= 0) {
-            throw std::invalid_argument("scale (s) must be greater than 0.0");
+            throw std::invalid_argument(
+                "CauchyKernel: scale (s) must be greater than 0.0");
         }
     }
 

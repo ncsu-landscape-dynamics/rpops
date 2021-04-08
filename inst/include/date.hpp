@@ -468,7 +468,7 @@ std::string Date::to_string()
 }
 
 /*!
- * Holds begining and end of a season and decides what is in season
+ * Holds beginning and end of a season and decides what is in season
  */
 class Season
 {

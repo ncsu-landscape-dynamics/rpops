@@ -132,6 +132,10 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
+                              use_overpopulation_movements = FALSE,
+                              overpopulation_percentage = 0,
+                              leaving_percentage = 0,
+                              leaving_scale_coefficient = 1,
                               calibration_method,
                               number_of_iterations)
 
@@ -283,6 +287,10 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
+                              use_overpopulation_movements = FALSE,
+                              overpopulation_percentage = 0,
+                              leaving_percentage = 0,
+                              leaving_scale_coefficient = 1,
                               calibration_method,
                               number_of_iterations)
 
@@ -436,6 +444,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
+                              use_overpopulation_movements = FALSE,
+                              overpopulation_percentage = 0,
+                              leaving_percentage = 0,
+                              leaving_scale_coefficient = 1,
                               calibration_method,
                               number_of_iterations)
 
@@ -586,6 +598,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
+                              use_overpopulation_movements = FALSE,
+                              overpopulation_percentage = 0,
+                              leaving_percentage = 0,
+                              leaving_scale_coefficient = 1,
                               calibration_method,
                               number_of_iterations)
 
