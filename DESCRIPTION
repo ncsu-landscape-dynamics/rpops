@@ -1,5 +1,5 @@
 Package: PoPS
-Version: 1.0.3
+Version: 1.1.0
 Title: Pest or Pathogen Spread Model
 Description: A generalized stochastic geospatial model for pest or pathogen spread in 
     forest and agricultural systems.
@@ -12,7 +12,7 @@ Authors@R: c(
 Depends: R (>= 3.3.0)
 Imports: 
     raster (>= 3.3-7),
-    terra (>= 1.1-7),
+    terra (>= 1.1-17),
     Rcpp (>= 0.12.19),
     stats,
     foreach,
