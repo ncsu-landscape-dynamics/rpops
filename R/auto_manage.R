@@ -110,7 +110,8 @@ auto_manage <- function(infected_files,
                         overpopulation_percentage = 0,
                         leaving_percentage = 0,
                         leaving_scale_coefficient = 1,
-                        exposed_file = "") {
+                        exposed_file = "",
+                        mask = NULL) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -174,6 +175,7 @@ auto_manage <- function(infected_files,
   # calibration.
   config$function_name <- "auto-manage"
   config$failure <- NULL
+  config$mask <- mask
 
   config <- configuration(config)
 

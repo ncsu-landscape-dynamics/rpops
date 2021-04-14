@@ -159,6 +159,24 @@ configuration <- function(config) {
     return(config)
   }
 
+  if (!is.null(config$mask)) {
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      mask_check <-
+        secondary_raster_checks(config$mask, infected,
+                                config$use_s3, config$bucket)
+    } else {
+      mask_check <- secondary_raster_checks(config$mask, infected)
+    }
+    if (mask_check$checks_passed) {
+      mask <- mask_check$raster
+      config$mask <- mask
+      config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
+    } else {
+      config$failure <- mask_check$failed_check
+      return(config)
+    }
+  }
+
   suitable <- host + infected
   suitable_points <- terra::as.points(suitable)
   names(suitable_points) <- "data"
@@ -412,6 +430,7 @@ configuration <- function(config) {
                                          wide = TRUE)
   config$total_populations <- terra::as.matrix(total_populations,
                                                wide = TRUE)
+
 
   config$mortality <- mortality_tracker
   config$resistant <- mortality_tracker

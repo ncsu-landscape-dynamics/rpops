@@ -234,6 +234,11 @@ is considered to be overpopulated}
 the natural kernel (if applicable)}
 
 \item{exposed_file}{a file with the exposed for the current}
+
+\item{mask}{Raster file used to provide a mask to remove 0's that are not
+true negatives from comparisons (e.g. mask out lakes and oceans from statics
+if modeling terrestrial species). This can also be used to mask out areas
+that can't be managed in the auto_manage function.}
 }
 \value{
 list of infected and susceptible per year
@@ -244,6 +249,6 @@ or agricultural ecosystems. The model is process based meaning that it uses
 understanding of the effect of weather and other environmental factors on
 reproduction and survival of the pest/pathogen in order to forecast spread
 of the pest/pathogen into the future. This function performs a single
-stochastic realisation of the model and is predominantly used for automated
-tests.
+stochastic realization of the model and is predominantly used for automated
+tests of model features.
 }
