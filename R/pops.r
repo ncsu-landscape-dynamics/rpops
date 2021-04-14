@@ -199,7 +199,8 @@ pops <- function(infected_file,
                  overpopulation_percentage = 0,
                  leaving_percentage = 0,
                  leaving_scale_coefficient = 1,
-                 exposed_file = "") {
+                 exposed_file = "",
+                 mask = NULL) {
 
   config <- c()
   config$random_seed <- random_seed

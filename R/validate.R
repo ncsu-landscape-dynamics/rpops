@@ -269,8 +269,10 @@ validate <- function(infected_years_file,
           reference <- terra::rast(config$infected_file)
           terra::values(comp_year) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
-          mask <- terra::rast(config$infected_file)
-          terra::values(mask) <- config$mask_matrix
+          if (!is.null(config$mask)){
+            mask <- terra::rast(config$infected_file)
+            terra::values(mask) <- config$mask_matrix
+          }
           ad <-
             quantity_allocation_disagreement(reference,
                                              comp_year,

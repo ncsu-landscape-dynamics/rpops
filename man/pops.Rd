@@ -57,7 +57,8 @@ pops(
   overpopulation_percentage = 0,
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
-  exposed_file = ""
+  exposed_file = "",
+  mask = NULL
 )
 }
 \arguments{
