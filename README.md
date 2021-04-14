@@ -13,6 +13,29 @@ This is the R package for simulating spread of pests and pathogens. The package 
 
 PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit [popsmodel.org](https://popsmodel.org/). The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use [r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
 
+## Features
+The PoPS Core C++ library and its interfaces: rpops R package and r.pops.spread GRASS GIS module. The release of rpops includes:
+
+* Susceptible-infected (`SI`) and susceptible-exposed-infected (`SEI`) host phases (`model_type`, `latency_period`),
+* Host mortality tracking (`mortality_rate`, `mortality`),
+* Host removal and pesticide application treatments (`treatments`, `treatment_date`, `pesticide_duration`),
+* Host resistance based on pesticide application treatments (`pesticide_duration` > 0),
+* Treatments applied only to a ratio of hosts (`treatment_application`),
+* Yearly pest removal based on lethal temperature (`lethal_temperature`, `lethal_month`),
+* Two different dispersal kernels (`natural_dispersal_kernel`, `anthropogenic_dispersal_kernel`),
+* Cauchy, Exponential, Uniform, Power-law, Deterministic neighbor, Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic radial dispersal kernels use Von Mises distribution,
+* Seasonal spread (`seasonality` in months),
+* Multiple stochastic runs (`pops_multirun`),
+* Parallel execution of multiple runs (`number_of_cores` in `pops_multirun`),
+* Output of average and standard deviation of infected hosts across multiple runs and for a single stochastic run (`simulation_mean`,  `single_run`,  `simulation_sd`, `simulation_min`, `simulation_max`),
+* Average and standard deviations for output averages (`number_infecteds`, `infected_areas`),
+* Infection probability output in percent (this is the percent of model runs that a cell has at least one infestation/infection (`probability`),
+* Spread rate measurement in 4 cardinal directions (`west_rate`, `east_rate`, `south_rate`, `north_rate` ),
+* Distance to quarantine in 4 cardinal directions (`north_distance_to_quarantine`, `south_distance_to_quarantine`, `east_distance_to_quarantine`, `west_distance_to_quarantine` ),
+* Probability of quarantine escape (`escape_probability`).
+* Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average)
+* Calibration of the model parameters using either MCMC (markov chain monte carlo) or ABC (approximate bayesian computation) (`calibrate`)
+* Validation of the model using quantiy, allocation, and configuration disagreement (`validate`)
 ## How to cite
 
 If you use this software or code, please cite the following papers:
@@ -53,11 +76,11 @@ you are using for example:
 
 Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
 running the code below and changing the ref to match the latest semantic version
-or the specific version that you are looking to install. PoPS requires [terra](https://github.com/rspatial/terra) version 1.1-7 or higher which isn't on the CRAN yet.
+or the specific version that you are looking to install. PoPS requires [terra](https://github.com/rspatial/terra) version 1.1-17 or higher.
+
 ```R
 install.packages("devtools")
 library(devtools)
-devtools::install_github("rspatial/terra")
 devtools::install_github("ncsu-landscape-dynamics/rpops", ref = "v1.0.2")
 library(PoPS)
 
