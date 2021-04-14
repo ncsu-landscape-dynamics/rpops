@@ -507,9 +507,9 @@ pops_multirun <- function(infected_file,
     simulation_sd_stack[is.na(config$mask)] <- 0
     simulation_min_stack[is.na(config$mask)] <- 0
     simulation_max_stack[is.na(config$mask)] <- 0
-    single_run[is.na(config$mask)] <- 0
-    susceptible_run[is.na(config$mask)] <- 0
-    exposed_run[is.na(config$mask)] <- 0
+    # single_run[is.na(config$mask)] <- 0
+    # susceptible_run[is.na(config$mask)] <- 0
+    # exposed_run[is.na(config$mask)] <- 0
   }
 
   outputs <-
