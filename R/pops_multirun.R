@@ -80,7 +80,8 @@ pops_multirun <- function(infected_file,
                           overpopulation_percentage = 0,
                           leaving_percentage = 0,
                           leaving_scale_coefficient = 1,
-                          exposed_file = "") {
+                          exposed_file = "",
+                          mask = NULL) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -143,6 +144,7 @@ pops_multirun <- function(infected_file,
   config$function_name <- "multirun"
   config$failure <- NULL
   config$exposed_file <- exposed_file
+  config$mask <- mask
 
   config <- configuration(config)
 
@@ -497,6 +499,17 @@ pops_multirun <- function(infected_file,
       simulation_probability_stack <-
         c(simulation_probability_stack, simulation_probability)
     }
+  }
+
+  if (!is.null(config$mask)) {
+    simulation_probability_stack[is.na(config$mask)] <- 0
+    simulation_mean_stack[is.na(config$mask)] <- 0
+    simulation_sd_stack[is.na(config$mask)] <- 0
+    simulation_min_stack[is.na(config$mask)] <- 0
+    simulation_max_stack[is.na(config$mask)] <- 0
+    single_run[is.na(config$mask)] <- 0
+    susceptible_run[is.na(config$mask)] <- 0
+    exposed_run[is.na(config$mask)] <- 0
   }
 
   outputs <-
