@@ -17,7 +17,7 @@ PoPs is a stochastic spread model of pests and pathogens in forest and agricultu
 The PoPS Core C++ library and its interfaces: rpops R package and r.pops.spread GRASS GIS module. The release of rpops includes:
 
 * Susceptible-infected (`SI`) and susceptible-exposed-infected (`SEI`) host phases (`model_type`, `latency_period`),
-* Host mortality tracking (`mortality_rate`, `mortality`),
+* Host mortality tracking (`mortality_rate`, `mortality_time_lag`, `mortality`),
 * Host removal and pesticide application treatments (`treatments`, `treatment_date`, `pesticide_duration`),
 * Host resistance based on pesticide application treatments (`pesticide_duration` > 0),
 * Treatments applied only to a ratio of hosts (`treatment_application`),
@@ -25,11 +25,13 @@ The PoPS Core C++ library and its interfaces: rpops R package and r.pops.spread 
 * Two different dispersal kernels (`natural_dispersal_kernel`, `anthropogenic_dispersal_kernel`),
 * Cauchy, Exponential, Uniform, Power-law, Deterministic neighbor, Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic radial dispersal kernels use Von Mises distribution,
 * Seasonal spread (`seasonality` in months),
-* Reduced stochasticity options and deterministic versions of kernels (`deterministic`, `generate_stochasticity`, `establishment_stochasticity`, `movement_stochasticity`),
-* Spread rate measurement in 4 cardinal directions (`west_rate`, `east_rate`, `south_rate`, `north_rate`),
-* Distance to quarantine in 4 cardinal directions (`north_distance_to_quarantine`, `south_distance_to_quarantine`, `east_distance_to_quarantine`, `west_distance_to_quarantine`),
+* Host movement for animals moving from farm to farm or plants via nursery trade (`use_movements`, `movements_file`),
+* Reduced stochasticity options (`generate_stochasticity`, `establishment_stochasticity`, `movement_stochasticity`) and deterministic versions of kernels (`deterministic`) other required parameters if reducing stochasticity are (`dispersal_percentage`, `establishment_probability`),
+* Spread rate measurement in 4 cardinal directions (`west_rate`, `east_rate`, `south_rate`, `north_rate`) when (`use_spreadrates`) is true,
+* Distance to quarantine in 4 cardinal directions (`north_distance_to_quarantine`, `south_distance_to_quarantine`, `east_distance_to_quarantine`, `west_distance_to_quarantine`) when (`use_quarantine`) is true and (`quarantine_areas_file`) is provided,
 * Probability of quarantine escape (`escape_probability`).
-* Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average)
+* Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average) (`use_overpopulation`, `overpopulation_percentage`, `leaving_percentage`, `leaving_scale_coefficient`)
+* Flexible output frequency with n number of days, weeks, months, or years as options (`output_frequency`, `output_frequency_n`)
 
 ### Functions in rpops
 * `calibrate:` Calibration of the model parameters using either MCMC (markov chain monte carlo) or ABC (approximate bayesian computation). 
