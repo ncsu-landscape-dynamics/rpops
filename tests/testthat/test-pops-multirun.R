@@ -353,7 +353,7 @@ test_that("Multirun model outputs work", {
 })
 
 test_that("Multirun model outputs work with mask", {
-  # skip_on_os("windows")
+  skip_on_os("windows")
   infected_file <-
     system.file("extdata", "simple20x20", "initial_infection.tif",
                 package = "PoPS")
