@@ -57,15 +57,15 @@ public:
     int latency_period_steps;
     // Kernels
     std::string natural_kernel_type;
-    double natural_scale;
+    double natural_scale{0};
     std::string natural_direction;
-    double natural_kappa;
+    double natural_kappa{0};
     bool use_anthropogenic_kernel{false};
-    double percent_natural_dispersal;
+    double percent_natural_dispersal{1};
     std::string anthro_kernel_type;
-    double anthro_scale;
+    double anthro_scale{0};
     std::string anthro_direction;
-    double anthro_kappa;
+    double anthro_kappa{0};
     double shape{1.0};
     // Treatments
     bool use_treatments{false};
@@ -86,6 +86,10 @@ public:
     bool use_spreadrates{true};
     std::string spreadrate_frequency;
     unsigned spreadrate_frequency_n;
+    bool use_overpopulation_movements{false};
+    double overpopulation_percentage{0};
+    double leaving_percentage{0};
+    double leaving_scale_coefficient{1};
 
     void create_schedules()
     {

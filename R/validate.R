@@ -25,13 +25,14 @@
 #' @param parameter_cov_matrix the parameter covariance matrix from the abc
 #' calibration function (posterior covairance matrix)
 #'
-#' @importFrom raster raster values as.matrix xres yres stack reclassify
-#' cellStats nlayers calc extract rasterToPoints rowFromCell colFromCell
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
+#' @importFrom MASS mvrnorm
 #'
 #' @return a dataframe of the variables saved and their success metrics for
 #' each run
@@ -88,7 +89,12 @@ validate <- function(infected_years_file,
                      dispersal_percentage = 0.99,
                      quarantine_areas_file = "",
                      use_quarantine = FALSE,
-                     use_spreadrates = FALSE) {
+                     use_spreadrates = FALSE,
+                     use_overpopulation_movements = FALSE,
+                     overpopulation_percentage = 0,
+                     leaving_percentage = 0,
+                     leaving_scale_coefficient = 1,
+                     exposed_file = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -140,6 +146,10 @@ validate <- function(infected_years_file,
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
+  config$use_overpopulation_movements <- use_overpopulation_movements
+  config$overpopulation_percentage <- overpopulation_percentage
+  config$leaving_percentage <- leaving_percentage
+  config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
   # add function name for use in configuration function to skip
@@ -147,6 +157,7 @@ validate <- function(infected_years_file,
   # calibration.
   config$function_name <- "validate"
   config$failure <- NULL
+  config$exposed_file <- exposed_file
 
   config <- configuration(config)
 
@@ -163,10 +174,10 @@ validate <- function(infected_years_file,
     foreach::foreach(
       i = 1:number_of_iterations,
       .combine = rbind,
-      .packages = c("raster", "PoPS", "foreach", "MASS")
+      .packages = c("terra", "PoPS", "foreach")
     ) %dopar% {
-      config$random_seed <- round(stats::runif(1, 1, 1000000))
 
+      config$random_seed <- round(stats::runif(1, 1, 1000000))
       data <- pops_model(
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
@@ -238,26 +249,38 @@ validate <- function(infected_years_file,
         deterministic = config$deterministic,
         establishment_probability =
           config$establishment_probability,
-        dispersal_percentage = config$dispersal_percentage
+        dispersal_percentage = config$dispersal_percentage,
+        use_overpopulation_movements = config$use_overpopulation_movements,
+        overpopulation_percentage = config$overpopulation_percentage,
+        leaving_percentage = config$leaving_percentage,
+        leaving_scale_coefficient = config$leaving_scale_coefficient
       )
 
-      comp_year <- raster(config$infected_file)
+
       all_disagreement <-
         foreach(
           q = seq_len(length(data$infected)), .combine = rbind,
-          .packages = c("raster", "PoPS", "foreach"),
+          .packages = c("terra", "PoPS"),
           .final = colSums
-        ) %dopar% {
-          comp_year[] <- data$infected[[q]]
-          quantity_allocation_disagreement(
-            config$infection_years[[q]],
-            comp_year,
-            config$configuration,
-            config$mask
-          )
+        ) %do% {
+          # need to assign reference, comp_year, and mask in inner loop since
+          # terra objects are pointers and pointers using %dopar%
+          comp_year <- terra::rast(config$infected_file)
+          reference <- terra::rast(config$infected_file)
+          terra::values(comp_year) <- data$infected[[q]]
+          terra::values(reference) <- config$infection_years2[[q]]
+          if (!is.null(config$mask)){
+            mask <- terra::rast(config$infected_file)
+            terra::values(mask) <- config$mask_matrix
+          }
+          ad <-
+            quantity_allocation_disagreement(reference,
+                                             comp_year,
+                                             config$configuration,
+                                             mask)
         }
 
-      data.frame(t(all_disagreement))
+      to.qa <- data.frame(t(all_disagreement))
     }
 
   parallel::stopCluster(cl)

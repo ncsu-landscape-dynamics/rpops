@@ -1,52 +1,62 @@
 # These functions are designed to reduce code complexity and the need to copy
 # and past code across main functions
 
+# Uncertainty propagation for raster data sets, expects a spatRaster with 2
+# layers (mean and standard deviation)
+output_from_raster_mean_and_sd <- function(x) {
+  x[[1]] <- terra::classify(x[[1]],
+                            matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[2]] <- terra::classify(x[[2]],
+                            matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  fun <- function(x) {
+    round(rnorm(1, mean = x[1], sd = x[2]), digits = 0)
+  }
+  x2 <- suppressWarnings(terra::app(x, fun))
+  return(x2)
+}
+
+# function for getting all infected locations based on rook or queens rule for
+# assessing clusters of infections.
 get_all_infected <- function(rast, direction = 4) {
-  p <- rasterToPoints(rast,
-                      fun = function(x) {
-                        x > 0
-                        },
-                      spatial = TRUE)
-  infections <- data.frame(extract(rast, p, cellnumbers = TRUE))
-  if (direction == 4) {
-    cellnumbersb <-
-      data.frame(extract(rast, p, buf = xres(rast), cellnumbers = TRUE))
-  } else if (direction == 8) {
-    cellnumbersb <-
-      data.frame(extract(rast, p, buf = 1.5 * xres(rast), cellnumbers = TRUE))
+  # get infections as points
+  p <- terra::as.points(rast)
+  rast <-
+    terra::classify(rast,
+                    matrix(c(0, NA), ncol = 2, byrow = TRUE), right = NA)
+  names(rast) <- "group"
+  names(p) <- "data"
+  p <- p[p$data > 0]
+  infections <- data.frame(terra::extract(rast, p, cells = TRUE))
+  infections <- infections[, 2:3]
+  names(infections) <- c("detections", "cells")
+  if (direction %in% c(4, 8)) {
+    infections$i <- terra::colFromCell(rast, infections$cells)
+    infections$j <- terra::rowFromCell(rast, infections$cells)
+    r <- terra::patches(rast, direction = direction, zeroAsNA = TRUE)
+    infections$group <- terra::extract(r, p)$group
   } else {
     return("direction should be either of 4 or 8")
   }
-  infections$i <- infections$cells %/% ncol(rast) + 1
-  infections$j <- infections$cells %% ncol(rast)
-  infections$group <- seq(1, nrow(infections), 1)
-  cell_cols <- seq(1, ncol(cellnumbersb) - 1, 2)
-  for (i in cell_cols) {
-    infections$group[infections$cells %in% cellnumbersb[, i]] <-
-      min(infections$group[infections$cells %in% cellnumbersb[, i]])
 
-  }
-  groups <- unique(infections$group)
-  group_map <- seq(1, length(groups), 1)
-  for (m in seq_len(length(groups))) {
-    infections$group_size[infections$group == groups[m]] <-
-      nrow(infections[infections$group == groups[m], ])
-    infections$group[infections$group == groups[m]] <- group_map[m]
-
+  infections$group_size <- 0
+  groups <- data.frame(table(infections$group))
+  groups$Var1 <- as.numeric(groups$Var1)
+  for (m in seq_len(nrow(groups))) {
+    infections$group_size[infections$group == groups$Var1[m]] <- groups$Freq[m]
   }
   names(infections) <-
-    c("cell_number", "detections", "i", "j", "group", "group_size")
+    c("detections", "cell_number", "i", "j", "group", "group_size")
   return(infections)
 }
 
-
+# returns the foci of infestation for a spatRaster Object
 get_foci <- function(rast) {
   indexes <- get_all_infected(rast)
   center <- data.frame(i = floor(mean(indexes$i)), j = floor(mean(indexes$j)))
   return(center)
 }
 
-
+# returns the border of the infected area for a spatRaster
 get_infection_border <- function(rast) {
   s <- get_all_infected(rast)
   min_max_col <-
@@ -95,7 +105,8 @@ get_infection_border <- function(rast) {
   return(borders)
 }
 
-## options for get
+# returns the distances of points from either the Foci, the Border, or a set of
+# points
 get_infection_distances <- function(rast, method = "Foci", points = c()) {
   infections <- get_all_infected(rast)
   if (method == "Foci") {
@@ -123,6 +134,8 @@ get_infection_distances <- function(rast, method = "Foci", points = c()) {
   return(infections)
 }
 
+# returns a set of treatments for a group of species infestations based on
+# multiple rules
 treatment_auto <- function(rasts,
                            rasts2,
                            method = "Foci",
@@ -133,36 +146,44 @@ treatment_auto <- function(rasts,
                            buffer_cells = 1.5,
                            direction_first = TRUE,
                            treatment_priority = "equal",
-                          treatment_rank = c(0)) {
-  ## get distances and groups and group size
+                           treatment_rank = c(0)) {
+  # get distances and groups and group size
   if (method == "Points") {
     points <- points
   }
 
   if (treatment_priority == "equal") {
     rasts <-
-      raster::stackApply(rasts,
-                         indices = rep(1, raster::nlayers(rasts)),
-                         fun = sum)
+      terra::tapp(rasts,
+                  index = rep(1, terra::nlyr(rasts)),
+                  fun = sum)
     rasts2 <-
-      raster::stackApply(rasts2,
-                         indices = rep(1, raster::nlayers(rasts2)),
-                         fun = sum)
+      terra::tapp(rasts2,
+                  index = rep(1, terra::nlyr(rasts2)),
+                  fun = sum)
   } else if (treatment_priority == "ranked") {
-    if (all(treatment_rank == c(1, 0))) {
-      rasts <- rasts
-      rasts2 <- rasts2
-    } else if (all(treatment_rank == c(0, 1))) {
-      rasts <- stack(rasts[[2]], rasts[[1]])
-      rasts2 <- stack(rasts2[[2]], rasts2[[1]])
+    for (r in seq_len(length(treatment_rank))) {
+      if (r == 1) {
+        raste <- rast(rasts[[match(r, treatment_rank)]])
+        terra::values(raste) <- terra::values(rasts[[match(r, treatment_rank)]])
+        raste2 <- rast(rasts2[[match(r, treatment_rank)]])
+        terra::values(raste2) <-
+          terra::values(rasts2[[match(r, treatment_rank)]])
+      } else if (r > 1) {
+        raste <- c(raste, rasts[[match(r, treatment_rank)]])
+        raste2 <- c(raste2, rasts2[[match(r, treatment_rank)]])
+      }
     }
+    rasts <- raste
+    rasts2 <- raste2
   }
 
   total_infs <- c(0)
   cells_treated <- 0
-  treatment <- rasts
+  treatment <- rasts[[1]]
   treatment[] <- 0
-  for (q in 1:nlayers(rasts)) {
+  names(treatment) <- treatment
+  for (q in 1:terra::nlyr(rasts)) {
     rast <- rasts[[q]]
     rast2 <- rasts2[[q]]
     total_infs[q] <- sum(rast[rast > 0] > 0)
@@ -171,13 +192,13 @@ treatment_auto <- function(rasts,
       cells_treated <- cells_treated
     }
 
-    if (total_infs[q] > 0 && cells_treated < number_of_locations) {
+    if (total_infs[q] > 0 && cells_treated[[1]] < number_of_locations) {
 
       infections <-
         get_infection_distances(rast = rast, method = method, points = points)
       infections$host <- 0
-      for (p in seq_len(length(infections))) {
-        infections$host <- rast2[infections$i[p], infections$j[p]]
+      for (p in seq_len(nrow(infections))) {
+        infections$host[p] <- rast2[infections$i[p], infections$j[p]]
       }
 
       if (priority == "group size") {
@@ -199,7 +220,7 @@ treatment_auto <- function(rasts,
             i <- managed_group$i[m]
             j <- managed_group$j[m]
             if (treatment[i, j] < 1 & (rast[i, j] | rast2[i, j])) {
-              value <- min(1, treatment[i, j] + 1)
+              value <- min(1, treatment[i, j]$treatment + 1)
               if (value > treatment[i, j]) {
                 cells_treated <- cells_treated + value - treatment[i, j]
               } else {
@@ -216,14 +237,19 @@ treatment_auto <- function(rasts,
             j <- managed_group$j[m]
             i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
             j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
+            i_s <- i_s[i_s > 0]
+            j_s <- j_s[j_s > 0]
             for (s in seq_len(length(i_s))) {
               for (n in seq_len(length(j_s))) {
                 if (treatment[i_s[s], j_s[n]] < 1 &
                     (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
+                  if (cells_treated >= number_of_locations) {
+                    break
+                  }
                   if (abs(i - i_s[s]) > buffer_cells |
                       abs(j - j_s[n]) > buffer_cells) {
                     value <-
-                      min(1, treatment[i_s[s], j_s[n]] +
+                      min(1, treatment[i_s[s], j_s[n]]$treatment +
                             (buffer_cells - floor(buffer_cells)))
                     if (value > treatment[i_s[s], j_s[n]]) {
                       cells_treated <-
@@ -234,14 +260,14 @@ treatment_auto <- function(rasts,
                     treatment[i_s[s], j_s[n]] <- value
                   } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
                     if (treatment[i_s[s], j_s[n]] < 1) {
+                      if (cells_treated >= number_of_locations) {
+                        break
+                      }
                       cells_treated <-
                         cells_treated + (1 - treatment[i_s[s], j_s[n]])
                       treatment[i_s[s], j_s[n]] <- 1
                     }
                   }
-                  if (cells_treated >= number_of_locations) {
-                    break
-                    }
                 }
                 if (cells_treated >= number_of_locations) {
                   break
@@ -280,6 +306,8 @@ treatment_auto <- function(rasts,
           }
           i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
           j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
+          i_s <- i_s[i_s > 0]
+          j_s <- j_s[j_s > 0]
           for (s in seq_len(length(i_s))) {
             for (n in seq_len(length(j_s))) {
               if (cells_treated >= number_of_locations) {
@@ -290,7 +318,7 @@ treatment_auto <- function(rasts,
                 if (abs(i - i_s[s]) > buffer_cells |
                     abs(j - j_s[n]) > buffer_cells) {
                   value <-
-                    min(1, treatment[i_s[s], j_s[n]] +
+                    min(1, treatment[i_s[s], j_s[n]]$treatment +
                           (buffer_cells - floor(buffer_cells)))
                   if (value > treatment[i_s[s], j_s[n]]) {
                     cells_treated <-
@@ -334,6 +362,8 @@ treatment_auto <- function(rasts,
           }
           i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
           j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
+          i_s <- i_s[i_s > 0]
+          j_s <- j_s[j_s > 0]
           for (s in seq_len(length(i_s))) {
             for (n in seq_len(length(j_s))) {
               if (cells_treated >= number_of_locations) {
@@ -344,7 +374,7 @@ treatment_auto <- function(rasts,
                 if (abs(i - i_s[s]) > buffer_cells |
                     abs(j - j_s[n]) > buffer_cells) {
                   value <-
-                    min(1, treatment[i_s[s], j_s[n]] +
+                    min(1, treatment[i_s[s], j_s[n]]$treatment +
                           (buffer_cells - floor(buffer_cells)))
                   if (value > treatment[i_s[s], j_s[n]]) {
                     cells_treated <-
@@ -373,7 +403,6 @@ treatment_auto <- function(rasts,
                or "infected"')
       }
     }
-    print(q)
   }
   treatment <- treatment[[1]]
 

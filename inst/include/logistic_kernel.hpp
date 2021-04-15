@@ -39,7 +39,8 @@ public:
     LogisticKernel(double scale) : s(scale), distribution(0.0, 1.0)
     {
         if (s <= 0) {
-            throw std::invalid_argument("scale (s) must be greater than 0.0");
+            throw std::invalid_argument(
+                "LogisticKernel: scale (s) must be greater than 0.0");
         }
     }
 

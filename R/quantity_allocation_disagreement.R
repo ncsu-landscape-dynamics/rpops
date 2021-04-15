@@ -13,7 +13,7 @@
 #' negatives from comparisons.
 #'
 #' @importFrom landscapemetrics lsm_c_np lsm_c_enn_mn lsm_c_para_mn lsm_c_lpi
-#' @importFrom raster cellsFromExtent xres ncol nrow yres extent
+#' @importFrom terra cells xres ncol nrow yres ext compareGeom
 #'
 #' @return A data frame with spatial configuration metrics. Particularly
 #' quantity, allocation, and total disagreement,  omission and comission, and
@@ -23,15 +23,13 @@
 #'
 quantity_allocation_disagreement <-
   function(reference, comparison, configuration = FALSE, mask = NULL) {
-    if (is.null(mask)) {
-
-    } else {
-      reference[is.na(mask)] <- NA
-      comparison[is.na(mask)] <- NA
+    if (!is.null(mask)) {
+      reference <- terra::mask(reference, mask)
+      comparison <- terra::mask(comparison, mask)
     }
     # test that the comparison raster is the same extent, resolution, and crs as
     # the reference to ensure that they can be compared accurately
-    raster::compareRaster(reference, comparison)
+    # terra::compareGeom(reference, comparison)
     # save initial reference and comparison to use for residual error
     # calculation and then reclassify the original reference and comparison to
     # binary values for other classifications as we are only concerned with
@@ -41,13 +39,13 @@ quantity_allocation_disagreement <-
     ref <- reference
     rcl <- c(1, Inf, 1, 0, 0.99, 0)
     rclmat <- matrix(rcl, ncol = 3, byrow = TRUE)
-    reference <- reclassify(reference, rclmat)
-    comparison <- reclassify(comparison, rclmat)
+    reference <- terra::classify(reference, rclmat)
+    comparison <- terra::classify(comparison, rclmat)
 
     if (configuration == TRUE) {
       # calculate number of infected patches
       np_ref <- landscapemetrics::lsm_c_np(reference, directions = 8)$value[2]
-      if (sum(comparison[comparison > 0]) == 0) {
+      if (sum(terra::values(comparison) > 0, na.rm = TRUE) == 0) {
         np_comp <- 0
         enn_mn_comp <- 0
         lpi_comp <- 0
@@ -76,13 +74,15 @@ quantity_allocation_disagreement <-
         enn_mn_ref <- 0
       }
 
-      if (sum(comparison[comparison > 0]) != 0 && np_comp > 1) {
+      if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 &&
+          np_comp > 1) {
         enn_mn_comp <-
           landscapemetrics::lsm_c_enn_mn(comparison,
             directions = 8,
             verbose = TRUE
           )$value[2]
-      } else if (sum(comparison[comparison > 0]) != 0 && np_comp <= 1) {
+      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 &&
+                 np_comp <= 1) {
         enn_mn_comp <- 0
       }
 
@@ -100,9 +100,9 @@ quantity_allocation_disagreement <-
       # calculate the mean perimeter-area ratio of patches and the difference
       para_mn_ref <-
         landscapemetrics::lsm_c_para_mn(reference, directions = 8)$value[2]
-      if (sum(comparison[comparison > 0]) == 0) {
+      if (sum(terra::values(comparison) > 0, na.rm = TRUE) == 0) {
         para_mn_comp <- 0
-      } else if (sum(comparison[comparison > 0]) != 0) {
+      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0) {
         para_mn_comp <-
           landscapemetrics::lsm_c_para_mn(comparison, directions = 8)$value[2]
       }
@@ -114,9 +114,9 @@ quantity_allocation_disagreement <-
 
       # calculate the largest patch index and difference
       lpi_ref <- landscapemetrics::lsm_c_lpi(reference, directions = 8)$value[2]
-      if (sum(comparison[comparison > 0]) == 0) {
+      if (sum(terra::values(comparison) > 0, na.rm = TRUE) == 0) {
         lpi_comp <- 0
-      } else if (sum(comparison[comparison > 0]) != 0) {
+      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0) {
         lpi_comp <-
           landscapemetrics::lsm_c_lpi(comparison, directions = 8)$value[2]
       }
@@ -133,14 +133,18 @@ quantity_allocation_disagreement <-
 
     # calculate reference and comparison totals to use for creation of
     # probabilities
-    positives_in_reference <- sum(reference[!is.na(reference)] == 1)
-    positives_in_comparison <- sum(comparison[!is.na(reference)] == 1)
+    positives_in_reference <- sum(terra::values(reference) == 1, na.rm = TRUE)
+    positives_in_comparison <- sum(terra::values(comparison) == 1, na.rm = TRUE)
 
-    ## calculate confusion matrix for accurracy assessment
-    true_positive <- sum(comparison[reference == 1] == 1)
-    false_positive <- sum(comparison[reference == 0] == 1)
-    false_negative <- sum(comparison[reference == 1] == 0)
-    true_negative <- sum(comparison[reference == 0] == 0)
+    ## calculate confusion matrix for accuracy assessment
+    true_negative <- sum(terra::values(reference) == 0 &
+                           terra::values(comparison) == 0, na.rm = TRUE)
+    false_positive <- sum(terra::values(reference) == 0 &
+                            terra::values(comparison) == 1, na.rm = TRUE)
+    true_positive <- sum(terra::values(reference) == 1 &
+                           terra::values(comparison) == 1, na.rm = TRUE)
+    false_negative <- sum(terra::values(reference) == 1 &
+                            terra::values(comparison) == 0, na.rm = TRUE)
 
     # calculate quantity and allocation disagreements for infected/infested from
     # probabilities based on Death to Kappa (Pontius et al. 2011)
@@ -180,7 +184,7 @@ quantity_allocation_disagreement <-
     output$total_disagreement <- total_disagreement
     output$configuration_disagreement <- configuration_disagreement
     output$odds_ratio <- odds_ratio
-    output$residual_error <- cellStats(abs(ref - comp), "sum")
+    output$residual_error <- terra::global(abs(ref - comp), "sum")[[1]]
     output$true_infected <- positives_in_reference
     output$simulated_infected <- positives_in_comparison
     output$infected_difference <-

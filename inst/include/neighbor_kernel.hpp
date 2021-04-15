@@ -29,7 +29,7 @@ namespace pops {
  * deterministic.
  *
  * When a diagonal direction such as SE is used, disperser is moved
- * one cell in each cooresponding cardial direction, i.e., 1 S and 1 E
+ * one cell in each corresponding cardinal direction, i.e., 1 S and 1 E
  * for SE.
  */
 class DeterministicNeighborDispersalKernel

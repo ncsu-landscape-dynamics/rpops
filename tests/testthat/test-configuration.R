@@ -75,11 +75,20 @@ config$number_of_cores <- 1
 config$calibration_method <- "ABC"
 config$failure <- NULL
 config$function_name <- "pops"
+config$exposed_file <-
+  system.file("extdata", "simple20x20", "initial_infection.tif",
+              package = "PoPS")
+
 
 test_that("Configuration returns proper values when no errors present", {
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
+  config$start_exposed <- TRUE
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
+
+  config$start_exposed <- FALSE
   config$parameter_means <- c(0.2, 20, 0.99, 6000, 0, 0)
   config$parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0.1)
   config$function_name <- "multirun"
@@ -388,6 +397,15 @@ test_that("Configuration returns proper values when no errors present", {
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
+  config$infected_files <-
+    c(system.file("extdata", "simple20x20", "initial_infection.tif",
+                package = "PoPS"))
+  config$parameter_means <- list(c(0.2, 20, 0.99, 6000, 0, 0))
+  config$parameter_cov_matrix <- list(matrix(ncol = 6, nrow = 6, 0.1))
+  config$function_name <- "auto-manage"
+  config$species <- c("pest")
+  config <- configuration(config)
+  expect_equal(config$failure, NULL)
 })
 
 test_that("configuration returns proper errors", {

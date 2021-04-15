@@ -63,8 +63,14 @@ calibrate(
   quarantine_areas_file = "",
   use_quarantine = FALSE,
   use_spreadrates = FALSE,
+  use_overpopulation_movements = FALSE,
+  overpopulation_percentage = 0,
+  leaving_percentage = 0,
+  leaving_scale_coefficient = 1,
   calibration_method = "ABC",
-  number_of_iterations = 1e+05
+  number_of_iterations = 1e+05,
+  exposed_file = "",
+  verbose = TRUE
 )
 }
 \arguments{
@@ -177,8 +183,9 @@ in years integer >= 1}
 ('YYYY_MM_DD') (needs to be the same length as treatment_file and
 pesticide_duration)}
 
-\item{treatments_file}{path to raster file with treatment data by dates
-(needs to be the same length as treatment_dates and pesticide_duration)}
+\item{treatments_file}{path to raster files with treatment data by dates.
+Needs to be a list of files the same length as treatment_dates and
+pesticide_duration.}
 
 \item{treatment_method}{what method to use when applying treatment one of
 ("ratio" or "all infected"). ratio removes a portion of all infected and
@@ -243,7 +250,8 @@ lon_to, lat_to, number of animals, and date.}
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected
-(only used if model_type is "SEI")}
+(only used if model_type is "SEI"). Default False. If this is TRUE need to
+have both an infected_file (this can be a raster of all 0's) and exposed_file}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use
 stochasticity in reproductive functions default is TRUE}
@@ -274,6 +282,18 @@ quarantine areas (default = FALSE)}
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
 
+\item{use_overpopulation_movements}{boolean to indicate whether to use
+the overpopulation pest movement module (driven by the natural kernel with
+its scale parameter modified by a coefficient)}
+
+\item{overpopulation_percentage}{percentage of occupied hosts when the cell
+is considered to be overpopulated}
+
+\item{leaving_percentage}{percentage of pests leaving an overpopulated cell}
+
+\item{leaving_scale_coefficient}{coefficient to multiply scale parameter of
+the natural kernel (if applicable)}
+
 \item{calibration_method}{choose which method of calibration to use either
 'ABC' (Approximate Bayesian Computation) or 'MCMC' (Markov Chain Monte Carlo
 Approximation)}
@@ -281,6 +301,12 @@ Approximation)}
 \item{number_of_iterations}{how many iterations do you want to run to allow
 the calibration to converge (recommend a minimum of at least 100,000 but
 preferably 1 million).}
+
+\item{exposed_file}{a file with the exposed for the current}
+
+\item{verbose}{Boolean with true printing current status of calibration,
+(e.g. the current generation, current particle, and the acceptance rate).
+Defaults if FALSE.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for

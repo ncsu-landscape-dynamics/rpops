@@ -2,27 +2,39 @@
 # and pasting of code across functions
 Sys.setenv("R_TESTS" = "")
 
-initial_raster_checks <- function(x) {
+initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
   checks_passed <- TRUE
 
-  if (!all(file.exists(x))) {
-    checks_passed <- FALSE
-    failed_check <- "file does not exist"
+  if (use_s3) {
+    if (!aws.s3::head_object(x, bucket)) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
+  } else {
+    if (!all(file.exists(x))) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
   }
 
-  if (checks_passed && !all((raster::extension(x) %in%
-    c(".grd", ".tif", ".img")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in%
+    c("grd", "tif", "img", "vrt")))) {
     checks_passed <- FALSE
-    failed_check <- "file is not one of '.grd', '.tif', '.img'"
+    failed_check <- "file is not one of '.grd', '.tif', '.img', or '.vrt'"
   }
 
   if (checks_passed) {
-    r <- raster::stack(x)
-    r <- raster::reclassify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
+    if (use_s3) {
+      aws.s3::save_object(object = x, bucket = bucket,
+                          file = x, check_region = FALSE)
+      r <- terra::rast(x)
+    } else {
+      r <- terra::rast(x)
+    }
+    r <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
       right = NA
     )
   }
-
 
   if (checks_passed) {
     outs <- list(checks_passed, r)
@@ -37,51 +49,70 @@ initial_raster_checks <- function(x) {
 
 # adds checks to test for raster extent, resolution, and crs x2 being the
 # raster already through initial checks for comparison
-secondary_raster_checks <- function(x, x2) {
+secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
   checks_passed <- TRUE
 
-  if (!all(file.exists(x))) {
-    checks_passed <- FALSE
-    failed_check <- "file does not exist"
+  if (use_s3) {
+    if (!aws.s3::head_object(x, bucket)) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
+  } else {
+    if (!all(file.exists(x))) {
+      checks_passed <- FALSE
+      failed_check <- "file does not exist"
+    }
   }
 
-  if (checks_passed && !all((raster::extension(x) %in%
-    c(".grd", ".tif", ".img")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in%
+    c("grd", "tif", "img", "vrt")))) {
     checks_passed <- FALSE
-    failed_check <- "file is not one of '.grd', '.tif', '.img'"
+    failed_check <- "file is not one of '.grd', '.tif', '.img', or '.vrt'"
   }
 
   if (checks_passed) {
-    r <- raster::stack(x)
-    r2 <- raster::reclassify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
+    if (use_s3) {
+      aws.s3::save_object(object = x, bucket = bucket,
+                          file = x, check_region = FALSE)
+      r <- terra::rast(x)
+    } else {
+      r <- terra::rast(x)
+    }
+    r2 <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
       right = NA
     )
-    if (!(raster::extent(r2) == raster::extent(r))) {
-      raster::extent(r2) <- raster::extent(r)
+    if (!(terra::ext(r2) == terra::ext(r))) {
+      terra::ext(r2) <- terra::ext(r)
     }
     r <- r2
   }
 
-  if (checks_passed && !(raster::extent(x2) == raster::extent(r))) {
+  if (checks_passed && !(terra::ext(x2) == terra::ext(r))) {
     checks_passed <- FALSE
     failed_check <-
       "Extents of input rasters do not match. Ensure that all of your input
     rasters have the same extent"
   }
 
-  if (checks_passed && !(raster::xres(x2) == raster::xres(r) &&
-    raster::yres(x2) == raster::yres(r))) {
+  if (checks_passed && !(terra::xres(x2) == terra::xres(r) &&
+    terra::yres(x2) == terra::yres(r))) {
     checks_passed <- FALSE
     failed_check <-
       "Resolution of input rasters do not match. Ensure that all of your input
     rasters have the same resolution"
   }
 
-  if (checks_passed && !raster::compareCRS(r, x2)) {
-    checks_passed <- FALSE
-    failed_check <-
-      "Coordinate reference system (crs) of input rasters do not match. Ensure
+  if (checks_passed) {
+    crs1 <- terra::crs(r, describe = TRUE)
+    crs2 <- terra::crs(x2, describe = TRUE)
+    if (is.na(crs1$EPSG)) {crs1$EPSG <- "1"}
+    if (is.na(crs2$EPSG)) {crs2$EPSG <- "1"}
+    if (!(crs1$EPSG == crs2$EPSG)) {
+      checks_passed <- FALSE
+      failed_check <-
+        "Coordinate reference system (crs) of input rasters do not match. Ensure
     that all of your input rasters have the same crs"
+    }
   }
 
   if (checks_passed) {
@@ -117,18 +148,23 @@ treatment_checks <- function(treatment_stack,
   if (checks_passed) {
     if (pesticide_duration[1] > 0) {
       treatment_maps <-
-        list(raster::as.matrix(treatment_stack[[1]] * pesticide_efficacy))
+        list(terra::as.matrix(treatment_stack[[1]] * pesticide_efficacy,
+             wide = TRUE))
     } else {
-      treatment_maps <- list(raster::as.matrix(treatment_stack[[1]]))
+      treatment_maps <- list(terra::as.matrix(treatment_stack[[1]],
+                                              wide = TRUE))
     }
 
-    if (raster::nlayers(treatment_stack) >= 2) {
-      for (i in 2:raster::nlayers(treatment_stack)) {
+    if (terra::nlyr(treatment_stack) >= 2) {
+      for (i in 2:terra::nlyr(treatment_stack)) {
         if (pesticide_duration[i] > 0) {
           treatment_maps[[i]] <-
-            raster::as.matrix(treatment_stack[[i]] * pesticide_efficacy)
+            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy,
+                                  wide = TRUE))
         } else {
-          treatment_maps[[i]] <- raster::as.matrix(treatment_stack[[i]])
+          treatment_maps[[i]] <-
+            list(terra::as.matrix(treatment_stack[[i]],
+                                  wide = TRUE))
         }
       }
     }
@@ -499,16 +535,36 @@ bayesian_mnn_checks <- function(prior_means,
 
 multispecies_checks <- function(species,
                                 infected_files,
-                                reproductive_rate,
-                                percent_natural_dispersal,
+                                parameter_means,
+                                parameter_cov_matrix,
                                 natural_kernel_type,
                                 anthropogenic_kernel_type,
-                                natural_distance_scale,
-                                anthropogenic_distance_scale,
                                 natural_dir,
-                                natural_kappa,
                                 anthropogenic_dir,
-                                anthropogenic_kappa) {
+                                model_type,
+                                host_file,
+                                total_populations_file,
+                                temp,
+                                temperature_coefficient_file,
+                                precip,
+                                precipitation_coefficient_file,
+                                latency_period,
+                                time_step,
+                                season_month_start,
+                                season_month_end,
+                                use_lethal_temperature,
+                                temperature_file,
+                                lethal_temperature,
+                                lethal_temperature_month,
+                                mortality_on,
+                                mortality_rate,
+                                mortality_time_lag,
+                                movements_file,
+                                use_movements,
+                                start_exposed,
+                                quarantine_areas_file,
+                                use_quarantine,
+                                use_spreadrates) {
   checks_passed <- TRUE
 
   if (checks_passed && length(species) != length(infected_files)) {
@@ -517,18 +573,22 @@ multispecies_checks <- function(species,
       "Length of list for species and infected_files must be equal"
   }
 
-  if (checks_passed && length(reproductive_rate) != length(infected_files)) {
+  if (checks_passed && length(parameter_means) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and reproductive_rate must be equal"
+      "Length of list for parameter_means and infected_files must be equal"
   }
 
-  if (checks_passed && length(percent_natural_dispersal) !=
-    length(infected_files)) {
+  if (checks_passed && length(parameter_cov_matrix) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and percent_natural_dispersal must be
-    equal"
+      "Length of list for parameter_cov_matrix and infected_files must be equal"
+  }
+
+  if (checks_passed && length(model_type) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for model_type and infected_files must be equal"
   }
 
   if (checks_passed && length(natural_kernel_type) != length(infected_files)) {
@@ -541,23 +601,7 @@ multispecies_checks <- function(species,
     length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and anthropogenic_kernel_type must be
-    equal"
-  }
-
-  if (checks_passed && length(natural_distance_scale) !=
-    length(infected_files)) {
-    checks_passed <- FALSE
-    failed_check <-
-    "Length of list for infected_files and natural_distance_scale must be equal"
-  }
-
-  if (checks_passed && length(anthropogenic_distance_scale) !=
-    length(infected_files)) {
-    checks_passed <- FALSE
-    failed_check <-
-    "Length of list for infected_files and anthropogenic_distance_scale must be
-    equal"
+      "Length of list for infected_files and anthropogenic_kernel_type must be equal"
   }
 
   if (checks_passed && length(natural_dir) != length(infected_files)) {
@@ -566,22 +610,148 @@ multispecies_checks <- function(species,
       "Length of list for infected_files and natural_dir must be equal"
   }
 
-  if (checks_passed && length(natural_kappa) != length(infected_files)) {
-    checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and natural_kappa must be equal"
-  }
-
   if (checks_passed && length(anthropogenic_dir) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
       "Length of list for infected_files and anthropogenic_dir must be equal"
   }
 
-  if (checks_passed && length(anthropogenic_kappa) != length(infected_files)) {
+  if (checks_passed && length(host_file) != length(infected_files)) {
     checks_passed <- FALSE
     failed_check <-
-      "Length of list for infected_files and anthropogenic_kappa must be equal"
+      "Length of list for infected_files and host_file must be equal"
+  }
+
+  if (checks_passed && length(total_populations_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and total_populations_file must be equal"
+  }
+
+  if (checks_passed && length(temp) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and temp must be equal"
+  }
+
+  if (checks_passed && length(temperature_coefficient_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and temperature_coefficient_file must be equal"
+  }
+
+  if (checks_passed && length(precip) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and precip must be equal"
+  }
+
+  if (checks_passed && length(precipitation_coefficient_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and precipitation_coefficient_file must be equal"
+  }
+
+  if (checks_passed && length(latency_period) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and latency_period must be equal"
+  }
+
+  if (checks_passed && length(time_step) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and time_step must be equal"
+  }
+
+  if (checks_passed && length(season_month_start) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and season_month_start must be equal"
+  }
+
+  if (checks_passed && length(season_month_end) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and season_month_end must be equal"
+  }
+
+  if (checks_passed && length(use_lethal_temperature) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_lethal_temperature must be equal"
+  }
+
+  if (checks_passed && length(temperature_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and temperature_file must be equal"
+  }
+
+  if (checks_passed && length(lethal_temperature) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and lethal_temperature must be equal"
+  }
+
+  if (checks_passed && length(lethal_temperature_month) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and lethal_temperature_month must be equal"
+  }
+
+  if (checks_passed && length(mortality_on) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and mortality_on must be equal"
+  }
+
+  if (checks_passed && length(mortality_rate) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and mortality_rate must be equal"
+  }
+
+  if (checks_passed && length(mortality_time_lag) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and mortality_time_lag must be equal"
+  }
+
+  if (checks_passed && length(movements_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and movements_file must be equal"
+  }
+
+  if (checks_passed && length(use_movements) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_movements must be equal"
+  }
+
+  if (checks_passed && length(start_exposed) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and start_exposed must be equal"
+  }
+
+  if (checks_passed && length(quarantine_areas_file) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and quarantine_areas_file must be equal"
+  }
+
+  if (checks_passed && length(use_quarantine) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_quarantine must be equal"
+  }
+
+  if (checks_passed && length(use_spreadrates) != length(infected_files)) {
+    checks_passed <- FALSE
+    failed_check <-
+      "Length of list for infected_files and use_spreadrates must be equal"
   }
 
   if (checks_passed) {
@@ -603,7 +773,7 @@ movement_checks <- function(x, rast, start_date, end_date) {
     failed_check <- "file does not exist"
   }
 
-  if (checks_passed && !all((raster::extension(x) %in% c(".csv", ".txt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% c(".csv", ".txt")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.csv' or '.txt'"
   }
@@ -621,8 +791,8 @@ movement_checks <- function(x, rast, start_date, end_date) {
     )
     movement_from <- spTransform(movement_from, CRSobj = crs(rast))
     movement_to <- spTransform(movement_to, CRSobj = crs(rast))
-    cell_from <- raster::extract(rast, movement_from, cellnumbers = TRUE)
-    cell_to <- raster::extract(rast, movement_to, cellnumbers = TRUE)
+    cell_from <- terra::extract(rast, movement_from, cellnumbers = TRUE)
+    cell_to <- terra::extract(rast, movement_to, cellnumbers = TRUE)
     rowcol_from <- rowColFromCell(rast, cell_from[, 1])
     rowcol_to <- rowColFromCell(rast, cell_to[, 1])
     movements <- data.frame(
