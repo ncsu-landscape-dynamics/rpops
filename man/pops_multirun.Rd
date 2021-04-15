@@ -149,13 +149,13 @@ susceptibles, all infected removes all infected a portion of susceptibles.}
 \item{natural_kernel_type}{what type of dispersal kernel should be used for
 natural dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'exponential power', 'weibull', 'log normal',
+ 'hyperbolic secant', 'gamma', 'weibull',
  'logistic')}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'exponential power', 'weibull', 'log normal',
+ 'hyperbolic secant', 'gamma', 'weibull',
  'logistic')}
 
 \item{natural_dir}{sets the predominate direction of natural dispersal

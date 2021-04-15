@@ -329,7 +329,7 @@ configuration <- function(config) {
     config$failure <-
       "Natural kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'"
+      'gamma',  'weibull', 'logistic'"
     return(config)
   }
 
@@ -337,7 +337,7 @@ configuration <- function(config) {
     config$failure <-
       "Anthropogenic kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'"
+      'gamma', 'weibull', 'logistic'"
     return(config)
   }
 
