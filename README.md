@@ -36,7 +36,7 @@ The PoPS Core C++ library and its interfaces: rpops R package and r.pops.spread 
 ### Functions in rpops
 * `calibrate:` Calibration of the model parameters using either MCMC (markov chain monte carlo) or ABC (approximate bayesian computation). 
 * `validate:` Validation of the model using quantiy, allocation, and configuration disagreement.
-* `pops_multirun:` Parallel execution of multiple stochastic runs (`number_of_cores` used to set cores used if left NULL defaults to using n - 1 cores on the machine). Outputs statistics of infected/infested hosts across multiple runs (`simulation_mean`,  `single_run`,  `simulation_sd`, `simulation_min`, `simulation_max`), current state using the median (`infected`,  `exposed`, and `susceptible`), Average and standard deviations whole area statistics (`number_infecteds`, `infected_areas`), and probabilty of infection (this is the percent of model runs that a cell has at least one infestation/infection (`probability`).
+* `pops_multirun:` Parallel execution of multiple stochastic runs (`number_of_cores` used to set cores used if left NULL defaults to using n - 1 cores on the machine). Outputs statistics of infected/infested hosts across multiple runs (`simulation_mean`,  `single_run`,  `simulation_sd`, `simulation_min`, `simulation_max`), current state using the median (`infected`,  `exposed`, and `susceptible`), average and standard deviations whole area statistics (`number_infecteds`, `infected_areas`), and probability of infection (`probability`) which is the percent of model runs that a cell has at least one infestation/infection.
 * `pops:` Runs a single stochastic run of the model. This function is primarily used for automated testing of model functionality.
 
 ## How to cite
