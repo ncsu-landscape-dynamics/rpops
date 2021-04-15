@@ -25,17 +25,18 @@ The PoPS Core C++ library and its interfaces: rpops R package and r.pops.spread 
 * Two different dispersal kernels (`natural_dispersal_kernel`, `anthropogenic_dispersal_kernel`),
 * Cauchy, Exponential, Uniform, Power-law, Deterministic neighbor, Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic radial dispersal kernels use Von Mises distribution,
 * Seasonal spread (`seasonality` in months),
-* Multiple stochastic runs (`pops_multirun`),
-* Parallel execution of multiple runs (`number_of_cores` in `pops_multirun`),
-* Output of average and standard deviation of infected hosts across multiple runs and for a single stochastic run (`simulation_mean`,  `single_run`,  `simulation_sd`, `simulation_min`, `simulation_max`),
-* Average and standard deviations for output averages (`number_infecteds`, `infected_areas`),
-* Infection probability output in percent (this is the percent of model runs that a cell has at least one infestation/infection (`probability`),
-* Spread rate measurement in 4 cardinal directions (`west_rate`, `east_rate`, `south_rate`, `north_rate` ),
-* Distance to quarantine in 4 cardinal directions (`north_distance_to_quarantine`, `south_distance_to_quarantine`, `east_distance_to_quarantine`, `west_distance_to_quarantine` ),
+* Reduced stochasticity options and deterministic versions of kernels (`deterministic`, `generate_stochasticity`, `establishment_stochasticity`, `movement_stochasticity`),
+* Spread rate measurement in 4 cardinal directions (`west_rate`, `east_rate`, `south_rate`, `north_rate`),
+* Distance to quarantine in 4 cardinal directions (`north_distance_to_quarantine`, `south_distance_to_quarantine`, `east_distance_to_quarantine`, `west_distance_to_quarantine`),
 * Probability of quarantine escape (`escape_probability`).
 * Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average)
-* Calibration of the model parameters using either MCMC (markov chain monte carlo) or ABC (approximate bayesian computation) (`calibrate`)
-* Validation of the model using quantiy, allocation, and configuration disagreement (`validate`)
+
+### Functions in rpops
+* `calibrate:` Calibration of the model parameters using either MCMC (markov chain monte carlo) or ABC (approximate bayesian computation). 
+* `validate:` Validation of the model using quantiy, allocation, and configuration disagreement.
+* `pops_multirun:` Parallel execution of multiple stochastic runs (`number_of_cores` used to set cores used if left NULL defaults to using n - 1 cores on the machine). Outputs statistics of infected/infested hosts across multiple runs (`simulation_mean`,  `single_run`,  `simulation_sd`, `simulation_min`, `simulation_max`), current state using the median (`infected`,  `exposed`, and `susceptible`), Average and standard deviations whole area statistics (`number_infecteds`, `infected_areas`), and probabilty of infection (this is the percent of model runs that a cell has at least one infestation/infection (`probability`).
+* `pops:` Runs a single stochastic run of the model. This function is primarily used for automated testing of model functionality.
+
 ## How to cite
 
 If you use this software or code, please cite the following papers:
@@ -102,12 +103,13 @@ _(alphabetical order)_
 * Vaclav Petras
 * Anna Petrasova
 
-### Previous contributors
+### Contributors (current and past
 
 _(alphabetical order)_
 
 * Zexi Chen
 * Devon Gaydos
+* Nick Kruskamp
 * Francesco Tonini
 
 See Git commit history, GitHub insights, or CHANGELOG.md file (if present)
