@@ -216,7 +216,7 @@ test_that("Model stops if kernel is of the wrong type and/or dimension", {
                    parameter_cov_matrix = parameter_cov_matrix),
               "Natural kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'")
+      'gamma',  'weibull', 'logistic'")
             expect_equal(
               pops(infected_file = infected_file,
                    host_file = host_file,
@@ -226,7 +226,7 @@ test_that("Model stops if kernel is of the wrong type and/or dimension", {
                    parameter_cov_matrix = parameter_cov_matrix),
               "Anthropogenic kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'")
+      'gamma', 'weibull', 'logistic'")
           })
 
 test_that("Input raster resolutions, extents, and crs all match", {
@@ -1200,30 +1200,30 @@ test_that("All kernel types lead to spread", {
   # parameter_means <- c(0.4, 1000, 1, 500, 0, 0)
   # parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
-  data <- pops(infected_file = infected_file,
-               host_file = host_file,
-               total_populations_file = host_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               natural_kernel_type = "exponential-power")
-  infecteds <- data$infected[[1]]
-  expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
-               TRUE)
-  expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
-
-  # bad array when icdf is available
-  data <- pops(infected_file = infected_file,
-               host_file = host_file,
-               total_populations_file = host_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               natural_kernel_type = "log normal")
-  infecteds <- data$infected[[1]]
-  expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
-               TRUE)
-  expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
+  # data <- pops(infected_file = infected_file,
+  #              host_file = host_file,
+  #              total_populations_file = host_file,
+  #              parameter_means = parameter_means,
+  #              parameter_cov_matrix = parameter_cov_matrix,
+  #              natural_kernel_type = "exponential-power")
+  # infecteds <- data$infected[[1]]
+  # expect_equal(all(infecteds >=
+  #                    raster::as.matrix(raster::raster(infected_file))),
+  #              TRUE)
+  # expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
+  #
+  # # bad array when icdf is available
+  # data <- pops(infected_file = infected_file,
+  #              host_file = host_file,
+  #              total_populations_file = host_file,
+  #              parameter_means = parameter_means,
+  #              parameter_cov_matrix = parameter_cov_matrix,
+  #              natural_kernel_type = "log normal")
+  # infecteds <- data$infected[[1]]
+  # expect_equal(all(infecteds >=
+  #                    raster::as.matrix(raster::raster(infected_file))),
+  #              TRUE)
+  # expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
   # checks for anthropogenic kernel type
   data <- pops(infected_file = infected_file,
@@ -1302,21 +1302,23 @@ test_that("All kernel types lead to spread", {
                total_populations_file = host_file,
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
-               anthropogenic_kernel_type = "exponential-power")
+               anthropogenic_kernel_type = "gamma")
   expect_equal(all(data$infected[[1]] >=
                      raster::as.matrix(raster::raster(infected_file))),
                TRUE)
 
+#
+#   data <- pops(infected_file = infected_file,
+#                host_file = host_file,
+#                total_populations_file = host_file,
+#                parameter_means = parameter_means,
+#                parameter_cov_matrix = parameter_cov_matrix,
+#                anthropogenic_kernel_type = "exponential-power")
+#   expect_equal(all(data$infected[[1]] >=
+#                      raster::as.matrix(raster::raster(infected_file))),
+#                TRUE)
+
   ## currently not working
-  # data <- pops(infected_file = infected_file,
-  #              host_file = host_file,
-  #              total_populations_file = host_file,
-  #              parameter_means = parameter_means,
-  #              parameter_cov_matrix = parameter_cov_matrix,
-  #              anthropogenic_kernel_type = "gamma")
-  # expect_equal(all(data$infected[[1]] >=
-  #                    raster::as.matrix(raster::raster(infected_file))),
-  #              TRUE)
   #
   #
   # data <- pops(infected_file = infected_file,
