@@ -5,8 +5,8 @@
 #' understanding of the effect of weather and other environmental factors on
 #' reproduction and survival of the pest/pathogen in order to forecast spread
 #' of the pest/pathogen into the future. This function performs a single
-#' stochastic realisation of the model and is predominantly used for automated
-#' tests.
+#' stochastic realization of the model and is predominantly used for automated
+#' tests of model features.
 #'
 #' @param infected_file path to raster file with initial infections
 #' @param host_file path to raster files with number of hosts and standard
@@ -129,6 +129,10 @@
 #' @param leaving_scale_coefficient coefficient to multiply scale parameter of
 #' the natural kernel (if applicable)
 #' @param exposed_file a file with the exposed for the current
+#' @param mask Raster file used to provide a mask to remove 0's that are not
+#' true negatives from comparisons (e.g. mask out lakes and oceans from statics
+#' if modeling terrestrial species). This can also be used to mask out areas
+#' that can't be managed in the auto_manage function.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -195,7 +199,8 @@ pops <- function(infected_file,
                  overpopulation_percentage = 0,
                  leaving_percentage = 0,
                  leaving_scale_coefficient = 1,
-                 exposed_file = "") {
+                 exposed_file = "",
+                 mask = NULL) {
 
   config <- c()
   config$random_seed <- random_seed

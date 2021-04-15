@@ -70,7 +70,8 @@ auto_manage(
   overpopulation_percentage = 0,
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
-  exposed_file = ""
+  exposed_file = "",
+  mask = NULL
 )
 }
 \arguments{
@@ -285,6 +286,11 @@ is considered to be overpopulated}
 the natural kernel (if applicable)}
 
 \item{exposed_file}{a file with the exposed for the current}
+
+\item{mask}{Raster file used to provide a mask to remove 0's that are not
+true negatives from comparisons (e.g. mask out lakes and oceans from statics
+if modeling terrestrial species). This can also be used to mask out areas
+that can't be managed in the auto_manage function.}
 }
 \value{
 list of infected and susceptible per year

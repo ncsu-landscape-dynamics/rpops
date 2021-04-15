@@ -263,15 +263,21 @@ validate <- function(infected_years_file,
           .packages = c("terra", "PoPS"),
           .final = colSums
         ) %do% {
+          # need to assign reference, comp_year, and mask in inner loop since
+          # terra objects are pointers and pointers using %dopar%
           comp_year <- terra::rast(config$infected_file)
           reference <- terra::rast(config$infected_file)
           terra::values(comp_year) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
+          if (!is.null(config$mask)){
+            mask <- terra::rast(config$infected_file)
+            terra::values(mask) <- config$mask_matrix
+          }
           ad <-
             quantity_allocation_disagreement(reference,
                                              comp_year,
                                              config$configuration,
-                                             config$mask)
+                                             mask)
         }
 
       to.qa <- data.frame(t(all_disagreement))

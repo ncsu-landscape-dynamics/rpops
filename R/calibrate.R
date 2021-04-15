@@ -672,7 +672,6 @@ calibrate <- function(infected_years_file,
         proposed_anthropogenic_kappa
       )
 
-    comp_year <- terra::rast(config$infected_file)
     all_disagreement <-
       foreach::foreach(
         q = seq_len(length(data$infected)),
@@ -680,13 +679,18 @@ calibrate <- function(infected_years_file,
         .packages = c("terra", "PoPS"),
         .final = colSums
       ) %do% {
+        comp_year <- terra::rast(config$infected_file)
+        reference <- terra::rast(config$infected_file)
         terra::values(comp_year) <- data$infected[[q]]
-        quantity_allocation_disagreement(
-          config$infection_years[[q]],
-          comp_year,
-          config$configuration,
-          config$mask
-        )
+        terra::values(reference) <- config$infection_years2[[q]]
+        if (!is.null(config$mask)){
+          mask <- terra::rast(config$infected_file)
+          terra::values(mask) <- config$mask_matrix
+        }
+        quantity_allocation_disagreement(reference,
+                                         comp_year,
+                                         config$configuration,
+                                         mask)
       }
 
     ## save current state of the system
