@@ -181,25 +181,25 @@ test_that("Configuration returns proper values when no errors present", {
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
-  config$natural_kernel_type <- "exponential power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "exponential-power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "Exponential-power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "Exponential-Power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "Exponential power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  # config$natural_kernel_type <- "exponential power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "exponential-power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "Exponential-power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "Exponential-Power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "Exponential power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
 
   config$natural_kernel_type <- "weibull"
   config <- configuration(config)
@@ -213,29 +213,29 @@ test_that("Configuration returns proper values when no errors present", {
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
-  config$natural_kernel_type <- "log normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "log-normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "Log-normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "Log-Normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "Log normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$natural_kernel_type <- "Log Normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  # config$natural_kernel_type <- "log normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "log-normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "Log-normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "Log-Normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "Log normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$natural_kernel_type <- "Log Normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
 
   config$natural_kernel_type <- "logistic"
   config <- configuration(config)
@@ -333,23 +333,23 @@ test_that("Configuration returns proper values when no errors present", {
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
-  config$anthropogenic_kernel_type <- "exponential power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "exponential-power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "Exponential-power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "Exponential-Power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "Exponential power"
+  # config$anthropogenic_kernel_type <- "exponential power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "exponential-power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "Exponential-power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "Exponential-Power"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "Exponential power"
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
@@ -365,29 +365,29 @@ test_that("Configuration returns proper values when no errors present", {
   config <- configuration(config)
   expect_equal(config$failure, NULL)
 
-  config$anthropogenic_kernel_type <- "log normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "log-normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "Log-normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "Log-Normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "Log normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
-
-  config$anthropogenic_kernel_type <- "Log Normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  # config$anthropogenic_kernel_type <- "log normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "log-normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "Log-normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "Log-Normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "Log normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
+  #
+  # config$anthropogenic_kernel_type <- "Log Normal"
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
 
   config$anthropogenic_kernel_type <- "logistic"
   config <- configuration(config)
@@ -433,7 +433,7 @@ test_that("configuration returns proper errors", {
     config$failure,
     "Natural kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'")
+      'gamma', 'weibull', 'logistic'")
 
   config$natural_kernel_type <- "cauchy"
   config$anthropogenic_kernel_type <- "good-bye"
@@ -442,5 +442,5 @@ test_that("configuration returns proper errors", {
     config$failure,
     "Anthropogenic kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'exponential power', 'weibull', 'log normal', 'logistic'")
+      'gamma', 'weibull', 'logistic'")
 })

@@ -469,7 +469,7 @@ configuration <- function(config) {
     config$failure <-
       "Natural kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma',  'weibull', 'logistic'"
+      'gamma', 'weibull', 'logistic'"
     return(config)
   }
 

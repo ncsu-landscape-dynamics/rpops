@@ -216,7 +216,7 @@ test_that("Model stops if kernel is of the wrong type and/or dimension", {
                    parameter_cov_matrix = parameter_cov_matrix),
               "Natural kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma',  'weibull', 'logistic'")
+      'gamma', 'weibull', 'logistic'")
             expect_equal(
               pops(infected_file = infected_file,
                    host_file = host_file,
@@ -1096,7 +1096,7 @@ test_that("All kernel types lead to spread", {
   start_date <- "2008-01-01"
   end_date <- "2008-12-31"
   time_step <- "month"
-  parameter_means <- c(0.4, 20, 1, 500, 0, 0)
+  parameter_means <- c(0.4, 30, 1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
   data <- pops(infected_file = infected_file,
@@ -1109,7 +1109,7 @@ test_that("All kernel types lead to spread", {
 
   infecteds <- data$infected[[1]]
   expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1121,7 +1121,7 @@ test_that("All kernel types lead to spread", {
                natural_kernel_type = "cauchy")
   infecteds <- data$infected[[1]]
   expect_equal(all(infecteds >=
-      raster::as.matrix(raster::raster(infected_file))),
+      terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
     TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1133,7 +1133,7 @@ test_that("All kernel types lead to spread", {
                natural_kernel_type = "uniform")
   infecteds <- data$infected[[1]]
   expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1145,7 +1145,7 @@ test_that("All kernel types lead to spread", {
                natural_kernel_type = "hyperbolic secant")
   infecteds <- data$infected[[1]]
   expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1157,7 +1157,7 @@ test_that("All kernel types lead to spread", {
                natural_kernel_type = "weibull")
   infecteds <- data$infected[[1]]
   expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1169,19 +1169,7 @@ test_that("All kernel types lead to spread", {
                natural_kernel_type = "logistic")
   infecteds <- data$infected[[1]]
   expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
-               TRUE)
-  expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
-
-  data <- pops(infected_file = infected_file,
-               host_file = host_file,
-               total_populations_file = host_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               natural_kernel_type = "power law")
-  infecteds <- data$infected[[1]]
-  expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1193,7 +1181,21 @@ test_that("All kernel types lead to spread", {
                natural_kernel_type = "gamma")
   infecteds <- data$infected[[1]]
   expect_equal(all(infecteds >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
+               TRUE)
+  expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
+
+  parameter_means <- c(0.4, 3, 1, 500, 0, 0)
+
+  data <- pops(infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               natural_kernel_type = "power law")
+  infecteds <- data$infected[[1]]
+  expect_equal(all(infecteds >=
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
   expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1210,7 +1212,7 @@ test_that("All kernel types lead to spread", {
   #              natural_kernel_type = "exponential-power")
   # infecteds <- data$infected[[1]]
   # expect_equal(all(infecteds >=
-  #                    raster::as.matrix(raster::raster(infected_file))),
+  #                    terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
   #              TRUE)
   # expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
   #
@@ -1223,7 +1225,7 @@ test_that("All kernel types lead to spread", {
   #              natural_kernel_type = "log normal")
   # infecteds <- data$infected[[1]]
   # expect_equal(all(infecteds >=
-  #                    raster::as.matrix(raster::raster(infected_file))),
+  #                    terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
   #              TRUE)
   # expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
 
@@ -1236,7 +1238,7 @@ test_that("All kernel types lead to spread", {
                anthropogenic_kernel_type = "exponential")
 
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
   data <- pops(infected_file = infected_file,
@@ -1246,7 +1248,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "cauchy")
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
   data <- pops(infected_file = infected_file,
@@ -1256,7 +1258,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "uniform")
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
   data <- pops(infected_file = infected_file,
@@ -1266,7 +1268,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "hyperbolic secant")
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
   data <- pops(infected_file = infected_file,
@@ -1276,7 +1278,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "logistic")
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
   data <- pops(infected_file = infected_file,
@@ -1286,7 +1288,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "weibull")
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
   data <- pops(infected_file = infected_file,
@@ -1296,7 +1298,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "power law")
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
   data <- pops(infected_file = infected_file,
@@ -1306,7 +1308,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "gamma")
   expect_equal(all(data$infected[[1]] >=
-                     raster::as.matrix(raster::raster(infected_file))),
+                     terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
                TRUE)
 
 #
@@ -1317,7 +1319,7 @@ test_that("All kernel types lead to spread", {
 #                parameter_cov_matrix = parameter_cov_matrix,
 #                anthropogenic_kernel_type = "exponential-power")
 #   expect_equal(all(data$infected[[1]] >=
-#                      raster::as.matrix(raster::raster(infected_file))),
+#                      terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
 #                TRUE)
 
   ## currently not working
@@ -1330,7 +1332,7 @@ test_that("All kernel types lead to spread", {
   #              parameter_cov_matrix = parameter_cov_matrix,
   #              anthropogenic_kernel_type = "log normal")
   # expect_equal(all(data$infected[[1]] >=
-  #                    raster::as.matrix(raster::raster(infected_file))),
+  #                    terra::as.matrix(terra::rast(infected_file), wide = TRUE)),
   #              TRUE)
 
 })
