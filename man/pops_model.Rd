@@ -172,10 +172,16 @@ or pathogen (integer value between 1 and 12)}
 susceptibles, all infected removes all infected a portion of susceptibles.}
 
 \item{natural_kernel_type}{what type of dispersal kernel should be used for
-natural dispersal can be ('cauchy', 'exponential')}
+natural dispersal. Current dispersal kernel options are
+ ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
+ 'hyperbolic secant', 'gamma', 'weibull',
+ 'logistic')}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
-used for anthropogenic dispersal can be ('cauchy', 'exponential')}
+used for anthropogenic dispersal. Current dispersal kernel options are
+ ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
+ 'hyperbolic secant', 'gamma', 'weibull',
+ 'logistic')}
 
 \item{use_anthropogenic_kernel}{A boolean that turns on the use of the
 anthropogenic or long distance dispersal portion of the 2 scale dispersal

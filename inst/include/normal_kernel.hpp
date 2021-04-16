@@ -87,11 +87,11 @@ public:
         //  approximation for inverse error function
         double y = (2 * x) - 1;
         float sign = (y < 0) ? -1.0f : 1.0f;
-        //  0.147 used for a relative error of about 2*10^-3
-        float b = 2.0 / (M_PI * 0.147) + 0.5f * log(1 - pow(y, 2));
+        double a = 0.140012;
+        double t = 2.0 / (M_PI * a);
+        double l = log(1 - pow(y, 2));
         double inverf =
-            (sign * sqrt(-b + sqrt(pow(b, 2) - (1.0 / (0.147) * log(1 - pow(y, 2))))));
-
+            sign * sqrt(sqrt(pow(t + (l / 2.0), 2) - (l / a)) - (t + (l / 2.0)));
         return sigma * std::sqrt(2) * inverf;
     }
 };

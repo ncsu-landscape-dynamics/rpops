@@ -436,6 +436,7 @@ pops_multirun <- function(infected_file,
   min_run <- single_runs[[min_run_index]]
   max_run <- single_runs[[max_run_index]]
 
+
   for (q in seq_len(length(single_runs[[1]]))) {
     for (j in seq_len(length(single_runs))) {
       if (j == 1) {
@@ -444,6 +445,7 @@ pops_multirun <- function(infected_file,
         raster_stacks[[j]] <- single_runs[[j]][[q]]
       }
     }
+
     raster_stacks2 <- do.call(cbind, raster_stacks)
     raster_stacks2 <-
       array(raster_stacks2, dim = c(dim(raster_stacks[[1]]),

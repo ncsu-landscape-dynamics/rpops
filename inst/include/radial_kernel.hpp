@@ -184,7 +184,7 @@ public:
         else if (dispersal_kernel_type_ == DispersalKernelType::Gamma) {
             distance = std::abs(gamma_distribution.random(generator));
         }
-        else if (dispersal_kernel_type_ == DispersalKernelType::Logistic) {
+        else if (dispersal_kernel_type_ == DispersalKernelType::ExponentialPower) {
             distance = std::abs(exponential_power_distribution.random(generator));
         }
         else if (dispersal_kernel_type_ == DispersalKernelType::Logistic) {

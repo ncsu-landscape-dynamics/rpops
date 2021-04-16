@@ -108,6 +108,8 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
+
+
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
@@ -180,6 +182,7 @@ test_that("Multirun model outputs work", {
                         quarantine_areas_file,
                         use_quarantine,
                         use_spreadrates)
+
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
@@ -256,6 +259,7 @@ test_that("Multirun model outputs work", {
                         quarantine_areas_file,
                         use_quarantine,
                         use_spreadrates)
+
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),

@@ -152,10 +152,16 @@ pesticide_duration.}
 susceptibles, all infected removes all infected a portion of susceptibles.}
 
 \item{natural_kernel_type}{what type of dispersal kernel should be used for
-natural dispersal can be ('cauchy', 'exponential')}
+natural dispersal. Current dispersal kernel options are
+ ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
+ 'hyperbolic secant', 'gamma', 'weibull',
+ 'logistic')}
 
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
-used for anthropogenic dispersal can be ('cauchy', 'exponential')}
+used for anthropogenic dispersal. Current dispersal kernel options are
+ ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
+ 'hyperbolic secant', 'gamma', 'weibull',
+ 'logistic')}
 
 \item{natural_dir}{sets the predominate direction of natural dispersal
 usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',

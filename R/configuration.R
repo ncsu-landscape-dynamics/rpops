@@ -23,6 +23,8 @@
 
 configuration <- function(config) {
 
+  "%notin%" <- Negate("%in%")
+
   # Check that all data has same length if using multiple species currently
   # only implemented for auto manage
   if (config$function_name == "auto-manage") {
@@ -424,6 +426,61 @@ configuration <- function(config) {
     }
   }
 
+  kernel_list <- c("cauchy",
+                   "Cauchy",
+                   "exponential",
+                   "Exponential",
+                   "uniform",
+                   "Uniform",
+                   "deterministic neighbor",
+                   "deterministic-neighbor",
+                   "power law",
+                   "power-law",
+                   "Power-law",
+                   "Power-Law",
+                   "Power Law",
+                   "Power law",
+                   "hyperbolic secant",
+                   "hyperbolic-secant",
+                   "Hyperbolic-secant",
+                   "Hyperbolic-Secant",
+                   "Hyperbolic secant",
+                   "Hyperbolic Secant",
+                   "gamma",
+                   "Gamma",
+                   # "exponential power",
+                   # "exponential-power",
+                   # "Exponential-power",
+                   # "Exponential-Power",
+                   # "Exponential power",
+                   "weibull",
+                   "Weibull",
+                   "normal",
+                   # "log normal",
+                   # "log-normal",
+                   # "Log-normal",
+                   # "Log-Normal",
+                   # "Log normal",
+                   # "Log Normal",
+                   "logistic",
+                   "Logistic")
+
+  if (config$natural_kernel_type %notin% kernel_list) {
+    config$failure <-
+      "Natural kernel type not one of 'cauchy', 'exponential',
+      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
+      'gamma', 'weibull', 'logistic'"
+    return(config)
+  }
+
+  if (config$anthropogenic_kernel_type %notin% kernel_list) {
+    config$failure <-
+      "Anthropogenic kernel type not one of 'cauchy', 'exponential',
+      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
+      'gamma', 'weibull', 'logistic'"
+    return(config)
+  }
+
   infected <- terra::as.matrix(infected,
                                wide = TRUE)
   config$susceptible <- terra::as.matrix(susceptible,
@@ -434,6 +491,7 @@ configuration <- function(config) {
 
   config$mortality <- mortality_tracker
   config$resistant <- mortality_tracker
+
 
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
@@ -501,17 +559,17 @@ configuration <- function(config) {
                                 config$parameter_means,
                                 config$parameter_cov_matrix)
     while (any(parameters[, 1] < 0 |
-               parameters[, 2] < 0 |
+               parameters[, 2] <= 0 |
                parameters[, 3] > 1 |
-               parameters[, 3] < 0 |
-               parameters[, 4] < 0 |
+               parameters[, 3] <= 0 |
+               parameters[, 4] <= 0 |
                parameters[, 5] < 0 |
                parameters[, 6] < 0)) {
       config$number_of_draws <- nrow(parameters[parameters[, 1] < 0 |
-                                                parameters[, 2] < 0 |
+                                                parameters[, 2] <= 0 |
                                                 parameters[, 3] > 1 |
-                                                parameters[, 3] < 0 |
-                                                parameters[, 4] < 0 |
+                                                parameters[, 3] <= 0 |
+                                                parameters[, 4] <= 0 |
                                                 parameters[, 5] < 0 |
                                                 parameters[, 6] < 0, ])
       if (is.null(config$number_of_draws)) {
@@ -519,10 +577,10 @@ configuration <- function(config) {
       }
 
       parameters[parameters[, 1] < 0 |
-                   parameters[, 2] < 0 |
+                   parameters[, 2] <= 0 |
                    parameters[, 3] > 1 |
-                   parameters[, 3] < 0 |
-                   parameters[, 4] < 0 |
+                   parameters[, 3] <= 0 |
+                   parameters[, 4] <= 0 |
                    parameters[, 5] < 0 |
                    parameters[, 6] < 0, ] <-
         MASS::mvrnorm(config$number_of_draws,
