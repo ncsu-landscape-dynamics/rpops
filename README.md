@@ -1,4 +1,4 @@
-# PoPS (Pest or Pathogen Spread) R <img src="man/PoPS_GIF_transparent.gif" align="right" width="15%" />
+# PoPS (Pest or Pathogen Spread) R Package <img src="man/PoPS_GIF_transparent.gif" align="right" width="15%" />
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check)
