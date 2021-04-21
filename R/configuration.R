@@ -184,7 +184,7 @@ configuration <- function(config) {
   names(suitable_points) <- "data"
   suitable_points <- suitable_points[suitable_points$data > 0]
   suitable_cells <-
-    terra::extract(suitable, suitable_points, cellnumbers = TRUE)[, 1]
+    terra::extract(suitable, suitable_points, cells = TRUE)$cells
   suitable_row <- terra::rowFromCell(suitable, suitable_cells)
   suitable_row <- suitable_row - 1
   suitable_row <- as.integer(suitable_row)
