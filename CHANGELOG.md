@@ -101,3 +101,9 @@ Version 1.0.0 of the _PoPS Core_ C++ library and its interfaces: _rpops_ R packa
 - Distance to quarantine in 4 cardinal directions (`north_distance_to_quarantine`, `south_distance_to_quarantine`, `east_distance_to_quarantine`, `west_distance_to_quarantine` ).
 
 - Probability of quarantine escape (`escape_probability`).
+
+
+[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...master
+[1.0.2]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.0...v1.0.2
+[1.0.1]: https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0
+[1.0.0]: https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0
