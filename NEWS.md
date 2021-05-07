@@ -1,14 +1,36 @@
-# rpops (development version)
+# NEWS
 
-* Exposed and Infected populations can both be present at the start of a simulation
+All notable changes to this project should be documented in this file.
+
+The _Unreleased_ section should become the release once the release is ready
+and the text can be used as part of the release description.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
+with an additional rule that interfaces to the core library follow the same numbering
+although they are in separate repositories, so increasing version number there
+increases version here although there is no specific tag or release for that in
+this repository.
+
+## rpops (Unreleased)
+
+### Added
+- New dispersal kernels added: Uniform, Power-law, Deterministic neighbor, 
+  Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic.
+  * These kernels are usable for both (`natural_dispersal_kernel`, `anthropogenic_dispersal_kernel`).
+  * Used in the following functions (`pops`, `pops_multirun`, `auto_manage`, `calibrate`, 
+### Enhancements
+- Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average).
+
+
+
+- Exposed and Infected populations can both be present at the start of a simulation
+* 
+### Bug Fixes
 
 * Internal functions for data handling have switched from the raster package to the terra package (greatly speeds up data handling and preparation).
 
-* Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average).
-
-* New dispersal kernels added: Uniform, Power-law, Deterministic neighbor, Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic.
-
-# rpops (1.0.2)
+## rpops (1.0.2)
 
 * Multirun and validate draw a parameter set from the distribution for each run as intended
 
@@ -16,7 +38,12 @@
 
 * Fixed error when calibrating for less than 4 parameters
 
-# rpops (1.0.0)
+## rpops [1.0.1]
+
+- [Patch release of r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread/releases/tag/v1.0.1) (no changes in rpops)
+
+
+## [1.0.0] - 09-16-2020
 
 Version 1.0.0 of the _PoPS Core_ C++ library and its interfaces: _rpops_ R package and _r.pops.spread_ GRASS GIS module. The release of rpops includes:
 
