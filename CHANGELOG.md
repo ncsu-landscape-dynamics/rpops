@@ -1,4 +1,4 @@
-# NEWS
+# Change Log
 
 All notable changes to this project should be documented in this file.
 
@@ -17,26 +17,41 @@ this repository.
 ### Added
 
 - New dispersal kernels added: Uniform, Power-law, Deterministic neighbor, 
-  Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic (@mal.
+  Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic (@ChrisJones687, #73).
   * These kernels are usable for both (`natural_dispersal_kernel`, `anthropogenic_dispersal_kernel`).
   * Used in the following functions (`pops`, `pops_multirun`, `auto_manage`, `calibrate`, and `validate`).
 
-- Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average).
+- Overpopulation module added to pops-core (@wenzeslaus, #83).
+
+- Spatial Index to increase computational speed (@ChrisJones, #67)
 
 ### Changed
-- Exposed and Infected populations can both be present at the start of a simulation.
+- Exposed and Infected populations can both be present at the start of a simulation (@ChrisJones687, #92).
 
-- Internal functions for data handling have switched from the raster package to the terra package (greatly speeds up data handling and preparation).
+- Internal functions for data handling have switched from the raster package to the terra package (@ChrisJones687, #79).
+  * Adds terra dependency.
+  * Greatly speeds up data handling and preparation.
+
+- Mask parameter now used in pops-multirun to for post processing data for visuallization (@ChrisJones687, #104).
+
+- Calibration function now takes verbose parameter (@nfkruska, #99).
+
+- All functions now support vrt data types (@ChrisJones687, #97).
+
+- Raster files can now be read from S3 buckets (@chrisJones687, #75).
+  * needed for model-api for dashboard
 
 ### Fixed
 
+- Mask parameter works as intended in validate function after terra updates (@ChrisJones687, #104).
 
+- Improved pops_model documentation updating (@ChrisJones687, #94).
 
-## [1.0.2] - 10-20-2020
+## [1.0.2] - 2020-10-09
 
 ### Changed
 
-- Exposed populations now exported each time-step
+- Exposed populations now exported each time-step (@ChrisJones687, #64).
 
 ### Fixed
 
@@ -44,12 +59,12 @@ this repository.
 
 - Fixed error when calibrating for less than 4 parameters
 
-## [1.0.1] - 09-16-2020
+## [1.0.1] - 2020-09-16
 
 - [Patch release of r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread/releases/tag/v1.0.1) (no changes in rpops)
 
 
-## [1.0.0] - 09-16-2020
+## [1.0.0] - 2020-09-16
 
 Version 1.0.0 of the _PoPS Core_ C++ library and its interfaces: _rpops_ R package and _r.pops.spread_ GRASS GIS module. The release of rpops includes:
 
