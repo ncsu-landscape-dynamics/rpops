@@ -70,7 +70,9 @@ calibrate(
   calibration_method = "ABC",
   number_of_iterations = 1e+05,
   exposed_file = "",
-  verbose = TRUE
+  verbose = TRUE,
+  write_outputs = "None",
+  output_location = ""
 )
 }
 \arguments{
@@ -307,6 +309,12 @@ preferably 1 million).}
 \item{verbose}{Boolean with true printing current status of calibration,
 (e.g. the current generation, current particle, and the acceptance rate).
 Defaults if FALSE.}
+
+\item{write_outputs}{Either c("summary outputs", or "None"). If not
+"None" output folder path must be provided.}
+
+\item{output_folder_path}{this is the full path with either / or \\ (e.g.,
+"C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 }
 \value{
 a dataframe of the variables saved and their success metrics for
