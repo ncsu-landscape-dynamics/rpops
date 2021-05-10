@@ -21,6 +21,7 @@ Imports:
     iterators,
     landscapemetrics,
     lubridate,
+    folderfun,
     sp,
     utils,
     MASS,

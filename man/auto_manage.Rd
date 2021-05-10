@@ -73,7 +73,7 @@ auto_manage(
   exposed_file = "",
   mask = NULL,
   write_outputs = "None",
-  output_location = ""
+  output_folder_path = ""
 )
 }
 \arguments{

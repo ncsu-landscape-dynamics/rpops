@@ -72,7 +72,7 @@ calibrate(
   exposed_file = "",
   verbose = TRUE,
   write_outputs = "None",
-  output_location = ""
+  output_folder_path = ""
 )
 }
 \arguments{

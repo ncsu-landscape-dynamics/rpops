@@ -64,7 +64,7 @@ validate(
   leaving_scale_coefficient = 1,
   exposed_file = "",
   write_outputs = "None",
-  output_location = ""
+  output_folder_path = ""
 )
 }
 \arguments{
