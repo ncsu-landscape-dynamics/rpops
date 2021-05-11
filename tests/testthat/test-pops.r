@@ -714,7 +714,7 @@ test_that(
                     host_file = host_file,
                     total_populations_file = host_file,
                     use_lethal_temperature = TRUE,
-                    lethal_temperature = -12,
+                    lethal_temperature = -16,
                     lethal_temperature_month = 1,
                     temperature_file =
                       system.file("extdata", "simple2x2", "critical_temp.tif",
@@ -757,6 +757,8 @@ test_that(
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix,
                     use_lethal_temperature = TRUE,
+                    lethal_temperature = -16,
+                    lethal_temperature_month = 1,
                     temperature_file =
                       system.file("extdata", "simple2x2", "critical_temp.tif",
                                   package = "PoPS"),
@@ -814,6 +816,8 @@ test_that(
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
          use_lethal_temperature = TRUE,
+         lethal_temperature = -16,
+         lethal_temperature_month = 1,
          temperature_file =
            system.file("extdata", "simple2x2", "critical_temp.tif",
                        package = "PoPS"),
@@ -877,6 +881,8 @@ test_that(
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
          use_lethal_temperature = TRUE,
+         lethal_temperature = -16,
+         lethal_temperature_month = 1,
          temperature_file =
            system.file("extdata", "simple2x2", "critical_temp.tif",
                        package = "PoPS"),
