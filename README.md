@@ -13,6 +13,29 @@ This is the R package for simulating spread of pests and pathogens. The package 
 
 PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit [popsmodel.org](https://popsmodel.org/). The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use [r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
 
+## Installation
+
+If you are on Windows, you need to first install
+[Rtools](https://cran.r-project.org/bin/windows/Rtools/) to get a C++ compiler that R can use.
+
+### Version Specific
+
+If you want to install a specific version just change the version number.
+
+```R
+install.packages("remotes")
+remotes::install_github("ncsu-landscape-dynamics/rpops", ref = "v1.0.2")
+library(PoPS)
+
+```
+### Development Version
+
+```R
+install.packages("remotes")
+remotes::install_github("ncsu-landscape-dynamics/rpops")
+library(PoPS)
+
+```
 ## Features
 the PoPS package in R is built on top of PoPS Core C++ library includes:
 
@@ -75,22 +98,7 @@ you are using for example:
 * *We have used rpops R package version 1.0.0 from
   <https://github.com/ncsu-landscape-dynamics/rpops>*.
 
-## How to install
-
-Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) if not already installed. Once Rtools is installed you can the latest version of PoPS by 
-running the code below and changing the ref to match the latest semantic version
-or the specific version that you are looking to install. PoPS requires [terra](https://github.com/rspatial/terra) version 1.1-17 or higher.
-
-```R
-install.packages("devtools")
-library(devtools)
-devtools::install_github("ncsu-landscape-dynamics/rpops", ref = "v1.0.2")
-library(PoPS)
-
-```
-
 ## Contributing
-
 
 Please see the [pops-core](https://github.com/ncsu-landscape-dynamics/pops-core#readme) repository for contributing best practices and release policies. Other than that, just open pull requests against this repo. We suggest following the [Style Guide from Hadley](http://adv-r.had.co.nz/Style.html) for R code.
 
@@ -114,8 +122,8 @@ _(alphabetical order)_
 * Nick Kruskamp
 * Francesco Tonini
 
-See Git commit history, GitHub insights, or CHANGELOG.md file (if present)
-for details about contributions.
+See Git commit history, GitHub insights, or CHANGELOG.md file for details about
+contributions.
 
 ## License
 
