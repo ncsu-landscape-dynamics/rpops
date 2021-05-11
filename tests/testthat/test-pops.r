@@ -767,7 +767,6 @@ test_that(
                       coefficient_file)$infected[[1]],
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
 
-  skip_on_appveyor()
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,
