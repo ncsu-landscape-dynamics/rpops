@@ -13,6 +13,7 @@ pops_model(
   exposed,
   susceptible,
   total_populations,
+  total_hosts,
   mortality_on,
   mortality_tracker,
   mortality,
@@ -96,6 +97,8 @@ model type}
 \item{susceptible}{matrix of susceptible hosts}
 
 \item{total_populations}{matrix of total populations}
+
+\item{total_hosts}{matrix of all hosts}
 
 \item{mortality_on}{boolean to turn host mortality on and off
 (TRUE or FALSE)}

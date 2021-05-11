@@ -247,7 +247,6 @@ public:
     unsigned movement(
         IntegerRaster& infected,
         IntegerRaster& susceptible,
-        std::vector<IntegerRaster>& exposed,
         IntegerRaster& mortality_tracker,
         IntegerRaster& total_hosts,
         unsigned step,
