@@ -519,7 +519,7 @@ configuration <- function(config) {
                                          wide = TRUE)
   config$total_populations <- terra::as.matrix(total_populations,
                                                wide = TRUE)
-
+  config$total_hosts <- terra::as.matrix(host, wide = TRUE)
 
   config$mortality <- mortality_tracker
   config$resistant <- mortality_tracker
@@ -529,7 +529,7 @@ configuration <- function(config) {
   if (config$use_quarantine) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       quarantine_check <-
-        secondary_raster_checks(config$quarantine_areas_file, infected,
+        secondary_raster_checks(config$quarantine_areas_file, host,
                                 config$use_s3, config$bucket)
     } else {
       quarantine_check <-
