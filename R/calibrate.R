@@ -63,6 +63,10 @@
 #' @param verbose Boolean with true printing current status of calibration,
 #' (e.g. the current generation, current particle, and the acceptance rate).
 #' Defaults if FALSE.
+#' @param write_outputs Either c("summary outputs", or "None"). If not
+#' "None" output folder path must be provided.
+#' @param output_folder_path this is the full path with either / or \\ (e.g.,
+#' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -145,7 +149,9 @@ calibrate <- function(infected_years_file,
                       calibration_method = "ABC",
                       number_of_iterations = 100000,
                       exposed_file = "",
-                      verbose = TRUE) {
+                      verbose = TRUE,
+                      write_outputs = "None",
+                      output_folder_path = "") {
 
   # add all data to config list
   config <- c()
@@ -219,6 +225,8 @@ calibrate <- function(infected_years_file,
   # calibration.
   config$function_name <- "calibrate"
   config$failure <- NULL
+  config$write_outputs <- write_outputs
+  config$output_folder_path <- output_folder_path
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -958,5 +966,10 @@ calibrate <- function(infected_years_file,
       "posterior_means", "posterior_cov_matrix",
       "total_number_of_observations", "raw_calibration_data"
     )
+
+  if (config$write_outputs %in% config$output_write_list) {
+    save(outputs, file = ffOut("calibration_outputs.rdata"))
+  }
+
   return(outputs)
 }

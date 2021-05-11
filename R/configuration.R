@@ -16,6 +16,7 @@
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom aws.s3 head_object save_object
+#' @importFrom folderfun setff
 #'
 #' @return config list with all data ready for pops C++ or error message
 #'
@@ -64,6 +65,22 @@ configuration <- function(config) {
     if (!multispecies_check$checks_passed) {
       config$failure <- multispecies_check$failed_check
       return(config)
+    }
+  }
+
+  config$output_list <- c("all_simulations", "summary outputs", "None")
+  config$output_write_list <- c("all_simulations", "summary outputs")
+
+  if (config$write_outputs %notin% config$output_list) {
+    config$failure <-
+      "write_outputs is not one of c('all simulations', 'summary outputs', 'None')"
+  }
+
+  if (config$write_outputs %in% config$output_write_list) {
+    if (!base::dir.exists(config$output_folder_path)) {
+      config$failure <- "output path doesn't exist"
+    } else {
+      folderfun::setff("Out", config$output_folder_path)
     }
   }
 

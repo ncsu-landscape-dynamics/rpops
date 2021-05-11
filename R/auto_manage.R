@@ -32,6 +32,10 @@
 #' @param direction_first boolean to indicate if direction is the
 #' first priortity in sorting (if false first sorting priority goes to the
 #' selection_method)
+#' @param write_outputs Either c("all_simulations", "summary outputs", or
+#' "None"). If not "None" output folder path must be provided.
+#' @param output_folder_path this is the full path with either / or \\ (e.g.,
+#' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -111,7 +115,9 @@ auto_manage <- function(infected_files,
                         leaving_percentage = 0,
                         leaving_scale_coefficient = 1,
                         exposed_file = "",
-                        mask = NULL) {
+                        mask = NULL,
+                        write_outputs = "None",
+                        output_folder_path = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -176,6 +182,8 @@ auto_manage <- function(infected_files,
   config$function_name <- "auto-manage"
   config$failure <- NULL
   config$mask <- mask
+  config$write_outputs <- write_outputs
+  config$output_folder_path <- output_folder_path
 
   config <- configuration(config)
 
@@ -195,6 +203,7 @@ auto_manage <- function(infected_files,
 
   infected_species <- list(as.matrix(infected_speci[[1]]))
   susceptible_species <- list(as.matrix(susceptible_speci[[1]]))
+
   for(u in 2:nlayers(infected_speci)) {
     infected_species[[u]] <- as.matrix(infected_speci[[u]])
     susceptible_species[[u]] <- as.matrix(susceptible_speci[[u]])
@@ -502,7 +511,32 @@ auto_manage <- function(infected_files,
   names(north_rates) <- species
   names(south_rates) <- species
 
-  outputs <- list(infecteds, susceptibles, probabilities, number_infecteds, infected_areas, west_rates, east_rates, north_rates, south_rates, treatments)
-  names(outputs) <- c('infecteds', 'susceptibles', 'probabilities', 'number_infecteds', 'infected_areas', 'west_rates', 'east_rates', 'north_rates', 'south_rates', 'treatments')
+  outputs <-
+    list(infecteds,
+         susceptibles,
+         probabilities,
+         number_infecteds,
+         infected_areas,
+         west_rates,
+         east_rates,
+         north_rates,
+         south_rates,
+         treatments)
+  names(outputs) <-
+    c('infecteds',
+      'susceptibles',
+      'probabilities',
+      'number_infecteds',
+      'infected_areas',
+      'west_rates',
+      'east_rates',
+      'north_rates',
+      'south_rates',
+      'treatments')
+
+  if (config$write_outputs %in% config$output_write_list) {
+    save(outputs, file = ffOut("automanage_outputs.rdata"))
+  }
+
   return(outputs)
 }
