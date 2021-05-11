@@ -62,7 +62,9 @@ validate(
   overpopulation_percentage = 0,
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
-  exposed_file = ""
+  exposed_file = "",
+  write_outputs = "None",
+  output_folder_path = ""
 )
 }
 \arguments{
@@ -256,6 +258,12 @@ is considered to be overpopulated}
 the natural kernel (if applicable)}
 
 \item{exposed_file}{a file with the exposed for the current}
+
+\item{write_outputs}{Either c("summary outputs", or "None"). If not
+"None" output folder path must be provided.}
+
+\item{output_folder_path}{this is the full path with either / or \\ (e.g.,
+"C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 }
 \value{
 a dataframe of the variables saved and their success metrics for

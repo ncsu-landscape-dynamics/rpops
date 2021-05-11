@@ -271,6 +271,8 @@ pops <- function(infected_file,
   config$function_name <- "pops"
   config$failure <- NULL
   config$exposed_file <- exposed_file
+  config$write_outputs <- "None"
+  config$output_folder_path <- ""
 
   config <- configuration(config)
 

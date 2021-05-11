@@ -15,6 +15,10 @@
 #' the calibration to converge at least 10
 #' @param number_of_cores enter how many cores you want to use (default = NA).
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
+#' @param write_outputs Either c("all_simulations", "summary outputs", or
+#' "None"). If not "None" output folder path must be provided.
+#' @param output_folder_path this is the full path with either / or \\ (e.g.,
+#' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
@@ -81,7 +85,9 @@ pops_multirun <- function(infected_file,
                           leaving_percentage = 0,
                           leaving_scale_coefficient = 1,
                           exposed_file = "",
-                          mask = NULL) {
+                          mask = NULL,
+                          write_outputs = "None",
+                          output_folder_path = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -145,6 +151,8 @@ pops_multirun <- function(infected_file,
   config$failure <- NULL
   config$exposed_file <- exposed_file
   config$mask <- mask
+  config$write_outputs <- write_outputs
+  config$output_folder_path <- output_folder_path
 
   config <- configuration(config)
 
@@ -552,6 +560,21 @@ pops_multirun <- function(infected_file,
       "south_distance_to_quarantine",
       "east_distance_to_quarantine",
       "west_distance_to_quarantine")
+
+
+  if (config$write_outputs %in% config$output_write_list) {
+    terra::writeRaster(simulation_probability_stack,
+                       ffOut("simulation_probability.tif"), overwrite = TRUE)
+    terra::writeRaster(simulation_probability_stack,
+                       ffOut("simulation_mean.tif"), overwrite = TRUE)
+    terra::writeRaster(simulation_probability_stack,
+                       ffOut("simulation_sd_stack"), overwrite = TRUE)
+    terra::writeRaster(simulation_probability_stack,
+                       ffOut("simulation_min_stack"), overwrite = TRUE)
+    terra::writeRaster(simulation_probability_stack,
+                       ffOut("simulation_max_stack"), overwrite = TRUE)
+    save(outputs, file = ffOut("multirun_outputs.rdata"))
+  }
 
   return(outputs)
 }

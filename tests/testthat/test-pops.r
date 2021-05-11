@@ -768,6 +768,7 @@ test_that(
                     precipitation_coefficient_file =
                       coefficient_file)$infected[[1]],
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+
   expect_equal(
     pops(infected_file = infected_file,
          host_file = host_file,

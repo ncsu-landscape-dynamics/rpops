@@ -78,6 +78,8 @@ config$function_name <- "pops"
 config$exposed_file <-
   system.file("extdata", "simple20x20", "initial_infection.tif",
               package = "PoPS")
+config$write_outputs <- "None"
+config$output_folder_path <- ""
 
 
 test_that("Configuration returns proper values when no errors present", {
@@ -350,8 +352,8 @@ test_that("Configuration returns proper values when no errors present", {
   # expect_equal(config$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Exponential power"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  # config <- configuration(config)
+  # expect_equal(config$failure, NULL)
 
   config$anthropogenic_kernel_type <- "weibull"
   config <- configuration(config)
@@ -443,4 +445,18 @@ test_that("configuration returns proper errors", {
     "Anthropogenic kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
       'gamma', 'weibull', 'logistic'")
+
+  config$anthropogenic_kernel_type <- "cauchy"
+  config$write_outputs <- "hi"
+  config <- configuration(config)
+  expect_equal(
+    config$failure,
+    "write_outputs is not one of c('all simulations', 'summary outputs', 'None')")
+
+  config$write_outputs <- "summary outputs"
+  config$output_folder_path <- "hi"
+  config <- configuration(config)
+  expect_equal(
+    config$failure,
+    "output path doesn't exist")
 })

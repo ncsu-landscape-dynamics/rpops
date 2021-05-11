@@ -24,6 +24,10 @@
 #' (posterior means)
 #' @param parameter_cov_matrix the parameter covariance matrix from the abc
 #' calibration function (posterior covairance matrix)
+#' @param write_outputs Either c("summary outputs", or "None"). If not
+#' "None" output folder path must be provided.
+#' @param output_folder_path this is the full path with either / or \\ (e.g.,
+#' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
@@ -94,7 +98,9 @@ validate <- function(infected_years_file,
                      overpopulation_percentage = 0,
                      leaving_percentage = 0,
                      leaving_scale_coefficient = 1,
-                     exposed_file = "") {
+                     exposed_file = "",
+                     write_outputs = "None",
+                     output_folder_path = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -158,6 +164,8 @@ validate <- function(infected_years_file,
   config$function_name <- "validate"
   config$failure <- NULL
   config$exposed_file <- exposed_file
+  config$write_outputs <- write_outputs
+  config$output_folder_path <- output_folder_path
 
   config <- configuration(config)
 
@@ -284,6 +292,10 @@ validate <- function(infected_years_file,
     }
 
   parallel::stopCluster(cl)
+
+  if (config$write_outputs %in% config$output_write_list) {
+    save(outputs, file = ffOut("validation_outputs.rdata"))
+  }
 
   return(qa)
 }
