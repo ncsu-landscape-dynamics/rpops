@@ -233,7 +233,8 @@ public:
      * @param infected Currently infected hosts
      * @param susceptible Currently susceptible hosts
      * @param mortality_tracker Hosts that are infected at a specific time step
-     * @param total_hosts Total number of hosts
+     * @param total_hosts All host individuals in the area. Is equal to
+     * infected + exposed + susceptible in the cell.s
      * @param step the current step of the simulation
      * @param last_index the last index to not be used from movements
      * @param movements a vector of ints with row_from, col_from, row_to, col_to, and
@@ -246,6 +247,7 @@ public:
     unsigned movement(
         IntegerRaster& infected,
         IntegerRaster& susceptible,
+        std::vector<IntegerRaster>& exposed,
         IntegerRaster& mortality_tracker,
         IntegerRaster& total_hosts,
         unsigned step,
@@ -487,7 +489,8 @@ public:
      *
      * @param[in,out] susceptible Susceptible hosts
      * @param[in,out] infected Infected hosts
-     * @param[in] total_hosts All hosts
+     * @param total_hosts All host individuals in the area. Is equal to
+     * infected + exposed + susceptible in the cell.
      * @param[in,out] outside_dispersers Dispersers escaping the rasters
      * @param dispersal_kernel Dispersal kernel to move dispersers (pests)
      * @param overpopulation_percentage Percentage of occupied hosts when the cell is

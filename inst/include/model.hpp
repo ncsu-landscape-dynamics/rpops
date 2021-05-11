@@ -203,6 +203,8 @@ public:
      * @param step Step number in the simulation.
      * @param[in,out] infected Infected hosts
      * @param[in,out] susceptible Susceptible hosts
+     * @param[in,out] total_hosts All host individuals in the area. Is equal to
+     * infected + exposed + susceptible in the cell.
      * @param[in,out] total_populations All host and non-host individuals in the area
      * @param[out] dispersers Dispersing individuals (used internally)
      * @param exposed[in,out] Exposed hosts (if SEI model is active)
@@ -232,6 +234,7 @@ public:
         IntegerRaster& infected,
         IntegerRaster& susceptible,
         IntegerRaster& total_populations,
+        IntegerRaster& total_hosts,
         IntegerRaster& dispersers,
         std::vector<IntegerRaster>& exposed,
         std::vector<IntegerRaster>& mortality_tracker,
@@ -296,7 +299,7 @@ public:
                 simulation_.move_overpopulated_pests(
                     susceptible,
                     infected,
-                    total_populations,
+                    total_hosts,
                     outside_dispersers,
                     overpopulation_kernel,
                     suitable_cells,
@@ -308,7 +311,7 @@ public:
                     infected,
                     susceptible,
                     mortality_tracker[mortality_simulation_year],
-                    total_populations,
+                    total_hosts,
                     step,
                     last_index,
                     movements,
