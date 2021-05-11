@@ -73,6 +73,14 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             use_quarantine <- FALSE
             use_spreadrates <- FALSE
             calibration_method <- "ABC"
+            use_overpopulation_movements <- FALSE
+            overpopulation_percentage <- 0
+            leaving_percentage <- 0
+            leaving_scale_coefficient <- 1
+            exposed_file <- ""
+            verbose <- TRUE
+            write_outputs <- "None"
+            output_folder_path <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -132,12 +140,16 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
-                              use_overpopulation_movements = FALSE,
-                              overpopulation_percentage = 0,
-                              leaving_percentage = 0,
-                              leaving_scale_coefficient = 1,
+                              use_overpopulation_movements,
+                              overpopulation_percentage,
+                              leaving_percentage,
+                              leaving_scale_coefficient,
                               calibration_method,
-                              number_of_iterations)
+                              number_of_iterations,
+                              exposed_file,
+                              verbose,
+                              write_outputs,
+                              output_folder_path)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -228,6 +240,14 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             use_quarantine <- FALSE
             use_spreadrates <- FALSE
             calibration_method <- "ABC"
+            use_overpopulation_movements <- FALSE
+            overpopulation_percentage <- 0
+            leaving_percentage <- 0
+            leaving_scale_coefficient <- 1
+            exposed_file <- ""
+            verbose <- TRUE
+            write_outputs <- "None"
+            output_folder_path <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -287,12 +307,16 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
-                              use_overpopulation_movements = FALSE,
-                              overpopulation_percentage = 0,
-                              leaving_percentage = 0,
-                              leaving_scale_coefficient = 1,
+                              use_overpopulation_movements,
+                              overpopulation_percentage,
+                              leaving_percentage,
+                              leaving_scale_coefficient,
                               calibration_method,
-                              number_of_iterations)
+                              number_of_iterations,
+                              exposed_file,
+                              verbose,
+                              write_outputs,
+                              output_folder_path)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -384,6 +408,14 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             use_quarantine <- FALSE
             use_spreadrates <- FALSE
             calibration_method <- "ABC"
+            use_overpopulation_movements <- FALSE
+            overpopulation_percentage <- 0
+            leaving_percentage <- 0
+            leaving_scale_coefficient <- 1
+            exposed_file <- ""
+            verbose <- TRUE
+            write_outputs <- "None"
+            output_folder_path <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -443,12 +475,16 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
-                              use_overpopulation_movements = FALSE,
-                              overpopulation_percentage = 0,
-                              leaving_percentage = 0,
-                              leaving_scale_coefficient = 1,
+                              use_overpopulation_movements,
+                              overpopulation_percentage,
+                              leaving_percentage,
+                              leaving_scale_coefficient,
                               calibration_method,
-                              number_of_iterations)
+                              number_of_iterations,
+                              exposed_file,
+                              verbose,
+                              write_outputs,
+                              output_folder_path)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -539,7 +575,14 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             use_spreadrates <- FALSE
             calibration_method <- "ABC"
             number_of_iterations <- 10
-
+            use_overpopulation_movements <- FALSE
+            overpopulation_percentage <- 0
+            leaving_percentage <- 0
+            leaving_scale_coefficient <- 1
+            exposed_file <- ""
+            verbose <- TRUE
+            write_outputs <- "None"
+            output_folder_path <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -599,12 +642,16 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
-                              use_overpopulation_movements = FALSE,
-                              overpopulation_percentage = 0,
-                              leaving_percentage = 0,
-                              leaving_scale_coefficient = 1,
+                              use_overpopulation_movements,
+                              overpopulation_percentage,
+                              leaving_percentage,
+                              leaving_scale_coefficient,
                               calibration_method,
-                              number_of_iterations)
+                              number_of_iterations,
+                              exposed_file,
+                              verbose,
+                              write_outputs,
+                              output_folder_path)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -693,6 +740,14 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             use_quarantine <- FALSE
             use_spreadrates <- FALSE
             calibration_method <- "MCMC"
+            use_overpopulation_movements <- FALSE
+            overpopulation_percentage <- 0
+            leaving_percentage <- 0
+            leaving_scale_coefficient <- 1
+            exposed_file <- ""
+            verbose <- TRUE
+            write_outputs <- "None"
+            output_folder_path <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -752,12 +807,16 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
-                              use_overpopulation_movements = FALSE,
-                              overpopulation_percentage = 0,
-                              leaving_percentage = 0,
-                              leaving_scale_coefficient = 1,
+                              use_overpopulation_movements,
+                              overpopulation_percentage,
+                              leaving_percentage,
+                              leaving_scale_coefficient,
                               calibration_method,
-                              number_of_iterations)
+                              number_of_iterations,
+                              exposed_file,
+                              verbose,
+                              write_outputs,
+                              output_folder_path)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -847,6 +906,14 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             use_quarantine <- FALSE
             use_spreadrates <- FALSE
             calibration_method <- "MCMC"
+            use_overpopulation_movements <- FALSE
+            overpopulation_percentage <- 0
+            leaving_percentage <- 0
+            leaving_scale_coefficient <- 1
+            exposed_file <- ""
+            verbose <- TRUE
+            write_outputs <- "None"
+            output_folder_path <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -906,12 +973,16 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               quarantine_areas_file,
                               use_quarantine,
                               use_spreadrates,
-                              use_overpopulation_movements = FALSE,
-                              overpopulation_percentage = 0,
-                              leaving_percentage = 0,
-                              leaving_scale_coefficient = 1,
+                              use_overpopulation_movements,
+                              overpopulation_percentage,
+                              leaving_percentage,
+                              leaving_scale_coefficient,
                               calibration_method,
-                              number_of_iterations)
+                              number_of_iterations,
+                              exposed_file,
+                              verbose,
+                              write_outputs,
+                              output_folder_path)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)

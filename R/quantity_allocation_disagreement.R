@@ -184,7 +184,8 @@ quantity_allocation_disagreement <-
     output$total_disagreement <- total_disagreement
     output$configuration_disagreement <- configuration_disagreement
     output$odds_ratio <- odds_ratio
-    output$residual_error <- terra::global(abs(ref - comp), "sum")[[1]]
+    output$residual_error <-
+      terra::global(abs(ref - comp), "sum", na.rm = TRUE)[[1]]
     output$true_infected <- positives_in_reference
     output$simulated_infected <- positives_in_comparison
     output$infected_difference <-

@@ -476,9 +476,7 @@ calibrate <- function(infected_years_file,
             terra::values(infected_sim) <- data$infected[[y]]
           }
 
-          if (!is.null(config$mask)) {
-            infected_sim[is.na(config$mask)] <- 0
-          }
+          infected_sim[is.na(config$mask)] <- 0
 
           # calculate residual error for each time step
           diff_raster <- config$infection_years[[y]] - infected_sim
@@ -691,10 +689,8 @@ calibrate <- function(infected_years_file,
         reference <- terra::rast(config$infected_file)
         terra::values(comp_year) <- data$infected[[q]]
         terra::values(reference) <- config$infection_years2[[q]]
-        if (!is.null(config$mask)){
-          mask <- terra::rast(config$infected_file)
-          terra::values(mask) <- config$mask_matrix
-        }
+        mask <- terra::rast(config$infected_file)
+        terra::values(mask) <- config$mask_matrix
         quantity_allocation_disagreement(reference,
                                          comp_year,
                                          config$configuration,
