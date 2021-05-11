@@ -16,8 +16,7 @@
 ^src/PoPS.dll$
 ^src/.clang-format
 
-^contributing_docs\.md$
-^contributing_docs
+^.md$
 
 ^inst/cpp/pops-core/contributing\.md$
 ^inst/cpp/pops-core/LICENSE$
