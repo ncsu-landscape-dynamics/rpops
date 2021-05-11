@@ -68,6 +68,14 @@ configuration <- function(config) {
     }
   }
 
+  if (config$function_name == "sensitivity") {
+    config$sensitivity_rcl <- c(0.10, Inf, 1, 0, 0.10, 0)
+    config$sensitivity_rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
+  }
+
+  config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
+  config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
+
   config$output_list <- c("all_simulations", "summary outputs", "None")
   config$output_write_list <- c("all_simulations", "summary outputs")
 
@@ -188,12 +196,19 @@ configuration <- function(config) {
     }
     if (mask_check$checks_passed) {
       mask <- mask_check$raster
+      mask <- terra::classify(mask, config$rclmat)
+      host_mask <- terra::classify(host, config$rclmat)
+      mask <- terra::mask(host_mask, mask, maskvalues = NA, updatevalue = NA)
       config$mask <- mask
       config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
     } else {
       config$failure <- mask_check$failed_check
       return(config)
     }
+  } else {
+    mask <- terra::classify(host, config$rclmat)
+    config$mask <- mask
+    config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
   }
 
   suitable <- host + infected
@@ -538,14 +553,6 @@ configuration <- function(config) {
   config$mortality_tracker <- mortality_tracker
   config$exposed <- exposed
   config$infected <- infected
-
-  if (config$function_name == "sensitivity") {
-    config$rcl <- c(0.10, Inf, 1, 0, 0.10, 0)
-    config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
-  } else {
-    config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
-    config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
-  }
 
 
   if (config$function_name %in% c("validate", "multirun", "sensitivity")) {

@@ -512,11 +512,21 @@ pops_multirun <- function(infected_file,
   }
 
   if (!is.null(config$mask)) {
-    simulation_probability_stack[is.na(config$mask)] <- 0
-    simulation_mean_stack[is.na(config$mask)] <- 0
-    simulation_sd_stack[is.na(config$mask)] <- 0
-    simulation_min_stack[is.na(config$mask)] <- 0
-    simulation_max_stack[is.na(config$mask)] <- 0
+    simulation_probability_stack <-
+      terra::mask(simulation_probability_stack, config$mask,
+                  maskvalues = NA, updatevalue = NA)
+    simulation_mean_stack <-
+      terra::mask(simulation_mean_stack, config$mask,
+                  maskvalues = NA, updatevalue = NA)
+    simulation_sd_stack <-
+      terra::mask(simulation_sd_stack, config$mask,
+                  maskvalues = NA, updatevalue = NA)
+    simulation_min_stack <-
+      terra::mask(simulation_min_stack, config$mask,
+                  maskvalues = NA, updatevalue = NA)
+    simulation_max_stack <-
+      terra::mask(simulation_max_stack, config$mask,
+                  maskvalues = NA, updatevalue = NA)
   }
 
   outputs <-
