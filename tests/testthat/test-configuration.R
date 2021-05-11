@@ -81,323 +81,324 @@ config$exposed_file <-
 config$write_outputs <- "None"
 config$output_folder_path <- ""
 
-
 test_that("Configuration returns proper values when no errors present", {
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$start_exposed <- TRUE
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$start_exposed <- FALSE
   config$parameter_means <- c(0.2, 20, 0.99, 6000, 0, 0)
   config$parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0.1)
   config$function_name <- "multirun"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "cauchy"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Cauchy"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "exponential"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
+
   config$natural_kernel_type <- "Exponential"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "uniform"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Uniform"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
+
   config$natural_kernel_type <- "deterministic neighbor"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "deterministic-neighbor"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "power law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "power-law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Power-law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Power-Law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Power Law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Power law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "hyperbolic secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "hyperbolic-secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Hyperbolic-secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Hyperbolic-Secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Hyperbolic secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Hyperbolic Secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "gamma"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Gamma"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   # config$natural_kernel_type <- "exponential power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "exponential-power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "Exponential-power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "Exponential-Power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "Exponential power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "weibull"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Weibull"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   # config$natural_kernel_type <- "log normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "log-normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "Log-normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "Log-Normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "Log normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$natural_kernel_type <- "Log Normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "logistic"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$natural_kernel_type <- "Logistic"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "cauchy"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Cauchy"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "exponential"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Exponential"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "uniform"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Uniform"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "deterministic neighbor"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "deterministic-neighbor"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "power law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "power-law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Power-law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Power-Law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Power Law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Power law"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "hyperbolic secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "hyperbolic-secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Hyperbolic-secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Hyperbolic-Secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Hyperbolic secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Hyperbolic Secant"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "gamma"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Gamma"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   # config$anthropogenic_kernel_type <- "exponential power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "exponential-power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Exponential-power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Exponential-Power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Exponential power"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "weibull"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Weibull"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "normal"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   # config$anthropogenic_kernel_type <- "log normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "log-normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Log-normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Log-Normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Log normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
   #
   # config$anthropogenic_kernel_type <- "Log Normal"
-  # config <- configuration(config)
-  # expect_equal(config$failure, NULL)
+  # config2 <- configuration(config)
+  # expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "logistic"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$anthropogenic_kernel_type <- "Logistic"
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 
   config$infected_files <-
     c(system.file("extdata", "simple20x20", "initial_infection.tif",
@@ -406,57 +407,57 @@ test_that("Configuration returns proper values when no errors present", {
   config$parameter_cov_matrix <- list(matrix(ncol = 6, nrow = 6, 0.1))
   config$function_name <- "auto-manage"
   config$species <- c("pest")
-  config <- configuration(config)
-  expect_equal(config$failure, NULL)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
 })
 
 test_that("configuration returns proper errors", {
   config$model_type <- "SEID"
-  config <- configuration(config)
-  expect_equal(config$failure,
+  config2 <- configuration(config)
+  expect_equal(config2$failure,
                "Model type is not a valid type options are 'SI' or 'SEI'")
 
   config$model_type <- "SEI"
   config$latency_period <- 0
-  config <- configuration(config)
-  expect_equal(config$failure,
+  config2 <- configuration(config)
+  expect_equal(config2$failure,
                "Model type is set to SEI but the latency period is less than 1")
 
   config$latency_period <- 1
   config$treatment_method <- "everything"
-  config <- configuration(config)
-  expect_equal(config$failure,
+  config2 <- configuration(config)
+  expect_equal(config2$failure,
                "treatment method is not one of the valid treatment options")
 
   config$treatment_method <- "ratio"
   config$natural_kernel_type <- "hello"
-  config <- configuration(config)
+  config2 <- configuration(config)
   expect_equal(
-    config$failure,
+    config2$failure,
     "Natural kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
       'gamma', 'weibull', 'logistic'")
 
   config$natural_kernel_type <- "cauchy"
   config$anthropogenic_kernel_type <- "good-bye"
-  config <- configuration(config)
+  config2 <- configuration(config)
   expect_equal(
-    config$failure,
+    config2$failure,
     "Anthropogenic kernel type not one of 'cauchy', 'exponential',
       'uniform','deterministic neighbor','power law', 'hyperbolic secant',
       'gamma', 'weibull', 'logistic'")
 
   config$anthropogenic_kernel_type <- "cauchy"
   config$write_outputs <- "hi"
-  config <- configuration(config)
+  config2 <- configuration(config)
   expect_equal(
-    config$failure,
+    config2$failure,
     "write_outputs is not one of c('all simulations', 'summary outputs', 'None')")
 
   config$write_outputs <- "summary outputs"
   config$output_folder_path <- "hi"
-  config <- configuration(config)
+  config2 <- configuration(config)
   expect_equal(
-    config$failure,
+    config2$failure,
     "output path doesn't exist")
 })
