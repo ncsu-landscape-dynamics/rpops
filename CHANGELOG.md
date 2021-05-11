@@ -32,7 +32,7 @@ this repository.
   * Adds terra dependency.
   * Greatly speeds up data handling and preparation.
 
-- Mask parameter now used in pops-multirun to for post processing data for visuallization (@ChrisJones687, #104).
+- Mask parameter now used in pops-multirun for post processing data for visualization (@ChrisJones687, #104).
 
 - Calibration function now takes verbose parameter (@nfkruska, #99).
 
@@ -40,10 +40,14 @@ this repository.
 
 - Raster files can now be read from S3 buckets (@chrisJones687, #75).
   * needed for model-api for dashboard
+  
+- Outputs can now be saved with `write_outputs` and `output_folder_path` parameters (@ChrisJones687, #111)
+
+- Host map now used as initial mask for postprocessing and validation calculations (@ChrisJones687, #112)
 
 ### Fixed
 
-- Mask parameter works as intended in validate function after terra updates (@ChrisJones687, #104).
+- Mask parameter works as intended in validate function after terra update (@ChrisJones687, #104).
 
 - Improved pops_model documentation updating (@ChrisJones687, #94).
 
