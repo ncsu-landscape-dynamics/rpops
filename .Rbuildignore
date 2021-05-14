@@ -16,7 +16,9 @@
 ^src/PoPS.dll$
 ^src/.clang-format
 
-^.md$
+^CHANGELOG\.md$
+^CODE_OF_CONDUCT\.md$
+^CONTRIBUTING\.md$
 
 ^inst/cpp/pops-core/contributing\.md$
 ^inst/cpp/pops-core/LICENSE$
