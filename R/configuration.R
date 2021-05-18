@@ -23,45 +23,46 @@
 #' @export
 
 configuration <- function(config) {
-
   "%notin%" <- Negate("%in%")
 
   # Check that all data has same length if using multiple species currently
   # only implemented for auto manage
   if (config$function_name == "auto-manage") {
     multispecies_check <-
-      multispecies_checks(config$species,
-                          config$infected_files,
-                          config$parameter_means,
-                          config$parameter_cov_matrix,
-                          config$natural_kernel_type,
-                          config$anthropogenic_kernel_type,
-                          config$natural_dir,
-                          config$anthropogenic_dir,
-                          config$model_type,
-                          config$host_file,
-                          config$total_populations_file,
-                          config$temp,
-                          config$temperature_coefficient_file,
-                          config$precip,
-                          config$precipitation_coefficient_file,
-                          config$latency_period,
-                          config$time_step,
-                          config$season_month_start,
-                          config$season_month_end,
-                          config$use_lethal_temperature,
-                          config$temperature_file,
-                          config$lethal_temperature,
-                          config$lethal_temperature_month,
-                          config$mortality_on,
-                          config$mortality_rate,
-                          config$mortality_time_lag,
-                          config$movements_file,
-                          config$use_movements,
-                          config$start_exposed,
-                          config$quarantine_areas_file,
-                          config$use_quarantine,
-                          config$use_spreadrates)
+      multispecies_checks(
+        config$species,
+        config$infected_files,
+        config$parameter_means,
+        config$parameter_cov_matrix,
+        config$natural_kernel_type,
+        config$anthropogenic_kernel_type,
+        config$natural_dir,
+        config$anthropogenic_dir,
+        config$model_type,
+        config$host_file,
+        config$total_populations_file,
+        config$temp,
+        config$temperature_coefficient_file,
+        config$precip,
+        config$precipitation_coefficient_file,
+        config$latency_period,
+        config$time_step,
+        config$season_month_start,
+        config$season_month_end,
+        config$use_lethal_temperature,
+        config$temperature_file,
+        config$lethal_temperature,
+        config$lethal_temperature_month,
+        config$mortality_on,
+        config$mortality_rate,
+        config$mortality_time_lag,
+        config$movements_file,
+        config$use_movements,
+        config$start_exposed,
+        config$quarantine_areas_file,
+        config$use_quarantine,
+        config$use_spreadrates
+      )
     if (!multispecies_check$checks_passed) {
       config$failure <- multispecies_check$failed_check
       return(config)
@@ -88,24 +89,30 @@ configuration <- function(config) {
     if (!base::dir.exists(config$output_folder_path)) {
       config$failure <- "output path doesn't exist"
     } else {
-      folderfun::setff("Out", config$output_folder_path)
+      suppressMessages({
+        folderfun::setff("Out", config$output_folder_path)
+      })
     }
   }
 
   # ensures correct model type
   if (config$model_type %in%
-      c("SEI",
-        "susceptible-exposed-infected",
-        "susceptible_exposed_infected",
-        "Susceptible-Exposed-Infected",
-        "Susceptible_Exposed_Infected")) {
+    c(
+      "SEI",
+      "susceptible-exposed-infected",
+      "susceptible_exposed_infected",
+      "Susceptible-Exposed-Infected",
+      "Susceptible_Exposed_Infected"
+    )) {
     config$model_type <- "SEI"
   } else if (config$model_type %in%
-             c("SI",
-               "susceptible-infected",
-               "susceptible_infected",
-               "Susceptible-Infected",
-               "Susceptible_Infected")) {
+    c(
+      "SI",
+      "susceptible-infected",
+      "susceptible_infected",
+      "Susceptible-Infected",
+      "Susceptible_Infected"
+    )) {
     config$model_type <- "SI"
   } else {
     config$failure <-
@@ -134,8 +141,10 @@ configuration <- function(config) {
   }
 
   ## check output and timestep are correct.
-  time_check <- time_checks(config$end_date, config$start_date,
-                            config$time_step, config$output_frequency)
+  time_check <- time_checks(
+    config$end_date, config$start_date,
+    config$time_step, config$output_frequency
+  )
   if (time_check$checks_passed) {
     config$number_of_time_steps <- time_check$number_of_time_steps
     config$number_of_years <- time_check$number_of_years
@@ -170,8 +179,10 @@ configuration <- function(config) {
   # check that host raster has the same crs, resolution, and extent
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
     host_check <-
-      secondary_raster_checks(config$host_file, infected,
-                              config$use_s3, config$bucket)
+      secondary_raster_checks(
+        config$host_file, infected,
+        config$use_s3, config$bucket
+      )
   } else {
     host_check <- secondary_raster_checks(config$host_file, infected)
   }
@@ -189,8 +200,10 @@ configuration <- function(config) {
   if (!is.null(config$mask)) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       mask_check <-
-        secondary_raster_checks(config$mask, infected,
-                                config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$mask, infected,
+          config$use_s3, config$bucket
+        )
     } else {
       mask_check <- secondary_raster_checks(config$mask, infected)
     }
@@ -238,8 +251,10 @@ configuration <- function(config) {
   # check that total populations raster has the same crs, resolution, and extent
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
     total_populations_check <-
-      secondary_raster_checks(config$total_populations_file, infected,
-                              config$use_s3, config$bucket)
+      secondary_raster_checks(
+        config$total_populations_file, infected,
+        config$use_s3, config$bucket
+      )
   } else {
     total_populations_check <-
       secondary_raster_checks(config$total_populations_file, infected)
@@ -261,8 +276,10 @@ configuration <- function(config) {
   if (config$use_lethal_temperature == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       temperature_check <-
-        secondary_raster_checks(config$temperature_file, infected,
-                                config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$temperature_file, infected,
+          config$use_s3, config$bucket
+        )
     } else {
       temperature_check <-
         secondary_raster_checks(config$temperature_file, infected)
@@ -275,19 +292,21 @@ configuration <- function(config) {
     }
 
     temperature <- list(terra::as.matrix(temperature_stack[[1]],
-                                         wide = TRUE))
+      wide = TRUE
+    ))
     if (nlyr(temperature_stack) > 1) {
       for (i in 2:config$number_of_years) {
         temperature[[i]] <- terra::as.matrix(temperature_stack[[i]],
-                                             wide = TRUE)
+          wide = TRUE
+        )
       }
     }
-
   } else {
     temperature <- host
     terra::values(temperature) <- 1
     temperature <- list(terra::as.matrix(temperature,
-                               wide = TRUE))
+      wide = TRUE
+    ))
   }
 
   config$temperature <- temperature
@@ -297,8 +316,10 @@ configuration <- function(config) {
   if (config$temp == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       temperature_coefficient_check <-
-        secondary_raster_checks(config$temperature_coefficient_file, infected,
-                                config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$temperature_coefficient_file, infected,
+          config$use_s3, config$bucket
+        )
     } else {
       temperature_coefficient_check <-
         secondary_raster_checks(config$temperature_coefficient_file, infected)
@@ -315,12 +336,16 @@ configuration <- function(config) {
     if (config$precip == TRUE) {
       if (config$function_name %in% c("casestudy_creation", "model_api")) {
         precipitation_coefficient_check <-
-          secondary_raster_checks(config$precipitation_coefficient_file,
-                                  infected, config$use_s3, config$bucket)
+          secondary_raster_checks(
+            config$precipitation_coefficient_file,
+            infected, config$use_s3, config$bucket
+          )
       } else {
         precipitation_coefficient_check <-
-          secondary_raster_checks(config$precipitation_coefficient_file,
-                                  infected)
+          secondary_raster_checks(
+            config$precipitation_coefficient_file,
+            infected
+          )
       }
       if (precipitation_coefficient_check$checks_passed) {
         precipitation_coefficient <- precipitation_coefficient_check$raster
@@ -335,8 +360,10 @@ configuration <- function(config) {
   } else if (config$precip == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       precipitation_coefficient_check <-
-        secondary_raster_checks(config$precipitation_coefficient_file, infected,
-                                config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$precipitation_coefficient_file, infected,
+          config$use_s3, config$bucket
+        )
     } else {
       precipitation_coefficient_check <-
         secondary_raster_checks(config$precipitation_coefficient_file, infected)
@@ -355,17 +382,20 @@ configuration <- function(config) {
   if (config$weather == TRUE) {
     weather_coefficient <- list(terra::as.matrix(
       weather_coefficient_stack[[1]],
-      wide = TRUE))
+      wide = TRUE
+    ))
     for (i in 2:terra::nlyr(weather_coefficient_stack)) {
       weather_coefficient[[i]] <- terra::as.matrix(
         weather_coefficient_stack[[i]],
-        wide = TRUE)
+        wide = TRUE
+      )
     }
   } else {
     weather_coefficient <- host
     terra::values(weather_coefficient) <- 1
     weather_coefficient <- list(terra::as.matrix(weather_coefficient,
-                                                 wide = TRUE))
+      wide = TRUE
+    ))
   }
 
   config$weather_coefficient <- weather_coefficient
@@ -373,8 +403,10 @@ configuration <- function(config) {
   if (config$management == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       treatments_check <-
-        secondary_raster_checks(config$treatments_file, infected,
-                                config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$treatments_file, infected,
+          config$use_s3, config$bucket
+        )
     } else {
       treatments_check <-
         secondary_raster_checks(config$treatments_file, infected)
@@ -387,10 +419,12 @@ configuration <- function(config) {
       return(config)
     }
 
-    treatment_check <- treatment_checks(treatment_stack, config$treatments_file,
-                                        config$pesticide_duration,
-                                        config$treatment_dates,
-                                        config$pesticide_efficacy)
+    treatment_check <- treatment_checks(
+      treatment_stack, config$treatments_file,
+      config$pesticide_duration,
+      config$treatment_dates,
+      config$pesticide_efficacy
+    )
     if (treatment_check$checks_passed) {
       config$treatment_maps <- treatment_check$treatment_maps
     } else {
@@ -401,7 +435,8 @@ configuration <- function(config) {
     treatment_map <- host
     treatment_map[] <- 0
     config$treatment_maps <- list(terra::as.matrix(treatment_map,
-                                                   wide = TRUE))
+      wide = TRUE
+    ))
     config$treatment_dates <- c(config$start_date)
   }
 
@@ -412,8 +447,10 @@ configuration <- function(config) {
 
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
-    movements_check <- movement_checks(config$movements_file, infected,
-                                       config$start_date, config$end_date)
+    movements_check <- movement_checks(
+      config$movements_file, infected,
+      config$start_date, config$end_date
+    )
     if (movements_check$checks_passed) {
       config$movements <- movements_check$movements
       config$movements_dates <- movements_check$movements_dates
@@ -429,7 +466,8 @@ configuration <- function(config) {
   mortality_tracker <- infected
   terra::values(mortality_tracker) <- 0
   mortality_tracker <- terra::as.matrix(mortality_tracker,
-                                        wide = TRUE)
+    wide = TRUE
+  )
   exposed <- list(mortality_tracker)
 
   if (config$model_type == "SEI" & config$latency_period > 1) {
@@ -441,8 +479,10 @@ configuration <- function(config) {
   if (config$model_type == "SEI" & config$start_exposed) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       exposed_check <-
-        secondary_raster_checks(config$exposed_file, infected,
-                                config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$exposed_file, infected,
+          config$use_s3, config$bucket
+        )
     } else {
       exposed_check <- secondary_raster_checks(config$exposed_file, infected)
     }
@@ -458,44 +498,46 @@ configuration <- function(config) {
     }
   }
 
-  kernel_list <- c("cauchy",
-                   "Cauchy",
-                   "exponential",
-                   "Exponential",
-                   "uniform",
-                   "Uniform",
-                   "deterministic neighbor",
-                   "deterministic-neighbor",
-                   "power law",
-                   "power-law",
-                   "Power-law",
-                   "Power-Law",
-                   "Power Law",
-                   "Power law",
-                   "hyperbolic secant",
-                   "hyperbolic-secant",
-                   "Hyperbolic-secant",
-                   "Hyperbolic-Secant",
-                   "Hyperbolic secant",
-                   "Hyperbolic Secant",
-                   "gamma",
-                   "Gamma",
-                   # "exponential power",
-                   # "exponential-power",
-                   # "Exponential-power",
-                   # "Exponential-Power",
-                   # "Exponential power",
-                   "weibull",
-                   "Weibull",
-                   "normal",
-                   # "log normal",
-                   # "log-normal",
-                   # "Log-normal",
-                   # "Log-Normal",
-                   # "Log normal",
-                   # "Log Normal",
-                   "logistic",
-                   "Logistic")
+  kernel_list <- c(
+    "cauchy",
+    "Cauchy",
+    "exponential",
+    "Exponential",
+    "uniform",
+    "Uniform",
+    "deterministic neighbor",
+    "deterministic-neighbor",
+    "power law",
+    "power-law",
+    "Power-law",
+    "Power-Law",
+    "Power Law",
+    "Power law",
+    "hyperbolic secant",
+    "hyperbolic-secant",
+    "Hyperbolic-secant",
+    "Hyperbolic-Secant",
+    "Hyperbolic secant",
+    "Hyperbolic Secant",
+    "gamma",
+    "Gamma",
+    # "exponential power",
+    # "exponential-power",
+    # "Exponential-power",
+    # "Exponential-Power",
+    # "Exponential power",
+    "weibull",
+    "Weibull",
+    "normal",
+    # "log normal",
+    # "log-normal",
+    # "Log-normal",
+    # "Log-Normal",
+    # "Log normal",
+    # "Log Normal",
+    "logistic",
+    "Logistic"
+  )
 
   if (config$natural_kernel_type %notin% kernel_list) {
     config$failure <-
@@ -514,11 +556,14 @@ configuration <- function(config) {
   }
 
   infected <- terra::as.matrix(infected,
-                               wide = TRUE)
+    wide = TRUE
+  )
   config$susceptible <- terra::as.matrix(susceptible,
-                                         wide = TRUE)
+    wide = TRUE
+  )
   config$total_populations <- terra::as.matrix(total_populations,
-                                               wide = TRUE)
+    wide = TRUE
+  )
   config$total_hosts <- terra::as.matrix(host, wide = TRUE)
 
   config$mortality <- mortality_tracker
@@ -529,8 +574,10 @@ configuration <- function(config) {
   if (config$use_quarantine) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       quarantine_check <-
-        secondary_raster_checks(config$quarantine_areas_file, host,
-                                config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$quarantine_areas_file, host,
+          config$use_s3, config$bucket
+        )
     } else {
       quarantine_check <-
         secondary_raster_checks(config$quarantine_areas_file, host)
@@ -539,7 +586,8 @@ configuration <- function(config) {
     if (quarantine_check$checks_passed) {
       quarantine_areas <- quarantine_check$raster
       config$quarantine_areas <- terra::as.matrix(quarantine_areas,
-                                        wide = TRUE)
+        wide = TRUE
+      )
     } else {
       config$failure <- quarantine_check$failed_check
       return(config)
@@ -557,7 +605,7 @@ configuration <- function(config) {
 
   if (config$function_name %in% c("validate", "multirun", "sensitivity")) {
     if (is.na(config$number_of_cores) ||
-        config$number_of_cores > parallel::detectCores()) {
+      config$number_of_cores > parallel::detectCores()) {
       core_count <- parallel::detectCores() - 1
     } else {
       core_count <- config$number_of_cores
@@ -566,10 +614,9 @@ configuration <- function(config) {
   }
 
   if (config$function_name %in%
-      c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")) {
-
+    c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")) {
     if (nrow(config$parameter_cov_matrix) != 6 |
-        ncol(config$parameter_cov_matrix) != 6) {
+      ncol(config$parameter_cov_matrix) != 6) {
       config$failure <- "parameter covariance matrix is not 6 x 6"
       return(config)
     }
@@ -579,37 +626,41 @@ configuration <- function(config) {
       return(config)
     }
 
-    parameters <- MASS::mvrnorm(config$number_of_iterations,
-                                config$parameter_means,
-                                config$parameter_cov_matrix)
+    parameters <- MASS::mvrnorm(
+      config$number_of_iterations,
+      config$parameter_means,
+      config$parameter_cov_matrix
+    )
     while (any(parameters[, 1] < 0 |
-               parameters[, 2] <= 0 |
-               parameters[, 3] > 1 |
-               parameters[, 3] <= 0 |
-               parameters[, 4] <= 0 |
-               parameters[, 5] < 0 |
-               parameters[, 6] < 0)) {
+      parameters[, 2] <= 0 |
+      parameters[, 3] > 1 |
+      parameters[, 3] <= 0 |
+      parameters[, 4] <= 0 |
+      parameters[, 5] < 0 |
+      parameters[, 6] < 0)) {
       config$number_of_draws <- nrow(parameters[parameters[, 1] < 0 |
-                                                parameters[, 2] <= 0 |
-                                                parameters[, 3] > 1 |
-                                                parameters[, 3] <= 0 |
-                                                parameters[, 4] <= 0 |
-                                                parameters[, 5] < 0 |
-                                                parameters[, 6] < 0, ])
+        parameters[, 2] <= 0 |
+        parameters[, 3] > 1 |
+        parameters[, 3] <= 0 |
+        parameters[, 4] <= 0 |
+        parameters[, 5] < 0 |
+        parameters[, 6] < 0, ])
       if (is.null(config$number_of_draws)) {
         config$number_of_draws <- 1
       }
 
       parameters[parameters[, 1] < 0 |
-                   parameters[, 2] <= 0 |
-                   parameters[, 3] > 1 |
-                   parameters[, 3] <= 0 |
-                   parameters[, 4] <= 0 |
-                   parameters[, 5] < 0 |
-                   parameters[, 6] < 0, ] <-
-        MASS::mvrnorm(config$number_of_draws,
-                      config$parameter_means,
-                      config$parameter_cov_matrix)
+        parameters[, 2] <= 0 |
+        parameters[, 3] > 1 |
+        parameters[, 3] <= 0 |
+        parameters[, 4] <= 0 |
+        parameters[, 5] < 0 |
+        parameters[, 6] < 0, ] <-
+        MASS::mvrnorm(
+          config$number_of_draws,
+          config$parameter_means,
+          config$parameter_cov_matrix
+        )
     }
     config$reproductive_rate <- parameters[, 1]
     config$natural_distance_scale <- parameters[, 2]
@@ -634,12 +685,14 @@ configuration <- function(config) {
     # Get rid of NA values to make comparisons
     infection_years <-
       terra::classify(infection_years,
-                         matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
+        matrix(c(NA, 0), ncol = 2, byrow = TRUE),
+        right = NA
+      )
     config$num_layers_infected_years <- terra::nlyr(infection_years)
 
     if (config$num_layers_infected_years < config$number_of_outputs) {
       config$failure <-
-      paste("The infection years file must have enough layers to match the
+        paste("The infection years file must have enough layers to match the
             number of outputs from the model. The number of layers of your
             infected year file is", config$num_layers_infected_years, "and the
             number of outputs is", config$number_of_time_steps)
@@ -647,11 +700,13 @@ configuration <- function(config) {
     }
 
     infection_years2 <- list(terra::as.matrix(infection_years[[1]],
-                                         wide = TRUE))
+      wide = TRUE
+    ))
     if (nlyr(infection_years) > 1) {
       for (i in 2:nlyr(infection_years)) {
         infection_years2[[i]] <- terra::as.matrix(infection_years[[i]],
-                                             wide = TRUE)
+          wide = TRUE
+        )
       }
     }
     config$infection_years <- infection_years
@@ -659,8 +714,8 @@ configuration <- function(config) {
   }
 
   if (config$function_name %in% c("validate") |
-      (config$function_name %in% c("calibrate") &&
-       config$calibration_method == "MCMC")) {
+    (config$function_name %in% c("calibrate") &&
+      config$calibration_method == "MCMC")) {
     metric_check <- metric_checks(config$success_metric)
     if (metric_check$checks_passed) {
       config$configuration <- metric_check$configuration
@@ -671,7 +726,7 @@ configuration <- function(config) {
   }
 
   if (config$function_name %in% c("calibrate") &&
-      config$calibration_method == "ABC") {
+    config$calibration_method == "ABC") {
     config$num_particles <-
       config$number_of_generations * config$generation_size
 
@@ -685,10 +740,9 @@ configuration <- function(config) {
     ## management module information
     config$num_cells <-
       round((config$budget / config$cost_per_meter_sq) /
-              (config$ew_res * config$ns_res))
+        (config$ew_res * config$ns_res))
     config$buffer_cells <- config$buffer / config$ew_res
     config$years_simulated <- length(config$years)
-
   }
 
   config$crs <- terra::crs(config$host)
@@ -698,4 +752,4 @@ configuration <- function(config) {
   config$ymin <- terra::ymin(config$host)
 
   return(config)
-  }
+}

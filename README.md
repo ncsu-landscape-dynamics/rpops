@@ -14,6 +14,7 @@ This is the R package for simulating spread of pests and pathogens. The package 
 PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit [popsmodel.org](https://popsmodel.org/). The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use [r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
 
 ## Installation
+Requires terra version between 1.1.17 and 1.2.5. terra 1.2.10 has a breaking bug in the extract function.
 
 If you are on Windows, you need to first install
 [Rtools](https://cran.r-project.org/bin/windows/Rtools/) to get a C++ compiler that R can use.
