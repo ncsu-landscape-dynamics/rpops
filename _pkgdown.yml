@@ -6,8 +6,9 @@ navbar:
     home: ~
     news:
       text: Change Log
-      href: CHANGELOG.md
+      href: CHANGELOG.html
       one_page: false
+      cran_dates: false
 
 reference:
   - title: "Calibration and validation of the model to observed data"
