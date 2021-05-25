@@ -3,12 +3,18 @@ Version: 1.1.0
 Title: Pest or Pathogen Spread Model
 Description: A generalized stochastic geospatial model for pest or pathogen spread in 
     forest and agricultural systems.
-Authors@R: c(
-    person("Chris", "Jones", email = "cmjone25@ncsu.edu", role = c("aut", "cre")),
-    person("Vaclav", "Petras", role = c("aut")),
-    person("Anna", "Petrasova", role = c("aut")),
-    person("Gaydos", "Devon", role = c("aut"))
-    )
+Authors@R: 
+    c(person(given = "Chris",
+             family = "Jones", 
+             email = "cmjone25@ncsu.edu", 
+             role = c("aut", "cre"),
+             comment = c(ORCID = "0000-0002-0229-2970")),
+      person(given = "Vaclav", 
+             family = "Petras", 
+             role = c("aut")),
+      person(given = "Anna", 
+             family = "Petrasova", 
+             role = c("aut")))
 Depends: R (>= 3.3.0)
 Imports: 
     raster (>= 3.3-7),
