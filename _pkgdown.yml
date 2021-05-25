@@ -1,0 +1,30 @@
+home:
+  strip_header: true
+
+navbar:
+  components:
+    home: ~
+    news:
+      text: Change Log
+      href: CHANGELOG.md
+      one_page: false
+
+reference:
+  - title: "Calibration and validation of the model to observed data"
+    desc: >
+      Functions for calibrating and validating a model built with PoPS.
+    contents:
+    - calibrate
+    - validate
+  - title: "Running the model"
+    desc: "Functions for running a PoPS model."
+    contents:
+    - pops
+    - pops_multirun
+    - auto_manage
+  - title: "Iternal data handlers"
+    desc: "Functions for error checks and data handling for pops setup"
+    contents:
+    - configuration
+    - pops_model
+    - quantity_allocation_disagreement
