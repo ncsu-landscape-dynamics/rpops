@@ -1,3 +1,8 @@
+title: PoPS
+
+template:
+  params:
+    bootswatch: slate
 home:
   strip_header: true
 
