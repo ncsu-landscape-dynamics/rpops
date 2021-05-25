@@ -46,3 +46,6 @@
 ^\codecov\.yml$
 ^\.clang-format$
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
