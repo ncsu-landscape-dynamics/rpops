@@ -8,6 +8,13 @@
 
 <title>Function reference • PoPS</title>
 
+<!-- favicons -->
+<link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
+<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="../apple-touch-icon.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="120x120" href="../apple-touch-icon-120x120.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png" />
+<link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png" />
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
@@ -78,13 +85,10 @@
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
         <li>
-  <a href="../index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
+  <a href="../reference/index.html">Reference</a>
 </li>
 <li>
-  <a href="../reference/index.html">Reference</a>
+  <a href="../CHANGELOG.md">Change Log</a>
 </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
@@ -121,8 +125,8 @@
     <tbody>
       <tr>
         <th colspan="2">
-          <h2 id="section-all-functions" class="hasAnchor"><a href="#section-all-functions" class="anchor"></a>All functions</h2>
-          <p class="section-desc"></p>
+          <h2 id="section-calibration-and-validation-of-the-model-to-observed-data" class="hasAnchor"><a href="#section-calibration-and-validation-of-the-model-to-observed-data" class="anchor"></a>Calibration and validation of the model to observed data</h2>
+          <p class="section-desc"><p>Functions for calibrating and validating a model built with PoPS.</p></p>
         </th>
       </tr>
       
@@ -133,31 +137,33 @@
       <tr>
         
         <td>
-          <p><code><a href="auto_manage.html">auto_manage()</a></code> </p>
-        </td>
-        <td><p>PoPS (Pest or Pathogen Spread) automated management</p></td>
-      </tr><tr>
-        
-        <td>
           <p><code><a href="calibrate.html">calibrate()</a></code> </p>
         </td>
         <td><p>Calibrates the reproductive rate and dispersal scales of the pops model.</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="configuration.html">configuration()</a></code> </p>
+          <p><code><a href="validate.html">validate()</a></code> </p>
         </td>
-        <td><p>PoPS (configuration</p></td>
-      </tr><tr>
+        <td><p>Validates the accuracy of the calibrated reproductive rate and dispersal
+scales of the pops model.</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-running-the-model" class="hasAnchor"><a href="#section-running-the-model" class="anchor"></a>Running the model</h2>
+          <p class="section-desc"><p>Functions for running a PoPS model.</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
         
         <td>
           <p><code><a href="pops.html">pops()</a></code> </p>
-        </td>
-        <td><p>PoPS (Pest or Pathogen Spread) model</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="pops_model.html">pops_model()</a></code> </p>
         </td>
         <td><p>PoPS (Pest or Pathogen Spread) model</p></td>
       </tr><tr>
@@ -169,16 +175,40 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="quantity_allocation_disagreement.html">quantity_allocation_disagreement()</a></code> </p>
+          <p><code><a href="auto_manage.html">auto_manage()</a></code> </p>
         </td>
-        <td><p>Compares quantity and allocation disagreement of two raster datasets</p></td>
+        <td><p>PoPS (Pest or Pathogen Spread) automated management</p></td>
+      </tr>
+    </tbody><tbody>
+      <tr>
+        <th colspan="2">
+          <h2 id="section-iternal-data-handlers" class="hasAnchor"><a href="#section-iternal-data-handlers" class="anchor"></a>Iternal data handlers</h2>
+          <p class="section-desc"><p>Functions for error checks and data handling for pops setup</p></p>
+        </th>
+      </tr>
+      
+      
+    </tbody><tbody>
+      
+      
+      <tr>
+        
+        <td>
+          <p><code><a href="configuration.html">configuration()</a></code> </p>
+        </td>
+        <td><p>PoPS (configuration</p></td>
       </tr><tr>
         
         <td>
-          <p><code><a href="validate.html">validate()</a></code> </p>
+          <p><code><a href="pops_model.html">pops_model()</a></code> </p>
         </td>
-        <td><p>Validates the accuracy of the calibrated reproductive rate and dispersal
-scales of the pops model.</p></td>
+        <td><p>PoPS (Pest or Pathogen Spread) model</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="quantity_allocation_disagreement.html">quantity_allocation_disagreement()</a></code> </p>
+        </td>
+        <td><p>Compares quantity and allocation disagreement of two raster datasets</p></td>
       </tr>
     </tbody>
     </table>
