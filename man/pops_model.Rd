@@ -10,6 +10,7 @@ pops_model(
   lethal_temperature,
   lethal_temperature_month,
   infected,
+  total_exposed,
   exposed,
   susceptible,
   total_populations,
@@ -28,8 +29,7 @@ pops_model(
   weather,
   temperature,
   weather_coefficient,
-  ew_res,
-  ns_res,
+  res,
   num_rows,
   num_cols,
   time_step,
@@ -59,6 +59,8 @@ pops_model(
   use_quarantine = FALSE,
   spreadrate_frequency = "year",
   spreadrate_frequency_n = 1,
+  mortality_frequency = "year",
+  mortality_frequency_n = 1,
   use_spreadrates = FALSE,
   model_type_ = "SI",
   latency_period = 0,
@@ -90,6 +92,9 @@ related mortality occurs for your pest or pathogen integer value between 1
 and 12}
 
 \item{infected}{matrix of infected hosts}
+
+\item{total_exposed}{sum of all exposed cohorts in exposed class for use with
+"SEI" model type}
 
 \item{exposed}{vector of matrices of the exposed class for use with "SEI"
 model type}
@@ -139,9 +144,7 @@ against lethal temperature}
 
 \item{weather_coefficient}{vector of matrices of weather coefficients}
 
-\item{ew_res}{east and west resolution}
-
-\item{ns_res}{north and south resolution}
+\item{res}{vector of east/west resolution and north/south resolution}
 
 \item{num_rows}{number of rows in the raster files}
 
@@ -158,7 +161,7 @@ host under optimal weather conditions}
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur
-in years integer >= 1}
+in time steps integer >= 1}
 
 \item{season_month_start}{when does spread first start occurring in the year
 for your pest or pathogen (integer value between 1 and 12)}
@@ -217,8 +220,8 @@ in the von-mises distribution numeric value between 0.01 and 12}
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day' or 'time step')}
 
-\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.}
+\item{output_frequency_n}{sets number units from output_frequency in which to
+export model results.}
 
 \item{quarantine_frequency}{sets how often the quarantine statistics are
 calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)}
@@ -236,6 +239,12 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
 
 \item{spreadrate_frequency_n}{sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export spread rate statistics.}
+
+\item{mortality_frequency}{sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day' or 'time step')}
+
+\item{mortality_frequency_n}{sets number units from mortality_frequency in
+which to run the mortality calculation. Must be an integer >= 1.}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}

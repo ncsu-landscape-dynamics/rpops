@@ -1,6 +1,6 @@
-#' PoPS (Pest or Pathogen Spread) model
+#' @title PoPS (Pest or Pathogen Spread) model
 #'
-#' Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
+#' @description Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
 #' pathogen spread in forest or agricultural ecosystems. The model is process
 #' based meaning that it uses understanding of the effect of weather and other
 #' environmental factors on reproduction and survival of the pest/pathogen in
@@ -20,8 +20,7 @@
 #' @param temperature vector of matrices of temperature values used to check
 #' against lethal temperature
 #' @param weather_coefficient vector of matrices of weather coefficients
-#' @param ew_res east and west resolution
-#' @param ns_res north and south resolution
+#' @param res  vector of east/west resolution and north/south resolution
 #' @param num_rows number of rows in the raster files
 #' @param num_cols number of columns in the raster files
 #' @param use_anthropogenic_kernel A boolean that turns on the use of the
@@ -34,6 +33,8 @@
 #' format 'YYYY-MM-DD'
 #' @param exposed vector of matrices of the exposed class for use with "SEI"
 #' model type
+#' @param total_exposed sum of all exposed cohorts in exposed class for use with
+#' "SEI" model type
 #' @param model_type_ What type of model most represents your system. Options
 #' are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 #' (Susceptible - Infected/Infested). Default value is "SI".
@@ -72,6 +73,7 @@ pops_model <-
            lethal_temperature,
            lethal_temperature_month,
            infected,
+           total_exposed,
            exposed,
            susceptible,
            total_populations,
@@ -90,8 +92,7 @@ pops_model <-
            weather,
            temperature,
            weather_coefficient,
-           ew_res,
-           ns_res,
+           res,
            num_rows,
            num_cols,
            time_step,
@@ -121,6 +122,8 @@ pops_model <-
            use_quarantine = FALSE,
            spreadrate_frequency = "year",
            spreadrate_frequency_n = 1,
+           mortality_frequency = "year",
+           mortality_frequency_n = 1,
            use_spreadrates = FALSE,
            model_type_ = "SI",
            latency_period = 0,
@@ -147,6 +150,7 @@ pops_model <-
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
                      infected = infected,
+                     total_exposed = total_exposed,
                      exposed = exposed,
                      susceptible = susceptible,
                      total_populations = total_populations,
@@ -165,8 +169,7 @@ pops_model <-
                      weather = weather,
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,
-                     ew_res = ew_res,
-                     ns_res = ns_res,
+                     res = res,
                      num_rows = num_rows,
                      num_cols = num_cols,
                      time_step = time_step,
@@ -200,6 +203,8 @@ pops_model <-
                      use_quarantine = use_quarantine,
                      spreadrate_frequency = spreadrate_frequency,
                      spreadrate_frequency_n = spreadrate_frequency_n,
+                     mortality_frequency = mortality_frequency,
+                     mortality_frequency_n = mortality_frequency_n,
                      use_spreadrates = use_spreadrates,
                      model_type_ = model_type_,
                      latency_period = latency_period,
