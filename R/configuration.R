@@ -440,8 +440,9 @@ configuration <- function(config) {
     config$treatment_dates <- c(config$start_date)
   }
 
-  config$ew_res <- terra::xres(susceptible)
-  config$ns_res <- terra::yres(susceptible)
+  ew_res <- terra::xres(susceptible)
+  ns_res <- terra::yres(susceptible)
+  config$res <- list(ew_res, ns_res)
   config$num_cols <- terra::ncol(susceptible)
   config$num_rows <- terra::nrow(susceptible)
 
