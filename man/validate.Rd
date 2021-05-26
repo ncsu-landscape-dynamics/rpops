@@ -147,7 +147,7 @@ and 12}
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur
-in years integer >= 1}
+in time steps integer >= 1}
 
 \item{management}{boolean to allow use of management (TRUE or FALSE)}
 
@@ -204,8 +204,8 @@ Choices are "quantity", "quantity and configuration", "residual error" and
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day' or 'time step')}
 
-\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.}
+\item{output_frequency_n}{sets number units from output_frequency in which to
+export model results.}
 
 \item{movements_file}{this is a csv file with columns lon_from, lat_from,
 lon_to, lat_to, number of animals, and date.}

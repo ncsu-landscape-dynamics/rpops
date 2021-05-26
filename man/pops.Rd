@@ -28,6 +28,8 @@ pops(
   mortality_on = FALSE,
   mortality_rate = 0,
   mortality_time_lag = 0,
+  mortality_frequency = "Year",
+  mortality_frequency_n = 1,
   management = FALSE,
   treatment_dates = c(""),
   treatments_file = "",
@@ -135,7 +137,13 @@ and 12}
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur
-in years integer >= 1}
+in time steps integer >= 1}
+
+\item{mortality_frequency}{sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day' or 'time step')}
+
+\item{mortality_frequency_n}{sets number units from mortality_frequency in
+which to run the mortality calculation. Must be an integer >= 1.}
 
 \item{management}{boolean to allow use of management (TRUE or FALSE)}
 
@@ -187,8 +195,8 @@ reproducibility}
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day' or 'time step')}
 
-\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.}
+\item{output_frequency_n}{sets number units from output_frequency in which to
+export model results.}
 
 \item{movements_file}{this is a csv file with columns lon_from, lat_from,
 lon_to, lat_to, number of animals, and date.}
@@ -251,11 +259,11 @@ that can't be managed in the auto_manage function.}
 list of infected and susceptible per year
 }
 \description{
-A dynamic species distribution model for pest or pathogen spread in forest
-or agricultural ecosystems. The model is process based meaning that it uses
-understanding of the effect of weather and other environmental factors on
-reproduction and survival of the pest/pathogen in order to forecast spread
-of the pest/pathogen into the future. This function performs a single
-stochastic realization of the model and is predominantly used for automated
-tests of model features.
+A dynamic species distribution model for pest or pathogen spread
+in forest or agricultural ecosystems. The model is process based meaning that
+it uses understanding of the effect of weather and other environmental
+factors on reproduction and survival of the pest/pathogen in order to
+forecast spread of the pest/pathogen into the future. This function performs
+a single stochastic realization of the model and is predominantly used for
+automated tests of model features.
 }
