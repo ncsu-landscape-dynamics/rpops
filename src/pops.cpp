@@ -44,6 +44,7 @@ List pops_model_cpp(
     double lethal_temperature,
     int lethal_temperature_month,
     IntegerMatrix infected,
+    IntegerMatrix total_exposed,
     std::vector<IntegerMatrix> exposed,
     IntegerMatrix susceptible,
     IntegerMatrix total_populations,
@@ -62,8 +63,7 @@ List pops_model_cpp(
     bool weather,
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> weather_coefficient,
-    double ew_res,
-    double ns_res,
+    std::vector<double> res,
     int num_rows,
     int num_cols,
     std::string time_step,
@@ -93,6 +93,8 @@ List pops_model_cpp(
     bool use_quarantine = false,
     std::string spreadrate_frequency = "year",
     int spreadrate_frequency_n = 1,
+    std::string mortality_frequency = "year",
+    int mortality_frequency_n = 1,
     bool use_spreadrates = false,
     std::string model_type_ = "SI",
     int latency_period = 0,
@@ -109,8 +111,8 @@ List pops_model_cpp(
     config.random_seed = random_seed;
     config.rows = num_rows;
     config.cols = num_cols;
-    config.ew_res = ew_res;
-    config.ns_res = ns_res;
+    config.ew_res = res[0];
+    config.ns_res = res[1];
 
     config.generate_stochasticity = generate_stochasticity;
     config.establishment_stochasticity = establishment_stochasticity;
@@ -139,7 +141,7 @@ List pops_model_cpp(
     // use_treatment set later
     config.use_mortality = mortality_on;
     config.mortality_rate = mortality_rate;
-    config.first_mortality_year = mortality_time_lag;
+    config.mortality_time_lag = mortality_time_lag;
     if (output_frequency == "time_step") {
         output_frequency = time_step;
     }
@@ -187,6 +189,7 @@ List pops_model_cpp(
     std::vector<IntegerMatrix> mortality_vector;
     std::vector<IntegerMatrix> resistant_vector;
     std::vector<IntegerMatrix> total_populations_vector;
+    std::vector<IntegerMatrix> total_exposed_vector;
     std::vector<IntegerMatrix> dispersers_vector;
     std::vector<IntegerMatrix> exposed_v;
     std::vector<std::vector<IntegerMatrix>> exposed_vector;
@@ -242,7 +245,7 @@ List pops_model_cpp(
     }
 
     QuarantineEscape<IntegerMatrix> quarantine(
-            quarantine_areas, ew_res, ns_res, quarantine_outputs, spatial_indices);
+            quarantine_areas, config.ew_res, config.ns_res, quarantine_outputs, spatial_indices);
     bool quarantine_escape;
     std::vector<bool> quarantine_escapes;
     int escape_dist;
@@ -267,6 +270,7 @@ List pops_model_cpp(
             total_populations,
             total_hosts,
             dispersers,
+            total_exposed,
             exposed,
             mortality_tracker_vector,
             mortality,
@@ -294,6 +298,7 @@ List pops_model_cpp(
             susceptible_vector.push_back(Rcpp::clone(susceptible));
             resistant_vector.push_back(Rcpp::clone(resistant));
             total_populations_vector.push_back(Rcpp::clone(total_populations));
+            total_exposed_vector.push_back(Rcpp::clone(total_exposed));
             dispersers_vector.push_back(Rcpp::clone(total_dispersers));
 
             if (config.model_type == "SEI") {
@@ -352,6 +357,7 @@ List pops_model_cpp(
         _["number_infected"] = number_infected,
         _["area_infected"] = area_infected,
         _["total_populations"] = total_populations_vector,
+        _["total_exposed"] = total_exposed_vector,
         _["propogules"] = dispersers_vector,
         _["quarantine_escape"] = quarantine_escapes,
         _["quarantine_escape_distance"] = escape_dists,
