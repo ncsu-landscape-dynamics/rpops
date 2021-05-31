@@ -120,6 +120,16 @@ configuration <- function(config) {
     return(config)
   }
 
+  seasons <- seq(1, 12, 1)
+  if (config$season_month_start %in% seasons &&
+      config$season_month_end %in% seasons) {
+    config$season_month_start_end <- c(config$season_month_start,
+                                          config$season_month_end)
+  } else {
+    config$failure <-
+      "Season month start or end not between 1 and 12"
+  }
+
   # ensures latent period is correct for type of model selected
   if (config$model_type == "SEI" && config$latency_period <= 0) {
     config$failure <-
@@ -442,10 +452,10 @@ configuration <- function(config) {
 
   ew_res <- terra::xres(susceptible)
   ns_res <- terra::yres(susceptible)
-  config$res <- list(ew_res, ns_res)
-  config$num_cols <- terra::ncol(susceptible)
-  config$num_rows <- terra::nrow(susceptible)
-
+  config$res <- c(ew_res, ns_res)
+  num_cols <- terra::ncol(susceptible)
+  num_rows <- terra::nrow(susceptible)
+  config$rows_cols <- c(num_rows, num_cols)
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <- movement_checks(
@@ -470,6 +480,7 @@ configuration <- function(config) {
     wide = TRUE
   )
   exposed <- list(mortality_tracker)
+  total_exposed <- mortality_tracker
 
   if (config$model_type == "SEI" & config$latency_period > 1) {
     for (ex in 2:(config$latency_period + 1)) {
@@ -493,6 +504,7 @@ configuration <- function(config) {
       susceptible[susceptible < 0] <- 0
       exposed[[config$latency_period + 1]] <-
         terra::as.matrix(exposed2, wide = TRUE)
+      total_exposed <- exposed2
     } else {
       config$failure <- exposed_check$failed_check
       return(config)
