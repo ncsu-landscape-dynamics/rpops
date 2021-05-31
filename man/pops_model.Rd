@@ -30,15 +30,13 @@ pops_model(
   temperature,
   weather_coefficient,
   res,
-  num_rows,
-  num_cols,
+  rows_cols,
   time_step,
   reproductive_rate,
   spatial_indices,
+  season_month_start_end,
   mortality_rate = 0,
   mortality_time_lag = 2,
-  season_month_start = 1,
-  season_month_end = 12,
   start_date = "2018-01-01",
   end_date = "2018-12-31",
   treatment_method = "ratio",
@@ -146,9 +144,7 @@ against lethal temperature}
 
 \item{res}{vector of east/west resolution and north/south resolution}
 
-\item{num_rows}{number of rows in the raster files}
-
-\item{num_cols}{number of columns in the raster files}
+\item{rows_cols}{vector of number of rows and columns in the raster files}
 
 \item{time_step}{how often should spread occur options: ('day', 'week',
 'month')}
@@ -158,16 +154,12 @@ host under optimal weather conditions}
 
 \item{spatial_indices}{list of all spatial locations with suitable hosts}
 
+\item{season_month_start_end}{vector of months when spread starts and stops}
+
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur
 in time steps integer >= 1}
-
-\item{season_month_start}{when does spread first start occurring in the year
-for your pest or pathogen (integer value between 1 and 12)}
-
-\item{season_month_end}{when does spread end during the year for your pest
-or pathogen (integer value between 1 and 12)}
 
 \item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
 

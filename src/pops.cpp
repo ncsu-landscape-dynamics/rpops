@@ -64,15 +64,13 @@ List pops_model_cpp(
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> weather_coefficient,
     std::vector<double> res,
-    int num_rows,
-    int num_cols,
+    std::vector<int> rows_cols,
     std::string time_step,
     double reproductive_rate,
     std::vector<std::vector<int>> spatial_indices,
+    std::vector<int> season_month_start_end,
     double mortality_rate = 0.0,
     int mortality_time_lag = 2,
-    int season_month_start = 1,
-    int season_month_end = 12,
     std::string start_date = "2018-01-01",
     std::string end_date = "2018-12-31",
     std::string treatment_method = "ratio",
@@ -109,8 +107,8 @@ List pops_model_cpp(
 {
     Config config;
     config.random_seed = random_seed;
-    config.rows = num_rows;
-    config.cols = num_cols;
+    config.rows = rows_cols[0];
+    config.cols = rows_cols[1];
     config.ew_res = res[0];
     config.ns_res = res[1];
 
@@ -172,7 +170,7 @@ List pops_model_cpp(
     config.set_date_end(end_date);
     config.set_step_unit(time_step);
     config.set_step_num_units(1);
-    config.set_season_start_end_month(season_month_start, season_month_end);
+    config.set_season_start_end_month(season_month_start_end[0], season_month_start_end[1]);
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
