@@ -279,6 +279,8 @@ pops <- function(infected_file,
   config$exposed_file <- exposed_file
   config$write_outputs <- "None"
   config$output_folder_path <- ""
+  config$mortality_frequency <- mortality_frequency
+  config$mortality_frequency_n <- mortality_frequency_n
 
   config <- configuration(config)
 
@@ -311,15 +313,13 @@ pops <- function(infected_file,
                      temperature = config$temperature,
                      weather_coefficient = config$weather_coefficient,
                      res = config$res,
-                     num_rows = config$num_rows,
-                     num_cols = config$num_cols,
+                     rows_cols = config$rows_cols,
                      time_step = config$time_step,
                      reproductive_rate = config$reproductive_rate[1],
                      spatial_indices = config$spatial_indices,
+                     season_month_start_end = config$season_month_start_end,
                      mortality_rate = config$mortality_rate,
                      mortality_time_lag = config$mortality_time_lag,
-                     season_month_start = config$season_month_start,
-                     season_month_end = config$season_month_end,
                      start_date = config$start_date,
                      end_date = config$end_date,
                      treatment_method = config$treatment_method,

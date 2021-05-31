@@ -21,8 +21,8 @@
 #' against lethal temperature
 #' @param weather_coefficient vector of matrices of weather coefficients
 #' @param res  vector of east/west resolution and north/south resolution
-#' @param num_rows number of rows in the raster files
-#' @param num_cols number of columns in the raster files
+#' @param rows_cols vector of number of rows and columns in the raster files
+#' @param season_month_start_end vector of months when spread starts and stops
 #' @param use_anthropogenic_kernel A boolean that turns on the use of the
 #' anthropogenic or long distance dispersal portion of the 2 scale dispersal
 #' kernel function
@@ -93,15 +93,13 @@ pops_model <-
            temperature,
            weather_coefficient,
            res,
-           num_rows,
-           num_cols,
+           rows_cols,
            time_step,
            reproductive_rate,
            spatial_indices,
+           season_month_start_end,
            mortality_rate = 0.0,
            mortality_time_lag = 2,
-           season_month_start = 1,
-           season_month_end = 12,
            start_date = "2018-01-01",
            end_date = "2018-12-31",
            treatment_method = "ratio",
@@ -170,15 +168,13 @@ pops_model <-
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,
                      res = res,
-                     num_rows = num_rows,
-                     num_cols = num_cols,
+                     rows_cols = rows_cols,
                      time_step = time_step,
                      reproductive_rate = reproductive_rate,
                      spatial_indices = spatial_indices,
+                     season_month_start_end = season_month_start_end,
                      mortality_rate = mortality_rate,
                      mortality_time_lag = mortality_time_lag,
-                     season_month_start = season_month_start,
-                     season_month_end = season_month_end,
                      start_date = start_date,
                      end_date = end_date,
                      treatment_method = treatment_method,

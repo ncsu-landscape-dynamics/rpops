@@ -152,6 +152,8 @@ pops_multirun <- function(infected_file,
   config$mask <- mask
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
+  config$mortality_frequency <- mortality_frequency
+  config$mortality_frequency_n <- mortality_frequency_n
 
   config <- configuration(config)
 
@@ -179,6 +181,7 @@ pops_multirun <- function(infected_file,
         lethal_temperature_month =
           config$lethal_temperature_month,
         infected = config$infected,
+        total_exposed = config$total_exposed,
         exposed = config$exposed,
         susceptible = config$susceptible,
         total_populations = config$total_populations,
@@ -197,17 +200,14 @@ pops_multirun <- function(infected_file,
         weather = config$weather,
         temperature = config$temperature,
         weather_coefficient = config$weather_coefficient,
-        ew_res = config$ew_res,
-        ns_res = config$ns_res,
-        num_rows = config$num_rows,
-        num_cols = config$num_cols,
+        res = config$res,
+        rows_cols = config$rows_cols,
         time_step = config$time_step,
         reproductive_rate = config$reproductive_rate[i],
         spatial_indices = config$spatial_indices,
+        season_month_start_end = config$season_month_start_end,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
-        season_month_start = config$season_month_start,
-        season_month_end = config$season_month_end,
         start_date = config$start_date,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
@@ -233,6 +233,8 @@ pops_multirun <- function(infected_file,
         use_quarantine = config$use_quarantine,
         spreadrate_frequency = config$spreadrate_frequency,
         spreadrate_frequency_n = config$spreadrate_frequency_n,
+        mortality_frequency = config$mortality_frequency,
+        mortality_frequency_n = config$mortality_frequency_n,
         use_spreadrates = config$use_spreadrates,
         model_type_ = config$model_type,
         latency_period = config$latency_period,
