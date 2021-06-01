@@ -36,6 +36,8 @@ test_that(
     mortality_on <- FALSE
     mortality_rate <- 0
     mortality_time_lag <- 0
+    mortality_frequency = "Year"
+    mortality_frequency_n = 1
     management <- FALSE
     treatment_dates <- c("2003-01-24")
     treatments_file <- ""
@@ -96,6 +98,8 @@ test_that(
       mortality_on,
       mortality_rate,
       mortality_time_lag,
+      mortality_frequency,
+      mortality_frequency_n,
       management,
       treatment_dates,
       treatments_file,
@@ -206,6 +210,8 @@ test_that(
     mortality_on <- FALSE
     mortality_rate <- 0
     mortality_time_lag <- 0
+    mortality_frequency = "Year"
+    mortality_frequency_n = 1
     management <- FALSE
     treatment_dates <- c("2003-01-24")
     treatments_file <- ""
@@ -266,6 +272,8 @@ test_that(
       mortality_on,
       mortality_rate,
       mortality_time_lag,
+      mortality_frequency,
+      mortality_frequency_n,
       management,
       treatment_dates,
       treatments_file,
@@ -376,6 +384,8 @@ test_that(
     mortality_on <- FALSE
     mortality_rate <- 0
     mortality_time_lag <- 0
+    mortality_frequency = "Year"
+    mortality_frequency_n = 1
     management <- FALSE
     treatment_dates <- c("2003-01-24")
     treatments_file <- ""
@@ -436,6 +446,8 @@ test_that(
       mortality_on,
       mortality_rate,
       mortality_time_lag,
+      mortality_frequency,
+      mortality_frequency_n,
       management,
       treatment_dates,
       treatments_file,
