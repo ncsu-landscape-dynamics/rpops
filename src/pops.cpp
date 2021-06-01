@@ -63,12 +63,12 @@ List pops_model_cpp(
     bool weather,
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> weather_coefficient,
-    std::vector<double> res,
-    std::vector<int> rows_cols,
+    List res,
+    List rows_cols,
     std::string time_step,
     double reproductive_rate,
     std::vector<std::vector<int>> spatial_indices,
-    std::vector<int> season_month_start_end,
+    List season_month_start_end,
     double mortality_rate = 0.0,
     int mortality_time_lag = 2,
     std::string start_date = "2018-01-01",
@@ -107,10 +107,10 @@ List pops_model_cpp(
 {
     Config config;
     config.random_seed = random_seed;
-    config.rows = rows_cols[0];
-    config.cols = rows_cols[1];
-    config.ew_res = res[0];
-    config.ns_res = res[1];
+    config.rows = rows_cols["num_rows"];
+    config.cols = rows_cols["num_cols"];
+    config.ew_res = res["ew_res"];
+    config.ns_res = res["ns_res"];
 
     config.generate_stochasticity = generate_stochasticity;
     config.establishment_stochasticity = establishment_stochasticity;
@@ -170,7 +170,9 @@ List pops_model_cpp(
     config.set_date_end(end_date);
     config.set_step_unit(time_step);
     config.set_step_num_units(1);
-    config.set_season_start_end_month(season_month_start_end[0], season_month_start_end[1]);
+    int start_month = season_month_start_end["start_month"];
+    int end_month = season_month_start_end["end_month"];
+    config.set_season_start_end_month(start_month, end_month);
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
