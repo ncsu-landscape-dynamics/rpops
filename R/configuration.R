@@ -123,9 +123,10 @@ configuration <- function(config) {
   seasons <- seq(1, 12, 1)
   if (config$season_month_start %in% seasons &&
       config$season_month_end %in% seasons) {
-    config$season_month_start_end <- c()
-    config$season_month_start_end[[1]] <- as.integer(config$season_month_start)
-    config$season_month_start_end[[2]] <- as.integer(config$season_month_end)
+    season_month_start_end <- c()
+    season_month_start_end$start_month <- as.integer(config$season_month_start)
+    season_month_start_end$end_month <- as.integer(config$season_month_end)
+    config$season_month_start_end <- season_month_start_end
   } else {
     config$failure <-
       "Season month start or end not between 1 and 12"
@@ -451,16 +452,18 @@ configuration <- function(config) {
     config$treatment_dates <- c(config$start_date)
   }
 
-  ew_res <- terra::xres(susceptible)
-  ns_res <- terra::yres(susceptible)
-  config$res <- list()
-  config$res[[1]] <- ew_res
-  config$res[[2]] <- ns_res
-  num_cols <- terra::ncol(susceptible)
-  num_rows <- terra::nrow(susceptible)
-  config$rows_cols <- list()
-  config$rows_cols[[1]] <- num_rows
-  config$rows_cols[[2]] <- num_cols
+  res <- c()
+  res$ew_res <- terra::xres(susceptible)
+  res$ns_res <- terra::yres(susceptible)
+  # config$res[[1]] <- ew_res
+  # config$res[[2]] <- ns_res
+  config$res <- res
+  rows_cols <- c()
+  rows_cols$num_rows <- terra::nrow(susceptible)
+  rows_cols$num_cols <- terra::ncol(susceptible)
+  config$rows_cols <- rows_cols
+  # config$rows_cols[[1]] <- num_rows
+  # config$rows_cols[[2]] <- num_cols
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <- movement_checks(

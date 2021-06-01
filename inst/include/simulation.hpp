@@ -721,7 +721,7 @@ public:
                 // Move hosts to infected raster
                 infected += oldest;
                 mortality_tracker += oldest;
-                total_exposed -= oldest;
+                total_exposed += (oldest * (-1));
                 // Reset the raster
                 // (hosts moved from the raster)
                 oldest.fill(0);
