@@ -35,6 +35,8 @@ calibrate(
   mortality_on = FALSE,
   mortality_rate = 0,
   mortality_time_lag = 0,
+  mortality_frequency = "Year",
+  mortality_frequency_n = 1,
   management = FALSE,
   treatment_dates = c(""),
   treatments_file = "",
@@ -179,6 +181,12 @@ and 12}
 \item{mortality_time_lag}{time lag from infection until mortality can occur
 in time steps integer >= 1}
 
+\item{mortality_frequency}{sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day' or 'time step')}
+
+\item{mortality_frequency_n}{sets number units from mortality_frequency in
+which to run the mortality calculation. Must be an integer >= 1.}
+
 \item{management}{boolean to allow use of management (TRUE or FALSE)}
 
 \item{treatment_dates}{dates in which to apply treatment list with format
@@ -310,7 +318,7 @@ preferably 1 million).}
 (e.g. the current generation, current particle, and the acceptance rate).
 Defaults if FALSE.}
 
-\item{write_outputs}{Either c("summary outputs", or "None"). If not
+\item{write_outputs}{Either c("summary_outputs", or "None"). If not
 "None" output folder path must be provided.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,

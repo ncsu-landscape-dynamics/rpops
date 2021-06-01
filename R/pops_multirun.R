@@ -15,8 +15,9 @@
 #' the calibration to converge at least 10
 #' @param number_of_cores enter how many cores you want to use (default = NA).
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
-#' @param write_outputs Either c("all_simulations", "summary outputs", or
-#' "None"). If not "None" output folder path must be provided.
+#' @param write_outputs Either c("all_simulations", "summary_outputs", or
+#' "None"). If not "None" output folder path must be provided. all_simulations
+#' doesn't currently work and is a place holder for future developement.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
@@ -53,6 +54,8 @@ pops_multirun <- function(infected_file,
                           mortality_on = FALSE,
                           mortality_rate = 0,
                           mortality_time_lag = 0,
+                          mortality_frequency = "Year",
+                          mortality_frequency_n = 1,
                           management = FALSE,
                           treatment_dates = c(""),
                           treatments_file = "",

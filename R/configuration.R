@@ -77,12 +77,12 @@ configuration <- function(config) {
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
-  config$output_list <- c("all_simulations", "summary outputs", "None")
-  config$output_write_list <- c("all_simulations", "summary outputs")
+  config$output_list <- c("all_simulations", "summary_outputs", "None")
+  config$output_write_list <- c("all_simulations", "summary_outputs")
 
   if (config$write_outputs %notin% config$output_list) {
     config$failure <-
-      "write_outputs is not one of c('all simulations', 'summary outputs', 'None')"
+      "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')"
   }
 
   if (config$write_outputs %in% config$output_write_list) {
@@ -123,8 +123,9 @@ configuration <- function(config) {
   seasons <- seq(1, 12, 1)
   if (config$season_month_start %in% seasons &&
       config$season_month_end %in% seasons) {
-    config$season_month_start_end <- c(config$season_month_start,
-                                          config$season_month_end)
+    config$season_month_start_end <- c()
+    config$season_month_start_end[[1]] <- as.integer(config$season_month_start)
+    config$season_month_start_end[[2]] <- as.integer(config$season_month_end)
   } else {
     config$failure <-
       "Season month start or end not between 1 and 12"
@@ -452,10 +453,14 @@ configuration <- function(config) {
 
   ew_res <- terra::xres(susceptible)
   ns_res <- terra::yres(susceptible)
-  config$res <- c(ew_res, ns_res)
+  config$res <- list()
+  config$res[[1]] <- ew_res
+  config$res[[2]] <- ns_res
   num_cols <- terra::ncol(susceptible)
   num_rows <- terra::nrow(susceptible)
-  config$rows_cols <- c(num_rows, num_cols)
+  config$rows_cols <- list()
+  config$rows_cols[[1]] <- num_rows
+  config$rows_cols[[2]] <- num_cols
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <- movement_checks(
@@ -480,7 +485,7 @@ configuration <- function(config) {
     wide = TRUE
   )
   exposed <- list(mortality_tracker)
-  total_exposed <- mortality_tracker
+  config$total_exposed <- mortality_tracker
 
   if (config$model_type == "SEI" & config$latency_period > 1) {
     for (ex in 2:(config$latency_period + 1)) {
@@ -504,7 +509,7 @@ configuration <- function(config) {
       susceptible[susceptible < 0] <- 0
       exposed[[config$latency_period + 1]] <-
         terra::as.matrix(exposed2, wide = TRUE)
-      total_exposed <- exposed2
+      config$total_exposed <- terra::as.matrix(exposed2, wide = TRUE)
     } else {
       config$failure <- exposed_check$failed_check
       return(config)
