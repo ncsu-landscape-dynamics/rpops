@@ -50,7 +50,7 @@ List pops_model_cpp(
     IntegerMatrix total_populations,
     IntegerMatrix total_hosts,
     bool mortality_on,
-    IntegerMatrix mortality_tracker,
+    std::vector<IntegerMatrix> mortality_tracker,
     IntegerMatrix mortality,
     IntegerMatrix quarantine_areas,
     std::vector<NumericMatrix> treatment_maps,
@@ -185,7 +185,6 @@ List pops_model_cpp(
 
     std::vector<IntegerMatrix> infected_vector;
     std::vector<IntegerMatrix> susceptible_vector;
-    std::vector<IntegerMatrix> mortality_tracker_vector;
     std::vector<IntegerMatrix> mortality_vector;
     std::vector<IntegerMatrix> resistant_vector;
     std::vector<IntegerMatrix> total_populations_vector;
@@ -262,7 +261,6 @@ List pops_model_cpp(
          ++current_index) {
 
         IntegerMatrix dispersers(config.rows, config.cols);
-        mortality_tracker_vector.push_back(Rcpp::clone(mortality_tracker));
         model.run_step(
             current_index,
             infected,
@@ -272,7 +270,7 @@ List pops_model_cpp(
             dispersers,
             total_exposed,
             exposed,
-            mortality_tracker_vector,
+            mortality_tracker,
             mortality,
             temperature,
             weather_coefficient[current_index],
