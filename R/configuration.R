@@ -605,9 +605,7 @@ configuration <- function(config) {
 
     if (quarantine_check$checks_passed) {
       quarantine_areas <- quarantine_check$raster
-      config$quarantine_areas <- terra::as.matrix(quarantine_areas,
-        wide = TRUE
-      )
+      config$quarantine_areas <- terra::as.matrix(quarantine_areas, wide = TRUE)
     } else {
       config$failure <- quarantine_check$failed_check
       return(config)
@@ -626,6 +624,10 @@ configuration <- function(config) {
       mortality_tracker2[[mt]] <- mortality_tracker
     }
   }
+  ## add currently infected cells to last element of the mortality tracker so
+  ## that mortality occurs at the appropriate interval
+  mortality_tracker2[[length(mortality_tracker2)]] <- infected
+
   config$mortality_tracker <- mortality_tracker2
   config$exposed <- exposed
   config$infected <- infected
