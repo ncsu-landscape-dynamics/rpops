@@ -590,7 +590,6 @@ configuration <- function(config) {
   config$mortality <- mortality_tracker
   config$resistant <- mortality_tracker
 
-
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
@@ -619,10 +618,17 @@ configuration <- function(config) {
     config$quarantine_areas <- mortality_tracker
   }
 
-  config$mortality_tracker <- mortality_tracker
+  mortality_tracker2 <- list(mortality_tracker)
+  if (config$mortality_on) {
+    mortality_length <- 1/config$mortality_rate + config$mortality_time_lag
+
+    for (mt in 2:(mortality_length)) {
+      mortality_tracker2[[mt]] <- mortality_tracker
+    }
+  }
+  config$mortality_tracker <- mortality_tracker2
   config$exposed <- exposed
   config$infected <- infected
-
 
   if (config$function_name %in% c("validate", "multirun", "sensitivity")) {
     if (is.na(config$number_of_cores) ||
