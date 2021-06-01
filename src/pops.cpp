@@ -154,6 +154,8 @@ List pops_model_cpp(
     config.use_quarantine = use_quarantine;
     config.spreadrate_frequency = spreadrate_frequency;
     config.spreadrate_frequency_n = spreadrate_frequency_n;
+    config.mortality_frequency = mortality_frequency;
+    config.mortality_frequency_n = mortality_frequency_n;
     config.use_spreadrates = use_spreadrates;
     config.use_overpopulation_movements = use_overpopulation_movements;
     if (use_overpopulation_movements && overpopulation_config.isNotNull()) {
