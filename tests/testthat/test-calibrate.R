@@ -40,6 +40,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             mortality_on <- FALSE
             mortality_rate <- 0
             mortality_time_lag <- 0
+            mortality_frequency <- "Year"
+            mortality_frequency_n <- 1
             management <- FALSE
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
@@ -112,6 +114,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               mortality_on,
                               mortality_rate,
                               mortality_time_lag,
+                              mortality_frequency,
+                              mortality_frequency_n,
                               management,
                               treatment_dates,
                               treatments_file,
@@ -206,6 +210,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             mortality_on <- FALSE
             mortality_rate <- 0
             mortality_time_lag <- 0
+            mortality_frequency <- "Year"
+            mortality_frequency_n <- 1
             management <- FALSE
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
@@ -279,6 +285,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               mortality_on,
                               mortality_rate,
                               mortality_time_lag,
+                              mortality_frequency,
+                              mortality_frequency_n,
                               management,
                               treatment_dates,
                               treatments_file,
@@ -374,6 +382,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             mortality_on <- FALSE
             mortality_rate <- 0
             mortality_time_lag <- 0
+            mortality_frequency <- "Year"
+            mortality_frequency_n <- 1
             management <- FALSE
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
@@ -447,6 +457,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               mortality_on,
                               mortality_rate,
                               mortality_time_lag,
+                              mortality_frequency,
+                              mortality_frequency_n,
                               management,
                               treatment_dates,
                               treatments_file,
@@ -540,6 +552,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             mortality_on <- FALSE
             mortality_rate <- 0
             mortality_time_lag <- 0
+            mortality_frequency <- "Year"
+            mortality_frequency_n <- 1
             management <- FALSE
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
@@ -614,6 +628,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               mortality_on,
                               mortality_rate,
                               mortality_time_lag,
+                              mortality_frequency,
+                              mortality_frequency_n,
                               management,
                               treatment_dates,
                               treatments_file,
@@ -707,6 +723,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             mortality_on <- FALSE
             mortality_rate <- 0
             mortality_time_lag <- 0
+            mortality_frequency <- "Year"
+            mortality_frequency_n <- 1
             management <- FALSE
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
@@ -779,6 +797,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               mortality_on,
                               mortality_rate,
                               mortality_time_lag,
+                              mortality_frequency,
+                              mortality_frequency_n,
                               management,
                               treatment_dates,
                               treatments_file,
@@ -872,6 +892,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             mortality_on <- FALSE
             mortality_rate <- 0
             mortality_time_lag <- 0
+            mortality_frequency <- "Year"
+            mortality_frequency_n <- 1
             management <- FALSE
             treatment_dates <- c("2003-01-24")
             treatments_file <- ""
@@ -945,6 +967,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               mortality_on,
                               mortality_rate,
                               mortality_time_lag,
+                              mortality_frequency,
+                              mortality_frequency_n,
                               management,
                               treatment_dates,
                               treatments_file,
