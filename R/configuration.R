@@ -455,15 +455,11 @@ configuration <- function(config) {
   res <- c()
   res$ew_res <- terra::xres(susceptible)
   res$ns_res <- terra::yres(susceptible)
-  # config$res[[1]] <- ew_res
-  # config$res[[2]] <- ns_res
   config$res <- res
   rows_cols <- c()
   rows_cols$num_rows <- terra::nrow(susceptible)
   rows_cols$num_cols <- terra::ncol(susceptible)
   config$rows_cols <- rows_cols
-  # config$rows_cols[[1]] <- num_rows
-  # config$rows_cols[[2]] <- num_cols
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <- movement_checks(
@@ -618,7 +614,7 @@ configuration <- function(config) {
 
   mortality_tracker2 <- list(mortality_tracker)
   if (config$mortality_on) {
-    mortality_length <- 1/config$mortality_rate + config$mortality_time_lag
+    mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
 
     for (mt in 2:(mortality_length)) {
       mortality_tracker2[[mt]] <- mortality_tracker

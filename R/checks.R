@@ -105,8 +105,12 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
   if (checks_passed) {
     crs1 <- terra::crs(r, describe = TRUE)
     crs2 <- terra::crs(x2, describe = TRUE)
-    if (is.na(crs1$EPSG)) {crs1$EPSG <- "1"}
-    if (is.na(crs2$EPSG)) {crs2$EPSG <- "1"}
+    if (is.na(crs1$EPSG)) {
+      crs1$EPSG <- "1"
+      }
+    if (is.na(crs2$EPSG)) {
+      crs2$EPSG <- "1"
+      }
     if (!(crs1$EPSG == crs2$EPSG)) {
       checks_passed <- FALSE
       failed_check <-

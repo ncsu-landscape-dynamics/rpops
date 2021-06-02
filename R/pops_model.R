@@ -1,10 +1,11 @@
 #' @title PoPS (Pest or Pathogen Spread) model
 #'
-#' @description Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
-#' pathogen spread in forest or agricultural ecosystems. The model is process
-#' based meaning that it uses understanding of the effect of weather and other
-#' environmental factors on reproduction and survival of the pest/pathogen in
-#' order to forecast spread of the pest/pathogen into the future.
+#' @description Wrapper for pops_model_cpp. A dynamic species distribution model
+#' for pest or pathogen spread in forest or agricultural ecosystems. The model
+#' is process based meaning that it uses understanding of the effect of weather
+#' and other environmental factors on reproduction and survival of the
+#' pest/pathogen in order to forecast spread of the pest/pathogen into the
+#' future.
 #'
 #' @inheritParams pops
 #' @param weather Boolean that is true if weather is used
@@ -53,14 +54,16 @@
 #' @param quarantine_areas areas that are set as quarantined for computing
 #' escape from quarantine statistics.
 #' @param quarantine_frequency sets how often the quarantine statistics are
-#' calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)
+#' calculated either ('year', 'month', 'week', 'day' or 'time step')
+#' (default is year)
 #' @param quarantine_frequency_n sets number units ('year', 'month', 'week',
 #' 'day' or 'time step') in which to calculate and export quarantine statistics.
 #' @param spreadrate_frequency sets how often the spread rate statistics are
 #' calculated either ('year', 'month', 'week', 'day' or 'time step')
 #' (default is year)
 #' @param spreadrate_frequency_n sets number units ('year', 'month', 'week',
-#' 'day' or 'time step') in which to calculate and export spread rate statistics.
+#' 'day' or 'time step') in which to calculate and export spread rate
+#' statistics.
 #' @param spatial_indices list of all spatial locations with suitable hosts
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -137,7 +140,7 @@ pops_model <-
            leaving_scale_coefficient = 1.0) {
 
     # List of overpopulation parameters of type double
-    overpopulation_config = c()
+    overpopulation_config <- c()
     overpopulation_config$overpopulation_percentage <- overpopulation_percentage
     overpopulation_config$leaving_percentage <- leaving_percentage
     overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
@@ -212,7 +215,8 @@ pops_model <-
                      establishment_probability =
                        establishment_probability,
                      dispersal_percentage = dispersal_percentage,
-                     use_overpopulation_movements = use_overpopulation_movements,
+                     use_overpopulation_movements =
+                       use_overpopulation_movements,
                      overpopulation_config = overpopulation_config
     )
 

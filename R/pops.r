@@ -358,10 +358,13 @@ pops <- function(infected_file,
                      establishment_probability =
                        config$establishment_probability,
                      dispersal_percentage = config$dispersal_percentage,
-                     use_overpopulation_movements = config$use_overpopulation_movements,
-                     overpopulation_percentage = config$overpopulation_percentage,
+                     use_overpopulation_movements =
+                       config$use_overpopulation_movements,
+                     overpopulation_percentage =
+                       config$overpopulation_percentage,
                      leaving_percentage = config$leaving_percentage,
-                     leaving_scale_coefficient = config$leaving_scale_coefficient
+                     leaving_scale_coefficient =
+                       config$leaving_scale_coefficient
   )
 
   return(data)

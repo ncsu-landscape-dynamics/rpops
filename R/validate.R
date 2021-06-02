@@ -291,13 +291,13 @@ validate <- function(infected_years_file,
                                              mask)
         }
 
-      to.qa <- data.frame(t(all_disagreement))
+      data.frame(t(all_disagreement))
     }
 
   parallel::stopCluster(cl)
 
   if (config$write_outputs %in% config$output_write_list) {
-    save(outputs, file = ffOut("validation_outputs.rdata"))
+    save(qa, file = ffOut("validation_outputs.rdata"))
   }
 
   return(qa)

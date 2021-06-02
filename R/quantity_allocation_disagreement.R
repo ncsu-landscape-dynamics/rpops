@@ -29,7 +29,6 @@ quantity_allocation_disagreement <-
     }
     # test that the comparison raster is the same extent, resolution, and crs as
     # the reference to ensure that they can be compared accurately
-    # terra::compareGeom(reference, comparison)
     # save initial reference and comparison to use for residual error
     # calculation and then reclassify the original reference and comparison to
     # binary values for other classifications as we are only concerned with
