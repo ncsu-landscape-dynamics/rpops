@@ -773,32 +773,37 @@ movement_checks <- function(x, rast, start_date, end_date) {
     failed_check <- "file does not exist"
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in% c(".csv", ".txt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% c("csv", "txt")))) {
     checks_passed <- FALSE
     failed_check <- "file is not one of '.csv' or '.txt'"
   }
 
   if (checks_passed) {
     moves <- read.csv(x, header = TRUE)
-    movement_from <- SpatialPointsDataFrame(moves[, 1:2],
-      data = moves,
+    movement_from <- sp::SpatialPointsDataFrame(moves[, 1:2],
+      data = moves[, c(1:2, 5:6)],
       proj4string =
-        CRS("+init=epsg:4326")
+        sp::CRS("+init=epsg:4326")
     )
-    movement_to <- SpatialPointsDataFrame(moves[, 3:4],
-      data = moves,
-      proj4string = CRS("+init=epsg:4326")
+    movement_to <- sp::SpatialPointsDataFrame(moves[, 3:4],
+      data = moves[, 3:6],
+      proj4string = sp::CRS("+init=epsg:4326")
     )
-    movement_from <- spTransform(movement_from, CRSobj = crs(rast))
-    movement_to <- spTransform(movement_to, CRSobj = crs(rast))
-    cell_from <- terra::extract(rast, movement_from, cellnumbers = TRUE)
-    cell_to <- terra::extract(rast, movement_to, cellnumbers = TRUE)
-    rowcol_from <- rowColFromCell(rast, cell_from[, 1])
-    rowcol_to <- rowColFromCell(rast, cell_to[, 1])
+    movement_from <-
+      suppressWarnings(sp::spTransform(movement_from, CRSobj = terra::crs(rast)))
+    movement_to <-
+      suppressWarnings(sp::spTransform(movement_to, CRSobj = terra::crs(rast)))
+    move_from <- terra::vect(movement_from)
+    move_to <- terra::vect(movement_to)
+    cell_from <- terra::extract(rast, move_from, cells = TRUE)
+    cell_to <- terra::extract(rast, move_to, cells = TRUE)
+    rowcol_from <- terra::rowColFromCell(rast, cell_from[, 3])
+    rowcol_to <- terra::rowColFromCell(rast, cell_to[, 3])
     movements <- data.frame(
       row_from = rowcol_from[, 1],
       col_from = rowcol_from[, 2],
-      row_to = rowcol_to[, 1], col_to = rowcol_to[, 2],
+      row_to = rowcol_to[, 1],
+      col_to = rowcol_to[, 2],
       num_animals = moves$animals,
       date = moves$date
     )
