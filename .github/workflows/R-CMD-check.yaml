@@ -67,7 +67,7 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
-          remotes::install_github("rspatial/terra")
+          remotes::install_version("terra", "1.2-5", repos = "http://cran.us.r-project.org")
         shell: Rscript {0}
 
       - name: Install dependencies
@@ -75,7 +75,7 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
-          remotes::install_github("rspatial/terra")
+          remotes::install_version("terra", "1.2-5", repos = "http://cran.us.r-project.org")
         shell: Rscript {0}
 
       - name: Install dependencies
@@ -83,7 +83,7 @@ jobs:
         run: |
           install.packages(c("remotes", "rcmdcheck"))
           remotes::install_deps(dependencies = TRUE)
-          remotes::install_github("rspatial/terra")
+          remotes::install_version("terra", "1.2-5", repos = "http://cran.us.r-project.org")
         shell: Rscript {0}
 
       # - name: Install rgdal from source
