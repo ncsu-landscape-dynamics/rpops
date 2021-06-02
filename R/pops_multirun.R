@@ -494,7 +494,6 @@ pops_multirun <- function(infected_file,
   min_run <- single_runs[[min_run_index]]
   max_run <- single_runs[[max_run_index]]
 
-
   for (q in seq_len(length(single_runs[[1]]))) {
     for (j in seq_len(length(single_runs))) {
       if (j == 1) {
@@ -516,7 +515,7 @@ pops_multirun <- function(infected_file,
 
     simulation_mean <-
       terra::rast(
-        nrow = config$num_rows, ncol = config$num_cols,
+        nrow = config$rows_cols$num_rows, ncol = config$rows_cols$num_cols,
         xmin = config$xmin, xmax = config$xmax,
         ymin = config$ymin, ymax = config$ymax, crs = config$crs
       )
@@ -633,7 +632,6 @@ pops_multirun <- function(infected_file,
       "east_distance_to_quarantine",
       "west_distance_to_quarantine"
     )
-
 
   if (config$write_outputs %in% config$output_write_list) {
     terra::writeRaster(simulation_probability_stack,

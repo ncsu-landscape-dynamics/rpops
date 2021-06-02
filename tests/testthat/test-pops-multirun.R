@@ -58,6 +58,14 @@ test_that("Multirun model outputs work", {
   use_quarantine <- FALSE
   output_frequency_n <- 1
   use_spreadrates <- TRUE
+  use_overpopulation_movements <- FALSE
+  overpopulation_percentage <- 0
+  leaving_percentage <- 0
+  leaving_scale_coefficient <- 1
+  exposed_file <- ""
+  mask <- NULL
+  write_outputs <- "None"
+  output_folder_path <- ""
 
   data <- pops_multirun(infected_file,
                         host_file,
