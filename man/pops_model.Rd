@@ -210,13 +210,15 @@ nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
 in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
-'week', 'day' or 'time step')}
+'week', 'day', 'time step', or 'every_n_steps')}
 
-\item{output_frequency_n}{sets number units from output_frequency in which to
-export model results.}
+\item{output_frequency_n}{sets number of units from output_frequency in which
+to export model results if mortality_frequency is 'every_n_steps'.
+Must be an integer >= 1.}
 
 \item{quarantine_frequency}{sets how often the quarantine statistics are
-calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)}
+calculated either ('year', 'month', 'week', 'day' or 'time step')
+(default is year)}
 
 \item{quarantine_frequency_n}{sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export quarantine statistics.}
@@ -230,13 +232,15 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
 (default is year)}
 
 \item{spreadrate_frequency_n}{sets number units ('year', 'month', 'week',
-'day' or 'time step') in which to calculate and export spread rate statistics.}
+'day' or 'time step') in which to calculate and export spread rate
+statistics.}
 
 \item{mortality_frequency}{sets the frequency of mortality calculations occur
-either ('year', 'month', week', 'day' or 'time step')}
+either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')}
 
-\item{mortality_frequency_n}{sets number units from mortality_frequency in
-which to run the mortality calculation. Must be an integer >= 1.}
+\item{mortality_frequency_n}{sets number of units from mortality_frequency in
+which to run the mortality calculation if mortality_frequency is
+'every_n_steps'. Must be an integer >= 1.}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
@@ -284,9 +288,10 @@ list of vector matrices of infected and susceptible hosts per
 simulated year and associated statistics (e.g. spread rate)
 }
 \description{
-Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
-pathogen spread in forest or agricultural ecosystems. The model is process
-based meaning that it uses understanding of the effect of weather and other
-environmental factors on reproduction and survival of the pest/pathogen in
-order to forecast spread of the pest/pathogen into the future.
+Wrapper for pops_model_cpp. A dynamic species distribution model
+for pest or pathogen spread in forest or agricultural ecosystems. The model
+is process based meaning that it uses understanding of the effect of weather
+and other environmental factors on reproduction and survival of the
+pest/pathogen in order to forecast spread of the pest/pathogen into the
+future.
 }
