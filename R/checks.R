@@ -258,7 +258,8 @@ percent_checks <- function(percent_natural_dispersal) {
   }
 }
 
-time_checks <- function(end_date, start_date, time_step, output_frequency) {
+time_checks <- function(end_date, start_date, time_step,
+                        output_frequency, output_frequency_n) {
   checks_passed <- TRUE
   output_frequency_error <-
     "Output frequency is more frequent than time_step. The minimum
@@ -283,11 +284,11 @@ time_checks <- function(end_date, start_date, time_step, output_frequency) {
   }
 
   if (checks_passed && !(output_frequency %in% list(
-    "week", "month", "day",
-    "year", "time_step"
+    "week", "month", "day", "year", "time_step", "every_n_steps"
   ))) {
     checks_passed <- FALSE
-    failed_check <- "Output frequency must be one of 'week', 'month' or 'day'"
+    failed_check <-
+      "Output frequency must be either 'week', 'month', 'day', 'year', 'time_step', or 'every_n_steps'"
   }
 
   if (checks_passed && output_frequency == "day") {
@@ -331,6 +332,8 @@ time_checks <- function(end_date, start_date, time_step, output_frequency) {
       number_of_outputs <- ceiling(lubridate::time_length(duration, "year"))
     } else if (output_frequency == "time_step") {
       number_of_outputs <- number_of_time_steps
+    } else if (output_frequency == "every_n_steps") {
+      number_of_outputs <- number_of_time_steps / output_frequency_n
     }
 
     if (output_frequency == "year" && time_step == "day" &&

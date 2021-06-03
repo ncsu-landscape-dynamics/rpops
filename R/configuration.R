@@ -155,7 +155,7 @@ configuration <- function(config) {
   ## check output and timestep are correct.
   time_check <- time_checks(
     config$end_date, config$start_date,
-    config$time_step, config$output_frequency
+    config$time_step, config$output_frequency, config$output_frequency_n
   )
   if (time_check$checks_passed) {
     config$number_of_time_steps <- time_check$number_of_time_steps

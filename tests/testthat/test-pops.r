@@ -2122,6 +2122,19 @@ test_that(
                start_date = start_date,
                end_date = end_date)
   expect_equal(length(data$infected), 364)
+
+  data <- pops(output_frequency = "every_n_steps",
+               output_frequency_n = 5,
+               time_step = "day",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date)
+  expect_equal(length(data$infected), 72)
 })
 
 test_that(

@@ -48,9 +48,10 @@
 #' @param mortality_time_lag time lag from infection until mortality can occur
 #' in time steps integer >= 1
 #' @param mortality_frequency sets the frequency of mortality calculations occur
-#' either ('year', 'month', week', 'day' or 'time step')
-#' @param mortality_frequency_n sets number units from mortality_frequency in
-#' which to run the mortality calculation. Must be an integer >= 1.
+#' either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')
+#' @param mortality_frequency_n sets number of units from mortality_frequency in
+#' which to run the mortality calculation if mortality_frequency is
+#' 'every_n_steps'. Must be an integer >= 1.
 #' @param management boolean to allow use of management (TRUE or FALSE)
 #' @param treatment_dates dates in which to apply treatment list with format
 #' ('YYYY_MM_DD') (needs to be the same length as treatment_file and
@@ -88,9 +89,10 @@
 #' @param random_seed sets the random seed for the simulation used for
 #' reproducibility
 #' @param output_frequency sets when outputs occur either ('year', 'month',
-#' 'week', 'day' or 'time step')
-#' @param output_frequency_n sets number units from output_frequency in which to
-#' export model results.
+#' 'week', 'day', 'time step', or 'every_n_steps')
+#' @param output_frequency_n sets number of units from output_frequency in which
+#' to export model results if mortality_frequency is 'every_n_steps'.
+#' Must be an integer >= 1.
 #' @param movements_file this is a csv file with columns lon_from, lat_from,
 #' lon_to, lat_to, number of animals, and date.
 #' @param use_movements this is a boolean to turn on use of the movement module.

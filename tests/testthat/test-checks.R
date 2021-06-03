@@ -270,7 +270,7 @@ test_that(
     expect_equal(time_check$checks_passed, FALSE)
     expect_equal(
       time_check$failed_check,
-      "Output frequency must be one of 'week', 'month' or 'day'")
+      "Output frequency must be either 'week', 'month', 'day', 'year', 'time_step', or 'every_n_steps'")
 
     end_date <- "2017-01-01"
     start_date <- "2016-01-01"
