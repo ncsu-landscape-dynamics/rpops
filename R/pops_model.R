@@ -1,10 +1,11 @@
-#' PoPS (Pest or Pathogen Spread) model
+#' @title PoPS (Pest or Pathogen Spread) model
 #'
-#' Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
-#' pathogen spread in forest or agricultural ecosystems. The model is process
-#' based meaning that it uses understanding of the effect of weather and other
-#' environmental factors on reproduction and survival of the pest/pathogen in
-#' order to forecast spread of the pest/pathogen into the future.
+#' @description Wrapper for pops_model_cpp. A dynamic species distribution model
+#' for pest or pathogen spread in forest or agricultural ecosystems. The model
+#' is process based meaning that it uses understanding of the effect of weather
+#' and other environmental factors on reproduction and survival of the
+#' pest/pathogen in order to forecast spread of the pest/pathogen into the
+#' future.
 #'
 #' @inheritParams pops
 #' @param weather Boolean that is true if weather is used
@@ -20,10 +21,9 @@
 #' @param temperature vector of matrices of temperature values used to check
 #' against lethal temperature
 #' @param weather_coefficient vector of matrices of weather coefficients
-#' @param ew_res east and west resolution
-#' @param ns_res north and south resolution
-#' @param num_rows number of rows in the raster files
-#' @param num_cols number of columns in the raster files
+#' @param res  vector of east/west resolution and north/south resolution
+#' @param rows_cols vector of number of rows and columns in the raster files
+#' @param season_month_start_end vector of months when spread starts and stops
 #' @param use_anthropogenic_kernel A boolean that turns on the use of the
 #' anthropogenic or long distance dispersal portion of the 2 scale dispersal
 #' kernel function
@@ -34,6 +34,8 @@
 #' format 'YYYY-MM-DD'
 #' @param exposed vector of matrices of the exposed class for use with "SEI"
 #' model type
+#' @param total_exposed sum of all exposed cohorts in exposed class for use with
+#' "SEI" model type
 #' @param model_type_ What type of model most represents your system. Options
 #' are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 #' (Susceptible - Infected/Infested). Default value is "SI".
@@ -52,14 +54,16 @@
 #' @param quarantine_areas areas that are set as quarantined for computing
 #' escape from quarantine statistics.
 #' @param quarantine_frequency sets how often the quarantine statistics are
-#' calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)
+#' calculated either ('year', 'month', 'week', 'day' or 'time step')
+#' (default is year)
 #' @param quarantine_frequency_n sets number units ('year', 'month', 'week',
 #' 'day' or 'time step') in which to calculate and export quarantine statistics.
 #' @param spreadrate_frequency sets how often the spread rate statistics are
 #' calculated either ('year', 'month', 'week', 'day' or 'time step')
 #' (default is year)
 #' @param spreadrate_frequency_n sets number units ('year', 'month', 'week',
-#' 'day' or 'time step') in which to calculate and export spread rate statistics.
+#' 'day' or 'time step') in which to calculate and export spread rate
+#' statistics.
 #' @param spatial_indices list of all spatial locations with suitable hosts
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -72,6 +76,7 @@ pops_model <-
            lethal_temperature,
            lethal_temperature_month,
            infected,
+           total_exposed,
            exposed,
            susceptible,
            total_populations,
@@ -90,17 +95,14 @@ pops_model <-
            weather,
            temperature,
            weather_coefficient,
-           ew_res,
-           ns_res,
-           num_rows,
-           num_cols,
+           res,
+           rows_cols,
            time_step,
            reproductive_rate,
            spatial_indices,
+           season_month_start_end,
            mortality_rate = 0.0,
            mortality_time_lag = 2,
-           season_month_start = 1,
-           season_month_end = 12,
            start_date = "2018-01-01",
            end_date = "2018-12-31",
            treatment_method = "ratio",
@@ -121,6 +123,8 @@ pops_model <-
            use_quarantine = FALSE,
            spreadrate_frequency = "year",
            spreadrate_frequency_n = 1,
+           mortality_frequency = "year",
+           mortality_frequency_n = 1,
            use_spreadrates = FALSE,
            model_type_ = "SI",
            latency_period = 0,
@@ -136,7 +140,7 @@ pops_model <-
            leaving_scale_coefficient = 1.0) {
 
     # List of overpopulation parameters of type double
-    overpopulation_config = c()
+    overpopulation_config <- c()
     overpopulation_config$overpopulation_percentage <- overpopulation_percentage
     overpopulation_config$leaving_percentage <- leaving_percentage
     overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
@@ -147,6 +151,7 @@ pops_model <-
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
                      infected = infected,
+                     total_exposed = total_exposed,
                      exposed = exposed,
                      susceptible = susceptible,
                      total_populations = total_populations,
@@ -165,17 +170,14 @@ pops_model <-
                      weather = weather,
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,
-                     ew_res = ew_res,
-                     ns_res = ns_res,
-                     num_rows = num_rows,
-                     num_cols = num_cols,
+                     res = res,
+                     rows_cols = rows_cols,
                      time_step = time_step,
                      reproductive_rate = reproductive_rate,
                      spatial_indices = spatial_indices,
+                     season_month_start_end = season_month_start_end,
                      mortality_rate = mortality_rate,
                      mortality_time_lag = mortality_time_lag,
-                     season_month_start = season_month_start,
-                     season_month_end = season_month_end,
                      start_date = start_date,
                      end_date = end_date,
                      treatment_method = treatment_method,
@@ -200,6 +202,8 @@ pops_model <-
                      use_quarantine = use_quarantine,
                      spreadrate_frequency = spreadrate_frequency,
                      spreadrate_frequency_n = spreadrate_frequency_n,
+                     mortality_frequency = mortality_frequency,
+                     mortality_frequency_n = mortality_frequency_n,
                      use_spreadrates = use_spreadrates,
                      model_type_ = model_type_,
                      latency_period = latency_period,
@@ -211,7 +215,8 @@ pops_model <-
                      establishment_probability =
                        establishment_probability,
                      dispersal_percentage = dispersal_percentage,
-                     use_overpopulation_movements = use_overpopulation_movements,
+                     use_overpopulation_movements =
+                       use_overpopulation_movements,
                      overpopulation_config = overpopulation_config
     )
 

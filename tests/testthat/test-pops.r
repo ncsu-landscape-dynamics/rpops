@@ -2122,6 +2122,19 @@ test_that(
                start_date = start_date,
                end_date = end_date)
   expect_equal(length(data$infected), 364)
+
+  data <- pops(output_frequency = "every_n_steps",
+               output_frequency_n = 5,
+               time_step = "day",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date)
+  expect_equal(length(data$infected), 72)
 })
 
 test_that(
@@ -2432,4 +2445,241 @@ test_that("Quarantine and spread rates work at all timings", {
   expect_equal(length(data$quarantine_escape_distance), 364)
   expect_equal(length(data$quarantine_escape_directions), 364)
   expect_equal(length(data$rates), 364)
+})
+
+
+test_that("Mortality works as expected with multiple ", {
+  infected_file <-
+    system.file("extdata", "simple20x20", "initial_infection.tif",
+                package = "PoPS")
+  host_file <-
+    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  start_date <- "2009-01-01"
+  end_date <- "2009-12-31"
+  treatment_dates <- start_date
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+
+  data <- pops(output_frequency = "month",
+               time_step = "month",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date,
+               mortality_frequency = "month",
+               mortality_frequency_n = 1,
+               mortality_rate = 0.50,
+               mortality_time_lag = 1,
+               mortality_on = TRUE)
+
+  expect_equal(length(data$mortality), 12)
+  expect_equal(data$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[3]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+
+  data <- pops(output_frequency = "week",
+               time_step = "week",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date,
+               mortality_frequency = "month",
+               mortality_frequency_n = 1,
+               mortality_rate = 0.50,
+               mortality_time_lag = 1,
+               mortality_on = TRUE)
+
+  expect_equal(length(data$mortality), 12)
+  expect_equal(data$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[3]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+
+
+  data <- pops(output_frequency = "week",
+               time_step = "week",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date,
+               mortality_frequency = "month",
+               mortality_frequency_n = 1,
+               mortality_rate = 0.250,
+               mortality_time_lag = 1,
+               mortality_on = TRUE)
+
+  expect_equal(length(data$mortality), 12)
+  expect_equal(data$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[3]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[4]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[5]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+
+
+  data <- pops(output_frequency = "week",
+               time_step = "week",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date,
+               mortality_frequency = "month",
+               mortality_frequency_n = 1,
+               mortality_rate = 0.250,
+               mortality_time_lag = 3,
+               mortality_on = TRUE)
+
+  expect_equal(length(data$mortality), 12)
+  expect_equal(data$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[3]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[4]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[5]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[6]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[7]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+
+  data <- pops(output_frequency = "week",
+               time_step = "week",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date,
+               mortality_frequency = "month",
+               mortality_frequency_n = 1,
+               mortality_rate = 0.10,
+               mortality_time_lag = 1,
+               mortality_on = TRUE)
+
+  expect_equal(length(data$mortality), 12)
+  expect_equal(data$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[3]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[4]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[5]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[6]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[7]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[8]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[9]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[10]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$mortality[[11]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+})
+
+test_that("Movements works as expected", {
+  infected_file <-
+    system.file("extdata", "simple20x20", "initial_infection.tif",
+                package = "PoPS")
+  host_file <-
+    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  start_date <- "2009-01-01"
+  end_date <- "2009-12-31"
+  treatment_dates <- start_date
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  use_movements <- TRUE
+  movements_file <-
+    system.file("extdata", "simple20x20", "movements.csv", package = "PoPS")
+
+  data <- pops(output_frequency = "month",
+               time_step = "month",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date,
+               use_movements = use_movements,
+               movements_file = movements_file,
+               random_seed = 42)
+
+  expect_equal(length(data$infected), 12)
+  expect_equal(data$infected[[1]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$infected[[2]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$infected[[3]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$infected[[4]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  infected_move <- matrix(0, ncol = 20, nrow = 20)
+  infected_move[2,1] <- 1
+  expect_equal(data$infected[[5]], infected_move)
+  sus <- terra::rast(host_file) - terra::rast(infected_file)
+  sus <- terra::as.matrix(sus, wide = TRUE)
+  sus5 <- sus
+  sus5[1,1] <- sus5[1,1] - 99
+  sus5[2,1] <- sus5[2,1] + 99
+  sus6 <- sus5
+  sus6[1,2] <- sus6[1,2] - 50
+  sus6[2,2] <- sus6[2,2] + 50
+  expect_equal(data$susceptible[[1]], sus)
+  expect_equal(data$susceptible[[2]], sus)
+  expect_equal(data$susceptible[[3]], sus)
+  expect_equal(data$susceptible[[4]], sus)
+  expect_equal(data$susceptible[[5]], sus5)
+  expect_equal(data$susceptible[[6]], sus6)
+
+  data <- pops(output_frequency = "month",
+               time_step = "month",
+               treatment_dates = start_date,
+               infected_file = infected_file,
+               host_file = host_file,
+               total_populations_file = host_file,
+               parameter_means = parameter_means,
+               parameter_cov_matrix = parameter_cov_matrix,
+               start_date = start_date,
+               end_date = end_date,
+               use_movements = use_movements,
+               movements_file = movements_file,
+               random_seed = 45)
+
+  expect_equal(length(data$infected), 12)
+  expect_equal(data$infected[[1]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$infected[[2]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$infected[[3]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$infected[[4]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$infected[[5]],
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  sus <- terra::rast(host_file) - terra::rast(infected_file)
+  sus <- terra::as.matrix(sus, wide = TRUE)
+  sus5 <- sus
+  sus5[1,1] <- sus5[1,1] - 100
+  sus5[2,1] <- sus5[2,1] + 100
+  sus6 <- sus5
+  sus6[1,2] <- sus6[1,2] - 50
+  sus6[2,2] <- sus6[2,2] + 50
+  expect_equal(data$susceptible[[1]], sus)
+  expect_equal(data$susceptible[[2]], sus)
+  expect_equal(data$susceptible[[3]], sus)
+  expect_equal(data$susceptible[[4]], sus)
+  expect_equal(data$susceptible[[5]], sus5)
+  expect_equal(data$susceptible[[6]], sus6)
 })

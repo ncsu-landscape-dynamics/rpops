@@ -32,6 +32,8 @@ validate(
   mortality_on = FALSE,
   mortality_rate = 0,
   mortality_time_lag = 0,
+  mortality_frequency = "Year",
+  mortality_frequency_n = 1,
   management = FALSE,
   treatment_dates = c(""),
   treatments_file = "",
@@ -147,7 +149,14 @@ and 12}
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur
-in years integer >= 1}
+in time steps integer >= 1}
+
+\item{mortality_frequency}{sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')}
+
+\item{mortality_frequency_n}{sets number of units from mortality_frequency in
+which to run the mortality calculation if mortality_frequency is
+'every_n_steps'. Must be an integer >= 1.}
 
 \item{management}{boolean to allow use of management (TRUE or FALSE)}
 
@@ -202,10 +211,11 @@ Choices are "quantity", "quantity and configuration", "residual error" and
 "odds ratio". Default is "quantity"}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
-'week', 'day' or 'time step')}
+'week', 'day', 'time step', or 'every_n_steps')}
 
-\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.}
+\item{output_frequency_n}{sets number of units from output_frequency in which
+to export model results if mortality_frequency is 'every_n_steps'.
+Must be an integer >= 1.}
 
 \item{movements_file}{this is a csv file with columns lon_from, lat_from,
 lon_to, lat_to, number of animals, and date.}
@@ -259,7 +269,7 @@ the natural kernel (if applicable)}
 
 \item{exposed_file}{a file with the exposed for the current}
 
-\item{write_outputs}{Either c("summary outputs", or "None"). If not
+\item{write_outputs}{Either c("summary_outputs", or "None"). If not
 "None" output folder path must be provided.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,

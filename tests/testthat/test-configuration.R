@@ -452,9 +452,9 @@ test_that("configuration returns proper errors", {
   config2 <- configuration(config)
   expect_equal(
     config2$failure,
-    "write_outputs is not one of c('all simulations', 'summary outputs', 'None')")
+    "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')")
 
-  config$write_outputs <- "summary outputs"
+  config$write_outputs <- "summary_outputs"
   config$output_folder_path <- "hi"
   config2 <- configuration(config)
   expect_equal(

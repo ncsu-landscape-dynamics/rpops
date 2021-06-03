@@ -71,8 +71,10 @@ public:
     bool use_treatments{false};
     // Mortality
     bool use_mortality{false};
+    std::string mortality_frequency;
+    unsigned mortality_frequency_n;
     double mortality_rate{0};
-    int first_mortality_year{0};  // TODO: document that it starts at 1, not 0
+    int mortality_time_lag{0};  // Time lag of mortality in mortality steps
     // Quarantine
     bool use_quarantine{false};
     std::string quarantine_frequency;
@@ -98,7 +100,9 @@ public:
             scheduler_.schedule_spread(Season(season_start_month_, season_end_month_));
         output_schedule_ =
             schedule_from_string(scheduler_, output_frequency, output_frequency_n);
-        mortality_schedule_ = scheduler_.schedule_action_end_of_year();
+        if (use_mortality)
+            mortality_schedule_ = schedule_from_string(
+                scheduler_, mortality_frequency, mortality_frequency_n);
         if (use_lethal_temperature)
             lethal_schedule_ =
                 scheduler_.schedule_action_yearly(lethal_temperature_month, 1);
@@ -176,11 +180,11 @@ public:
         return output_schedule_;
     }
 
-    unsigned num_mortality_years()
+    unsigned num_mortality_steps()
     {
         if (!schedules_created_)
             throw std::logic_error(
-                "Schedules were not created before calling num_mortality_years()");
+                "Schedules were not created before calling num_mortality_steps()");
         return get_number_of_scheduled_actions(mortality_schedule_);
     }
 

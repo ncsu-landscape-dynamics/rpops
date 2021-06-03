@@ -28,6 +28,8 @@ pops_multirun(
   mortality_on = FALSE,
   mortality_rate = 0,
   mortality_time_lag = 0,
+  mortality_frequency = "Year",
+  mortality_frequency_n = 1,
   management = FALSE,
   treatment_dates = c(""),
   treatments_file = "",
@@ -139,7 +141,14 @@ and 12}
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur
-in years integer >= 1}
+in time steps integer >= 1}
+
+\item{mortality_frequency}{sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')}
+
+\item{mortality_frequency_n}{sets number of units from mortality_frequency in
+which to run the mortality calculation if mortality_frequency is
+'every_n_steps'. Must be an integer >= 1.}
 
 \item{management}{boolean to allow use of management (TRUE or FALSE)}
 
@@ -195,10 +204,11 @@ successfully treats 70 percent of the plants or animals)}
 reproducibility}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
-'week', 'day' or 'time step')}
+'week', 'day', 'time step', or 'every_n_steps')}
 
-\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.}
+\item{output_frequency_n}{sets number of units from output_frequency in which
+to export model results if mortality_frequency is 'every_n_steps'.
+Must be an integer >= 1.}
 
 \item{movements_file}{this is a csv file with columns lon_from, lat_from,
 lon_to, lat_to, number of animals, and date.}
@@ -257,8 +267,9 @@ true negatives from comparisons (e.g. mask out lakes and oceans from statics
 if modeling terrestrial species). This can also be used to mask out areas
 that can't be managed in the auto_manage function.}
 
-\item{write_outputs}{Either c("all_simulations", "summary outputs", or
-"None"). If not "None" output folder path must be provided.}
+\item{write_outputs}{Either c("all_simulations", "summary_outputs", or
+"None"). If not "None" output folder path must be provided. all_simulations
+doesn't currently work and is a place holder for future developement.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}

@@ -41,15 +41,23 @@ this repository.
 - Raster files can now be read from S3 buckets (@chrisJones687, #75).
   * needed for model-api for dashboard
   
-- Outputs can now be saved with `write_outputs` and `output_folder_path` parameters (@ChrisJones687, #111)
+- Outputs can now be saved with `write_outputs` and `output_folder_path` parameters (@ChrisJones687, #111).
 
-- Host map now used as initial mask for postprocessing and validation calculations (@ChrisJones687, #112)
+- Host map now used as initial mask for post processing and validation calculations (@ChrisJones687, #112).
+
+- Movements now moves exposed, resistant, and mortality tracked populations (@ChrisJones687, #118).
+
+- Mortality can now occur at various timesteps not just yearly (@ChrisJones687, #118).
+  * Can be either "day", "week", "month", "year", or "every_n_steps".
+  * adds parameters `mortality_frequency` and `mortality_frequency_n`.
 
 ### Fixed
 
 - Mask parameter works as intended in validate function after terra update (@ChrisJones687, #104).
 
 - Improved pops_model documentation updating (@ChrisJones687, #94).
+
+- `Output_frequency` can now be `every_n_steps` (@ChrisJones, #118).
 
 ## [1.0.2] - 2020-10-09
 

@@ -10,6 +10,7 @@ pops_model(
   lethal_temperature,
   lethal_temperature_month,
   infected,
+  total_exposed,
   exposed,
   susceptible,
   total_populations,
@@ -28,17 +29,14 @@ pops_model(
   weather,
   temperature,
   weather_coefficient,
-  ew_res,
-  ns_res,
-  num_rows,
-  num_cols,
+  res,
+  rows_cols,
   time_step,
   reproductive_rate,
   spatial_indices,
+  season_month_start_end,
   mortality_rate = 0,
   mortality_time_lag = 2,
-  season_month_start = 1,
-  season_month_end = 12,
   start_date = "2018-01-01",
   end_date = "2018-12-31",
   treatment_method = "ratio",
@@ -59,6 +57,8 @@ pops_model(
   use_quarantine = FALSE,
   spreadrate_frequency = "year",
   spreadrate_frequency_n = 1,
+  mortality_frequency = "year",
+  mortality_frequency_n = 1,
   use_spreadrates = FALSE,
   model_type_ = "SI",
   latency_period = 0,
@@ -90,6 +90,9 @@ related mortality occurs for your pest or pathogen integer value between 1
 and 12}
 
 \item{infected}{matrix of infected hosts}
+
+\item{total_exposed}{sum of all exposed cohorts in exposed class for use with
+"SEI" model type}
 
 \item{exposed}{vector of matrices of the exposed class for use with "SEI"
 model type}
@@ -139,13 +142,9 @@ against lethal temperature}
 
 \item{weather_coefficient}{vector of matrices of weather coefficients}
 
-\item{ew_res}{east and west resolution}
+\item{res}{vector of east/west resolution and north/south resolution}
 
-\item{ns_res}{north and south resolution}
-
-\item{num_rows}{number of rows in the raster files}
-
-\item{num_cols}{number of columns in the raster files}
+\item{rows_cols}{vector of number of rows and columns in the raster files}
 
 \item{time_step}{how often should spread occur options: ('day', 'week',
 'month')}
@@ -155,16 +154,12 @@ host under optimal weather conditions}
 
 \item{spatial_indices}{list of all spatial locations with suitable hosts}
 
+\item{season_month_start_end}{vector of months when spread starts and stops}
+
 \item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
 
 \item{mortality_time_lag}{time lag from infection until mortality can occur
-in years integer >= 1}
-
-\item{season_month_start}{when does spread first start occurring in the year
-for your pest or pathogen (integer value between 1 and 12)}
-
-\item{season_month_end}{when does spread end during the year for your pest
-or pathogen (integer value between 1 and 12)}
+in time steps integer >= 1}
 
 \item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
 
@@ -215,13 +210,15 @@ nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
 in the von-mises distribution numeric value between 0.01 and 12}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
-'week', 'day' or 'time step')}
+'week', 'day', 'time step', or 'every_n_steps')}
 
-\item{output_frequency_n}{sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.}
+\item{output_frequency_n}{sets number of units from output_frequency in which
+to export model results if mortality_frequency is 'every_n_steps'.
+Must be an integer >= 1.}
 
 \item{quarantine_frequency}{sets how often the quarantine statistics are
-calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)}
+calculated either ('year', 'month', 'week', 'day' or 'time step')
+(default is year)}
 
 \item{quarantine_frequency_n}{sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export quarantine statistics.}
@@ -235,7 +232,15 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
 (default is year)}
 
 \item{spreadrate_frequency_n}{sets number units ('year', 'month', 'week',
-'day' or 'time step') in which to calculate and export spread rate statistics.}
+'day' or 'time step') in which to calculate and export spread rate
+statistics.}
+
+\item{mortality_frequency}{sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')}
+
+\item{mortality_frequency_n}{sets number of units from mortality_frequency in
+which to run the mortality calculation if mortality_frequency is
+'every_n_steps'. Must be an integer >= 1.}
 
 \item{use_spreadrates}{boolean to indicate whether or not to calculate
 spread rates}
@@ -283,9 +288,10 @@ list of vector matrices of infected and susceptible hosts per
 simulated year and associated statistics (e.g. spread rate)
 }
 \description{
-Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
-pathogen spread in forest or agricultural ecosystems. The model is process
-based meaning that it uses understanding of the effect of weather and other
-environmental factors on reproduction and survival of the pest/pathogen in
-order to forecast spread of the pest/pathogen into the future.
+Wrapper for pops_model_cpp. A dynamic species distribution model
+for pest or pathogen spread in forest or agricultural ecosystems. The model
+is process based meaning that it uses understanding of the effect of weather
+and other environmental factors on reproduction and survival of the
+pest/pathogen in order to forecast spread of the pest/pathogen into the
+future.
 }

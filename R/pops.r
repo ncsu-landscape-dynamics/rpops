@@ -1,12 +1,12 @@
-#' PoPS (Pest or Pathogen Spread) model
+#' @title PoPS (Pest or Pathogen Spread) model
 #'
-#' A dynamic species distribution model for pest or pathogen spread in forest
-#' or agricultural ecosystems. The model is process based meaning that it uses
-#' understanding of the effect of weather and other environmental factors on
-#' reproduction and survival of the pest/pathogen in order to forecast spread
-#' of the pest/pathogen into the future. This function performs a single
-#' stochastic realization of the model and is predominantly used for automated
-#' tests of model features.
+#' @description A dynamic species distribution model for pest or pathogen spread
+#' in forest or agricultural ecosystems. The model is process based meaning that
+#' it uses understanding of the effect of weather and other environmental
+#' factors on reproduction and survival of the pest/pathogen in order to
+#' forecast spread of the pest/pathogen into the future. This function performs
+#' a single stochastic realization of the model and is predominantly used for
+#' automated tests of model features.
 #'
 #' @param infected_file path to raster file with initial infections
 #' @param host_file path to raster files with number of hosts and standard
@@ -46,7 +46,12 @@
 #' (TRUE or FALSE)
 #' @param mortality_rate rate at which mortality occurs value between 0 and 1
 #' @param mortality_time_lag time lag from infection until mortality can occur
-#' in years integer >= 1
+#' in time steps integer >= 1
+#' @param mortality_frequency sets the frequency of mortality calculations occur
+#' either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')
+#' @param mortality_frequency_n sets number of units from mortality_frequency in
+#' which to run the mortality calculation if mortality_frequency is
+#' 'every_n_steps'. Must be an integer >= 1.
 #' @param management boolean to allow use of management (TRUE or FALSE)
 #' @param treatment_dates dates in which to apply treatment list with format
 #' ('YYYY_MM_DD') (needs to be the same length as treatment_file and
@@ -84,9 +89,10 @@
 #' @param random_seed sets the random seed for the simulation used for
 #' reproducibility
 #' @param output_frequency sets when outputs occur either ('year', 'month',
-#' 'week', 'day' or 'time step')
-#' @param output_frequency_n sets number units ('year', 'month', 'week', 'day'
-#' or 'time step') in which to export model results.
+#' 'week', 'day', 'time step', or 'every_n_steps')
+#' @param output_frequency_n sets number of units from output_frequency in which
+#' to export model results if mortality_frequency is 'every_n_steps'.
+#' Must be an integer >= 1.
 #' @param movements_file this is a csv file with columns lon_from, lat_from,
 #' lon_to, lat_to, number of animals, and date.
 #' @param use_movements this is a boolean to turn on use of the movement module.
@@ -176,6 +182,8 @@ pops <- function(infected_file,
                  mortality_on = FALSE,
                  mortality_rate = 0,
                  mortality_time_lag = 0,
+                 mortality_frequency = "Year",
+                 mortality_frequency_n = 1,
                  management = FALSE,
                  treatment_dates = c(""),
                  treatments_file = "",
@@ -273,6 +281,8 @@ pops <- function(infected_file,
   config$exposed_file <- exposed_file
   config$write_outputs <- "None"
   config$output_folder_path <- ""
+  config$mortality_frequency <- mortality_frequency
+  config$mortality_frequency_n <- mortality_frequency_n
 
   config <- configuration(config)
 
@@ -285,6 +295,7 @@ pops <- function(infected_file,
                      lethal_temperature = config$lethal_temperature,
                      lethal_temperature_month = config$lethal_temperature_month,
                      infected = config$infected,
+                     total_exposed = config$total_exposed,
                      exposed = config$exposed,
                      susceptible = config$susceptible,
                      total_populations = config$total_populations,
@@ -303,17 +314,14 @@ pops <- function(infected_file,
                      weather = config$weather,
                      temperature = config$temperature,
                      weather_coefficient = config$weather_coefficient,
-                     ew_res = config$ew_res,
-                     ns_res = config$ns_res,
-                     num_rows = config$num_rows,
-                     num_cols = config$num_cols,
+                     res = config$res,
+                     rows_cols = config$rows_cols,
                      time_step = config$time_step,
                      reproductive_rate = config$reproductive_rate[1],
                      spatial_indices = config$spatial_indices,
+                     season_month_start_end = config$season_month_start_end,
                      mortality_rate = config$mortality_rate,
                      mortality_time_lag = config$mortality_time_lag,
-                     season_month_start = config$season_month_start,
-                     season_month_end = config$season_month_end,
                      start_date = config$start_date,
                      end_date = config$end_date,
                      treatment_method = config$treatment_method,
@@ -338,6 +346,8 @@ pops <- function(infected_file,
                      use_quarantine = config$use_quarantine,
                      spreadrate_frequency = config$spreadrate_frequency,
                      spreadrate_frequency_n = config$spreadrate_frequency_n,
+                     mortality_frequency = config$mortality_frequency,
+                     mortality_frequency_n = config$mortality_frequency_n,
                      use_spreadrates = config$use_spreadrates,
                      model_type_ = config$model_type,
                      latency_period = config$latency_period,
@@ -350,10 +360,13 @@ pops <- function(infected_file,
                      establishment_probability =
                        config$establishment_probability,
                      dispersal_percentage = config$dispersal_percentage,
-                     use_overpopulation_movements = config$use_overpopulation_movements,
-                     overpopulation_percentage = config$overpopulation_percentage,
+                     use_overpopulation_movements =
+                       config$use_overpopulation_movements,
+                     overpopulation_percentage =
+                       config$overpopulation_percentage,
                      leaving_percentage = config$leaving_percentage,
-                     leaving_scale_coefficient = config$leaving_scale_coefficient
+                     leaving_scale_coefficient =
+                       config$leaving_scale_coefficient
   )
 
   return(data)

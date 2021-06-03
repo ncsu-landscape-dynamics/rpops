@@ -29,6 +29,8 @@ test_that("Multirun model outputs work", {
   mortality_on <- FALSE
   mortality_rate <- 0
   mortality_time_lag <- 0
+  mortality_frequency = "Year"
+  mortality_frequency_n = 1
   natural_kernel_type <- "cauchy"
   anthropogenic_kernel_type <- "cauchy"
   natural_dir <- "NONE"
@@ -56,6 +58,14 @@ test_that("Multirun model outputs work", {
   use_quarantine <- FALSE
   output_frequency_n <- 1
   use_spreadrates <- TRUE
+  use_overpopulation_movements <- FALSE
+  overpopulation_percentage <- 0
+  leaving_percentage <- 0
+  leaving_scale_coefficient <- 1
+  exposed_file <- ""
+  mask <- NULL
+  write_outputs <- "None"
+  output_folder_path <- ""
 
   data <- pops_multirun(infected_file,
                         host_file,
@@ -80,6 +90,8 @@ test_that("Multirun model outputs work", {
                         mortality_on,
                         mortality_rate,
                         mortality_time_lag,
+                        mortality_frequency,
+                        mortality_frequency_n,
                         management,
                         treatment_dates,
                         treatments_file,
@@ -155,6 +167,8 @@ test_that("Multirun model outputs work", {
                         mortality_on,
                         mortality_rate,
                         mortality_time_lag,
+                        mortality_frequency,
+                        mortality_frequency_n,
                         management,
                         treatment_dates,
                         treatments_file,
@@ -232,6 +246,8 @@ test_that("Multirun model outputs work", {
                         mortality_on,
                         mortality_rate,
                         mortality_time_lag,
+                        mortality_frequency,
+                        mortality_frequency_n,
                         management,
                         treatment_dates,
                         treatments_file,
@@ -306,6 +322,8 @@ test_that("Multirun model outputs work", {
                         mortality_on,
                         mortality_rate,
                         mortality_time_lag,
+                        mortality_frequency,
+                        mortality_frequency_n,
                         management,
                         treatment_dates,
                         treatments_file,
@@ -386,6 +404,8 @@ test_that("Multirun model outputs work with mask", {
   mortality_on <- FALSE
   mortality_rate <- 0
   mortality_time_lag <- 0
+  mortality_frequency = "Year"
+  mortality_frequency_n = 1
   natural_kernel_type <- "cauchy"
   anthropogenic_kernel_type <- "cauchy"
   natural_dir <- "NONE"
@@ -438,6 +458,8 @@ test_that("Multirun model outputs work with mask", {
                         mortality_on,
                         mortality_rate,
                         mortality_time_lag,
+                        mortality_frequency,
+                        mortality_frequency_n,
                         management,
                         treatment_dates,
                         treatments_file,

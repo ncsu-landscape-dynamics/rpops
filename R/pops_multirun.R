@@ -15,8 +15,9 @@
 #' the calibration to converge at least 10
 #' @param number_of_cores enter how many cores you want to use (default = NA).
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
-#' @param write_outputs Either c("all_simulations", "summary outputs", or
-#' "None"). If not "None" output folder path must be provided.
+#' @param write_outputs Either c("all_simulations", "summary_outputs", or
+#' "None"). If not "None" output folder path must be provided. all_simulations
+#' doesn't currently work and is a place holder for future developement.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
@@ -53,6 +54,8 @@ pops_multirun <- function(infected_file,
                           mortality_on = FALSE,
                           mortality_rate = 0,
                           mortality_time_lag = 0,
+                          mortality_frequency = "Year",
+                          mortality_frequency_n = 1,
                           management = FALSE,
                           treatment_dates = c(""),
                           treatments_file = "",
@@ -152,6 +155,8 @@ pops_multirun <- function(infected_file,
   config$mask <- mask
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
+  config$mortality_frequency <- mortality_frequency
+  config$mortality_frequency_n <- mortality_frequency_n
 
   config <- configuration(config)
 
@@ -179,6 +184,7 @@ pops_multirun <- function(infected_file,
         lethal_temperature_month =
           config$lethal_temperature_month,
         infected = config$infected,
+        total_exposed = config$total_exposed,
         exposed = config$exposed,
         susceptible = config$susceptible,
         total_populations = config$total_populations,
@@ -197,17 +203,14 @@ pops_multirun <- function(infected_file,
         weather = config$weather,
         temperature = config$temperature,
         weather_coefficient = config$weather_coefficient,
-        ew_res = config$ew_res,
-        ns_res = config$ns_res,
-        num_rows = config$num_rows,
-        num_cols = config$num_cols,
+        res = config$res,
+        rows_cols = config$rows_cols,
         time_step = config$time_step,
         reproductive_rate = config$reproductive_rate[i],
         spatial_indices = config$spatial_indices,
+        season_month_start_end = config$season_month_start_end,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
-        season_month_start = config$season_month_start,
-        season_month_end = config$season_month_end,
         start_date = config$start_date,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
@@ -233,6 +236,8 @@ pops_multirun <- function(infected_file,
         use_quarantine = config$use_quarantine,
         spreadrate_frequency = config$spreadrate_frequency,
         spreadrate_frequency_n = config$spreadrate_frequency_n,
+        mortality_frequency = config$mortality_frequency,
+        mortality_frequency_n = config$mortality_frequency_n,
         use_spreadrates = config$use_spreadrates,
         model_type_ = config$model_type,
         latency_period = config$latency_period,
@@ -489,7 +494,6 @@ pops_multirun <- function(infected_file,
   min_run <- single_runs[[min_run_index]]
   max_run <- single_runs[[max_run_index]]
 
-
   for (q in seq_len(length(single_runs[[1]]))) {
     for (j in seq_len(length(single_runs))) {
       if (j == 1) {
@@ -511,7 +515,7 @@ pops_multirun <- function(infected_file,
 
     simulation_mean <-
       terra::rast(
-        nrow = config$num_rows, ncol = config$num_cols,
+        nrow = config$rows_cols$num_rows, ncol = config$rows_cols$num_cols,
         xmin = config$xmin, xmax = config$xmax,
         ymin = config$ymin, ymax = config$ymax, crs = config$crs
       )
@@ -628,7 +632,6 @@ pops_multirun <- function(infected_file,
       "east_distance_to_quarantine",
       "west_distance_to_quarantine"
     )
-
 
   if (config$write_outputs %in% config$output_write_list) {
     terra::writeRaster(simulation_probability_stack,

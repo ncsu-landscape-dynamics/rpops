@@ -24,7 +24,7 @@
 #' (posterior means)
 #' @param parameter_cov_matrix the parameter covariance matrix from the abc
 #' calibration function (posterior covairance matrix)
-#' @param write_outputs Either c("summary outputs", or "None"). If not
+#' @param write_outputs Either c("summary_outputs", or "None"). If not
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
@@ -68,6 +68,8 @@ validate <- function(infected_years_file,
                      mortality_on = FALSE,
                      mortality_rate = 0,
                      mortality_time_lag = 0,
+                     mortality_frequency = "Year",
+                     mortality_frequency_n = 1,
                      management = FALSE,
                      treatment_dates = c(""),
                      treatments_file = "",
@@ -166,6 +168,8 @@ validate <- function(infected_years_file,
   config$exposed_file <- exposed_file
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
+  config$mortality_frequency <- mortality_frequency
+  config$mortality_frequency_n <- mortality_frequency_n
 
   config <- configuration(config)
 
@@ -193,6 +197,7 @@ validate <- function(infected_years_file,
         lethal_temperature_month =
           config$lethal_temperature_month,
         infected = config$infected,
+        total_exposed = config$total_exposed,
         exposed = config$exposed,
         susceptible = config$susceptible,
         total_populations = config$total_populations,
@@ -211,17 +216,14 @@ validate <- function(infected_years_file,
         weather = config$weather,
         temperature = config$temperature,
         weather_coefficient = config$weather_coefficient,
-        ew_res = config$ew_res,
-        ns_res = config$ns_res,
-        num_rows = config$num_rows,
-        num_cols = config$num_cols,
+        res = config$res,
+        rows_cols = config$rows_cols,
         time_step = config$time_step,
         reproductive_rate = config$reproductive_rate[i],
         spatial_indices = config$spatial_indices,
+        season_month_start_end = config$season_month_start_end,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
-        season_month_start = config$season_month_start,
-        season_month_end = config$season_month_end,
         start_date = config$start_date,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
@@ -247,6 +249,8 @@ validate <- function(infected_years_file,
         use_quarantine = config$use_quarantine,
         spreadrate_frequency = config$spreadrate_frequency,
         spreadrate_frequency_n = config$spreadrate_frequency_n,
+        mortality_frequency = config$mortality_frequency,
+        mortality_frequency_n = config$mortality_frequency_n,
         use_spreadrates = config$use_spreadrates,
         model_type_ = config$model_type,
         latency_period = config$latency_period,
@@ -287,13 +291,13 @@ validate <- function(infected_years_file,
                                              mask)
         }
 
-      to.qa <- data.frame(t(all_disagreement))
+      data.frame(t(all_disagreement))
     }
 
   parallel::stopCluster(cl)
 
   if (config$write_outputs %in% config$output_write_list) {
-    save(outputs, file = ffOut("validation_outputs.rdata"))
+    save(qa, file = ffOut("validation_outputs.rdata"))
   }
 
   return(qa)

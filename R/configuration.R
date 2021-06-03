@@ -77,12 +77,12 @@ configuration <- function(config) {
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
-  config$output_list <- c("all_simulations", "summary outputs", "None")
-  config$output_write_list <- c("all_simulations", "summary outputs")
+  config$output_list <- c("all_simulations", "summary_outputs", "None")
+  config$output_write_list <- c("all_simulations", "summary_outputs")
 
   if (config$write_outputs %notin% config$output_list) {
     config$failure <-
-      "write_outputs is not one of c('all simulations', 'summary outputs', 'None')"
+      "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')"
   }
 
   if (config$write_outputs %in% config$output_write_list) {
@@ -120,6 +120,18 @@ configuration <- function(config) {
     return(config)
   }
 
+  seasons <- seq(1, 12, 1)
+  if (config$season_month_start %in% seasons &&
+      config$season_month_end %in% seasons) {
+    season_month_start_end <- c()
+    season_month_start_end$start_month <- as.integer(config$season_month_start)
+    season_month_start_end$end_month <- as.integer(config$season_month_end)
+    config$season_month_start_end <- season_month_start_end
+  } else {
+    config$failure <-
+      "Season month start or end not between 1 and 12"
+  }
+
   # ensures latent period is correct for type of model selected
   if (config$model_type == "SEI" && config$latency_period <= 0) {
     config$failure <-
@@ -143,7 +155,7 @@ configuration <- function(config) {
   ## check output and timestep are correct.
   time_check <- time_checks(
     config$end_date, config$start_date,
-    config$time_step, config$output_frequency
+    config$time_step, config$output_frequency, config$output_frequency_n
   )
   if (time_check$checks_passed) {
     config$number_of_time_steps <- time_check$number_of_time_steps
@@ -440,11 +452,14 @@ configuration <- function(config) {
     config$treatment_dates <- c(config$start_date)
   }
 
-  config$ew_res <- terra::xres(susceptible)
-  config$ns_res <- terra::yres(susceptible)
-  config$num_cols <- terra::ncol(susceptible)
-  config$num_rows <- terra::nrow(susceptible)
-
+  res <- c()
+  res$ew_res <- terra::xres(susceptible)
+  res$ns_res <- terra::yres(susceptible)
+  config$res <- res
+  rows_cols <- c()
+  rows_cols$num_rows <- terra::nrow(susceptible)
+  rows_cols$num_cols <- terra::ncol(susceptible)
+  config$rows_cols <- rows_cols
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <- movement_checks(
@@ -469,6 +484,7 @@ configuration <- function(config) {
     wide = TRUE
   )
   exposed <- list(mortality_tracker)
+  config$total_exposed <- mortality_tracker
 
   if (config$model_type == "SEI" & config$latency_period > 1) {
     for (ex in 2:(config$latency_period + 1)) {
@@ -492,6 +508,7 @@ configuration <- function(config) {
       susceptible[susceptible < 0] <- 0
       exposed[[config$latency_period + 1]] <-
         terra::as.matrix(exposed2, wide = TRUE)
+      config$total_exposed <- terra::as.matrix(exposed2, wide = TRUE)
     } else {
       config$failure <- exposed_check$failed_check
       return(config)
@@ -569,7 +586,6 @@ configuration <- function(config) {
   config$mortality <- mortality_tracker
   config$resistant <- mortality_tracker
 
-
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
@@ -585,9 +601,7 @@ configuration <- function(config) {
 
     if (quarantine_check$checks_passed) {
       quarantine_areas <- quarantine_check$raster
-      config$quarantine_areas <- terra::as.matrix(quarantine_areas,
-        wide = TRUE
-      )
+      config$quarantine_areas <- terra::as.matrix(quarantine_areas, wide = TRUE)
     } else {
       config$failure <- quarantine_check$failed_check
       return(config)
@@ -598,10 +612,21 @@ configuration <- function(config) {
     config$quarantine_areas <- mortality_tracker
   }
 
-  config$mortality_tracker <- mortality_tracker
+  mortality_tracker2 <- list(mortality_tracker)
+  if (config$mortality_on) {
+    mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
+
+    for (mt in 2:(mortality_length)) {
+      mortality_tracker2[[mt]] <- mortality_tracker
+    }
+  }
+  ## add currently infected cells to last element of the mortality tracker so
+  ## that mortality occurs at the appropriate interval
+  mortality_tracker2[[length(mortality_tracker2)]] <- infected
+
+  config$mortality_tracker <- mortality_tracker2
   config$exposed <- exposed
   config$infected <- infected
-
 
   if (config$function_name %in% c("validate", "multirun", "sensitivity")) {
     if (is.na(config$number_of_cores) ||
