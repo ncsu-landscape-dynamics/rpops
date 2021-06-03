@@ -172,6 +172,8 @@ the total number of iterations specified.</p>
   mortality_on <span class='op'>=</span> <span class='cn'>FALSE</span>,
   mortality_rate <span class='op'>=</span> <span class='fl'>0</span>,
   mortality_time_lag <span class='op'>=</span> <span class='fl'>0</span>,
+  mortality_frequency <span class='op'>=</span> <span class='st'>"Year"</span>,
+  mortality_frequency_n <span class='op'>=</span> <span class='fl'>1</span>,
   management <span class='op'>=</span> <span class='cn'>FALSE</span>,
   treatment_dates <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>""</span><span class='op'>)</span>,
   treatments_file <span class='op'>=</span> <span class='st'>""</span>,
@@ -376,7 +378,18 @@ and 12</p></td>
     <tr>
       <th>mortality_time_lag</th>
       <td><p>time lag from infection until mortality can occur
-in years integer &gt;= 1</p></td>
+in time steps integer &gt;= 1</p></td>
+    </tr>
+    <tr>
+      <th>mortality_frequency</th>
+      <td><p>sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')</p></td>
+    </tr>
+    <tr>
+      <th>mortality_frequency_n</th>
+      <td><p>sets number of units from mortality_frequency in
+which to run the mortality calculation if mortality_frequency is
+'every_n_steps'. Must be an integer &gt;= 1.</p></td>
     </tr>
     <tr>
       <th>management</th>
@@ -470,12 +483,13 @@ Default is "number of locations and total distance"</p></td>
     <tr>
       <th>output_frequency</th>
       <td><p>sets when outputs occur either ('year', 'month',
-'week', 'day' or 'time step')</p></td>
+'week', 'day', 'time step', or 'every_n_steps')</p></td>
     </tr>
     <tr>
       <th>output_frequency_n</th>
-      <td><p>sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.</p></td>
+      <td><p>sets number of units from output_frequency in which
+to export model results if mortality_frequency is 'every_n_steps'.
+Must be an integer &gt;= 1.</p></td>
     </tr>
     <tr>
       <th>movements_file</th>
@@ -583,7 +597,7 @@ Defaults if FALSE.</p></td>
     </tr>
     <tr>
       <th>write_outputs</th>
-      <td><p>Either c("summary outputs", or "None"). If not
+      <td><p>Either c("summary_outputs", or "None"). If not
 "None" output folder path must be provided.</p></td>
     </tr>
     <tr>

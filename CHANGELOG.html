@@ -159,8 +159,16 @@
 <li>needed for model-api for dashboard</li>
 </ul>
 </li>
-<li><p>Outputs can now be saved with <code>write_outputs</code> and <code>output_folder_path</code> parameters (@ChrisJones687, #111)</p></li>
-<li><p>Host map now used as initial mask for postprocessing and validation calculations (@ChrisJones687, #112)</p></li>
+<li><p>Outputs can now be saved with <code>write_outputs</code> and <code>output_folder_path</code> parameters (@ChrisJones687, #111).</p></li>
+<li><p>Host map now used as initial mask for post processing and validation calculations (@ChrisJones687, #112).</p></li>
+<li><p>Movements now moves exposed, resistant, and mortality tracked populations (@ChrisJones687, #118).</p></li>
+<li>
+<p>Mortality can now occur at various timesteps not just yearly (@ChrisJones687, #118).</p>
+<ul>
+<li>Can be either “day”, “week”, “month”, “year”, or “every_n_steps”.</li>
+<li>adds parameters <code>mortality_frequency</code> and <code>mortality_frequency_n</code>.</li>
+</ul>
+</li>
 </ul>
 </div>
 <div id="fixed" class="section level3">
@@ -169,6 +177,7 @@
 <ul>
 <li><p>Mask parameter works as intended in validate function after terra update (@ChrisJones687, #104).</p></li>
 <li><p>Improved pops_model documentation updating (@ChrisJones687, #94).</p></li>
+<li><p><code>Output_frequency</code> can now be <code>every_n_steps</code> (@ChrisJones, #118).</p></li>
 </ul>
 </div>
 </div>

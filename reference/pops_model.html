@@ -47,11 +47,12 @@
 
 
 <meta property="og:title" content="PoPS (Pest or Pathogen Spread) model — pops_model" />
-<meta property="og:description" content="Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
-pathogen spread in forest or agricultural ecosystems. The model is process
-based meaning that it uses understanding of the effect of weather and other
-environmental factors on reproduction and survival of the pest/pathogen in
-order to forecast spread of the pest/pathogen into the future." />
+<meta property="og:description" content="Wrapper for pops_model_cpp. A dynamic species distribution model
+for pest or pathogen spread in forest or agricultural ecosystems. The model
+is process based meaning that it uses understanding of the effect of weather
+and other environmental factors on reproduction and survival of the
+pest/pathogen in order to forecast spread of the pest/pathogen into the
+future." />
 
 
 
@@ -122,11 +123,12 @@ order to forecast spread of the pest/pathogen into the future." />
     </div>
 
     <div class="ref-description">
-    <p>Wrapper for pops_model_cpp. A dynamic species distribution model for pest or
-pathogen spread in forest or agricultural ecosystems. The model is process
-based meaning that it uses understanding of the effect of weather and other
-environmental factors on reproduction and survival of the pest/pathogen in
-order to forecast spread of the pest/pathogen into the future.</p>
+    <p>Wrapper for pops_model_cpp. A dynamic species distribution model
+for pest or pathogen spread in forest or agricultural ecosystems. The model
+is process based meaning that it uses understanding of the effect of weather
+and other environmental factors on reproduction and survival of the
+pest/pathogen in order to forecast spread of the pest/pathogen into the
+future.</p>
     </div>
 
     <pre class="usage"><span class='fu'>pops_model</span><span class='op'>(</span>
@@ -135,6 +137,7 @@ order to forecast spread of the pest/pathogen into the future.</p>
   <span class='va'>lethal_temperature</span>,
   <span class='va'>lethal_temperature_month</span>,
   <span class='va'>infected</span>,
+  <span class='va'>total_exposed</span>,
   <span class='va'>exposed</span>,
   <span class='va'>susceptible</span>,
   <span class='va'>total_populations</span>,
@@ -153,17 +156,14 @@ order to forecast spread of the pest/pathogen into the future.</p>
   <span class='va'>weather</span>,
   <span class='va'>temperature</span>,
   <span class='va'>weather_coefficient</span>,
-  <span class='va'>ew_res</span>,
-  <span class='va'>ns_res</span>,
-  <span class='va'>num_rows</span>,
-  <span class='va'>num_cols</span>,
+  <span class='va'>res</span>,
+  <span class='va'>rows_cols</span>,
   <span class='va'>time_step</span>,
   <span class='va'>reproductive_rate</span>,
   <span class='va'>spatial_indices</span>,
+  <span class='va'>season_month_start_end</span>,
   mortality_rate <span class='op'>=</span> <span class='fl'>0</span>,
   mortality_time_lag <span class='op'>=</span> <span class='fl'>2</span>,
-  season_month_start <span class='op'>=</span> <span class='fl'>1</span>,
-  season_month_end <span class='op'>=</span> <span class='fl'>12</span>,
   start_date <span class='op'>=</span> <span class='st'>"2018-01-01"</span>,
   end_date <span class='op'>=</span> <span class='st'>"2018-12-31"</span>,
   treatment_method <span class='op'>=</span> <span class='st'>"ratio"</span>,
@@ -184,6 +184,8 @@ order to forecast spread of the pest/pathogen into the future.</p>
   use_quarantine <span class='op'>=</span> <span class='cn'>FALSE</span>,
   spreadrate_frequency <span class='op'>=</span> <span class='st'>"year"</span>,
   spreadrate_frequency_n <span class='op'>=</span> <span class='fl'>1</span>,
+  mortality_frequency <span class='op'>=</span> <span class='st'>"year"</span>,
+  mortality_frequency_n <span class='op'>=</span> <span class='fl'>1</span>,
   use_spreadrates <span class='op'>=</span> <span class='cn'>FALSE</span>,
   model_type_ <span class='op'>=</span> <span class='st'>"SI"</span>,
   latency_period <span class='op'>=</span> <span class='fl'>0</span>,
@@ -227,6 +229,11 @@ and 12</p></td>
     <tr>
       <th>infected</th>
       <td><p>matrix of infected hosts</p></td>
+    </tr>
+    <tr>
+      <th>total_exposed</th>
+      <td><p>sum of all exposed cohorts in exposed class for use with
+"SEI" model type</p></td>
     </tr>
     <tr>
       <th>exposed</th>
@@ -313,20 +320,12 @@ against lethal temperature</p></td>
       <td><p>vector of matrices of weather coefficients</p></td>
     </tr>
     <tr>
-      <th>ew_res</th>
-      <td><p>east and west resolution</p></td>
+      <th>res</th>
+      <td><p>vector of east/west resolution and north/south resolution</p></td>
     </tr>
     <tr>
-      <th>ns_res</th>
-      <td><p>north and south resolution</p></td>
-    </tr>
-    <tr>
-      <th>num_rows</th>
-      <td><p>number of rows in the raster files</p></td>
-    </tr>
-    <tr>
-      <th>num_cols</th>
-      <td><p>number of columns in the raster files</p></td>
+      <th>rows_cols</th>
+      <td><p>vector of number of rows and columns in the raster files</p></td>
     </tr>
     <tr>
       <th>time_step</th>
@@ -343,23 +342,17 @@ host under optimal weather conditions</p></td>
       <td><p>list of all spatial locations with suitable hosts</p></td>
     </tr>
     <tr>
+      <th>season_month_start_end</th>
+      <td><p>vector of months when spread starts and stops</p></td>
+    </tr>
+    <tr>
       <th>mortality_rate</th>
       <td><p>rate at which mortality occurs value between 0 and 1</p></td>
     </tr>
     <tr>
       <th>mortality_time_lag</th>
       <td><p>time lag from infection until mortality can occur
-in years integer &gt;= 1</p></td>
-    </tr>
-    <tr>
-      <th>season_month_start</th>
-      <td><p>when does spread first start occurring in the year
-for your pest or pathogen (integer value between 1 and 12)</p></td>
-    </tr>
-    <tr>
-      <th>season_month_end</th>
-      <td><p>when does spread end during the year for your pest
-or pathogen (integer value between 1 and 12)</p></td>
+in time steps integer &gt;= 1</p></td>
     </tr>
     <tr>
       <th>start_date</th>
@@ -438,17 +431,19 @@ in the von-mises distribution numeric value between 0.01 and 12</p></td>
     <tr>
       <th>output_frequency</th>
       <td><p>sets when outputs occur either ('year', 'month',
-'week', 'day' or 'time step')</p></td>
+'week', 'day', 'time step', or 'every_n_steps')</p></td>
     </tr>
     <tr>
       <th>output_frequency_n</th>
-      <td><p>sets number units ('year', 'month', 'week', 'day'
-or 'time step') in which to export model results.</p></td>
+      <td><p>sets number of units from output_frequency in which
+to export model results if mortality_frequency is 'every_n_steps'.
+Must be an integer &gt;= 1.</p></td>
     </tr>
     <tr>
       <th>quarantine_frequency</th>
       <td><p>sets how often the quarantine statistics are
-calculated either ('year', 'month', 'week', 'day' or 'time step') (default is year)</p></td>
+calculated either ('year', 'month', 'week', 'day' or 'time step')
+(default is year)</p></td>
     </tr>
     <tr>
       <th>quarantine_frequency_n</th>
@@ -470,7 +465,19 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
     <tr>
       <th>spreadrate_frequency_n</th>
       <td><p>sets number units ('year', 'month', 'week',
-'day' or 'time step') in which to calculate and export spread rate statistics.</p></td>
+'day' or 'time step') in which to calculate and export spread rate
+statistics.</p></td>
+    </tr>
+    <tr>
+      <th>mortality_frequency</th>
+      <td><p>sets the frequency of mortality calculations occur
+either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')</p></td>
+    </tr>
+    <tr>
+      <th>mortality_frequency_n</th>
+      <td><p>sets number of units from mortality_frequency in
+which to run the mortality calculation if mortality_frequency is
+'every_n_steps'. Must be an integer &gt;= 1.</p></td>
     </tr>
     <tr>
       <th>use_spreadrates</th>
