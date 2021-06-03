@@ -72,6 +72,8 @@ auto_manage <- function(infected_files,
                         mortality_on = FALSE,
                         mortality_rate = 0,
                         mortality_time_lag = 0,
+                        mortality_frequency = "Year",
+                        mortality_frequency_n = 1,
                         management = FALSE,
                         treatment_dates = c(""),
                         treatments_file = "",
@@ -305,6 +307,8 @@ auto_manage <- function(infected_files,
                            use_quarantine = config$use_quarantine,
                            spreadrate_frequency = config$spreadrate_frequency,
                            spreadrate_frequency_n = config$spreadrate_frequency_n,
+                           mortality_frequency = config$mortality_frequency,
+                           mortality_frequency_n = config$mortality_frequency_n,
                            use_spreadrates = config$use_spreadrates,
                            model_type_ = config$model_type,
                            latency_period = config$latency_period,
@@ -365,12 +369,12 @@ auto_manage <- function(infected_files,
       }
 
       probability <- (prediction/(length(probability_runs))) * 100
-      infected_areas <- round(sapply(infected_area, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      number_infecteds <- round(sapply(infected_number, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      west_rate <- round(sapply(west_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      east_rate <- round(sapply(east_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      south_rate <- round(sapply(south_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
-      north_rate <- round(sapply(north_rates, function(x) c( "Mean"= mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
+      infected_areas <- round(sapply(infected_area, function(x) c( "Mean" = mean(x, na.rm = TRUE),"Stand dev" = sd(x))), digits = 0)
+      number_infecteds <- round(sapply(infected_number, function(x) c( "Mean" = mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
+      west_rate <- round(sapply(west_rates, function(x) c( "Mean" = mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
+      east_rate <- round(sapply(east_rates, function(x) c( "Mean" = mean(x,na.rm=TRUE),"Stand dev" = sd(x))), digits = 0)
+      south_rate <- round(sapply(south_rates, function(x) c( "Mean" = mean(x,na.rm= TRUE),"Stand dev" = sd(x))), digits = 0)
+      north_rate <- round(sapply(north_rates, function(x) c( "Mean" = mean(x,na.rm = TRUE),"Stand dev" = sd(x))), digits = 0)
       which_median <- function(x) raster::which.min(abs(x - median(x)))
 
       median_run_index <- which_median(infected_number[[1]])
