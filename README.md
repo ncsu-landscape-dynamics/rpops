@@ -67,20 +67,12 @@ the PoPS package in R is built on top of PoPS Core C++ library includes:
 
 If you use this software or code, please cite the following papers:
 
-* Ross K. Meentemeyer, Nik J. Cunniffe, Alex R. Cook, Joao A. N. Filipe,
-  Richard D. Hunter, David M. Rizzo, and Christopher A. Gilligan, 2011.
-  Epidemiological modeling of invasion in heterogeneous landscapes:
-  spread of sudden oak death in California (1990–2030).
-  *Ecosphere* 2:art17.
-  [DOI: 10.1890/ES10-00192.1](https://doi.org/10.1890/ES10-00192.1)
-
-* Tonini, Francesco, Douglas Shoemaker, Anna Petrasova, Brendan Harmon,
-  Vaclav Petras, Richard C. Cobb, Helena Mitasova,
-  and Ross K. Meentemeyer, 2017.
-  Tangible geospatial modeling for collaborative solutions
-  to invasive species management.
-  *Environmental Modelling & Software* 92: 176-188.
-  [DOI: 10.1016/j.envsoft.2017.02.020](https://doi.org/10.1016/j.envsoft.2017.02.020)
+* Jones, Chris, Jones, Shannon, Petrasova, Anna, Petras, Vaclav, Gaydos, Devon, 
+  Skrip, Megan, Yu, Takeuchi, Bigsby, Kevin, and Meentemeyer, Ross, 2021.
+  Iteratively forecasting biological invasions with PoPS and a little help from 
+  our friends.
+  *Frontiers in Ecology and the Environment* 
+  [DOI: 10.1002/fee.2357](https://doi.org/10.1002/fee.2357)
 
 In case you are using the automatic management feature in rpops or the
 steering version of r.pops.spread (from the branch steering), please
