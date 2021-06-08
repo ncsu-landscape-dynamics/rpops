@@ -47,7 +47,10 @@ Suggests:
     testthat,
     rgdal,
     igraph,
-    rlist
+    rlist,
+    knitr,
+    rmarkdown
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1
+VignetteBuilder: knitr
