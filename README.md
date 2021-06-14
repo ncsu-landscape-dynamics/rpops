@@ -67,8 +67,8 @@ the PoPS package in R is built on top of PoPS Core C++ library includes:
 
 If you use this software or code, please cite the following papers:
 
-* Jones, Chris, Jones, Shannon, Petrasova, Anna, Petras, Vaclav, Gaydos, Devon, 
-  Skrip, Megan, Yu, Takeuchi, Bigsby, Kevin, and Meentemeyer, Ross, 2021.
+* Jones, C., Jones, S., Petrasova, A., Petras, V., Gaydos, D., 
+  Skrip, M., Takeuchi, Y., Bigsby, K., and Meentemeyer, R., 2021.
   Iteratively forecasting biological invasions with PoPS and a little help from 
   our friends.
   *Frontiers in Ecology and the Environment* 
