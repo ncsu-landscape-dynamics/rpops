@@ -273,8 +273,7 @@ validate <- function(infected_years_file,
       all_disagreement <-
         foreach(
           q = seq_len(length(data$infected)), .combine = rbind,
-          .packages = c("terra", "PoPS"),
-          .final = colSums
+          .packages = c("terra", "PoPS")
         ) %do% {
           # need to assign reference, comp_year, and mask in inner loop since
           # terra objects are pointers and pointers using %dopar%
@@ -289,16 +288,45 @@ validate <- function(infected_years_file,
                                              comp_year,
                                              config$configuration,
                                              mask)
+          ad$ouput <- q
+          ad
         }
 
-      data.frame(t(all_disagreement))
+      data.frame(all_disagreement)
     }
 
   parallel::stopCluster(cl)
 
-  if (config$write_outputs %in% config$output_write_list) {
-    save(qa, file = ffOut("validation_outputs.rdata"))
+  output_list <- list()
+  for (j in 1:max(qa$ouput)) {
+    output_step <- qa[qa$ouput == j, ]
+    assign(paste("output_step_", j, sep = ""), output_step)
+    output_list[[paste0("output_step_", j)]] <- output_step
+    if (config$write_outputs %in% config$output_write_list) {
+      write.csv(output_step, ffOut(paste("output_step_", j, ".csv", sep = "")))
+    }
+    if (j == 1) {
+      cum_output_step <- output_step
+      assign(paste("cum_output_step_", j, sep = ""), cum_output_step/j)
+      output_list[[paste0("cum_output_step_", j)]] <- cum_output_step
+      if (config$write_outputs %in% config$output_write_list) {
+        write.csv(cum_output_step, ffOut(paste("cum_output_step_", j, ".csv", sep = "")))
+      }
+    }
+    else {
+      assign(paste("cum_output_step", sep = ""), (cum_output_step + output_step))
+      assign(paste("cum_output_step_", j, sep = ""), cum_output_step/j)
+      output_list[[paste0("cum_output_step_", j)]] <- cum_output_step
+      if (config$write_outputs %in% config$output_write_list) {
+        write.csv(cum_output_step, ffOut(paste("cum_output_step_", j, ".csv", sep = "")))
+      }
+
+    }
   }
 
-  return(qa)
+  if (config$write_outputs %in% config$output_write_list) {
+    save(output_list, file = ffOut("validation_outputs.rdata"))
+  }
+
+  return(output_list)
 }
