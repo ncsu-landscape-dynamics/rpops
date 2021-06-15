@@ -51,6 +51,8 @@ this repository.
   * Can be either "day", "week", "month", "year", or "every_n_steps".
   * adds parameters `mortality_frequency` and `mortality_frequency_n`.
 
+- Validation now exports the statistics for each output and the cumulative statistics for each year (@ChrisJones687, #121).
+
 ### Fixed
 
 - Mask parameter works as intended in validate function after terra update (@ChrisJones687, #104).
