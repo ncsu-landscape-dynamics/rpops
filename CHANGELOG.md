@@ -53,6 +53,8 @@ this repository.
 
 - Validation now exports the statistics for each output and the cumulative statistics for each year (@ChrisJones687, #121).
 
+- Treatments now update total_hosts (@ChrisJones687, #122)
+
 ### Fixed
 
 - Mask parameter works as intended in validate function after terra update (@ChrisJones687, #104).
