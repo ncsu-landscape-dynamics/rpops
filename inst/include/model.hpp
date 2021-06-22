@@ -329,7 +329,13 @@ public:
         // treatments
         if (config_.use_treatments) {
             bool managed = treatments.manage(
-                step, infected, exposed, susceptible, resistant, suitable_cells);
+                step,
+                infected,
+                exposed,
+                susceptible,
+                resistant,
+                total_hosts,
+                suitable_cells);
             if (managed && config_.use_mortality) {
                 // treatments apply to all mortality tracker cohorts
                 for (auto& raster : mortality_tracker) {
