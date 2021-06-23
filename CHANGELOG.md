@@ -14,6 +14,8 @@ this repository.
 
 ## [Unreleased]
 
+## [1.1.0] - 2021-06-22
+
 ### Added
 
 - New dispersal kernels added: Uniform, Power-law, Deterministic neighbor, 
@@ -52,6 +54,8 @@ this repository.
   * adds parameters `mortality_frequency` and `mortality_frequency_n`.
 
 - Validation now exports the statistics for each output and the cumulative statistics for each year (@ChrisJones687, #121).
+
+- Treatments now update total_hosts (@ChrisJones687, #122)
 
 ### Fixed
 
@@ -117,7 +121,8 @@ Version 1.0.0 of the _PoPS Core_ C++ library and its interfaces: _rpops_ R packa
 - Probability of quarantine escape (`escape_probability`).
 
 
-[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...master
+[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/1.1.0...master
+[1.1.0]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...1.1.0
 [1.0.2]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.0...v1.0.2
 [1.0.1]: https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0
 [1.0.0]: https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0
