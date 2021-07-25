@@ -37,12 +37,12 @@ quantity_allocation_disagreement <-
     comp <- comparison
     ref <- reference
     rcl_comp <- c(1, Inf, 1, 0, 0.99, 0)
-    rclmat_comp <- matrix(rcl, ncol = 3, byrow = TRUE)
+    rclmat_comp <- matrix(rcl_comp, ncol = 3, byrow = TRUE)
     ## use 2 to indicate areas that aren't sampled in the reference data. This
     ## allows for the calculation of pure non-inflated accuracy statistics and
     ## to examine where the model is predicting
     rcl_ref <- c(NA, 0, 2, 1, Inf, 1, 0, 0.99, 0)
-    rclmat_ref <- matrix(rcl, ncol = 3, byrow = TRUE)
+    rclmat_ref <- matrix(rcl_ref, ncol = 3, byrow = TRUE)
     reference <- terra::classify(reference, rclmat_ref)
     comparison <- terra::classify(comparison, rclmat_comp)
 
