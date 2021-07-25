@@ -158,7 +158,7 @@ quantity_allocation_disagreement <-
     precision <- true_positive / (true_positive + false_positive)
     recall <- true_positive / (true_positive + false_negative)
     specificiity <- true_negative / (true_negative + false_positive)
-    
+
     # calculate quantity and allocation disagreements for infected/infested from
     # probabilities based on Death to Kappa (Pontius et al. 2011)
     quantity_disagreement <-
@@ -193,11 +193,11 @@ quantity_allocation_disagreement <-
     output$true_positives <- true_positive
     output$true_negatives <- true_negative
     output$unknown_positive <- unknown_positive
-    outputs$unknown_negative <- unknown_negative
+    output$unknown_negative <- unknown_negative
     output$accuracy <- accuracy
     output$precision <- precision
     output$recall <- recall
-    output$specificity <- specificity
+    output$specificiity <- specificiity
     output$quantity_disagreement <- quantity_disagreement
     output$allocation_disagreement <- allocation_disagreement
     output$total_disagreement <- total_disagreement
