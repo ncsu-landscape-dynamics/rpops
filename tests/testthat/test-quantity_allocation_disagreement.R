@@ -162,7 +162,7 @@ test_that("Check that configuration disagreement works", {
   expect_equal(data$false_negative, 0)
   expect_equal(data$false_positive, 0)
   expect_equal(data$odds_ratio, 1)
-  expect_equal(data$configuration_disagreement, 0)
+  expect_equal(data$configuration_disagreement, 0.25)
 
 
   data <- quantity_allocation_disagreement(ref, comp, configuration)
