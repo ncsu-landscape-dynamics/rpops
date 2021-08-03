@@ -183,7 +183,8 @@ quantity_allocation_disagreement <-
         allocation_disagreement = 0,
         total_disagreement = 0,
         configuration_disagreement = 0,
-        omission = 0, commission = 0,
+        false_negative = 0,
+        false_positive = 0,
         true_positives = 0,
         true_negatives = 0,
         odds_ratio = 0
