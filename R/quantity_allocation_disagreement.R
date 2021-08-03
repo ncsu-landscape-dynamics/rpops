@@ -183,18 +183,18 @@ quantity_allocation_disagreement <-
         allocation_disagreement = 0,
         total_disagreement = 0,
         configuration_disagreement = 0,
-        false_negative = 0,
-        false_positive = 0,
+        false_negatives = 0,
+        false_positives = 0,
         true_positives = 0,
         true_negatives = 0,
         odds_ratio = 0
       )
-    output$false_negative <- false_negative
-    output$false_positive <- false_positive
+    output$false_negatives <- false_negative
+    output$false_positives <- false_positive
     output$true_positives <- true_positive
     output$true_negatives <- true_negative
-    output$unknown_positive <- unknown_positive
-    output$unknown_negative <- unknown_negative
+    output$unknown_positives <- unknown_positive
+    output$unknown_negatives <- unknown_negative
     output$accuracy <- accuracy
     output$precision <- precision
     output$recall <- recall
