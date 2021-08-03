@@ -28,7 +28,7 @@
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
-#' @param point_file  file for point comparison if not provided skips 
+#' @param point_file  file for point comparison if not provided skips
 #' calculations
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -104,7 +104,8 @@ validate <- function(infected_years_file,
                      leaving_scale_coefficient = 1,
                      exposed_file = "",
                      write_outputs = "None",
-                     output_folder_path = "") {
+                     output_folder_path = "",
+                     point_file = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -301,23 +302,23 @@ validate <- function(infected_years_file,
             ## calculate true positive, true negatives, false positives, false
             ## negatives, and other statistics and add them to the data frame
             ## for export
-            ad$points_true_positive <- 
+            ad$points_true_positive <-
               nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 > 0, ])
-            ad$points_false_negative <- 
+            ad$points_false_negative <-
               nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 == 0, ])
-            ad$points_false_positive <- 
+            ad$points_false_positive <-
               nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 > 0, ])
-            ad$points_true_negative <- 
+            ad$points_true_negative <-
               nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
-            ad$points_total_obs <- 
+            ad$points_total_obs <-
               points_true_negative + points_true_positive + points_false_negative + points_false_positive
-            ad$points_accuracy <- 
+            ad$points_accuracy <-
               (points_true_negative + points_true_positive) / points_total_obs
-            ad$points_precision <- 
+            ad$points_precision <-
               points_true_positive / (points_true_positive + points_false_positive)
-            ad$points_recall <- 
+            ad$points_recall <-
               points_true_positive / (points_true_positive + points_false_negative)
-            ad$points_specificiity <- 
+            ad$points_specificiity <-
               points_true_negative / (points_true_negative + points_false_positive)
 
           }
