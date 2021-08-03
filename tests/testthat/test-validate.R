@@ -340,7 +340,7 @@ test_that(
     )
 
     expect_type(outputs, "list")
-    expect_length(outputs, 12)
+    expect_length(outputs, 2)
     data <- outputs[[1]]
     expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
@@ -536,7 +536,7 @@ test_that(
     )
 
     expect_type(outputs, "list")
-    expect_length(outputs, 12)
+    expect_length(outputs, 2)
     data <- outputs[[1]]
     expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
