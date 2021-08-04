@@ -66,7 +66,8 @@ validate(
   leaving_scale_coefficient = 1,
   exposed_file = "",
   write_outputs = "None",
-  output_folder_path = ""
+  output_folder_path = "",
+  point_file = ""
 )
 }
 \arguments{
@@ -274,6 +275,9 @@ the natural kernel (if applicable)}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
+
+\item{point_file}{file for point comparison if not provided skips
+calculations}
 }
 \value{
 a dataframe of the variables saved and their success metrics for

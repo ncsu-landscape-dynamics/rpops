@@ -77,6 +77,7 @@ test_that(
     exposed_file <- ""
     write_outputs <- "None"
     output_folder_path <- ""
+    point_file <- ""
 
     outputs <- validate(
       infected_years_file,
@@ -139,13 +140,13 @@ test_that(
       leaving_scale_coefficient,
       exposed_file,
       write_outputs,
-      output_folder_path
-    )
+      output_folder_path,
+      point_file)
 
     expect_type(outputs, "list")
     expect_length(outputs, 12)
     data <- outputs[[1]]
-    expect_length(data, 14)
+    expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
       size = number_of_iterations
     )
@@ -158,10 +159,10 @@ test_that(
     expect_vector(data$configuration_disagreement,
       size = number_of_iterations
     )
-    expect_vector(data$omission,
+    expect_vector(data$false_negatives,
       size = number_of_iterations
     )
-    expect_vector(data$commission,
+    expect_vector(data$false_positives,
       size = number_of_iterations
     )
     expect_vector(data$true_positives,
@@ -169,6 +170,12 @@ test_that(
     )
     expect_vector(data$true_negatives,
       size = number_of_iterations
+    )
+    expect_vector(data$unknown_positives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_negatives,
+                  size = number_of_iterations
     )
     expect_vector(data$odds_ratio,
       size = number_of_iterations
@@ -335,7 +342,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 14)
+    expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
                   size = number_of_iterations
     )
@@ -348,16 +355,22 @@ test_that(
     expect_vector(data$configuration_disagreement,
                   size = number_of_iterations
     )
-    expect_vector(data$omission,
+    expect_vector(data$false_negatives,
                   size = number_of_iterations
     )
-    expect_vector(data$commission,
+    expect_vector(data$false_positives,
                   size = number_of_iterations
     )
     expect_vector(data$true_positives,
                   size = number_of_iterations
     )
     expect_vector(data$true_negatives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_positives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_negatives,
                   size = number_of_iterations
     )
     expect_vector(data$odds_ratio,
@@ -525,7 +538,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 14)
+    expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
                   size = number_of_iterations
     )
@@ -538,16 +551,22 @@ test_that(
     expect_vector(data$configuration_disagreement,
                   size = number_of_iterations
     )
-    expect_vector(data$omission,
+    expect_vector(data$false_negatives,
                   size = number_of_iterations
     )
-    expect_vector(data$commission,
+    expect_vector(data$false_positives,
                   size = number_of_iterations
     )
     expect_vector(data$true_positives,
                   size = number_of_iterations
     )
     expect_vector(data$true_negatives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_positives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_negatives,
                   size = number_of_iterations
     )
     expect_vector(data$odds_ratio,

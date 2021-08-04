@@ -14,6 +14,12 @@ this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- `validate` now takes the variable point_file and uses it to calculate statistics based on the
+  point_file in addition to the raster file also calculates new measures of model performance
+  accuracy, precision, recall, and specificity (@ChrisJones, #124).
+  
 ## [1.1.0] - 2021-06-22
 
 ### Added
@@ -28,6 +34,7 @@ this repository.
 - Spatial Index to increase computational speed (@ChrisJones, #67)
 
 ### Changed
+
 - Exposed and Infected populations can both be present at the start of a simulation (@ChrisJones687, #92).
 
 - Internal functions for data handling have switched from the raster package to the terra package (@ChrisJones687, #79).
