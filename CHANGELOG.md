@@ -14,6 +14,14 @@ this repository.
 
 ## [Unreleased]
 
+### Changed
+
+- `validate` now takes the variable point_file and uses it to calculate statistics based on the
+  point_file in addition to the raster file also calculates new measures of model performance
+  accuracy, precision, recall, and specificity (@ChrisJones, #124).
+  
+## [1.1.0] - 2021-06-22
+
 ### Added
 
 - New dispersal kernels added: Uniform, Power-law, Deterministic neighbor, 
@@ -26,6 +34,7 @@ this repository.
 - Spatial Index to increase computational speed (@ChrisJones, #67)
 
 ### Changed
+
 - Exposed and Infected populations can both be present at the start of a simulation (@ChrisJones687, #92).
 
 - Internal functions for data handling have switched from the raster package to the terra package (@ChrisJones687, #79).
@@ -50,6 +59,10 @@ this repository.
 - Mortality can now occur at various timesteps not just yearly (@ChrisJones687, #118).
   * Can be either "day", "week", "month", "year", or "every_n_steps".
   * adds parameters `mortality_frequency` and `mortality_frequency_n`.
+
+- Validation now exports the statistics for each output and the cumulative statistics for each year (@ChrisJones687, #121).
+
+- Treatments now update total_hosts (@ChrisJones687, #122)
 
 ### Fixed
 
@@ -115,7 +128,8 @@ Version 1.0.0 of the _PoPS Core_ C++ library and its interfaces: _rpops_ R packa
 - Probability of quarantine escape (`escape_probability`).
 
 
-[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...master
+[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/1.1.0...master
+[1.1.0]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...1.1.0
 [1.0.2]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.0...v1.0.2
 [1.0.1]: https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0
 [1.0.0]: https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0

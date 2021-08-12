@@ -70,8 +70,16 @@ test_that(
     quarantine_areas_file <- ""
     use_quarantine <- FALSE
     use_spreadrates <- FALSE
+    use_overpopulation_movements <- FALSE
+    overpopulation_percentage <- 0
+    leaving_percentage <- 0
+    leaving_scale_coefficient <- 1
+    exposed_file <- ""
+    write_outputs <- "None"
+    output_folder_path <- ""
+    point_file <- ""
 
-    data <- validate(
+    outputs <- validate(
       infected_years_file,
       number_of_iterations,
       number_of_cores,
@@ -125,49 +133,64 @@ test_that(
       dispersal_percentage,
       quarantine_areas_file,
       use_quarantine,
-      use_spreadrates
-    )
+      use_spreadrates,
+      use_overpopulation_movements,
+      overpopulation_percentage,
+      leaving_percentage,
+      leaving_scale_coefficient,
+      exposed_file,
+      write_outputs,
+      output_folder_path,
+      point_file)
 
-    expect_s3_class(data, "data.frame")
-    expect_length(data, 13)
+    expect_type(outputs, "list")
+    expect_length(outputs, 12)
+    data <- outputs[[1]]
+    expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
     expect_vector(data$allocation_disagreement,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
     expect_vector(data$total_disagreement,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
     expect_vector(data$configuration_disagreement,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
-    expect_vector(data$omission,
-      ptype = double(), size = number_of_iterations
+    expect_vector(data$false_negatives,
+      size = number_of_iterations
     )
-    expect_vector(data$commission,
-      ptype = double(), size = number_of_iterations
+    expect_vector(data$false_positives,
+      size = number_of_iterations
     )
     expect_vector(data$true_positives,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
     expect_vector(data$true_negatives,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
+    )
+    expect_vector(data$unknown_positives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_negatives,
+                  size = number_of_iterations
     )
     expect_vector(data$odds_ratio,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
     expect_vector(data$residual_error,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
     expect_vector(data$true_infected,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
     expect_vector(data$simulated_infected,
-      ptype = double(), size = number_of_iterations
+       size = number_of_iterations
     )
     expect_vector(data$infected_difference,
-      ptype = double(), size = number_of_iterations
+      size = number_of_iterations
     )
   }
 )
@@ -244,8 +267,15 @@ test_that(
     use_quarantine <- FALSE
     output_frequency_n <- 1
     use_spreadrates <- FALSE
+    use_overpopulation_movements <- FALSE
+    overpopulation_percentage <- 0
+    leaving_percentage <- 0
+    leaving_scale_coefficient <- 1
+    exposed_file <- ""
+    write_outputs <- "None"
+    output_folder_path <- ""
 
-    data <- validate(
+    outputs <- validate(
       infected_years_file,
       number_of_iterations,
       number_of_cores,
@@ -299,49 +329,64 @@ test_that(
       dispersal_percentage,
       quarantine_areas_file,
       use_quarantine,
-      use_spreadrates
+      use_spreadrates,
+      use_overpopulation_movements,
+      overpopulation_percentage,
+      leaving_percentage,
+      leaving_scale_coefficient,
+      exposed_file,
+      write_outputs,
+      output_folder_path
     )
 
-    expect_s3_class(data, "data.frame")
-    expect_length(data, 13)
+    expect_type(outputs, "list")
+    expect_length(outputs, 2)
+    data <- outputs[[1]]
+    expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$allocation_disagreement,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$total_disagreement,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$configuration_disagreement,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
-    expect_vector(data$omission,
-      ptype = double(), size = number_of_iterations
+    expect_vector(data$false_negatives,
+                  size = number_of_iterations
     )
-    expect_vector(data$commission,
-      ptype = double(), size = number_of_iterations
+    expect_vector(data$false_positives,
+                  size = number_of_iterations
     )
     expect_vector(data$true_positives,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$true_negatives,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_positives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_negatives,
+                  size = number_of_iterations
     )
     expect_vector(data$odds_ratio,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$residual_error,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$true_infected,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$simulated_infected,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$infected_difference,
-      ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
   }
 )
@@ -418,8 +463,15 @@ test_that(
     use_quarantine <- FALSE
     output_frequency_n <- 1
     use_spreadrates <- FALSE
+    use_overpopulation_movements <- FALSE
+    overpopulation_percentage <- 0
+    leaving_percentage <- 0
+    leaving_scale_coefficient <- 1
+    exposed_file <- ""
+    write_outputs <- "None"
+    output_folder_path <- ""
 
-    data <- validate(
+    outputs <- validate(
       infected_years_file,
       number_of_iterations,
       number_of_cores,
@@ -473,49 +525,64 @@ test_that(
       dispersal_percentage,
       quarantine_areas_file,
       use_quarantine,
-      use_spreadrates
+      use_spreadrates,
+      use_overpopulation_movements,
+      overpopulation_percentage,
+      leaving_percentage,
+      leaving_scale_coefficient,
+      exposed_file,
+      write_outputs,
+      output_folder_path
     )
 
-    expect_s3_class(data, "data.frame")
-    expect_length(data, 13)
+    expect_type(outputs, "list")
+    expect_length(outputs, 2)
+    data <- outputs[[1]]
+    expect_length(data, 20)
     expect_vector(data$quantity_disagreement,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$allocation_disagreement,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$total_disagreement,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$configuration_disagreement,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
-    expect_vector(data$omission,
-                  ptype = double(), size = number_of_iterations
+    expect_vector(data$false_negatives,
+                  size = number_of_iterations
     )
-    expect_vector(data$commission,
-                  ptype = double(), size = number_of_iterations
+    expect_vector(data$false_positives,
+                  size = number_of_iterations
     )
     expect_vector(data$true_positives,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$true_negatives,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_positives,
+                  size = number_of_iterations
+    )
+    expect_vector(data$unknown_negatives,
+                  size = number_of_iterations
     )
     expect_vector(data$odds_ratio,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$residual_error,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$true_infected,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$simulated_infected,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
     expect_vector(data$infected_difference,
-                  ptype = double(), size = number_of_iterations
+                  size = number_of_iterations
     )
   }
 )
