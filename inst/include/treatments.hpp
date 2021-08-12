@@ -20,6 +20,7 @@
 #include "raster.hpp"
 #include "date.hpp"
 #include "scheduling.hpp"
+#include "utils.hpp"
 
 #include <map>
 #include <vector>
@@ -87,6 +88,7 @@ public:
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
         IntegerRaster& resistant,
+        IntegerRaster& total_hosts,
         const std::vector<std::vector<int>>& spatial_indeices) = 0;
     virtual void end_treatment(
         IntegerRaster& susceptible,
@@ -175,29 +177,45 @@ public:
         IntegerRaster& infected,
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
-        IntegerRaster&,
+        IntegerRaster& resistant,
+        IntegerRaster& total_hosts,
         const std::vector<std::vector<int>>& suitable_cells) override
     {
         for (auto indices : suitable_cells) {
             int i = indices[0];
             int j = indices[1];
+            int new_exposed_total = 0;
+            int new_infected = 0;
+            int new_susceptible = 0;
+            int new_exposed_individual = 0;
             if (this->application_ == TreatmentApplication::Ratio) {
-                infected(i, j) = infected(i, j) - (infected(i, j) * this->map_(i, j));
+                new_infected = infected(i, j) - (infected(i, j) * this->map_(i, j));
+                infected(i, j) = new_infected;
             }
             else if (this->application_ == TreatmentApplication::AllInfectedInCell) {
-                infected(i, j) = this->map_(i, j) ? 0 : infected(i, j);
+                new_infected = this->map_(i, j) ? 0 : infected(i, j);
+                infected(i, j) = new_infected;
             }
             for (auto& raster : exposed) {
                 if (this->application_ == TreatmentApplication::Ratio) {
-                    raster(i, j) = raster(i, j) - (raster(i, j) * this->map_(i, j));
+                    new_exposed_individual =
+                        raster(i, j) - (raster(i, j) * this->map_(i, j));
+                    raster(i, j) = new_exposed_individual;
+                    new_exposed_total += new_exposed_individual;
                 }
                 else if (
                     this->application_ == TreatmentApplication::AllInfectedInCell) {
-                    raster(i, j) = this->map_(i, j) ? 0 : raster(i, j);
+                    new_exposed_individual =
+                        raster(i, j) - (raster(i, j) * this->map_(i, j));
+                    raster(i, j) = new_exposed_individual;
+                    new_exposed_total += new_exposed_individual;
                 }
             }
-            susceptible(i, j) =
+            new_susceptible =
                 susceptible(i, j) - (susceptible(i, j) * this->map_(i, j));
+            susceptible(i, j) = new_susceptible;
+            total_hosts(i, j) =
+                new_infected + new_susceptible + new_exposed_total + resistant(i, j);
         }
     }
     void end_treatment(
@@ -244,8 +262,10 @@ public:
         std::vector<IntegerRaster>& exposed_vector,
         IntegerRaster& susceptible,
         IntegerRaster& resistant,
+        IntegerRaster& total_hosts,
         const std::vector<std::vector<int>>& suitable_cells) override
     {
+        UNUSED(total_hosts);
         for (auto indices : suitable_cells) {
             int i = indices[0];
             int j = indices[1];
@@ -370,13 +390,19 @@ public:
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& susceptible,
         IntegerRaster& resistant,
+        IntegerRaster& total_hosts,
         const std::vector<std::vector<int>>& suitable_cells)
     {
         bool changed = false;
         for (unsigned i = 0; i < treatments.size(); i++) {
             if (treatments[i]->should_start(current)) {
                 treatments[i]->apply_treatment(
-                    infected, exposed, susceptible, resistant, suitable_cells);
+                    infected,
+                    exposed,
+                    susceptible,
+                    resistant,
+                    total_hosts,
+                    suitable_cells);
                 changed = true;
             }
             else if (treatments[i]->should_end(current)) {

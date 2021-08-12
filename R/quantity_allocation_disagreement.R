@@ -36,10 +36,15 @@ quantity_allocation_disagreement <-
     # (residual error is a comparison of exact population numbers)
     comp <- comparison
     ref <- reference
-    rcl <- c(1, Inf, 1, 0, 0.99, 0)
-    rclmat <- matrix(rcl, ncol = 3, byrow = TRUE)
-    reference <- terra::classify(reference, rclmat)
-    comparison <- terra::classify(comparison, rclmat)
+    rcl_comp <- c(1, Inf, 1, 0, 0.99, 0)
+    rclmat_comp <- matrix(rcl_comp, ncol = 3, byrow = TRUE)
+    ## use 2 to indicate areas that aren't sampled in the reference data. This
+    ## allows for the calculation of pure non-inflated accuracy statistics and
+    ## to examine where the model is predicting
+    rcl_ref <- c(NA, 0, 2, 1, Inf, 1, 0, 0.99, 0)
+    rclmat_ref <- matrix(rcl_ref, ncol = 3, byrow = TRUE)
+    reference <- terra::classify(reference, rclmat_ref)
+    comparison <- terra::classify(comparison, rclmat_comp)
 
     if (configuration == TRUE) {
       # calculate number of infected patches
@@ -144,6 +149,15 @@ quantity_allocation_disagreement <-
                            terra::values(comparison) == 1, na.rm = TRUE)
     false_negative <- sum(terra::values(reference) == 1 &
                             terra::values(comparison) == 0, na.rm = TRUE)
+    unknown_positive <- sum(terra::values(reference) == 2 &
+                              terra::values(comparison) == 1, na.rm = TRUE)
+    unknown_negative <- sum(terra::values(reference) == 2 &
+                              terra::values(comparison) == 0, na.rm = TRUE)
+    total_obs <- true_negative + true_positive + false_negative + false_positive
+    accuracy <- (true_negative + true_positive) / total_obs
+    precision <- true_positive / (true_positive + false_positive)
+    recall <- true_positive / (true_positive + false_negative)
+    specificiity <- true_negative / (true_negative + false_positive)
 
     # calculate quantity and allocation disagreements for infected/infested from
     # probabilities based on Death to Kappa (Pontius et al. 2011)
@@ -169,15 +183,22 @@ quantity_allocation_disagreement <-
         allocation_disagreement = 0,
         total_disagreement = 0,
         configuration_disagreement = 0,
-        omission = 0, commission = 0,
+        false_negatives = 0,
+        false_positives = 0,
         true_positives = 0,
         true_negatives = 0,
         odds_ratio = 0
       )
-    output$omission <- false_negative
-    output$commission <- false_positive
+    output$false_negatives <- false_negative
+    output$false_positives <- false_positive
     output$true_positives <- true_positive
     output$true_negatives <- true_negative
+    output$unknown_positives <- unknown_positive
+    output$unknown_negatives <- unknown_negative
+    output$accuracy <- accuracy
+    output$precision <- precision
+    output$recall <- recall
+    output$specificiity <- specificiity
     output$quantity_disagreement <- quantity_disagreement
     output$allocation_disagreement <- allocation_disagreement
     output$total_disagreement <- total_disagreement

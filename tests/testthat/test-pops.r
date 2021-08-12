@@ -2631,8 +2631,8 @@ test_that("Movements works as expected", {
   sus <- terra::rast(host_file) - terra::rast(infected_file)
   sus <- terra::as.matrix(sus, wide = TRUE)
   sus5 <- sus
-  sus5[1,1] <- sus5[1,1] - 99
-  sus5[2,1] <- sus5[2,1] + 99
+  sus5[1,1] <- sus5[1,1] - 199
+  sus5[2,1] <- sus5[2,1] + 199
   sus6 <- sus5
   sus6[1,2] <- sus6[1,2] - 50
   sus6[2,2] <- sus6[2,2] + 50
@@ -2666,13 +2666,14 @@ test_that("Movements works as expected", {
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(data$infected[[4]],
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
-  expect_equal(data$infected[[5]],
-               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  infected_move <- matrix(0, ncol = 20, nrow = 20)
+  infected_move[2,1] <- 1
+  expect_equal(data$infected[[5]], infected_move)
   sus <- terra::rast(host_file) - terra::rast(infected_file)
   sus <- terra::as.matrix(sus, wide = TRUE)
   sus5 <- sus
-  sus5[1,1] <- sus5[1,1] - 100
-  sus5[2,1] <- sus5[2,1] + 100
+  sus5[1,1] <- sus5[1,1] - 199
+  sus5[2,1] <- sus5[2,1] + 199
   sus6 <- sus5
   sus6[1,2] <- sus6[1,2] - 50
   sus6[2,2] <- sus6[2,2] + 50
