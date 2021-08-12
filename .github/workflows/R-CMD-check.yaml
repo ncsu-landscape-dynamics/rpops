@@ -62,34 +62,35 @@ jobs:
           rm '/usr/local/bin/gfortran'
           brew install pkg-config gdal proj geos
 
-      - name: Install dependencies
-        if: runner.os == 'macOS'
-        run: |
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_version("terra", "1.2-5", repos = "http://cran.us.r-project.org")
-        shell: Rscript {0}
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Linux')
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
 
-      - name: Install dependencies
-        if: runner.os == 'Linux'
-        run: |
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_version("terra", "1.2-5", repos = "http://cran.us.r-project.org")
-        shell: Rscript {0}
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'macOS')
+        with:
+          path: ~/Library/Application Support/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
 
-      - name: Install dependencies
-        if: runner.os == 'Windows'
-        run: |
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_version("terra", "1.2-5", repos = "http://cran.us.r-project.org")
-        shell: Rscript {0}
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Windows')
+        with:
+          path: ~\AppData\Local\renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
 
-      # - name: Install rgdal from source
-      #   if: runner.os == 'macOS'
-      #   run: install.packages("rgdal", type = "source")
-      #   shell: Rscript {0}
+      - name: Restore packages
+        shell: Rscript {0}
+        run: |
+          if (!requireNamespace("renv", quietly = TRUE)) install.packages("renv")
+          renv::restore()
 
       - name: Check
         run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-multiarch"), error_on = "warning")
