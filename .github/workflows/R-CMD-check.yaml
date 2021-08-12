@@ -67,30 +67,6 @@ jobs:
         run: |
           install.packages("renv")
 
-      - uses: actions/cache@v2
-        if: startsWith(runner.os, 'Linux')
-        with:
-          path: ~/.local/share/renv
-          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-renv-
-
-      - uses: actions/cache@v2
-        if: startsWith(runner.os, 'macOS')
-        with:
-          path: ~/Library/Application Support/renv
-          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-renv-
-
-      - uses: actions/cache@v2
-        if: startsWith(runner.os, 'Windows')
-        with:
-          path: ~\AppData\Local\renv
-          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-renv-
-
       - name: Restore packages
         shell: Rscript {0}
         run: |
