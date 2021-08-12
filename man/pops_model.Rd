@@ -147,7 +147,7 @@ against lethal temperature}
 \item{rows_cols}{vector of number of rows and columns in the raster files}
 
 \item{time_step}{how often should spread occur options: ('day', 'week',
-'month')}
+'month').}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single
 host under optimal weather conditions}
