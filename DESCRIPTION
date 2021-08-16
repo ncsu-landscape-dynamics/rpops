@@ -49,7 +49,10 @@ Suggests:
     igraph,
     rlist,
     knitr,
-    rmarkdown
+    rmarkdown,
+    qpdf,
+    remotes,
+    rcmdcheck
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1
