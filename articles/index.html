@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Compares quantity and allocation disagreement of two raster datasets — quantity_allocation_disagreement • PoPS</title>
+<title>Articles • PoPS</title>
 
 <!-- favicons -->
 <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
@@ -46,10 +46,7 @@
 
 
 
-<meta property="og:title" content="Compares quantity and allocation disagreement of two raster datasets — quantity_allocation_disagreement" />
-<meta property="og:description" content="Uses quantity and allocation disagreement metrics by Pontius and Millones
-(2014) and omission and comission errors of comparing a modeled raster
-dataset to a reference raster datatset." />
+<meta property="og:title" content="Articles" />
 
 
 
@@ -68,7 +65,7 @@ dataset to a reference raster datatset." />
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-topic">
+    <div class="container template-article-index">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -126,59 +123,18 @@ dataset to a reference raster datatset." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Compares quantity and allocation disagreement of two raster datasets</h1>
-    <small class="dont-index">Source: <a href='https://github.com/ncsu-landscape-dynamics/rpops/blob/master/R/quantity_allocation_disagreement.R'><code>R/quantity_allocation_disagreement.R</code></a></small>
-    <div class="hidden name"><code>quantity_allocation_disagreement.Rd</code></div>
+      <h1>Articles</h1>
     </div>
 
-    <div class="ref-description">
-    <p>Uses quantity and allocation disagreement metrics by Pontius and Millones
-(2014) and omission and comission errors of comparing a modeled raster
-dataset to a reference raster datatset.</p>
+    <div class="section ">
+      <h3>All vignettes</h3>
+      <p class="section-desc"></p>
+
+      <dl>
+        <dt><a href="setting-up-data.html">Setting up data</a></dt>
+        <dd></dt>
+      </dl>
     </div>
-
-    <pre class="usage"><span class='fu'>quantity_allocation_disagreement</span><span class='op'>(</span>
-  <span class='va'>reference</span>,
-  <span class='va'>comparison</span>,
-  configuration <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  mask <span class='op'>=</span> <span class='cn'>NULL</span>
-<span class='op'>)</span></pre>
-
-    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
-    <table class="ref-arguments">
-    <colgroup><col class="name" /><col class="desc" /></colgroup>
-    <tr>
-      <th>reference</th>
-      <td><p>the binary (0 or 1) raster with ground truth data</p></td>
-    </tr>
-    <tr>
-      <th>comparison</th>
-      <td><p>the binary (0 or 1) raster with simulated data to be
-compared to ground truth</p></td>
-    </tr>
-    <tr>
-      <th>configuration</th>
-      <td><p>Set to true if you want to use configuration
-disagreement for comparing model runs. Default is FALSE.</p></td>
-    </tr>
-    <tr>
-      <th>mask</th>
-      <td><p>Used to provide a mask to remove 0's that are not true
-negatives from comparisons.</p></td>
-    </tr>
-    </table>
-
-    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
-
-    <p>A data frame with spatial configuration metrics. Particularly
-quantity, allocation, and total disagreement,  omission and comission, and
-directional disagreement where directional disagreement.</p>
-
-  </div>
-  <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <nav id="toc" data-toggle="toc" class="sticky-top">
-      <h2 data-toc-skip>Contents</h2>
-    </nav>
   </div>
 </div>
 

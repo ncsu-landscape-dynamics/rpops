@@ -94,6 +94,18 @@ then the model can be validated for the final 2 years." />
         <li>
   <a href="../reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/setting-up-data.html">Setting up data</a>
+    </li>
+  </ul>
+</li>
 <li>
   <a href="../CHANGELOG.html">Change Log</a>
 </li>
@@ -227,7 +239,9 @@ calibration function (posterior covairance matrix)</p></td>
     </tr>
     <tr>
       <th>infected_file</th>
-      <td><p>path to raster file with initial infections</p></td>
+      <td><p>Raster file with initial infections. Units for
+infections are based on data availability and the way the units used for your
+host file is created (e.g. percent area, # of hosts per cell, etc.).</p></td>
     </tr>
     <tr>
       <th>host_file</th>
@@ -235,12 +249,18 @@ calibration function (posterior covairance matrix)</p></td>
 deviation on those estimates can be based in 3 formats (a single file with
 number of hosts, a single file with 2 layers number of hosts and standard
 deviation, or two files 1 with number of hosts and the other with standard
-deviation of those estimates)</p></td>
+deviation of those estimates). The units for this can be of many formats the
+two most common that we use are either percent area (0 to 100) or # of hosts
+in the cell. Usually depends on data available and estimation methods.</p></td>
     </tr>
     <tr>
       <th>total_populations_file</th>
       <td><p>path to raster file with number of total
-populations of all hosts and non-hosts (must be only hosts if using movement)</p></td>
+populations of all hosts and non-hosts. This depends on how your host data is
+set up. If host is percent area then this should be a raster with values
+that are 100 anywhere with host. If host file is # of hosts in a cell then
+this should be a raster with values that are the max of the host raster any
+where the # of hosts is greater than 0.</p></td>
     </tr>
     <tr>
       <th>temp</th>
@@ -250,7 +270,12 @@ modify spread (TRUE or FALSE)</p></td>
     <tr>
       <th>temperature_coefficient_file</th>
       <td><p>path to raster file with temperature
-coefficient data for the timestep and number of years specified</p></td>
+coefficient data for the timestep and and time period specified (e.g. if timestep
+= week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
+have 52 * 3 bands = 156 bands with data being weekly precipitation
+coefficients). We convert raw precipitation values to coefficients that
+affect the reproduction and survival of the pest all values in the raster are
+between 0 and 1.</p></td>
     </tr>
     <tr>
       <th>precip</th>
@@ -259,12 +284,17 @@ modify spread (TRUE or FALSE)</p></td>
     </tr>
     <tr>
       <th>precipitation_coefficient_file</th>
-      <td><p>path to raster file with precipitation
-coefficient data for the timestep and number of years specified</p></td>
+      <td><p>Raster file with precipitation
+coefficient data for the timestep and time period specified (e.g. if timestep
+= week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
+have 52 * 3 bands = 156 bands with data being weekly precipitation
+coefficients). We convert raw precipitation values to coefficients that
+affect the reproduction and survival of the pest all values in the raster are
+between 0 and 1.</p></td>
     </tr>
     <tr>
       <th>model_type</th>
-      <td><p>What type of model most represents your sysetm. Options
+      <td><p>What type of model most represents your system. Options
 are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 (Susceptible - Infected/Infested). Default value is "SI".</p></td>
     </tr>
@@ -277,7 +307,7 @@ greater than 0 if model type is SEI.</p></td>
     <tr>
       <th>time_step</th>
       <td><p>how often should spread occur options: ('day', 'week',
-'month')</p></td>
+'month').</p></td>
     </tr>
     <tr>
       <th>season_month_start</th>
