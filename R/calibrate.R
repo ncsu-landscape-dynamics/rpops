@@ -14,17 +14,40 @@
 #'
 #' @inheritParams pops
 #' @param infected_years_file Raster file with years of initial
-#' infection/infestation as individual locations of a pest or pathogen
+#' infection/infestation as individual locations of a pest or pathogen. This is
+#' a multiband raster file (e.g. .tif) with each band representing a unique time
+#' step (e.g. band 1 = year 1 .... band 6 = year 6 or band 1 = week 1 .... band
+#' 6 = week 6). This needs to allign with both the time step selection and start
+#' and end dates selection. Units for infections are based on data availability
+#' and the way the units used for your host file creation (e.g. percent area, #
+#' of hosts per cell, etc.). This doesn't include the start year which passed in
+#' in the initial_infected_file (e.g. if we had observation data from 2017,
+#' 2018, and 2019 the 2017 raster file would be the initial_infected_file and a
+#' dual band raster file would have band 1 = 2018 and band 2 = 2019 observations)
 #' @param number_of_observations the number of observations used for this
-#' calibartion
+#' calibration. Useful if using previous calibration. This is used to
+#' weight the parameters when updating parameters when new data becomes
+#' available. Example if we have 2,000 observations in 2019 and had 1,000
+#' observations in 2018 and 1,000 in 2017, we would use 2,000 here and 2,000 for
+#' our prior_number_of_observations.
 #' @param number_of_generations the number of generations to use to decrease
 #' the uncertainty in the parameter estimation (too many and it will take a
-#' long time, too few and your parameter sets will be too wide)
+#' long time, too few and your parameter sets will be too wide). This is an ABC
+#' implementation naming convention but should be set to greater than 7 for
+#' robust calibrations. There is a tradeoff between computational time and model
+#' accuracy the larger this number gets. Usually 7 to 9 is the ideal range.
 #' @param generation_size how many accepted parameter sets should occur in each
-#' generation
+#' generation. For example if generation size is 1,000 then the simulation runs
+#' until 1,000 model runs are less than the threshold value selected in checks.
+#' We recommend running at least 1,000 but the greater this number the more
+#' accurate the model parameters selected will be.
 #' @param prior_number_of_observations the number of total observations from
 #' previous calibrations used to weight the posterior distributions (if this is
-#' a new calibration this value takes the form of a prior weight (0 - 1))
+#' a new calibration this value takes the form of a prior weight (0 - 1)). This
+#' is used to weight the parameters when updating parameters when new data
+#' becomes available. Example if we have 2,000 observations in 2019 and had
+#' 1,000 observations in 2018 and 1,000 in 2017, we would use 2,000 here and
+#' 2,000 for our number_of_observations.
 #' @param params_to_estimate A list of booleans specificing which parameters to
 #' estimate ordered from (reproductive_rate, natural_dispersal_distance,
 #' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
@@ -38,14 +61,19 @@
 #' @param prior_means A vector of the means of your parameters you are
 #' estimating in order from (reproductive_rate, natural_dispersal_distance,
 #' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
-#' and anthropogenic kappa)
+#' and anthropogenic kappa). This is used when updating a parameter set from a
+#' previous calibration using the iterative framework.
 #' @param prior_cov_matrix A covariance matrix from the previous years
 #' posterior parameter estimation ordered from (reproductive_rate,
 #' natural_dispersal_distance, percent_natural_dispersal,
-#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
+#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
+#' This is used when updating a parameter set from a previous calibration using
+#' the iterative framework.
 #' @param mask Raster file used to provide a mask to remove 0's that are not
 #' true negatives from comparisons (e.g. mask out lakes and oceans from statics
-#' if modeling terrestrial species).
+#' if modeling terrestrial species). A numerical value represents the area you
+#' want to calculate statistics on and an NA value represents the area to remove
+#' from the statistics.
 #' @param checks A list of the 4 starting check values in order of # of
 #' locations, total min distance, residual error, and # infected. default is
 #' (500,500000, 100000, 1000). Starting check values can play a role in speed

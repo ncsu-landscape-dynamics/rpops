@@ -8,24 +8,42 @@
 #' a single stochastic realization of the model and is predominantly used for
 #' automated tests of model features.
 #'
-#' @param infected_file path to raster file with initial infections
+#' @param infected_file Raster file with initial infections. Units for
+#' infections are based on data availability and the way the units used for your
+#' host file is created (e.g. percent area, # of hosts per cell, etc.).
 #' @param host_file path to raster files with number of hosts and standard
 #' deviation on those estimates can be based in 3 formats (a single file with
 #' number of hosts, a single file with 2 layers number of hosts and standard
 #' deviation, or two files 1 with number of hosts and the other with standard
-#' deviation of those estimates)
+#' deviation of those estimates). The units for this can be of many formats the
+#' two most common that we use are either percent area (0 to 100) or # of hosts
+#' in the cell. Usually depends on data available and estimation methods.
 #' @param total_populations_file path to raster file with number of total
-#' populations of all hosts and non-hosts (must be only hosts if using movement)
+#' populations of all hosts and non-hosts. This depends on how your host data is
+#' set up. If host is percent area then this should be a raster with values
+#' that are 100 anywhere with host. If host file is # of hosts in a cell then
+#' this should be a raster with values that are the max of the host raster any
+#' where the # of hosts is greater than 0.
 #' @param temp boolean that allows the use of temperature coefficients to
 #' modify spread (TRUE or FALSE)
 #' @param temperature_coefficient_file path to raster file with temperature
-#' coefficient data for the timestep and number of years specified
+#' coefficient data for the timestep and and time period specified (e.g. if timestep
+#' = week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
+#' have 52 * 3 bands = 156 bands with data being weekly precipitation
+#' coefficients). We convert raw precipitation values to coefficients that
+#' affect the reproduction and survival of the pest all values in the raster are
+#' between 0 and 1.
 #' @param precip boolean that allows the use of precipitation coefficients to
 #' modify spread (TRUE or FALSE)
-#' @param precipitation_coefficient_file path to raster file with precipitation
-#' coefficient data for the timestep and number of years specified
+#' @param precipitation_coefficient_file Raster file with precipitation
+#' coefficient data for the timestep and time period specified (e.g. if timestep
+#' = week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
+#' have 52 * 3 bands = 156 bands with data being weekly precipitation
+#' coefficients). We convert raw precipitation values to coefficients that
+#' affect the reproduction and survival of the pest all values in the raster are
+#' between 0 and 1.
 #' @param time_step how often should spread occur options: ('day', 'week',
-#' 'month')
+#' 'month').
 #' @param season_month_start when does spread first start occurring in the year
 #' for your pest or pathogen (integer value between 1 and 12)
 #' @param season_month_end when does spread end during the year for your pest
@@ -99,7 +117,7 @@
 #' @param latency_period How many times steps does it take to for exposed
 #' populations become infected/infested. This is an integer value and must be
 #' greater than 0 if model type is SEI.
-#' @param model_type What type of model most represents your sysetm. Options
+#' @param model_type What type of model most represents your system. Options
 #' are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 #' (Susceptible - Infected/Infested). Default value is "SI".
 #' @param parameter_means A vector of the means of the model parameters
@@ -108,7 +126,8 @@
 #' @param parameter_cov_matrix A covariance matrix from the previous years
 #' posterior parameter estimation ordered from (reproductive_rate,
 #' natural_dispersal_distance, percent_natural_dispersal,
-#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
+#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
+#' Should be 6x6.
 #' @param start_exposed Do your initial conditions start as exposed or infected
 #' (only used if model_type is "SEI"). Default False. If this is TRUE need to
 #' have both an infected_file (this can be a raster of all 0's) and exposed_file

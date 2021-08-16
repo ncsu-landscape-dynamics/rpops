@@ -79,24 +79,44 @@ calibrate(
 }
 \arguments{
 \item{infected_years_file}{Raster file with years of initial
-infection/infestation as individual locations of a pest or pathogen}
+infection/infestation as individual locations of a pest or pathogen. This is
+a multiband raster file (e.g. .tif) with each band representing a unique time
+step (e.g. band 1 = year 1 .... band 6 = year 6 or band 1 = week 1 .... band
+6 = week 6). This needs to allign with both the time step selection and start
+and end dates selection. Units for infections are based on data availability
+and the way the units used for your host file creation (e.g. percent area, #
+of hosts per cell, etc.). This doesn't include the start year which passed in
+in the initial_infected_file (e.g. if we had observation data from 2017,
+2018, and 2019 the 2017 raster file would be the initial_infected_file and a
+dual band raster file would have band 1 = 2018 and band 2 = 2019 observations)}
 
 \item{number_of_observations}{the number of observations used for this
-calibartion}
+calibration. Useful if using previous calibration. This is used to
+weight the parameters when updating parameters when new data becomes
+available. Example if we have 2,000 observations in 2019 and had 1,000
+observations in 2018 and 1,000 in 2017, we would use 2,000 here and 2,000 for
+our prior_number_of_observations.}
 
 \item{prior_number_of_observations}{the number of total observations from
 previous calibrations used to weight the posterior distributions (if this is
-a new calibration this value takes the form of a prior weight (0 - 1))}
+a new calibration this value takes the form of a prior weight (0 - 1)). This
+is used to weight the parameters when updating parameters when new data
+becomes available. Example if we have 2,000 observations in 2019 and had
+1,000 observations in 2018 and 1,000 in 2017, we would use 2,000 here and
+2,000 for our number_of_observations.}
 
 \item{prior_means}{A vector of the means of your parameters you are
 estimating in order from (reproductive_rate, natural_dispersal_distance,
 percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
-and anthropogenic kappa)}
+and anthropogenic kappa). This is used when updating a parameter set from a
+previous calibration using the iterative framework.}
 
 \item{prior_cov_matrix}{A covariance matrix from the previous years
 posterior parameter estimation ordered from (reproductive_rate,
 natural_dispersal_distance, percent_natural_dispersal,
-anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
+anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
+This is used when updating a parameter set from a previous calibration using
+the iterative framework.}
 
 \item{params_to_estimate}{A list of booleans specificing which parameters to
 estimate ordered from (reproductive_rate, natural_dispersal_distance,
@@ -105,40 +125,64 @@ and anthropogenic kappa)}
 
 \item{number_of_generations}{the number of generations to use to decrease
 the uncertainty in the parameter estimation (too many and it will take a
-long time, too few and your parameter sets will be too wide)}
+long time, too few and your parameter sets will be too wide). This is an ABC
+implementation naming convention but should be set to greater than 7 for
+robust calibrations. There is a tradeoff between computational time and model
+accuracy the larger this number gets. Usually 7 to 9 is the ideal range.}
 
 \item{generation_size}{how many accepted parameter sets should occur in each
-generation}
+generation. For example if generation size is 1,000 then the simulation runs
+until 1,000 model runs are less than the threshold value selected in checks.
+We recommend running at least 1,000 but the greater this number the more
+accurate the model parameters selected will be.}
 
 \item{checks}{A list of the 4 starting check values in order of # of
 locations, total min distance, residual error, and # infected. default is
 (500,500000, 100000, 1000). Starting check values can play a role in speed
 of calibration and in success of calibration.}
 
-\item{infected_file}{path to raster file with initial infections}
+\item{infected_file}{Raster file with initial infections. Units for
+infections are based on data availability and the way the units used for your
+host file is created (e.g. percent area, # of hosts per cell, etc.).}
 
 \item{host_file}{path to raster files with number of hosts and standard
 deviation on those estimates can be based in 3 formats (a single file with
 number of hosts, a single file with 2 layers number of hosts and standard
 deviation, or two files 1 with number of hosts and the other with standard
-deviation of those estimates)}
+deviation of those estimates). The units for this can be of many formats the
+two most common that we use are either percent area (0 to 100) or # of hosts
+in the cell. Usually depends on data available and estimation methods.}
 
 \item{total_populations_file}{path to raster file with number of total
-populations of all hosts and non-hosts (must be only hosts if using movement)}
+populations of all hosts and non-hosts. This depends on how your host data is
+set up. If host is percent area then this should be a raster with values
+that are 100 anywhere with host. If host file is # of hosts in a cell then
+this should be a raster with values that are the max of the host raster any
+where the # of hosts is greater than 0.}
 
 \item{temp}{boolean that allows the use of temperature coefficients to
 modify spread (TRUE or FALSE)}
 
 \item{temperature_coefficient_file}{path to raster file with temperature
-coefficient data for the timestep and number of years specified}
+coefficient data for the timestep and and time period specified (e.g. if timestep
+= week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
+have 52 * 3 bands = 156 bands with data being weekly precipitation
+coefficients). We convert raw precipitation values to coefficients that
+affect the reproduction and survival of the pest all values in the raster are
+between 0 and 1.}
 
 \item{precip}{boolean that allows the use of precipitation coefficients to
 modify spread (TRUE or FALSE)}
 
-\item{precipitation_coefficient_file}{path to raster file with precipitation
-coefficient data for the timestep and number of years specified}
+\item{precipitation_coefficient_file}{Raster file with precipitation
+coefficient data for the timestep and time period specified (e.g. if timestep
+= week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
+have 52 * 3 bands = 156 bands with data being weekly precipitation
+coefficients). We convert raw precipitation values to coefficients that
+affect the reproduction and survival of the pest all values in the raster are
+between 0 and 1.}
 
-\item{model_type}{What type of model most represents your sysetm. Options
+\item{model_type}{What type of model most represents your system. Options
 are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 (Susceptible - Infected/Infested). Default value is "SI".}
 
@@ -147,7 +191,7 @@ populations become infected/infested. This is an integer value and must be
 greater than 0 if model type is SEI.}
 
 \item{time_step}{how often should spread occur options: ('day', 'week',
-'month')}
+'month').}
 
 \item{season_month_start}{when does spread first start occurring in the year
 for your pest or pathogen (integer value between 1 and 12)}
@@ -240,7 +284,9 @@ successfully treats 70 percent of the plants or animals)}
 
 \item{mask}{Raster file used to provide a mask to remove 0's that are not
 true negatives from comparisons (e.g. mask out lakes and oceans from statics
-if modeling terrestrial species).}
+if modeling terrestrial species). A numerical value represents the area you
+want to calculate statistics on and an NA value represents the area to remove
+from the statistics.}
 
 \item{success_metric}{Choose which success metric to use for calibration.
 Choices are "number of locations", "number of locations and total distance",

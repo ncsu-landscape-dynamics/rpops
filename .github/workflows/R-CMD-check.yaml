@@ -33,6 +33,12 @@ jobs:
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      RENV_CI_CACHE_VERSION_LINUX: 1
+      RENV_CI_CACHE_VERSION_MACOS: 1
+      RENV_CI_CACHE_VERSION_WINDOWS: 1
+      USE_CXX1X: TRUE
+      USE_CXX11: TRUE
 
     steps:
       - uses: actions/checkout@v2
@@ -40,6 +46,10 @@ jobs:
       - uses: r-lib/actions/setup-r@master
         with:
           r-version: ${{ matrix.config.r }}
+
+      - uses: r-lib/actions/setup-pandoc@v1
+        with:
+          pandoc-version: '2.7.3'
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
@@ -62,32 +72,37 @@ jobs:
           rm '/usr/local/bin/gfortran'
           brew install pkg-config gdal proj geos
 
-      - name: Install dependencies
-        if: runner.os == 'macOS'
+      - name: Install renv
+        shell: Rscript {0}
         run: |
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
+          install.packages("renv")
 
-      - name: Install dependencies
-        if: runner.os == 'Linux'
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Linux')
+        with:
+          path: ~/.local/share/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'macOS')
+        with:
+          path: ~/Library/Application Support/renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+
+      - uses: actions/cache@v2
+        if: startsWith(runner.os, 'Windows')
+        with:
+          path: ~\AppData\Local\renv
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+
+      - name: Restore packages
+        shell: Rscript {0}
         run: |
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
-
-      - name: Install dependencies
-        if: runner.os == 'Windows'
-        run: |
-          install.packages(c("remotes", "rcmdcheck"))
-          remotes::install_deps(dependencies = TRUE)
-        shell: Rscript {0}
-
-      # - name: Install rgdal from source
-      #   if: runner.os == 'macOS'
-      #   run: install.packages("rgdal", type = "source")
-      #   shell: Rscript {0}
-
-      - name: Check
-        run: rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-multiarch"), error_on = "warning")
-        shell: Rscript {0}
+          renv::restore()
+          rcmdcheck::rcmdcheck(args = c("--no-manual", "--no-multiarch"), error_on = "warning")

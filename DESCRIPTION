@@ -47,7 +47,13 @@ Suggests:
     testthat,
     rgdal,
     igraph,
-    rlist
+    rlist,
+    knitr,
+    rmarkdown,
+    qpdf,
+    remotes,
+    rcmdcheck
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1
+VignetteBuilder: knitr
