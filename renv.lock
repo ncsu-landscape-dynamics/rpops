@@ -137,10 +137,10 @@
     },
     "callr": {
       "Package": "callr",
-      "Version": "3.7.0",
+      "Version": "3.3.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "461aa75a11ce2400245190ef5d3995df"
+      "Hash": "b3c10a6b94482a227ba11e245c194884"
     },
     "class": {
       "Package": "class",
@@ -611,6 +611,13 @@
       "Repository": "CRAN",
       "Hash": "97def703420c8ab10d8f0e6c72101e02"
     },
+    "qpdf": {
+      "Package": "qpdf",
+      "Version": "1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "5a2907cd44279b5861ac5f813465b5c9"
+    },
     "ragg": {
       "Package": "ragg",
       "Version": "1.1.3",
@@ -799,13 +806,6 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "575216c9946ca70016c3ffb9c31709ba"
-    },
-    "textshaping": {
-      "Package": "textshaping",
-      "Version": "0.3.5",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "6bb7e974b464fe72f192e51b4dab67f2"
     },
     "tibble": {
       "Package": "tibble",
