@@ -32,7 +32,7 @@
 #' calculations
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
-#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
+#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vecct
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -293,7 +293,7 @@ validate <- function(infected_years_file,
                                              config$configuration,
                                              mask)
           if (file.exists(config$point_file)) {
-            obs_data <- vect(config$point_file)
+            obs_data <- terra::vect(config$point_file)
             obs_data <- terra::project(obs_data, comp_year)
             s <- extract(comp_year, obs_data)
             names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
@@ -311,15 +311,15 @@ validate <- function(infected_years_file,
             ad$points_true_negative <-
               nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
             ad$points_total_obs <-
-              points_true_negative + points_true_positive + points_false_negative + points_false_positive
+              ad$points_true_negative + ad$points_true_positive + ad$points_false_negative + ad$points_false_positive
             ad$points_accuracy <-
-              (points_true_negative + points_true_positive) / points_total_obs
+              (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
             ad$points_precision <-
-              points_true_positive / (points_true_positive + points_false_positive)
+              ad$points_true_positive / (ad$points_true_positive + ad$points_false_positive)
             ad$points_recall <-
-              points_true_positive / (points_true_positive + points_false_negative)
+              ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
             ad$points_specificiity <-
-              points_true_negative / (points_true_negative + points_false_positive)
+              ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
 
           }
           ad$ouput <- q
