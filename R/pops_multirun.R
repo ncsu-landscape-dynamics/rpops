@@ -22,7 +22,7 @@
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
-#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
+#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do%

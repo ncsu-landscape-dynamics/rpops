@@ -9,7 +9,7 @@
 #' cellStats  calc extract
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
-#' rowColFromCell global
+#' rowColFromCell global vect
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do%
@@ -703,16 +703,9 @@ configuration <- function(config) {
 
   if (config$function_name %in% c("validate", "calibrate")) {
     config$use_anthropogenic_kernel <- TRUE
-
     # Load observed data on occurence
     infection_years <- terra::rast(config$infected_years_file)
     infection_years[] <- as.integer(infection_years[])
-    # Get rid of NA values to make comparisons
-    infection_years <-
-      terra::classify(infection_years,
-        matrix(c(NA, 0), ncol = 2, byrow = TRUE),
-        right = NA
-      )
     config$num_layers_infected_years <- terra::nlyr(infection_years)
 
     if (config$num_layers_infected_years < config$number_of_outputs) {
