@@ -32,7 +32,7 @@
 #' calculations
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
-#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vecct
+#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
