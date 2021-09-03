@@ -12,7 +12,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(12000, 100000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -55,7 +54,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
             mask <- NULL
-            success_metric <- "number of locations and total distance"
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -83,6 +81,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
+            use_distance <- FALSE
+            use_rmse <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -92,7 +92,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              checks,
                               infected_file,
                               host_file,
                               total_populations_file,
@@ -129,7 +128,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               pesticide_duration,
                               pesticide_efficacy,
                               mask,
-                              success_metric,
                               output_frequency,
                               output_frequency_n,
                               movements_file,
@@ -153,7 +151,9 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               exposed_file,
                               verbose,
                               write_outputs,
-                              output_folder_path)
+                              output_folder_path,
+                              use_distance,
+                              use_rmse)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -182,7 +182,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(12000, 100000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -226,7 +225,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             pesticide_efficacy <- 1.0
             mask <- system.file("extdata", "simple20x20", "mask.tif",
                                 package = "PoPS")
-            success_metric <- "number of locations and total distance"
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -254,6 +252,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
+            use_distance <- FALSE
+            use_rmse <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -263,7 +263,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              checks,
                               infected_file,
                               host_file,
                               total_populations_file,
@@ -300,7 +299,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               pesticide_duration,
                               pesticide_efficacy,
                               mask,
-                              success_metric,
                               output_frequency,
                               output_frequency_n,
                               movements_file,
@@ -324,7 +322,9 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               exposed_file,
                               verbose,
                               write_outputs,
-                              output_folder_path)
+                              output_folder_path,
+                              use_distance,
+                              use_rmse)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -354,7 +354,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, F, F, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(12000, 100000, 900, 70000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -397,8 +396,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
             mask <- NULL
-            success_metric <-
-              "number of locations, number of infections, and total distance"
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -426,6 +423,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
+            use_distance <- FALSE
+            use_rmse <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -435,7 +434,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              checks,
                               infected_file,
                               host_file,
                               total_populations_file,
@@ -472,7 +470,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               pesticide_duration,
                               pesticide_efficacy,
                               mask,
-                              success_metric,
                               output_frequency,
                               output_frequency_n,
                               movements_file,
@@ -496,7 +493,9 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               exposed_file,
                               verbose,
                               write_outputs,
-                              output_folder_path)
+                              output_folder_path,
+                              use_distance,
+                              use_rmse)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -524,7 +523,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(1700, 140000, 90000, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -567,7 +565,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
             mask <- NULL
-            success_metric <- "residual error"
             output_frequency <- "year"
             output_frequency_n <- 1
             movements_file <- ""
@@ -597,6 +594,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
+            use_distance <- FALSE
+            use_rmse <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -606,7 +605,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              checks,
                               infected_file,
                               host_file,
                               total_populations_file,
@@ -643,7 +641,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               pesticide_duration,
                               pesticide_efficacy,
                               mask,
-                              success_metric,
                               output_frequency,
                               output_frequency_n,
                               movements_file,
@@ -667,7 +664,9 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               exposed_file,
                               verbose,
                               write_outputs,
-                              output_folder_path)
+                              output_folder_path,
+                              use_distance,
+                              use_rmse)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -695,7 +694,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(1200, 100000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -738,7 +736,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
             mask <- NULL
-            success_metric <- "quantity"
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -766,6 +763,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
+            use_distance <- FALSE
+            use_rmse <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -775,7 +774,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              checks,
                               infected_file,
                               host_file,
                               total_populations_file,
@@ -812,7 +810,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               pesticide_duration,
                               pesticide_efficacy,
                               mask,
-                              success_metric,
                               output_frequency,
                               output_frequency_n,
                               movements_file,
@@ -836,7 +833,9 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               exposed_file,
                               verbose,
                               write_outputs,
-                              output_folder_path)
+                              output_folder_path,
+                              use_distance,
+                              use_rmse)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
@@ -864,7 +863,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 3
             generation_size <- 5
-            checks <- c(1200, 100000, 900, 1000)
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -908,7 +906,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             pesticide_efficacy <- 1.0
             mask <- system.file("extdata", "simple20x20", "mask.tif",
                                 package = "PoPS")
-            success_metric <- "quantity"
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -936,6 +933,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
+            use_distance <- FALSE
+            use_rmse <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -945,7 +944,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              checks,
                               infected_file,
                               host_file,
                               total_populations_file,
@@ -982,7 +980,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               pesticide_duration,
                               pesticide_efficacy,
                               mask,
-                              success_metric,
                               output_frequency,
                               output_frequency_n,
                               movements_file,
@@ -1006,7 +1003,9 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               exposed_file,
                               verbose,
                               write_outputs,
-                              output_folder_path)
+                              output_folder_path,
+                              use_distance,
+                              use_rmse)
 
             expect_length(data$posterior_means, 6)
             expect_vector(data$posterior_means, ptype = double(), size = 6)
