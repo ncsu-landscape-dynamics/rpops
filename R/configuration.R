@@ -731,18 +731,6 @@ configuration <- function(config) {
     config$infection_years2 <- infection_years2
   }
 
-  if (config$function_name %in% c("validate") |
-    (config$function_name %in% c("calibrate") &&
-      config$calibration_method == "MCMC")) {
-    metric_check <- metric_checks(config$success_metric)
-    if (metric_check$checks_passed) {
-      config$configuration <- metric_check$configuration
-    } else {
-      config$failure <- metric_check$failed_check
-      return(config)
-    }
-  }
-
   if (config$function_name %in% c("calibrate") &&
     config$calibration_method == "ABC") {
     config$num_particles <-
