@@ -43,15 +43,15 @@ quantity_allocation_disagreement <-
     # (residual error is a comparison of exact population numbers)
     comp <- comparison
     ref <- reference
-    rcl_comp <- c(1, Inf, 1, 0, 0.99, 0, NA, 0, 0)
+    rcl_comp <- c(1, Inf, 1, 0, 1, 0, NA, 0, 0)
     rclmat_comp <- matrix(rcl_comp, ncol = 3, byrow = TRUE)
     ## use 2 to indicate areas that aren't sampled in the reference data. This
     ## allows for the calculation of pure non-inflated accuracy statistics and
     ## to examine where the model is predicting
     rcl_ref <- c(NA, 0, 2, 1, Inf, 1, 0, 0.99, 0)
     rclmat_ref <- matrix(rcl_ref, ncol = 3, byrow = TRUE)
-    reference <- terra::classify(reference, rclmat_ref)
-    comparison <- terra::classify(comparison, rclmat_comp)
+    reference <- terra::classify(reference, rclmat_ref, right = FALSE)
+    comparison <- terra::classify(comparison, rclmat_comp, right = TRUE)
 
     if (use_configuration) {
       # calculate number of infected patches
@@ -165,6 +165,11 @@ quantity_allocation_disagreement <-
     precision <- true_positive / (true_positive + false_positive)
     recall <- true_positive / (true_positive + false_negative)
     specificity <- true_negative / (true_negative + false_positive)
+
+    if (is.nan(accuracy)) {accuracy <- 0}
+    if (is.nan(precision)) {precision <- 0}
+    if (is.nan(recall)) {recall <- 0}
+    if (is.nan(specificity)) {specificity <- 0}
 
     # calculate quantity and allocation disagreements for infected/infested from
     # probabilities based on Death to Kappa (Pontius et al. 2011)
