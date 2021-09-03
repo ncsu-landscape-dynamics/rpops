@@ -114,7 +114,6 @@ calibrate <- function(infected_years_file,
                       params_to_estimate = c(T, T, T, T, F, F),
                       number_of_generations = 7,
                       generation_size = 1000,
-                      checks = c(500, 500000, 100000, 1000),
                       infected_file,
                       host_file,
                       total_populations_file,
@@ -477,6 +476,7 @@ calibrate <- function(infected_years_file,
           }
 
         all_disagreement <- as.data.frame(t(all_disagreement))
+        all_disagreement <- all_disagreement / length(data$infected)
         accuracy <- all_disagreement$accuracy
         precision <- all_disagreement$precision
         recall <- all_disagreement$recall
@@ -728,13 +728,27 @@ calibrate <- function(infected_years_file,
         terra::values(mask) <- config$mask_matrix
         quantity_allocation_disagreement(reference,
                                          comparison,
-                                         config$configuration,
-                                         mask)
+                                         use_configuration = FALSE,
+                                         mask = mask,
+                                         use_distance = config$use_distance)
       }
 
+    all_disagreement <- as.data.frame(t(all_disagreement))
+    all_disagreement <- all_disagreement / length(data$infected)
+    accuracy <- all_disagreement$accuracy
+    precision <- all_disagreement$precision
+    recall <- all_disagreement$recall
+    specificity <- all_disagreement$specificity
+    rmse <- all_disagreement$rmse
+    distance_difference <- all_disagreement$distance_difference
+
     ## save current state of the system
-    current <- best <-
-      data.frame(t(all_disagreement),
+    current <-
+      data.frame(all_disagreement[, c("accuracy", "precision", "recall",
+                                      "specificity", "rmse",
+                                      "distance_difference", "false_negatives",
+                                      "false_positives", "true_positives",
+                                      "true_negatives", "odds_ratio")],
                  reproductive_rate = proposed_reproductive_rate,
                  natural_distance_scale = proposed_natural_distance_scale,
                  anthropogenic_distance_scale =
@@ -745,25 +759,22 @@ calibrate <- function(infected_years_file,
       )
 
     params <-
-      data.frame(quantity_disagreement = rep(0, config$number_of_iterations),
-                 allocation_disagreement = rep(0, config$number_of_iterations),
-                 total_disagreement = rep(0, config$number_of_iterations),
-                 configuration_disagreement =
-                   rep(0, config$number_of_iterations),
-                 omission = rep(0, config$number_of_iterations),
-                 commission = rep(0, config$number_of_iterations),
+      data.frame(accuracy = rep(0, config$number_of_iterations),
+                 precision = rep(0, config$number_of_iterations),
+                 recall = rep(0, config$number_of_iterations),
+                 specificity = rep(0, config$number_of_iterations),
+                 rmse = rep(0, config$number_of_iterations),
+                 distance_difference = rep(0, config$number_of_iterations),
+                 false_negatives = rep(0, config$number_of_iterations),
+                 false_positives = rep(0, config$number_of_iterations),
                  true_positives = rep(0, config$number_of_iterations),
                  true_negatives = rep(0, config$number_of_iterations),
                  odds_ratio = rep(0, config$number_of_iterations),
-                 residual_error = rep(0, config$number_of_iterations),
-                 true_infected = rep(0, config$number_of_iterations),
-                 simulated_infected = rep(0, config$number_of_iterations),
-                 infected_difference = rep(0, config$number_of_iterations),
                  reproductive_rate = rep(0, config$number_of_iterations),
                  natural_distance_scale = rep(0, config$number_of_iterations),
                  anthropogenic_distance_scale =
                    rep(0, config$number_of_iterations),
-                 percent_natural_dispersa = rep(0, config$number_of_iterations),
+                 percent_natural_dispersal = rep(0, config$number_of_iterations),
                  natural_kappa = rep(0, config$number_of_iterations),
                  anthropogenic_kappa = rep(0, config$number_of_iterations))
 
@@ -844,7 +855,6 @@ calibrate <- function(infected_years_file,
         )
 
       # set up comparison
-      comparison <- terra::rast(config$infected_file)
       all_disagreement <-
         foreach::foreach(
           q = seq_len(length(data$infected)),
@@ -852,17 +862,27 @@ calibrate <- function(infected_years_file,
           .packages = c("terra", "PoPS"),
           .final = colSums
         ) %do% {
+          comparison <- terra::rast(config$infected_file)
+          reference <- terra::rast(config$infected_file)
           terra::values(comparison) <- data$infected[[q]]
-          quantity_allocation_disagreement(
-            config$infection_years[[q]],
-            comparison,
-            config$configuration,
-            config$mask
-          )
+          terra::values(reference) <- config$infection_years2[[q]]
+          mask <- terra::rast(config$infected_file)
+          terra::values(mask) <- config$mask_matrix
+          quantity_allocation_disagreement(reference,
+                                           comparison,
+                                           use_configuration = FALSE,
+                                           mask = mask,
+                                           use_distance = config$use_distance)
         }
 
+      all_disagreement <- as.data.frame(t(all_disagreement))
+      all_disagreement <- all_disagreement / length(data$infected)
       proposed <-
-        data.frame(t(all_disagreement),
+        data.frame(all_disagreement[, c("accuracy", "precision", "recall",
+                                        "specificity", "rmse",
+                                        "distance_difference", "false_negatives",
+                                        "false_positives", "true_positives",
+                                        "true_negatives", "odds_ratio")],
                    reproductive_rate = proposed_reproductive_rate,
                    natural_distance_scale = proposed_natural_distance_scale,
                    anthropogenic_distance_scale =
@@ -873,62 +893,72 @@ calibrate <- function(infected_years_file,
                    anthropogenic_kappa = proposed_anthropogenic_kappa
         )
 
+
       # make sure no proposed statistics are 0 or the calculation fails
       # instead set them all to the lowest possible non-zero value
-      if (proposed$allocation_disagreement == 0) {
-        proposed$allocation_disagreement <- 1
+      if (proposed$accuracy == 0) {
+        proposed$accuracy <- 0.001
       }
-      if (proposed$quantity_disagreement == 0) {
-        proposed$quantity_disagreement <- 1
+      if (proposed$precision == 0) {
+        proposed$precisiont <- 0.001
       }
-      if (proposed$total_disagreement == 0) {
-        proposed$total_disagreement <- 1
+      if (proposed$recall == 0) {
+        proposed$recall <- 0.001
       }
-      if (proposed$configuration_disagreement == 0) {
-        proposed$configuration_disagreement <- 0.01
+      if (proposed$specificity == 0) {
+        proposed$specificity <- 0.001
       }
-      if (proposed$residual_error == 0) {
-        proposed$residual_error <- 1
+      if (proposed$rmse == 0) {
+        proposed$rmse <- 0.001
+      }
+      if (proposed$distance_difference == 0) {
+        proposed$distance_difference <- 0.001
       }
       # Set up tests for to see if new variable is an improvement in
-      # performance metrics
-      quantity_test <-
-        min(1, current$quantity_disagreement / proposed$quantity_disagreement)
-      configuration_test <-
-        min(1, current$configuration_disagreement /
-              proposed$configuration_disagreement)
-      # odds ratio is treated differently than all the other metrics as it is
-      # the only one where higher numbers means better model performance
-      oddsratio_test <-
-        min(1, proposed$odds_ratio / current$odds_ratio)
-      residual_error_test <-
-        min(1, current$residual_error / proposed$residual_error)
+      # performance metrics for accuracy, precision, recall, and specificity
+      # higher values are better so the proposed parameter is in the numerator,
+      # for rmse and distance lower values are improvements and the proposed
+      # value is in the denominator.
+      accurracy_test <- min(1, proposed$accuracy / current$accuracy)
+      precision_test <- min(1, proposed$precision / current$precision)
+      recall_test <- min(1, proposed$recall / current$recall)
+      specificity_test <- min(1, proposed$specificity / current$specificity)
+      rmse_test <- min(1, current$rmse / proposed$rmse)
+      distance_test <- min(1, current$distance / proposed$distance)
 
-      quantity_pass <- runif(1) <= quantity_test
-      configuration_pass <- runif(1) <= configuration_test
-      oddsratio_pass <- runif(1) <= oddsratio_test
-      residual_error_pass <- runif(1) <= residual_error_test
+      accurracy_pass <- runif(1) <= accurracy_test
+      precision_pass <- runif(1) <= precision_test
+      recall_pass <- runif(1) <= recall_test
+      specificity_pass <- runif(1) <= specificity_test
+      rmse_pass <- runif(1) <= rmse_test
+      distance_pass <- runif(1) <= distance_test
 
       proposed_accepted <- FALSE
-      if (success_metric == "quantity" & quantity_pass) {
-        proposed_accepted <- TRUE
-      } else if (success_metric == "quantity and configuration" &
-                 quantity_pass &
-                 configuration_pass) {
-        proposed_accepted <- TRUE
-      } else if (success_metric == "odds ratio" & oddsratio_pass) {
-        proposed_accepted <- TRUE
-      } else if (success_metric == "residual error" & residual_error_pass) {
-        proposed_accepted <- TRUE
-      } else {
-        proposed_accepted <- FALSE
+      if (accurracy_pass && precision_pass && recall_pass && specificity_pass) {
+
+        if (config$use_distance) {
+          if (distance_pass) {
+            proposed_accepted <- TRUE
+          } else {
+            proposed_accepted <- FALSE
+          }
+        } else {
+          proposed_accepted <- TRUE
+        }
+
+        if (config$use_rmse) {
+          if (rmse_pass) {
+            proposed_accepted <- TRUE
+          } else {
+            proposed_accepted <- FALSE
+          }
+        } else {
+          proposed_accepted <- TRUE
+        }
       }
 
       if (proposed_accepted) {
         current <- proposed
-        if (current$quantity_disagreement <= best$quantity_disagreement) {
-          best <- current
-        }
       }
 
       param <- current
@@ -945,9 +975,21 @@ calibrate <- function(infected_years_file,
     }
 
     calibrated_means <-
-      colMeans(params[start_index:config$number_of_iterations, 14:19])
+      colMeans(params[start_index:config$number_of_iterations,
+                      c("reproductive_rate",
+                        "natural_distance_scale",
+                        "anthropogenic_distance_scale",
+                        "percent_natural_dispersal",
+                        "natural_kappa",
+                        "anthropogenic_kappa")])
     calibrated_cov_matrix <-
-      cov(params[start_index:config$number_of_iterations, 14:19])
+      cov(params[start_index:config$number_of_iterations,
+                 c("reproductive_rate",
+                   "natural_distance_scale",
+                   "anthropogenic_distance_scale",
+                   "percent_natural_dispersal",
+                   "natural_kappa",
+                   "anthropogenic_kappa")])
 
     parameters_kept <- params
 
@@ -1000,6 +1042,9 @@ calibrate <- function(infected_years_file,
 
   if (config$write_outputs %in% config$output_write_list) {
     save(outputs, file = ffOut("calibration_outputs.rdata"))
+    write.csv(posterior_means, ffOut("posterior_means.csv"), row.names = FALSE)
+    write.csv(posterior_cov_matrix, ffOut("posterior_cov_matrix.csv"), row.names = FALSE)
+    write.csv(parameters_kept, ffOut("raw_calibration_data.csv"), row.names = FALSE)
   }
 
   return(outputs)

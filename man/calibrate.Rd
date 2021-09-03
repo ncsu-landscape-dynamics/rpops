@@ -13,7 +13,6 @@ calibrate(
   params_to_estimate = c(T, T, T, T, F, F),
   number_of_generations = 7,
   generation_size = 1000,
-  checks = c(500, 5e+05, 1e+05, 1000),
   infected_file,
   host_file,
   total_populations_file,
