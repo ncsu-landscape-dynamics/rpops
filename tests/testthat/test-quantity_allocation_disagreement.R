@@ -19,7 +19,7 @@ test_that(
   expect_equal(data$accuracy, 1)
   expect_equal(data$precision, 1)
   expect_equal(data$recall, 1)
-  expect_equal(data$specificity, NaN)
+  expect_equal(data$specificity, 0)
 })
 
 test_that("Check that quantity disagreement, total disagreement, ommision, and
@@ -39,9 +39,9 @@ test_that("Check that quantity disagreement, total disagreement, ommision, and
   expect_equal(data$false_positive, 0)
   expect_equal(data$odds_ratio, 0)
   expect_equal(data$accuracy, 0)
-  expect_equal(data$precision, NaN)
+  expect_equal(data$precision, 0)
   expect_equal(data$recall, 0)
-  expect_equal(data$specificity, NaN)
+  expect_equal(data$specificity, 0)
 })
 
 test_that("Check that quantity disagreement, total disagreement,
@@ -62,7 +62,7 @@ test_that("Check that quantity disagreement, total disagreement,
   expect_equal(data$odds_ratio, 0)
   expect_equal(data$accuracy, 0)
   expect_equal(data$precision, 0)
-  expect_equal(data$recall, NaN)
+  expect_equal(data$recall, 0)
   expect_equal(data$specificity, 0)
 })
 
