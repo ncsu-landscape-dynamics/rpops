@@ -361,8 +361,9 @@ Defaults if FALSE.}
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 
 \item{use_distance}{Boolean if you want to compare distance between
-simulations and observations. Default is FALSE.
-#' @param use_rmse Boolean if you want to calibrate based on rmse. This is
+simulations and observations. Default is FALSE.}
+
+\item{use_rmse}{Boolean if you want to calibrate based on rmse. This is
 useful if you have very good population level observations. Default is FALSE.}
 }
 \value{
