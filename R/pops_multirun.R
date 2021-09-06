@@ -28,6 +28,8 @@
 #' @importFrom foreach  registerDoSEQ %dopar% %do%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
+#' @importFrom utils write.csv
+#'
 #' @return list of infected and susceptible per year
 #' @export
 #'

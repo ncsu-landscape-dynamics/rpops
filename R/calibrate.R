@@ -100,6 +100,7 @@
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
 #' @importFrom Metrics rmse
+#' @importFrom utils write.csv
 #'
 #' @return a dataframe of the variables saved and their success metrics for
 #' each run

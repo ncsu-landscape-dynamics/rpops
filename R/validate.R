@@ -41,6 +41,7 @@
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
 #' @importFrom Metrics rmse
+#' @importFrom utils write.csv
 #'
 #' @return a data frame of statistical measures of model performance.
 #' @export
@@ -282,7 +283,7 @@ validate <- function(infected_years_file,
           q = seq_len(length(data$infected)), .combine = rbind,
           .packages = c("terra", "PoPS")
         ) %do% {
-          # need to assign reference, comp_year, and mask in inner loop since
+          # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers and pointers using %dopar%
           comparison <- terra::rast(config$infected_file)
           reference <- terra::rast(config$infected_file)
@@ -298,8 +299,8 @@ validate <- function(infected_years_file,
                                              use_distance = config$use_distance)
           if (file.exists(config$point_file)) {
             obs_data <- terra::vect(config$point_file)
-            obs_data <- terra::project(obs_data, comp_year)
-            s <- extract(comp_year, obs_data)
+            obs_data <- terra::project(obs_data, comparison)
+            s <- extract(comparison, obs_data)
             names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
             s <- s[2]
             obs_data <- cbind(obs_data, s)
