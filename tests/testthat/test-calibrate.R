@@ -2,6 +2,7 @@ context("test-calibrate")
 
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons", {
+            skip_on_ci("takes too long")
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")
@@ -172,6 +173,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
 
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons with mask", {
+            skip_on_ci("takes too long")
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")
@@ -344,6 +346,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
 
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons", {
+            skip_on_ci("takes too long")
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")
