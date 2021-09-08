@@ -347,6 +347,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons", {
             skip_on_ci()
+            skip_on_covr()
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")
