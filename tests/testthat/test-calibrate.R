@@ -3,6 +3,7 @@ context("test-calibrate")
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons", {
             skip_on_ci()
+            skip_on_covr()
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")
@@ -174,6 +175,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons with mask", {
             skip_on_ci()
+            skip_on_covr()
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")
@@ -857,6 +859,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
 
 test_that("MCMC calibration has correctly formatted returns with multiple output
           comparisons with mask", {
+            skip_on_ci()
+            skip_on_covr()
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_years.tif",
                           package = "PoPS")
