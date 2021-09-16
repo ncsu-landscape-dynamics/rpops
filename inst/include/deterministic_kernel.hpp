@@ -287,6 +287,15 @@ public:
         return std::make_tuple(row + row_movement, col + col_movement);
     }
 
+    /*! \copydoc RadialDispersalKernel::is_cell_eligible()
+     */
+    bool is_cell_eligible(int row, int col)
+    {
+        UNUSED(row);
+        UNUSED(col);
+        return true;
+    }
+
     /*! Returns true if the kernel class support a given kernel type
      *
      * \warning This function is experimental and may be removed or

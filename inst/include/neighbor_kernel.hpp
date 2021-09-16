@@ -98,6 +98,15 @@ public:
         return std::make_tuple(row, col);
     }
 
+    /*! \copydoc RadialDispersalKernel::is_cell_eligible()
+     */
+    bool is_cell_eligible(int row, int col)
+    {
+        UNUSED(row);
+        UNUSED(col);
+        return true;
+    }
+
     /*! \copybrief RadialDispersalKernel::supports_kernel()
      */
     static bool supports_kernel(const DispersalKernelType type)

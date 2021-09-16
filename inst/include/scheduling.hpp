@@ -308,7 +308,7 @@ public:
     }
     /**
      * @brief Prints schedule for debugging purposes.
-     * @param vector of bools to print along the steps
+     * @param schedule vector of bools to print along the steps
      */
     void debug_schedule(std::vector<bool>& schedule) const
     {

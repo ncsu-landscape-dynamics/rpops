@@ -147,9 +147,9 @@ public:
 
     /*! Generates a new position for the spread.
      *
-     * The randomness is based on the *generator*. The result may depend
-     * on previous calls of this operator (see e.g.
-     * `std::cauchy_distribution<RealType>::reset()`).
+     * The randomness is based on the *generator*, but the result may depend
+     * on previous calls of this operator (see e.g. documentation of the underlying
+     * `std::cauchy_distribution<RealType>`, specifically the `reset()` function).
      * Parameters *row* and *col* are row and column position of the
      * current disperser. The generated position will be relative to it.
      */
@@ -202,6 +202,15 @@ public:
         col += round(distance * sin(theta) / east_west_resolution);
 
         return std::make_tuple(row, col);
+    }
+
+    /*! Returns true if kernel can be used with a given cell.
+     */
+    bool is_cell_eligible(int row, int col)
+    {
+        UNUSED(row);
+        UNUSED(col);
+        return true;
     }
 
     /*! Returns true if the kernel class support a given kernel type

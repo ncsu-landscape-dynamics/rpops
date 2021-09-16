@@ -25,6 +25,7 @@
 #define POPS_CONFIG_HPP
 
 #include "scheduling.hpp"
+#include "utils.hpp"
 
 #include <vector>
 
@@ -40,6 +41,7 @@ public:
     int cols{0};
     double ew_res{0};
     double ns_res{0};
+    BBox<double> bbox;
     // Reduced stochasticity
     bool generate_stochasticity{true};
     bool establishment_stochasticity{true};
@@ -65,6 +67,9 @@ public:
     std::string anthro_kernel_type;
     double anthro_scale{0};
     std::string anthro_direction;
+    double network_min_time{0};
+    double network_max_time{0};
+    double network_speed{0};
     double anthro_kappa{0};
     double shape{1.0};
     // Treatments

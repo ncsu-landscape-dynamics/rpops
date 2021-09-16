@@ -1,7 +1,7 @@
 /*
  * PoPS model - disperal kernels
  *
- * Copyright (C) 2019 - 2020 by the authors.
+ * Copyright (C) 2019-2021 by the authors.
  *
  * Authors: Vaclav Petras (wenzeslaus gmail com)
  *
@@ -20,7 +20,9 @@
 #include "deterministic_kernel.hpp"
 #include "uniform_kernel.hpp"
 #include "neighbor_kernel.hpp"
+#include "network_kernel.hpp"
 #include "kernel_types.hpp"
+#include "utils.hpp"
 
 namespace pops {
 
@@ -33,7 +35,7 @@ namespace pops {
  * its call in the function call operator, and extend the
  * supports_kernel() function.
  */
-template<typename IntegerRaster>
+template<typename IntegerRaster, typename RasterIndex>
 class SwitchDispersalKernel
 {
 protected:
@@ -42,6 +44,7 @@ protected:
     DeterministicDispersalKernel<IntegerRaster> deterministic_kernel_;
     UniformDispersalKernel uniform_kernel_;
     DeterministicNeighborDispersalKernel deterministic_neighbor_kernel_;
+    NetworkDispersalKernel<RasterIndex> network_kernel_;
     bool deterministic_;
 
 public:
@@ -50,6 +53,7 @@ public:
         const RadialDispersalKernel<IntegerRaster>& radial_kernel,
         const DeterministicDispersalKernel<IntegerRaster>& deterministic_kernel,
         const UniformDispersalKernel& uniform_kernel,
+        const NetworkDispersalKernel<RasterIndex>& network_kernel,
         const DeterministicNeighborDispersalKernel& deterministic_neighbor_kernel =
             DeterministicNeighborDispersalKernel(Direction::None),
         const bool deterministic = false)
@@ -60,6 +64,7 @@ public:
           deterministic_kernel_(deterministic_kernel),
           uniform_kernel_(uniform_kernel),
           deterministic_neighbor_kernel_(deterministic_neighbor_kernel),
+          network_kernel_(network_kernel),
           deterministic_(deterministic)
     {}
 
@@ -75,11 +80,35 @@ public:
         else if (dispersal_kernel_type_ == DispersalKernelType::DeterministicNeighbor) {
             return deterministic_neighbor_kernel_(generator, row, col);
         }
+        else if (dispersal_kernel_type_ == DispersalKernelType::Network) {
+            return network_kernel_(generator, row, col);
+        }
         else if (deterministic_) {
             return deterministic_kernel_(generator, row, col);
         }
         else {
             return radial_kernel_(generator, row, col);
+        }
+    }
+
+    bool is_cell_eligible(int row, int col)
+    {
+        // switch in between the supported kernels
+        if (dispersal_kernel_type_ == DispersalKernelType::Uniform) {
+            // TODO: Individual kernels should support this.
+            return true;
+        }
+        else if (dispersal_kernel_type_ == DispersalKernelType::DeterministicNeighbor) {
+            return true;
+        }
+        else if (dispersal_kernel_type_ == DispersalKernelType::Network) {
+            return network_kernel_.is_cell_eligible(row, col);
+        }
+        else if (deterministic_) {
+            return true;
+        }
+        else {
+            return true;
         }
     }
 

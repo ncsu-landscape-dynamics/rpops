@@ -350,9 +350,9 @@ public:
      * \param map treatment raster
      * \param start_date date when treatment is applied
      * \param num_days for simple treatments should be 0, otherwise number of days host
-     * is resistant \param treatment_application if efficiency < 100% how should it be
-     * applied to infected/susceptible \param increase_by_step function to increase
-     * simulation step
+     *        is resistant
+     * \param treatment_application if efficiency < 100% how should it be
+     *        applied to infected/susceptible
      */
     void add_treatment(
         const FloatRaster& map,
@@ -380,8 +380,12 @@ public:
      *
      * \param current simulation step
      * \param infected raster of infected host
+     * \param exposed Exposed hosts per cohort
      * \param susceptible raster of susceptible host
      * \param resistant raster of resistant host
+     * \param total_hosts All host individuals in the area (I+E+S in the cell)
+     * \param suitable_cells List of indices of cells with hosts
+     *
      * \return true if any management action was necessary
      */
     bool manage(
@@ -416,6 +420,8 @@ public:
      * \brief Separately manage mortality infected cohorts
      * \param current simulation step
      * \param infected raster of infected host
+     * \param suitable_cells List of indices of cells with hosts
+     *
      * \return true if any management action was necessary
      */
     bool manage_mortality(

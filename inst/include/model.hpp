@@ -1,7 +1,7 @@
 /*
  * Tests for the PoPS Model class.
  *
- * Copyright (C) 2020 by the authors.
+ * Copyright (C) 2020-2021 by the authors.
  *
  * Authors: Vaclav Petras <wenzeslaus gmail com>
  *
@@ -28,6 +28,7 @@
 #include "treatments.hpp"
 #include "spread_rate.hpp"
 #include "simulation.hpp"
+#include "switch_kernel.hpp"
 #include "kernel.hpp"
 #include "scheduling.hpp"
 #include "quarantine.hpp"
@@ -36,7 +37,13 @@
 
 namespace pops {
 
-template<typename IntegerRaster, typename FloatRaster, typename RasterIndex>
+template<
+    typename IntegerRaster,
+    typename FloatRaster,
+    typename RasterIndex,
+    typename Generator = std::default_random_engine,
+    typename KernelFactory = DispersalKernel<Generator>(
+        const Config&, const IntegerRaster&, const Network<RasterIndex>&)>
 class Model
 {
 protected:
@@ -46,45 +53,9 @@ protected:
     UniformDispersalKernel uniform_kernel;
     DeterministicNeighborDispersalKernel natural_neighbor_kernel;
     DeterministicNeighborDispersalKernel anthro_neighbor_kernel;
-    Simulation<IntegerRaster, FloatRaster, RasterIndex> simulation_;
+    Simulation<IntegerRaster, FloatRaster, RasterIndex, Generator> simulation_;
+    KernelFactory& kernel_factory_;
     unsigned last_index{0};
-
-    /**
-     * @brief Create natural kernel
-     *
-     * Kernel parameters are taken from the configuration.
-     *
-     * @param dispersers The disperser raster (reference, for deterministic kernel)
-     * @return Created kernel
-     */
-    SwitchDispersalKernel<IntegerRaster>
-    create_natural_kernel(const IntegerRaster& dispersers)
-    {
-        RadialDispersalKernel<IntegerRaster> radial_kernel(
-            config_.ew_res,
-            config_.ns_res,
-            natural_kernel,
-            config_.natural_scale,
-            direction_from_string(config_.natural_direction),
-            config_.natural_kappa,
-            config_.shape);
-        DeterministicDispersalKernel<IntegerRaster> deterministic_kernel(
-            natural_kernel,
-            dispersers,
-            config_.dispersal_percentage,
-            config_.ew_res,
-            config_.ns_res,
-            config_.natural_scale,
-            config_.shape);
-        SwitchDispersalKernel<IntegerRaster> selectable_kernel(
-            natural_kernel,
-            radial_kernel,
-            deterministic_kernel,
-            uniform_kernel,
-            natural_neighbor_kernel,
-            config_.deterministic);
-        return selectable_kernel;
-    }
 
     /**
      * @brief Create overpopulation movement kernel
@@ -94,10 +65,12 @@ protected:
      * by the leaving scale coefficient.
      *
      * @param dispersers The disperser raster (reference, for deterministic kernel)
+     * @param network Network (initialized or not)
      * @return Created kernel
      */
-    SwitchDispersalKernel<IntegerRaster>
-    create_overpopulation_movement_kernel(const IntegerRaster& dispersers)
+    SwitchDispersalKernel<IntegerRaster, RasterIndex>
+    create_overpopulation_movement_kernel(
+        const IntegerRaster& dispersers, const Network<RasterIndex>& network)
     {
         RadialDispersalKernel<IntegerRaster> radial_kernel(
             config_.ew_res,
@@ -115,56 +88,24 @@ protected:
             config_.ns_res,
             config_.natural_scale * config_.leaving_scale_coefficient,
             config_.shape);
-        SwitchDispersalKernel<IntegerRaster> selectable_kernel(
+        NetworkDispersalKernel<RasterIndex> network_kernel(
+            network, config_.network_min_time, config_.network_max_time);
+        SwitchDispersalKernel<IntegerRaster, RasterIndex> selectable_kernel(
             natural_kernel,
             radial_kernel,
             deterministic_kernel,
             uniform_kernel,
+            network_kernel,
             natural_neighbor_kernel,
             config_.deterministic);
         return selectable_kernel;
     }
 
-    /**
-     * @brief Create anthropogenic kernel
-     *
-     * Same structure as the natural kernel, but the parameters are for anthropogenic
-     * kernel when available.
-     *
-     * @param dispersers The disperser raster (reference, for deterministic kernel)
-     * @return Created kernel
-     */
-    SwitchDispersalKernel<IntegerRaster>
-    create_anthro_kernel(const IntegerRaster& dispersers)
-    {
-        RadialDispersalKernel<IntegerRaster> radial_kernel(
-            config_.ew_res,
-            config_.ns_res,
-            anthro_kernel,
-            config_.anthro_scale,
-            direction_from_string(config_.anthro_direction),
-            config_.anthro_kappa,
-            config_.shape);
-        DeterministicDispersalKernel<IntegerRaster> deterministic_kernel(
-            anthro_kernel,
-            dispersers,
-            config_.dispersal_percentage,
-            config_.ew_res,
-            config_.ns_res,
-            config_.anthro_scale,
-            config_.shape);
-        SwitchDispersalKernel<IntegerRaster> selectable_kernel(
-            anthro_kernel,
-            radial_kernel,
-            deterministic_kernel,
-            uniform_kernel,
-            anthro_neighbor_kernel,
-            config_.deterministic);
-        return selectable_kernel;
-    }
-
 public:
-    Model(const Config& config)
+    Model(
+        const Config& config,
+        KernelFactory& kernel_factory =
+            create_dynamic_kernel<Generator, IntegerRaster, RasterIndex>)
         : config_(config),
           natural_kernel(kernel_type_from_string(config.natural_kernel_type)),
           anthro_kernel(kernel_type_from_string(config.anthro_kernel_type)),
@@ -179,7 +120,8 @@ public:
               config.latency_period_steps,
               config.generate_stochasticity,
               config.establishment_stochasticity,
-              config.movement_stochasticity)
+              config.movement_stochasticity),
+          kernel_factory_(kernel_factory)
     {}
 
     /**
@@ -207,25 +149,28 @@ public:
      * infected + exposed + susceptible in the cell.
      * @param[in,out] total_populations All host and non-host individuals in the area
      * @param[out] dispersers Dispersing individuals (used internally)
-     * @param exposed[in,out] Exposed hosts (if SEI model is active)
-     * @param mortality_tracker[in,out] Mortality tracker used to generate *died*.
+     * @param[in,out] total_exposed Sum of all exposed hosts (if SEI model is active)
+     * @param[in,out] exposed Exposed hosts (if SEI model is active)
+     * @param[in,out] mortality_tracker Mortality tracker used to generate *died*.
      * Expectation is that mortality tracker is of length (1/mortality_rate +
      * mortality_time_lag)
-     * @param died[out] Infected hosts which died this step based on the mortality
+     * @param[out] died Infected hosts which died this step based on the mortality
      * schedule
-     * @param temperatures[in] Vector of temperatures used to evaluate lethal
+     * @param[in] temperatures Vector of temperatures used to evaluate lethal
      * temperature
-     * @param weather_coefficient[in] Weather coefficient (for the current step)
-     * @param treatments[in,out] Treatments to be applied (also tracks use of
+     * @param[in] weather_coefficient Weather coefficient (for the current step)
+     * @param[in,out] treatments Treatments to be applied (also tracks use of
      * treatments)
-     * @param resistant[in,out] Resistant hosts (host temporarily removed from
+     * @param[in,out] resistant Resistant hosts (host temporarily removed from
      * susceptible hosts)
-     * @param outside_dispersers[in,out] Dispersers escaping the rasters (adds to the
+     * @param[in,out] outside_dispersers Dispersers escaping the rasters (adds to the
      * vector)
-     * @param spread_rate[in,out] Spread rate tracker
-     * @param quarantine[in,out] Quarantine escape tracker
-     * @param quarantine_areas[in] Quarantine areas
-     * @param movements[in] Table of host movements
+     * @param[in,out] spread_rate Spread rate tracker
+     * @param[in,out] quarantine Quarantine escape tracker
+     * @param[in] quarantine_areas Quarantine areas
+     * @param[in] movements Table of host movements
+     * @param network Network (initialized or Network::null_network() if unused)
+     * @param[in,out] suitable_cells List of indices of cells with hosts
      *
      * @note The parameters roughly correspond to Simulation::disperse()
      * and Simulation::disperse_and_infect() functions, so these can be used
@@ -251,6 +196,7 @@ public:
         QuarantineEscape<IntegerRaster>& quarantine,  // out
         const IntegerRaster& quarantine_areas,
         const std::vector<std::vector<int>> movements,
+        const Network<RasterIndex>& network,
         std::vector<std::vector<int>>& suitable_cells)
     {
 
@@ -275,13 +221,9 @@ public:
                 config_.reproductive_rate,
                 suitable_cells);
 
-            DispersalKernel<IntegerRaster> dispersal_kernel(
-                create_natural_kernel(dispersers),
-                create_anthro_kernel(dispersers),
-                config_.use_anthropogenic_kernel,
-                config_.percent_natural_dispersal);
+            auto dispersal_kernel = kernel_factory_(config_, dispersers, network);
             auto overpopulation_kernel =
-                create_overpopulation_movement_kernel(dispersers);
+                create_overpopulation_movement_kernel(dispersers, network);
 
             simulation_.disperse_and_infect(
                 step,

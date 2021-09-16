@@ -283,6 +283,7 @@ List pops_model_cpp(
             quarantine,
             quarantine_areas,
             movements,
+            Network<int>::null_network(),
             spatial_indices);
 
         if (config.spread_schedule()[current_index]) {
