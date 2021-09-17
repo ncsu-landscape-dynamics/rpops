@@ -63,6 +63,7 @@ List pops_model_cpp(
     bool weather,
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> weather_coefficient,
+    List bbox,
     List res,
     List rows_cols,
     std::string time_step,
@@ -84,15 +85,12 @@ List pops_model_cpp(
     double natural_kappa = 0,
     std::string anthropogenic_dir = "NONE",
     double anthropogenic_kappa = 0,
+    Nullable<List> frequencies_n_config = R_NilValue,
     std::string output_frequency = "year",
-    int output_frequency_n = 1,
     std::string quarantine_frequency = "year",
-    int quarantine_frequency_n = 1,
     bool use_quarantine = false,
     std::string spreadrate_frequency = "year",
-    int spreadrate_frequency_n = 1,
     std::string mortality_frequency = "year",
-    int mortality_frequency_n = 1,
     bool use_spreadrates = false,
     std::string model_type_ = "SI",
     int latency_period = 0,
@@ -103,7 +101,9 @@ List pops_model_cpp(
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
     bool use_overpopulation_movements = false,
-    Nullable<List> overpopulation_config = R_NilValue)
+    Nullable<List> overpopulation_config = R_NilValue,
+    Nullable<List> network_config = R_NilValue,
+    Nullable<List> network_data_config = R_NilValue)
 {
     Config config;
     config.random_seed = random_seed;
@@ -147,15 +147,20 @@ List pops_model_cpp(
     // movement_schedule used later
 
     config.dispersal_percentage = dispersal_percentage;
+
+    if (frequencies_n_config.isNotNull()) {
+        List freq_n_config(frequencies_n_config);
+        config.output_frequency_n = freq_n_config["output_frequency_n"];
+        config.quarantine_frequency_n = freq_n_config["quarantine_frequency_n"];
+        config.spreadrate_frequency_n = freq_n_config["spreadrate_frequency_n"];
+        config.mortality_frequency_n = freq_n_config["mortality_frequency_n"];
+    }
+
     config.output_frequency = output_frequency;
-    config.output_frequency_n = output_frequency_n;
     config.quarantine_frequency = quarantine_frequency;
-    config.quarantine_frequency_n = quarantine_frequency_n;
     config.use_quarantine = use_quarantine;
     config.spreadrate_frequency = spreadrate_frequency;
-    config.spreadrate_frequency_n = spreadrate_frequency_n;
     config.mortality_frequency = mortality_frequency;
-    config.mortality_frequency_n = mortality_frequency_n;
     config.use_spreadrates = use_spreadrates;
     config.use_overpopulation_movements = use_overpopulation_movements;
     if (use_overpopulation_movements && overpopulation_config.isNotNull()) {
@@ -254,6 +259,25 @@ List pops_model_cpp(
     Direction escape_direction;
     std::vector<std::string> escape_directions;
 
+    std::unique_ptr<Network<int>> network{nullptr};
+    if (network_config.isNotNull() && network_data_config.isNotNull()) {
+        // The best place for bbox handling would be with rows, cols, and
+        // resolution, but since it is required only for network, it is here.
+        config.bbox.north = bbox["north"];
+        config.bbox.south = bbox["south"];
+        config.bbox.east = bbox["east"];
+        config.bbox.west = bbox["west"];
+        List net_config(network_config);
+        config.network_min_time = net_config["network_min_time"];
+        config.network_max_time = net_config["network_max_time"];
+        config.network_speed = net_config["network_speed"];
+        network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res, config.network_speed));
+        List net_data_config(network_data_config);
+        std::ifstream node_stream{Rcpp::as<std::string>(net_data_config["node_filename"])};
+        std::ifstream segment_stream{Rcpp::as<std::string>(net_data_config["segment_filename"])};
+        network->load(node_stream, segment_stream);
+    }
+
     ModelType mt = model_type_from_string(config.model_type);
     Simulation<IntegerMatrix, NumericMatrix> simulation(
         config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
@@ -283,7 +307,7 @@ List pops_model_cpp(
             quarantine,
             quarantine_areas,
             movements,
-            Network<int>::null_network(),
+            network ? *network : Network<int>::null_network(),
             spatial_indices);
 
         if (config.spread_schedule()[current_index]) {

@@ -137,13 +137,41 @@ pops_model <-
            use_overpopulation_movements = FALSE,
            overpopulation_percentage = 0.0,
            leaving_percentage = 0.0,
-           leaving_scale_coefficient = 1.0) {
+           leaving_scale_coefficient = 1.0,
+           bbox = NULL,
+           network_min_time = 0,
+           network_max_time = 0,
+           network_speed = 0,
+           node_filename = "",
+           segment_filename = "") {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
     overpopulation_config$overpopulation_percentage <- overpopulation_percentage
     overpopulation_config$leaving_percentage <- leaving_percentage
     overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
+
+    # List of frequency n parameters
+    frequencies_n_config <- c()
+    frequencies_n_config$output_frequency_n <- output_frequency_n
+    frequencies_n_config$quarantine_frequency_n <- quarantine_frequency_n
+    frequencies_n_config$spreadrate_frequency_n <- spreadrate_frequency_n
+    frequencies_n_config$mortality_frequency_n <- mortality_frequency_n
+
+    # Network configuration
+    network_config <- NULL;
+    network_data_config <- NULL;
+    # Checking only one file here, eventually, we should only have one.
+    if (!(is.na(node_filename) || is.null(node_filename) || node_filename == '')) {
+      network_config <- c()
+      network_config$network_min_time <- network_min_time
+      network_config$network_max_time <- network_max_time
+      network_config$network_speed <- network_speed
+
+      network_data_config <- c()
+      network_data_config$node_filename <- node_filename
+      network_data_config$segment_filename <- segment_filename
+    }
 
     data <-
       pops_model_cpp(random_seed = random_seed,
@@ -170,6 +198,7 @@ pops_model <-
                      weather = weather,
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,
+                     bbox = bbox,
                      res = res,
                      rows_cols = rows_cols,
                      time_step = time_step,
@@ -195,15 +224,12 @@ pops_model <-
                      natural_kappa = natural_kappa,
                      anthropogenic_dir = anthropogenic_dir,
                      anthropogenic_kappa = anthropogenic_kappa,
+                     frequencies_n_config = frequencies_n_config,
                      output_frequency = output_frequency,
-                     output_frequency_n = output_frequency_n,
                      quarantine_frequency = quarantine_frequency,
-                     quarantine_frequency_n = quarantine_frequency_n,
                      use_quarantine = use_quarantine,
                      spreadrate_frequency = spreadrate_frequency,
-                     spreadrate_frequency_n = spreadrate_frequency_n,
                      mortality_frequency = mortality_frequency,
-                     mortality_frequency_n = mortality_frequency_n,
                      use_spreadrates = use_spreadrates,
                      model_type_ = model_type_,
                      latency_period = latency_period,
@@ -217,7 +243,9 @@ pops_model <-
                      dispersal_percentage = dispersal_percentage,
                      use_overpopulation_movements =
                        use_overpopulation_movements,
-                     overpopulation_config = overpopulation_config
+                     overpopulation_config = overpopulation_config,
+                     network_config = network_config,
+                     network_data_config = network_data_config
     )
 
   }
