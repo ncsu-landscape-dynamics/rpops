@@ -71,7 +71,13 @@ pops_model(
   use_overpopulation_movements = FALSE,
   overpopulation_percentage = 0,
   leaving_percentage = 0,
-  leaving_scale_coefficient = 1
+  leaving_scale_coefficient = 1,
+  bbox = NULL,
+  network_min_time = 0,
+  network_max_time = 0,
+  network_speed = 0,
+  node_filename = "",
+  segment_filename = ""
 )
 }
 \arguments{
