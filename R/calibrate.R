@@ -375,10 +375,10 @@ calibrate <- function(infected_years_file,
       matrix(ncol = 1, nrow = config$number_of_generations)
 
     # assign thresholds for summary static values to be compared to the
-    accuracy_threshold <- 0.80 # starting threshold for model accuracy
-    precision_threshold <- 0.80 # starting threshold for model precision
-    recall_threshold <- 0.80 # starting threshold for model recall
-    specificity_threshold <- 0.80 # starting threshold for model
+    accuracy_threshold <- 0.70 # starting threshold for model accuracy
+    precision_threshold <- 0.70 # starting threshold for model precision
+    recall_threshold <- 0.70 # starting threshold for model recall
+    specificity_threshold <- 0.70 # starting threshold for model
     rmse_threshold <- 7 # starting threshold for RMSE (root mean squared error)
     distance_threshold <- 1000 # starting threshold for distance between simulated
     # and observed data in units
