@@ -2067,57 +2067,40 @@ test_that(
          end_date = end_date)
   expect_equal(length(data$infected), 52)
 
-  data <-
-    pops(output_frequency = "day",
-         time_step = "week",
-         treatment_dates = start_date,
-         infected_file = infected_file,
-         host_file = host_file,
-         total_populations_file = host_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         start_date = start_date,
-         end_date = end_date)
-  expect_equal(data, output_frequency_error)
+  expect_error(pops(output_frequency = "day",
+                    time_step = "week",
+                    treatment_dates = start_date,
+                    infected_file = infected_file,
+                    host_file = host_file,
+                    total_populations_file = host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    start_date = start_date,
+                    end_date = end_date), output_frequency_error)
 
-  data <-
-    pops(output_frequency = "day",
-         time_step = "month",
-         treatment_dates = start_date,
-         infected_file = infected_file,
-         host_file = host_file,
-         total_populations_file = host_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         start_date = start_date,
-         end_date = end_date)
-  expect_equal(data, output_frequency_error)
+  expect_error(pops(output_frequency = "day",
+                    time_step = "month",
+                    treatment_dates = start_date,
+                    infected_file = infected_file,
+                    host_file = host_file,
+                    total_populations_file = host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    start_date = start_date,
+                    end_date = end_date), output_frequency_error)
 
-  data <- pops(output_frequency = "week",
-               time_step = "month",
-               treatment_dates = start_date,
-               infected_file = infected_file,
-               host_file = host_file,
-               total_populations_file = host_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               start_date = start_date,
-               end_date = end_date)
-  expect_equal(data, output_frequency_error)
+  expect_error(pops(output_frequency = "week",
+                    time_step = "month",
+                    treatment_dates = start_date,
+                    infected_file = infected_file,
+                    host_file = host_file,
+                    total_populations_file = host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    start_date = start_date,
+                    end_date = end_date), output_frequency_error)
 
   data <- pops(output_frequency = "day",
-               time_step = "day",
-               treatment_dates = start_date,
-               infected_file = infected_file,
-               host_file = host_file,
-               total_populations_file = host_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               start_date = start_date,
-               end_date = end_date)
-  expect_equal(length(data$infected), 364)
-
-  data <- pops(output_frequency = "time_step",
                time_step = "day",
                treatment_dates = start_date,
                infected_file = infected_file,
