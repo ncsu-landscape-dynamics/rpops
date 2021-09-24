@@ -306,7 +306,7 @@ pops <- function(infected_file,
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
-    return(config$failure)
+    stop(config$failure)
   }
 
   data <- pops_model(random_seed = config$random_seed,

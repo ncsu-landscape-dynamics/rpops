@@ -161,7 +161,7 @@ pops_multirun <- function(infected_file,
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
-    return(config$failure)
+    stop(config$failure)
   }
 
   config$crs <- terra::crs(config$host)
