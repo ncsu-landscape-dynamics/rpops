@@ -12,8 +12,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
-            number_of_generations <- 3
-            generation_size <- 5
+            number_of_generations <- 2
+            generation_size <- 3
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -183,8 +183,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
-            number_of_generations <- 3
-            generation_size <- 5
+            number_of_generations <- 2
+            generation_size <- 3
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -354,8 +354,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
-            number_of_generations <- 3
-            generation_size <- 5
+            number_of_generations <- 2
+            generation_size <- 3
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -525,8 +525,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
-            number_of_generations <- 3
-            generation_size <- 5
+            number_of_generations <- 2
+            generation_size <- 3
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
