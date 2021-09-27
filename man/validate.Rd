@@ -7,7 +7,7 @@ scales of the pops model.}
 \usage{
 validate(
   infected_years_file,
-  number_of_iterations,
+  number_of_iterations = 10,
   number_of_cores = NA,
   parameter_means,
   parameter_cov_matrix,
