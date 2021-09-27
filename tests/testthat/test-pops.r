@@ -136,7 +136,6 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_cov_matrix = parameter_cov_matrix),
                "file is not one of '.grd', '.tif', '.img', or '.vrt'",
                fixed = TRUE)
-
 })
 
 test_that("Model stops if time and date parameters are of the wrong type and/or

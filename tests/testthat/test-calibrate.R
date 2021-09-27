@@ -1,5 +1,30 @@
 context("test-calibrate")
 
+test_that("Model stops if files don't exist or aren't the correct extension", {
+  infected_file <-
+    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  infected_years_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS"
+    )
+  host_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  prior_means <- c(0, 21, 1, 500, 0, 0)
+  prior_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  number_of_observations = 1
+  prior_number_of_observations = 0
+
+  expect_error(calibrate(infected_years_file = infected_years_file,
+                         number_of_observations = number_of_observations,
+                         prior_number_of_observations = prior_number_of_observations,
+                         prior_means = prior_means,
+                         prior_cov_matrix = prior_cov_matrix,
+                         infected_file = "",
+                         host_file =  host_file,
+                         total_populations_file =  host_file),
+               "file does not exist")
+})
+
 test_that("ABC calibration has correctly formatted returns with multiple output
           comparisons", {
             infected_years_file <-
