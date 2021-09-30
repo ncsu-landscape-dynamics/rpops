@@ -81,17 +81,12 @@ configuration <- function(config) {
   config$output_write_list <- c("all_simulations", "summary_outputs")
 
   if (config$write_outputs %notin% config$output_list) {
-    config$failure <-
-      "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')"
+    config$failure <- write_outputs_error
   }
 
   if (config$write_outputs %in% config$output_write_list) {
     if (!base::dir.exists(config$output_folder_path)) {
-      config$failure <- "output path doesn't exist"
-    } else {
-      suppressMessages({
-        folderfun::setff("Out", config$output_folder_path)
-      })
+      config$failure <- output_path_error
     }
   }
 
@@ -115,8 +110,7 @@ configuration <- function(config) {
     )) {
     config$model_type <- "SI"
   } else {
-    config$failure <-
-      "Model type is not a valid type options are 'SI' or 'SEI'"
+    config$failure <- model_type_error
     return(config)
   }
 
@@ -128,14 +122,12 @@ configuration <- function(config) {
     season_month_start_end$end_month <- as.integer(config$season_month_end)
     config$season_month_start_end <- season_month_start_end
   } else {
-    config$failure <-
-      "Season month start or end not between 1 and 12"
+    config$failure <- season_month_error
   }
 
   # ensures latent period is correct for type of model selected
   if (config$model_type == "SEI" && config$latency_period <= 0) {
-    config$failure <-
-      "Model type is set to SEI but the latency period is less than 1"
+    config$failure <- latency_period_error
     return(config)
   } else if (config$model_type == "SI" && config$latency_period > 0) {
     config$latency_period <- 0
@@ -143,8 +135,7 @@ configuration <- function(config) {
 
   # ensure correct treatment method
   if (!config$treatment_method %in% c("ratio", "all infected")) {
-    config$failure <-
-      "treatment method is not one of the valid treatment options"
+    config$failure <- treatment_option_error
     return(config)
   }
 
@@ -306,7 +297,7 @@ configuration <- function(config) {
     temperature <- list(terra::as.matrix(temperature_stack[[1]],
       wide = TRUE
     ))
-    if (nlyr(temperature_stack) > 1) {
+    if (terra::nlyr(temperature_stack) > 1) {
       for (i in 2:config$number_of_years) {
         temperature[[i]] <- terra::as.matrix(temperature_stack[[i]],
           wide = TRUE
@@ -557,18 +548,12 @@ configuration <- function(config) {
   )
 
   if (config$natural_kernel_type %notin% kernel_list) {
-    config$failure <-
-      "Natural kernel type not one of 'cauchy', 'exponential',
-      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'weibull', 'logistic'"
+    config$failure <- natural_kernel_error
     return(config)
   }
 
   if (config$anthropogenic_kernel_type %notin% kernel_list) {
-    config$failure <-
-      "Anthropogenic kernel type not one of 'cauchy', 'exponential',
-      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'weibull', 'logistic'"
+    config$failure <- anthropogenic_kernel_error
     return(config)
   }
 
@@ -642,12 +627,12 @@ configuration <- function(config) {
     c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")) {
     if (nrow(config$parameter_cov_matrix) != 6 |
       ncol(config$parameter_cov_matrix) != 6) {
-      config$failure <- "parameter covariance matrix is not 6 x 6"
+      config$failure <- covariance_mat_error
       return(config)
     }
 
     if (length(config$parameter_means) != 6) {
-      config$failure <- "parameter means is not a vector of length 6"
+      config$failure <- paramter_means_error
       return(config)
     }
 
@@ -720,15 +705,15 @@ configuration <- function(config) {
         paste("The infection years file must have enough layers to match the
             number of outputs from the model. The number of layers of your
             infected year file is", config$num_layers_infected_years, "and the
-            number of outputs is", config$number_of_time_steps)
+            number of outputs is", config$number_of_time_steps, sep = " ")
       return(config)
     }
 
     infection_years2 <- list(terra::as.matrix(infection_years[[1]],
       wide = TRUE
     ))
-    if (nlyr(infection_years) > 1) {
-      for (i in 2:nlyr(infection_years)) {
+    if (terra::nlyr(infection_years) > 1) {
+      for (i in 2:terra::nlyr(infection_years)) {
         infection_years2[[i]] <- terra::as.matrix(infection_years[[i]],
           wide = TRUE
         )
@@ -764,8 +749,7 @@ configuration <- function(config) {
   if (config$function_name == "auto-manage") {
     ## management module information
     config$num_cells <-
-      round((config$budget / config$cost_per_meter_sq) /
-        (config$ew_res * config$ns_res))
+      round((config$budget / config$cost_per_meter_sq) / (config$ew_res * config$ns_res))
     config$buffer_cells <- config$buffer / config$ew_res
     config$years_simulated <- length(config$years)
   }
