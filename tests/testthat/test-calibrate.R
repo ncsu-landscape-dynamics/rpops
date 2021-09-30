@@ -1019,6 +1019,4 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                          number_of_observations)
             expect_equal(nrow(data$raw_calibration_data),
                          number_of_iterations)
-
           })
-

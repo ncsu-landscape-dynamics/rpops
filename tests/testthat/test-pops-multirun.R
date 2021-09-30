@@ -29,8 +29,8 @@ test_that("Multirun model outputs work", {
   mortality_on <- FALSE
   mortality_rate <- 0
   mortality_time_lag <- 0
-  mortality_frequency = "Year"
-  mortality_frequency_n = 1
+  mortality_frequency <- "Year"
+  mortality_frequency_n <- 1
   natural_kernel_type <- "cauchy"
   anthropogenic_kernel_type <- "cauchy"
   natural_dir <- "NONE"
@@ -377,8 +377,7 @@ test_that("Multirun model outputs work", {
 test_that("Multirun model outputs work with mask", {
   skip_on_os("windows")
   infected_file <-
-    system.file("extdata", "simple20x20", "initial_infection.tif",
-                package = "PoPS")
+    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <-
     system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   total_populations_file <-
@@ -404,8 +403,8 @@ test_that("Multirun model outputs work with mask", {
   mortality_on <- FALSE
   mortality_rate <- 0
   mortality_time_lag <- 0
-  mortality_frequency = "Year"
-  mortality_frequency_n = 1
+  mortality_frequency <- "Year"
+  mortality_frequency_n <- 1
   natural_kernel_type <- "cauchy"
   anthropogenic_kernel_type <- "cauchy"
   natural_dir <- "NONE"
