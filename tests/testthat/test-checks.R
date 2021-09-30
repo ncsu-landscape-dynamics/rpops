@@ -223,14 +223,6 @@ test_that(
     expect_equal(time_check$number_of_outputs, 53)
 
     time_step <- "week"
-    output_frequency <- "week"
-    time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
-    expect_equal(time_check$checks_passed, TRUE)
-    expect_equal(time_check$number_of_time_steps, 5)
-    expect_equal(time_check$number_of_years, 1)
-    expect_equal(time_check$number_of_outputs, 5)
-
-    time_step <- "week"
     output_frequency <- "month"
     time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
     expect_equal(time_check$checks_passed, TRUE)
@@ -246,6 +238,15 @@ test_that(
     expect_equal(time_check$number_of_years, 1)
     expect_equal(time_check$number_of_outputs, 1)
 
+    end_date <- "2016-02-01"
+    start_date <- "2016-01-01"
+    time_step <- "week"
+    output_frequency <- "week"
+    time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
+    expect_equal(time_check$checks_passed, TRUE)
+    expect_equal(time_check$number_of_time_steps, 5)
+    expect_equal(time_check$number_of_years, 1)
+    expect_equal(time_check$number_of_outputs, 5)
   })
 
 test_that("Bayesian MNN checks work properly", {
