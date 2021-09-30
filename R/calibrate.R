@@ -613,17 +613,17 @@ calibrate <- function(infected_years_file,
             ) {
           if (acceptance_rate < 0.05) {
             accuracy_threshold <-
-              mean(c(median(parameters_test[, 7], na.rm = TRUE) - 0.02, accuracy_threshold))
+              mean(c(median(parameters_test[, 7], na.rm = TRUE), accuracy_threshold)) - 0.03
             precision_threshold <-
-              mean(c(median(parameters_test[, 8], na.rm = TRUE) - 0.02, precision_threshold))
+              mean(c(median(parameters_test[, 8], na.rm = TRUE), precision_threshold)) - 0.03
             recall_threshold <-
-              mean(c(median(parameters_test[, 9], na.rm = TRUE) - 0.02, recall_threshold))
+              mean(c(median(parameters_test[, 9], na.rm = TRUE), recall_threshold)) - 0.03
             specificity_threshold <-
-              mean(c(median(parameters_test[, 10], na.rm = TRUE) - 0.02, specificity_threshold))
+              mean(c(median(parameters_test[, 10], na.rm = TRUE), specificity_threshold)) - 0.03
             rmse_threshold <-
-              mean(c(median(parameters_test[, 11], na.rm = TRUE) + 2, rmse_threshold))
+              mean(c(median(parameters_test[, 11], na.rm = TRUE), rmse_threshold)) + 2
             distance_threshold <-
-              mean(c(median(parameters_test[, 12], na.rm = TRUE) + 10, distance_threshold))
+              mean(c(median(parameters_test[, 12], na.rm = TRUE), distance_threshold)) + 10
             ## reset starting point of parameters kept and acceptance rate
             parameters_kept <- matrix(ncol = 12, nrow = config$num_particles)
             parameters_test <- matrix(ncol = 12, nrow = 200)

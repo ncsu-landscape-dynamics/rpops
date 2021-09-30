@@ -13,7 +13,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 2
-            generation_size <- 3
+            generation_size <- 2
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -169,7 +169,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                          number_of_observations)
             expect_equal(nrow(data$raw_calibration_data),
                          number_of_generations * generation_size)
-
           })
 
 
@@ -184,7 +183,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 2
-            generation_size <- 3
+            generation_size <- 2
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -204,7 +203,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             season_month_start <- 1
             season_month_end <- 12
             start_date <- "2003-01-01"
-            end_date <- "2003-12-31"
+            end_date <- "2003-02-11"
             use_lethal_temperature <- FALSE
             temperature_file <- ""
             lethal_temperature <- -30
@@ -355,7 +354,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 2
-            generation_size <- 3
+            generation_size <- 2
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
@@ -526,7 +525,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 2
-            generation_size <- 3
+            generation_size <- 2
             infected_file <-
               system.file("extdata", "simple20x20", "initial_infection.tif",
                           package = "PoPS")
