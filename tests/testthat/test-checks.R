@@ -198,7 +198,7 @@ test_that(
     output_frequency <- "week"
     time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
     expect_equal(time_check$checks_passed, FALSE)
-    expect_equal(time_check$failed_check, time_format_error)
+    expect_equal(time_check$failed_check, date_format_error)
 
     end_date <- "2017-01-01"
     start_date <- "2016-01-01"
