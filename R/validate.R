@@ -33,6 +33,7 @@
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
+#' vect
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
@@ -293,7 +294,7 @@ validate <- function(infected_years_file,
                                              config$configuration,
                                              mask)
           if (file.exists(config$point_file)) {
-            obs_data <- vect(config$point_file)
+            obs_data <- terra::vect(config$point_file)
             obs_data <- terra::project(obs_data, comp_year)
             s <- extract(comp_year, obs_data)
             names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
@@ -311,7 +312,8 @@ validate <- function(infected_years_file,
             ad$points_true_negative <-
               nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
             ad$points_total_obs <-
-              points_true_negative + points_true_positive + points_false_negative + points_false_positive
+              points_true_negative + points_true_positive +
+              points_false_negative + points_false_positive
             ad$points_accuracy <-
               (points_true_negative + points_true_positive) / points_total_obs
             ad$points_precision <-
@@ -337,29 +339,32 @@ validate <- function(infected_years_file,
     assign(paste("output_step_", j, sep = ""), output_step)
     output_list[[paste0("output_step_", j)]] <- output_step
     if (config$write_outputs %in% config$output_write_list) {
-      write.csv(output_step, ffOut(paste("output_step_", j, ".csv", sep = "")))
+      file_name <- paste(config$output_folder_path, "output_step_", j, ".csv", sep = "")
+      write.csv(output_step, file = file_name)
     }
     if (j == 1) {
       cum_output_step <- output_step
-      assign(paste("cum_output_step_", j, sep = ""), cum_output_step/j)
+      assign(paste("cum_output_step_", j, sep = ""), cum_output_step / j)
       output_list[[paste0("cum_output_step_", j)]] <- cum_output_step
       if (config$write_outputs %in% config$output_write_list) {
-        write.csv(cum_output_step, ffOut(paste("cum_output_step_", j, ".csv", sep = "")))
+        file_name <- paste(config$output_folder_path, "cum_output_step_", j, ".csv", sep = "")
+        write.csv(cum_output_step, file = file_name)
       }
     }
     else {
       assign(paste("cum_output_step", sep = ""), (cum_output_step + output_step))
-      assign(paste("cum_output_step_", j, sep = ""), cum_output_step/j)
+      assign(paste("cum_output_step_", j, sep = ""), cum_output_step / j)
       output_list[[paste0("cum_output_step_", j)]] <- cum_output_step
       if (config$write_outputs %in% config$output_write_list) {
-        write.csv(cum_output_step, ffOut(paste("cum_output_step_", j, ".csv", sep = "")))
+        file_name <- paste(config$output_folder_path, "cum_output_step_", j, ".csv", sep = "")
+        write.csv(cum_output_step, file = file_name)
       }
-
     }
   }
 
   if (config$write_outputs %in% config$output_write_list) {
-    save(output_list, file = ffOut("validation_outputs.rdata"))
+    file_name <- paste(config$output_folder_path, "validation_outputs.rdata", sep = "")
+    save(output_list, file = file_name)
   }
 
   return(output_list)

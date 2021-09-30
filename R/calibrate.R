@@ -282,8 +282,7 @@ calibrate <- function(infected_years_file,
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
-        lethal_temperature_month =
-          config$lethal_temperature_month,
+        lethal_temperature_month = config$lethal_temperature_month,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -316,15 +315,11 @@ calibrate <- function(infected_years_file,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
         natural_kernel_type = config$natural_kernel_type,
-        anthropogenic_kernel_type =
-          config$anthropogenic_kernel_type,
-        use_anthropogenic_kernel =
-          config$use_anthropogenic_kernel,
-        percent_natural_dispersal =
-          percent_natural_dispersal,
+        anthropogenic_kernel_type = config$anthropogenic_kernel_type,
+        use_anthropogenic_kernel = config$use_anthropogenic_kernel,
+        percent_natural_dispersal = percent_natural_dispersal,
         natural_distance_scale = natural_distance_scale,
-        anthropogenic_distance_scale =
-          anthropogenic_distance_scale,
+        anthropogenic_distance_scale = anthropogenic_distance_scale,
         natural_dir = config$natural_dir,
         natural_kappa = natural_kappa,
         anthropogenic_dir = config$anthropogenic_dir,
@@ -341,14 +336,11 @@ calibrate <- function(infected_years_file,
         use_spreadrates = config$use_spreadrates,
         model_type_ = config$model_type,
         latency_period = config$latency_period,
-        generate_stochasticity =
-          config$generate_stochasticity,
-        establishment_stochasticity =
-          config$establishment_stochasticity,
+        generate_stochasticity = config$generate_stochasticity,
+        establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
         deterministic = config$deterministic,
-        establishment_probability =
-          config$establishment_probability,
+        establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
         overpopulation_percentage = config$overpopulation_percentage,
@@ -368,8 +360,7 @@ calibrate <- function(infected_years_file,
     infected_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
     location_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
     distance_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
-    residual_error_checks <-
-      matrix(ncol = 1, nrow = config$number_of_generations)
+    residual_error_checks <- matrix(ncol = 1, nrow = config$number_of_generations)
 
     # calculate comparison metrics for input data (still need to add in
     # configuration metrics to this)
@@ -377,8 +368,7 @@ calibrate <- function(infected_years_file,
     num_infected_data <- length(config$number_of_outputs)
     num_locs_data <- c()
     num_locs_data <- length(config$number_of_outputs)
-    infected_data_points <-
-      vector(mode = "list", length = config$number_of_outputs)
+    infected_data_points <- vector(mode = "list", length = config$number_of_outputs)
 
     for (y in seq_len(terra::nlyr(config$infection_years))) {
       inf_year <- config$infection_years[[y]]
@@ -389,11 +379,9 @@ calibrate <- function(infected_years_file,
             "number of locations and total distance",
             "number of locations, number of infections, and total distance"
           )) {
-        infected_data_point <-
-          terra::as.points(inf_year)
+        infected_data_point <- terra::as.points(inf_year)
         names(infected_data_point) <- "data"
-        infected_data_points[[y]] <-
-          infected_data_point[infected_data_point$data > 0]
+        infected_data_points[[y]] <- infected_data_point[infected_data_point$data > 0]
         }
     }
 
@@ -453,8 +441,7 @@ calibrate <- function(infected_years_file,
           # draw from the multivariate normal distribution and ensure that
           # parameters are within their allowed range
           proposed_parameters <-
-            MASS::mvrnorm(1, config$parameter_means,
-                          config$parameter_cov_matrix)
+            MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           while (proposed_parameters[1] < 0.1 |
                  proposed_parameters[2] < 0.1 |
                  proposed_parameters[3] > 1.00 |
@@ -463,8 +450,7 @@ calibrate <- function(infected_years_file,
                  proposed_parameters[5] < 0 |
                  proposed_parameters[6] < 0) {
             proposed_parameters <-
-              MASS::mvrnorm(1, config$parameter_means,
-                            config$parameter_cov_matrix)
+              MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           }
           proposed_reproductive_rate <- proposed_parameters[1]
           proposed_natural_distance_scale <- proposed_parameters[2]
@@ -997,7 +983,8 @@ calibrate <- function(infected_years_file,
     )
 
   if (config$write_outputs %in% config$output_write_list) {
-    save(outputs, file = ffOut("calibration_outputs.rdata"))
+    file_name <- paste(config$output_folder_path, "calibration_outputs.rdata", sep = "")
+    save(outputs, file = file_name)
   }
 
   return(outputs)

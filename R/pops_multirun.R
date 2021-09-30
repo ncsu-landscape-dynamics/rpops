@@ -278,12 +278,9 @@ pops_multirun <- function(infected_file,
   susceptible_runs <- infected_stack[seq(4, length(infected_stack), 10)]
   area_infected_runs <- infected_stack[seq(5, length(infected_stack), 10)]
   spread_rate_runs <- infected_stack[seq(6, length(infected_stack), 10)]
-  quarantine_escape_runs <-
-    infected_stack[seq(7, length(infected_stack), 10)]
-  quarantine_escape_distance_runs <-
-    infected_stack[seq(8, length(infected_stack), 10)]
-  quarantine_escape_directions_runs <-
-    infected_stack[seq(9, length(infected_stack), 10)]
+  quarantine_escape_runs <- infected_stack[seq(7, length(infected_stack), 10)]
+  quarantine_escape_distance_runs <- infected_stack[seq(8, length(infected_stack), 10)]
+  quarantine_escape_directions_runs <- infected_stack[seq(9, length(infected_stack), 10)]
   exposed_runs <- infected_stack[seq(10, length(infected_stack), 10)]
 
   prediction <- probability_runs[[1]]
@@ -299,12 +296,9 @@ pops_multirun <- function(infected_file,
   south_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
   north_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
   max_values <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escapes <-
-    data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escape_distances <-
-    data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escape_directions <-
-    data.frame(t(rep(0, length(probability_runs[[1]]))))
+  quarantine_escapes <- data.frame(t(rep(0, length(probability_runs[[1]]))))
+  quarantine_escape_distances <- data.frame(t(rep(0, length(probability_runs[[1]]))))
+  quarantine_escape_directions <- data.frame(t(rep(0, length(probability_runs[[1]]))))
 
   for (p in seq_len(length(probability_runs))) {
     for (w in seq_len(length(prediction))) {
@@ -329,8 +323,7 @@ pops_multirun <- function(infected_file,
       north_rates[p, ] <- 0
     }
 
-    if (config$use_quarantine &
-      length(quarantine_escape_runs[[p]]) ==
+    if (config$use_quarantine & length(quarantine_escape_runs[[p]]) ==
         length(probability_runs[[p]])) {
       escape_probability <- escape_probability + quarantine_escape_runs[[p]]
       quarantine_escapes[p, ] <- quarantine_escape_runs[[p]]
@@ -505,10 +498,7 @@ pops_multirun <- function(infected_file,
 
     raster_stacks2 <- do.call(cbind, raster_stacks)
     raster_stacks2 <-
-      array(raster_stacks2, dim = c(
-        dim(raster_stacks[[1]]),
-        length(raster_stacks)
-      ))
+      array(raster_stacks2, dim = c( dim(raster_stacks[[1]]), length(raster_stacks)))
     sim_mean <-
       round(apply(raster_stacks2, c(1, 2), mean, na.rm = TRUE), digits = 0)
     sim_sd <- apply(raster_stacks2, c(1, 2), sd, na.rm = TRUE)
@@ -566,25 +556,15 @@ pops_multirun <- function(infected_file,
 
   if (!is.null(config$mask)) {
     simulation_probability_stack <-
-      terra::mask(simulation_probability_stack, config$mask,
-        maskvalues = NA, updatevalue = NA
-      )
+      terra::mask(simulation_probability_stack, config$mask, maskvalues = NA, updatevalue = NA)
     simulation_mean_stack <-
-      terra::mask(simulation_mean_stack, config$mask,
-        maskvalues = NA, updatevalue = NA
-      )
+      terra::mask(simulation_mean_stack, config$mask, maskvalues = NA, updatevalue = NA)
     simulation_sd_stack <-
-      terra::mask(simulation_sd_stack, config$mask,
-        maskvalues = NA, updatevalue = NA
-      )
+      terra::mask(simulation_sd_stack, config$mask, maskvalues = NA, updatevalue = NA)
     simulation_min_stack <-
-      terra::mask(simulation_min_stack, config$mask,
-        maskvalues = NA, updatevalue = NA
-      )
+      terra::mask(simulation_min_stack, config$mask, maskvalues = NA, updatevalue = NA)
     simulation_max_stack <-
-      terra::mask(simulation_max_stack, config$mask,
-        maskvalues = NA, updatevalue = NA
-      )
+      terra::mask(simulation_max_stack, config$mask, maskvalues = NA, updatevalue = NA)
   }
 
   outputs <-
@@ -634,27 +614,18 @@ pops_multirun <- function(infected_file,
     )
 
   if (config$write_outputs %in% config$output_write_list) {
-    terra::writeRaster(simulation_probability_stack,
-      ffOut("simulation_probability.tif"),
-      overwrite = TRUE
-    )
-    terra::writeRaster(simulation_mean_stack,
-      ffOut("simulation_mean.tif"),
-      overwrite = TRUE
-    )
-    terra::writeRaster(simulation_sd_stack,
-      ffOut("simulation_sd.tif"),
-      overwrite = TRUE
-    )
-    terra::writeRaster(simulation_min_stack,
-      ffOut("simulation_min.tif"),
-      overwrite = TRUE
-    )
-    terra::writeRaster(simulation_max_stack,
-      ffOut("simulation_max.tif"),
-      overwrite = TRUE
-    )
-    save(outputs, file = ffOut("multirun_outputs.rdata"))
+    file_name <- paste(config$output_folder_path, "simulation_probability.tif", sep = "")
+    terra::writeRaster(simulation_probability_stack, file_name, overwrite = TRUE)
+    file_name <- paste(config$output_folder_path, "simulation_mean.tif", sep = "")
+    terra::writeRaster(simulation_mean_stack, file_name, overwrite = TRUE)
+    file_name <- paste(config$output_folder_path, "simulation_sd.tif", sep = "")
+    terra::writeRaster(simulation_sd_stack, file_name, overwrite = TRUE)
+    file_name <- paste(config$output_folder_path, "simulation_min.tif", sep = "")
+    terra::writeRaster(simulation_min_stack, file_name, overwrite = TRUE)
+    file_name <- paste(config$output_folder_path, "simulation_max.tif", sep = "")
+    terra::writeRaster(simulation_max_stack, file_name, overwrite = TRUE)
+    file_name <- paste(config$output_folder_path, "multirun_outputs.rdata", sep = "")
+    save(outputs, file = ffOut())
   }
 
   return(outputs)
