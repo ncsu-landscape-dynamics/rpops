@@ -709,14 +709,18 @@ configuration <- function(config) {
       return(config)
     }
 
-    infection_years2 <- list(terra::as.matrix(infection_years[[1]],
-      wide = TRUE
-    ))
+    # add / to output folder path if not provided by user.
+    if (substr(config$output_folder_path, nchar(config$output_folder_path),
+               nchar(config$output_folder_path)) == "/") {
+      config$output_folder_path <- config$output_folder_path
+    } else {
+      config$output_folder_path <- paste(config$output_folder_path, "/", sep = "")
+    }
+
+    infection_years2 <- list(terra::as.matrix(infection_years[[1]], wide = TRUE))
     if (terra::nlyr(infection_years) > 1) {
       for (i in 2:terra::nlyr(infection_years)) {
-        infection_years2[[i]] <- terra::as.matrix(infection_years[[i]],
-          wide = TRUE
-        )
+        infection_years2[[i]] <- terra::as.matrix(infection_years[[i]], wide = TRUE)
       }
     }
     config$infection_years <- infection_years
@@ -737,9 +741,7 @@ configuration <- function(config) {
 
   if (config$function_name %in% c("calibrate") &&
     config$calibration_method == "ABC") {
-    config$num_particles <-
-      config$number_of_generations * config$generation_size
-
+    config$num_particles <- config$number_of_generations * config$generation_size
     config$total_particles <- 1
     config$current_particles <- 1
     config$proposed_particles <- 1
