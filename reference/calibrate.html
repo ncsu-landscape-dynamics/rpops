@@ -155,14 +155,13 @@ the total number of iterations specified.</p>
 
     <pre class="usage"><span class='fu'>calibrate</span><span class='op'>(</span>
   <span class='va'>infected_years_file</span>,
-  <span class='va'>number_of_observations</span>,
-  <span class='va'>prior_number_of_observations</span>,
-  <span class='va'>prior_means</span>,
-  <span class='va'>prior_cov_matrix</span>,
+  number_of_observations <span class='op'>=</span> <span class='fl'>1</span>,
+  prior_number_of_observations <span class='op'>=</span> <span class='fl'>0</span>,
+  prior_means <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>0</span>, <span class='fl'>0</span><span class='op'>)</span>,
+  prior_cov_matrix <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/matrix.html'>matrix</a></span><span class='op'>(</span><span class='fl'>0</span>, <span class='fl'>6</span>, <span class='fl'>6</span><span class='op'>)</span>,
   params_to_estimate <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='cn'>T</span>, <span class='cn'>T</span>, <span class='cn'>T</span>, <span class='cn'>T</span>, <span class='cn'>F</span>, <span class='cn'>F</span><span class='op'>)</span>,
   number_of_generations <span class='op'>=</span> <span class='fl'>7</span>,
   generation_size <span class='op'>=</span> <span class='fl'>1000</span>,
-  checks <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>500</span>, <span class='fl'>5e+05</span>, <span class='fl'>1e+05</span>, <span class='fl'>1000</span><span class='op'>)</span>,
   <span class='va'>infected_file</span>,
   <span class='va'>host_file</span>,
   <span class='va'>total_populations_file</span>,
@@ -199,7 +198,6 @@ the total number of iterations specified.</p>
   pesticide_duration <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='fl'>0</span><span class='op'>)</span>,
   pesticide_efficacy <span class='op'>=</span> <span class='fl'>1</span>,
   mask <span class='op'>=</span> <span class='cn'>NULL</span>,
-  success_metric <span class='op'>=</span> <span class='st'>"number of locations and total distance"</span>,
   output_frequency <span class='op'>=</span> <span class='st'>"year"</span>,
   output_frequency_n <span class='op'>=</span> <span class='fl'>1</span>,
   movements_file <span class='op'>=</span> <span class='st'>""</span>,
@@ -223,7 +221,9 @@ the total number of iterations specified.</p>
   exposed_file <span class='op'>=</span> <span class='st'>""</span>,
   verbose <span class='op'>=</span> <span class='cn'>TRUE</span>,
   write_outputs <span class='op'>=</span> <span class='st'>"None"</span>,
-  output_folder_path <span class='op'>=</span> <span class='st'>""</span>
+  output_folder_path <span class='op'>=</span> <span class='st'>""</span>,
+  use_distance <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  use_rmse <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -299,16 +299,9 @@ accuracy the larger this number gets. Usually 7 to 9 is the ideal range.</p></td
       <th>generation_size</th>
       <td><p>how many accepted parameter sets should occur in each
 generation. For example if generation size is 1,000 then the simulation runs
-until 1,000 model runs are less than the threshold value selected in checks.
+until 1,000 model runs are less than the threshold value.
 We recommend running at least 1,000 but the greater this number the more
 accurate the model parameters selected will be.</p></td>
-    </tr>
-    <tr>
-      <th>checks</th>
-      <td><p>A list of the 4 starting check values in order of # of
-locations, total min distance, residual error, and # infected. default is
-(500,500000, 100000, 1000). Starting check values can play a role in speed
-of calibration and in success of calibration.</p></td>
     </tr>
     <tr>
       <th>infected_file</th>
@@ -530,15 +523,6 @@ want to calculate statistics on and an NA value represents the area to remove
 from the statistics.</p></td>
     </tr>
     <tr>
-      <th>success_metric</th>
-      <td><p>Choose which success metric to use for calibration.
-Choices are "number of locations", "number of locations and total distance",
-"number of locations, number of infections, and total distance", or
-"residual error" for 'ABC" method. Choices are "quantity", "quantity and
-configuration", "residual error" and "odds ratio" for the 'MCMC' method.
-Default is "number of locations and total distance"</p></td>
-    </tr>
-    <tr>
       <th>output_frequency</th>
       <td><p>sets when outputs occur either ('year', 'month',
 'week', 'day', 'time step', or 'every_n_steps')</p></td>
@@ -662,6 +646,16 @@ Defaults if FALSE.</p></td>
       <th>output_folder_path</th>
       <td><p>this is the full path with either / or \ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")</p></td>
+    </tr>
+    <tr>
+      <th>use_distance</th>
+      <td><p>Boolean if you want to compare distance between
+simulations and observations. Default is FALSE.</p></td>
+    </tr>
+    <tr>
+      <th>use_rmse</th>
+      <td><p>Boolean if you want to calibrate based on rmse. This is
+useful if you have very good population level observations. Default is FALSE.</p></td>
     </tr>
     </table>
 

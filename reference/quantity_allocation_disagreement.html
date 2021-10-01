@@ -140,8 +140,9 @@ dataset to a reference raster datatset.</p>
     <pre class="usage"><span class='fu'>quantity_allocation_disagreement</span><span class='op'>(</span>
   <span class='va'>reference</span>,
   <span class='va'>comparison</span>,
-  configuration <span class='op'>=</span> <span class='cn'>FALSE</span>,
-  mask <span class='op'>=</span> <span class='cn'>NULL</span>
+  use_configuration <span class='op'>=</span> <span class='cn'>FALSE</span>,
+  mask <span class='op'>=</span> <span class='cn'>NULL</span>,
+  use_distance <span class='op'>=</span> <span class='cn'>FALSE</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -149,22 +150,30 @@ dataset to a reference raster datatset.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>reference</th>
-      <td><p>the binary (0 or 1) raster with ground truth data</p></td>
+      <td><p>the raster with ground truth data. For all metrics expect
+RMSE these values are reclassified with values &gt; 1 becoming 1, values &lt; 1
+going to 0, and NA values staying NA.</p></td>
     </tr>
     <tr>
       <th>comparison</th>
-      <td><p>the binary (0 or 1) raster with simulated data to be
-compared to ground truth</p></td>
+      <td><p>the raster with simulated data. For all metrics expect
+RMSE these values are reclassified with values &gt; 1 becoming 1, values &lt; 1
+going to 0.</p></td>
     </tr>
     <tr>
-      <th>configuration</th>
-      <td><p>Set to true if you want to use configuration
+      <th>use_configuration</th>
+      <td><p>Boolean if you want to use configuration
 disagreement for comparing model runs. Default is FALSE.</p></td>
     </tr>
     <tr>
       <th>mask</th>
       <td><p>Used to provide a mask to remove 0's that are not true
 negatives from comparisons.</p></td>
+    </tr>
+    <tr>
+      <th>use_distance</th>
+      <td><p>Boolean if you want to compare distance between
+simulations and observations. Default is FALSE.</p></td>
     </tr>
     </table>
 
