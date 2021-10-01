@@ -53,7 +53,8 @@ Suggests:
     rmarkdown,
     qpdf,
     remotes,
-    rcmdcheck
+    rcmdcheck,
+    covr
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1
