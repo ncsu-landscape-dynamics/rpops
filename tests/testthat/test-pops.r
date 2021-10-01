@@ -20,7 +20,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                file_exists_error, fixed = TRUE)
-  
+
  expect_error(pops(
     infected_file =  system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
     host_file =  host_file,
@@ -28,14 +28,14 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
     parameter_means = parameter_means,
     parameter_cov_matrix = parameter_cov_matrix),
     raster_type_error, fixed = TRUE)
-  
+
   expect_error(pops(infected_file =  infected_file,
                     host_file = "",
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                file_exists_error)
-  
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =
                       system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
