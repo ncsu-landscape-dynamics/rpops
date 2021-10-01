@@ -7,9 +7,10 @@ test_that(
   ref <- terra::rast(matrix(1, nrow = 2, ncol = 2))
   comparison <- comp
   reference <- ref
-  configuration <- FALSE
+  use_configuration <- FALSE
   mask <- NULL
-  data <- quantity_allocation_disagreement(ref, comp, configuration, mask)
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask)
+
   expect_equal(data$quantity_disagreement, 0)
   expect_equal(data$allocation_disagreement, 0)
   expect_equal(data$total_disagreement, 0)
@@ -19,7 +20,7 @@ test_that(
   expect_equal(data$accuracy, 1)
   expect_equal(data$precision, 1)
   expect_equal(data$recall, 1)
-  expect_equal(data$specificiity, NaN)
+  expect_equal(data$specificity, 0)
 })
 
 test_that("Check that quantity disagreement, total disagreement, ommision, and
@@ -29,9 +30,9 @@ test_that("Check that quantity disagreement, total disagreement, ommision, and
   ref <- terra::rast(matrix(1, nrow = 2, ncol = 2))
   comparison <- comp
   reference <- ref
-  configuration <- FALSE
+  use_configuration <- FALSE
   mask <- NULL
-  data <- quantity_allocation_disagreement(ref, comp, configuration, mask)
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask)
   expect_equal(data$quantity_disagreement, 4)
   expect_equal(data$allocation_disagreement, 0)
   expect_equal(data$total_disagreement, 4)
@@ -39,9 +40,9 @@ test_that("Check that quantity disagreement, total disagreement, ommision, and
   expect_equal(data$false_positive, 0)
   expect_equal(data$odds_ratio, 0)
   expect_equal(data$accuracy, 0)
-  expect_equal(data$precision, NaN)
+  expect_equal(data$precision, 0)
   expect_equal(data$recall, 0)
-  expect_equal(data$specificiity, NaN)
+  expect_equal(data$specificity, 0)
 })
 
 test_that("Check that quantity disagreement, total disagreement,
@@ -51,9 +52,9 @@ test_that("Check that quantity disagreement, total disagreement,
   ref <- terra::rast(matrix(0, nrow = 2, ncol = 2))
   comparison <- comp
   reference <- ref
-  configuration <- FALSE
+  use_configuration <- FALSE
   mask <- NULL
-  data <- quantity_allocation_disagreement(ref, comp, configuration, mask)
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask)
   expect_equal(data$quantity_disagreement, 4)
   expect_equal(data$allocation_disagreement, 0)
   expect_equal(data$total_disagreement, 4)
@@ -62,8 +63,8 @@ test_that("Check that quantity disagreement, total disagreement,
   expect_equal(data$odds_ratio, 0)
   expect_equal(data$accuracy, 0)
   expect_equal(data$precision, 0)
-  expect_equal(data$recall, NaN)
-  expect_equal(data$specificiity, 0)
+  expect_equal(data$recall, 0)
+  expect_equal(data$specificity, 0)
 })
 
 test_that("Check that allocation disgreement and total disagreement are 4 and
@@ -78,9 +79,9 @@ test_that("Check that allocation disgreement and total disagreement are 4 and
   ref[2, 2] <- 1
   comparison <- comp
   reference <- ref
-  configuration <- FALSE
+  use_configuration <- FALSE
   mask <- NULL
-  data <- quantity_allocation_disagreement(ref, comp, configuration, mask)
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask)
   expect_equal(data$quantity_disagreement, 0)
   expect_equal(data$allocation_disagreement, 4)
   expect_equal(data$total_disagreement, 4)
@@ -90,7 +91,7 @@ test_that("Check that allocation disgreement and total disagreement are 4 and
   expect_equal(data$accuracy, 0)
   expect_equal(data$precision, 0)
   expect_equal(data$recall, 0)
-  expect_equal(data$specificiity, 0)
+  expect_equal(data$specificity, 0)
 })
 
 test_that(
@@ -106,9 +107,9 @@ test_that(
   ref[2, 2] <- 1
   comparison <- comp
   reference <- ref
-  configuration <- FALSE
+  use_configuration <- FALSE
   mask <- NULL
-  data <- quantity_allocation_disagreement(ref, comp, configuration, mask)
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask)
   expect_equal(data$quantity_disagreement, 0)
   expect_equal(data$allocation_disagreement, 2)
   expect_equal(data$total_disagreement, 2)
@@ -118,7 +119,7 @@ test_that(
   expect_equal(data$accuracy, 0.5)
   expect_equal(data$precision, 0.5)
   expect_equal(data$recall, 0.5)
-  expect_equal(data$specificiity, 0.5)
+  expect_equal(data$specificity, 0.5)
 })
 
 test_that("Check that configuration disagreement works", {
@@ -130,9 +131,9 @@ test_that("Check that configuration disagreement works", {
   ref[1, 2] <- 1
   comparison <- comp
   reference <- ref
-  configuration <- TRUE
+  use_configuration <- TRUE
   mask <- NULL
-  data <- quantity_allocation_disagreement(ref, comp, configuration, mask)
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask)
   expect_equal(data$quantity_disagreement, 0)
   expect_equal(data$allocation_disagreement, 0)
   expect_equal(data$total_disagreement, 0)
@@ -152,20 +153,19 @@ test_that("Check that configuration disagreement works", {
   mask[2, 2] <- NA
   comparison <- comp
   reference <- ref
-  configuration <- TRUE
+  use_configuration <- TRUE
 
-  data <- quantity_allocation_disagreement(ref, comp, configuration, mask)
-
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask)
   expect_equal(data$quantity_disagreement, 0)
   expect_equal(data$allocation_disagreement, 0)
   expect_equal(data$total_disagreement, 0)
   expect_equal(data$false_negative, 0)
   expect_equal(data$false_positive, 0)
   expect_equal(data$odds_ratio, 1)
-  expect_equal(data$configuration_disagreement, 0.25)
+  expect_equal(data$configuration_disagreement, 0)
 
 
-  data <- quantity_allocation_disagreement(ref, comp, configuration)
+  data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask = NULL)
   expect_equal(data$quantity_disagreement, 0)
   expect_equal(data$allocation_disagreement, 2)
   expect_equal(data$total_disagreement, 2)

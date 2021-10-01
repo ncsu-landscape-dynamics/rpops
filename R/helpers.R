@@ -173,7 +173,7 @@ get_all_infected <- function(rast, direction = 4) {
 # returns the foci of infestation for a spatRaster Object
 get_foci <- function(rast) {
   indexes <- get_all_infected(rast)
-  center <- data.frame(i = floor(mean(indexes$i)), j = floor(mean(indexes$j)))
+  center <- data.frame(i = round(mean(indexes$i), digits = 0), j = round(mean(indexes$j, digits = 0)))
   return(center)
 }
 

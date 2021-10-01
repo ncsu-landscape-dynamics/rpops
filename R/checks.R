@@ -31,9 +31,6 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     } else {
       r <- terra::rast(x)
     }
-    r <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
-      right = NA
-    )
   }
 
   if (checks_passed) {
@@ -78,13 +75,6 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     } else {
       r <- terra::rast(x)
     }
-    r2 <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
-      right = NA
-    )
-    if (!(terra::ext(r2) == terra::ext(r))) {
-      terra::ext(r2) <- terra::ext(r)
-    }
-    r <- r2
   }
 
   if (checks_passed && !(terra::ext(x2) == terra::ext(r))) {

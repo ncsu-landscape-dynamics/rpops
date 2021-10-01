@@ -7,21 +7,28 @@
 quantity_allocation_disagreement(
   reference,
   comparison,
-  configuration = FALSE,
-  mask = NULL
+  use_configuration = FALSE,
+  mask = NULL,
+  use_distance = FALSE
 )
 }
 \arguments{
-\item{reference}{the binary (0 or 1) raster with ground truth data}
+\item{reference}{the raster with ground truth data. For all metrics expect
+RMSE these values are reclassified with values > 1 becoming 1, values < 1
+going to 0, and NA values staying NA.}
 
-\item{comparison}{the binary (0 or 1) raster with simulated data to be
-compared to ground truth}
+\item{comparison}{the raster with simulated data. For all metrics expect
+RMSE these values are reclassified with values > 1 becoming 1, values < 1
+going to 0.}
 
-\item{configuration}{Set to true if you want to use configuration
+\item{use_configuration}{Boolean if you want to use configuration
 disagreement for comparing model runs. Default is FALSE.}
 
 \item{mask}{Used to provide a mask to remove 0's that are not true
 negatives from comparisons.}
+
+\item{use_distance}{Boolean if you want to compare distance between
+simulations and observations. Default is FALSE.}
 }
 \value{
 A data frame with spatial configuration metrics. Particularly
