@@ -16,7 +16,6 @@
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom aws.s3 head_object save_object
-#' @importFrom folderfun setff
 #'
 #' @return config list with all data ready for pops C++ or error message
 #'
