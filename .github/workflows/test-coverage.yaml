@@ -25,13 +25,6 @@ jobs:
           rm '/usr/local/bin/gfortran'
           brew install pkg-config gdal proj geos
 
-      - name: Install system dependencies
-        if: runner.os == 'macOS'
-        run: |
-          # install spatial dependencies
-          rm '/usr/local/bin/gfortran'
-          brew install pkg-config gdal proj geos
-
       - name: Install renv
         shell: Rscript {0}
         run: |
@@ -47,4 +40,6 @@ jobs:
 
       - name: Test coverage
         run: covr::codecov()
-        shell: Rscript {0}
+        shell: |
+          renv::restore()
+          Rscript {0}
