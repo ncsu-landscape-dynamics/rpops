@@ -102,10 +102,10 @@
     },
     "callr": {
       "Package": "callr",
-      "Version": "3.7.0",
+      "Version": "3.3.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "461aa75a11ce2400245190ef5d3995df"
+      "Hash": "b3c10a6b94482a227ba11e245c194884"
     },
     "cli": {
       "Package": "cli",
