@@ -1,8 +1,8 @@
-#' Compares quantity and allocation disagreement of two raster datasets
+#' Compares quantity and allocation disagreement of two raster data sets
 #'
 #' Uses quantity and allocation disagreement metrics by Pontius and Millones
-#' (2014) and omission and comission errors of comparing a modeled raster
-#' dataset to a reference raster datatset.
+#' (2014) and omission and commission errors of comparing a modeled raster
+#' data set to a reference raster data set.
 #'
 #' @param reference the raster with ground truth data. For all metrics expect
 #' RMSE these values are reclassified with values > 1 becoming 1, values < 1
@@ -22,7 +22,7 @@
 #' @importFrom Metrics rmse
 #'
 #' @return A data frame with spatial configuration metrics. Particularly
-#' quantity, allocation, and total disagreement,  omission and comission, and
+#' quantity, allocation, and total disagreement,  omission and commission, and
 #' directional disagreement where directional disagreement.
 #'
 #' @export
@@ -184,7 +184,7 @@ quantity_allocation_disagreement <-
     obs_points <- obs_points[obs_points$data > 0]
     actual <- extract(ref, obs_points)
     predicted <- extract(comp, obs_points)
-    RMSE <- Metrics::rmse(actual[,2], predicted[, 2])
+    RMSE <- Metrics::rmse(actual[, 2], predicted[, 2])
     distance_difference <- 0
 
     if (use_distance) {

@@ -288,7 +288,7 @@ that can't be managed in the auto_manage function.}
 
 \item{write_outputs}{Either c("all_simulations", "summary_outputs", or
 "None"). If not "None" output folder path must be provided. all_simulations
-doesn't currently work and is a place holder for future developement.}
+doesn't currently work and is a place holder for future development.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
@@ -301,8 +301,8 @@ A dynamic species distribution model for pest or pathogen spread in forest
 or agricultural ecosystems. The model is process based meaning that it uses
 understanding of the effect of weather and other environmental factors on
 reproduction and survival of the pest/pathogen in order to forecast spread
-of the pest/pathogen into the future. Run multiple stochasitic simulations,
-propogating uncertainty in parameters, initial conditions, and drivers.
+of the pest/pathogen into the future. Run multiple stochastic simulations,
+propagating uncertainty in parameters, initial conditions, and drivers.
 The model is process based meaning that it uses understanding of the effect
 of weather on reproduction and survival of the pest/pathogen in order to
 forecast spread of the pest/pathogen into the future.

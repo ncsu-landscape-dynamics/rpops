@@ -19,8 +19,8 @@
 #' if modeling terrestrial species).
 #' @param parameter_means the parameter means from the abc calibration function
 #' (posterior means)
-#' @param parameter_cov_matrix the parameter covariance matrix from the abc
-#' calibration function (posterior covairance matrix)
+#' @param parameter_cov_matrix the parameter covariance matrix from the ABC
+#' calibration function (posterior covariance matrix)
 #' @param write_outputs Either c("summary_outputs", or "None"). If not
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
@@ -316,7 +316,8 @@ validate <- function(infected_years_file,
             ad$points_true_negative <-
               nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
             ad$points_total_obs <-
-              ad$points_true_negative + ad$points_true_positive + ad$points_false_negative + ad$points_false_positive
+              ad$points_true_negative + ad$points_true_positive +
+              ad$points_false_negative + ad$points_false_positive
             ad$points_accuracy <-
               (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
             ad$points_precision <-
@@ -325,7 +326,6 @@ validate <- function(infected_years_file,
               ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
             ad$points_specificiity <-
               ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
-
           }
           ad$ouput <- q
           ad

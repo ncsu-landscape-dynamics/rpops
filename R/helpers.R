@@ -9,11 +9,14 @@ frequency_error <-
 raster_type_error <-
   "file is not one of '.grd', '.tif', '.img', or '.vrt'"
 extent_error <-
-  "Extents of input rasters do not match. Ensure that all of your input rasters have the same extent"
+  "Extents of input rasters do not match. Ensure that all of your input rasters have the same
+extent"
 resolution_error <-
-  "Resolution of input rasters do not match. Ensure that all of your input rasters have the same resolution"
+  "Resolution of input rasters do not match. Ensure that all of your input rasters have the same
+resolution"
 crs_error <-
-  "Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input rasters have the same crs"
+  "Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input
+rasters have the same crs"
 treatment_length_error <-
   "Length of list for treatment dates and treatments_file must be equal"
 pesticide_length_error <-
@@ -173,7 +176,8 @@ get_all_infected <- function(rast, direction = 4) {
 # returns the foci of infestation for a spatRaster Object
 get_foci <- function(rast) {
   indexes <- get_all_infected(rast)
-  center <- data.frame(i = round(mean(indexes$i), digits = 0), j = round(mean(indexes$j, digits = 0)))
+  center <-
+    data.frame(i = round(mean(indexes$i), digits = 0), j = round(mean(indexes$j, digits = 0)))
   return(center)
 }
 

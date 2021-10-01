@@ -4,8 +4,8 @@
 #' or agricultural ecosystems. The model is process based meaning that it uses
 #' understanding of the effect of weather and other environmental factors on
 #' reproduction and survival of the pest/pathogen in order to forecast spread
-#' of the pest/pathogen into the future. Run multiple stochasitic simulations,
-#' propogating uncertainty in parameters, initial conditions, and drivers.
+#' of the pest/pathogen into the future. Run multiple stochastic simulations,
+#' propagating uncertainty in parameters, initial conditions, and drivers.
 #' The model is process based meaning that it uses understanding of the effect
 #' of weather on reproduction and survival of the pest/pathogen in order to
 #' forecast spread of the pest/pathogen into the future.
@@ -17,7 +17,7 @@
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
 #' @param write_outputs Either c("all_simulations", "summary_outputs", or
 #' "None"). If not "None" output folder path must be provided. all_simulations
-#' doesn't currently work and is a place holder for future developement.
+#' doesn't currently work and is a place holder for future development.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
@@ -500,7 +500,7 @@ pops_multirun <- function(infected_file,
 
     raster_stacks2 <- do.call(cbind, raster_stacks)
     raster_stacks2 <-
-      array(raster_stacks2, dim = c( dim(raster_stacks[[1]]), length(raster_stacks)))
+      array(raster_stacks2, dim = c(dim(raster_stacks[[1]]), length(raster_stacks)))
     sim_mean <-
       round(apply(raster_stacks2, c(1, 2), mean, na.rm = TRUE), digits = 0)
     sim_sd <- apply(raster_stacks2, c(1, 2), sd, na.rm = TRUE)
@@ -627,7 +627,7 @@ pops_multirun <- function(infected_file,
     file_name <- paste(config$output_folder_path, "simulation_max.tif", sep = "")
     terra::writeRaster(simulation_max_stack, file_name, overwrite = TRUE)
     file_name <- paste(config$output_folder_path, "multirun_outputs.rdata", sep = "")
-    save(outputs, file = ffOut())
+    save(outputs, file = file_name)
   }
 
   return(outputs)
