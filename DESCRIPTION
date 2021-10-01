@@ -53,6 +53,7 @@ Suggests:
     qpdf,
     remotes,
     rcmdcheck,
+    markdown,
     covr
 LinkingTo: 
     Rcpp

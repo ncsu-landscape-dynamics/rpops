@@ -14,56 +14,58 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
   parameter_means <- c(0, 21, 1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
-  expect_equal(pops(infected_file = "",
+  expect_error(pops(infected_file = "",
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error)
-  expect_equal(pops(
+               file_exists_error, fixed = TRUE)
+  
+ expect_error(pops(
     infected_file =  system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
     host_file =  host_file,
     total_populations_file =  host_file,
     parameter_means = parameter_means,
     parameter_cov_matrix = parameter_cov_matrix),
-    raster_type_error)
-  expect_equal(pops(infected_file =  infected_file,
+    raster_type_error, fixed = TRUE)
+  
+  expect_error(pops(infected_file =  infected_file,
                     host_file = "",
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                file_exists_error)
-  expect_equal(pops(infected_file =  infected_file,
+  
+  expect_error(pops(infected_file =  infected_file,
                     host_file =
-                      system.file("extdata", "simple2x2", "infected.csv",
-                                  package = "PoPS"),
+                      system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               raster_type_error)
-  expect_equal(pops(infected_file =  infected_file,
+               raster_type_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file = "",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error)
-  expect_equal(pops(infected_file =  infected_file,
+               file_exists_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =
                       system.file("extdata", "simple2x2", "infected.csv",
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               raster_type_error)
-  expect_equal(pops(infected_file =  infected_file,
+               raster_type_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     use_lethal_temperature = TRUE,
                     temperature_file = "",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error)
-  expect_equal(pops(infected_file =  infected_file,
+               file_exists_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     use_lethal_temperature = TRUE,
@@ -72,16 +74,16 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               raster_type_error)
-  expect_equal(pops(infected_file =  infected_file,
+               raster_type_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     temp = TRUE,
                     temperature_coefficient_file = "",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error)
-  expect_equal(pops(infected_file =  infected_file,
+               file_exists_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     temp = TRUE,
@@ -90,16 +92,16 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               raster_type_error)
-  expect_equal(pops(infected_file =  infected_file,
+               raster_type_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     precip = TRUE,
                     precipitation_coefficient_file = "",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error)
-  expect_equal(pops(infected_file =  infected_file,
+               file_exists_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     precip = TRUE,
@@ -108,16 +110,16 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               raster_type_error)
-  expect_equal(pops(infected_file =  infected_file,
+               raster_type_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     management = TRUE,
                     treatments_file = "",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error)
-  expect_equal(pops(infected_file =  infected_file,
+               file_exists_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     management = TRUE,
@@ -126,8 +128,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               raster_type_error)
-
+               raster_type_error, fixed = TRUE)
 })
 
 test_that("Model stops if time and date parameters are of the wrong type and/or
@@ -145,42 +146,41 @@ test_that("Model stops if time and date parameters are of the wrong type and/or
   parameter_means <- c(0, 21, 1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
-  expect_equal(pops(infected_file = infected_file,
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     time_step = "two",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               time_step_error)
-  expect_equal(pops(infected_file = infected_file,
+               time_step_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     end_date = "two",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-              date_format_error)
-  expect_equal(pops(infected_file = infected_file,
+              date_format_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     end_date = 156,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-              date_format_error)
-  expect_equal(pops(infected_file = infected_file,
+              date_format_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     start_date = "five",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-              date_format_error)
-  expect_equal(pops(infected_file = infected_file,
+              date_format_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     start_date = 19,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-              date_format_error)
-
+              date_format_error, fixed = TRUE)
 })
 
 test_that("Model stops if kernel is of the wrong type and/or dimension", {
@@ -198,22 +198,22 @@ test_that("Model stops if kernel is of the wrong type and/or dimension", {
             parameter_means <- c(0, 21, 1, 500, 0, 0)
             parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
-            expect_equal(
+            expect_error(
               pops(infected_file = infected_file,
                    host_file = host_file,
                    total_populations_file = host_file,
                    parameter_means = parameter_means,
                    natural_kernel_type = "none",
                    parameter_cov_matrix = parameter_cov_matrix),
-              natural_kernel_error)
-            expect_equal(
+              natural_kernel_error, fixed = TRUE)
+            expect_error(
               pops(infected_file = infected_file,
                    host_file = host_file,
                    total_populations_file = host_file,
                    parameter_means = parameter_means,
                    anthropogenic_kernel_type = "none",
                    parameter_cov_matrix = parameter_cov_matrix),
-              anthropogenic_kernel_error)
+              anthropogenic_kernel_error, fixed = TRUE)
           })
 
 test_that("Input raster resolutions, extents, and crs all match", {
@@ -230,29 +230,29 @@ test_that("Input raster resolutions, extents, and crs all match", {
   parameter_means <- c(0, 21, 1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
-  expect_equal(pops(infected_file = infected_file,
+  expect_error(pops(infected_file = infected_file,
                     host_file =
                       system.file("extdata", "simple5x5", "total_plants.tif", package = "PoPS"),
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
-  expect_equal(pops(infected_file = infected_file,
+               extent_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file =
                       system.file("extdata", "simple5x5", "total_plants.tif",
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
-  expect_equal(pops(infected_file =
+               extent_error, fixed = TRUE)
+  expect_error(pops(infected_file =
                       system.file("extdata", "simple5x5", "total_plants.tif", package = "PoPS"),
                     host_file = host_file,
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
-  expect_equal(pops(infected_file = infected_file,
+               extent_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     use_lethal_temperature = TRUE,
@@ -261,8 +261,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_extent.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
-  expect_equal(pops(infected_file = infected_file,
+               extent_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -271,8 +271,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_extent.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
-  expect_equal(pops(infected_file = infected_file,
+               extent_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     precip = TRUE,
@@ -281,8 +281,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_extent.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
-  expect_equal(pops(infected_file = infected_file,
+               extent_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -294,8 +294,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_extent.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
-  expect_equal(pops(infected_file = infected_file,
+               extent_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     management = TRUE,
@@ -304,81 +304,81 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_extent.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               extent_error)
+               extent_error, fixed = TRUE)
 
-  expect_equal(pops(infected_file = infected_file,
+  expect_error(pops(infected_file = infected_file,
                     host_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_res.tif", package = "PoPS"),
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_xres.tif", package = "PoPS"),
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_yres.tif", package = "PoPS"),
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_res.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_xres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_yres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file =
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_res.tif", package = "PoPS"),
                     host_file = host_file,
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file =
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_xres.tif", package = "PoPS"),
                     host_file = host_file,
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file =
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file =
                       system.file("extdata", "simple2x2",
                                   "total_plants_diff_yres.tif", package = "PoPS"),
                     host_file = host_file,
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     use_lethal_temperature = TRUE,
@@ -387,8 +387,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_res.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     use_lethal_temperature = TRUE,
@@ -397,8 +397,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_xres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     use_lethal_temperature = TRUE,
@@ -407,8 +407,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_yres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -417,8 +417,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_res.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp  = TRUE,
@@ -427,8 +427,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_xres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -437,8 +437,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_yres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     precip = TRUE,
@@ -447,8 +447,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_res.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     precip  = TRUE,
@@ -457,8 +457,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_xres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     precip = TRUE,
@@ -467,8 +467,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_yres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -480,8 +480,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_res.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -493,8 +493,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_xres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -506,8 +506,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_yres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     management = TRUE,
@@ -516,8 +516,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_res.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     management = TRUE,
@@ -526,8 +526,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_xres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
-  expect_equal(pops(infected_file = infected_file,
+               resolution_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     management = TRUE,
@@ -536,33 +536,33 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_yres.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               resolution_error)
+               resolution_error, fixed = TRUE)
 
-  expect_equal(pops(infected_file = infected_file,
+  expect_error(pops(infected_file = infected_file,
                     host_file =
                       system.file("extdata", "simple2x2",
                                   "critical_temp_diff_crs.tif", package = "PoPS"),
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
-  expect_equal(pops(infected_file = infected_file,
+               crs_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file =
                       system.file("extdata", "simple2x2",
                                   "critical_temp_diff_crs.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
-  expect_equal(pops(infected_file =
+               crs_error, fixed = TRUE)
+  expect_error(pops(infected_file =
                       system.file("extdata", "simple2x2",
                                   "critical_temp_diff_crs.tif", package = "PoPS"),
                     host_file = host_file,
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
-  expect_equal(pops(infected_file = infected_file,
+               crs_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     use_lethal_temperature = TRUE,
@@ -571,8 +571,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_crs.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
-  expect_equal(pops(infected_file = infected_file,
+               crs_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -581,8 +581,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_crs.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
-  expect_equal(pops(infected_file = infected_file,
+               crs_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     precip = TRUE,
@@ -591,8 +591,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   "critical_temp_diff_crs.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
-  expect_equal(pops(infected_file = infected_file,
+               crs_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     temp = TRUE,
@@ -606,8 +606,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
-  expect_equal(pops(infected_file = infected_file,
+               crs_error, fixed = TRUE)
+  expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     management = TRUE,
@@ -617,7 +617,7 @@ test_that("Input raster resolutions, extents, and crs all match", {
                                   package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               crs_error)
+               crs_error, fixed = TRUE)
 
 })
 
@@ -1891,57 +1891,40 @@ test_that(
          end_date = end_date)
   expect_equal(length(data$infected), 52)
 
-  data <-
-    pops(output_frequency = "day",
-         time_step = "week",
-         treatment_dates = start_date,
-         infected_file = infected_file,
-         host_file = host_file,
-         total_populations_file = host_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         start_date = start_date,
-         end_date = end_date)
-  expect_equal(data, output_frequency_error)
+  expect_error(pops(output_frequency = "day",
+                    time_step = "week",
+                    treatment_dates = start_date,
+                    infected_file = infected_file,
+                    host_file = host_file,
+                    total_populations_file = host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    start_date = start_date,
+                    end_date = end_date), output_frequency_error)
 
-  data <-
-    pops(output_frequency = "day",
-         time_step = "month",
-         treatment_dates = start_date,
-         infected_file = infected_file,
-         host_file = host_file,
-         total_populations_file = host_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         start_date = start_date,
-         end_date = end_date)
-  expect_equal(data, output_frequency_error)
+  expect_error(pops(output_frequency = "day",
+                    time_step = "month",
+                    treatment_dates = start_date,
+                    infected_file = infected_file,
+                    host_file = host_file,
+                    total_populations_file = host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    start_date = start_date,
+                    end_date = end_date), output_frequency_error)
 
-  data <- pops(output_frequency = "week",
-               time_step = "month",
-               treatment_dates = start_date,
-               infected_file = infected_file,
-               host_file = host_file,
-               total_populations_file = host_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               start_date = start_date,
-               end_date = end_date)
-  expect_equal(data, output_frequency_error)
+  expect_error(pops(output_frequency = "week",
+                    time_step = "month",
+                    treatment_dates = start_date,
+                    infected_file = infected_file,
+                    host_file = host_file,
+                    total_populations_file = host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    start_date = start_date,
+                    end_date = end_date), output_frequency_error)
 
   data <- pops(output_frequency = "day",
-               time_step = "day",
-               treatment_dates = start_date,
-               infected_file = infected_file,
-               host_file = host_file,
-               total_populations_file = host_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               start_date = start_date,
-               end_date = end_date)
-  expect_equal(length(data$infected), 364)
-
-  data <- pops(output_frequency = "time_step",
                time_step = "day",
                treatment_dates = start_date,
                infected_file = infected_file,

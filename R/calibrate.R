@@ -260,7 +260,7 @@ calibrate <- function(infected_years_file,
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
-    return(config$failure)
+    stop(config$failure)
   }
 
   # set the parameter function to only need the parameters that change so that

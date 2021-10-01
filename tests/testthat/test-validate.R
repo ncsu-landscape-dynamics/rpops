@@ -1,5 +1,26 @@
 context("test-validate")
 
+test_that("Model stops if files don't exist or aren't the correct extension", {
+  infected_file <-
+    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  infected_years_file <-
+    system.file("extdata", "simple20x20", "infected_years.tif",
+                package = "PoPS"
+    )
+  host_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+
+  expect_error(validate(infected_years_file = infected_years_file,
+                        infected_file = "",
+                        host_file =  host_file,
+                        total_populations_file =  host_file,
+                        parameter_means = parameter_means,
+                        parameter_cov_matrix = parameter_cov_matrix),
+               "file does not exist")
+})
+
 test_that(
   "Validation has correctly formatted returns with multiple output
   comparisons", {
