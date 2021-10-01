@@ -190,7 +190,7 @@ auto_manage <- function(infected_files,
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
-    return(config$failure)
+    stop(config$failure)
   }
 
   infected_speci <- infected

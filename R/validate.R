@@ -47,7 +47,7 @@
 #' @export
 #'
 validate <- function(infected_years_file,
-                     number_of_iterations,
+                     number_of_iterations = 10,
                      number_of_cores = NA,
                      parameter_means,
                      parameter_cov_matrix,
@@ -182,7 +182,7 @@ validate <- function(infected_years_file,
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
-    return(config$failure)
+    stop(config$failure)
   }
 
   i <- NULL
