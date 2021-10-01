@@ -18,9 +18,9 @@ test_that("Get all infected returns all infected locations", {
                 package = "PoPS")
   infected <- terra::rast(infected_file)
   test <- get_all_infected(infected, direction = 4)
-  expect_equal(nrow(test), 393)
-  expect_equal(unique(test$group), 1)
-  expect_equal(unique(test$group_size), 393)
+  expect_equal(nrow(test), 4)
+  expect_equal(length(unique(test$group)), 2)
+  expect_equal(max(test$group_size), 3)
 
   ## tests with multi year raster
   infected_file <-
