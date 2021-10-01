@@ -14,9 +14,6 @@
 #' the calibration to converge at least 10
 #' @param number_of_cores enter how many cores you want to use (default = NA).
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
-#' @param success_metric Choose which success metric to use for calibration.
-#' Choices are "quantity", "quantity and configuration", "residual error" and
-#' "odds ratio". Default is "quantity"
 #' @param mask Raster file used to provide a mask to remove 0's that are not
 #' true negatives from comparisons (e.g. mask out lakes and oceans from statics
 #' if modeling terrestrial species).
@@ -30,18 +27,23 @@
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #' @param point_file  file for point comparison if not provided skips
 #' calculations
+#' @param use_distance Boolean if you want to compare distance between
+#' simulations and observations. Default is FALSE.
+#' @param use_configuration Boolean if you want to use configuration
+#' disagreement for comparing model runs. Default is FALSE.
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
-#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
+#' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
+#' @importFrom Metrics rmse
+#' @importFrom utils write.csv
 #'
-#' @return a dataframe of the variables saved and their success metrics for
-#' each run
+#' @return a data frame of statistical measures of model performance.
 #' @export
 #'
 validate <- function(infected_years_file,
@@ -83,7 +85,6 @@ validate <- function(infected_years_file,
                      pesticide_duration = 0,
                      pesticide_efficacy = 1.0,
                      mask = NULL,
-                     success_metric = "quantity",
                      output_frequency = "year",
                      output_frequency_n = 1,
                      movements_file = "",
@@ -105,7 +106,9 @@ validate <- function(infected_years_file,
                      exposed_file = "",
                      write_outputs = "None",
                      output_folder_path = "",
-                     point_file = "") {
+                     point_file = "",
+                     use_distance = FALSE,
+                     use_configuration = FALSE) {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -142,7 +145,6 @@ validate <- function(infected_years_file,
   config$pesticide_duration <- pesticide_duration
   config$pesticide_efficacy <- pesticide_efficacy
   config$mask <- mask
-  config$success_metric <- success_metric
   config$output_frequency <- output_frequency
   config$output_frequency_n <- output_frequency_n
   config$movements_file <- movements_file
@@ -174,6 +176,8 @@ validate <- function(infected_years_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
   config$point_file <- point_file
+  config$use_configuration <- use_configuration
+  config$use_distance <- use_distance
 
   config <- configuration(config)
 
@@ -279,23 +283,24 @@ validate <- function(infected_years_file,
           q = seq_len(length(data$infected)), .combine = rbind,
           .packages = c("terra", "PoPS")
         ) %do% {
-          # need to assign reference, comp_year, and mask in inner loop since
+          # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers and pointers using %dopar%
-          comp_year <- terra::rast(config$infected_file)
+          comparison <- terra::rast(config$infected_file)
           reference <- terra::rast(config$infected_file)
-          terra::values(comp_year) <- data$infected[[q]]
+          terra::values(comparison) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
           mask <- terra::rast(config$infected_file)
           terra::values(mask) <- config$mask_matrix
           ad <-
             quantity_allocation_disagreement(reference,
-                                             comp_year,
-                                             config$configuration,
-                                             mask)
+                                             comparison,
+                                             use_configuration = config$use_configuration,
+                                             mask = mask,
+                                             use_distance = config$use_distance)
           if (file.exists(config$point_file)) {
-            obs_data <- vect(config$point_file)
-            obs_data <- terra::project(obs_data, comp_year)
-            s <- extract(comp_year, obs_data)
+            obs_data <- terra::vect(config$point_file)
+            obs_data <- terra::project(obs_data, comparison)
+            s <- extract(comparison, obs_data)
             names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
             s <- s[2]
             obs_data <- cbind(obs_data, s)
@@ -311,15 +316,15 @@ validate <- function(infected_years_file,
             ad$points_true_negative <-
               nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
             ad$points_total_obs <-
-              points_true_negative + points_true_positive + points_false_negative + points_false_positive
+              ad$points_true_negative + ad$points_true_positive + ad$points_false_negative + ad$points_false_positive
             ad$points_accuracy <-
-              (points_true_negative + points_true_positive) / points_total_obs
+              (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
             ad$points_precision <-
-              points_true_positive / (points_true_positive + points_false_positive)
+              ad$points_true_positive / (ad$points_true_positive + ad$points_false_positive)
             ad$points_recall <-
-              points_true_positive / (points_true_positive + points_false_negative)
+              ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
             ad$points_specificiity <-
-              points_true_negative / (points_true_negative + points_false_positive)
+              ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
 
           }
           ad$ouput <- q

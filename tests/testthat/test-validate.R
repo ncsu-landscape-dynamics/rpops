@@ -72,7 +72,6 @@ test_that(
     pesticide_duration <- c(0)
     pesticide_efficacy <- 1.0
     mask <- NULL
-    success_metric <- "quantity and configuration"
     output_frequency <- "week"
     output_frequency_n <- 1
     movements_file <- ""
@@ -140,7 +139,6 @@ test_that(
       pesticide_duration,
       pesticide_efficacy,
       mask,
-      success_metric,
       output_frequency,
       output_frequency_n,
       movements_file,
@@ -167,7 +165,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 12)
     data <- outputs[[1]]
-    expect_length(data, 20)
+    expect_length(data, 22)
     expect_vector(data$quantity_disagreement,
       size = number_of_iterations
     )
@@ -269,7 +267,6 @@ test_that(
     pesticide_duration <- c(0)
     pesticide_efficacy <- 1.0
     mask <- NULL
-    success_metric <- "quantity and configuration"
     output_frequency <- "year"
     movements_file <- ""
     use_movements <- FALSE
@@ -336,7 +333,6 @@ test_that(
       pesticide_duration,
       pesticide_efficacy,
       mask,
-      success_metric,
       output_frequency,
       output_frequency_n,
       movements_file,
@@ -363,7 +359,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 20)
+    expect_length(data, 22)
     expect_vector(data$quantity_disagreement,
                   size = number_of_iterations
     )
@@ -465,7 +461,6 @@ test_that(
     pesticide_duration <- c(0)
     pesticide_efficacy <- 1.0
     mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
-    success_metric <- "quantity and configuration"
     output_frequency <- "year"
     movements_file <- ""
     use_movements <- FALSE
@@ -532,7 +527,6 @@ test_that(
       pesticide_duration,
       pesticide_efficacy,
       mask,
-      success_metric,
       output_frequency,
       output_frequency_n,
       movements_file,
@@ -559,7 +553,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 20)
+    expect_length(data, 22)
     expect_vector(data$quantity_disagreement,
                   size = number_of_iterations
     )

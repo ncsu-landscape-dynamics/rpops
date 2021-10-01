@@ -45,7 +45,6 @@ validate(
   pesticide_duration = 0,
   pesticide_efficacy = 1,
   mask = NULL,
-  success_metric = "quantity",
   output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
@@ -67,7 +66,9 @@ validate(
   exposed_file = "",
   write_outputs = "None",
   output_folder_path = "",
-  point_file = ""
+  point_file = "",
+  use_distance = FALSE,
+  use_configuration = FALSE
 )
 }
 \arguments{
@@ -225,10 +226,6 @@ successfully treats 70 percent of the plants or animals)}
 true negatives from comparisons (e.g. mask out lakes and oceans from statics
 if modeling terrestrial species).}
 
-\item{success_metric}{Choose which success metric to use for calibration.
-Choices are "quantity", "quantity and configuration", "residual error" and
-"odds ratio". Default is "quantity"}
-
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day', 'time step', or 'every_n_steps')}
 
@@ -296,10 +293,15 @@ the natural kernel (if applicable)}
 
 \item{point_file}{file for point comparison if not provided skips
 calculations}
+
+\item{use_distance}{Boolean if you want to compare distance between
+simulations and observations. Default is FALSE.}
+
+\item{use_configuration}{Boolean if you want to use configuration
+disagreement for comparing model runs. Default is FALSE.}
 }
 \value{
-a dataframe of the variables saved and their success metrics for
-each run
+a data frame of statistical measures of model performance.
 }
 \description{
 This function uses the quantity, allocation, and configuration disagreement

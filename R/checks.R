@@ -31,9 +31,6 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     } else {
       r <- terra::rast(x)
     }
-    r <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
-      right = NA
-    )
   }
 
   if (checks_passed) {
@@ -78,13 +75,6 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     } else {
       r <- terra::rast(x)
     }
-    r2 <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
-      right = NA
-    )
-    if (!(terra::ext(r2) == terra::ext(r))) {
-      terra::ext(r2) <- terra::ext(r)
-    }
-    r <- r2
   }
 
   if (checks_passed && !(terra::ext(x2) == terra::ext(r))) {
@@ -408,94 +398,94 @@ prior_checks <- function(priors) {
   }
 }
 
-## helper for taking priors and calibartion to posteriors
-bayesian_checks <- function(prior,
-                            start_priors,
-                            sd_priors,
-                            params,
-                            count,
-                            prior_weight,
-                            weight,
-                            step_size,
-                            bounds = c(0, Inf),
-                            round_to = 1,
-                            round_to_digits = 1) {
-  checks_passed <- TRUE
-
-  if ((is(prior, "matrix") && nrow(prior) == 1) || (is(prior, "numeric") &&
-    length(prior) == 1)) {
-    priors <- round(rnorm(count, start_priors, sd_priors) / round_to,
-      digits = round_to_digits
-    ) * round_to
-    priors <- as.data.frame(table(priors))
-    priors$priors <- as.numeric(as.character(priors$priors))
-    priors$prob <- round(priors$Freq / count, digits = 3)
-    priors$prob[priors$priors == bounds[2]] <-
-      sum(priors$prob[priors$priors >= bounds[2]])
-    priors$prob[priors$priors == bounds[1]] <-
-      sum(priors$prob[priors$priors <= bounds[1]])
-    priors <- priors[priors$prob > 0.000, ]
-    priors <- priors[priors$priors <= bounds[2] & priors$priors >= bounds[1], ]
-  } else if ((is(priors, "data.frame") | is(priors, "matrix")) &&
-    nrow(prior) > 1) {
-    priors <- prior[, 1:2]
-    names(priors) <- c("priors", "prob")
-  }
-
-  if (is(params, "matrix")) {
-    params <- data.frame(params)
-    names(params) <- c("params", "prob")
-  }
-  calibration_count <- length(params)
-  calibrated_rates <- base::as.data.frame(table(params))
-  calibrated_rates$params <- as.numeric(as.character(calibrated_rates$params))
-  calibrated_rates$prob <- round(calibrated_rates$Freq / calibration_count,
-    digits = 3
-  )
-
-  min_rate <- min(min(priors$priors), min(calibrated_rates$params))
-  max_rate <- max(max(priors$priors), max(calibrated_rates$params))
-
-  rates <- data.frame(
-    rate = round(seq(min_rate, max_rate, step_size),
-      digits = round_to_digits
-    ),
-    prior_probability = rep(
-      0,
-      length(seq(
-        min_rate,
-        max_rate,
-        step_size
-      ))
-    ),
-    calibrated_probability =
-      rep(0, length(seq(min_rate, max_rate, step_size))),
-    posterior_probability =
-      rep(0, length(seq(min_rate, max_rate, step_size)))
-  )
-
-  for (i in seq_len(base::nrow(rates))) {
-    if (length(priors$prob[priors$priors == rates$rate[i]]) > 0) {
-      rates$prior_probability[i] <- priors$prob[priors$priors == rates$rate[i]]
-    }
-    if (length(calibrated_rates$prob[calibrated_rates$params ==
-      rates$rate[i]]) > 0) {
-      rates$calibrated_probability[i] <-
-        calibrated_rates$prob[calibrated_rates$params == rates$rate[i]]
-    }
-  }
-  rates$posterior_probability <- round(rates$prior_probability * prior_weight +
-    rates$calibrated_probability * weight,
-  digits = 3
-  )
-  posterior_rates <- rates[, c(1, 4)]
-
-  if (checks_passed) {
-    outs <- list(checks_passed, rates, posterior_rates)
-    names(outs) <- c("checks_passed", "rates", "posterior_rates")
-    return(outs)
-  }
-}
+# ## helper for taking priors and calibartion to posteriors
+# bayesian_checks <- function(prior,
+#                             start_priors,
+#                             sd_priors,
+#                             params,
+#                             count,
+#                             prior_weight,
+#                             weight,
+#                             step_size,
+#                             bounds = c(0, Inf),
+#                             round_to = 1,
+#                             round_to_digits = 1) {
+#   checks_passed <- TRUE
+#
+#   if ((is(prior, "matrix") && nrow(prior) == 1) || (is(prior, "numeric") &&
+#     length(prior) == 1)) {
+#     priors <- round(rnorm(count, start_priors, sd_priors) / round_to,
+#       digits = round_to_digits
+#     ) * round_to
+#     priors <- as.data.frame(table(priors))
+#     priors$priors <- as.numeric(as.character(priors$priors))
+#     priors$prob <- round(priors$Freq / count, digits = 3)
+#     priors$prob[priors$priors == bounds[2]] <-
+#       sum(priors$prob[priors$priors >= bounds[2]])
+#     priors$prob[priors$priors == bounds[1]] <-
+#       sum(priors$prob[priors$priors <= bounds[1]])
+#     priors <- priors[priors$prob > 0.000, ]
+#     priors <- priors[priors$priors <= bounds[2] & priors$priors >= bounds[1], ]
+#   } else if ((is(priors, "data.frame") | is(priors, "matrix")) &&
+#     nrow(prior) > 1) {
+#     priors <- prior[, 1:2]
+#     names(priors) <- c("priors", "prob")
+#   }
+#
+#   if (is(params, "matrix")) {
+#     params <- data.frame(params)
+#     names(params) <- c("params", "prob")
+#   }
+#   calibration_count <- length(params)
+#   calibrated_rates <- base::as.data.frame(table(params))
+#   calibrated_rates$params <- as.numeric(as.character(calibrated_rates$params))
+#   calibrated_rates$prob <- round(calibrated_rates$Freq / calibration_count,
+#     digits = 3
+#   )
+#
+#   min_rate <- min(min(priors$priors), min(calibrated_rates$params))
+#   max_rate <- max(max(priors$priors), max(calibrated_rates$params))
+#
+#   rates <- data.frame(
+#     rate = round(seq(min_rate, max_rate, step_size),
+#       digits = round_to_digits
+#     ),
+#     prior_probability = rep(
+#       0,
+#       length(seq(
+#         min_rate,
+#         max_rate,
+#         step_size
+#       ))
+#     ),
+#     calibrated_probability =
+#       rep(0, length(seq(min_rate, max_rate, step_size))),
+#     posterior_probability =
+#       rep(0, length(seq(min_rate, max_rate, step_size)))
+#   )
+#
+#   for (i in seq_len(base::nrow(rates))) {
+#     if (length(priors$prob[priors$priors == rates$rate[i]]) > 0) {
+#       rates$prior_probability[i] <- priors$prob[priors$priors == rates$rate[i]]
+#     }
+#     if (length(calibrated_rates$prob[calibrated_rates$params ==
+#       rates$rate[i]]) > 0) {
+#       rates$calibrated_probability[i] <-
+#         calibrated_rates$prob[calibrated_rates$params == rates$rate[i]]
+#     }
+#   }
+#   rates$posterior_probability <- round(rates$prior_probability * prior_weight +
+#     rates$calibrated_probability * weight,
+#   digits = 3
+#   )
+#   posterior_rates <- rates[, c(1, 4)]
+#
+#   if (checks_passed) {
+#     outs <- list(checks_passed, rates, posterior_rates)
+#     names(outs) <- c("checks_passed", "rates", "posterior_rates")
+#     return(outs)
+#   }
+# }
 
 bayesian_mnn_checks <- function(prior_means,
                                 prior_cov_matrix,
