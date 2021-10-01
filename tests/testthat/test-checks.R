@@ -352,52 +352,6 @@ test_that("Prior checks report correct errors and return reformatted priors,
 
           })
 
-test_that(
-  "Bayesian checks report correct errors and return all rates as a data frame
-  and posterior rates as a data frame", {
-    skip_on_appveyor()
-    priors <- 2.1
-    prior_check <- prior_checks(priors)
-    prior <- 2.1
-    start_priors <- 2.1
-    sd_priors <- 0.2
-    params <-
-      data.frame(data = c(rep(1.5, 10),
-                          rep(1.5, 10),
-                          rep(1.6, 15),
-                          rep(1.7, 15),
-                          rep(1.8, 30),
-                          rep(1.9, 15),
-                          rep(2.0, 15),
-                          rep(2.1, 15),
-                          rep(2.2, 15)))
-    count <- 10000000
-    prior_weight <- 0.05
-    weight <- 1 - prior_weight
-    step_size <- 0.1
-    bounds <- c(0, Inf)
-    round_to <- 1
-    round_to_digits <- 1
-    bayesian_check <-
-      bayesian_checks(prior,
-                      start_priors,
-                      sd_priors,
-                      params,
-                      count,
-                      prior_weight,
-                      weight,
-                      step_size,
-                      bounds = c(0, Inf),
-                      round_to = 1,
-                      round_to_digits = 1)
-    expect_equal(bayesian_check$checks_passed, TRUE)
-    expect_length(bayesian_check$rates, 4)
-    expect_length(bayesian_check$posterior_rates, 2)
-    expect_lte(weighted.mean(bayesian_check$posterior_rates[, 1],
-                             bayesian_check$posterior_rates[, 2]),
-               2.1)
-  })
-
 test_that("Bayesian MNN checks work properly", {
   prior_means <- c(0.2, 23)
   prior_cov_matrix <- matrix(c(1, 1, 1, 1), ncol = 2, nrow = 2)

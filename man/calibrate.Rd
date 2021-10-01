@@ -6,14 +6,13 @@
 \usage{
 calibrate(
   infected_years_file,
-  number_of_observations,
-  prior_number_of_observations,
-  prior_means,
-  prior_cov_matrix,
+  number_of_observations = 1,
+  prior_number_of_observations = 0,
+  prior_means = c(0, 0, 0, 0, 0, 0),
+  prior_cov_matrix = matrix(0, 6, 6),
   params_to_estimate = c(T, T, T, T, F, F),
   number_of_generations = 7,
   generation_size = 1000,
-  checks = c(500, 5e+05, 1e+05, 1000),
   infected_file,
   host_file,
   total_populations_file,
@@ -50,7 +49,6 @@ calibrate(
   pesticide_duration = c(0),
   pesticide_efficacy = 1,
   mask = NULL,
-  success_metric = "number of locations and total distance",
   output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
@@ -74,7 +72,9 @@ calibrate(
   exposed_file = "",
   verbose = TRUE,
   write_outputs = "None",
-  output_folder_path = ""
+  output_folder_path = "",
+  use_distance = FALSE,
+  use_rmse = FALSE
 )
 }
 \arguments{
@@ -132,14 +132,9 @@ accuracy the larger this number gets. Usually 7 to 9 is the ideal range.}
 
 \item{generation_size}{how many accepted parameter sets should occur in each
 generation. For example if generation size is 1,000 then the simulation runs
-until 1,000 model runs are less than the threshold value selected in checks.
+until 1,000 model runs are less than the threshold value.
 We recommend running at least 1,000 but the greater this number the more
 accurate the model parameters selected will be.}
-
-\item{checks}{A list of the 4 starting check values in order of # of
-locations, total min distance, residual error, and # infected. default is
-(500,500000, 100000, 1000). Starting check values can play a role in speed
-of calibration and in success of calibration.}
 
 \item{infected_file}{Raster file with initial infections. Units for
 infections are based on data availability and the way the units used for your
@@ -288,13 +283,6 @@ if modeling terrestrial species). A numerical value represents the area you
 want to calculate statistics on and an NA value represents the area to remove
 from the statistics.}
 
-\item{success_metric}{Choose which success metric to use for calibration.
-Choices are "number of locations", "number of locations and total distance",
-"number of locations, number of infections, and total distance", or
-"residual error" for 'ABC" method. Choices are "quantity", "quantity and
-configuration", "residual error" and "odds ratio" for the 'MCMC' method.
-Default is "number of locations and total distance"}
-
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day', 'time step', or 'every_n_steps')}
 
@@ -371,6 +359,12 @@ Defaults if FALSE.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
+
+\item{use_distance}{Boolean if you want to compare distance between
+simulations and observations. Default is FALSE.}
+
+\item{use_rmse}{Boolean if you want to calibrate based on rmse. This is
+useful if you have very good population level observations. Default is FALSE.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for
