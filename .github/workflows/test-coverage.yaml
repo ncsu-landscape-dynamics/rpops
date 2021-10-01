@@ -31,7 +31,6 @@ jobs:
           install.packages("renv")
 
       - uses: actions/cache@v2
-        if: startsWith(runner.os, 'macOS')
         with:
           path: ~/Library/Application Support/renv
           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
@@ -39,7 +38,8 @@ jobs:
             ${{ runner.os }}-renv-
 
       - name: Test coverage
-        run: covr::codecov()
-        shell: |
+        shell: Rscript {0}
+        run: |
           renv::restore()
-          Rscript {0}
+          covr::codecov()
+
