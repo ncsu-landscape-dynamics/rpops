@@ -81,8 +81,8 @@ test_that("Multirun model outputs work", {
   leaving_scale_coefficient <- 1
   exposed_file <- ""
   mask <- NULL
-  write_outputs <- "None"
-  output_folder_path <- ""
+  write_outputs <- "all_simulations"
+  output_folder_path <- tempdir()
 
   data <- pops_multirun(infected_file,
                         host_file,

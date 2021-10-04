@@ -287,8 +287,7 @@ if modeling terrestrial species). This can also be used to mask out areas
 that can't be managed in the auto_manage function.}
 
 \item{write_outputs}{Either c("all_simulations", "summary_outputs", or
-"None"). If not "None" output folder path must be provided. all_simulations
-doesn't currently work and is a place holder for future development.}
+"None"). If not "None" output folder path must be provided.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
