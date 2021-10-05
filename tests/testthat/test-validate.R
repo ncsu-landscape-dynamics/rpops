@@ -262,6 +262,8 @@ test_that(
     write_outputs <- "None"
     output_folder_path <- ""
     point_file <- system.file("extdata", "simple20x20", "points.gpkg", package = "PoPS")
+    use_distance <- FALSE
+    use_configuration <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -324,12 +326,14 @@ test_that(
       exposed_file,
       write_outputs,
       output_folder_path,
-      point_file)
+      point_file,
+      use_distance,
+      use_configuration)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 22)
+    expect_length(data, 31)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
