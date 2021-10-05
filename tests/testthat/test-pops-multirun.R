@@ -145,8 +145,6 @@ test_that("Multirun model outputs work", {
                         use_quarantine,
                         use_spreadrates)
 
-
-
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
@@ -166,8 +164,12 @@ test_that("Multirun model outputs work", {
   expect_equal(data$south_rate[[2]], 0)
   expect_equal(data$north_rate[[1]], 0)
   expect_equal(data$north_rate[[2]], 0)
+  expect_true(file.exists(paste(output_folder_path, "/simulation_sd.tif", sep = "")))
+  on.exit(unlink(output_folder_path))
 
   output_frequency <- "month"
+  write_outputs <- "None"
+  output_folder_path <- ""
 
   data <- pops_multirun(infected_file,
                         host_file,

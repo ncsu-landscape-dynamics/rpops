@@ -628,14 +628,6 @@ configuration <- function(config) {
       return(config)
     }
 
-    # add / to output folder path if not provided by user.
-    if (substr(config$output_folder_path, nchar(config$output_folder_path),
-               nchar(config$output_folder_path)) == "/") {
-      config$output_folder_path <- config$output_folder_path
-    } else {
-      config$output_folder_path <- paste(config$output_folder_path, "/", sep = "")
-    }
-
     infection_years2 <- list(terra::as.matrix(infection_years[[1]], wide = TRUE))
     if (terra::nlyr(infection_years) > 1) {
       for (i in 2:terra::nlyr(infection_years)) {
@@ -661,6 +653,14 @@ configuration <- function(config) {
       round((config$budget / config$cost_per_meter_sq) / (config$ew_res * config$ns_res))
     config$buffer_cells <- config$buffer / config$ew_res
     config$years_simulated <- length(config$years)
+  }
+
+  # add / to output folder path if not provided by user.
+  if (substr(config$output_folder_path, nchar(config$output_folder_path),
+             nchar(config$output_folder_path)) == "/") {
+    config$output_folder_path <- config$output_folder_path
+  } else {
+    config$output_folder_path <- paste(config$output_folder_path, "/", sep = "")
   }
 
   config$crs <- terra::crs(config$host)
