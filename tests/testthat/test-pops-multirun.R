@@ -164,8 +164,6 @@ test_that("Multirun model outputs work", {
   expect_equal(data$south_rate[[2]], 0)
   expect_equal(data$north_rate[[1]], 0)
   expect_equal(data$north_rate[[2]], 0)
-  expect_true(file.exists(paste(output_folder_path, "/simulation_sd.tif", sep = "")))
-  on.exit(unlink(output_folder_path))
 
   output_frequency <- "month"
   write_outputs <- "None"

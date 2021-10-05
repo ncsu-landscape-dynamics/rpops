@@ -98,8 +98,8 @@ test_that(
     leaving_percentage <- 0
     leaving_scale_coefficient <- 1
     exposed_file <- ""
-    write_outputs <- "None"
-    output_folder_path <- ""
+    write_outputs <- "all_simulations"
+    output_folder_path <- tempdir()
     point_file <- ""
 
     outputs <- validate(
@@ -261,6 +261,7 @@ test_that(
     exposed_file <- ""
     write_outputs <- "None"
     output_folder_path <- ""
+    point_file <- system.file("extdata", "simple20x20", "points.gpkg", package = "PoPS")
 
     outputs <- validate(
       infected_years_file,
@@ -322,8 +323,8 @@ test_that(
       leaving_scale_coefficient,
       exposed_file,
       write_outputs,
-      output_folder_path
-    )
+      output_folder_path,
+      point_file)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)
