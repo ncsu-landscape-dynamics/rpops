@@ -411,7 +411,7 @@ test_that("Configuration returns proper values when no errors present", {
 test_that("configuration returns proper errors", {
   config$season_month_end <- 15
   config2 <- configuration(config)
-  expect_equal(config$failure, season_month_error)
+  expect_equal(config2$failure, season_month_error)
 
   config$season_month_end <- 12
   config$model_type <- "SEID"
