@@ -11,8 +11,8 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   prior_means <- c(0, 21, 1, 500, 0, 0)
   prior_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  number_of_observations = 1
-  prior_number_of_observations = 0
+  number_of_observations <- 1
+  prior_number_of_observations <- 0
 
   expect_error(calibrate(infected_years_file = infected_years_file,
                          number_of_observations = number_of_observations,
@@ -706,6 +706,4 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                          number_of_observations)
             expect_equal(nrow(data$raw_calibration_data),
                          number_of_iterations)
-
           })
-

@@ -26,15 +26,11 @@ test_that(
   comparisons", {
     skip_on_os("windows")
     infected_years_file <-
-      system.file("extdata", "simple20x20", "infected_years.tif",
-        package = "PoPS"
-      )
+      system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
     parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
     infected_file <-
-      system.file("extdata", "simple20x20", "initial_infection.tif",
-        package = "PoPS"
-      )
+      system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
     host_file <-
       system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
     total_populations_file <-
@@ -57,8 +53,8 @@ test_that(
     mortality_on <- FALSE
     mortality_rate <- 0
     mortality_time_lag <- 0
-    mortality_frequency = "Year"
-    mortality_frequency_n = 1
+    mortality_frequency <- "Year"
+    mortality_frequency_n <- 1
     management <- FALSE
     treatment_dates <- c("2003-01-24")
     treatments_file <- ""
@@ -166,51 +162,21 @@ test_that(
     expect_length(outputs, 12)
     data <- outputs[[1]]
     expect_length(data, 22)
-    expect_vector(data$quantity_disagreement,
-      size = number_of_iterations
-    )
-    expect_vector(data$allocation_disagreement,
-      size = number_of_iterations
-    )
-    expect_vector(data$total_disagreement,
-      size = number_of_iterations
-    )
-    expect_vector(data$configuration_disagreement,
-      size = number_of_iterations
-    )
-    expect_vector(data$false_negatives,
-      size = number_of_iterations
-    )
-    expect_vector(data$false_positives,
-      size = number_of_iterations
-    )
-    expect_vector(data$true_positives,
-      size = number_of_iterations
-    )
-    expect_vector(data$true_negatives,
-      size = number_of_iterations
-    )
-    expect_vector(data$unknown_positives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$unknown_negatives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$odds_ratio,
-      size = number_of_iterations
-    )
-    expect_vector(data$residual_error,
-      size = number_of_iterations
-    )
-    expect_vector(data$true_infected,
-      size = number_of_iterations
-    )
-    expect_vector(data$simulated_infected,
-       size = number_of_iterations
-    )
-    expect_vector(data$infected_difference,
-      size = number_of_iterations
-    )
+    expect_vector(data$quantity_disagreement, size = number_of_iterations)
+    expect_vector(data$allocation_disagreement, size = number_of_iterations)
+    expect_vector(data$total_disagreement, size = number_of_iterations)
+    expect_vector(data$configuration_disagreement, size = number_of_iterations)
+    expect_vector(data$false_negatives, size = number_of_iterations)
+    expect_vector(data$false_positives, size = number_of_iterations)
+    expect_vector(data$true_positives, size = number_of_iterations)
+    expect_vector(data$true_negatives, size = number_of_iterations)
+    expect_vector(data$unknown_positives, size = number_of_iterations)
+    expect_vector(data$unknown_negatives, size = number_of_iterations)
+    expect_vector(data$odds_ratio, size = number_of_iterations)
+    expect_vector(data$residual_error, size = number_of_iterations)
+    expect_vector(data$true_infected, size = number_of_iterations)
+    expect_vector(data$simulated_infected, size = number_of_iterations)
+    expect_vector(data$infected_difference, size = number_of_iterations)
   }
 )
 
@@ -219,17 +185,13 @@ test_that(
   single output comparison", {
     skip_on_os("windows")
     infected_years_file <-
-      system.file("extdata", "simple20x20", "infected_single.tif",
-        package = "PoPS"
-      )
+      system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
     parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
     checks <- c(500, 60000, 900, 1000)
     infected_file <-
-      system.file("extdata", "simple20x20", "initial_infection.tif",
-        package = "PoPS"
-      )
+      system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
     host_file <-
       system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
     total_populations_file <-
@@ -252,8 +214,8 @@ test_that(
     mortality_on <- FALSE
     mortality_rate <- 0
     mortality_time_lag <- 0
-    mortality_frequency = "Year"
-    mortality_frequency_n = 1
+    mortality_frequency <- "Year"
+    mortality_frequency_n <- 1
     management <- FALSE
     treatment_dates <- c("2003-01-24")
     treatments_file <- ""
@@ -360,51 +322,21 @@ test_that(
     expect_length(outputs, 2)
     data <- outputs[[1]]
     expect_length(data, 22)
-    expect_vector(data$quantity_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$allocation_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$total_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$configuration_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$false_negatives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$false_positives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$true_positives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$true_negatives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$unknown_positives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$unknown_negatives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$odds_ratio,
-                  size = number_of_iterations
-    )
-    expect_vector(data$residual_error,
-                  size = number_of_iterations
-    )
-    expect_vector(data$true_infected,
-                  size = number_of_iterations
-    )
-    expect_vector(data$simulated_infected,
-                  size = number_of_iterations
-    )
-    expect_vector(data$infected_difference,
-                  size = number_of_iterations
-    )
+    expect_vector(data$quantity_disagreement, size = number_of_iterations)
+    expect_vector(data$allocation_disagreement, size = number_of_iterations)
+    expect_vector(data$total_disagreement, size = number_of_iterations)
+    expect_vector(data$configuration_disagreement, size = number_of_iterations)
+    expect_vector(data$false_negatives, size = number_of_iterations)
+    expect_vector(data$false_positives, size = number_of_iterations)
+    expect_vector(data$true_positives, size = number_of_iterations)
+    expect_vector(data$true_negatives, size = number_of_iterations)
+    expect_vector(data$unknown_positives, size = number_of_iterations)
+    expect_vector(data$unknown_negatives, size = number_of_iterations)
+    expect_vector(data$odds_ratio, size = number_of_iterations)
+    expect_vector(data$residual_error, size = number_of_iterations)
+    expect_vector(data$true_infected, size = number_of_iterations)
+    expect_vector(data$simulated_infected, size = number_of_iterations)
+    expect_vector(data$infected_difference, size = number_of_iterations)
   }
 )
 
@@ -413,17 +345,13 @@ test_that(
   single output comparison with mask", {
     skip_on_os("windows")
     infected_years_file <-
-      system.file("extdata", "simple20x20", "infected_single.tif",
-                  package = "PoPS"
-      )
+      system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
     parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
     checks <- c(500, 60000, 900, 1000)
     infected_file <-
-      system.file("extdata", "simple20x20", "initial_infection.tif",
-                  package = "PoPS"
-      )
+      system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
     host_file <-
       system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
     total_populations_file <-
@@ -446,8 +374,8 @@ test_that(
     mortality_on <- FALSE
     mortality_rate <- 0
     mortality_time_lag <- 0
-    mortality_frequency = "Year"
-    mortality_frequency_n = 1
+    mortality_frequency <- "Year"
+    mortality_frequency_n <- 1
     management <- FALSE
     treatment_dates <- c("2003-01-24")
     treatments_file <- ""
@@ -554,50 +482,20 @@ test_that(
     expect_length(outputs, 2)
     data <- outputs[[1]]
     expect_length(data, 22)
-    expect_vector(data$quantity_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$allocation_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$total_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$configuration_disagreement,
-                  size = number_of_iterations
-    )
-    expect_vector(data$false_negatives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$false_positives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$true_positives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$true_negatives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$unknown_positives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$unknown_negatives,
-                  size = number_of_iterations
-    )
-    expect_vector(data$odds_ratio,
-                  size = number_of_iterations
-    )
-    expect_vector(data$residual_error,
-                  size = number_of_iterations
-    )
-    expect_vector(data$true_infected,
-                  size = number_of_iterations
-    )
-    expect_vector(data$simulated_infected,
-                  size = number_of_iterations
-    )
-    expect_vector(data$infected_difference,
-                  size = number_of_iterations
-    )
+    expect_vector(data$quantity_disagreement, size = number_of_iterations)
+    expect_vector(data$allocation_disagreement, size = number_of_iterations)
+    expect_vector(data$total_disagreement, size = number_of_iterations)
+    expect_vector(data$configuration_disagreement, size = number_of_iterations)
+    expect_vector(data$false_negatives, size = number_of_iterations)
+    expect_vector(data$false_positives, size = number_of_iterations)
+    expect_vector(data$true_positives, size = number_of_iterations)
+    expect_vector(data$true_negatives, size = number_of_iterations)
+    expect_vector(data$unknown_positives, size = number_of_iterations)
+    expect_vector(data$unknown_negatives, size = number_of_iterations)
+    expect_vector(data$odds_ratio, size = number_of_iterations)
+    expect_vector(data$residual_error, size = number_of_iterations)
+    expect_vector(data$true_infected, size = number_of_iterations)
+    expect_vector(data$simulated_infected, size = number_of_iterations)
+    expect_vector(data$infected_difference, size = number_of_iterations)
   }
 )

@@ -84,8 +84,8 @@ If not set uses the # of CPU cores - 1. must be an integer >= 1}
 \item{parameter_means}{the parameter means from the abc calibration function
 (posterior means)}
 
-\item{parameter_cov_matrix}{the parameter covariance matrix from the abc
-calibration function (posterior covairance matrix)}
+\item{parameter_cov_matrix}{the parameter covariance matrix from the ABC
+calibration function (posterior covariance matrix)}
 
 \item{infected_file}{Raster file with initial infections. Units for
 infections are based on data availability and the way the units used for your

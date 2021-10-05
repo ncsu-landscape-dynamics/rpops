@@ -17,7 +17,7 @@
 #' infection/infestation as individual locations of a pest or pathogen. This is
 #' a multiband raster file (e.g. .tif) with each band representing a unique time
 #' step (e.g. band 1 = year 1 .... band 6 = year 6 or band 1 = week 1 .... band
-#' 6 = week 6). This needs to allign with both the time step selection and start
+#' 6 = week 6). This needs to align with both the time step selection and start
 #' and end dates selection. Units for infections are based on data availability
 #' and the way the units used for your host file creation (e.g. percent area, #
 #' of hosts per cell, etc.). This doesn't include the start year which passed in
@@ -34,7 +34,7 @@
 #' the uncertainty in the parameter estimation (too many and it will take a
 #' long time, too few and your parameter sets will be too wide). This is an ABC
 #' implementation naming convention but should be set to greater than 7 for
-#' robust calibrations. There is a tradeoff between computational time and model
+#' robust calibrations. There is a trade off between computational time and model
 #' accuracy the larger this number gets. Usually 7 to 9 is the ideal range.
 #' @param generation_size how many accepted parameter sets should occur in each
 #' generation. For example if generation size is 1,000 then the simulation runs
@@ -48,7 +48,7 @@
 #' becomes available. Example if we have 2,000 observations in 2019 and had
 #' 1,000 observations in 2018 and 1,000 in 2017, we would use 2,000 here and
 #' 2,000 for our number_of_observations.
-#' @param params_to_estimate A list of booleans specificing which parameters to
+#' @param params_to_estimate A list of booleans specifying which parameters to
 #' estimate ordered from (reproductive_rate, natural_dispersal_distance,
 #' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
 #' and anthropogenic kappa)
@@ -277,8 +277,7 @@ calibrate <- function(infected_years_file,
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
-        lethal_temperature_month =
-          config$lethal_temperature_month,
+        lethal_temperature_month = config$lethal_temperature_month,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -311,15 +310,11 @@ calibrate <- function(infected_years_file,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
         natural_kernel_type = config$natural_kernel_type,
-        anthropogenic_kernel_type =
-          config$anthropogenic_kernel_type,
-        use_anthropogenic_kernel =
-          config$use_anthropogenic_kernel,
-        percent_natural_dispersal =
-          percent_natural_dispersal,
+        anthropogenic_kernel_type = config$anthropogenic_kernel_type,
+        use_anthropogenic_kernel = config$use_anthropogenic_kernel,
+        percent_natural_dispersal = percent_natural_dispersal,
         natural_distance_scale = natural_distance_scale,
-        anthropogenic_distance_scale =
-          anthropogenic_distance_scale,
+        anthropogenic_distance_scale = anthropogenic_distance_scale,
         natural_dir = config$natural_dir,
         natural_kappa = natural_kappa,
         anthropogenic_dir = config$anthropogenic_dir,
@@ -336,14 +331,11 @@ calibrate <- function(infected_years_file,
         use_spreadrates = config$use_spreadrates,
         model_type_ = config$model_type,
         latency_period = config$latency_period,
-        generate_stochasticity =
-          config$generate_stochasticity,
-        establishment_stochasticity =
-          config$establishment_stochasticity,
+        generate_stochasticity = config$generate_stochasticity,
+        establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
         deterministic = config$deterministic,
-        establishment_probability =
-          config$establishment_probability,
+        establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
         overpopulation_percentage = config$overpopulation_percentage,
@@ -361,6 +353,7 @@ calibrate <- function(infected_years_file,
     parameters_test <- matrix(ncol = 12, nrow = 200)
     acceptance_rate <- 1
     acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
+
     accuracy_thresholds <-
       matrix(ncol = 1, nrow = config$number_of_generations)
     precision_thresholds <-
@@ -422,8 +415,7 @@ calibrate <- function(infected_years_file,
           # draw from the multivariate normal distribution and ensure that
           # parameters are within their allowed range
           proposed_parameters <-
-            MASS::mvrnorm(1, config$parameter_means,
-                          config$parameter_cov_matrix)
+            MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           while (proposed_parameters[1] < 0.1 |
                  proposed_parameters[2] < 0.1 |
                  proposed_parameters[3] > 1.00 |
@@ -432,8 +424,7 @@ calibrate <- function(infected_years_file,
                  proposed_parameters[5] < 0 |
                  proposed_parameters[6] < 0) {
             proposed_parameters <-
-              MASS::mvrnorm(1, config$parameter_means,
-                            config$parameter_cov_matrix)
+              MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           }
           proposed_reproductive_rate <- proposed_parameters[1]
           proposed_natural_distance_scale <- proposed_parameters[2]
@@ -1042,10 +1033,14 @@ calibrate <- function(infected_years_file,
     )
 
   if (config$write_outputs %in% config$output_write_list) {
-    save(outputs, file = ffOut("calibration_outputs.rdata"))
-    write.csv(posterior_means, ffOut("posterior_means.csv"), row.names = FALSE)
-    write.csv(posterior_cov_matrix, ffOut("posterior_cov_matrix.csv"), row.names = FALSE)
-    write.csv(parameters_kept, ffOut("raw_calibration_data.csv"), row.names = FALSE)
+    file_name <- paste(config$output_folder_path, "calibration_outputs.rdata", sep = "")
+    save(outputs, file = file_name)
+    file_name <- paste(config$output_folder_path, "posterior_means.csv", sep = "")
+    write.csv(posterior_means, file_name, row.names = FALSE)
+    file_name <- paste(config$output_folder_path, "posterior_cov_matrix.csv", sep = "")
+    write.csv(posterior_cov_matrix, file_name, row.names = FALSE)
+    file_name <- paste(config$output_folder_path, "raw_calibration_data.csv", sep = "")
+    write.csv(parameters_kept, file_name, row.names = FALSE)
   }
 
   return(outputs)
