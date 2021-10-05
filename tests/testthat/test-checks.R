@@ -218,6 +218,16 @@ test_that(
     expect_equal(time_check$number_of_time_steps, 5)
     expect_equal(time_check$number_of_years, 1)
     expect_equal(time_check$number_of_outputs, 5)
+
+    end_date <- "2016-02-01"
+    start_date <- "2016-01-01"
+    time_step <- "week"
+    output_frequency <- "time_step"
+    time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
+    expect_equal(time_check$checks_passed, TRUE)
+    expect_equal(time_check$number_of_time_steps, 5)
+    expect_equal(time_check$number_of_years, 1)
+    expect_equal(time_check$number_of_outputs, 5)
   })
 
 test_that("Bayesian MNN checks work properly", {
@@ -237,8 +247,41 @@ test_that("Bayesian MNN checks work properly", {
                         weight)
   expect_equal(mnn_check$checks_passed, TRUE)
   expect_equal(mnn_check$posterior_means, c(0.295, 21.1))
-  expect_equal(mnn_check$posterior_cov_matrix,
-               matrix(c(1, 1.95, 1, 1), ncol = 2, nrow = 2))
+  expect_equal(mnn_check$posterior_cov_matrix, matrix(c(1, 1.95, 1, 1), ncol = 2, nrow = 2))
+
+  prior_means <- c(0.2, 23)
+  prior_cov_matrix <- matrix(c(1, 1, 1, 1), ncol = 2, nrow = 2)
+  calibrated_means <- c(0.3, 21)
+  calibrated_cov_matrix <- matrix(c(1, 2), ncol = 1, nrow = 2)
+  prior_weight <- 0.05
+  weight <- 1 - prior_weight
+
+  mnn_check <-
+    bayesian_mnn_checks(prior_means,
+                        prior_cov_matrix,
+                        calibrated_means,
+                        calibrated_cov_matrix,
+                        prior_weight,
+                        weight)
+  expect_equal(mnn_check$checks_passed, FALSE)
+  expect_equal(mnn_check$failed_check, prior_cov_matrix_error)
+
+  prior_means <- c(0.2, 23)
+  prior_cov_matrix <- matrix(c(1, 1, 1, 1), ncol = 2, nrow = 2)
+  calibrated_means <- c(0.3)
+  calibrated_cov_matrix <- matrix(c(1, 2, 1, 1), ncol = 2, nrow = 2)
+  prior_weight <- 0.05
+  weight <- 1 - prior_weight
+
+  mnn_check <-
+    bayesian_mnn_checks(prior_means,
+                        prior_cov_matrix,
+                        calibrated_means,
+                        calibrated_cov_matrix,
+                        prior_weight,
+                        weight)
+  expect_equal(mnn_check$checks_passed, FALSE)
+  expect_equal(mnn_check$failed_check, prior_means_error)
 })
 
 

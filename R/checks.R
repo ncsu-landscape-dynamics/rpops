@@ -69,8 +69,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
 
   if (checks_passed) {
     if (use_s3) {
-      aws.s3::save_object(object = x, bucket = bucket,
-                          file = x, check_region = FALSE)
+      aws.s3::save_object(object = x, bucket = bucket, file = x, check_region = FALSE)
       r <- terra::rast(x)
     } else {
       r <- terra::rast(x)
