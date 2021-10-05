@@ -134,22 +134,18 @@ treatment_checks <- function(treatment_stack,
   if (checks_passed) {
     if (pesticide_duration[1] > 0) {
       treatment_maps <-
-        list(terra::as.matrix(treatment_stack[[1]] * pesticide_efficacy,
-             wide = TRUE))
+        list(terra::as.matrix(treatment_stack[[1]] * pesticide_efficacy, wide = TRUE))
     } else {
-      treatment_maps <-
-        list(terra::as.matrix(treatment_stack[[1]], wide = TRUE))
+      treatment_maps <- list(terra::as.matrix(treatment_stack[[1]], wide = TRUE))
     }
 
     if (terra::nlyr(treatment_stack) >= 2) {
       for (i in 2:terra::nlyr(treatment_stack)) {
         if (pesticide_duration[i] > 0) {
           treatment_maps[[i]] <-
-            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy,
-                                  wide = TRUE))
+            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy, wide = TRUE))
         } else {
-          treatment_maps[[i]] <-
-            list(terra::as.matrix(treatment_stack[[i]], wide = TRUE))
+          treatment_maps[[i]] <- list(terra::as.matrix(treatment_stack[[i]], wide = TRUE))
         }
       }
     }
@@ -177,35 +173,6 @@ treatment_metric_checks <- function(treatment_method) {
   if (checks_passed) {
     outs <- list(checks_passed)
     names(outs) <- c("checks_passed")
-    return(outs)
-  } else {
-    outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
-    return(outs)
-  }
-}
-
-metric_checks <- function(success_metric) {
-  checks_passed <- TRUE
-
-  if (success_metric == "quantity") {
-    configuration <- FALSE
-  } else if (success_metric == "quantity and configuration") {
-    configuration <- TRUE
-  } else if (success_metric == "odds ratio") {
-    configuration <- FALSE
-  } else if (success_metric == "residual error") {
-    configuration <- FALSE
-  } else {
-    checks_passed <- FALSE
-    failed_check <-
-      "Success metric must be one of 'quantity','quantity and configuration',
-    'residual error', or 'odds ratio'"
-  }
-
-  if (checks_passed) {
-    outs <- list(checks_passed, configuration)
-    names(outs) <- c("checks_passed", "configuration")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)

@@ -149,36 +149,7 @@ test_that("Treatment method checks report correct errors and TRUE otherwise", {
   treatment_method <- "all infected"
   methods_check <- treatment_metric_checks(treatment_method)
   expect_equal(methods_check$checks_passed, TRUE)
-
 })
-
-test_that(
-  "Success metric checks report correct errors and return configuration
-  disagreement boolean otherwise", {
-    success_metric <- "Test"
-    metric_check <- metric_checks(success_metric)
-    expect_equal(metric_check$checks_passed, FALSE)
-    expect_equal(
-      metric_check$failed_check,
-      "Success metric must be one of 'quantity','quantity and configuration',
-    'residual error', or 'odds ratio'")
-    success_metric <- "quantity"
-    metric_check <- metric_checks(success_metric)
-    expect_equal(metric_check$checks_passed, TRUE)
-    expect_equal(metric_check$configuration, FALSE)
-    success_metric <- "quantity and configuration"
-    metric_check <- metric_checks(success_metric)
-    expect_equal(metric_check$checks_passed, TRUE)
-    expect_equal(metric_check$configuration, TRUE)
-    success_metric <- "odds ratio"
-    metric_check <- metric_checks(success_metric)
-    expect_equal(metric_check$checks_passed, TRUE)
-    expect_equal(metric_check$configuration, FALSE)
-    success_metric <- "residual error"
-    metric_check <- metric_checks(success_metric)
-    expect_equal(metric_check$checks_passed, TRUE)
-    expect_equal(metric_check$configuration, FALSE)
-  })
 
 test_that(
   "Time checks report correct errors and return number of time steps, number of
