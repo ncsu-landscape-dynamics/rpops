@@ -2564,3 +2564,61 @@ test_that("Movements works as expected", {
   expect_equal(data$susceptible[[5]], sus5)
   expect_equal(data$susceptible[[6]], sus6)
 })
+
+test_that(
+  "OVerpopulation dispersal works as expected with directionality to prevent dispersers from
+  leaving the simulated area", {
+    infected_file <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+    host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    start_date <- "2008-01-01"
+    end_date <- "2008-12-31"
+    parameter_means <- c(0, 21, 1, 500, 2, 0)
+    parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+
+    data <-
+      pops(infected_file = infected_file,
+           host_file = host_file,
+           total_populations_file = host_file,
+           parameter_means = parameter_means,
+           parameter_cov_matrix = parameter_cov_matrix,
+           start_date = start_date,
+           end_date = end_date,
+           use_overpopulation_movements = TRUE,
+           overpopulation_percentage = 0.2,
+           leaving_percentage = 0.5,
+           leaving_scale_coefficient = 0.5,
+           natural_dir = "SE")
+    test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+    expect_lte(data$infected[[1]][[1]], test_mat[[1]])
+    expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+    expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+    expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  })
+
+test_that(
+  "Deterministic dispersal works as expected", {
+    infected_file <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+    host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    start_date <- "2008-01-01"
+    end_date <- "2008-12-31"
+    parameter_means <- c(2, 21, 1, 500, 2, 0)
+    parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+
+    data <-
+      pops(infected_file = infected_file,
+           host_file = host_file,
+           total_populations_file = host_file,
+           parameter_means = parameter_means,
+           parameter_cov_matrix = parameter_cov_matrix,
+           start_date = start_date,
+           end_date = end_date,
+           generate_stochasticity = FALSE,
+           establishment_stochasticity = FALSE,
+           movement_stochasticity = FALSE,
+           deterministic = TRUE)
+    test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+    expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+    expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+    expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+    expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  })
