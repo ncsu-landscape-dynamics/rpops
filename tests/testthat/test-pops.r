@@ -129,6 +129,59 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
+                    host_file =  host_file,
+                    total_populations_file =  host_file,
+                    model_type = "SEI",
+                    exposed_file = "",
+                    latency_period = 2,
+                    start_exposed = TRUE,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix),
+               file_exists_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
+                    host_file =  host_file,
+                    total_populations_file =  host_file,
+                    quarantine_areas_file = "",
+                    use_quarantine = TRUE,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix),
+               file_exists_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
+                    host_file =  host_file,
+                    total_populations_file =  host_file,
+                    parameter_means = c(0, 0, 0, 0),
+                    parameter_cov_matrix = parameter_cov_matrix),
+               paramter_means_error, fixed = TRUE)
+  expect_error(pops(infected_file =  infected_file,
+                    host_file =  host_file,
+                    total_populations_file =  host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = matrix(0, nrow = 5, ncol = 6)),
+               covariance_mat_error, fixed = TRUE)
+})
+
+test_that("Model stops if treatments don't have correct dimenisions", {
+  infected_file <-
+    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2010-12-31"
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  treatments_file <- system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
+  treatment_dates <- c("2008-01-01", "2008-05-01")
+
+  expect_error(pops(infected_file = infected_file,
+                    host_file =  host_file,
+                    total_populations_file =  host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    management = TRUE,
+                    treatments_file = treatments_file,
+                    treatment_dates = treatment_dates),
+               treatment_length_error, fixed = TRUE)
 })
 
 test_that("Model stops if time and date parameters are of the wrong type and/or
@@ -621,6 +674,8 @@ test_that("Input raster resolutions, extents, and crs all match", {
 
 })
 
+
+
 test_that(
 "Infected results return initial infected if reproductive rate isset to 0", {
   infected_file <-
@@ -892,8 +947,7 @@ test_that(
     system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2010-12-31"
-  treatments_file <-
-    system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
+  treatments_file <- system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
   parameter_means <- c(0, 21, 1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
@@ -2408,8 +2462,26 @@ test_that("Movements works as expected", {
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   use_movements <- TRUE
   movements_file <-
-    system.file("extdata", "simple20x20", "movements.csv", package = "PoPS")
+    system.file("extdata", "simple20x20", "movements.tif", package = "PoPS")
 
+  expect_error(pops(output_frequency = "month",
+                    time_step = "month",
+                    treatment_dates = start_date,
+                    infected_file = infected_file,
+                    host_file = host_file,
+                    total_populations_file = host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    start_date = start_date,
+                    end_date = end_date,
+                    use_movements = use_movements,
+                    movements_file = movements_file,
+                    random_seed = 42),
+               file_exists_error, fixed = TRUE)
+
+
+  movements_file <-
+    system.file("extdata", "simple20x20", "movements.csv", package = "PoPS")
   data <- pops(output_frequency = "month",
                time_step = "month",
                treatment_dates = start_date,

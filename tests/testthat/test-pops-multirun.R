@@ -14,7 +14,15 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file does not exist")
+               file_exists_error)
+
+  expect_error(pops_multirun(infected_file = infected_file,
+                             host_file =  host_file,
+                             total_populations_file =  host_file,
+                             parameter_means = parameter_means,
+                             parameter_cov_matrix = parameter_cov_matrix,
+                             mask = ""),
+               file_exists_error)
 })
 
 test_that("Multirun model outputs work", {

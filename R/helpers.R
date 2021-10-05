@@ -125,6 +125,14 @@ latency_period_error <-
   "Model type is set to SEI but the latency period is less than 1"
 treatment_option_error <-
   "treatment method is not one of the valid treatment options"
+infection_years_length_error <- function(num_layers_infected_years, number_of_time_steps) {
+  error_message <-
+    paste("The infection years file must have enough layers to match the number of outputs from the
+    model. The number of layers of your infected year file is", num_layers_infected_years,
+    "and the number of outputs is", number_of_time_steps, sep = " ")
+  return(error_message)
+}
+
 # Uncertainty propagation for raster data sets, expects a spatRaster with 2
 # layers (mean and standard deviation)
 output_from_raster_mean_and_sd <- function(x) {
