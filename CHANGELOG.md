@@ -37,6 +37,11 @@ this repository.
 - `quantity_allocation_disagreement` variable configuration changed to use_configuration
   to be more consistent with variable names. (@ChrisJones, #130).
   
+- `pops_multirun` can now use variable write_output = "all_simulations" to write out
+  susceptible, exposed, and infected rasters from all simulations. This will allow for a 
+  future update where simulations can easily be started from previous simulation outputs.
+  (@ChrisJones, #133)
+  
 ## [1.1.0] - 2021-06-22
 
 ### Added
