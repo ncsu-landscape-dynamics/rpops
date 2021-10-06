@@ -107,7 +107,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             leaving_scale_coefficient <- 1
             exposed_file <- ""
             verbose <- TRUE
-            write_outputs <- "all_simulations"
+            write_outputs <- "summary_outputs"
             output_folder_path <- tempdir()
             use_distance <- FALSE
             use_rmse <- FALSE

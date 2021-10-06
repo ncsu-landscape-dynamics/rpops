@@ -143,7 +143,15 @@ test_that("Multirun model outputs work", {
                         dispersal_percentage,
                         quarantine_areas_file,
                         use_quarantine,
-                        use_spreadrates)
+                        use_spreadrates,
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
