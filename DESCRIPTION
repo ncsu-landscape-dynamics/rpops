@@ -54,7 +54,8 @@ Suggests:
     remotes,
     rcmdcheck,
     markdown,
-    covr
+    covr,
+    pkgdown
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1
