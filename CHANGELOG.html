@@ -151,6 +151,7 @@
 <li><p><code>calibrate</code> no longer uses success_metrics and checks parameters as these are both handled internally by auto updating if the values are too far of in the first generation. This makes for a simpler and faster user experience (@ChrisJones, #130).</p></li>
 <li><p><code>validate</code> no longer uses success_metrics parameter but now has the added parameters use_rmse and use_distance that are used in <code>quantity_allocation_disagreement</code>. This allows for a more intuitive user interface (@ChrisJones, #130).</p></li>
 <li><p><code>quantity_allocation_disagreement</code> variable configuration changed to use_configuration to be more consistent with variable names. (@ChrisJones, #130).</p></li>
+<li><p><code>pops_multirun</code> can now use variable write_output = “all_simulations” to write out susceptible, exposed, and infected rasters from all simulations. This will allow for a future update where simulations can easily be started from previous simulation outputs. (@ChrisJones, #133)</p></li>
 </ul>
 </div>
 </div>
