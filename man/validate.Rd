@@ -291,8 +291,7 @@ the natural kernel (if applicable)}
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 
-\item{point_file}{file for point comparison if not provided skips
-calculations}
+\item{point_file}{file for point comparison if not provided skips calculations}
 
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}

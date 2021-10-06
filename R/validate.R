@@ -25,8 +25,7 @@
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
-#' @param point_file  file for point comparison if not provided skips
-#' calculations
+#' @param point_file  file for point comparison if not provided skips calculations
 #' @param use_distance Boolean if you want to compare distance between
 #' simulations and observations. Default is FALSE.
 #' @param use_configuration Boolean if you want to use configuration

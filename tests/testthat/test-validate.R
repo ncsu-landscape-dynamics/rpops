@@ -1,14 +1,10 @@
 context("test-validate")
 
 test_that("Model stops if files don't exist or aren't the correct extension", {
-  infected_file <-
-    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  infected_file <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   infected_years_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif",
-                package = "PoPS"
-    )
-  host_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
+  host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   parameter_means <- c(0, 21, 1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
 
@@ -18,7 +14,18 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                         total_populations_file =  host_file,
                         parameter_means = parameter_means,
                         parameter_cov_matrix = parameter_cov_matrix),
-               "file does not exist")
+               PoPS:::file_exists_error, fixed = TRUE)
+
+  expect_error(validate(infected_years_file = infected_years_file,
+                        infected_file = infected_file,
+                        host_file =  host_file,
+                        total_populations_file =  host_file,
+                        start_date = "2008-01-01",
+                        end_date = "2009-12-31",
+                        output_frequency = "year",
+                        parameter_means = parameter_means,
+                        parameter_cov_matrix = parameter_cov_matrix),
+               PoPS:::infection_years_length_error(1, 2), fixed = TRUE)
 })
 
 test_that(
@@ -91,8 +98,8 @@ test_that(
     leaving_percentage <- 0
     leaving_scale_coefficient <- 1
     exposed_file <- ""
-    write_outputs <- "None"
-    output_folder_path <- ""
+    write_outputs <- "all_simulations"
+    output_folder_path <- tempdir()
     point_file <- ""
 
     outputs <- validate(
@@ -254,6 +261,9 @@ test_that(
     exposed_file <- ""
     write_outputs <- "None"
     output_folder_path <- ""
+    point_file <- system.file("extdata", "simple20x20", "points.gpkg", package = "PoPS")
+    use_distance <- FALSE
+    use_configuration <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -315,13 +325,15 @@ test_that(
       leaving_scale_coefficient,
       exposed_file,
       write_outputs,
-      output_folder_path
-    )
+      output_folder_path,
+      point_file,
+      use_distance,
+      use_configuration)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 22)
+    expect_length(data, 31)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)

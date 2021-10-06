@@ -285,6 +285,7 @@ List pops_model_cpp(
             movements,
             spatial_indices);
 
+        // keeps track of cumulative dispers or propagules from a site.
         if (config.spread_schedule()[current_index]) {
             total_dispersers += dispersers;
         }

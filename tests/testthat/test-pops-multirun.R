@@ -14,7 +14,15 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               "file does not exist")
+               file_exists_error)
+
+  expect_error(pops_multirun(infected_file = infected_file,
+                             host_file =  host_file,
+                             total_populations_file =  host_file,
+                             parameter_means = parameter_means,
+                             parameter_cov_matrix = parameter_cov_matrix,
+                             mask = ""),
+               file_exists_error)
 })
 
 test_that("Multirun model outputs work", {
@@ -135,9 +143,15 @@ test_that("Multirun model outputs work", {
                         dispersal_percentage,
                         quarantine_areas_file,
                         use_quarantine,
-                        use_spreadrates)
-
-
+                        use_spreadrates,
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
@@ -160,6 +174,8 @@ test_that("Multirun model outputs work", {
   expect_equal(data$north_rate[[2]], 0)
 
   output_frequency <- "month"
+  write_outputs <- "None"
+  output_folder_path <- ""
 
   data <- pops_multirun(infected_file,
                         host_file,

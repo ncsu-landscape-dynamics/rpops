@@ -163,8 +163,7 @@ configuration <- function(config) {
 
   # check that initial raster file exists
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
-    infected_check <-
-      initial_raster_checks(config$infected_file, config$use_s3, config$bucket)
+    infected_check <- initial_raster_checks(config$infected_file, config$use_s3, config$bucket)
   } else {
     infected_check <- initial_raster_checks(config$infected_file)
   }
@@ -180,11 +179,7 @@ configuration <- function(config) {
 
   # check that host raster has the same crs, resolution, and extent
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
-    host_check <-
-      secondary_raster_checks(
-        config$host_file, infected,
-        config$use_s3, config$bucket
-      )
+    host_check <- secondary_raster_checks(config$host_file, infected, config$use_s3, config$bucket)
   } else {
     host_check <- secondary_raster_checks(config$host_file, infected)
   }
@@ -201,11 +196,7 @@ configuration <- function(config) {
 
   if (!is.null(config$mask)) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
-      mask_check <-
-        secondary_raster_checks(
-          config$mask, infected,
-          config$use_s3, config$bucket
-        )
+      mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
     } else {
       mask_check <- secondary_raster_checks(config$mask, infected)
     }
@@ -230,8 +221,7 @@ configuration <- function(config) {
   suitable_points <- terra::as.points(suitable)
   names(suitable_points) <- "data"
   suitable_points <- suitable_points[suitable_points$data > 0]
-  suitable_cells <-
-    terra::extract(suitable, suitable_points, cells = TRUE)$cell
+  suitable_cells <- terra::extract(suitable, suitable_points, cells = TRUE)$cell
   suitable_row <- terra::rowFromCell(suitable, suitable_cells)
   suitable_row <- suitable_row - 1
   suitable_row <- as.integer(suitable_row)
@@ -253,13 +243,9 @@ configuration <- function(config) {
   # check that total populations raster has the same crs, resolution, and extent
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
     total_populations_check <-
-      secondary_raster_checks(
-        config$total_populations_file, infected,
-        config$use_s3, config$bucket
-      )
+      secondary_raster_checks(config$total_populations_file, infected, config$use_s3, config$bucket)
   } else {
-    total_populations_check <-
-      secondary_raster_checks(config$total_populations_file, infected)
+    total_populations_check <- secondary_raster_checks(config$total_populations_file, infected)
   }
   if (total_populations_check$checks_passed) {
     total_populations <- total_populations_check$raster
@@ -278,13 +264,9 @@ configuration <- function(config) {
   if (config$use_lethal_temperature == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       temperature_check <-
-        secondary_raster_checks(
-          config$temperature_file, infected,
-          config$use_s3, config$bucket
-        )
+        secondary_raster_checks(config$temperature_file, infected, config$use_s3, config$bucket)
     } else {
-      temperature_check <-
-        secondary_raster_checks(config$temperature_file, infected)
+      temperature_check <- secondary_raster_checks(config$temperature_file, infected)
     }
     if (temperature_check$checks_passed) {
       temperature_stack <- temperature_check$raster
@@ -293,22 +275,16 @@ configuration <- function(config) {
       return(config)
     }
 
-    temperature <- list(terra::as.matrix(temperature_stack[[1]],
-      wide = TRUE
-    ))
+    temperature <- list(terra::as.matrix(temperature_stack[[1]], wide = TRUE))
     if (terra::nlyr(temperature_stack) > 1) {
       for (i in 2:config$number_of_years) {
-        temperature[[i]] <- terra::as.matrix(temperature_stack[[i]],
-          wide = TRUE
-        )
+        temperature[[i]] <- terra::as.matrix(temperature_stack[[i]], wide = TRUE)
       }
     }
   } else {
     temperature <- host
     terra::values(temperature) <- 1
-    temperature <- list(terra::as.matrix(temperature,
-      wide = TRUE
-    ))
+    temperature <- list(terra::as.matrix(temperature, wide = TRUE))
   }
 
   config$temperature <- temperature
@@ -318,10 +294,8 @@ configuration <- function(config) {
   if (config$temp == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       temperature_coefficient_check <-
-        secondary_raster_checks(
-          config$temperature_coefficient_file, infected,
-          config$use_s3, config$bucket
-        )
+        secondary_raster_checks(config$temperature_coefficient_file, infected,
+                                config$use_s3, config$bucket)
     } else {
       temperature_coefficient_check <-
         secondary_raster_checks(config$temperature_coefficient_file, infected)
@@ -338,16 +312,11 @@ configuration <- function(config) {
     if (config$precip == TRUE) {
       if (config$function_name %in% c("casestudy_creation", "model_api")) {
         precipitation_coefficient_check <-
-          secondary_raster_checks(
-            config$precipitation_coefficient_file,
-            infected, config$use_s3, config$bucket
-          )
+          secondary_raster_checks(config$precipitation_coefficient_file, infected,
+                                  config$use_s3, config$bucket)
       } else {
         precipitation_coefficient_check <-
-          secondary_raster_checks(
-            config$precipitation_coefficient_file,
-            infected
-          )
+          secondary_raster_checks(config$precipitation_coefficient_file, infected)
       }
       if (precipitation_coefficient_check$checks_passed) {
         precipitation_coefficient <- precipitation_coefficient_check$raster
@@ -356,16 +325,13 @@ configuration <- function(config) {
         return(config)
       }
 
-      weather_coefficient_stack <- weather_coefficient_stack *
-        precipitation_coefficient
+      weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
     }
   } else if (config$precip == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       precipitation_coefficient_check <-
-        secondary_raster_checks(
-          config$precipitation_coefficient_file, infected,
-          config$use_s3, config$bucket
-        )
+        secondary_raster_checks(config$precipitation_coefficient_file, infected,
+                                config$use_s3, config$bucket)
     } else {
       precipitation_coefficient_check <-
         secondary_raster_checks(config$precipitation_coefficient_file, infected)
@@ -382,22 +348,14 @@ configuration <- function(config) {
   }
 
   if (config$weather == TRUE) {
-    weather_coefficient <- list(terra::as.matrix(
-      weather_coefficient_stack[[1]],
-      wide = TRUE
-    ))
+    weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]], wide = TRUE))
     for (i in 2:terra::nlyr(weather_coefficient_stack)) {
-      weather_coefficient[[i]] <- terra::as.matrix(
-        weather_coefficient_stack[[i]],
-        wide = TRUE
-      )
+      weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
     }
   } else {
     weather_coefficient <- host
     terra::values(weather_coefficient) <- 1
-    weather_coefficient <- list(terra::as.matrix(weather_coefficient,
-      wide = TRUE
-    ))
+    weather_coefficient <- list(terra::as.matrix(weather_coefficient, wide = TRUE))
   }
 
   config$weather_coefficient <- weather_coefficient
@@ -405,13 +363,9 @@ configuration <- function(config) {
   if (config$management == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       treatments_check <-
-        secondary_raster_checks(
-          config$treatments_file, infected,
-          config$use_s3, config$bucket
-        )
+        secondary_raster_checks(config$treatments_file, infected, config$use_s3, config$bucket)
     } else {
-      treatments_check <-
-        secondary_raster_checks(config$treatments_file, infected)
+      treatments_check <- secondary_raster_checks(config$treatments_file, infected)
     }
 
     if (treatments_check$checks_passed) {
@@ -436,9 +390,7 @@ configuration <- function(config) {
   } else {
     treatment_map <- host
     treatment_map[] <- 0
-    config$treatment_maps <- list(terra::as.matrix(treatment_map,
-      wide = TRUE
-    ))
+    config$treatment_maps <- list(terra::as.matrix(treatment_map, wide = TRUE))
     config$treatment_dates <- c(config$start_date)
   }
 
@@ -452,10 +404,8 @@ configuration <- function(config) {
   config$rows_cols <- rows_cols
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
-    movements_check <- movement_checks(
-      config$movements_file, infected,
-      config$start_date, config$end_date
-    )
+    movements_check <-
+      movement_checks(config$movements_file, infected, config$start_date, config$end_date)
     if (movements_check$checks_passed) {
       config$movements <- movements_check$movements
       config$movements_dates <- movements_check$movements_dates
@@ -470,9 +420,7 @@ configuration <- function(config) {
 
   mortality_tracker <- infected
   terra::values(mortality_tracker) <- 0
-  mortality_tracker <- terra::as.matrix(mortality_tracker,
-    wide = TRUE
-  )
+  mortality_tracker <- terra::as.matrix(mortality_tracker, wide = TRUE)
   exposed <- list(mortality_tracker)
   config$total_exposed <- mortality_tracker
 
@@ -485,10 +433,7 @@ configuration <- function(config) {
   if (config$model_type == "SEI" & config$start_exposed) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       exposed_check <-
-        secondary_raster_checks(
-          config$exposed_file, infected,
-          config$use_s3, config$bucket
-        )
+        secondary_raster_checks(config$exposed_file, infected, config$use_s3, config$bucket)
     } else {
       exposed_check <- secondary_raster_checks(config$exposed_file, infected)
     }
@@ -496,8 +441,7 @@ configuration <- function(config) {
       exposed2 <- exposed_check$raster
       susceptible <- susceptible - exposed2
       susceptible[susceptible < 0] <- 0
-      exposed[[config$latency_period + 1]] <-
-        terra::as.matrix(exposed2, wide = TRUE)
+      exposed[[config$latency_period + 1]] <- terra::as.matrix(exposed2, wide = TRUE)
       config$total_exposed <- terra::as.matrix(exposed2, wide = TRUE)
     } else {
       config$failure <- exposed_check$failed_check
@@ -556,17 +500,10 @@ configuration <- function(config) {
     return(config)
   }
 
-  infected <- terra::as.matrix(infected,
-    wide = TRUE
-  )
-  config$susceptible <- terra::as.matrix(susceptible,
-    wide = TRUE
-  )
-  config$total_populations <- terra::as.matrix(total_populations,
-    wide = TRUE
-  )
+  infected <- terra::as.matrix(infected, wide = TRUE)
+  config$susceptible <- terra::as.matrix(susceptible, wide = TRUE)
+  config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
   config$total_hosts <- terra::as.matrix(host, wide = TRUE)
-
   config$mortality <- mortality_tracker
   config$resistant <- mortality_tracker
 
@@ -574,13 +511,9 @@ configuration <- function(config) {
   if (config$use_quarantine) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       quarantine_check <-
-        secondary_raster_checks(
-          config$quarantine_areas_file, host,
-          config$use_s3, config$bucket
-        )
+        secondary_raster_checks(config$quarantine_areas_file, host, config$use_s3, config$bucket)
     } else {
-      quarantine_check <-
-        secondary_raster_checks(config$quarantine_areas_file, host)
+      quarantine_check <- secondary_raster_checks(config$quarantine_areas_file, host)
     }
 
     if (quarantine_check$checks_passed) {
@@ -591,15 +524,13 @@ configuration <- function(config) {
       return(config)
     }
   } else {
-    # set quarantine areas to all zeros. meaning no quarantine areas are
-    # considered
+    # set quarantine areas to all zeros. meaning no quarantine areas are considered
     config$quarantine_areas <- mortality_tracker
   }
 
   mortality_tracker2 <- list(mortality_tracker)
   if (config$mortality_on) {
     mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
-
     for (mt in 2:(mortality_length)) {
       mortality_tracker2[[mt]] <- mortality_tracker
     }
@@ -635,11 +566,10 @@ configuration <- function(config) {
       return(config)
     }
 
-    parameters <- MASS::mvrnorm(
-      config$number_of_iterations,
-      config$parameter_means,
-      config$parameter_cov_matrix
-    )
+    parameters <-
+      MASS::mvrnorm(config$number_of_iterations,
+                    config$parameter_means,
+                    config$parameter_cov_matrix)
     while (any(parameters[, 1] < 0 |
       parameters[, 2] <= 0 |
       parameters[, 3] > 1 |
@@ -687,26 +617,15 @@ configuration <- function(config) {
 
   if (config$function_name %in% c("validate", "calibrate")) {
     config$use_anthropogenic_kernel <- TRUE
-    # Load observed data on occurence
+    # Load observed data on occurrence
     infection_years <- terra::rast(config$infected_years_file)
     infection_years[] <- as.integer(infection_years[])
     config$num_layers_infected_years <- terra::nlyr(infection_years)
 
     if (config$num_layers_infected_years < config$number_of_outputs) {
       config$failure <-
-        paste("The infection years file must have enough layers to match the
-            number of outputs from the model. The number of layers of your
-            infected year file is", config$num_layers_infected_years, "and the
-            number of outputs is", config$number_of_time_steps, sep = " ")
+        infection_years_length_error(config$num_layers_infected_years, config$number_of_time_steps)
       return(config)
-    }
-
-    # add / to output folder path if not provided by user.
-    if (substr(config$output_folder_path, nchar(config$output_folder_path),
-               nchar(config$output_folder_path)) == "/") {
-      config$output_folder_path <- config$output_folder_path
-    } else {
-      config$output_folder_path <- paste(config$output_folder_path, "/", sep = "")
     }
 
     infection_years2 <- list(terra::as.matrix(infection_years[[1]], wide = TRUE))
@@ -734,6 +653,14 @@ configuration <- function(config) {
       round((config$budget / config$cost_per_meter_sq) / (config$ew_res * config$ns_res))
     config$buffer_cells <- config$buffer / config$ew_res
     config$years_simulated <- length(config$years)
+  }
+
+  # add / to output folder path if not provided by user.
+  if (substr(config$output_folder_path, nchar(config$output_folder_path),
+             nchar(config$output_folder_path)) == "/") {
+    config$output_folder_path <- config$output_folder_path
+  } else {
+    config$output_folder_path <- paste(config$output_folder_path, "/", sep = "")
   }
 
   config$crs <- terra::crs(config$host)

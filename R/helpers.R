@@ -125,13 +125,19 @@ latency_period_error <-
   "Model type is set to SEI but the latency period is less than 1"
 treatment_option_error <-
   "treatment method is not one of the valid treatment options"
+infection_years_length_error <- function(num_layers_infected_years, number_of_time_steps) {
+  error_message <-
+    paste("The infection years file must have enough layers to match the number of outputs from the
+    model. The number of layers of your infected year file is", num_layers_infected_years,
+    "and the number of outputs is", number_of_time_steps, sep = " ")
+  return(error_message)
+}
+
 # Uncertainty propagation for raster data sets, expects a spatRaster with 2
 # layers (mean and standard deviation)
 output_from_raster_mean_and_sd <- function(x) {
-  x[[1]] <- terra::classify(x[[1]],
-                            matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
-  x[[2]] <- terra::classify(x[[2]],
-                            matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[1]] <- terra::classify(x[[1]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
+  x[[2]] <- terra::classify(x[[2]], matrix(c(-Inf, 0, 0), ncol = 3, byrow = TRUE))
   fun <- function(x) {
     round(rnorm(1, mean = x[1], sd = x[2]), digits = 0)
   }
@@ -145,8 +151,7 @@ get_all_infected <- function(rast, direction = 4) {
   # get infections as points
   p <- terra::as.points(rast)
   rast <-
-    terra::classify(rast,
-                    matrix(c(0, NA), ncol = 2, byrow = TRUE), right = NA)
+    terra::classify(rast, matrix(c(0, NA), ncol = 2, byrow = TRUE), right = NA)
   names(rast) <- "group"
   names(p) <- "data"
   p <- p[p$data > 0]
@@ -247,8 +252,7 @@ get_infection_distances <- function(rast, method = "Foci", points = c()) {
     minimum_distance <- Inf
     for (l in seq_len(nrow(points))) {
       new_distance <-
-        sqrt((abs(infections$i[i] - points$i[l]))^2 +
-               (abs(infections$j[i] - points$j[l]))^2)
+        sqrt((abs(infections$i[i] - points$i[l]))^2 + (abs(infections$j[i] - points$j[l]))^2)
       if (new_distance < minimum_distance) {
         minimum_distance <- new_distance
       }
@@ -319,8 +323,7 @@ treatment_auto <- function(rasts,
 
     if (total_infs[q] > 0 && cells_treated[[1]] < number_of_locations) {
 
-      infections <-
-        get_infection_distances(rast = rast, method = method, points = points)
+      infections <- get_infection_distances(rast = rast, method = method, points = points)
       infections$host <- 0
       for (p in seq_len(nrow(infections))) {
         infections$host[p] <- rast2[infections$i[p], infections$j[p]]
@@ -377,8 +380,7 @@ treatment_auto <- function(rasts,
                       min(1, treatment[i_s[s], j_s[n]]$treatment +
                             (buffer_cells - floor(buffer_cells)))
                     if (value > treatment[i_s[s], j_s[n]]) {
-                      cells_treated <-
-                        cells_treated + value - treatment[i_s[s], j_s[n]]
+                      cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
                     } else {
                       cells_treated <- cells_treated + value
                     }
@@ -388,8 +390,7 @@ treatment_auto <- function(rasts,
                       if (cells_treated >= number_of_locations) {
                         break
                       }
-                      cells_treated <-
-                        cells_treated + (1 - treatment[i_s[s], j_s[n]])
+                      cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
                       treatment[i_s[s], j_s[n]] <- 1
                     }
                   }
@@ -446,16 +447,14 @@ treatment_auto <- function(rasts,
                     min(1, treatment[i_s[s], j_s[n]]$treatment +
                           (buffer_cells - floor(buffer_cells)))
                   if (value > treatment[i_s[s], j_s[n]]) {
-                    cells_treated <-
-                      cells_treated + value - treatment[i_s[s], j_s[n]]
+                    cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
                   } else {
                     cells_treated <- cells_treated + value
                   }
                   treatment[i_s[s], j_s[n]] <- value
                 } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
                   if (treatment[i_s[s], j_s[n]] < 1) {
-                    cells_treated <-
-                      cells_treated + (1 - treatment[i_s[s], j_s[n]])
+                    cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
                     treatment[i_s[s], j_s[n]] <- 1
                   }
                 }
@@ -502,16 +501,14 @@ treatment_auto <- function(rasts,
                     min(1, treatment[i_s[s], j_s[n]]$treatment +
                           (buffer_cells - floor(buffer_cells)))
                   if (value > treatment[i_s[s], j_s[n]]) {
-                    cells_treated <-
-                      cells_treated + value - treatment[i_s[s], j_s[n]]
+                    cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
                   } else {
                     cells_treated <- cells_treated + value
                   }
                   treatment[i_s[s], j_s[n]] <- value
                 } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
                   if (treatment[i_s[s], j_s[n]] < 1) {
-                    cells_treated <-
-                      cells_treated + (1 - treatment[i_s[s], j_s[n]])
+                    cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
                     treatment[i_s[s], j_s[n]] <- 1
                   }
                 }
@@ -524,8 +521,7 @@ treatment_auto <- function(rasts,
           }
         }
       } else {
-        return('priority needs to be one of "group size", "host",
-               or "infected"')
+        return('priority needs to be one of "group size", "host", or "infected"')
       }
     }
   }
