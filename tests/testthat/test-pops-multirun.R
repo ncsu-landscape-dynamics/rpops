@@ -1,5 +1,30 @@
 context("test-pops-multirun")
 
+
+test_that("Model stops if files don't exist or aren't the correct extension", {
+  infected_file <-
+    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+
+  expect_error(pops_multirun(infected_file = "",
+                    host_file =  host_file,
+                    total_populations_file =  host_file,
+                    parameter_means = parameter_means,
+                    parameter_cov_matrix = parameter_cov_matrix),
+               file_exists_error)
+
+  expect_error(pops_multirun(infected_file = infected_file,
+                             host_file =  host_file,
+                             total_populations_file =  host_file,
+                             parameter_means = parameter_means,
+                             parameter_cov_matrix = parameter_cov_matrix,
+                             mask = ""),
+               file_exists_error)
+})
+
 test_that("Multirun model outputs work", {
   skip_on_os("windows")
   infected_file <-
@@ -29,8 +54,8 @@ test_that("Multirun model outputs work", {
   mortality_on <- FALSE
   mortality_rate <- 0
   mortality_time_lag <- 0
-  mortality_frequency = "Year"
-  mortality_frequency_n = 1
+  mortality_frequency <- "Year"
+  mortality_frequency_n <- 1
   natural_kernel_type <- "cauchy"
   anthropogenic_kernel_type <- "cauchy"
   natural_dir <- "NONE"
@@ -64,8 +89,8 @@ test_that("Multirun model outputs work", {
   leaving_scale_coefficient <- 1
   exposed_file <- ""
   mask <- NULL
-  write_outputs <- "None"
-  output_folder_path <- ""
+  write_outputs <- "all_simulations"
+  output_folder_path <- tempdir()
 
   data <- pops_multirun(infected_file,
                         host_file,
@@ -118,9 +143,15 @@ test_that("Multirun model outputs work", {
                         dispersal_percentage,
                         quarantine_areas_file,
                         use_quarantine,
-                        use_spreadrates)
-
-
+                        use_spreadrates,
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
@@ -143,6 +174,8 @@ test_that("Multirun model outputs work", {
   expect_equal(data$north_rate[[2]], 0)
 
   output_frequency <- "month"
+  write_outputs <- "None"
+  output_folder_path <- ""
 
   data <- pops_multirun(infected_file,
                         host_file,
@@ -377,8 +410,7 @@ test_that("Multirun model outputs work", {
 test_that("Multirun model outputs work with mask", {
   skip_on_os("windows")
   infected_file <-
-    system.file("extdata", "simple20x20", "initial_infection.tif",
-                package = "PoPS")
+    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <-
     system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   total_populations_file <-
@@ -404,8 +436,8 @@ test_that("Multirun model outputs work with mask", {
   mortality_on <- FALSE
   mortality_rate <- 0
   mortality_time_lag <- 0
-  mortality_frequency = "Year"
-  mortality_frequency_n = 1
+  mortality_frequency <- "Year"
+  mortality_frequency_n <- 1
   natural_kernel_type <- "cauchy"
   anthropogenic_kernel_type <- "cauchy"
   natural_dir <- "NONE"

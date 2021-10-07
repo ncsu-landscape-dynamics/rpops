@@ -29,12 +29,12 @@ Imports:
     iterators,
     landscapemetrics,
     lubridate,
-    folderfun,
     sp,
     utils,
     MASS,
     methods,
-    aws.s3
+    aws.s3,
+    Metrics
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 URL: http://www.github.com/ncsu-landscape-dynamics/rpops
@@ -52,7 +52,10 @@ Suggests:
     rmarkdown,
     qpdf,
     remotes,
-    rcmdcheck
+    rcmdcheck,
+    markdown,
+    covr,
+    pkgdown
 LinkingTo: 
     Rcpp
 RoxygenNote: 7.1.1

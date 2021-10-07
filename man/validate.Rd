@@ -7,7 +7,7 @@ scales of the pops model.}
 \usage{
 validate(
   infected_years_file,
-  number_of_iterations,
+  number_of_iterations = 10,
   number_of_cores = NA,
   parameter_means,
   parameter_cov_matrix,
@@ -45,7 +45,6 @@ validate(
   pesticide_duration = 0,
   pesticide_efficacy = 1,
   mask = NULL,
-  success_metric = "quantity",
   output_frequency = "year",
   output_frequency_n = 1,
   movements_file = "",
@@ -73,6 +72,8 @@ validate(
   network_speed = 0,
   node_filename = "",
   segment_filename = ""
+  use_distance = FALSE,
+  use_configuration = FALSE
 )
 }
 \arguments{
@@ -88,8 +89,8 @@ If not set uses the # of CPU cores - 1. must be an integer >= 1}
 \item{parameter_means}{the parameter means from the abc calibration function
 (posterior means)}
 
-\item{parameter_cov_matrix}{the parameter covariance matrix from the abc
-calibration function (posterior covairance matrix)}
+\item{parameter_cov_matrix}{the parameter covariance matrix from the ABC
+calibration function (posterior covariance matrix)}
 
 \item{infected_file}{Raster file with initial infections. Units for
 infections are based on data availability and the way the units used for your
@@ -230,10 +231,6 @@ successfully treats 70 percent of the plants or animals)}
 true negatives from comparisons (e.g. mask out lakes and oceans from statics
 if modeling terrestrial species).}
 
-\item{success_metric}{Choose which success metric to use for calibration.
-Choices are "quantity", "quantity and configuration", "residual error" and
-"odds ratio". Default is "quantity"}
-
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day', 'time step', or 'every_n_steps')}
 
@@ -311,10 +308,18 @@ calculations}
 \item{node_filename}{entire file path for the node file}
 
 \item{segment_filename}{entire file path for the segment file}
+
+\item{point_file}{file for point comparison if not provided skips calculations}
+
+\item{use_distance}{Boolean if you want to compare distance between
+simulations and observations. Default is FALSE.}
+
+\item{use_configuration}{Boolean if you want to use configuration
+disagreement for comparing model runs. Default is FALSE.}
+
 }
 \value{
-a dataframe of the variables saved and their success metrics for
-each run
+a data frame of statistical measures of model performance.
 }
 \description{
 This function uses the quantity, allocation, and configuration disagreement

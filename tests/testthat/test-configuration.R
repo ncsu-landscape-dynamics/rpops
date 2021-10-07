@@ -12,8 +12,7 @@ config$number_of_generations <- 4
 config$generation_size <- 10
 config$checks <- c(1200, 100000, 900, 1000)
 config$infected_file <-
-  system.file("extdata", "simple20x20", "initial_infection.tif",
-              package = "PoPS")
+  system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
 config$host_file <-
   system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
 config$total_populations_file <-
@@ -76,8 +75,7 @@ config$calibration_method <- "ABC"
 config$failure <- NULL
 config$function_name <- "pops"
 config$exposed_file <-
-  system.file("extdata", "simple20x20", "initial_infection.tif",
-              package = "PoPS")
+  system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
 config$write_outputs <- "None"
 config$output_folder_path <- ""
 
@@ -401,8 +399,7 @@ test_that("Configuration returns proper values when no errors present", {
   expect_equal(config2$failure, NULL)
 
   config$infected_files <-
-    c(system.file("extdata", "simple20x20", "initial_infection.tif",
-                package = "PoPS"))
+    c(system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS"))
   config$parameter_means <- list(c(0.2, 20, 0.99, 6000, 0, 0))
   config$parameter_cov_matrix <- list(matrix(ncol = 6, nrow = 6, 0.1))
   config$function_name <- "auto-manage"
@@ -412,52 +409,43 @@ test_that("Configuration returns proper values when no errors present", {
 })
 
 test_that("configuration returns proper errors", {
+  config$season_month_end <- 15
+  config2 <- configuration(config)
+  expect_equal(config2$failure, season_month_error)
+
+  config$season_month_end <- 12
   config$model_type <- "SEID"
   config2 <- configuration(config)
-  expect_equal(config2$failure,
-               "Model type is not a valid type options are 'SI' or 'SEI'")
+  expect_equal(config2$failure, model_type_error)
 
   config$model_type <- "SEI"
   config$latency_period <- 0
   config2 <- configuration(config)
-  expect_equal(config2$failure,
-               "Model type is set to SEI but the latency period is less than 1")
+  expect_equal(config2$failure, latency_period_error)
 
   config$latency_period <- 1
   config$treatment_method <- "everything"
   config2 <- configuration(config)
-  expect_equal(config2$failure,
-               "treatment method is not one of the valid treatment options")
+  expect_equal(config2$failure, treatment_option_error)
 
   config$treatment_method <- "ratio"
   config$natural_kernel_type <- "hello"
   config2 <- configuration(config)
-  expect_equal(
-    config2$failure,
-    "Natural kernel type not one of 'cauchy', 'exponential',
-      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'weibull', 'logistic'")
+  expect_equal(config2$failure, natural_kernel_error)
 
   config$natural_kernel_type <- "cauchy"
   config$anthropogenic_kernel_type <- "good-bye"
   config2 <- configuration(config)
-  expect_equal(
-    config2$failure,
-    "Anthropogenic kernel type not one of 'cauchy', 'exponential',
-      'uniform','deterministic neighbor','power law', 'hyperbolic secant',
-      'gamma', 'weibull', 'logistic'")
+  expect_equal(config2$failure, anthropogenic_kernel_error)
 
   config$anthropogenic_kernel_type <- "cauchy"
   config$write_outputs <- "hi"
   config2 <- configuration(config)
-  expect_equal(
-    config2$failure,
-    "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')")
+  expect_equal(config2$failure, write_outputs_error)
 
   config$write_outputs <- "summary_outputs"
   config$output_folder_path <- "hi"
   config2 <- configuration(config)
-  expect_equal(
-    config2$failure,
-    "output path doesn't exist")
+  expect_equal(config2$failure, output_path_error)
+
 })

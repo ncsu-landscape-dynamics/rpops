@@ -1,28 +1,35 @@
-#' Compares quantity and allocation disagreement of two raster datasets
+#' Compares quantity and allocation disagreement of two raster data sets
 #'
 #' Uses quantity and allocation disagreement metrics by Pontius and Millones
-#' (2014) and omission and comission errors of comparing a modeled raster
-#' dataset to a reference raster datatset.
+#' (2014) and omission and commission errors of comparing a modeled raster
+#' data set to a reference raster data set.
 #'
-#' @param reference the binary (0 or 1) raster with ground truth data
-#' @param comparison the binary (0 or 1) raster with simulated data to be
-#' compared to ground truth
-#' @param configuration Set to true if you want to use configuration
+#' @param reference the raster with ground truth data. For all metrics expect
+#' RMSE these values are reclassified with values > 1 becoming 1, values < 1
+#' going to 0, and NA values staying NA.
+#' @param comparison the raster with simulated data. For all metrics expect
+#' RMSE these values are reclassified with values > 1 becoming 1, values < 1
+#' going to 0.
+#' @param use_configuration Boolean if you want to use configuration
 #' disagreement for comparing model runs. Default is FALSE.
 #' @param mask Used to provide a mask to remove 0's that are not true
 #' negatives from comparisons.
+#' @param use_distance Boolean if you want to compare distance between
+#' simulations and observations. Default is FALSE.
 #'
 #' @importFrom landscapemetrics lsm_c_np lsm_c_enn_mn lsm_c_para_mn lsm_c_lpi
-#' @importFrom terra cells xres ncol nrow yres ext compareGeom
+#' @importFrom terra cells xres ncol nrow yres ext compareGeom vect
+#' @importFrom Metrics rmse
 #'
 #' @return A data frame with spatial configuration metrics. Particularly
-#' quantity, allocation, and total disagreement,  omission and comission, and
+#' quantity, allocation, and total disagreement,  omission and commission, and
 #' directional disagreement where directional disagreement.
 #'
 #' @export
 #'
 quantity_allocation_disagreement <-
-  function(reference, comparison, configuration = FALSE, mask = NULL) {
+  function(reference, comparison, use_configuration = FALSE,
+           mask = NULL, use_distance = FALSE) {
     if (!is.null(mask)) {
       reference <- terra::mask(reference, mask)
       comparison <- terra::mask(comparison, mask)
@@ -36,63 +43,87 @@ quantity_allocation_disagreement <-
     # (residual error is a comparison of exact population numbers)
     comp <- comparison
     ref <- reference
-    rcl_comp <- c(1, Inf, 1, 0, 0.99, 0)
+    rcl_comp <- c(1, Inf, 1, 0, 1, 0, NA, 0, 0)
     rclmat_comp <- matrix(rcl_comp, ncol = 3, byrow = TRUE)
     ## use 2 to indicate areas that aren't sampled in the reference data. This
     ## allows for the calculation of pure non-inflated accuracy statistics and
     ## to examine where the model is predicting
     rcl_ref <- c(NA, 0, 2, 1, Inf, 1, 0, 0.99, 0)
     rclmat_ref <- matrix(rcl_ref, ncol = 3, byrow = TRUE)
-    reference <- terra::classify(reference, rclmat_ref)
-    comparison <- terra::classify(comparison, rclmat_comp)
+    reference <- terra::classify(reference, rclmat_ref, right = FALSE)
+    comparison <- terra::classify(comparison, rclmat_comp, right = TRUE)
 
-    if (configuration == TRUE) {
-      # calculate number of infected patches
-      np_ref <- landscapemetrics::lsm_c_np(reference, directions = 8)$value[2]
+    if (use_configuration) {
       if (sum(terra::values(comparison) > 0, na.rm = TRUE) == 0) {
         np_comp <- 0
         enn_mn_comp <- 0
         lpi_comp <- 0
         para_mn_comp <- 0
       } else {
-        np_comp <-
-          landscapemetrics::lsm_c_np(comparison, directions = 8)$value[2]
-      }
+        # calculate number of infected patches
+        np_comps <- landscapemetrics::lsm_c_np(comparison, directions = 8)
+        if (any(unique(np_comps$class) %in% 1)) {
+          np_comp <- np_comps$value[np_comps$class == 1]
+        } else {
+          np_comp <- 0
+        }
 
-      change_np <- abs((np_comp - np_ref) / (np_ref))
-      if (change_np > 1) {
-        change_np <- 1
+        # calculate the mean euclidean distance between patches
+        if (np_comp > 1) {
+          enn_mn_comps <- landscapemetrics::lsm_c_enn_mn(comparison, directions = 8, verbose = TRUE)
+          if (any(unique(enn_mn_comps$class) %in% 1)) {
+            enn_mn_comp <- enn_mn_comps$value[enn_mn_comps$class == 1]
+          } else {
+            enn_mn_comp <- 0
+          }
+        } else if (np_comp <= 1) {
+          enn_mn_comp <- 0
+        }
+
+        # calculate the mean perimeter-area ratio of patches and the difference
+        para_mn_comps <- landscapemetrics::lsm_c_para_mn(comparison, directions = 8)
+        if (any(unique(para_mn_comps$class) %in% 1)) {
+          para_mn_comp <- para_mn_comps$value[para_mn_comps$class == 1]
+        } else {
+          para_mn_comp <- 0
+        }
+
+        # calculate the largest patch index and difference
+        lpi_comps <- landscapemetrics::lsm_c_lpi(comparison, directions = 8)
+        if (any(unique(lpi_comps$class) %in% 1)) {
+          lpi_comp <- lpi_comps$value[lpi_comps$class == 1]
+        } else {
+          lpi_comp <- 0
+        }
       }
+      # calculate number of infected patches in reference (observed) and comparison (simulated)
+      # data
+      np_refs <- landscapemetrics::lsm_c_np(reference, directions = 8)
+      if (any(unique(np_refs$class) %in% 1)) {
+        np_ref <- np_refs$value[np_refs$class == 1]
+      } else {
+        np_ref <- 0
+      }
+      change_np <- abs((np_comp - np_ref) / (np_ref))
       if (change_np >= 1) {
         change_np <- 1
       }
 
       # calculate the mean euclidean distance between patches
       if (np_ref > 1) {
-        enn_mn_ref <-
-          landscapemetrics::lsm_c_enn_mn(reference,
-            directions = 8,
-            verbose = TRUE
-          )$value[2]
+        enn_mn_refs <- landscapemetrics::lsm_c_enn_mn(reference, directions = 8, verbose = TRUE)
+        if (any(unique(enn_mn_refs$class) %in% 1)) {
+          enn_mn_ref <- enn_mn_refs$value[enn_mn_refs$class == 1]
+        } else {
+          enn_mn_ref <- 0
+        }
       } else if (np_ref == 1) {
         enn_mn_ref <- 0
       }
 
-      if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 &&
-          np_comp > 1) {
-        enn_mn_comp <-
-          landscapemetrics::lsm_c_enn_mn(comparison,
-            directions = 8,
-            verbose = TRUE
-          )$value[2]
-      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0 &&
-                 np_comp <= 1) {
-        enn_mn_comp <- 0
-      }
-
       if (enn_mn_ref != 0) {
         change_enn_mn <- abs((enn_mn_comp - enn_mn_ref) / (enn_mn_ref))
-        if (change_enn_mn > 1) {
+        if (change_enn_mn >= 1) {
           change_enn_mn <- 1
         }
       } else if (enn_mn_comp == 0 && enn_mn_ref == 0) {
@@ -102,13 +133,11 @@ quantity_allocation_disagreement <-
       }
 
       # calculate the mean perimeter-area ratio of patches and the difference
-      para_mn_ref <-
-        landscapemetrics::lsm_c_para_mn(reference, directions = 8)$value[2]
-      if (sum(terra::values(comparison) > 0, na.rm = TRUE) == 0) {
-        para_mn_comp <- 0
-      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0) {
-        para_mn_comp <-
-          landscapemetrics::lsm_c_para_mn(comparison, directions = 8)$value[2]
+      para_mn_refs <- landscapemetrics::lsm_c_para_mn(reference, directions = 8)
+      if (any(unique(para_mn_refs$class) %in% 1)) {
+        para_mn_ref <- para_mn_refs$value[para_mn_refs$class == 1]
+      } else {
+        para_mn_ref <- 0
       }
 
       change_para_mn <- abs((para_mn_comp - para_mn_ref) / (para_mn_ref))
@@ -117,20 +146,19 @@ quantity_allocation_disagreement <-
       }
 
       # calculate the largest patch index and difference
-      lpi_ref <- landscapemetrics::lsm_c_lpi(reference, directions = 8)$value[2]
-      if (sum(terra::values(comparison) > 0, na.rm = TRUE) == 0) {
-        lpi_comp <- 0
-      } else if (sum(terra::values(comparison) > 0, na.rm = TRUE) != 0) {
-        lpi_comp <-
-          landscapemetrics::lsm_c_lpi(comparison, directions = 8)$value[2]
+      lpi_refs <- landscapemetrics::lsm_c_lpi(reference, directions = 8)
+      if (any(unique(lpi_refs$class) %in% 1)) {
+        lpi_ref <- lpi_refs$value[lpi_refs$class == 1]
+      } else {
+        lpi_ref <- 0
       }
 
       change_lpi <- abs((lpi_comp - lpi_ref) / (lpi_ref))
-      if (change_lpi > 1) {
+      if (change_lpi >= 1) {
         change_lpi <- 1
       }
-      configuration_disagreement <-
-        ((change_np + change_enn_mn + change_para_mn + change_lpi) / 4)
+
+      configuration_disagreement <- ((change_np + change_enn_mn + change_para_mn + change_lpi) / 4)
     } else {
       configuration_disagreement <- 0
     }
@@ -157,7 +185,12 @@ quantity_allocation_disagreement <-
     accuracy <- (true_negative + true_positive) / total_obs
     precision <- true_positive / (true_positive + false_positive)
     recall <- true_positive / (true_positive + false_negative)
-    specificiity <- true_negative / (true_negative + false_positive)
+    specificity <- true_negative / (true_negative + false_positive)
+
+    if (is.nan(accuracy)) {accuracy <- 0}
+    if (is.nan(precision)) {precision <- 0}
+    if (is.nan(recall)) {recall <- 0}
+    if (is.nan(specificity)) {specificity <- 0}
 
     # calculate quantity and allocation disagreements for infected/infested from
     # probabilities based on Death to Kappa (Pontius et al. 2011)
@@ -165,6 +198,39 @@ quantity_allocation_disagreement <-
       abs(positives_in_comparison - positives_in_reference)
     allocation_disagreement <- 2 * min(false_negative, false_positive)
     total_disagreement <- quantity_disagreement + allocation_disagreement
+
+    # calculate RMSE for comparison
+    obs_points <- terra::as.points(ref)
+    names(obs_points) <- "data"
+    obs_points <- obs_points[obs_points$data > 0]
+    actual <- terra::extract(ref, obs_points)
+    predicted <- terra::extract(comp, obs_points)
+    RMSE <- Metrics::rmse(actual[, 2], predicted[, 2])
+    distance_difference <- 0
+
+    if (use_distance) {
+      sim_points <- terra::as.points(comp)
+      names(sim_points) <- "data"
+      sim_points <- sim_points[sim_points$data > 0]
+      dist <-
+        terra::distance(obs_points,
+                        sim_points)
+      if (is(dist, "matrix")) {
+        distance_differences <- apply(dist, 2, min)
+      }
+
+      all_distances <- function(distance_differences) {
+        distance_differences <-
+          round(sqrt(sum(distance_differences^2)), digits = 0)
+        return(distance_differences)
+      }
+      distance_differences <- lapply(distance_differences, all_distances)
+      distance_differences <-
+        unlist(distance_differences, recursive = TRUE, use.names = TRUE)
+
+      distance_difference <- sum(distance_differences)
+    }
+
     # calculate odds ratio with adjustments so can never be NA or INF
     if (false_negative == 0 && false_positive == 0) {
       odds_ratio <- (true_positive * true_negative) / 1
@@ -198,7 +264,7 @@ quantity_allocation_disagreement <-
     output$accuracy <- accuracy
     output$precision <- precision
     output$recall <- recall
-    output$specificiity <- specificiity
+    output$specificity <- specificity
     output$quantity_disagreement <- quantity_disagreement
     output$allocation_disagreement <- allocation_disagreement
     output$total_disagreement <- total_disagreement
@@ -210,6 +276,8 @@ quantity_allocation_disagreement <-
     output$simulated_infected <- positives_in_comparison
     output$infected_difference <-
       positives_in_comparison - positives_in_reference
+    output$rmse <- RMSE
+    output$distance_difference <- distance_difference
 
     return(output)
   }

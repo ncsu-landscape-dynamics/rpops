@@ -8,19 +8,19 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
   if (use_s3) {
     if (!aws.s3::head_object(x, bucket)) {
       checks_passed <- FALSE
-      failed_check <- "file does not exist"
+      failed_check <- file_exists_error
     }
   } else {
     if (!all(file.exists(x))) {
       checks_passed <- FALSE
-      failed_check <- "file does not exist"
+      failed_check <- file_exists_error
     }
   }
 
   if (checks_passed && !all((tools::file_ext(x) %in%
     c("grd", "tif", "img", "vrt")))) {
     checks_passed <- FALSE
-    failed_check <- "file is not one of '.grd', '.tif', '.img', or '.vrt'"
+    failed_check <- raster_type_error
   }
 
   if (checks_passed) {
@@ -31,9 +31,6 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     } else {
       r <- terra::rast(x)
     }
-    r <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
-      right = NA
-    )
   }
 
   if (checks_passed) {
@@ -55,51 +52,39 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
   if (use_s3) {
     if (!aws.s3::head_object(x, bucket)) {
       checks_passed <- FALSE
-      failed_check <- "file does not exist"
+      failed_check <- file_exists_error
     }
   } else {
     if (!all(file.exists(x))) {
       checks_passed <- FALSE
-      failed_check <- "file does not exist"
+      failed_check <- file_exists_error
     }
   }
 
   if (checks_passed && !all((tools::file_ext(x) %in%
     c("grd", "tif", "img", "vrt")))) {
     checks_passed <- FALSE
-    failed_check <- "file is not one of '.grd', '.tif', '.img', or '.vrt'"
+    failed_check <- raster_type_error
   }
 
   if (checks_passed) {
     if (use_s3) {
-      aws.s3::save_object(object = x, bucket = bucket,
-                          file = x, check_region = FALSE)
+      aws.s3::save_object(object = x, bucket = bucket, file = x, check_region = FALSE)
       r <- terra::rast(x)
     } else {
       r <- terra::rast(x)
     }
-    r2 <- terra::classify(r, matrix(c(NA, 0), ncol = 2, byrow = TRUE),
-      right = NA
-    )
-    if (!(terra::ext(r2) == terra::ext(r))) {
-      terra::ext(r2) <- terra::ext(r)
-    }
-    r <- r2
   }
 
   if (checks_passed && !(terra::ext(x2) == terra::ext(r))) {
     checks_passed <- FALSE
-    failed_check <-
-      "Extents of input rasters do not match. Ensure that all of your input
-    rasters have the same extent"
+    failed_check <- extent_error
   }
 
   if (checks_passed && !(terra::xres(x2) == terra::xres(r) &&
     terra::yres(x2) == terra::yres(r))) {
     checks_passed <- FALSE
-    failed_check <-
-      "Resolution of input rasters do not match. Ensure that all of your input
-    rasters have the same resolution"
+    failed_check <- resolution_error
   }
 
   if (checks_passed) {
@@ -113,9 +98,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
       }
     if (!(crs1$EPSG == crs2$EPSG)) {
       checks_passed <- FALSE
-      failed_check <-
-        "Coordinate reference system (crs) of input rasters do not match. Ensure
-    that all of your input rasters have the same crs"
+      failed_check <- crs_error
     }
   }
 
@@ -139,36 +122,29 @@ treatment_checks <- function(treatment_stack,
 
   if (checks_passed && length(treatments_file) != length(treatment_dates)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for treatment dates and treatments_file must be equal"
+    failed_check <- treatment_length_error
   }
 
   if (checks_passed && length(pesticide_duration) != length(treatment_dates)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for treatment dates and pesticide_duration must be equal"
+    failed_check <- pesticide_length_error
   }
 
   if (checks_passed) {
     if (pesticide_duration[1] > 0) {
       treatment_maps <-
-        list(terra::as.matrix(treatment_stack[[1]] * pesticide_efficacy,
-             wide = TRUE))
+        list(terra::as.matrix(treatment_stack[[1]] * pesticide_efficacy, wide = TRUE))
     } else {
-      treatment_maps <- list(terra::as.matrix(treatment_stack[[1]],
-                                              wide = TRUE))
+      treatment_maps <- list(terra::as.matrix(treatment_stack[[1]], wide = TRUE))
     }
 
     if (terra::nlyr(treatment_stack) >= 2) {
       for (i in 2:terra::nlyr(treatment_stack)) {
         if (pesticide_duration[i] > 0) {
           treatment_maps[[i]] <-
-            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy,
-                                  wide = TRUE))
+            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy, wide = TRUE))
         } else {
-          treatment_maps[[i]] <-
-            list(terra::as.matrix(treatment_stack[[i]],
-                                  wide = TRUE))
+          treatment_maps[[i]] <- list(terra::as.matrix(treatment_stack[[i]], wide = TRUE))
         }
       }
     }
@@ -190,8 +166,7 @@ treatment_metric_checks <- function(treatment_method) {
 
   if (!treatment_method %in% c("ratio", "all infected")) {
     checks_passed <- FALSE
-    failed_check <-
-      "treatment method is not one of the valid treatment options"
+    failed_check <- treatment_method_error
   }
 
   if (checks_passed) {
@@ -205,71 +180,13 @@ treatment_metric_checks <- function(treatment_method) {
   }
 }
 
-metric_checks <- function(success_metric) {
-  checks_passed <- TRUE
-
-  if (success_metric == "quantity") {
-    configuration <- FALSE
-  } else if (success_metric == "quantity and configuration") {
-    configuration <- TRUE
-  } else if (success_metric == "odds ratio") {
-    configuration <- FALSE
-  } else if (success_metric == "residual error") {
-    configuration <- FALSE
-  } else {
-    checks_passed <- FALSE
-    failed_check <-
-      "Success metric must be one of 'quantity','quantity and configuration',
-    'residual error', or 'odds ratio'"
-  }
-
-  if (checks_passed) {
-    outs <- list(checks_passed, configuration)
-    names(outs) <- c("checks_passed", "configuration")
-    return(outs)
-  } else {
-    outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
-    return(outs)
-  }
-}
-
-percent_checks <- function(percent_natural_dispersal) {
-  checks_passed <- TRUE
-
-  if (percent_natural_dispersal == 1.0) {
-    use_anthropogenic_kernel <- FALSE
-  } else if (percent_natural_dispersal < 1.0 &&
-    percent_natural_dispersal >= 0.0) {
-    use_anthropogenic_kernel <- TRUE
-  } else {
-    checks_passed <- FALSE
-    failed_check <- "Percent natural dispersal must be between 0.0 and 1.0"
-  }
-
-  if (checks_passed) {
-    outs <- list(checks_passed, use_anthropogenic_kernel)
-    names(outs) <- c("checks_passed", "use_anthropogenic_kernel")
-    return(outs)
-  } else {
-    outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
-    return(outs)
-  }
-}
-
 time_checks <- function(end_date, start_date, time_step,
                         output_frequency, output_frequency_n) {
   checks_passed <- TRUE
-  output_frequency_error <-
-    "Output frequency is more frequent than time_step. The minimum
-      output_frequency you can use is the time_step of your simulation. You can
-      set the output_frequency to 'time_step' to default to most frequent
-      output possible"
 
   if (checks_passed && !(time_step %in% list("week", "month", "day"))) {
     checks_passed <- FALSE
-    failed_check <- "Time step must be one of 'week', 'month' or 'day'"
+    failed_check <- time_step_error
   }
 
   if (checks_passed && (!is(end_date, "character") ||
@@ -279,16 +196,14 @@ time_checks <- function(end_date, start_date, time_step,
     is.na(as.Date(end_date, format = "%Y-%m-%d")) ||
     is.na(as.Date(start_date, format = "%Y-%m-%d")))) {
     checks_passed <- FALSE
-    failed_check <-
-    "End time and/or start time not of type numeric and/or in format YYYY-MM-DD"
+    failed_check <- date_format_error
   }
 
   if (checks_passed && !(output_frequency %in% list(
     "week", "month", "day", "year", "time_step", "every_n_steps"
   ))) {
     checks_passed <- FALSE
-    failed_check <-
-      "Output frequency must be either 'week', 'month', 'day', 'year', 'time_step', or 'every_n_steps'"
+    failed_check <- output_type_error
   }
 
   if (checks_passed && output_frequency == "day") {
@@ -367,136 +282,6 @@ time_checks <- function(end_date, start_date, time_step,
   }
 }
 
-# check for making sure priors are in the proper format and output the mean
-# where the mean serves as the starting point for the calibration
-prior_checks <- function(priors) {
-  checks_passed <- TRUE
-
-  if (is(priors, "numeric") && length(priors) == 2) {
-    priors <- matrix(priors, ncol = 2)
-  }
-
-  if ((is(priors, "data.frame") | is(priors, "matrix")) && ncol(priors) == 2) {
-    if (is(priors, "matrix") && base::nrow(priors) == 1) {
-      start_priors <- priors[1]
-      sd_priors <- priors[2]
-    } else if (is(priors, "data.frame") && nrow(priors) == 1) {
-      start_priors <- priors[[1]]
-      sd_priors <- 0
-    } else if ((is(priors, "data.frame") | is(priors, "matrix")) &&
-      base::nrow(priors) > 1) {
-      names(priors) <- c("var", "prob")
-      start_priors <- priors$var[priors$prob == max(priors$prob)]
-      if (length(start_priors) > 1) {
-        start_priors <- mean(start_priors)
-      }
-      sd_priors <- sd(priors$var)
-    }
-  } else {
-    checks_passed <- FALSE
-    failed_check <- "Incorrect format for priors"
-  }
-
-  if (checks_passed) {
-    outs <- list(checks_passed, priors, start_priors, sd_priors)
-    names(outs) <- c("checks_passed", "priors", "start_priors", "sd_priors")
-    return(outs)
-  } else {
-    outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
-    return(outs)
-  }
-}
-
-## helper for taking priors and calibartion to posteriors
-bayesian_checks <- function(prior,
-                            start_priors,
-                            sd_priors,
-                            params,
-                            count,
-                            prior_weight,
-                            weight,
-                            step_size,
-                            bounds = c(0, Inf),
-                            round_to = 1,
-                            round_to_digits = 1) {
-  checks_passed <- TRUE
-
-  if ((is(prior, "matrix") && nrow(prior) == 1) || (is(prior, "numeric") &&
-    length(prior) == 1)) {
-    priors <- round(rnorm(count, start_priors, sd_priors) / round_to,
-      digits = round_to_digits
-    ) * round_to
-    priors <- as.data.frame(table(priors))
-    priors$priors <- as.numeric(as.character(priors$priors))
-    priors$prob <- round(priors$Freq / count, digits = 3)
-    priors$prob[priors$priors == bounds[2]] <-
-      sum(priors$prob[priors$priors >= bounds[2]])
-    priors$prob[priors$priors == bounds[1]] <-
-      sum(priors$prob[priors$priors <= bounds[1]])
-    priors <- priors[priors$prob > 0.000, ]
-    priors <- priors[priors$priors <= bounds[2] & priors$priors >= bounds[1], ]
-  } else if ((is(priors, "data.frame") | is(priors, "matrix")) &&
-    nrow(prior) > 1) {
-    priors <- prior[, 1:2]
-    names(priors) <- c("priors", "prob")
-  }
-
-  if (is(params, "matrix")) {
-    params <- data.frame(params)
-    names(params) <- c("params", "prob")
-  }
-  calibration_count <- length(params)
-  calibrated_rates <- base::as.data.frame(table(params))
-  calibrated_rates$params <- as.numeric(as.character(calibrated_rates$params))
-  calibrated_rates$prob <- round(calibrated_rates$Freq / calibration_count,
-    digits = 3
-  )
-
-  min_rate <- min(min(priors$priors), min(calibrated_rates$params))
-  max_rate <- max(max(priors$priors), max(calibrated_rates$params))
-
-  rates <- data.frame(
-    rate = round(seq(min_rate, max_rate, step_size),
-      digits = round_to_digits
-    ),
-    prior_probability = rep(
-      0,
-      length(seq(
-        min_rate,
-        max_rate,
-        step_size
-      ))
-    ),
-    calibrated_probability =
-      rep(0, length(seq(min_rate, max_rate, step_size))),
-    posterior_probability =
-      rep(0, length(seq(min_rate, max_rate, step_size)))
-  )
-
-  for (i in seq_len(base::nrow(rates))) {
-    if (length(priors$prob[priors$priors == rates$rate[i]]) > 0) {
-      rates$prior_probability[i] <- priors$prob[priors$priors == rates$rate[i]]
-    }
-    if (length(calibrated_rates$prob[calibrated_rates$params ==
-      rates$rate[i]]) > 0) {
-      rates$calibrated_probability[i] <-
-        calibrated_rates$prob[calibrated_rates$params == rates$rate[i]]
-    }
-  }
-  rates$posterior_probability <- round(rates$prior_probability * prior_weight +
-    rates$calibrated_probability * weight,
-  digits = 3
-  )
-  posterior_rates <- rates[, c(1, 4)]
-
-  if (checks_passed) {
-    outs <- list(checks_passed, rates, posterior_rates)
-    names(outs) <- c("checks_passed", "rates", "posterior_rates")
-    return(outs)
-  }
-}
-
 bayesian_mnn_checks <- function(prior_means,
                                 prior_cov_matrix,
                                 calibrated_means,
@@ -509,9 +294,7 @@ bayesian_mnn_checks <- function(prior_means,
     posterior_means <- calibrated_means
   } else {
     checks_passed <- FALSE
-    failed_check <-
-      "There are not enough prior_means to communte the posterior means for all
-    paramaters"
+    failed_check <- prior_means_error
   }
 
   if (nrow(prior_cov_matrix) == nrow(calibrated_cov_matrix) &&
@@ -523,10 +306,7 @@ bayesian_mnn_checks <- function(prior_means,
     posterior_cov_matrix <- calibrated_cov_matrix
   } else {
     checks_passed <- FALSE
-    failed_check <-
-      "The prior covariance matrix is not the correct dimension to match the
-    calibrated covariance matrix in order to computer the posterior covariance
-    matrix"
+    failed_check <- prior_cov_matrix_error
   }
 
   if (checks_passed) {
@@ -576,189 +356,158 @@ multispecies_checks <- function(species,
 
   if (checks_passed && length(species) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for species and infected_files must be equal"
+    failed_check <- species_length_error
   }
 
   if (checks_passed && length(parameter_means) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for parameter_means and infected_files must be equal"
+    failed_check <- parameter_length_error
   }
 
   if (checks_passed && length(parameter_cov_matrix) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for parameter_cov_matrix and infected_files must be equal"
+    failed_check <- cov_matrix_length_error
   }
 
   if (checks_passed && length(model_type) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for model_type and infected_files must be equal"
+    failed_check <- model_type_length_error
   }
 
   if (checks_passed && length(natural_kernel_type) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and natural_kernel_type must be equal"
+    failed_check <- natural_kernel_length_error
   }
 
   if (checks_passed && length(anthropogenic_kernel_type) !=
     length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and anthropogenic_kernel_type must be equal"
+    failed_check <- anthropogenic_kernel_length_error
   }
 
   if (checks_passed && length(natural_dir) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and natural_dir must be equal"
+    failed_check <- natural_dir_length_error
   }
 
   if (checks_passed && length(anthropogenic_dir) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and anthropogenic_dir must be equal"
+    failed_check <- anthropogenic_dir_length_error
   }
 
   if (checks_passed && length(host_file) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and host_file must be equal"
+    failed_check <- host_file_length_error
   }
 
   if (checks_passed && length(total_populations_file) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and total_populations_file must be equal"
+    failed_check <- total_population_length_error
   }
 
   if (checks_passed && length(temp) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and temp must be equal"
+    failed_check <- temp_length_error
   }
 
   if (checks_passed && length(temperature_coefficient_file) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and temperature_coefficient_file must be equal"
+    failed_check <- temperature_coefficient_length_error
   }
 
   if (checks_passed && length(precip) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and precip must be equal"
+    failed_check <- precip_length_error
   }
 
   if (checks_passed && length(precipitation_coefficient_file) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and precipitation_coefficient_file must be equal"
+    failed_check <- precipitation_coefficient_length_error
   }
 
   if (checks_passed && length(latency_period) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and latency_period must be equal"
+    failed_check <- latency_period_length_error
   }
 
   if (checks_passed && length(time_step) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and time_step must be equal"
+    failed_check <- time_step_length_error
   }
 
   if (checks_passed && length(season_month_start) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and season_month_start must be equal"
+    failed_check <- season_month_start_length_error
   }
 
   if (checks_passed && length(season_month_end) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and season_month_end must be equal"
+    failed_check <- season_month_end_length_error
   }
 
   if (checks_passed && length(use_lethal_temperature) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and use_lethal_temperature must be equal"
+    failed_check <- use_lethal_length_error
   }
 
   if (checks_passed && length(temperature_file) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and temperature_file must be equal"
+    failed_check <- temperature_file_length_error
   }
 
   if (checks_passed && length(lethal_temperature) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and lethal_temperature must be equal"
+    failed_check <- lethal_temperature_length_error
   }
 
   if (checks_passed && length(lethal_temperature_month) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and lethal_temperature_month must be equal"
+    failed_check <- lethal_temperature_month_length_error
   }
 
   if (checks_passed && length(mortality_on) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and mortality_on must be equal"
+    failed_check <- mortality_on_length_error
   }
 
   if (checks_passed && length(mortality_rate) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and mortality_rate must be equal"
+    failed_check <- mortality_rate_length_error
   }
 
   if (checks_passed && length(mortality_time_lag) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and mortality_time_lag must be equal"
+    failed_check <- mortality_time_lag_length_error
   }
 
   if (checks_passed && length(movements_file) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and movements_file must be equal"
+    failed_check <- movements_file_length_error
   }
 
   if (checks_passed && length(use_movements) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and use_movements must be equal"
+    failed_check <- use_movements_length_error
   }
 
   if (checks_passed && length(start_exposed) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and start_exposed must be equal"
+    failed_check <- start_exposed_length_error
   }
 
   if (checks_passed && length(quarantine_areas_file) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and quarantine_areas_file must be equal"
+    failed_check <- quarantine_areas_length_error
   }
 
   if (checks_passed && length(use_quarantine) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and use_quarantine must be equal"
+    failed_check <- use_quarantine_length_error
   }
 
   if (checks_passed && length(use_spreadrates) != length(infected_files)) {
     checks_passed <- FALSE
-    failed_check <-
-      "Length of list for infected_files and use_spreadrates must be equal"
+    failed_check <- use_spreadrates_length_error
   }
 
   if (checks_passed) {
@@ -777,20 +526,19 @@ movement_checks <- function(x, rast, start_date, end_date) {
 
   if (!all(file.exists(x))) {
     checks_passed <- FALSE
-    failed_check <- "file does not exist"
+    failed_check <- file_exists_error
   }
 
   if (checks_passed && !all((tools::file_ext(x) %in% c("csv", "txt")))) {
     checks_passed <- FALSE
-    failed_check <- "file is not one of '.csv' or '.txt'"
+    failed_check <- file_type_error
   }
 
   if (checks_passed) {
     moves <- read.csv(x, header = TRUE)
     movement_from <- sp::SpatialPointsDataFrame(moves[, 1:2],
       data = moves[, c(1:2, 5:6)],
-      proj4string =
-        sp::CRS("+init=epsg:4326")
+      proj4string = sp::CRS("+init=epsg:4326")
     )
     movement_to <- sp::SpatialPointsDataFrame(moves[, 3:4],
       data = moves[, 3:6],
@@ -847,37 +595,6 @@ movement_checks <- function(x, rast, start_date, end_date) {
     outs <- list(checks_passed, movement, movements_dates, movements_r)
     names(outs) <-
       c("checks_passed", "movements", "movements_dates", "movements_r")
-    return(outs)
-  } else {
-    outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
-    return(outs)
-  }
-}
-
-parameter_checks <- function(n, parameter_means, parameter_cov_matrix) {
-  checks_passed <- TRUE
-
-  if (nrow(parameter_cov_matrix) != 6 | ncol(parameter_cov_matrix) != 6) {
-    checks_passed <- FALSE
-    failed_check <- "parameter covariance matrix is not 6 x 6"
-  }
-
-  if (length(parameter_means) != 6) {
-    checks_passed <- FALSE
-    failed_check <- "parameter means is not a vector of length 6"
-  }
-
-  if (checks_passed) {
-    parameters <- data.frame(MASS::mvrnorm(
-      n, parameter_means,
-      parameter_cov_matrix
-    ))
-  }
-
-  if (checks_passed) {
-    outs <- list(checks_passed, parameters)
-    names(outs) <- c("checks_passed", "parameters")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)

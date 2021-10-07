@@ -4,7 +4,7 @@
 [![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check)
 [![lint](https://github.com/ncsu-landscape-dynamics/rpops/workflows/lint/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3Alint)
 [![Build Status](https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=master)](https://travis-ci.org/ncsu-landscape-dynamics/rpops)
-[![codecov](https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/master/graph/badge.svg)](https://codecov.io/gh/ncsu-landscape-dynamics/rpops)
+[![codecov](https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/main/graph/badge.svg)](https://codecov.io/gh/ncsu-landscape-dynamics/rpops)
 [![DOI](https://zenodo.org/badge/143435350.svg)](https://zenodo.org/badge/latestdoi/143435350)
   <!-- badges: end -->
 
@@ -15,8 +15,6 @@ This is the R package for simulating spread of pests and pathogens. The package 
 PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit [popsmodel.org](https://popsmodel.org/). The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use [r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
 
 ## Installation
-Requires terra version between 1.1.17 and 1.2.5. terra 1.2.10 has a breaking bug in the extract function.
-
 If you are on Windows, you need to first install
 [Rtools](https://cran.r-project.org/bin/windows/Rtools/) to get a C++ compiler that R can use.
 
@@ -26,7 +24,7 @@ If you want to install a specific version just change the version number.
 
 ```R
 install.packages("remotes")
-remotes::install_github("ncsu-landscape-dynamics/rpops", ref = "v1.0.2")
+remotes::install_github("ncsu-landscape-dynamics/rpops", ref = "v1.1.0")
 library(PoPS)
 
 ```

@@ -14,11 +14,33 @@ this repository.
 
 ## [Unreleased]
 
+### Added
+
+- `quantity_allocation_disagreement` now takes in the use_distance parameter which is FALSE
+  by default. This allows the model to commute the minimum total distance between observed
+  and simulated infestations (@ChrisJones, #130).
+
 ### Changed
 
 - `validate` now takes the variable point_file and uses it to calculate statistics based on the
   point_file in addition to the raster file also calculates new measures of model performance
   accuracy, precision, recall, and specificity (@ChrisJones, #124).
+  
+- `calibrate` no longer uses success_metrics and checks parameters as these are both handled
+  internally by auto updating if the values are too far of in the first generation. This 
+  makes for a simpler and faster user experience (@ChrisJones, #130).
+  
+- `validate` no longer uses success_metrics parameter but now has the added parameters 
+  use_rmse and use_distance that are used in `quantity_allocation_disagreement`.
+  This allows for a more intuitive user interface (@ChrisJones, #130).
+  
+- `quantity_allocation_disagreement` variable configuration changed to use_configuration
+  to be more consistent with variable names. (@ChrisJones, #130).
+  
+- `pops_multirun` can now use variable write_output = "all_simulations" to write out
+  susceptible, exposed, and infected rasters from all simulations. This will allow for a 
+  future update where simulations can easily be started from previous simulation outputs.
+  (@ChrisJones, #133)
   
 ## [1.1.0] - 2021-06-22
 

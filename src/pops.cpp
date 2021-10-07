@@ -310,6 +310,7 @@ List pops_model_cpp(
             network ? *network : Network<int>::null_network(),
             spatial_indices);
 
+        // keeps track of cumulative dispers or propagules from a site.
         if (config.spread_schedule()[current_index]) {
             total_dispersers += dispersers;
         }
