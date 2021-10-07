@@ -71,7 +71,7 @@ validate(
   network_max_time = 0,
   network_speed = 0,
   node_filename = "",
-  segment_filename = ""
+  segment_filename = "",
   use_distance = FALSE,
   use_configuration = FALSE
 )
@@ -296,8 +296,7 @@ the natural kernel (if applicable)}
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 
-\item{point_file}{file for point comparison if not provided skips
-calculations}
+\item{point_file}{file for point comparison if not provided skips calculations}
 
 \item{network_min_time}{minimum time a propagule rides on the network}
 
@@ -309,14 +308,11 @@ calculations}
 
 \item{segment_filename}{entire file path for the segment file}
 
-\item{point_file}{file for point comparison if not provided skips calculations}
-
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}
 
 \item{use_configuration}{Boolean if you want to use configuration
 disagreement for comparing model runs. Default is FALSE.}
-
 }
 \value{
 a data frame of statistical measures of model performance.

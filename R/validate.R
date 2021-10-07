@@ -110,7 +110,7 @@ validate <- function(infected_years_file,
                      network_max_time = 0,
                      network_speed = 0,
                      node_filename = "",
-                     segment_filename = "") {
+                     segment_filename = "",
                      use_distance = FALSE,
                      use_configuration = FALSE) {
   config <- c()

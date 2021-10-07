@@ -77,7 +77,7 @@ calibrate(
   network_max_time = 0,
   network_speed = 0,
   node_filename = "",
-  segment_filename = ""
+  segment_filename = "",
   use_distance = FALSE,
   use_rmse = FALSE
 )
@@ -380,7 +380,6 @@ simulations and observations. Default is FALSE.}
 
 \item{use_rmse}{Boolean if you want to calibrate based on rmse. This is
 useful if you have very good population level observations. Default is FALSE.}
-
 }
 \value{
 a dataframe of the variables saved and their success metrics for
