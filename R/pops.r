@@ -164,6 +164,11 @@
 #' true negatives from comparisons (e.g. mask out lakes and oceans from statics
 #' if modeling terrestrial species). This can also be used to mask out areas
 #' that can't be managed in the auto_manage function.
+#' @param network_min_time minimum time a propagule rides on the network
+#' @param network_max_time maximum time a propagule rides on the network
+#' @param network_speed average speed in the unit of the coordinate reference system (e.g. meters)
+#' @param node_filename entire file path for the node file
+#' @param segment_filename entire file path for the segment file
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -233,7 +238,12 @@ pops <- function(infected_file,
                  leaving_percentage = 0,
                  leaving_scale_coefficient = 1,
                  exposed_file = "",
-                 mask = NULL) {
+                 mask = NULL,
+                 network_min_time = 0,
+                 network_max_time = 0,
+                 network_speed = 0,
+                 node_filename = "",
+                 segment_filename = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -303,6 +313,12 @@ pops <- function(infected_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
 
+  config$network_min_time <- network_min_time
+  config$network_max_time <- network_max_time
+  config$network_speed <- network_speed
+  config$node_filename <- node_filename
+  config$segment_filename <- segment_filename
+
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
@@ -346,15 +362,11 @@ pops <- function(infected_file,
                      end_date = config$end_date,
                      treatment_method = config$treatment_method,
                      natural_kernel_type = config$natural_kernel_type,
-                     anthropogenic_kernel_type =
-                       config$anthropogenic_kernel_type,
-                     use_anthropogenic_kernel =
-                       config$use_anthropogenic_kernel,
-                     percent_natural_dispersal =
-                       config$percent_natural_dispersal[1],
+                     anthropogenic_kernel_type = config$anthropogenic_kernel_type,
+                     use_anthropogenic_kernel = config$use_anthropogenic_kernel,
+                     percent_natural_dispersal = config$percent_natural_dispersal[1],
                      natural_distance_scale = config$natural_distance_scale[1],
-                     anthropogenic_distance_scale =
-                       config$anthropogenic_distance_scale[1],
+                     anthropogenic_distance_scale = config$anthropogenic_distance_scale[1],
                      natural_dir = config$natural_dir,
                      natural_kappa = config$natural_kappa[1],
                      anthropogenic_dir = config$anthropogenic_dir,
@@ -371,22 +383,22 @@ pops <- function(infected_file,
                      use_spreadrates = config$use_spreadrates,
                      model_type_ = config$model_type,
                      latency_period = config$latency_period,
-                     generate_stochasticity =
-                       config$generate_stochasticity,
-                     establishment_stochasticity =
-                       config$establishment_stochasticity,
+                     generate_stochasticity = config$generate_stochasticity,
+                     establishment_stochasticity = config$establishment_stochasticity,
                      movement_stochasticity = config$movement_stochasticity,
                      deterministic = config$deterministic,
-                     establishment_probability =
-                       config$establishment_probability,
+                     establishment_probability = config$establishment_probability,
                      dispersal_percentage = config$dispersal_percentage,
-                     use_overpopulation_movements =
-                       config$use_overpopulation_movements,
-                     overpopulation_percentage =
-                       config$overpopulation_percentage,
+                     use_overpopulation_movements = config$use_overpopulation_movements,
+                     overpopulation_percentage = config$overpopulation_percentage,
                      leaving_percentage = config$leaving_percentage,
-                     leaving_scale_coefficient =
-                       config$leaving_scale_coefficient
+                     leaving_scale_coefficient = config$leaving_scale_coefficient,
+                     bbox = config$bounding_box,
+                     network_min_time = config$network_min_time,
+                     network_max_time = config$network_max_time,
+                     network_speed = config$network_speed,
+                     node_filename = config$node_filename,
+                     segment_filename = config$segment_filename
   )
 
   return(data)

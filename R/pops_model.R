@@ -65,6 +65,8 @@
 #' 'day' or 'time step') in which to calculate and export spread rate
 #' statistics.
 #' @param spatial_indices list of all spatial locations with suitable hosts
+#' @param bbox bounding box for network kernel
+#'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
 #' @export

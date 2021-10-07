@@ -119,7 +119,12 @@ auto_manage <- function(infected_files,
                         exposed_file = "",
                         mask = NULL,
                         write_outputs = "None",
-                        output_folder_path = "") {
+                        output_folder_path = "",
+                        network_min_time = 0,
+                        network_max_time = 0,
+                        network_speed = 0,
+                        node_filename = "",
+                        segment_filename = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -186,6 +191,11 @@ auto_manage <- function(infected_files,
   config$mask <- mask
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
+  config$network_min_time <- network_min_time
+  config$network_max_time <- network_max_time
+  config$network_speed <- network_speed
+  config$node_filename <- node_filename
+  config$segment_filename <- segment_filename
 
   config <- configuration(config)
 
@@ -321,7 +331,13 @@ auto_manage <- function(infected_files,
                            use_overpopulation_movements = config$use_overpopulation_movements,
                            overpopulation_percentage = overpopulation_percentage,
                            leaving_percentage = leaving_percentage,
-                           leaving_scale_coefficient = leaving_scale_coefficient
+                           leaving_scale_coefficient = leaving_scale_coefficient,
+                           bbox = config$bounding_box,
+                           network_min_time = config$network_min_time,
+                           network_max_time = config$network_max_time,
+                           network_speed = config$network_speed,
+                           node_filename = config$node_filename,
+                           segment_filename = config$segment_filename
         )
 
         infected_runs <- raster::stack(lapply(1:length(data$infected), function(x) host))

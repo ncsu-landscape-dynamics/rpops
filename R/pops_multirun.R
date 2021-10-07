@@ -90,7 +90,12 @@ pops_multirun <- function(infected_file,
                           exposed_file = "",
                           mask = NULL,
                           write_outputs = "None",
-                          output_folder_path = "") {
+                          output_folder_path = "",
+                          network_min_time = 0,
+                          network_max_time = 0,
+                          network_speed = 0,
+                          node_filename = "",
+                          segment_filename = "") {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -157,6 +162,11 @@ pops_multirun <- function(infected_file,
   config$output_folder_path <- output_folder_path
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
+  config$network_min_time <- network_min_time
+  config$network_max_time <- network_max_time
+  config$network_speed <- network_speed
+  config$node_filename <- node_filename
+  config$segment_filename <- segment_filename
 
   config <- configuration(config)
 
@@ -181,8 +191,7 @@ pops_multirun <- function(infected_file,
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
-        lethal_temperature_month =
-          config$lethal_temperature_month,
+        lethal_temperature_month = config$lethal_temperature_month,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -215,16 +224,11 @@ pops_multirun <- function(infected_file,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
         natural_kernel_type = config$natural_kernel_type,
-        anthropogenic_kernel_type =
-          config$anthropogenic_kernel_type,
-        use_anthropogenic_kernel =
-          config$use_anthropogenic_kernel,
-        percent_natural_dispersal =
-          config$percent_natural_dispersal[i],
-        natural_distance_scale =
-          config$natural_distance_scale[i],
-        anthropogenic_distance_scale =
-          config$anthropogenic_distance_scale[i],
+        anthropogenic_kernel_type = config$anthropogenic_kernel_type,
+        use_anthropogenic_kernel = config$use_anthropogenic_kernel,
+        percent_natural_dispersal = config$percent_natural_dispersal[i],
+        natural_distance_scale = config$natural_distance_scale[i],
+        anthropogenic_distance_scale = config$anthropogenic_distance_scale[i],
         natural_dir = config$natural_dir,
         natural_kappa = config$natural_kappa[i],
         anthropogenic_dir = config$anthropogenic_dir,
@@ -241,19 +245,22 @@ pops_multirun <- function(infected_file,
         use_spreadrates = config$use_spreadrates,
         model_type_ = config$model_type,
         latency_period = config$latency_period,
-        generate_stochasticity =
-          config$generate_stochasticity,
-        establishment_stochasticity =
-          config$establishment_stochasticity,
+        generate_stochasticity = config$generate_stochasticity,
+        establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
         deterministic = config$deterministic,
-        establishment_probability =
-          config$establishment_probability,
+        establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
         overpopulation_percentage = config$overpopulation_percentage,
         leaving_percentage = config$leaving_percentage,
-        leaving_scale_coefficient = config$leaving_scale_coefficient
+        leaving_scale_coefficient = config$leaving_scale_coefficient,
+        bbox = config$bounding_box,
+        network_min_time = config$network_min_time,
+        network_max_time = config$network_max_time,
+        network_speed = config$network_speed,
+        node_filename = config$node_filename,
+        segment_filename = config$segment_filename
       )
 
       run <- c()
