@@ -172,6 +172,7 @@ configuration <- function(config) {
     if (terra::nlyr(infected) > 1) {
       infected <- output_from_raster_mean_and_sd(infected)
     }
+    infected <- terra::classify(infected, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
   } else {
     config$failure <- infected_check$failed_check
     return(config)
@@ -487,7 +488,9 @@ configuration <- function(config) {
     # "Log normal",
     # "Log Normal",
     "logistic",
-    "Logistic"
+    "Logistic",
+    "network",
+    "Network"
   )
 
   if (config$natural_kernel_type %notin% kernel_list) {
@@ -668,6 +671,12 @@ configuration <- function(config) {
   config$xmin <- terra::xmin(config$host)
   config$ymax <- terra::ymax(config$host)
   config$ymin <- terra::ymin(config$host)
+  bounding_box <- c()
+  bounding_box$north <- config$ymax
+  bounding_box$south <- config$ymin
+  bounding_box$west <- config$xmin
+  bounding_box$east <- config$xmax
+  config$bounding_box <- bounding_box
 
   return(config)
 }

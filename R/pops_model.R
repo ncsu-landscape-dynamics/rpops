@@ -213,15 +213,11 @@ pops_model <-
                      end_date = end_date,
                      treatment_method = treatment_method,
                      natural_kernel_type = natural_kernel_type,
-                     anthropogenic_kernel_type =
-                       anthropogenic_kernel_type,
-                     use_anthropogenic_kernel =
-                       use_anthropogenic_kernel,
-                     percent_natural_dispersal =
-                       percent_natural_dispersal,
+                     anthropogenic_kernel_type = anthropogenic_kernel_type,
+                     use_anthropogenic_kernel = use_anthropogenic_kernel,
+                     percent_natural_dispersal = percent_natural_dispersal,
                      natural_distance_scale = natural_distance_scale,
-                     anthropogenic_distance_scale =
-                       anthropogenic_distance_scale,
+                     anthropogenic_distance_scale = anthropogenic_distance_scale,
                      natural_dir = natural_dir,
                      natural_kappa = natural_kappa,
                      anthropogenic_dir = anthropogenic_dir,
@@ -236,15 +232,12 @@ pops_model <-
                      model_type_ = model_type_,
                      latency_period = latency_period,
                      generate_stochasticity = generate_stochasticity,
-                     establishment_stochasticity =
-                       establishment_stochasticity,
+                     establishment_stochasticity = establishment_stochasticity,
                      movement_stochasticity = movement_stochasticity,
                      deterministic = deterministic,
-                     establishment_probability =
-                       establishment_probability,
+                     establishment_probability = establishment_probability,
                      dispersal_percentage = dispersal_percentage,
-                     use_overpopulation_movements =
-                       use_overpopulation_movements,
+                     use_overpopulation_movements =use_overpopulation_movements,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
                      network_data_config = network_data_config
