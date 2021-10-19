@@ -40,7 +40,6 @@ using namespace pops;
 // [[Rcpp::export]]
 List pops_model_cpp(
     int random_seed,
-    bool use_lethal_temperature,
     double lethal_temperature,
     int lethal_temperature_month,
     IntegerMatrix infected,
@@ -49,7 +48,6 @@ List pops_model_cpp(
     IntegerMatrix susceptible,
     IntegerMatrix total_populations,
     IntegerMatrix total_hosts,
-    bool mortality_on,
     std::vector<IntegerMatrix> mortality_tracker,
     IntegerMatrix mortality,
     IntegerMatrix quarantine_areas,
@@ -57,18 +55,17 @@ List pops_model_cpp(
     std::vector<std::string> treatment_dates,
     std::vector<int> pesticide_duration,
     IntegerMatrix resistant,
-    bool use_movements,
     std::vector<std::vector<int>> movements,
     std::vector<std::string> movements_dates,
-    bool weather,
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> weather_coefficient,
     List res,
     List rows_cols,
-    std::string time_step,
     double reproductive_rate,
     std::vector<std::vector<int>> spatial_indices,
     List season_month_start_end,
+    List frequency_config,
+    List bool_config,
     double mortality_rate = 0.0,
     int mortality_time_lag = 2,
     std::string start_date = "2018-01-01",
@@ -76,7 +73,6 @@ List pops_model_cpp(
     std::string treatment_method = "ratio",
     std::string natural_kernel_type = "cauchy",
     std::string anthropogenic_kernel_type = "cauchy",
-    bool use_anthropogenic_kernel = false,
     double percent_natural_dispersal = 0.0,
     double natural_distance_scale = 21,
     double anthropogenic_distance_scale = 0.0,
@@ -84,25 +80,14 @@ List pops_model_cpp(
     double natural_kappa = 0,
     std::string anthropogenic_dir = "NONE",
     double anthropogenic_kappa = 0,
-    std::string output_frequency = "year",
     int output_frequency_n = 1,
-    std::string quarantine_frequency = "year",
     int quarantine_frequency_n = 1,
-    bool use_quarantine = false,
-    std::string spreadrate_frequency = "year",
     int spreadrate_frequency_n = 1,
-    std::string mortality_frequency = "year",
     int mortality_frequency_n = 1,
-    bool use_spreadrates = false,
     std::string model_type_ = "SI",
     int latency_period = 0,
-    bool generate_stochasticity = true,
-    bool establishment_stochasticity = true,
-    bool movement_stochasticity = true,
-    bool deterministic = false,
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
-    bool use_overpopulation_movements = false,
     Nullable<List> overpopulation_config = R_NilValue)
 {
     Config config;
@@ -112,15 +97,15 @@ List pops_model_cpp(
     config.ew_res = res["ew_res"];
     config.ns_res = res["ns_res"];
 
-    config.generate_stochasticity = generate_stochasticity;
-    config.establishment_stochasticity = establishment_stochasticity;
-    config.movement_stochasticity = movement_stochasticity;
-    config.deterministic = deterministic;
+    config.generate_stochasticity = bool_config["generate_stochasticity"];
+    config.establishment_stochasticity = bool_config["establishment_stochasticity"];
+    config.movement_stochasticity = bool_config["movement_stochasticity"];
+    config.deterministic = bool_config["deterministic"];
     config.establishment_probability = establishment_probability;
-    config.use_lethal_temperature = use_lethal_temperature;
+    config.use_lethal_temperature = bool_config["use_lethal_temperature"];
     config.lethal_temperature = lethal_temperature;
     config.lethal_temperature_month = lethal_temperature_month;
-    config.weather = weather;
+    config.weather = bool_config["weather"];
     config.reproductive_rate = reproductive_rate;
     config.model_type = model_type_;
     config.latency_period_steps = latency_period;
@@ -129,21 +114,26 @@ List pops_model_cpp(
     config.natural_direction = natural_dir;
     config.natural_kappa = natural_kappa;
 
-    config.use_anthropogenic_kernel = use_anthropogenic_kernel;
+    config.use_anthropogenic_kernel = bool_config["use_anthropogenic_kernel"];
     config.percent_natural_dispersal = percent_natural_dispersal;
     config.anthro_kernel_type = anthropogenic_kernel_type;
     config.anthro_scale = anthropogenic_distance_scale;
     config.anthro_direction = anthropogenic_dir;
     config.anthro_kappa = anthropogenic_kappa;
 
+    std::string time_step = frequency_config["time_step"];
+    std::string output_frequency = frequency_config["output_frequency"];
+    std::string quarantine_frequency = frequency_config["quarantine_frequency"];
+    std::string spreadrate_frequency = frequency_config["spreadrate_frequency"];
+    std::string mortality_frequency = frequency_config["mortality_frequency"];
     // use_treatment set later
-    config.use_mortality = mortality_on;
+    config.use_mortality = bool_config["mortality_on"];
     config.mortality_rate = mortality_rate;
     config.mortality_time_lag = mortality_time_lag;
     if (output_frequency == "time_step") {
         output_frequency = time_step;
     }
-    config.use_movements = use_movements;
+    config.use_movements = bool_config["use_movements"];
     // movement_schedule used later
 
     config.dispersal_percentage = dispersal_percentage;
@@ -151,14 +141,14 @@ List pops_model_cpp(
     config.output_frequency_n = output_frequency_n;
     config.quarantine_frequency = quarantine_frequency;
     config.quarantine_frequency_n = quarantine_frequency_n;
-    config.use_quarantine = use_quarantine;
+    config.use_quarantine = bool_config["use_quarantine"];
     config.spreadrate_frequency = spreadrate_frequency;
     config.spreadrate_frequency_n = spreadrate_frequency_n;
     config.mortality_frequency = mortality_frequency;
     config.mortality_frequency_n = mortality_frequency_n;
-    config.use_spreadrates = use_spreadrates;
-    config.use_overpopulation_movements = use_overpopulation_movements;
-    if (use_overpopulation_movements && overpopulation_config.isNotNull()) {
+    config.use_spreadrates = bool_config["use_spreadrates"];
+    config.use_overpopulation_movements = bool_config["use_overpopulation_movements"];
+    if (config.use_overpopulation_movements && overpopulation_config.isNotNull()) {
         List over_config(overpopulation_config);
         config.overpopulation_percentage = over_config["overpopulation_percentage"];
         config.leaving_percentage = over_config["leaving_percentage"];
