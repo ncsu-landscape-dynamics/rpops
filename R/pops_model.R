@@ -145,9 +145,31 @@ pops_model <-
     overpopulation_config$leaving_percentage <- leaving_percentage
     overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
 
+    # List of frequencies type string
+    frequency_config <- c()
+    frequency_config$time_step <- time_step
+    frequency_config$mortality_frequency <- mortality_frequency
+    frequency_config$spreadrate_frequency <- spreadrate_frequency
+    frequency_config$quarantine_frequency <- quarantine_frequency
+    frequency_config$output_frequency <- output_frequency
+
+    # List of all booleans
+    bool_config <- c()
+    bool_config$use_lethal_temperature <- use_lethal_temperature
+    bool_config$mortality_on <- mortality_on
+    bool_config$use_movements <- use_movements
+    bool_config$weather <- weather
+    bool_config$use_anthropogenic_kernel <- use_anthropogenic_kernel
+    bool_config$use_quarantine <- use_quarantine
+    bool_config$use_spreadrates <- use_spreadrates
+    bool_config$generate_stochasticity <- generate_stochasticity
+    bool_config$establishment_stochasticity <- establishment_stochasticity
+    bool_config$movement_stochasticity <- movement_stochasticity
+    bool_config$deterministic <- deterministic
+    bool_config$use_overpopulation_movements <- use_overpopulation_movements
+
     data <-
       pops_model_cpp(random_seed = random_seed,
-                     use_lethal_temperature = use_lethal_temperature,
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
                      infected = infected,
@@ -156,7 +178,6 @@ pops_model <-
                      susceptible = susceptible,
                      total_populations = total_populations,
                      total_hosts = total_hosts,
-                     mortality_on = mortality_on,
                      mortality_tracker = mortality_tracker,
                      mortality = mortality,
                      quarantine_areas = quarantine_areas,
@@ -164,59 +185,38 @@ pops_model <-
                      treatment_dates = treatment_dates,
                      pesticide_duration = pesticide_duration,
                      resistant = resistant,
-                     use_movements = use_movements,
                      movements = movements,
                      movements_dates = movements_dates,
-                     weather = weather,
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,
                      res = res,
                      rows_cols = rows_cols,
-                     time_step = time_step,
                      reproductive_rate = reproductive_rate,
                      spatial_indices = spatial_indices,
                      season_month_start_end = season_month_start_end,
+                     frequency_config = frequency_config,
+                     bool_config = bool_config,
                      mortality_rate = mortality_rate,
                      mortality_time_lag = mortality_time_lag,
                      start_date = start_date,
                      end_date = end_date,
                      treatment_method = treatment_method,
                      natural_kernel_type = natural_kernel_type,
-                     anthropogenic_kernel_type =
-                       anthropogenic_kernel_type,
-                     use_anthropogenic_kernel =
-                       use_anthropogenic_kernel,
-                     percent_natural_dispersal =
-                       percent_natural_dispersal,
+                     anthropogenic_kernel_type = anthropogenic_kernel_type,
+                     percent_natural_dispersal = percent_natural_dispersal,
                      natural_distance_scale = natural_distance_scale,
-                     anthropogenic_distance_scale =
-                       anthropogenic_distance_scale,
+                     anthropogenic_distance_scale = anthropogenic_distance_scale,
                      natural_dir = natural_dir,
                      natural_kappa = natural_kappa,
                      anthropogenic_dir = anthropogenic_dir,
                      anthropogenic_kappa = anthropogenic_kappa,
-                     output_frequency = output_frequency,
                      output_frequency_n = output_frequency_n,
-                     quarantine_frequency = quarantine_frequency,
                      quarantine_frequency_n = quarantine_frequency_n,
-                     use_quarantine = use_quarantine,
-                     spreadrate_frequency = spreadrate_frequency,
                      spreadrate_frequency_n = spreadrate_frequency_n,
-                     mortality_frequency = mortality_frequency,
                      mortality_frequency_n = mortality_frequency_n,
-                     use_spreadrates = use_spreadrates,
                      model_type_ = model_type_,
                      latency_period = latency_period,
-                     generate_stochasticity = generate_stochasticity,
-                     establishment_stochasticity =
-                       establishment_stochasticity,
-                     movement_stochasticity = movement_stochasticity,
-                     deterministic = deterministic,
-                     establishment_probability =
-                       establishment_probability,
                      dispersal_percentage = dispersal_percentage,
-                     use_overpopulation_movements =
-                       use_overpopulation_movements,
                      overpopulation_config = overpopulation_config
     )
 
