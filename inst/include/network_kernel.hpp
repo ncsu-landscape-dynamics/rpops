@@ -38,17 +38,17 @@ public:
      * The kernel assumes that the *network* is already initialized. It does not modify
      * the network.
      *
-     * The *min_time* and *max_time* parameters are used as a range for uniform real
-     * distribution which determines the travel time through the network for one
-     * trip.
+     * The *min_distance* and *max_distance* parameters are used as a range for uniform
+     * real distribution which determines the travel distance through the network for
+     * one trip.
      *
      * @param network Existing network
-     * @param min_time Minimum travel time
-     * @param max_time Maximum travel time
+     * @param min_distance Minimum travel distance
+     * @param max_distance Maximum travel distance
      */
     NetworkDispersalKernel(
-        const Network<RasterIndex>& network, double min_time, double max_time)
-        : network_(network), time_distribution_(min_time, max_time)
+        const Network<RasterIndex>& network, double min_distance, double max_distance)
+        : network_(network), distance_distribution_(min_distance, max_distance)
     {}
 
     /*! \copybrief RadialDispersalKernel::operator()()
@@ -59,8 +59,8 @@ public:
     template<typename Generator>
     std::tuple<int, int> operator()(Generator& generator, int row, int col)
     {
-        double time = time_distribution_(generator);
-        std::tie(row, col) = network_.travel(row, col, time, generator);
+        double distance = distance_distribution_(generator);
+        std::tie(row, col) = network_.travel(row, col, distance, generator);
 
         return std::make_tuple(row, col);
     }
@@ -87,8 +87,8 @@ public:
 protected:
     /** Reference to the network */
     const Network<RasterIndex>& network_;
-    /** Travel Time distribnution */
-    std::uniform_real_distribution<double> time_distribution_;
+    /** Travel distance distribution */
+    std::uniform_real_distribution<double> distance_distribution_;
 };
 
 }  // namespace pops

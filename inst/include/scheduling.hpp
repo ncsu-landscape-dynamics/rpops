@@ -443,6 +443,8 @@ inline std::vector<bool> schedule_from_string(
         }
         else if (frequency == "every_n_steps" && n > 0)
             return scheduler.schedule_action_nsteps(n);
+        else if (frequency == "every_step" || frequency == "time_step")
+            return scheduler.schedule_action_nsteps(1);
         else
             throw std::invalid_argument("Invalid value of output frequency");
     }

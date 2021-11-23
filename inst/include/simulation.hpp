@@ -428,6 +428,7 @@ public:
      */
     void generate(
         IntegerRaster& dispersers,
+        IntegerRaster& established_dispersers,
         const IntegerRaster& infected,
         bool weather,
         const FloatRaster& weather_coefficient,
@@ -452,9 +453,11 @@ public:
                     dispersers_from_cell = lambda * infected(i, j);
                 }
                 dispersers(i, j) = dispersers_from_cell;
+                established_dispersers(i, j) = dispersers_from_cell;
             }
             else {
                 dispersers(i, j) = 0;
+                established_dispersers(i, j) = 0;
             }
         }
     }
@@ -507,6 +510,7 @@ public:
     template<typename DispersalKernel>
     void disperse(
         const IntegerRaster& dispersers,
+        IntegerRaster& established_dispersers,
         IntegerRaster& susceptible,
         IntegerRaster& exposed_or_infected,
         IntegerRaster& mortality_tracker,
@@ -559,6 +563,9 @@ public:
                                     "Unknown ModelType value in "
                                     "Simulation::disperse()");
                             }
+                        }
+                        else {
+                            established_dispersers(i, j) -= 1;
                         }
                     }
                 }
@@ -731,7 +738,7 @@ public:
                 // Move hosts to infected raster
                 infected += oldest;
                 mortality_tracker += oldest;
-                total_exposed += oldest; // TODO: minus not plus should be here!
+                total_exposed += (oldest * (-1));
                 // Reset the raster
                 // (hosts moved from the raster)
                 oldest.fill(0);
@@ -781,6 +788,7 @@ public:
     void disperse_and_infect(
         unsigned step,
         const IntegerRaster& dispersers,
+        IntegerRaster& established_dispersers,
         IntegerRaster& susceptible,
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& infected,
@@ -802,6 +810,7 @@ public:
         }
         this->disperse(
             dispersers,
+            established_dispersers,
             susceptible,
             *infected_or_exposed,
             mortality_tracker,

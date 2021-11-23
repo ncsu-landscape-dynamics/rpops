@@ -89,7 +89,7 @@ protected:
             config_.natural_scale * config_.leaving_scale_coefficient,
             config_.shape);
         NetworkDispersalKernel<RasterIndex> network_kernel(
-            network, config_.network_min_time, config_.network_max_time);
+            network, config_.network_min_distance, config_.network_max_distance);
         SwitchDispersalKernel<IntegerRaster, RasterIndex> selectable_kernel(
             natural_kernel,
             radial_kernel,
@@ -183,6 +183,7 @@ public:
         IntegerRaster& total_populations,
         IntegerRaster& total_hosts,
         IntegerRaster& dispersers,
+        IntegerRaster& established_dispersers,
         IntegerRaster& total_exposed,
         std::vector<IntegerRaster>& exposed,
         std::vector<IntegerRaster>& mortality_tracker,
@@ -215,6 +216,7 @@ public:
         if (config_.spread_schedule()[step]) {
             simulation_.generate(
                 dispersers,
+                established_dispersers,
                 infected,
                 config_.weather,
                 weather_coefficient,
@@ -228,6 +230,7 @@ public:
             simulation_.disperse_and_infect(
                 step,
                 dispersers,
+                established_dispersers,
                 susceptible,
                 exposed,
                 infected,

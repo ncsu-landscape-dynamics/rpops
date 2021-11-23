@@ -48,6 +48,15 @@ bool container_contains(const Container& container, const Value& value)
     return container.find(value) != container.end();
 }
 
+/**
+ * Return true if _string_ contains _value_ (character or substring).
+ */
+template<typename String, typename Value>
+bool string_contains(const String& string, const Value& value)
+{
+    return string.find(value) != String::npos;
+}
+
 // Replace by ranges::shuffle in C++20.
 /**
  * Reorder items in container.
