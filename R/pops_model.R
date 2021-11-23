@@ -237,7 +237,7 @@ pops_model <-
                      deterministic = deterministic,
                      establishment_probability = establishment_probability,
                      dispersal_percentage = dispersal_percentage,
-                     use_overpopulation_movements =use_overpopulation_movements,
+                     use_overpopulation_movements = use_overpopulation_movements,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
                      network_data_config = network_data_config
