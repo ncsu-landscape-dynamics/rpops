@@ -162,7 +162,6 @@ pops_model <-
     # Network configuration
     network_config <- NULL;
     network_data_config <- NULL;
-    # Checking only one file here, eventually, we should only have one.
     if (!(is.na(network_filename) || is.null(network_filename) || network_filename == '')) {
       network_config <- c()
       network_config$network_min_distance <- network_min_distance
