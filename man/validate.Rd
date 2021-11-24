@@ -67,11 +67,9 @@ validate(
   write_outputs = "None",
   output_folder_path = "",
   point_file = "",
-  network_min_time = 0,
-  network_max_time = 0,
-  network_speed = 0,
-  node_filename = "",
-  segment_filename = "",
+  network_min_distance = 0,
+  network_max_distance = 0,
+  network_filename = "",
   use_distance = FALSE,
   use_configuration = FALSE
 )
@@ -298,15 +296,11 @@ the natural kernel (if applicable)}
 
 \item{point_file}{file for point comparison if not provided skips calculations}
 
-\item{network_min_time}{minimum time a propagule rides on the network}
+\item{network_min_distance}{minimum time a propagule rides on the network}
 
-\item{network_max_time}{maximum time a propagule rides on the network}
+\item{network_max_distance}{maximum time a propagule rides on the network}
 
-\item{network_speed}{average speed in the unit of the coordinate reference system (e.g. meters)}
-
-\item{node_filename}{entire file path for the node file}
-
-\item{segment_filename}{entire file path for the segment file}
+\item{network_filename}{entire file path for the network file}
 
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}

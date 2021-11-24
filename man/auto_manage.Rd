@@ -337,16 +337,6 @@ that can't be managed in the auto_manage function.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
-
-\item{network_min_time}{minimum time a propagule rides on the network}
-
-\item{network_max_time}{maximum time a propagule rides on the network}
-
-\item{network_speed}{average speed in the unit of the coordinate reference system (e.g. meters)}
-
-\item{node_filename}{entire file path for the node file}
-
-\item{segment_filename}{entire file path for the segment file}
 }
 \value{
 list of infected and susceptible per year

@@ -73,11 +73,9 @@ pops_model(
   leaving_percentage = 0,
   leaving_scale_coefficient = 1,
   bbox = NULL,
-  network_min_time = 0,
-  network_max_time = 0,
-  network_speed = 0,
-  node_filename = "",
-  segment_filename = ""
+  network_min_distance = 0,
+  network_max_distance = 0,
+  network_filename = ""
 )
 }
 \arguments{
@@ -291,15 +289,11 @@ the natural kernel (if applicable)}
 
 \item{bbox}{bounding box for network kernel}
 
-\item{network_min_time}{minimum time a propagule rides on the network}
+\item{network_min_distance}{minimum time a propagule rides on the network}
 
-\item{network_max_time}{maximum time a propagule rides on the network}
+\item{network_max_distance}{maximum time a propagule rides on the network}
 
-\item{network_speed}{average speed in the unit of the coordinate reference system (e.g. meters)}
-
-\item{node_filename}{entire file path for the node file}
-
-\item{segment_filename}{entire file path for the segment file}
+\item{network_filename}{entire file path for the network file}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

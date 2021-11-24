@@ -61,11 +61,9 @@ pops(
   leaving_scale_coefficient = 1,
   exposed_file = "",
   mask = NULL,
-  network_min_time = 0,
-  network_max_time = 0,
-  network_speed = 0,
-  node_filename = "",
-  segment_filename = ""
+  network_min_distance = 0,
+  network_max_distance = 0,
+  network_filename = ""
 )
 }
 \arguments{
@@ -281,15 +279,11 @@ true negatives from comparisons (e.g. mask out lakes and oceans from statics
 if modeling terrestrial species). This can also be used to mask out areas
 that can't be managed in the auto_manage function.}
 
-\item{network_min_time}{minimum time a propagule rides on the network}
+\item{network_min_distance}{minimum time a propagule rides on the network}
 
-\item{network_max_time}{maximum time a propagule rides on the network}
+\item{network_max_distance}{maximum time a propagule rides on the network}
 
-\item{network_speed}{average speed in the unit of the coordinate reference system (e.g. meters)}
-
-\item{node_filename}{entire file path for the node file}
-
-\item{segment_filename}{entire file path for the segment file}
+\item{network_filename}{entire file path for the network file}
 }
 \value{
 list of infected and susceptible per year

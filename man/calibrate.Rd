@@ -73,11 +73,9 @@ calibrate(
   verbose = TRUE,
   write_outputs = "None",
   output_folder_path = "",
-  network_min_time = 0,
-  network_max_time = 0,
-  network_speed = 0,
-  node_filename = "",
-  segment_filename = "",
+  network_min_distance = 0,
+  network_max_distance = 0,
+  network_filename = "",
   use_distance = FALSE,
   use_rmse = FALSE
 )
@@ -365,15 +363,11 @@ Defaults if FALSE.}
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 
-\item{network_min_time}{minimum time a propagule rides on the network}
+\item{network_min_distance}{minimum time a propagule rides on the network}
 
-\item{network_max_time}{maximum time a propagule rides on the network}
+\item{network_max_distance}{maximum time a propagule rides on the network}
 
-\item{network_speed}{average speed in the unit of the coordinate reference system (e.g. meters)}
-
-\item{node_filename}{entire file path for the node file}
-
-\item{segment_filename}{entire file path for the segment file}
+\item{network_filename}{entire file path for the network file}
 
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}
