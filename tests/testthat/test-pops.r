@@ -2633,11 +2633,9 @@ test_that(
     end_date <- "2008-03-31"
     parameter_means <- c(2, 21, 0.5, 500, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-    node_filename <-  system.file("extdata", "simple20x20", "nodes.csv", package = "PoPS")
-    segment_filename <-  system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
-    network_min_time <- 10
-    network_max_time <- 100
-    network_speed <- 10
+    network_filename <-  system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
+    network_min_distance <- 10
+    network_max_distance <- 100
     anthropogenic_kernel_type <- "network"
     # anthropogenic_kernel_type <- "cauchy"
     # node_filename <-  ""
@@ -2652,11 +2650,9 @@ test_that(
            start_date = start_date,
            end_date = end_date,
            anthropogenic_kernel_type = anthropogenic_kernel_type,
-           network_min_time = network_min_time,
-           network_max_time = network_max_time,
-           network_speed = network_speed,
-           node_filename = node_filename,
-           segment_filename = segment_filename)
+           network_min_distance = network_min_distance,
+           network_max_distance = network_max_distance,
+           network_filename = network_filename)
 
     test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
     expect_gte(data$infected[[1]][[1]], test_mat[[1]])
