@@ -141,11 +141,9 @@ pops_model <-
            leaving_percentage = 0.0,
            leaving_scale_coefficient = 1.0,
            bbox = NULL,
-           network_min_time = 0,
-           network_max_time = 0,
-           network_speed = 0,
-           node_filename = "",
-           segment_filename = "") {
+           network_min_distance = 0,
+           network_max_distance = 0,
+           network_filename = "") {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
@@ -164,15 +162,13 @@ pops_model <-
     network_config <- NULL;
     network_data_config <- NULL;
     # Checking only one file here, eventually, we should only have one.
-    if (!(is.na(node_filename) || is.null(node_filename) || node_filename == '')) {
+    if (!(is.na(network_filename) || is.null(network_filename) || network_filename == '')) {
       network_config <- c()
-      network_config$network_min_time <- network_min_time
-      network_config$network_max_time <- network_max_time
-      network_config$network_speed <- network_speed
+      network_config$network_min_distance <- network_min_distance
+      network_config$network_max_distance <- network_max_distance
 
       network_data_config <- c()
-      network_data_config$node_filename <- node_filename
-      network_data_config$segment_filename <- segment_filename
+      network_data_config$network_filename <- network_filename
     }
 
     data <-
