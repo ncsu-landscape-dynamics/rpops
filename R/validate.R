@@ -274,8 +274,6 @@ validate <- function(infected_years_file,
         bbox = config$bounding_box,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
-        network_speed = config$network_speed,
-        node_filename = config$node_filename,
         network_filename = config$network_filename
       )
 
