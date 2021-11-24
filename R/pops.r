@@ -164,11 +164,9 @@
 #' true negatives from comparisons (e.g. mask out lakes and oceans from statics
 #' if modeling terrestrial species). This can also be used to mask out areas
 #' that can't be managed in the auto_manage function.
-#' @param network_min_time minimum time a propagule rides on the network
-#' @param network_max_time maximum time a propagule rides on the network
-#' @param network_speed average speed in the unit of the coordinate reference system (e.g. meters)
-#' @param node_filename entire file path for the node file
-#' @param segment_filename entire file path for the segment file
+#' @param network_min_distance minimum time a propagule rides on the network
+#' @param network_max_distance maximum time a propagule rides on the network
+#' @param network_filename entire file path for the network file
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -239,11 +237,9 @@ pops <- function(infected_file,
                  leaving_scale_coefficient = 1,
                  exposed_file = "",
                  mask = NULL,
-                 network_min_time = 0,
-                 network_max_time = 0,
-                 network_speed = 0,
-                 node_filename = "",
-                 segment_filename = "") {
+                 network_min_distance = 0,
+                 network_max_distance = 0,
+                 network_filename = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -313,11 +309,9 @@ pops <- function(infected_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
 
-  config$network_min_time <- network_min_time
-  config$network_max_time <- network_max_time
-  config$network_speed <- network_speed
-  config$node_filename <- node_filename
-  config$segment_filename <- segment_filename
+  config$network_min_distance <- network_min_distance
+  config$network_max_distance <- network_max_distance
+  config$network_filename <- network_filename
 
   config <- configuration(config)
 
@@ -393,11 +387,9 @@ pops <- function(infected_file,
                      leaving_percentage = config$leaving_percentage,
                      leaving_scale_coefficient = config$leaving_scale_coefficient,
                      bbox = config$bounding_box,
-                     network_min_time = config$network_min_time,
-                     network_max_time = config$network_max_time,
-                     network_speed = config$network_speed,
-                     node_filename = config$node_filename,
-                     segment_filename = config$segment_filename
+                     network_min_distance = config$network_min_distance,
+                     network_max_distance = config$network_max_distance,
+                     network_filename = config$network_filename
   )
 
   return(data)

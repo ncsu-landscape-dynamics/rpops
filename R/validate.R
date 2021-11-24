@@ -106,11 +106,9 @@ validate <- function(infected_years_file,
                      write_outputs = "None",
                      output_folder_path = "",
                      point_file = "",
-                     network_min_time = 0,
-                     network_max_time = 0,
-                     network_speed = 0,
-                     node_filename = "",
-                     segment_filename = "",
+                     network_min_distance = 0,
+                     network_max_distance = 0,
+                     network_filename = "",
                      use_distance = FALSE,
                      use_configuration = FALSE) {
   config <- c()
@@ -170,7 +168,7 @@ validate <- function(infected_years_file,
   config$number_of_iterations <- number_of_iterations
   config$number_of_cores <- number_of_cores
   # add function name for use in configuration function to skip
-  # function specific specifc configurations namely for validation and
+  # function specific specific configurations namely for validation and
   # calibration.
   config$function_name <- "validate"
   config$failure <- NULL
@@ -180,11 +178,9 @@ validate <- function(infected_years_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
   config$point_file <- point_file
-  config$network_min_time <- network_min_time
-  config$network_max_time <- network_max_time
-  config$network_speed <- network_speed
-  config$node_filename <- node_filename
-  config$segment_filename <- segment_filename
+  config$network_min_distance <- network_min_distance
+  config$network_max_distance <- network_max_distance
+  config$network_filename <- network_filename
   config$use_configuration <- use_configuration
   config$use_distance <- use_distance
 
@@ -276,11 +272,11 @@ validate <- function(infected_years_file,
         leaving_percentage = config$leaving_percentage,
         leaving_scale_coefficient = config$leaving_scale_coefficient,
         bbox = config$bounding_box,
-        network_min_time = config$network_min_time,
-        network_max_time = config$network_max_time,
+        network_min_distance = config$network_min_distance,
+        network_max_distance = config$network_max_distance,
         network_speed = config$network_speed,
         node_filename = config$node_filename,
-        segment_filename = config$segment_filename
+        network_filename = config$network_filename
       )
 
 
