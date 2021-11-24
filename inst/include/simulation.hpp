@@ -122,7 +122,11 @@ inline ModelType model_type_from_string(const char* text)
  * type are perfomed and a signed type might be required in the future.
  * A default is provided, but it can be changed in the future.
  */
-template<typename IntegerRaster, typename FloatRaster, typename RasterIndex = int>
+template<
+    typename IntegerRaster,
+    typename FloatRaster,
+    typename RasterIndex = int,
+    typename Generator = std::default_random_engine>
 class Simulation
 {
 private:
@@ -133,7 +137,7 @@ private:
     bool movement_stochasticity_;
     ModelType model_type_;
     unsigned latency_period_;
-    std::default_random_engine generator_;
+    Generator generator_;
 
 public:
     /** Creates simulation object and seeds the internal random number generator.
@@ -272,14 +276,17 @@ public:
      * @param susceptible Currently susceptible hosts
      * @param mortality_tracker_vector Hosts that are infected at a specific time step
      * @param total_hosts All host individuals in the area. Is equal to
-     * infected + exposed + susceptible in the cell.
+     *        infected + exposed + susceptible in the cell.
      * @param total_exposed Total exposed in all exposed cohorts
+     * @param exposed Exposed hosts per cohort
+     * @param resistant Resistant hosts
      * @param step the current step of the simulation
      * @param last_index the last index to not be used from movements
      * @param movements a vector of ints with row_from, col_from, row_to, col_to, and
-     * num_hosts
+     *        num_hosts
      * @param movement_schedule a vector matching movements with the step at which the
-     * movement from movements are applied
+     *        movement from movements are applied
+     * @param suitable_cells List of indices of cells with hosts
      *
      * @note Mortality and non-host individuals are not supported in movements.
      */
@@ -416,10 +423,12 @@ public:
      * @param weather Whether to use the weather coefficient
      * @param weather_coefficient Spatially explicit weather coefficient
      * @param reproductive_rate reproductive rate (used unmodified when weather
-     * coefficient is not used)
+     *        coefficient is not used)
+     * @param[in] suitable_cells List of indices of cells with hosts
      */
     void generate(
         IntegerRaster& dispersers,
+        IntegerRaster& established_dispersers,
         const IntegerRaster& infected,
         bool weather,
         const FloatRaster& weather_coefficient,
@@ -444,9 +453,11 @@ public:
                     dispersers_from_cell = lambda * infected(i, j);
                 }
                 dispersers(i, j) = dispersers_from_cell;
+                established_dispersers(i, j) = dispersers_from_cell;
             }
             else {
                 dispersers(i, j) = 0;
+                established_dispersers(i, j) = 0;
             }
         }
     }
@@ -490,7 +501,8 @@ public:
      * @param[in] weather_coefficient Weather coefficient for each location
      * @param dispersal_kernel Dispersal kernel to move dispersers
      * @param establishment_probability Probability of establishment with no
-     * stochasticity
+     *        stochasticity
+     * @param[in] suitable_cells List of indices of cells with hosts
      *
      * @note If the parameters or their default values don't correspond
      * with the disperse_and_infect() function, it is a bug.
@@ -498,6 +510,7 @@ public:
     template<typename DispersalKernel>
     void disperse(
         const IntegerRaster& dispersers,
+        IntegerRaster& established_dispersers,
         IntegerRaster& susceptible,
         IntegerRaster& exposed_or_infected,
         IntegerRaster& mortality_tracker,
@@ -551,6 +564,9 @@ public:
                                     "Simulation::disperse()");
                             }
                         }
+                        else {
+                            established_dispersers(i, j) -= 1;
+                        }
                     }
                 }
             }
@@ -578,6 +594,7 @@ public:
      * infected + exposed + susceptible in the cell.
      * @param[in,out] outside_dispersers Dispersers escaping the rasters
      * @param dispersal_kernel Dispersal kernel to move dispersers (pests)
+     * @param[in] suitable_cells List of indices of cells with hosts
      * @param overpopulation_percentage Percentage of occupied hosts when the cell is
      *        considered to be overpopulated
      * @param leaving_percentage Percentage pests leaving an overpopulated cell
@@ -771,6 +788,7 @@ public:
     void disperse_and_infect(
         unsigned step,
         const IntegerRaster& dispersers,
+        IntegerRaster& established_dispersers,
         IntegerRaster& susceptible,
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& infected,
@@ -792,6 +810,7 @@ public:
         }
         this->disperse(
             dispersers,
+            established_dispersers,
             susceptible,
             *infected_or_exposed,
             mortality_tracker,
