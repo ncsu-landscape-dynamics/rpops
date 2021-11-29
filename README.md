@@ -24,7 +24,7 @@ If you want to install a specific version just change the version number.
 
 ```R
 install.packages("remotes")
-remotes::install_github("ncsu-landscape-dynamics/rpops", ref = "v1.1.0")
+remotes::install_github("ncsu-landscape-dynamics/rpops", ref = "1.1.0")
 library(PoPS)
 
 ```
