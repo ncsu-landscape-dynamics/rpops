@@ -60,14 +60,16 @@ jobs:
             libudunits2-dev \
             libgdal-dev \
             libgeos-dev \
-            libproj-dev
+            libproj-dev \
+            libharfbuzz-dev \
+            libfribidi-dev
 
       - name: Install system dependencies
         if: runner.os == 'macOS'
         run: |
           # install spatial dependencies
           rm '/usr/local/bin/gfortran'
-          brew install pkg-config gdal proj geos
+          brew install pkg-config gdal proj geos harfbuzz fribidi
 
       - name: Install renv
         shell: Rscript {0}
