@@ -130,7 +130,8 @@ public:
     {
         cols_ = other.cols_;
         rows_ = other.rows_;
-        data_ = new Number[cols_ * rows_]{value};
+        data_ = new Number[cols_ * rows_];
+        std::fill_n(data_, cols_ * rows_, value);
     }
 
     Raster(Raster&& other) : owns_(other.owns_)
@@ -152,7 +153,8 @@ public:
     {
         this->cols_ = cols;
         this->rows_ = rows;
-        this->data_ = new Number[cols_ * rows_]{value};
+        this->data_ = new Number[cols_ * rows_];
+        std::fill_n(data_, cols_ * rows_, value);
     }
 
     /*! Use existing data storage
@@ -230,7 +232,7 @@ public:
     }
 
     template<class UnaryOperation>
-    void for_each(UnaryOperation op)
+    void for_each(UnaryOperation op) const
     {
         std::for_each(data_, data_ + (cols_ * rows_), op);
     }

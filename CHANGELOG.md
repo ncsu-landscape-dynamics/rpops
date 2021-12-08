@@ -19,6 +19,11 @@ this repository.
 - `quantity_allocation_disagreement` now takes in the use_distance parameter which is FALSE
   by default. This allows the model to commute the minimum total distance between observed
   and simulated infestations (@ChrisJones, #130).
+  
+- `validate`, `calibrate`, `pops_multirun`, `auto_manage` and `pops` now take in 
+  network_min_distance, network_max_distance, and network_filename parameters these are 
+  used when the anthropogenic_kernel_type = "network". This allows directed spread along
+  a network such as a railroad (@ChrisJones and @wenzeslaus, #131)
 
 ### Changed
 

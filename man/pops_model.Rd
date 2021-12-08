@@ -71,7 +71,11 @@ pops_model(
   use_overpopulation_movements = FALSE,
   overpopulation_percentage = 0,
   leaving_percentage = 0,
-  leaving_scale_coefficient = 1
+  leaving_scale_coefficient = 1,
+  bbox = NULL,
+  network_min_distance = 0,
+  network_max_distance = 0,
+  network_filename = ""
 )
 }
 \arguments{
@@ -282,6 +286,14 @@ is considered to be overpopulated}
 
 \item{leaving_scale_coefficient}{coefficient to multiply scale parameter of
 the natural kernel (if applicable)}
+
+\item{bbox}{bounding box for network kernel}
+
+\item{network_min_distance}{minimum time a propagule rides on the network}
+
+\item{network_max_distance}{maximum time a propagule rides on the network}
+
+\item{network_filename}{entire file path for the network file}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

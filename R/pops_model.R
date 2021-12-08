@@ -65,6 +65,8 @@
 #' 'day' or 'time step') in which to calculate and export spread rate
 #' statistics.
 #' @param spatial_indices list of all spatial locations with suitable hosts
+#' @param bbox bounding box for network kernel
+#'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
 #' @export
@@ -137,13 +139,37 @@ pops_model <-
            use_overpopulation_movements = FALSE,
            overpopulation_percentage = 0.0,
            leaving_percentage = 0.0,
-           leaving_scale_coefficient = 1.0) {
+           leaving_scale_coefficient = 1.0,
+           bbox = NULL,
+           network_min_distance = 0,
+           network_max_distance = 0,
+           network_filename = "") {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
     overpopulation_config$overpopulation_percentage <- overpopulation_percentage
     overpopulation_config$leaving_percentage <- leaving_percentage
     overpopulation_config$leaving_scale_coefficient <- leaving_scale_coefficient
+
+
+    # List of frequency n parameters
+    frequencies_n_config <- c()
+    frequencies_n_config$output_frequency_n <- output_frequency_n
+    frequencies_n_config$quarantine_frequency_n <- quarantine_frequency_n
+    frequencies_n_config$spreadrate_frequency_n <- spreadrate_frequency_n
+    frequencies_n_config$mortality_frequency_n <- mortality_frequency_n
+
+    # Network configuration
+    network_config <- NULL;
+    network_data_config <- NULL;
+    if (!(is.na(network_filename) || is.null(network_filename) || network_filename == '')) {
+      network_config <- c()
+      network_config$network_min_distance <- network_min_distance
+      network_config$network_max_distance <- network_max_distance
+
+      network_data_config <- c()
+      network_data_config$network_filename <- network_filename
+    }
 
     # List of frequencies type string
     frequency_config <- c()
@@ -168,6 +194,7 @@ pops_model <-
     bool_config$deterministic <- deterministic
     bool_config$use_overpopulation_movements <- use_overpopulation_movements
 
+
     data <-
       pops_model_cpp(random_seed = random_seed,
                      lethal_temperature = lethal_temperature,
@@ -189,6 +216,7 @@ pops_model <-
                      movements_dates = movements_dates,
                      temperature = temperature,
                      weather_coefficient = weather_coefficient,
+                     bbox = bbox,
                      res = res,
                      rows_cols = rows_cols,
                      reproductive_rate = reproductive_rate,
@@ -210,14 +238,14 @@ pops_model <-
                      natural_kappa = natural_kappa,
                      anthropogenic_dir = anthropogenic_dir,
                      anthropogenic_kappa = anthropogenic_kappa,
-                     output_frequency_n = output_frequency_n,
-                     quarantine_frequency_n = quarantine_frequency_n,
-                     spreadrate_frequency_n = spreadrate_frequency_n,
-                     mortality_frequency_n = mortality_frequency_n,
+                     frequencies_n_config = frequencies_n_config,
                      model_type_ = model_type_,
                      latency_period = latency_period,
                      dispersal_percentage = dispersal_percentage,
-                     overpopulation_config = overpopulation_config
+                     establishment_probability = establishment_probability,
+                     overpopulation_config = overpopulation_config,
+                     network_config = network_config,
+                     network_data_config = network_data_config
     )
 
   }

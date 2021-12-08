@@ -2622,3 +2622,41 @@ test_that(
     expect_gte(data$infected[[1]][[3]], test_mat[[3]])
     expect_gte(data$infected[[1]][[4]], test_mat[[4]])
   })
+
+
+test_that(
+  "Network dispersal works as expected", {
+    infected_file <-
+      system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
+    host_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+    start_date <- "2008-01-01"
+    end_date <- "2008-03-31"
+    parameter_means <- c(2, 21, 0.5, 500, 0, 0)
+    parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+    network_filename <-  system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
+    network_min_distance <- 10
+    network_max_distance <- 100
+    anthropogenic_kernel_type <- "network"
+    # anthropogenic_kernel_type <- "cauchy"
+    # node_filename <-  ""
+    # segment_filename <-  ""
+
+    data <-
+      pops(infected_file = infected_file,
+           host_file = host_file,
+           total_populations_file = host_file,
+           parameter_means = parameter_means,
+           parameter_cov_matrix = parameter_cov_matrix,
+           start_date = start_date,
+           end_date = end_date,
+           anthropogenic_kernel_type = anthropogenic_kernel_type,
+           network_min_distance = network_min_distance,
+           network_max_distance = network_max_distance,
+           network_filename = network_filename)
+
+    test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+    expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+    expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+    expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+    expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  })

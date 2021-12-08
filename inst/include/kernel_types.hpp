@@ -64,6 +64,7 @@ enum class DispersalKernelType
     Normal,  //!< Normal dispersal kernel
     LogNormal,  //!< Log-normal dispersal kernel
     Logistic,  //!< Logistic dispersal kernel
+    Network,  //!< Network spread
     None,  //!< No dispersal kernel (no spread)
 };
 
@@ -111,6 +112,8 @@ inline DispersalKernelType kernel_type_from_string(const std::string& text)
         return DispersalKernelType::LogNormal;
     else if (text == "logistic" || text == "Logistic")
         return DispersalKernelType::Logistic;
+    else if (text == "network" || text == "Network")
+        return DispersalKernelType::Network;
     else if (text == "none" || text == "None" || text == "NONE" || text.empty())
         return DispersalKernelType::None;
     else

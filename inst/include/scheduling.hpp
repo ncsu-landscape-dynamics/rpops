@@ -308,7 +308,7 @@ public:
     }
     /**
      * @brief Prints schedule for debugging purposes.
-     * @param vector of bools to print along the steps
+     * @param schedule vector of bools to print along the steps
      */
     void debug_schedule(std::vector<bool>& schedule) const
     {
@@ -443,6 +443,8 @@ inline std::vector<bool> schedule_from_string(
         }
         else if (frequency == "every_n_steps" && n > 0)
             return scheduler.schedule_action_nsteps(n);
+        else if (frequency == "every_step" || frequency == "time_step")
+            return scheduler.schedule_action_nsteps(1);
         else
             throw std::invalid_argument("Invalid value of output frequency");
     }

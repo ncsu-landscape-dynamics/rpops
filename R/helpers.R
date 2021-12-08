@@ -107,8 +107,8 @@ natural_kernel_error <-
   "Natural kernel type not one of 'cauchy', 'exponential', 'uniform', 'deterministic neighbor',
   'power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic'"
 anthropogenic_kernel_error <-
-  "Anthropogenic kernel type not one of 'cauchy', 'exponential', 'uniform',
-  'deterministic neighbor', 'power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic'"
+  "Anthropogenic kernel type not one of 'cauchy', 'exponential', 'uniform', 'deterministic
+  neighbor', 'power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network'"
 covariance_mat_error <-
   "parameter covariance matrix is not 6 x 6"
 paramter_means_error <-

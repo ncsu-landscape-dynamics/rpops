@@ -59,6 +59,7 @@ List pops_model_cpp(
     std::vector<std::string> movements_dates,
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> weather_coefficient,
+    List bbox,
     List res,
     List rows_cols,
     double reproductive_rate,
@@ -80,15 +81,14 @@ List pops_model_cpp(
     double natural_kappa = 0,
     std::string anthropogenic_dir = "NONE",
     double anthropogenic_kappa = 0,
-    int output_frequency_n = 1,
-    int quarantine_frequency_n = 1,
-    int spreadrate_frequency_n = 1,
-    int mortality_frequency_n = 1,
+    Nullable<List> frequencies_n_config = R_NilValue,
     std::string model_type_ = "SI",
     int latency_period = 0,
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
-    Nullable<List> overpopulation_config = R_NilValue)
+    Nullable<List> overpopulation_config = R_NilValue,
+    Nullable<List> network_config = R_NilValue,
+    Nullable<List> network_data_config = R_NilValue)
 {
     Config config;
     config.random_seed = random_seed;
@@ -137,15 +137,20 @@ List pops_model_cpp(
     // movement_schedule used later
 
     config.dispersal_percentage = dispersal_percentage;
+
+    if (frequencies_n_config.isNotNull()) {
+        List freq_n_config(frequencies_n_config);
+        config.output_frequency_n = freq_n_config["output_frequency_n"];
+        config.quarantine_frequency_n = freq_n_config["quarantine_frequency_n"];
+        config.spreadrate_frequency_n = freq_n_config["spreadrate_frequency_n"];
+        config.mortality_frequency_n = freq_n_config["mortality_frequency_n"];
+    }
+
     config.output_frequency = output_frequency;
-    config.output_frequency_n = output_frequency_n;
     config.quarantine_frequency = quarantine_frequency;
-    config.quarantine_frequency_n = quarantine_frequency_n;
     config.use_quarantine = bool_config["use_quarantine"];
     config.spreadrate_frequency = spreadrate_frequency;
-    config.spreadrate_frequency_n = spreadrate_frequency_n;
     config.mortality_frequency = mortality_frequency;
-    config.mortality_frequency_n = mortality_frequency_n;
     config.use_spreadrates = bool_config["use_spreadrates"];
     config.use_overpopulation_movements = bool_config["use_overpopulation_movements"];
     if (config.use_overpopulation_movements && overpopulation_config.isNotNull()) {
@@ -169,6 +174,7 @@ List pops_model_cpp(
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
     IntegerMatrix total_dispersers(config.rows, config.cols);
+    IntegerMatrix established_dispersers(config.rows, config.cols);
 
     int num_infected;
     std::vector<int> number_infected;
@@ -244,6 +250,23 @@ List pops_model_cpp(
     Direction escape_direction;
     std::vector<std::string> escape_directions;
 
+    std::unique_ptr<Network<int>> network{nullptr};
+    if (network_config.isNotNull() && network_data_config.isNotNull()) {
+        // The best place for bbox handling would be with rows, cols, and
+        // resolution, but since it is required only for network, it is here.
+        config.bbox.north = bbox["north"];
+        config.bbox.south = bbox["south"];
+        config.bbox.east = bbox["east"];
+        config.bbox.west = bbox["west"];
+        List net_config(network_config);
+        config.network_min_distance = net_config["network_min_distance"];
+        config.network_max_distance = net_config["network_max_distance"];
+        network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
+        List net_data_config(network_data_config);
+        std::ifstream network_stream{Rcpp::as<std::string>(net_data_config["network_filename"])};
+        network->load(network_stream);
+    }
+
     ModelType mt = model_type_from_string(config.model_type);
     Simulation<IntegerMatrix, NumericMatrix> simulation(
         config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
@@ -260,6 +283,7 @@ List pops_model_cpp(
             total_populations,
             total_hosts,
             dispersers,
+            established_dispersers,
             total_exposed,
             exposed,
             mortality_tracker,
@@ -273,9 +297,10 @@ List pops_model_cpp(
             quarantine,
             quarantine_areas,
             movements,
+            network ? *network : Network<int>::null_network(),
             spatial_indices);
 
-        // keeps track of cumulative dispers or propagules from a site.
+        // keeps track of cumulative dispersers or propagules from a site.
         if (config.spread_schedule()[current_index]) {
             total_dispersers += dispersers;
         }

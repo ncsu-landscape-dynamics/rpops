@@ -18,6 +18,7 @@
 
 #include "kernel_types.hpp"
 
+#include <memory>
 #include <tuple>
 #include <random>
 #include <type_traits>
@@ -38,27 +39,32 @@ namespace pops {
  * Bernoulli distribution is used to decide between the natural and
  * anthropogenic distance kernel. The anthropogenic distance dispersal can be also
  * competely disabled.
+ *
+ * Instances cannot be copied due to contained std::unique_ptr, but they can be
+ * moved, so returning new objects from functions works. This is enforced by the
+ * compiler.
  */
+
 template<typename NaturalKernelType, typename AnthropogenicKernelType>
 class NaturalAnthropogenicDispersalKernel
 {
 protected:
     bool use_anthropogenic_kernel_;
-    NaturalKernelType natural_kernel_;
-    AnthropogenicKernelType anthropogenic_kernel_;
+    std::unique_ptr<NaturalKernelType> natural_kernel_;
+    std::unique_ptr<AnthropogenicKernelType> anthropogenic_kernel_;
     std::bernoulli_distribution bernoulli_distribution;
 
 public:
     NaturalAnthropogenicDispersalKernel(
-        const NaturalKernelType& natural_kernel,
-        const AnthropogenicKernelType& anthropogenic_kernel,
+        std::unique_ptr<NaturalKernelType> natural_kernel,
+        std::unique_ptr<AnthropogenicKernelType> anthropogenic_kernel,
         bool use_anthropogenic_kernel,
         double percent_natural_dispersal)
         : use_anthropogenic_kernel_(use_anthropogenic_kernel),
           // Here we initialize all distributions,
           // although we won't use all of them.
-          natural_kernel_(natural_kernel),
-          anthropogenic_kernel_(anthropogenic_kernel),
+          natural_kernel_(std::move(natural_kernel)),
+          anthropogenic_kernel_(std::move(anthropogenic_kernel)),
           // use bernoulli distribution to act as the sampling with prob(gamma,1-gamma)
           bernoulli_distribution(percent_natural_dispersal)
     {}
@@ -69,12 +75,12 @@ public:
     std::tuple<int, int> operator()(Generator& generator, int row, int col)
     {
         // switch in between the supported kernels
-        if (!use_anthropogenic_kernel_ || bernoulli_distribution(generator)) {
-            return natural_kernel_(generator, row, col);
+        if (!use_anthropogenic_kernel_
+            || !anthropogenic_kernel_->is_cell_eligible(row, col)
+            || bernoulli_distribution(generator)) {
+            return natural_kernel_->operator()(generator, row, col);
         }
-        else {
-            return anthropogenic_kernel_(generator, row, col);
-        }
+        return anthropogenic_kernel_->operator()(generator, row, col);
     }
 
     /*! \copydoc RadialDispersalKernel::supports_kernel()
