@@ -209,7 +209,10 @@ forecast spread of the pest/pathogen into the future.</p>
   exposed_file <span class='op'>=</span> <span class='st'>""</span>,
   mask <span class='op'>=</span> <span class='cn'>NULL</span>,
   write_outputs <span class='op'>=</span> <span class='st'>"None"</span>,
-  output_folder_path <span class='op'>=</span> <span class='st'>""</span>
+  output_folder_path <span class='op'>=</span> <span class='st'>""</span>,
+  network_min_distance <span class='op'>=</span> <span class='fl'>0</span>,
+  network_max_distance <span class='op'>=</span> <span class='fl'>0</span>,
+  network_filename <span class='op'>=</span> <span class='st'>""</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -558,6 +561,18 @@ that can't be managed in the auto_manage function.</p></td>
       <th>output_folder_path</th>
       <td><p>this is the full path with either / or \ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")</p></td>
+    </tr>
+    <tr>
+      <th>network_min_distance</th>
+      <td><p>minimum time a propagule rides on the network</p></td>
+    </tr>
+    <tr>
+      <th>network_max_distance</th>
+      <td><p>maximum time a propagule rides on the network</p></td>
+    </tr>
+    <tr>
+      <th>network_filename</th>
+      <td><p>entire file path for the network file</p></td>
     </tr>
     </table>
 

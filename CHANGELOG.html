@@ -139,8 +139,8 @@
 <h3 class="hasAnchor">
 <a href="#added" class="anchor"></a>Added</h3>
 <ul>
-<li>
-<code>quantity_allocation_disagreement</code> now takes in the use_distance parameter which is FALSE by default. This allows the model to commute the minimum total distance between observed and simulated infestations (@ChrisJones, #130).</li>
+<li><p><code>quantity_allocation_disagreement</code> now takes in the use_distance parameter which is FALSE by default. This allows the model to commute the minimum total distance between observed and simulated infestations (@ChrisJones, #130).</p></li>
+<li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, <code>auto_manage</code> and <code>pops</code> now take in network_min_distance, network_max_distance, and network_filename parameters these are used when the anthropogenic_kernel_type = “network”. This allows directed spread along a network such as a railroad (@ChrisJones and @wenzeslaus, #131)</p></li>
 </ul>
 </div>
 <div id="changed" class="section level3">

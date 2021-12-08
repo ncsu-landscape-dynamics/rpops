@@ -210,7 +210,11 @@ future.</p>
   use_overpopulation_movements <span class='op'>=</span> <span class='cn'>FALSE</span>,
   overpopulation_percentage <span class='op'>=</span> <span class='fl'>0</span>,
   leaving_percentage <span class='op'>=</span> <span class='fl'>0</span>,
-  leaving_scale_coefficient <span class='op'>=</span> <span class='fl'>1</span>
+  leaving_scale_coefficient <span class='op'>=</span> <span class='fl'>1</span>,
+  bbox <span class='op'>=</span> <span class='cn'>NULL</span>,
+  network_min_distance <span class='op'>=</span> <span class='fl'>0</span>,
+  network_max_distance <span class='op'>=</span> <span class='fl'>0</span>,
+  network_filename <span class='op'>=</span> <span class='st'>""</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -557,6 +561,22 @@ is considered to be overpopulated</p></td>
       <th>leaving_scale_coefficient</th>
       <td><p>coefficient to multiply scale parameter of
 the natural kernel (if applicable)</p></td>
+    </tr>
+    <tr>
+      <th>bbox</th>
+      <td><p>bounding box for network kernel</p></td>
+    </tr>
+    <tr>
+      <th>network_min_distance</th>
+      <td><p>minimum time a propagule rides on the network</p></td>
+    </tr>
+    <tr>
+      <th>network_max_distance</th>
+      <td><p>maximum time a propagule rides on the network</p></td>
+    </tr>
+    <tr>
+      <th>network_filename</th>
+      <td><p>entire file path for the network file</p></td>
     </tr>
     </table>
 

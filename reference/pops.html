@@ -201,7 +201,10 @@ automated tests of model features.</p>
   leaving_percentage <span class='op'>=</span> <span class='fl'>0</span>,
   leaving_scale_coefficient <span class='op'>=</span> <span class='fl'>1</span>,
   exposed_file <span class='op'>=</span> <span class='st'>""</span>,
-  mask <span class='op'>=</span> <span class='cn'>NULL</span>
+  mask <span class='op'>=</span> <span class='cn'>NULL</span>,
+  network_min_distance <span class='op'>=</span> <span class='fl'>0</span>,
+  network_max_distance <span class='op'>=</span> <span class='fl'>0</span>,
+  network_filename <span class='op'>=</span> <span class='st'>""</span>
 <span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -530,6 +533,18 @@ the natural kernel (if applicable)</p></td>
 true negatives from comparisons (e.g. mask out lakes and oceans from statics
 if modeling terrestrial species). This can also be used to mask out areas
 that can't be managed in the auto_manage function.</p></td>
+    </tr>
+    <tr>
+      <th>network_min_distance</th>
+      <td><p>minimum time a propagule rides on the network</p></td>
+    </tr>
+    <tr>
+      <th>network_max_distance</th>
+      <td><p>maximum time a propagule rides on the network</p></td>
+    </tr>
+    <tr>
+      <th>network_filename</th>
+      <td><p>entire file path for the network file</p></td>
     </tr>
     </table>
 
