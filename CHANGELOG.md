@@ -14,6 +14,8 @@ this repository.
 
 ## [Unreleased]
 
+## [2.0.0] - 2021-12-14
+
 ### Added
 
 - `quantity_allocation_disagreement` now takes in the use_distance parameter which is FALSE
@@ -155,7 +157,8 @@ Version 1.0.0 of the _PoPS Core_ C++ library and its interfaces: _rpops_ R packa
 - Probability of quarantine escape (`escape_probability`).
 
 
-[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/1.1.0...master
+[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...main
+[2.0.0]: https://github.com/ncsu-landscape-dynamics/rpops/compare/1.1.0...v2.0.0
 [1.1.0]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...1.1.0
 [1.0.2]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.0...v1.0.2
 [1.0.1]: https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0
