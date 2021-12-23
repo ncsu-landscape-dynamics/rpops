@@ -78,6 +78,9 @@ config$exposed_file <-
   system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
 config$write_outputs <- "None"
 config$output_folder_path <- ""
+config$network_min_distance <- 0
+config$network_max_distance <- 0
+config$network_filename <- ""
 
 test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)
