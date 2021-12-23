@@ -204,8 +204,7 @@ natural dispersal. Current dispersal kernel options are
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')}
+ 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')}
 
 \item{natural_dir}{sets the predominate direction of natural dispersal
 usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
@@ -296,11 +295,14 @@ the natural kernel (if applicable)}
 
 \item{point_file}{file for point comparison if not provided skips calculations}
 
-\item{network_min_distance}{minimum time a propagule rides on the network}
+\item{network_min_distance}{minimum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'.}
 
-\item{network_max_distance}{maximum time a propagule rides on the network}
+\item{network_max_distance}{maximum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'.}
 
-\item{network_filename}{entire file path for the network file}
+\item{network_filename}{entire file path for the network file. Used if
+anthropogenic_kernel_type = 'network'.}
 
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}
