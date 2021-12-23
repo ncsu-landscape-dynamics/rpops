@@ -88,8 +88,7 @@
 #' @param anthropogenic_kernel_type what type of dispersal kernel should be
 #' used for anthropogenic dispersal. Current dispersal kernel options are
 #'  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
-#'  'hyperbolic secant', 'gamma', 'weibull',
-#'  'logistic')
+#'  'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')
 #' @param natural_dir sets the predominate direction of natural dispersal
 #' usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
 #' 'NONE')
@@ -164,9 +163,12 @@
 #' true negatives from comparisons (e.g. mask out lakes and oceans from statics
 #' if modeling terrestrial species). This can also be used to mask out areas
 #' that can't be managed in the auto_manage function.
-#' @param network_min_distance minimum time a propagule rides on the network
-#' @param network_max_distance maximum time a propagule rides on the network
-#' @param network_filename entire file path for the network file
+#' @param network_min_distance minimum time a propagule rides on the network. Used if
+#' anthropogenic_kernel_type = 'network'.
+#' @param network_max_distance maximum time a propagule rides on the network. Used if
+#' anthropogenic_kernel_type = 'network'.
+#' @param network_filename entire file path for the network file. Used if
+#' anthropogenic_kernel_type = 'network'.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
