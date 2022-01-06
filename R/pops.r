@@ -163,10 +163,6 @@
 #' true negatives from comparisons (e.g. mask out lakes and oceans from statics
 #' if modeling terrestrial species). This can also be used to mask out areas
 #' that can't be managed in the auto_manage function.
-#' @param network_min_distance minimum time a propagule rides on the network. Used if
-#' anthropogenic_kernel_type = 'network'.
-#' @param network_max_distance maximum time a propagule rides on the network. Used if
-#' anthropogenic_kernel_type = 'network'.
 #' @param network_filename entire file path for the network file. Used if
 #' anthropogenic_kernel_type = 'network'.
 #'
@@ -239,8 +235,6 @@ pops <- function(infected_file,
                  leaving_scale_coefficient = 1,
                  exposed_file = "",
                  mask = NULL,
-                 network_min_distance = 0,
-                 network_max_distance = 0,
                  network_filename = "") {
 
   config <- c()
@@ -311,8 +305,6 @@ pops <- function(infected_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
 
-  config$network_min_distance <- network_min_distance
-  config$network_max_distance <- network_max_distance
   config$network_filename <- network_filename
 
   config <- configuration(config)
@@ -389,8 +381,8 @@ pops <- function(infected_file,
                      leaving_percentage = config$leaving_percentage,
                      leaving_scale_coefficient = config$leaving_scale_coefficient,
                      bbox = config$bounding_box,
-                     network_min_distance = config$network_min_distance,
-                     network_max_distance = config$network_max_distance,
+                     network_min_distance = config$network_min_distance[1],
+                     network_max_distance = config$network_max_distance[1],
                      network_filename = config$network_filename
   )
 

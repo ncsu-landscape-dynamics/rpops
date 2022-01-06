@@ -92,8 +92,6 @@ pops_multirun <- function(infected_file,
                           mask = NULL,
                           write_outputs = "None",
                           output_folder_path = "",
-                          network_min_distance = 0,
-                          network_max_distance = 0,
                           network_filename = "") {
   config <- c()
   config$random_seed <- random_seed
@@ -161,8 +159,6 @@ pops_multirun <- function(infected_file,
   config$output_folder_path <- output_folder_path
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
-  config$network_min_distance <- network_min_distance
-  config$network_max_distance <- network_max_distance
   config$network_filename <- network_filename
 
   config <- configuration(config)
@@ -253,8 +249,8 @@ pops_multirun <- function(infected_file,
         leaving_percentage = config$leaving_percentage,
         leaving_scale_coefficient = config$leaving_scale_coefficient,
         bbox = config$bounding_box,
-        network_min_distance = config$network_min_distance,
-        network_max_distance = config$network_max_distance,
+        network_min_distance = config$network_min_distance[i],
+        network_max_distance = config$network_max_distance[i],
         network_filename = config$network_filename
       )
 

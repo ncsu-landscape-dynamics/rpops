@@ -175,8 +175,6 @@ calibrate <- function(infected_years_file,
                       verbose = TRUE,
                       write_outputs = "None",
                       output_folder_path = "",
-                      network_min_distance = 0,
-                      network_max_distance = 0,
                       network_filename = "",
                       use_distance = FALSE,
                       use_rmse = FALSE) {
@@ -255,8 +253,6 @@ calibrate <- function(infected_years_file,
   config$output_folder_path <- output_folder_path
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
-  config$network_min_distance <- network_min_distance
-  config$network_max_distance <- network_max_distance
   config$network_filename <- network_filename
   config$use_distance <- use_distance
   config$use_rmse <- use_rmse

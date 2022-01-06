@@ -120,8 +120,6 @@ auto_manage <- function(infected_files,
                         mask = NULL,
                         write_outputs = "None",
                         output_folder_path = "",
-                        network_min_distance = 0,
-                        network_max_distance = 0,
                         network_filename = "") {
 
   config <- c()
@@ -189,8 +187,6 @@ auto_manage <- function(infected_files,
   config$mask <- mask
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
-  config$network_min_distance <- network_min_distance
-  config$network_max_distance <- network_max_distance
   config$network_filename <- network_filename
 
   config <- configuration(config)

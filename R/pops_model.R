@@ -66,6 +66,10 @@
 #' statistics.
 #' @param spatial_indices list of all spatial locations with suitable hosts
 #' @param bbox bounding box for network kernel
+#' @param network_min_distance minimum time a propagule rides on the network. Used if
+#' anthropogenic_kernel_type = 'network'.
+#' @param network_max_distance maximum time a propagule rides on the network. Used if
+#' anthropogenic_kernel_type = 'network'.
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
