@@ -106,8 +106,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             output_folder_path <- tempdir()
             use_distance <- FALSE
             use_rmse <- FALSE
-            network_min_distance <- 0
-            network_max_distance <- 0
             network_filename <- ""
 
             data <- calibrate(infected_years_file,
@@ -178,8 +176,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_min_distance,
-                              network_max_distance,
                               network_filename,
                               use_distance,
                               use_rmse)
@@ -283,8 +279,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             output_folder_path <- ""
             use_distance <- FALSE
             use_rmse <- FALSE
-            network_min_distance <- 0
-            network_max_distance <- 0
             network_filename <-
               system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
 
@@ -356,8 +350,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_min_distance,
-                              network_max_distance,
                               network_filename,
                               use_distance,
                               use_rmse)
@@ -459,8 +451,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             output_folder_path <- ""
             use_distance <- FALSE
             use_rmse <- FALSE
-            network_min_distance <- 0
-            network_max_distance <- 0
             network_filename <- ""
 
             data <- calibrate(infected_years_file,
@@ -531,8 +521,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_min_distance,
-                              network_max_distance,
                               network_filename,
                               use_distance,
                               use_rmse)
@@ -637,8 +625,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             output_folder_path <- ""
             use_distance <- FALSE
             use_rmse <- FALSE
-            network_min_distance <- 0
-            network_max_distance <- 0
             network_filename <- ""
 
             data <- calibrate(infected_years_file,
@@ -709,8 +695,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_min_distance,
-                              network_max_distance,
                               network_filename,
                               use_distance,
                               use_rmse)
