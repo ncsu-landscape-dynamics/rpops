@@ -76,8 +76,6 @@ auto_manage(
   mask = NULL,
   write_outputs = "None",
   output_folder_path = "",
-  network_min_distance = 0,
-  network_max_distance = 0,
   network_filename = ""
 )
 }
@@ -334,12 +332,6 @@ that can't be managed in the auto_manage function.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
-
-\item{network_min_distance}{minimum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
-
-\item{network_max_distance}{maximum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}

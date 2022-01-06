@@ -73,8 +73,6 @@ calibrate(
   verbose = TRUE,
   write_outputs = "None",
   output_folder_path = "",
-  network_min_distance = 0,
-  network_max_distance = 0,
   network_filename = "",
   use_distance = FALSE,
   use_rmse = FALSE
@@ -361,12 +359,6 @@ Defaults if FALSE.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
-
-\item{network_min_distance}{minimum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
-
-\item{network_max_distance}{maximum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}

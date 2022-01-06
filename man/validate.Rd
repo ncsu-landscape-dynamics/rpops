@@ -67,8 +67,6 @@ validate(
   write_outputs = "None",
   output_folder_path = "",
   point_file = "",
-  network_min_distance = 0,
-  network_max_distance = 0,
   network_filename = "",
   use_distance = FALSE,
   use_configuration = FALSE
@@ -294,12 +292,6 @@ the natural kernel (if applicable)}
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 
 \item{point_file}{file for point comparison if not provided skips calculations}
-
-\item{network_min_distance}{minimum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
-
-\item{network_max_distance}{maximum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}

@@ -61,8 +61,6 @@ pops(
   leaving_scale_coefficient = 1,
   exposed_file = "",
   mask = NULL,
-  network_min_distance = 0,
-  network_max_distance = 0,
   network_filename = ""
 )
 }
@@ -277,12 +275,6 @@ the natural kernel (if applicable)}
 true negatives from comparisons (e.g. mask out lakes and oceans from statics
 if modeling terrestrial species). This can also be used to mask out areas
 that can't be managed in the auto_manage function.}
-
-\item{network_min_distance}{minimum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
-
-\item{network_max_distance}{maximum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
