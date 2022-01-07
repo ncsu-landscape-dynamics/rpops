@@ -190,7 +190,7 @@ test_that(
 test_that(
   "Validation has correctly formatted returns and runs with a
   single output comparison", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
@@ -264,6 +264,7 @@ test_that(
     point_file <- system.file("extdata", "simple20x20", "points.gpkg", package = "PoPS")
     use_distance <- FALSE
     use_configuration <- FALSE
+    network_filename <- ""
 
     outputs <- validate(
       infected_years_file,
@@ -327,6 +328,7 @@ test_that(
       write_outputs,
       output_folder_path,
       point_file,
+      network_filename,
       use_distance,
       use_configuration)
 
@@ -355,7 +357,7 @@ test_that(
 test_that(
   "Validation has correctly formatted returns and runs with a
   single output comparison with mask", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
@@ -426,6 +428,10 @@ test_that(
     exposed_file <- ""
     write_outputs <- "None"
     output_folder_path <- ""
+    point_file <- ""
+    use_distance <- FALSE
+    use_configuration <- FALSE
+    network_filename <- ""
 
     outputs <- validate(
       infected_years_file,
@@ -487,8 +493,11 @@ test_that(
       leaving_scale_coefficient,
       exposed_file,
       write_outputs,
-      output_folder_path
-    )
+      output_folder_path,
+      point_file,
+      network_filename,
+      use_distance,
+      use_configuration)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)
