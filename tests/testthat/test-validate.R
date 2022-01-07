@@ -5,8 +5,8 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
   infected_years_file <-
     system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
   host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
 
   expect_error(validate(infected_years_file = infected_years_file,
                         infected_file = "",
@@ -34,8 +34,8 @@ test_that(
     skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
-    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
-    parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
+    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
+    parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
     infected_file <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
     host_file <-
@@ -190,12 +190,12 @@ test_that(
 test_that(
   "Validation has correctly formatted returns and runs with a
   single output comparison", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
-    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
-    parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
+    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
+    parameter_cov_matrix <- matrix(ncol = 8, nrow = 8, 0)
     checks <- c(500, 60000, 900, 1000)
     infected_file <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
@@ -264,6 +264,7 @@ test_that(
     point_file <- system.file("extdata", "simple20x20", "points.gpkg", package = "PoPS")
     use_distance <- FALSE
     use_configuration <- FALSE
+    network_filename <- ""
 
     outputs <- validate(
       infected_years_file,
@@ -327,6 +328,7 @@ test_that(
       write_outputs,
       output_folder_path,
       point_file,
+      network_filename,
       use_distance,
       use_configuration)
 
@@ -355,12 +357,12 @@ test_that(
 test_that(
   "Validation has correctly formatted returns and runs with a
   single output comparison with mask", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
-    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
-    parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
+    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
+    parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
     checks <- c(500, 60000, 900, 1000)
     infected_file <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
@@ -426,6 +428,10 @@ test_that(
     exposed_file <- ""
     write_outputs <- "None"
     output_folder_path <- ""
+    point_file <- ""
+    use_distance <- FALSE
+    use_configuration <- FALSE
+    network_filename <- ""
 
     outputs <- validate(
       infected_years_file,
@@ -487,8 +493,11 @@ test_that(
       leaving_scale_coefficient,
       exposed_file,
       write_outputs,
-      output_folder_path
-    )
+      output_folder_path,
+      point_file,
+      network_filename,
+      use_distance,
+      use_configuration)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)

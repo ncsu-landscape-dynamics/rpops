@@ -182,8 +182,7 @@ natural dispersal. Current dispersal kernel options are
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')}
+ 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')}
 
 \item{use_anthropogenic_kernel}{A boolean that turns on the use of the
 anthropogenic or long distance dispersal portion of the 2 scale dispersal
@@ -289,11 +288,14 @@ the natural kernel (if applicable)}
 
 \item{bbox}{bounding box for network kernel}
 
-\item{network_min_distance}{minimum time a propagule rides on the network}
+\item{network_min_distance}{minimum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'.}
 
-\item{network_max_distance}{maximum time a propagule rides on the network}
+\item{network_max_distance}{maximum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'.}
 
-\item{network_filename}{entire file path for the network file}
+\item{network_filename}{entire file path for the network file. Used if
+anthropogenic_kernel_type = 'network'.}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

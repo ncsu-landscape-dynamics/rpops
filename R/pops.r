@@ -88,8 +88,7 @@
 #' @param anthropogenic_kernel_type what type of dispersal kernel should be
 #' used for anthropogenic dispersal. Current dispersal kernel options are
 #'  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
-#'  'hyperbolic secant', 'gamma', 'weibull',
-#'  'logistic')
+#'  'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')
 #' @param natural_dir sets the predominate direction of natural dispersal
 #' usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
 #' 'NONE')
@@ -164,9 +163,8 @@
 #' true negatives from comparisons (e.g. mask out lakes and oceans from statics
 #' if modeling terrestrial species). This can also be used to mask out areas
 #' that can't be managed in the auto_manage function.
-#' @param network_min_distance minimum time a propagule rides on the network
-#' @param network_max_distance maximum time a propagule rides on the network
-#' @param network_filename entire file path for the network file
+#' @param network_filename entire file path for the network file. Used if
+#' anthropogenic_kernel_type = 'network'.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -237,8 +235,6 @@ pops <- function(infected_file,
                  leaving_scale_coefficient = 1,
                  exposed_file = "",
                  mask = NULL,
-                 network_min_distance = 0,
-                 network_max_distance = 0,
                  network_filename = "") {
 
   config <- c()
@@ -309,8 +305,6 @@ pops <- function(infected_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
 
-  config$network_min_distance <- network_min_distance
-  config$network_max_distance <- network_max_distance
   config$network_filename <- network_filename
 
   config <- configuration(config)
@@ -387,8 +381,8 @@ pops <- function(infected_file,
                      leaving_percentage = config$leaving_percentage,
                      leaving_scale_coefficient = config$leaving_scale_coefficient,
                      bbox = config$bounding_box,
-                     network_min_distance = config$network_min_distance,
-                     network_max_distance = config$network_max_distance,
+                     network_min_distance = config$network_min_distance[1],
+                     network_max_distance = config$network_max_distance[1],
                      network_filename = config$network_filename
   )
 

@@ -110,9 +110,9 @@ anthropogenic_kernel_error <-
   "Anthropogenic kernel type not one of 'cauchy', 'exponential', 'uniform', 'deterministic
   neighbor', 'power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network'"
 covariance_mat_error <-
-  "parameter covariance matrix is not 6 x 6"
+  "parameter covariance matrix is not 8 x 8"
 paramter_means_error <-
-  "parameter means is not a vector of length 6"
+  "parameter means is not a vector of length 8"
 write_outputs_error <-
   "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')"
 output_path_error <-

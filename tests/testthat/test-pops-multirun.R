@@ -6,8 +6,8 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
 
   expect_error(pops_multirun(infected_file = "",
                     host_file =  host_file,
@@ -70,8 +70,8 @@ test_that("Multirun model outputs work", {
   number_of_cores <- 2
   model_type <- "SI"
   latency_period <- 0
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   start_exposed <- FALSE
   generate_stochasticity <- TRUE
   establishment_stochasticity <- TRUE
@@ -452,8 +452,8 @@ test_that("Multirun model outputs work with mask", {
   number_of_cores <- 2
   model_type <- "SI"
   latency_period <- 0
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   start_exposed <- FALSE
   generate_stochasticity <- TRUE
   establishment_stochasticity <- TRUE

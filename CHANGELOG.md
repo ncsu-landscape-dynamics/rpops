@@ -13,7 +13,15 @@ increases version here although there is no specific tag or release for that in
 this repository.
 
 ## [Unreleased]
-
+- `validate`, `calibrate`, `pops_multirun`, `auto_manage` and `pops` no longer take
+  network_min_distance and network_max_distance as these parameters are now passed
+  in through the parameter_means and parameter_cov_matrix parameters and are calibrated
+  as part of the calibration if network kernel is selected (@ChrisJones, #140).
+  
+- `calibrate` now calibrates the network_min_distance and network_max_distance parameters
+  during calibration and they are now part of the parameter_means and parameter_cov_matrix
+  that are exported from the calibration (@ChrisJones, #140).
+  
 ## [2.0.0] - 2021-12-14
 
 ### Added

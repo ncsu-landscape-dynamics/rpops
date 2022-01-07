@@ -106,8 +106,6 @@ validate <- function(infected_years_file,
                      write_outputs = "None",
                      output_folder_path = "",
                      point_file = "",
-                     network_min_distance = 0,
-                     network_max_distance = 0,
                      network_filename = "",
                      use_distance = FALSE,
                      use_configuration = FALSE) {
@@ -178,8 +176,6 @@ validate <- function(infected_years_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
   config$point_file <- point_file
-  config$network_min_distance <- network_min_distance
-  config$network_max_distance <- network_max_distance
   config$network_filename <- network_filename
   config$use_configuration <- use_configuration
   config$use_distance <- use_distance
@@ -272,8 +268,8 @@ validate <- function(infected_years_file,
         leaving_percentage = config$leaving_percentage,
         leaving_scale_coefficient = config$leaving_scale_coefficient,
         bbox = config$bounding_box,
-        network_min_distance = config$network_min_distance,
-        network_max_distance = config$network_max_distance,
+        network_min_distance = config$network_min_distance[i],
+        network_max_distance = config$network_max_distance[i],
         network_filename = config$network_filename
       )
 

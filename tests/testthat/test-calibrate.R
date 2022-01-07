@@ -30,8 +30,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             skip_on_ci()
             skip_on_covr()
             infected_years_file <-
-              system.file("extdata", "simple20x20", "infected_years.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
             number_of_observations <- 68
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
@@ -40,14 +39,11 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
-              system.file("extdata", "simple20x20", "initial_infection.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
             host_file <-
-              system.file("extdata", "simple20x20", "host.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
-              system.file("extdata", "simple20x20", "all_plants.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
             temperature_coefficient_file <- ""
             precip <- FALSE
@@ -80,8 +76,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             anthropogenic_kappa <- 0
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
-            mask <- system.file("extdata", "simple20x20", "mask.tif",
-                                package = "PoPS")
+            mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -111,6 +106,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             output_folder_path <- tempdir()
             use_distance <- FALSE
             use_rmse <- FALSE
+            network_filename <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -180,15 +176,16 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
+                              network_filename,
                               use_distance,
                               use_rmse)
 
-            expect_length(data$posterior_means, 6)
-            expect_vector(data$posterior_means, ptype = double(), size = 6)
+            expect_length(data$posterior_means, 8)
+            expect_vector(data$posterior_means, ptype = double(), size = 8)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 6)
-            expect_equal(ncol(data$posterior_cov_matrix), 6)
+            expect_equal(nrow(data$posterior_cov_matrix), 8)
+            expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations,
                          number_of_observations)
@@ -198,7 +195,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
 
 
 test_that("ABC calibration has correctly formatted returns and runs with a
-          single output comparison", {
+          single output comparison with network", {
             infected_years_file <-
               system.file("extdata", "simple20x20", "infected_single.tif",
                           package = "PoPS")
@@ -243,7 +240,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             treatments_file <- ""
             treatment_method <- "ratio"
             natural_kernel_type <- "exponential"
-            anthropogenic_kernel_type <- "cauchy"
+            anthropogenic_kernel_type <- "network"
             natural_dir <- "NONE"
             natural_kappa <- 0
             anthropogenic_dir <- "NONE"
@@ -282,6 +279,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             output_folder_path <- ""
             use_distance <- FALSE
             use_rmse <- FALSE
+            network_filename <-
+              system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -351,15 +350,16 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
+                              network_filename,
                               use_distance,
                               use_rmse)
 
-            expect_length(data$posterior_means, 6)
-            expect_vector(data$posterior_means, ptype = double(), size = 6)
+            expect_length(data$posterior_means, 8)
+            expect_vector(data$posterior_means, ptype = double(), size = 8)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 6)
-            expect_equal(ncol(data$posterior_cov_matrix), 6)
+            expect_equal(nrow(data$posterior_cov_matrix), 8)
+            expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations,
                          number_of_observations)
@@ -451,6 +451,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             output_folder_path <- ""
             use_distance <- FALSE
             use_rmse <- FALSE
+            network_filename <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -520,15 +521,16 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
+                              network_filename,
                               use_distance,
                               use_rmse)
 
-            expect_length(data$posterior_means, 6)
-            expect_vector(data$posterior_means, ptype = double(), size = 6)
+            expect_length(data$posterior_means, 8)
+            expect_vector(data$posterior_means, ptype = double(), size = 8)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 6)
-            expect_equal(ncol(data$posterior_cov_matrix), 6)
+            expect_equal(nrow(data$posterior_cov_matrix), 8)
+            expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations,
                          number_of_observations)
@@ -623,6 +625,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             output_folder_path <- ""
             use_distance <- FALSE
             use_rmse <- FALSE
+            network_filename <- ""
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -692,15 +695,16 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
+                              network_filename,
                               use_distance,
                               use_rmse)
 
-            expect_length(data$posterior_means, 6)
-            expect_vector(data$posterior_means, ptype = double(), size = 6)
+            expect_length(data$posterior_means, 8)
+            expect_vector(data$posterior_means, ptype = double(), size = 8)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 6)
-            expect_equal(ncol(data$posterior_cov_matrix), 6)
+            expect_equal(nrow(data$posterior_cov_matrix), 8)
+            expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations,
                          number_of_observations)

@@ -76,8 +76,6 @@ auto_manage(
   mask = NULL,
   write_outputs = "None",
   output_folder_path = "",
-  network_min_distance = 0,
-  network_max_distance = 0,
   network_filename = ""
 )
 }
@@ -205,8 +203,7 @@ natural dispersal. Current dispersal kernel options are
 \item{anthropogenic_kernel_type}{what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')}
+ 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')}
 
 \item{natural_dir}{sets the predominate direction of natural dispersal
 usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
@@ -336,11 +333,8 @@ that can't be managed in the auto_manage function.}
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 
-\item{network_min_distance}{minimum time a propagule rides on the network}
-
-\item{network_max_distance}{maximum time a propagule rides on the network}
-
-\item{network_filename}{entire file path for the network file}
+\item{network_filename}{entire file path for the network file. Used if
+anthropogenic_kernel_type = 'network'.}
 }
 \value{
 list of infected and susceptible per year
