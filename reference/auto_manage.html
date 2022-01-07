@@ -211,8 +211,6 @@ through each stochastic realisation with the same treatment.</p>
   mask <span class='op'>=</span> <span class='cn'>NULL</span>,
   write_outputs <span class='op'>=</span> <span class='st'>"None"</span>,
   output_folder_path <span class='op'>=</span> <span class='st'>""</span>,
-  network_min_distance <span class='op'>=</span> <span class='fl'>0</span>,
-  network_max_distance <span class='op'>=</span> <span class='fl'>0</span>,
   network_filename <span class='op'>=</span> <span class='st'>""</span>
 <span class='op'>)</span></pre>
 
@@ -404,8 +402,7 @@ natural dispersal. Current dispersal kernel options are
       <td><p>what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')</p></td>
+ 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')</p></td>
     </tr>
     <tr>
       <th>natural_dir</th>
@@ -616,16 +613,9 @@ that can't be managed in the auto_manage function.</p></td>
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")</p></td>
     </tr>
     <tr>
-      <th>network_min_distance</th>
-      <td><p>minimum time a propagule rides on the network</p></td>
-    </tr>
-    <tr>
-      <th>network_max_distance</th>
-      <td><p>maximum time a propagule rides on the network</p></td>
-    </tr>
-    <tr>
       <th>network_filename</th>
-      <td><p>entire file path for the network file</p></td>
+      <td><p>entire file path for the network file. Used if
+anthropogenic_kernel_type = 'network'.</p></td>
     </tr>
     </table>
 

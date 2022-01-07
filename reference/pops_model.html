@@ -397,8 +397,7 @@ natural dispersal. Current dispersal kernel options are
       <td><p>what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')</p></td>
+ 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')</p></td>
     </tr>
     <tr>
       <th>use_anthropogenic_kernel</th>
@@ -568,15 +567,18 @@ the natural kernel (if applicable)</p></td>
     </tr>
     <tr>
       <th>network_min_distance</th>
-      <td><p>minimum time a propagule rides on the network</p></td>
+      <td><p>minimum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'.</p></td>
     </tr>
     <tr>
       <th>network_max_distance</th>
-      <td><p>maximum time a propagule rides on the network</p></td>
+      <td><p>maximum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'.</p></td>
     </tr>
     <tr>
       <th>network_filename</th>
-      <td><p>entire file path for the network file</p></td>
+      <td><p>entire file path for the network file. Used if
+anthropogenic_kernel_type = 'network'.</p></td>
     </tr>
     </table>
 

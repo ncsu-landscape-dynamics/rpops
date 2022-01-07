@@ -202,8 +202,6 @@ automated tests of model features.</p>
   leaving_scale_coefficient <span class='op'>=</span> <span class='fl'>1</span>,
   exposed_file <span class='op'>=</span> <span class='st'>""</span>,
   mask <span class='op'>=</span> <span class='cn'>NULL</span>,
-  network_min_distance <span class='op'>=</span> <span class='fl'>0</span>,
-  network_max_distance <span class='op'>=</span> <span class='fl'>0</span>,
   network_filename <span class='op'>=</span> <span class='st'>""</span>
 <span class='op'>)</span></pre>
 
@@ -396,8 +394,7 @@ natural dispersal. Current dispersal kernel options are
       <td><p>what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')</p></td>
+ 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')</p></td>
     </tr>
     <tr>
       <th>natural_dir</th>
@@ -535,16 +532,9 @@ if modeling terrestrial species). This can also be used to mask out areas
 that can't be managed in the auto_manage function.</p></td>
     </tr>
     <tr>
-      <th>network_min_distance</th>
-      <td><p>minimum time a propagule rides on the network</p></td>
-    </tr>
-    <tr>
-      <th>network_max_distance</th>
-      <td><p>maximum time a propagule rides on the network</p></td>
-    </tr>
-    <tr>
       <th>network_filename</th>
-      <td><p>entire file path for the network file</p></td>
+      <td><p>entire file path for the network file. Used if
+anthropogenic_kernel_type = 'network'.</p></td>
     </tr>
     </table>
 

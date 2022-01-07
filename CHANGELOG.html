@@ -135,6 +135,10 @@
 <h2 class="hasAnchor">
 <a href="#unreleased" class="anchor"></a><a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...main">Unreleased</a>
 </h2>
+<ul>
+<li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, <code>auto_manage</code> and <code>pops</code> no longer take network_min_distance and network_max_distance as these parameters are now passed in through the parameter_means and parameter_cov_matrix parameters and are calibrated as part of the calibration if network kernel is selected (@ChrisJones, #140).</p></li>
+<li><p><code>calibrate</code> now calibrates the network_min_distance and network_max_distance parameters during calibration and they are now part of the parameter_means and parameter_cov_matrix that are exported from the calibration (@ChrisJones, #140).</p></li>
+</ul>
 </div>
 <div id="200---2021-12-14" class="section level2">
 <h2 class="hasAnchor">
