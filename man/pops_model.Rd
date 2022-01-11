@@ -87,7 +87,7 @@ pest or pathogen have a temperature at which it cannot survive?
 (TRUE or FALSE)}
 
 \item{lethal_temperature}{the temperature in degrees C at which lethal
-temperature related mortality occurs for your pest or pathogen (-50 and 60)}
+temperature related mortality occurs for your pest or pathogen (-50 to 60)}
 
 \item{lethal_temperature_month}{the month in which lethal temperature
 related mortality occurs for your pest or pathogen integer value between 1

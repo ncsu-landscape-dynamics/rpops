@@ -90,13 +90,14 @@ where the # of hosts is greater than 0.}
 
 \item{parameter_means}{A vector of the means of the model parameters
 (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal,
-anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)}
+anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
+network_min_distance, and network_max_distance). 1x8 vector.}
 
 \item{parameter_cov_matrix}{A covariance matrix from the previous years
 posterior parameter estimation ordered from (reproductive_rate,
 natural_dispersal_distance, percent_natural_dispersal,
-anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
-Should be 6x6.}
+anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
+network_min_distance, and network_max_distance) Should be 8x8 matrix.}
 
 \item{temp}{boolean that allows the use of temperature coefficients to
 modify spread (TRUE or FALSE)}
@@ -149,7 +150,7 @@ pest or pathogen have a temperature at which it cannot survive?
 minimum temperature}
 
 \item{lethal_temperature}{the temperature in degrees C at which lethal
-temperature related mortality occurs for your pest or pathogen (-50 and 60)}
+temperature related mortality occurs for your pest or pathogen (-50 to 60)}
 
 \item{lethal_temperature_month}{the month in which lethal temperature
 related mortality occurs for your pest or pathogen integer value between 1
