@@ -245,15 +245,16 @@ where the # of hosts is greater than 0.</p></td>
       <th>parameter_means</th>
       <td><p>A vector of the means of the model parameters
 (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal,
-anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)</p></td>
+anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
+network_min_distance, and network_max_distance). 1x8 vector.</p></td>
     </tr>
     <tr>
       <th>parameter_cov_matrix</th>
       <td><p>A covariance matrix from the previous years
 posterior parameter estimation ordered from (reproductive_rate,
 natural_dispersal_distance, percent_natural_dispersal,
-anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
-Should be 6x6.</p></td>
+anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
+network_min_distance, and network_max_distance) Should be 8x8 matrix.</p></td>
     </tr>
     <tr>
       <th>temp</th>
@@ -334,7 +335,7 @@ minimum temperature</p></td>
     <tr>
       <th>lethal_temperature</th>
       <td><p>the temperature in degrees C at which lethal
-temperature related mortality occurs for your pest or pathogen (-50 and 60)</p></td>
+temperature related mortality occurs for your pest or pathogen (-50 to 60)</p></td>
     </tr>
     <tr>
       <th>lethal_temperature_month</th>
