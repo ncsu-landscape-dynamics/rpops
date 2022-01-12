@@ -1052,18 +1052,19 @@ calibrate <- function(infected_years_file,
       colMeans(params[start_index:config$number_of_iterations,
                       c("reproductive_rate",
                         "natural_distance_scale",
-                        "anthropogenic_distance_scale",
                         "percent_natural_dispersal",
+                        "anthropogenic_distance_scale",
                         "natural_kappa",
                         "anthropogenic_kappa",
                         "network_min_distance",
                         "network_max_distance")])
+
     calibrated_cov_matrix <-
       cov(params[start_index:config$number_of_iterations,
                  c("reproductive_rate",
                    "natural_distance_scale",
-                   "anthropogenic_distance_scale",
                    "percent_natural_dispersal",
+                   "anthropogenic_distance_scale",
                    "natural_kappa",
                    "anthropogenic_kappa",
                    "network_min_distance",
@@ -1074,7 +1075,6 @@ calibrate <- function(infected_years_file,
   } else {
     return("Calibration method must be one of 'ABC' or 'MCMC'")
   }
-
 
   if (prior_number_of_observations < 1) {
     prior_weight <- prior_number_of_observations
@@ -1101,7 +1101,7 @@ calibrate <- function(infected_years_file,
     )
 
   if (posterior_check$checks_passed) {
-    posterior_means <- posterior_check$posterior_means
+    posterior_means <- as.numeric(posterior_check$posterior_means)
     posterior_cov_matrix <- posterior_check$posterior_cov_matrix
   } else {
     return(posterior_check$failed_check)

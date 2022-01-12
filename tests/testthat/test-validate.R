@@ -190,7 +190,7 @@ test_that(
 test_that(
   "Validation has correctly formatted returns and runs with a
   single output comparison", {
-    # skip_on_os("windows")
+    skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
@@ -357,7 +357,7 @@ test_that(
 test_that(
   "Validation has correctly formatted returns and runs with a
   single output comparison with mask", {
-    # skip_on_os("windows")
+    skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68

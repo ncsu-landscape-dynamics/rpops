@@ -56,7 +56,7 @@
 #' @param temperature_file path to raster file with temperature data for
 #' minimum temperature
 #' @param lethal_temperature the temperature in degrees C at which lethal
-#' temperature related mortality occurs for your pest or pathogen (-50 and 60)
+#' temperature related mortality occurs for your pest or pathogen (-50 to 60)
 #' @param lethal_temperature_month the month in which lethal temperature
 #' related mortality occurs for your pest or pathogen integer value between 1
 #' and 12
@@ -121,12 +121,13 @@
 #' (Susceptible - Infected/Infested). Default value is "SI".
 #' @param parameter_means A vector of the means of the model parameters
 #' (reproductive_rate, natural_dispersal_distance, percent_natural_dispersal,
-#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa)
+#' anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
+#' network_min_distance, and network_max_distance). 1x8 vector.
 #' @param parameter_cov_matrix A covariance matrix from the previous years
 #' posterior parameter estimation ordered from (reproductive_rate,
 #' natural_dispersal_distance, percent_natural_dispersal,
-#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
-#' Should be 6x6.
+#' anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
+#' network_min_distance, and network_max_distance) Should be 8x8 matrix.
 #' @param start_exposed Do your initial conditions start as exposed or infected
 #' (only used if model_type is "SEI"). Default False. If this is TRUE need to
 #' have both an infected_file (this can be a raster of all 0's) and exposed_file
