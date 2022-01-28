@@ -199,6 +199,8 @@ validate <- function(infected_years_file,
     ) %dopar% {
 
       config$random_seed <- round(stats::runif(1, 1, 1000000))
+      config <- draw_parameters(config)
+
       data <- pops_model(
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
@@ -227,7 +229,7 @@ validate <- function(infected_years_file,
         res = config$res,
         rows_cols = config$rows_cols,
         time_step = config$time_step,
-        reproductive_rate = config$reproductive_rate[i],
+        reproductive_rate = config$reproductive_rate,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
         mortality_rate = config$mortality_rate,
@@ -238,13 +240,13 @@ validate <- function(infected_years_file,
         natural_kernel_type = config$natural_kernel_type,
         anthropogenic_kernel_type = config$anthropogenic_kernel_type,
         use_anthropogenic_kernel = config$use_anthropogenic_kernel,
-        percent_natural_dispersal = config$percent_natural_dispersal[i],
-        natural_distance_scale = config$natural_distance_scale[i],
-        anthropogenic_distance_scale = config$anthropogenic_distance_scale[i],
+        percent_natural_dispersal = config$percent_natural_dispersal,
+        natural_distance_scale = config$natural_distance_scale,
+        anthropogenic_distance_scale = config$anthropogenic_distance_scale,
         natural_dir = config$natural_dir,
-        natural_kappa = config$natural_kappa[i],
+        natural_kappa = config$natural_kappa,
         anthropogenic_dir = config$anthropogenic_dir,
-        anthropogenic_kappa = config$anthropogenic_kappa[i],
+        anthropogenic_kappa = config$anthropogenic_kappa,
         output_frequency = config$output_frequency,
         output_frequency_n = config$output_frequency_n,
         quarantine_frequency = config$quarantine_frequency,
@@ -268,8 +270,8 @@ validate <- function(infected_years_file,
         leaving_percentage = config$leaving_percentage,
         leaving_scale_coefficient = config$leaving_scale_coefficient,
         bbox = config$bounding_box,
-        network_min_distance = config$network_min_distance[i],
-        network_max_distance = config$network_max_distance[i],
+        network_min_distance = config$network_min_distance,
+        network_max_distance = config$network_max_distance,
         network_filename = config$network_filename
       )
 
