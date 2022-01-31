@@ -602,3 +602,62 @@ movement_checks <- function(x, rast, start_date, end_date) {
     return(outs)
   }
 }
+
+draw_parameters <- function(config) {
+  parameters <-
+    MASS::mvrnorm(1,
+                  config$parameter_means,
+                  config$parameter_cov_matrix)
+  while (any(parameters[1] < 0 |
+             parameters[2] <= 0 |
+             parameters[3] > 1 |
+             parameters[3] <= 0 |
+             parameters[4] <= 0 |
+             parameters[5] < 0 |
+             parameters[6] < 0 |
+             parameters[7] < config$res$ew_res / 2 |
+             parameters[7] > parameters[8] |
+             parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
+
+    config$number_of_draws <- nrow(parameters[parameters[1] < 0 |
+                                                parameters[2] <= 0 |
+                                                parameters[3] > 1 |
+                                                parameters[3] <= 0 |
+                                                parameters[4] <= 0 |
+                                                parameters[5] < 0 |
+                                                parameters[6] < 0 |
+                                                parameters[7] < config$res$ew_res / 2 |
+                                                parameters[7] > parameters[8] |
+                                                parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res, ])
+
+    if (is.null(config$number_of_draws)) {
+      config$number_of_draws <- 1
+    }
+
+    parameters[parameters[1] < 0 |
+                 parameters[2] <= 0 |
+                 parameters[3] > 1 |
+                 parameters[3] <= 0 |
+                 parameters[4] <= 0 |
+                 parameters[5] < 0 |
+                 parameters[6] < 0 |
+                 parameters[7] < config$res$ew_res / 2 |
+                 parameters[7] > parameters[8] |
+                 parameters[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res), ] <-
+      MASS::mvrnorm(
+        config$number_of_draws,
+        config$parameter_means,
+        config$parameter_cov_matrix
+      )
+  }
+  config$reproductive_rate <- parameters[1]
+  config$natural_distance_scale <- parameters[2]
+  config$percent_natural_dispersal <- parameters[3]
+  config$anthropogenic_distance_scale <- parameters[4]
+  config$natural_kappa <- parameters[5]
+  config$anthropogenic_kappa <- parameters[6]
+  config$network_min_distance <- parameters[7]
+  config$network_max_distance <- parameters[8]
+
+  return(config)
+}
