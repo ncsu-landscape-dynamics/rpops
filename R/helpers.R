@@ -150,8 +150,7 @@ output_from_raster_mean_and_sd <- function(x) {
 get_all_infected <- function(rast, direction = 4) {
   # get infections as points
   p <- terra::as.points(rast)
-  rast <-
-    terra::classify(rast, matrix(c(0, NA), ncol = 2, byrow = TRUE), right = NA)
+  rast <- terra::classify(rast, matrix(c(0, NA), ncol = 2, byrow = TRUE), right = NA)
   names(rast) <- "group"
   names(p) <- "data"
   p <- p[p$data > 0]
@@ -162,7 +161,7 @@ get_all_infected <- function(rast, direction = 4) {
     infections$i <- terra::colFromCell(rast, infections$cells)
     infections$j <- terra::rowFromCell(rast, infections$cells)
     r <- terra::patches(rast, direction = direction, zeroAsNA = TRUE)
-    infections$group <- terra::extract(r, p)$group
+    infections$group <- terra::extract(r, p)$patches
   } else {
     return("direction should be either of 4 or 8")
   }
