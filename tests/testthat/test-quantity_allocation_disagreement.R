@@ -34,7 +34,7 @@ test_that("Check that quantity disagreement, total disagreement, ommision, and
   reference <- ref
   use_configuration <- TRUE
   mask <- NULL
-  use_distance <- TRUE
+  use_distance <- FALSE
   data <- quantity_allocation_disagreement(ref, comp, use_configuration, mask, use_distance)
   expect_equal(data$quantity_disagreement, 4)
   expect_equal(data$allocation_disagreement, 0)
