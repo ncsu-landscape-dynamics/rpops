@@ -186,6 +186,9 @@ quantity_allocation_disagreement <-
     precision <- true_positive / (true_positive + false_positive)
     recall <- true_positive / (true_positive + false_negative)
     specificity <- true_negative / (true_negative + false_positive)
+    mcc <- ((true_positive * true_negative) - (false_positive * false_negative)) /
+      sqrt((true_positive + false_positive) * (true_positive + false_negative) *
+             (true_negative + false_positive) * (true_negative * false_negative))
 
     if (is.nan(accuracy)) {accuracy <- 0}
     if (is.nan(precision)) {precision <- 0}
@@ -270,6 +273,7 @@ quantity_allocation_disagreement <-
     output$infected_difference <- positives_in_comparison - positives_in_reference
     output$rmse <- RMSE
     output$distance_difference <- distance_difference
+    output$mcc <- mcc
 
     return(output)
   }
