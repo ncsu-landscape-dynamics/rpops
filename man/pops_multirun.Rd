@@ -287,7 +287,7 @@ true negatives from comparisons (e.g. mask out lakes and oceans from statics
 if modeling terrestrial species). This can also be used to mask out areas
 that can't be managed in the auto_manage function.}
 
-\item{write_outputs}{Either c("all_simulations", "summary_outputs", or
+\item{write_outputs}{Either c("summary_outputs", or
 "None"). If not "None" output folder path must be provided.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
