@@ -168,7 +168,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 12)
     data <- outputs[[1]]
-    expect_length(data, 22)
+    expect_length(data, 23)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
@@ -335,7 +335,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 31)
+    expect_length(data, 32)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
@@ -502,7 +502,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 22)
+    expect_length(data, 23)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
