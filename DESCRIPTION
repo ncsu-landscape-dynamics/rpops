@@ -19,8 +19,8 @@ Authors@R:
              comment = c(ORCID = "0000-0002-5120-5538")))
 Depends: R (>= 3.3.0)
 Imports: 
-    raster (>= 3.3-7),
-    terra (>= 1.3-4),
+    raster (>= 3.5-15),
+    terra (>= 1.5-17),
     Rcpp (>= 0.12.19),
     stats,
     foreach,

@@ -51,7 +51,7 @@ quantity_allocation_disagreement <-
     rcl_ref <- c(NA, 0, 2, 1, Inf, 1, 0, 0.99, 0)
     rclmat_ref <- matrix(rcl_ref, ncol = 3, byrow = TRUE)
     reference <- terra::classify(reference, rclmat_ref, right = FALSE)
-    comparison <- terra::classify(comparison, rclmat_comp, right = TRUE)
+    comparison <- terra::classify(comparison, rclmat_comp, right = FALSE)
 
     if (use_configuration) {
       if (sum(terra::values(comparison) > 0, na.rm = TRUE) == 0) {
@@ -186,6 +186,9 @@ quantity_allocation_disagreement <-
     precision <- true_positive / (true_positive + false_positive)
     recall <- true_positive / (true_positive + false_negative)
     specificity <- true_negative / (true_negative + false_positive)
+    mcc <- ((true_positive * true_negative) - (false_positive * false_negative)) /
+      sqrt((true_positive + false_positive) * (true_positive + false_negative) *
+             (true_negative + false_positive) * (true_negative * false_negative))
 
     if (is.nan(accuracy)) {accuracy <- 0}
     if (is.nan(precision)) {precision <- 0}
@@ -194,8 +197,7 @@ quantity_allocation_disagreement <-
 
     # calculate quantity and allocation disagreements for infected/infested from
     # probabilities based on Death to Kappa (Pontius et al. 2011)
-    quantity_disagreement <-
-      abs(positives_in_comparison - positives_in_reference)
+    quantity_disagreement <- abs(positives_in_comparison - positives_in_reference)
     allocation_disagreement <- 2 * min(false_negative, false_positive)
     total_disagreement <- quantity_disagreement + allocation_disagreement
 
@@ -212,21 +214,17 @@ quantity_allocation_disagreement <-
       sim_points <- terra::as.points(comp)
       names(sim_points) <- "data"
       sim_points <- sim_points[sim_points$data > 0]
-      dist <-
-        terra::distance(obs_points,
-                        sim_points)
+      dist <- terra::distance(obs_points, sim_points)
       if (is(dist, "matrix")) {
         distance_differences <- apply(dist, 2, min)
       }
 
       all_distances <- function(distance_differences) {
-        distance_differences <-
-          round(sqrt(sum(distance_differences^2)), digits = 0)
+        distance_differences <- round(sqrt(sum(distance_differences^2)), digits = 0)
         return(distance_differences)
       }
       distance_differences <- lapply(distance_differences, all_distances)
-      distance_differences <-
-        unlist(distance_differences, recursive = TRUE, use.names = TRUE)
+      distance_differences <- unlist(distance_differences, recursive = TRUE, use.names = TRUE)
 
       distance_difference <- sum(distance_differences)
     }
@@ -239,8 +237,7 @@ quantity_allocation_disagreement <-
     } else if (false_positive == 0) {
       odds_ratio <- (true_positive * true_negative) / false_negative
     } else {
-      odds_ratio <-
-        (true_positive * true_negative) / (false_negative * false_positive)
+      odds_ratio <- (true_positive * true_negative) / (false_negative * false_positive)
     }
     # create data frame for outputs and add calculated values to it
     output <-
@@ -270,14 +267,13 @@ quantity_allocation_disagreement <-
     output$total_disagreement <- total_disagreement
     output$configuration_disagreement <- configuration_disagreement
     output$odds_ratio <- odds_ratio
-    output$residual_error <-
-      terra::global(abs(ref - comp), "sum", na.rm = TRUE)[[1]]
+    output$residual_error <- terra::global(abs(ref - comp), "sum", na.rm = TRUE)[[1]]
     output$true_infected <- positives_in_reference
     output$simulated_infected <- positives_in_comparison
-    output$infected_difference <-
-      positives_in_comparison - positives_in_reference
+    output$infected_difference <- positives_in_comparison - positives_in_reference
     output$rmse <- RMSE
     output$distance_difference <- distance_difference
+    output$mcc <- mcc
 
     return(output)
   }

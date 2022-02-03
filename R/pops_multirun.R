@@ -15,7 +15,7 @@
 #' the calibration to converge at least 10
 #' @param number_of_cores enter how many cores you want to use (default = NA).
 #' If not set uses the # of CPU cores - 1. must be an integer >= 1
-#' @param write_outputs Either c("all_simulations", "summary_outputs", or
+#' @param write_outputs Either c("summary_outputs", or
 #' "None"). If not "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
@@ -168,7 +168,7 @@ pops_multirun <- function(infected_file,
   }
 
   config$crs <- terra::crs(config$host)
-  i <- NULL
+  # i <- NULL
 
   cl <- parallel::makeCluster(config$core_count)
   doParallel::registerDoParallel(cl)
@@ -269,24 +269,26 @@ pops_multirun <- function(infected_file,
       run$quarantine_escape_direction <- data$quarantine_escape_directions
       run$exposed_runs <- data$exposed
 
-      if (config$write_outputs == "all_simulations") {
-        infected_out <- terra::rast(config$infected_file)
-        susectible_out <- terra::rast(config$infected_file)
-        exposed_out <- terra::rast(config$infected_file)
-        for (q in seq_len(length(data$infected))) {
-          terra::values(infected_out[[q]]) <- data$infected[[q]]
-          terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
-          for (p in seq_len(length(data$exposed[[q]])))
-          terra::values(exposed_out[[q]]) <- data$exposed[[q]][[p]]
-        }
-        dir.create(paste(config$output_folder_path, "pops_runs/", sep = ""))
-        file_name <- paste(config$output_folder_path, "pops_runs/infected_", i, ".tif", sep = "")
-        terra::writeRaster(infected_out, file_name, overwrite = TRUE)
-        file_name <- paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
-        terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
-        file_name <- paste(config$output_folder_path, "pops_runs/exposed_", i, ".tif", sep = "")
-        terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
-      }
+      # if (config$write_outputs == "all_simulations") {
+      #   infected_out <- terra::rast(config$infected_file)
+      #   susectible_out <- terra::rast(config$infected_file)
+      #   exposed_out <- terra::rast(config$infected_file)
+      #   for (q in seq_len(length(data$infected))) {
+      #     values(infected_out[[q]]) <- values(terra::rast(data$infected[[q]], crs = crs(infected_out), extent = ext(infected_out)))
+      #     terra::values(infected_out[[q]]) <- data$infected[[q]]
+      #     terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
+      #     for (p in seq_len(length(data$exposed[[q]])))
+      #     terra::values(exposed_out[[q]]) <- data$exposed[[q]][[p]]
+      #   }
+      #
+      #   dir.create(paste(config$output_folder_path, "pops_runs/", sep = ""))
+      #   file_name <- paste(config$output_folder_path, "pops_runs/infected_", i, ".tif", sep = "")
+      #   terra::writeRaster(infected_out, file_name, overwrite = TRUE)
+      #   file_name <- paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
+      #   terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
+      #   file_name <- paste(config$output_folder_path, "pops_runs/exposed_", i, ".tif", sep = "")
+      #   terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
+      # }
 
       run
     }

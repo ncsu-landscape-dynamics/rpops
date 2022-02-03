@@ -13,14 +13,18 @@ increases version here although there is no specific tag or release for that in
 this repository.
 
 ## [Unreleased]
+
+### Changed
 - `validate`, `calibrate`, `pops_multirun`, `auto_manage` and `pops` no longer take
   network_min_distance and network_max_distance as these parameters are now passed
   in through the parameter_means and parameter_cov_matrix parameters and are calibrated
-  as part of the calibration if network kernel is selected (@ChrisJones, #140).
+  as part of the calibration if network kernel is selected (@ChrisJones687, #140).
   
 - `calibrate` now calibrates the network_min_distance and network_max_distance parameters
   during calibration and they are now part of the parameter_means and parameter_cov_matrix
-  that are exported from the calibration (@ChrisJones, #140).
+  that are exported from the calibration (@ChrisJones687, #140).
+  
+- `pops_multirun` removed the ability to write all simulations. (@ChrisJones687, #144).
   
 ## [2.0.0] - 2021-12-14
 
@@ -28,34 +32,34 @@ this repository.
 
 - `quantity_allocation_disagreement` now takes in the use_distance parameter which is FALSE
   by default. This allows the model to commute the minimum total distance between observed
-  and simulated infestations (@ChrisJones, #130).
+  and simulated infestations (@ChrisJones687, #130).
   
 - `validate`, `calibrate`, `pops_multirun`, `auto_manage` and `pops` now take in 
   network_min_distance, network_max_distance, and network_filename parameters these are 
   used when the anthropogenic_kernel_type = "network". This allows directed spread along
-  a network such as a railroad (@ChrisJones and @wenzeslaus, #131)
+  a network such as a railroad (@ChrisJones687 and @wenzeslaus, #131)
 
 ### Changed
 
 - `validate` now takes the variable point_file and uses it to calculate statistics based on the
   point_file in addition to the raster file also calculates new measures of model performance
-  accuracy, precision, recall, and specificity (@ChrisJones, #124).
+  accuracy, precision, recall, and specificity (@ChrisJones687, #124).
   
 - `calibrate` no longer uses success_metrics and checks parameters as these are both handled
   internally by auto updating if the values are too far of in the first generation. This 
-  makes for a simpler and faster user experience (@ChrisJones, #130).
+  makes for a simpler and faster user experience (@ChrisJones687, #130).
   
 - `validate` no longer uses success_metrics parameter but now has the added parameters 
   use_rmse and use_distance that are used in `quantity_allocation_disagreement`.
-  This allows for a more intuitive user interface (@ChrisJones, #130).
+  This allows for a more intuitive user interface (@ChrisJones687, #130).
   
 - `quantity_allocation_disagreement` variable configuration changed to use_configuration
-  to be more consistent with variable names. (@ChrisJones, #130).
+  to be more consistent with variable names. (@ChrisJones687, #130).
   
 - `pops_multirun` can now use variable write_output = "all_simulations" to write out
   susceptible, exposed, and infected rasters from all simulations. This will allow for a 
   future update where simulations can easily be started from previous simulation outputs.
-  (@ChrisJones, #133)
+  (@ChrisJones687, #133)
   
 ## [1.1.0] - 2021-06-22
 
@@ -68,7 +72,7 @@ this repository.
 
 - Overpopulation module added to pops-core (@wenzeslaus, #83).
 
-- Spatial Index to increase computational speed (@ChrisJones, #67)
+- Spatial Index to increase computational speed (@ChrisJones687, #67)
 
 ### Changed
 
@@ -84,7 +88,7 @@ this repository.
 
 - All functions now support vrt data types (@ChrisJones687, #97).
 
-- Raster files can now be read from S3 buckets (@chrisJones687, #75).
+- Raster files can now be read from S3 buckets (@ChrisJones687, #75).
   * needed for model-api for dashboard
   
 - Outputs can now be saved with `write_outputs` and `output_folder_path` parameters (@ChrisJones687, #111).
