@@ -186,9 +186,10 @@ quantity_allocation_disagreement <-
     precision <- true_positive / (true_positive + false_positive)
     recall <- true_positive / (true_positive + false_negative)
     specificity <- true_negative / (true_negative + false_positive)
+    ## calculate MCC value
     mcc <- ((true_positive * true_negative) - (false_positive * false_negative)) /
-      sqrt((true_positive + false_positive) * (true_positive + false_negative) *
-             (true_negative + false_positive) * (true_negative * false_negative))
+      sqrt(as.double((true_positive + false_positive)) * as.double((true_positive + false_negative)) *
+             as.double((true_negative + false_positive)) * as.double((true_negative + false_negative)))
 
     if (is.nan(accuracy)) {accuracy <- 0}
     if (is.nan(precision)) {precision <- 0}
