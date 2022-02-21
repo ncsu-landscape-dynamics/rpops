@@ -107,6 +107,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             use_distance <- FALSE
             use_rmse <- FALSE
             network_filename <- ""
+            use_mcc <- TRUE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -178,7 +179,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               output_folder_path,
                               network_filename,
                               use_distance,
-                              use_rmse)
+                              use_rmse,
+                              use_mcc)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -470,6 +472,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             use_distance <- FALSE
             use_rmse <- FALSE
             network_filename <- ""
+            use_mcc <- TRUE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -541,7 +544,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               output_folder_path,
                               network_filename,
                               use_distance,
-                              use_rmse)
+                              use_rmse,
+                              use_mcc)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
