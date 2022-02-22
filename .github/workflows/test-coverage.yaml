@@ -23,7 +23,7 @@ jobs:
       - name: install gdal
         run: |
           rm '/usr/local/bin/gfortran'
-          brew install pkg-config gdal proj geos
+          brew install pkg-config gdal proj geos sqlite-devel
 
       - name: Install renv
         shell: Rscript {0}
