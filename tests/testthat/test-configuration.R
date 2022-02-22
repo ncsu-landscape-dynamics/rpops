@@ -467,6 +467,4 @@ test_that("configuration returns proper errors", {
   config2 <- configuration(config)
   expect_equal(config2$failure, network_max_distance_large_error)
 
-  config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 0, 0)
-
 })
