@@ -67,6 +67,8 @@ jobs:
           # install spatial dependencies
           rm '/usr/local/bin/gfortran'
           brew install pkg-config gdal proj geos harfbuzz fribidi sqlite
+          export LDFLAGS="-L/usr/local/opt/libpq/lib"
+          export CPPFLAGS="-I/usr/local/opt/libpq/include"
 
       - name: Install renv
         shell: Rscript {0}
