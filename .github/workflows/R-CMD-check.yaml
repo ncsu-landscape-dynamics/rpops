@@ -23,7 +23,6 @@ jobs:
           - {os: macOS-latest,   r: '4.1'}
           - {os: windows-latest, r: '4.1'}
           - {os: ubuntu-latest,   r: '4.1'}
-          - {os: ubuntu-latest,   r: '4.0'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -68,6 +67,8 @@ jobs:
           # install spatial dependencies
           rm '/usr/local/bin/gfortran'
           brew install pkg-config gdal proj geos harfbuzz fribidi
+          export LDFLAGS="-L/usr/local/opt/libpq/lib"
+          export CPPFLAGS="-I/usr/local/opt/libpq/include"
 
       - name: Install renv
         shell: Rscript {0}

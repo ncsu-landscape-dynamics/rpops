@@ -75,7 +75,8 @@ calibrate(
   output_folder_path = "",
   network_filename = "",
   use_distance = FALSE,
-  use_rmse = FALSE
+  use_rmse = FALSE,
+  use_mcc = FALSE
 )
 }
 \arguments{
@@ -368,6 +369,9 @@ simulations and observations. Default is FALSE.}
 
 \item{use_rmse}{Boolean if you want to calibrate based on rmse. This is
 useful if you have very good population level observations. Default is FALSE.}
+
+\item{use_mcc}{Boolean if you want the calibration to be based on the Mathews Correlation
+coefficient. This}
 }
 \value{
 a dataframe of the variables saved and their success metrics for

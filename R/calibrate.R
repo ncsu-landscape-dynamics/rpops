@@ -89,6 +89,8 @@
 #' simulations and observations. Default is FALSE.
 #' @param use_rmse Boolean if you want to calibrate based on rmse. This is
 #' useful if you have very good population level observations. Default is FALSE.
+#' @param use_mcc Boolean if you want the calibration to be based on the Mathews Correlation
+#' coefficient. This
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -177,7 +179,8 @@ calibrate <- function(infected_years_file,
                       output_folder_path = "",
                       network_filename = "",
                       use_distance = FALSE,
-                      use_rmse = FALSE) {
+                      use_rmse = FALSE,
+                      use_mcc = FALSE) {
 
   # add all data to config list
   config <- c()
@@ -256,6 +259,7 @@ calibrate <- function(infected_years_file,
   config$network_filename <- network_filename
   config$use_distance <- use_distance
   config$use_rmse <- use_rmse
+  config$use_mcc <- use_mcc
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -357,23 +361,17 @@ calibrate <- function(infected_years_file,
   # Computation or Markov Chain Monte Carlo.
   if (config$calibration_method == "ABC") {
     # set up data structures for storing results
-    parameters_kept <- matrix(ncol = 14, nrow = config$num_particles)
-    parameters_test <- matrix(ncol = 14, nrow = 200)
+    parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
+    parameters_test <- matrix(ncol = 15, nrow = 200)
     acceptance_rate <- 1
     acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
 
-    accuracy_thresholds <-
-      matrix(ncol = 1, nrow = config$number_of_generations)
-    precision_thresholds <-
-      matrix(ncol = 1, nrow = config$number_of_generations)
-    recall_thresholds <-
-      matrix(ncol = 1, nrow = config$number_of_generations)
-    specificity_thresholds <-
-      matrix(ncol = 1, nrow = config$number_of_generations)
-    rmse_thresholds <-
-      matrix(ncol = 1, nrow = config$number_of_generations)
-    distance_thresholds <-
-      matrix(ncol = 1, nrow = config$number_of_generations)
+    accuracy_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    precision_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    recall_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    specificity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    rmse_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
 
     # assign thresholds for summary static values to be compared to the
     accuracy_threshold <- 0.70 # starting threshold for model accuracy
@@ -383,6 +381,7 @@ calibrate <- function(infected_years_file,
     rmse_threshold <- 7 # starting threshold for RMSE (root mean squared error)
     distance_threshold <- 1000 # starting threshold for distance between simulated
     # and observed data in units
+    mcc_threshold <- 0.50 # starting threshold for Mathews Coorelation coefficient
     acceptance_rate_particle_check <- seq(60, 200, 20)
 
     # loop through until all generations are complete
@@ -395,17 +394,14 @@ calibrate <- function(infected_years_file,
         # generation values
         if (config$current_bin == 1) {
           proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
-          proposed_natural_distance_scale <-
-            round(runif(1, 0.5, 100), digits = 1)
+          proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
           if (params_to_estimate[3]) {
-            proposed_percent_natural_dispersal <-
-              round(runif(1, 0.93, 1), digits = 3)
+            proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
           } else {
             proposed_percent_natural_dispersal <- 1.0
           }
           if (params_to_estimate[4]) {
-            proposed_anthropogenic_distance_scale <-
-              round(runif(1, 30, 80), digits = 0) * 100
+            proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
           } else {
             proposed_anthropogenic_distance_scale <- 0.1
           }
@@ -447,7 +443,8 @@ calibrate <- function(infected_years_file,
                  proposed_parameters[6] < 0 |
                  proposed_parameters[7] < config$res$ew_res / 2 |
                  proposed_parameters[7] > proposed_parameters[8] |
-                 proposed_parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res) {
+                 proposed_parameters[8] >
+                 min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res) {
             proposed_parameters <-
               MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           }
@@ -504,32 +501,56 @@ calibrate <- function(infected_years_file,
         specificity <- all_disagreement$specificity
         rmse <- all_disagreement$rmse
         distance_difference <- all_disagreement$distance_difference
+        mcc <- all_disagreement$mcc
 
         # Check that statistics are improvements
         model_improved <- FALSE
-        if (accuracy >= accuracy_threshold &&
-            precision >= precision_threshold &&
-            recall >= recall_threshold &&
-            specificity >= specificity_threshold) {
-
-          if (config$use_distance) {
-            if (distance_difference <= distance_threshold) {
-              model_improved <- TRUE
+        if (config$use_mcc) {
+          if (mcc >= mcc_threshold) {
+            if (config$use_distance) {
+              if (distance_difference <= distance_threshold) {
+                model_improved <- TRUE
+              } else {
+                model_improved <- FALSE
+              }
             } else {
-              model_improved <- FALSE
+              model_improved <- TRUE
             }
-          } else {
-            model_improved <- TRUE
+
+            if (config$use_rmse) {
+              if (rmse <= rmse_threshold) {
+                model_improved <- TRUE
+              } else {
+                model_improved <- FALSE
+              }
+            } else {
+              model_improved <- TRUE
+            }
           }
-
-          if (config$use_rmse) {
-            if (rmse <= rmse_threshold) {
-              model_improved <- TRUE
+        } else {
+          if (accuracy >= accuracy_threshold &&
+              precision >= precision_threshold &&
+              recall >= recall_threshold &&
+              specificity >= specificity_threshold) {
+            if (config$use_distance) {
+              if (distance_difference <= distance_threshold) {
+                model_improved <- TRUE
+              } else {
+                model_improved <- FALSE
+              }
             } else {
-              model_improved <- FALSE
+              model_improved <- TRUE
             }
-          } else {
-            model_improved <- TRUE
+
+            if (config$use_rmse) {
+              if (rmse <= rmse_threshold) {
+                model_improved <- TRUE
+              } else {
+                model_improved <- FALSE
+              }
+            } else {
+              model_improved <- TRUE
+            }
           }
         }
 
@@ -549,7 +570,8 @@ calibrate <- function(infected_years_file,
               recall,
               specificity,
               rmse,
-              distance_difference
+              distance_difference,
+              mcc
             )
           if (config$current_bin == 1 && config$proposed_particles <= 200) {
             parameters_test[config$proposed_particles, ] <-
@@ -567,7 +589,8 @@ calibrate <- function(infected_years_file,
                 recall,
                 specificity,
                 rmse,
-                distance_difference
+                distance_difference,
+                mcc
               )
           }
           config$current_particles <- config$current_particles + 1
@@ -590,7 +613,8 @@ calibrate <- function(infected_years_file,
                 recall,
                 specificity,
                 rmse,
-                distance_difference
+                distance_difference,
+                mcc
               )
           }
           config$proposed_particles <- config$proposed_particles + 1
@@ -620,6 +644,10 @@ calibrate <- function(infected_years_file,
                             specificity,
                             "\nspecificity threshold: ",
                             specificity_threshold,
+                            "\nMCC:                   ",
+                            mcc,
+                            "\nMCC threshold:         ",
+                            mcc_threshold,
                             "\nrmse:                  ",
                             rmse,
                             "\nrmse threshold:        ",
@@ -650,9 +678,11 @@ calibrate <- function(infected_years_file,
               mean(c(median(parameters_test[, 13], na.rm = TRUE), rmse_threshold)) + 2
             distance_threshold <-
               mean(c(median(parameters_test[, 14], na.rm = TRUE), distance_threshold)) + 10
+            mcc_threshold <-
+              mean(c(median(parameters_test[, 15], na.rm = TRUE), mcc_threshold)) - 0.02
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 14, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 14, nrow = 200)
+            parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
+            parameters_test <- matrix(ncol = 15, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
@@ -663,9 +693,10 @@ calibrate <- function(infected_years_file,
             specificity_threshold <- median(parameters_kept[, 12], na.rm = TRUE)
             rmse_threshold <- median(parameters_kept[, 13], na.rm = TRUE)
             distance_threshold <- median(parameters_kept[, 14], na.rm = TRUE)
+            mcc_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 14, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 14, nrow = 200)
+            parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
+            parameters_test <- matrix(ncol = 15, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
@@ -679,10 +710,8 @@ calibrate <- function(infected_years_file,
 
       start_index <- config$current_bin * generation_size - generation_size + 1
       end_index <- config$current_bin * generation_size
-      config$parameter_means <-
-        colMeans(parameters_kept[start_index:end_index, 1:8])
-      config$parameter_cov_matrix <-
-        cov(parameters_kept[start_index:end_index, 1:8])
+      config$parameter_means <- colMeans(parameters_kept[start_index:end_index, 1:8])
+      config$parameter_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:8])
 
       config$current_particles <- 1
       config$proposed_particles <- 1
@@ -698,6 +727,7 @@ calibrate <- function(infected_years_file,
       specificity_threshold <- median(parameters_kept[start_index:end_index, 12])
       rmse_threshold <- median(parameters_kept[start_index:end_index, 13])
       distance_threshold <- median(parameters_kept[start_index:end_index, 14])
+      mcc_threshold <- median(parameters_kept[start_index:end_index, 15])
       config$current_bin <- config$current_bin + 1
     }
 
@@ -714,8 +744,7 @@ calibrate <- function(infected_years_file,
       proposed_percent_natural_dispersal <- 1.0
     }
     if (config$params_to_estimate[4]) {
-      proposed_anthropogenic_distance_scale <-
-        round(runif(1, 30, 100), digits = 0) * 100
+      proposed_anthropogenic_distance_scale <- round(runif(1, 30, 100), digits = 0) * 100
     } else {
       proposed_anthropogenic_distance_scale <- 0.1
     }
@@ -784,6 +813,7 @@ calibrate <- function(infected_years_file,
     specificity <- all_disagreement$specificity
     rmse <- all_disagreement$rmse
     distance_difference <- all_disagreement$distance_difference
+    mcc <- all_disagreement$mcc
 
     ## save current state of the system
     current <-
@@ -791,11 +821,10 @@ calibrate <- function(infected_years_file,
                                       "specificity", "rmse",
                                       "distance_difference", "false_negatives",
                                       "false_positives", "true_positives",
-                                      "true_negatives", "odds_ratio")],
+                                      "true_negatives", "odds_ratio", "mcc")],
                  reproductive_rate = proposed_reproductive_rate,
                  natural_distance_scale = proposed_natural_distance_scale,
-                 anthropogenic_distance_scale =
-                   proposed_anthropogenic_distance_scale,
+                 anthropogenic_distance_scale = proposed_anthropogenic_distance_scale,
                  percent_natural_dispersal = proposed_percent_natural_dispersal,
                  natural_kappa = proposed_natural_kappa,
                  anthropogenic_kappa = proposed_anthropogenic_kappa
@@ -813,10 +842,10 @@ calibrate <- function(infected_years_file,
                  true_positives = rep(0, config$number_of_iterations),
                  true_negatives = rep(0, config$number_of_iterations),
                  odds_ratio = rep(0, config$number_of_iterations),
+                 mcc = rep(0, config$number_of_iterations),
                  reproductive_rate = rep(0, config$number_of_iterations),
                  natural_distance_scale = rep(0, config$number_of_iterations),
-                 anthropogenic_distance_scale =
-                   rep(0, config$number_of_iterations),
+                 anthropogenic_distance_scale = rep(0, config$number_of_iterations),
                  percent_natural_dispersal = rep(0, config$number_of_iterations),
                  natural_kappa = rep(0, config$number_of_iterations),
                  anthropogenic_kappa = rep(0, config$number_of_iterations),
@@ -845,8 +874,7 @@ calibrate <- function(infected_years_file,
                proposed_percent_natural_dispersal >= 1) {
           proposed_percent_natural_dispersal <-
             round(rnorm(1, mean = current$percent_natural_dispersal,
-                        sd = current$percent_natural_dispersal / 20),
-                  digits = 3)
+                        sd = current$percent_natural_dispersal / 20), digits = 3)
         }
       } else {
         proposed_percent_natural_dispersal <- 1.0
@@ -858,8 +886,7 @@ calibrate <- function(infected_years_file,
                proposed_anthropogenic_distance_scale > 100000) {
           proposed_anthropogenic_distance_scale <-
             round(rnorm(1, mean = current$anthropogenic_distance_scale,
-                        sd = current$anthropogenic_distance_scale / 20),
-                  digits = 0)
+                        sd = current$anthropogenic_distance_scale / 20), digits = 0)
         }
       } else {
         proposed_anthropogenic_distance_scale <- 0.1
@@ -954,13 +981,11 @@ calibrate <- function(infected_years_file,
                                         "specificity", "rmse",
                                         "distance_difference", "false_negatives",
                                         "false_positives", "true_positives",
-                                        "true_negatives", "odds_ratio")],
+                                        "true_negatives", "odds_ratio", "mcc")],
                    reproductive_rate = proposed_reproductive_rate,
                    natural_distance_scale = proposed_natural_distance_scale,
-                   anthropogenic_distance_scale =
-                     proposed_anthropogenic_distance_scale,
-                   percent_natural_dispersal =
-                     proposed_percent_natural_dispersal,
+                   anthropogenic_distance_scale = proposed_anthropogenic_distance_scale,
+                   percent_natural_dispersal = proposed_percent_natural_dispersal,
                    natural_kappa = proposed_natural_kappa,
                    anthropogenic_kappa = proposed_anthropogenic_kappa,
                    network_min_distance = proposed_network_min_distance,
@@ -999,6 +1024,7 @@ calibrate <- function(infected_years_file,
       specificity_test <- min(1, proposed$specificity / current$specificity)
       rmse_test <- min(1, current$rmse / proposed$rmse)
       distance_test <- min(1, current$distance / proposed$distance)
+      mcc_test <- min(1, current$mcc / proposed$mcc)
 
       accurracy_pass <- runif(1) <= accurracy_test
       precision_pass <- runif(1) <= precision_test
@@ -1006,30 +1032,57 @@ calibrate <- function(infected_years_file,
       specificity_pass <- runif(1) <= specificity_test
       rmse_pass <- runif(1) <= rmse_test
       distance_pass <- runif(1) <= distance_test
+      mcc_pass <- runif(1) <= mcc_test
 
       proposed_accepted <- FALSE
-      if (accurracy_pass && precision_pass && recall_pass && specificity_pass) {
+      if (use_mcc) {
+        if (mcc_pass) {
 
-        if (config$use_distance) {
-          if (distance_pass) {
-            proposed_accepted <- TRUE
+          if (config$use_distance) {
+            if (distance_pass) {
+              proposed_accepted <- TRUE
+            } else {
+              proposed_accepted <- FALSE
+            }
           } else {
-            proposed_accepted <- FALSE
+            proposed_accepted <- TRUE
           }
-        } else {
-          proposed_accepted <- TRUE
+
+          if (config$use_rmse) {
+            if (rmse_pass) {
+              proposed_accepted <- TRUE
+            } else {
+              proposed_accepted <- FALSE
+            }
+          } else {
+            proposed_accepted <- TRUE
+          }
         }
+      } else {
+        if (accurracy_pass && precision_pass && recall_pass && specificity_pass) {
 
-        if (config$use_rmse) {
-          if (rmse_pass) {
-            proposed_accepted <- TRUE
+          if (config$use_distance) {
+            if (distance_pass) {
+              proposed_accepted <- TRUE
+            } else {
+              proposed_accepted <- FALSE
+            }
           } else {
-            proposed_accepted <- FALSE
+            proposed_accepted <- TRUE
           }
-        } else {
-          proposed_accepted <- TRUE
+
+          if (config$use_rmse) {
+            if (rmse_pass) {
+              proposed_accepted <- TRUE
+            } else {
+              proposed_accepted <- FALSE
+            }
+          } else {
+            proposed_accepted <- TRUE
+          }
         }
       }
+
 
       if (proposed_accepted) {
         current <- proposed
@@ -1078,13 +1131,11 @@ calibrate <- function(infected_years_file,
 
   if (prior_number_of_observations < 1) {
     prior_weight <- prior_number_of_observations
-    total_number_of_observations <-
-      number_of_observations +
+    total_number_of_observations <- number_of_observations +
       round(number_of_observations * prior_number_of_observations)
     weight <- 1 - prior_weight
   } else if (prior_number_of_observations >= 1) {
-    total_number_of_observations <-
-      prior_number_of_observations + number_of_observations
+    total_number_of_observations <- prior_number_of_observations + number_of_observations
     prior_weight <- prior_number_of_observations / total_number_of_observations
     weight <- 1 - prior_weight
   }
