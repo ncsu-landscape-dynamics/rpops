@@ -451,4 +451,22 @@ test_that("configuration returns proper errors", {
   config2 <- configuration(config)
   expect_equal(config2$failure, output_path_error)
 
+  config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 25, 150)
+  config$function_name <- "pops"
+  config$write_outputs <- "None"
+  config$output_folder_path <- ""
+  config$anthropogenic_kernel_type <- "network"
+  config2 <- configuration(config)
+  expect_equal(config2$failure, network_min_distance_small_error)
+
+  config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 175, 150)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, network_min_distance_large_error)
+
+  config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 175, 2200)
+  config2 <- configuration(config)
+  expect_equal(config2$failure, network_max_distance_large_error)
+
+  config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 0, 0)
+
 })
