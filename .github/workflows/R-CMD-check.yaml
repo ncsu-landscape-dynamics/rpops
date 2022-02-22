@@ -23,7 +23,6 @@ jobs:
           - {os: macOS-latest,   r: '4.1'}
           - {os: windows-latest, r: '4.1'}
           - {os: ubuntu-latest,   r: '4.1'}
-          - {os: ubuntu-latest,   r: '4.0'}
 
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
@@ -67,7 +66,7 @@ jobs:
         run: |
           # install spatial dependencies
           rm '/usr/local/bin/gfortran'
-          brew install pkg-config gdal proj geos harfbuzz fribidi
+          brew install pkg-config gdal proj geos harfbuzz fribidi sqlite-devel
 
       - name: Install renv
         shell: Rscript {0}
