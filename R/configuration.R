@@ -579,6 +579,21 @@ configuration <- function(config) {
         min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
     }
 
+    if (config$parameter_means[7] < config$res$ew_res / 2) {
+      config$failure <- network_min_distance_small_error
+      return(config)
+    }
+
+    if (config$parameter_means[7] > config$parameter_means[8]) {
+      config$failure <- network_min_distance_large_error
+      return(config)
+    }
+
+    if (config$parameter_means[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
+      config$failure <- network_max_distance_large_error
+      return(config)
+    }
+
     config <- draw_parameters(config)
 
     if (any(config$percent_natural_dispersal < 1.0)) {

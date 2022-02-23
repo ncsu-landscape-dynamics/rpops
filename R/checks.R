@@ -628,7 +628,7 @@ draw_parameters <- function(config) {
                                                 parameters[6] < 0 |
                                                 parameters[7] < config$res$ew_res / 2 |
                                                 parameters[7] > parameters[8] |
-                                                parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res, ])
+                                                parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res])
 
     if (is.null(config$number_of_draws)) {
       config$number_of_draws <- 1
@@ -643,7 +643,7 @@ draw_parameters <- function(config) {
                  parameters[6] < 0 |
                  parameters[7] < config$res$ew_res / 2 |
                  parameters[7] > parameters[8] |
-                 parameters[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res), ] <-
+                 parameters[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)] <-
       MASS::mvrnorm(
         config$number_of_draws,
         config$parameter_means,

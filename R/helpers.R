@@ -125,6 +125,13 @@ latency_period_error <-
   "Model type is set to SEI but the latency period is less than 1"
 treatment_option_error <-
   "treatment method is not one of the valid treatment options"
+network_min_distance_small_error <-
+  "network min distance is less than half the cell resolution"
+network_min_distance_large_error <-
+  "network min distance is greater than the network max distance"
+network_max_distance_large_error <-
+  "network max distance is greater than the resoultion times the minimum NS or EW extent"
+
 infection_years_length_error <- function(num_layers_infected_years, number_of_time_steps) {
   error_message <-
     paste("The infection years file must have enough layers to match the number of outputs from the

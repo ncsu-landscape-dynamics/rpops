@@ -14,6 +14,11 @@ this repository.
 
 ## [Unreleased]
 
+### Added
+
+- `calibrate` can now use the Mathews Correlation Coefficient as the summary statistic of 
+  to keep or reject parameter sets (@ChrisJones687, #145).
+ 
 ### Changed
 - `validate`, `calibrate`, `pops_multirun`, `auto_manage` and `pops` no longer take
   network_min_distance and network_max_distance as these parameters are now passed
@@ -25,6 +30,10 @@ this repository.
   that are exported from the calibration (@ChrisJones687, #140).
   
 - `pops_multirun` removed the ability to write all simulations. (@ChrisJones687, #144).
+
+### Fixed
+
+- fixed error on parameter draws in select situations (@ChrisJones687, #146).
   
 ## [2.0.0] - 2021-12-14
 
