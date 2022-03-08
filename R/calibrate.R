@@ -183,7 +183,9 @@ calibrate <- function(infected_years_file,
                       use_mcc = FALSE) {
 
   # add all data to config list
+  if (!exists('config$saved_calibration') || !config$saved_calibration) {
   config <- c()
+  config$saved_calibration <- FALSE
   config$infected_years_file <- infected_years_file
   config$number_of_observations <- number_of_observations
   config$prior_number_of_observations <- prior_number_of_observations
@@ -357,9 +359,14 @@ calibrate <- function(infected_years_file,
       return(data)
     }
 
+  } else {
+    load('calibration.RData')
+  }
+
   # Check which calibration method is being used either Approximate Bayesian
   # Computation or Markov Chain Monte Carlo.
   if (config$calibration_method == "ABC") {
+    if (config$saved_calibration) {}
     # set up data structures for storing results
     parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
     parameters_test <- matrix(ncol = 15, nrow = 200)
@@ -703,6 +710,12 @@ calibrate <- function(infected_years_file,
           }
         }
 
+        ## save RData file to rerun the
+        if (config$current_particles %% 50 == 0) {
+          config$saved_calibration <- TRUE
+          save.image(file = 'calibration.RData')
+        }
+
         if (verbose) {
           cat(acceptance_rate_info)
         }
@@ -733,6 +746,7 @@ calibrate <- function(infected_years_file,
 
     calibrated_means <- colMeans(parameters_kept[start_index:end_index, 1:8])
     calibrated_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:8])
+
 
   } else if (config$calibration_method == "MCMC") {
     proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
