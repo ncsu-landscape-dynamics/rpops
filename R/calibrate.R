@@ -13,84 +13,6 @@
 #' the total number of iterations specified.
 #'
 #' @inheritParams pops
-#' @param infected_years_file Raster file with years of initial
-#' infection/infestation as individual locations of a pest or pathogen. This is
-#' a multiband raster file (e.g. .tif) with each band representing a unique time
-#' step (e.g. band 1 = year 1 .... band 6 = year 6 or band 1 = week 1 .... band
-#' 6 = week 6). This needs to align with both the time step selection and start
-#' and end dates selection. Units for infections are based on data availability
-#' and the way the units used for your host file creation (e.g. percent area, #
-#' of hosts per cell, etc.). This doesn't include the start year which passed in
-#' in the initial_infected_file (e.g. if we had observation data from 2017,
-#' 2018, and 2019 the 2017 raster file would be the initial_infected_file and a
-#' dual band raster file would have band 1 = 2018 and band 2 = 2019 observations)
-#' @param number_of_observations the number of observations used for this
-#' calibration. Useful if using previous calibration. This is used to
-#' weight the parameters when updating parameters when new data becomes
-#' available. Example if we have 2,000 observations in 2019 and had 1,000
-#' observations in 2018 and 1,000 in 2017, we would use 2,000 here and 2,000 for
-#' our prior_number_of_observations.
-#' @param number_of_generations the number of generations to use to decrease
-#' the uncertainty in the parameter estimation (too many and it will take a
-#' long time, too few and your parameter sets will be too wide). This is an ABC
-#' implementation naming convention but should be set to greater than 7 for
-#' robust calibrations. There is a trade off between computational time and model
-#' accuracy the larger this number gets. Usually 7 to 9 is the ideal range.
-#' @param generation_size how many accepted parameter sets should occur in each
-#' generation. For example if generation size is 1,000 then the simulation runs
-#' until 1,000 model runs are less than the threshold value.
-#' We recommend running at least 1,000 but the greater this number the more
-#' accurate the model parameters selected will be.
-#' @param prior_number_of_observations the number of total observations from
-#' previous calibrations used to weight the posterior distributions (if this is
-#' a new calibration this value takes the form of a prior weight (0 - 1)). This
-#' is used to weight the parameters when updating parameters when new data
-#' becomes available. Example if we have 2,000 observations in 2019 and had
-#' 1,000 observations in 2018 and 1,000 in 2017, we would use 2,000 here and
-#' 2,000 for our number_of_observations.
-#' @param params_to_estimate A list of booleans specifying which parameters to
-#' estimate ordered from (reproductive_rate, natural_dispersal_distance,
-#' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
-#' and anthropogenic kappa)
-#' @param prior_means A vector of the means of your parameters you are
-#' estimating in order from (reproductive_rate, natural_dispersal_distance,
-#' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
-#' and anthropogenic kappa). This is used when updating a parameter set from a
-#' previous calibration using the iterative framework.
-#' @param prior_cov_matrix A covariance matrix from the previous years
-#' posterior parameter estimation ordered from (reproductive_rate,
-#' natural_dispersal_distance, percent_natural_dispersal,
-#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
-#' This is used when updating a parameter set from a previous calibration using
-#' the iterative framework.
-#' @param mask Raster file used to provide a mask to remove 0's that are not
-#' true negatives from comparisons (e.g. mask out lakes and oceans from statics
-#' if modeling terrestrial species). A numerical value represents the area you
-#' want to calculate statistics on and an NA value represents the area to remove
-#' from the statistics.
-#' @param natural_kappa sets the strength of the natural direction in the
-#' von-mises distribution numeric value between 0.01 and 12
-#' @param anthropogenic_kappa sets the strength of the anthropogenic direction
-#' in the von-mises distribution numeric value between 0.01 and 12
-#' @param calibration_method choose which method of calibration to use either
-#' 'ABC' (Approximate Bayesian Computation) or 'MCMC' (Markov Chain Monte Carlo
-#' Approximation)
-#' @param number_of_iterations how many iterations do you want to run to allow
-#' the calibration to converge (recommend a minimum of at least 100,000 but
-#' preferably 1 million).
-#' @param verbose Boolean with true printing current status of calibration,
-#' (e.g. the current generation, current particle, and the acceptance rate).
-#' Defaults if FALSE.
-#' @param write_outputs Either c("summary_outputs", or "None"). If not
-#' "None" output folder path must be provided.
-#' @param output_folder_path this is the full path with either / or \\ (e.g.,
-#' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
-#' @param use_distance Boolean if you want to compare distance between
-#' simulations and observations. Default is FALSE.
-#' @param use_rmse Boolean if you want to calibrate based on rmse. This is
-#' useful if you have very good population level observations. Default is FALSE.
-#' @param use_mcc Boolean if you want the calibration to be based on the Mathews Correlation
-#' coefficient. This
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -109,166 +31,7 @@
 #'
 #' @export
 
-calibrate <- function(infected_years_file,
-                      number_of_observations = 1,
-                      prior_number_of_observations = 0,
-                      prior_means = c(0, 0, 0, 0, 0, 0),
-                      prior_cov_matrix = matrix(0, 6, 6),
-                      params_to_estimate = c(T, T, T, T, F, F),
-                      number_of_generations = 7,
-                      generation_size = 1000,
-                      infected_file,
-                      host_file,
-                      total_populations_file,
-                      temp = FALSE,
-                      temperature_coefficient_file = "",
-                      precip = FALSE,
-                      precipitation_coefficient_file = "",
-                      model_type = "SI",
-                      latency_period = 0,
-                      time_step = "month",
-                      season_month_start = 1,
-                      season_month_end = 12,
-                      start_date = "2008-01-01",
-                      end_date = "2008-12-31",
-                      use_lethal_temperature = FALSE,
-                      temperature_file = "",
-                      lethal_temperature = -12.87,
-                      lethal_temperature_month = 1,
-                      mortality_on = FALSE,
-                      mortality_rate = 0,
-                      mortality_time_lag = 0,
-                      mortality_frequency = "year",
-                      mortality_frequency_n = 1,
-                      management = FALSE,
-                      treatment_dates = c(""),
-                      treatments_file = "",
-                      treatment_method = "ratio",
-                      natural_kernel_type = "cauchy",
-                      anthropogenic_kernel_type = "cauchy",
-                      natural_dir = "NONE",
-                      natural_kappa = 0,
-                      anthropogenic_dir = "NONE",
-                      anthropogenic_kappa = 0,
-                      pesticide_duration = c(0),
-                      pesticide_efficacy = 1.0,
-                      mask = NULL,
-                      output_frequency = "year",
-                      output_frequency_n = 1,
-                      movements_file = "",
-                      use_movements = FALSE,
-                      start_exposed = FALSE,
-                      generate_stochasticity = TRUE,
-                      establishment_stochasticity = TRUE,
-                      movement_stochasticity = TRUE,
-                      deterministic = FALSE,
-                      establishment_probability = 0.5,
-                      dispersal_percentage = 0.99,
-                      quarantine_areas_file = "",
-                      use_quarantine = FALSE,
-                      use_spreadrates = FALSE,
-                      use_overpopulation_movements = FALSE,
-                      overpopulation_percentage = 0,
-                      leaving_percentage = 0,
-                      leaving_scale_coefficient = 1,
-                      calibration_method = "ABC",
-                      number_of_iterations = 100000,
-                      exposed_file = "",
-                      verbose = TRUE,
-                      write_outputs = "None",
-                      output_folder_path = "",
-                      network_filename = "",
-                      use_distance = FALSE,
-                      use_rmse = FALSE,
-                      use_mcc = FALSE) {
-
-  # add all data to config list
-  config <- c()
-  config$infected_years_file <- infected_years_file
-  config$number_of_observations <- number_of_observations
-  config$prior_number_of_observations <- prior_number_of_observations
-  config$prior_means <- prior_means
-  config$prior_cov_matrix <- prior_cov_matrix
-  config$params_to_estimate <- params_to_estimate
-  config$number_of_generations <- number_of_generations
-  config$generation_size <- generation_size
-  config$infected_file <- infected_file
-  config$host_file <- host_file
-  config$total_populations_file <- total_populations_file
-  config$temp <- temp
-  config$temperature_coefficient_file <- temperature_coefficient_file
-  config$precip <- precip
-  config$precipitation_coefficient_file <- precipitation_coefficient_file
-  config$model_type <- model_type
-  config$latency_period <- latency_period
-  config$time_step <- time_step
-  config$season_month_start <- season_month_start
-  config$season_month_end <- season_month_end
-  config$start_date <- start_date
-  config$end_date <- end_date
-  config$use_lethal_temperature <- use_lethal_temperature
-  config$temperature_file <- temperature_file
-  config$lethal_temperature <- lethal_temperature
-  config$lethal_temperature_month <- lethal_temperature_month
-  config$mortality_on <- mortality_on
-  config$mortality_rate <- mortality_rate
-  config$mortality_time_lag <- mortality_time_lag
-  config$management <- management
-  config$treatment_dates <- treatment_dates
-  config$treatments_file <- treatments_file
-  config$treatment_method <- treatment_method
-  config$natural_kernel_type <- natural_kernel_type
-  config$anthropogenic_kernel_type <- anthropogenic_kernel_type
-  config$natural_dir <- natural_dir
-  config$natural_kappa <- natural_kappa
-  config$anthropogenic_dir <- anthropogenic_dir
-  config$anthropogenic_kappa <- anthropogenic_kappa
-  config$pesticide_duration <- pesticide_duration
-  config$pesticide_efficacy <- pesticide_efficacy
-  config$mask <- mask
-  config$output_frequency <- output_frequency
-  config$output_frequency_n <- output_frequency_n
-  config$movements_file <- movements_file
-  config$use_movements <- use_movements
-  config$start_exposed <- start_exposed
-  config$generate_stochasticity <- generate_stochasticity
-  config$establishment_stochasticity <- establishment_stochasticity
-  config$movement_stochasticity <- movement_stochasticity
-  config$deterministic <- deterministic
-  config$establishment_probability <- establishment_probability
-  config$dispersal_percentage <- dispersal_percentage
-  config$quarantine_areas_file <- quarantine_areas_file
-  config$use_quarantine <- use_quarantine
-  config$use_spreadrates <- use_spreadrates
-  config$use_overpopulation_movements <- use_overpopulation_movements
-  config$overpopulation_percentage <- overpopulation_percentage
-  config$leaving_percentage <- leaving_percentage
-  config$leaving_scale_coefficient <- leaving_scale_coefficient
-  config$calibration_method <- calibration_method
-  config$number_of_iterations <- number_of_iterations
-  config$exposed_file <- exposed_file
-  # add function name for use in configuration function to skip
-  # function specific specific configurations namely for validation and
-  # calibration.
-  config$function_name <- "calibrate"
-  config$failure <- NULL
-  config$write_outputs <- write_outputs
-  config$output_folder_path <- output_folder_path
-  config$mortality_frequency <- mortality_frequency
-  config$mortality_frequency_n <- mortality_frequency_n
-  config$network_filename <- network_filename
-  config$use_distance <- use_distance
-  config$use_rmse <- use_rmse
-  config$use_mcc <- use_mcc
-
-  # call configuration function to perform data checks and transform data into
-  # format used in pops c++
-  config <- configuration(config)
-
-  if (!is.null(config$failure)) {
-    stop(config$failure)
-  }
-
+calibrate <- function(config) {
   # set the parameter function to only need the parameters that change so that
   # each call to param func needs to pass in the parameters being calibrated
   param_func <-
@@ -380,8 +143,8 @@ calibrate <- function(infected_years_file,
     specificity_threshold <- 0.70 # starting threshold for model
     rmse_threshold <- 7 # starting threshold for RMSE (root mean squared error)
     distance_threshold <- 1000 # starting threshold for distance between simulated
-    # and observed data in units
-    mcc_threshold <- 0.50 # starting threshold for Mathews Coorelation coefficient
+    # and observed data in units of the CRS
+    mcc_threshold <- 0.50 # starting threshold for Mathews Correlation coefficient
     acceptance_rate_particle_check <- seq(60, 200, 20)
 
     # loop through until all generations are complete
@@ -395,37 +158,26 @@ calibrate <- function(infected_years_file,
         if (config$current_bin == 1) {
           proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
           proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
-          if (params_to_estimate[3]) {
-            proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
-          } else {
-            proposed_percent_natural_dispersal <- 1.0
-          }
-          if (params_to_estimate[4]) {
-            proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
-          } else {
-            proposed_anthropogenic_distance_scale <- 0.1
-          }
-          if (params_to_estimate[5]) {
+          proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
+          proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
+          if (config$natural_dir != "NONE" && config$natural_kappa <= 0) {
             proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
           } else {
-            proposed_natural_kappa <- natural_kappa
+            proposed_natural_kappa <- config$natural_kappa
           }
-          if (params_to_estimate[6]) {
+          if (config$anthropogenic_dir != "NONE" && config$anthropogenic_kappa <= 0) {
             proposed_anthropogenic_kappa <- round(runif(1, 0, 5), digits = 1)
           } else {
-            proposed_anthropogenic_kappa <- anthropogenic_kappa
+            proposed_anthropogenic_kappa <- config$anthropogenic_kappa
           }
-          if (anthropogenic_kernel_type == "network") {
+          if (config$anthropogenic_kernel_type == "network") {
             proposed_network_min_distance <-
               round(runif(1, config$res$ew_res / 2, config$res$ew_res * 10), digits = 0)
-          } else {
-            proposed_network_min_distance <- config$res$ew_res / 2
-          }
-          if (anthropogenic_kernel_type == "network") {
             proposed_network_max_distance <-
               round(runif(1, config$res$ew_res * 10, config$res$ew_res *
                             min(config$rows_cols$num_cols, config$rows_cols$num_rows)), digits = 0)
           } else {
+            proposed_network_min_distance <- config$res$ew_res / 2
             proposed_network_max_distance <-
               min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
           }
@@ -703,13 +455,13 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (verbose) {
+        if (config$verbose) {
           cat(acceptance_rate_info)
         }
       }
 
-      start_index <- config$current_bin * generation_size - generation_size + 1
-      end_index <- config$current_bin * generation_size
+      start_index <- config$current_bin * config$generation_size - config$generation_size + 1
+      end_index <- config$current_bin * config$generation_size
       config$parameter_means <- colMeans(parameters_kept[start_index:end_index, 1:8])
       config$parameter_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:8])
 
@@ -735,40 +487,29 @@ calibrate <- function(infected_years_file,
     calibrated_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:8])
 
   } else if (config$calibration_method == "MCMC") {
-    proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
+
+    proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
     proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
-    if (config$params_to_estimate[3]) {
-      proposed_percent_natural_dispersal <-
-        round(runif(1, 0.93, 1.000), digits = 3)
-    } else {
-      proposed_percent_natural_dispersal <- 1.0
-    }
-    if (config$params_to_estimate[4]) {
-      proposed_anthropogenic_distance_scale <- round(runif(1, 30, 100), digits = 0) * 100
-    } else {
-      proposed_anthropogenic_distance_scale <- 0.1
-    }
-    if (config$params_to_estimate[5]) {
+    proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
+    proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
+    if (config$natural_dir != "NONE" && config$natural_kappa <= 0) {
       proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
     } else {
-      proposed_natural_kappa <- natural_kappa
+      proposed_natural_kappa <- config$natural_kappa
     }
-    if (config$params_to_estimate[6]) {
+    if (config$natural_dir != "NONE" && config$natural_kappa <= 0) {
       proposed_anthropogenic_kappa <- round(runif(1, 0, 5), digits = 1)
     } else {
-      proposed_anthropogenic_kappa <- anthropogenic_kappa
+      proposed_anthropogenic_kappa <- config$anthropogenic_kappa
     }
-    if (anthropogenic_kernel_type == "network") {
+    if (config$anthropogenic_kernel_type == "network") {
       proposed_network_min_distance <-
         round(runif(1, config$res$ew_res / 2, config$res$ew_res * 10), digits = 0)
-    } else {
-      proposed_network_min_distance <- config$res$ew_res / 2
-    }
-    if (anthropogenic_kernel_type == "network") {
       proposed_network_max_distance <-
         round(runif(1, config$res$ew_res * 10, config$res$ew_res *
                       min(config$rows_cols$num_cols, config$rows_cols$num_rows)), digits = 0)
     } else {
+      proposed_network_min_distance <- config$res$ew_res / 2
       proposed_network_max_distance <-
         min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
     }
@@ -868,75 +609,60 @@ calibrate <- function(infected_years_file,
                       sd = current$natural_distance_scale / 10), digits = 0)
       }
 
-      if (config$params_to_estimate[3]) {
-        proposed_percent_natural_dispersal <- 0
-        while (proposed_percent_natural_dispersal < 0.93 ||
-               proposed_percent_natural_dispersal >= 1) {
-          proposed_percent_natural_dispersal <-
-            round(rnorm(1, mean = current$percent_natural_dispersal,
-                        sd = current$percent_natural_dispersal / 20), digits = 3)
-        }
-      } else {
-        proposed_percent_natural_dispersal <- 1.0
+      proposed_percent_natural_dispersal <- 0
+      while (proposed_percent_natural_dispersal < 0.93 ||
+             proposed_percent_natural_dispersal >= 1) {
+        proposed_percent_natural_dispersal <-
+          round(rnorm(1, mean = current$percent_natural_dispersal,
+                      sd = current$percent_natural_dispersal / 20), digits = 3)
       }
 
-      if (config$params_to_estimate[4]) {
-        proposed_anthropogenic_distance_scale <- 0
-        while (proposed_anthropogenic_distance_scale <= 1 |
-               proposed_anthropogenic_distance_scale > 100000) {
-          proposed_anthropogenic_distance_scale <-
-            round(rnorm(1, mean = current$anthropogenic_distance_scale,
-                        sd = current$anthropogenic_distance_scale / 20), digits = 0)
-        }
-      } else {
-        proposed_anthropogenic_distance_scale <- 0.1
+      proposed_anthropogenic_distance_scale <- 0
+      while (proposed_anthropogenic_distance_scale <= 1 |
+             proposed_anthropogenic_distance_scale > 100000) {
+        proposed_anthropogenic_distance_scale <-
+          round(rnorm(1, mean = current$anthropogenic_distance_scale,
+                      sd = current$anthropogenic_distance_scale / 20), digits = 0)
       }
 
-      if (config$params_to_estimate[5]) {
-        proposed_natural_kappa <- 0
-        while (proposed_natural_kappa <= 0 ||
-               proposed_natural_kappa > 4.000) {
-          proposed_natural_kappa <-
-            round(rnorm(1, mean = current$natural_kappa,
-                        sd = current$natural_kappa / 20), digits = 3)
-        }
+      proposed_natural_kappa <- 0
+      if (config$natural_dir != "NONE" && config$natural_kappa <= 0) {
+        proposed_natural_kappa <-
+          round(rnorm(1, mean = current$natural_kappa, sd = current$natural_kappa / 20), digits = 3)
       } else {
-        proposed_natural_kappa <- natural_kappa
+        proposed_natural_kappa <- config$natural_kappa
       }
 
-      if (config$params_to_estimate[6]) {
-        proposed_anthropogenic_kappa <- 0
-        while (proposed_anthropogenic_kappa <= 0 ||
-               proposed_anthropogenic_kappa > 4.000) {
-          proposed_anthropogenic_kappa <-
-            round(rnorm(1, mean = current$anthropogenic_kappa,
-                        sd = current$anthropogenic_kappa / 20), digits = 3)
-        }
+      proposed_anthropogenic_kappa <- 0
+      if (config$anthropogenic_dir != "NONE" && config$anthropogenic_kappa <= 0) {
+        proposed_anthropogenic_kappa <-
+          round(rnorm(1, mean = current$anthropogenic_kappa,
+                      sd = current$anthropogenic_kappa / 20), digits = 3)
       } else {
-        proposed_anthropogenic_kappa <- anthropogenic_kappa
+        proposed_anthropogenic_kappa <- config$anthropogenic_kappa
       }
 
-      if (anthropogenic_kernel_type == "network") {
+      if (config$anthropogenic_kernel_type == "network") {
         proposed_network_min_distance <- 0
         while (proposed_network_min_distance < config$res$ew_res / 2) {
           proposed_network_min_distance <-
             round(rnorm(1, mean = current$network_min_distance,
                         sd = current$network_min_distance / 20), digits = 0)
         }
-      } else {
-        proposed_network_min_distance <- config$res$ew_res / 2
-      }
+        proposed_network_max_distance <-
+          round(runif(1, config$res$ew_res * 10, config$res$ew_res *
+                        min(config$rows_cols$num_cols, config$rows_cols$num_rows)), digits = 0)
 
-      if (anthropogenic_kernel_type == "network") {
         proposed_network_max_distance <- 0
         while (proposed_network_max_distance < proposed_network_min_distance ||
-               proposed_network_max_distance > (config$res$ew_res *
-               min(config$rows_cols$num_cols, config$rows_cols$num_rows))) {
+               proposed_network_max_distance >
+               (config$res$ew_res * min(config$rows_cols$num_cols, config$rows_cols$num_rows))) {
           proposed_network_max_distance <-
             round(rnorm(1, mean = current$network_max_distance,
                         sd = current$network_max_distance / 20), digits = 0)
         }
       } else {
+        proposed_network_min_distance <- config$res$ew_res / 2
         proposed_network_max_distance <-
           min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
       }
@@ -992,7 +718,6 @@ calibrate <- function(infected_years_file,
                    network_max_distance = proposed_network_max_distance
         )
 
-
       # make sure no proposed statistics are 0 or the calculation fails
       # instead set them all to the lowest possible non-zero value
       if (proposed$accuracy == 0) {
@@ -1035,7 +760,7 @@ calibrate <- function(infected_years_file,
       mcc_pass <- runif(1) <= mcc_test
 
       proposed_accepted <- FALSE
-      if (use_mcc) {
+      if (config$use_mcc) {
         if (mcc_pass) {
 
           if (config$use_distance) {
@@ -1089,7 +814,7 @@ calibrate <- function(infected_years_file,
       }
 
       param <- current
-      if (verbose) {
+      if (config$verbose) {
         print(i)
       }
       params[i, ] <- param
@@ -1098,7 +823,7 @@ calibrate <- function(infected_years_file,
     if (config$number_of_iterations > 10000) {
       start_index <- 5000
     } else {
-      start_index <- number_of_iterations / 2
+      start_index <- config$number_of_iterations / 2
     }
 
     calibrated_means <-
@@ -1129,22 +854,23 @@ calibrate <- function(infected_years_file,
     return("Calibration method must be one of 'ABC' or 'MCMC'")
   }
 
-  if (prior_number_of_observations < 1) {
-    prior_weight <- prior_number_of_observations
-    total_number_of_observations <- number_of_observations +
-      round(number_of_observations * prior_number_of_observations)
+  if (config$prior_number_of_observations < 1) {
+    prior_weight <- config$prior_number_of_observations
+    total_number_of_observations <- config$number_of_observations +
+      round(config$number_of_observations * config$prior_number_of_observations)
     weight <- 1 - prior_weight
-  } else if (prior_number_of_observations >= 1) {
-    total_number_of_observations <- prior_number_of_observations + number_of_observations
-    prior_weight <- prior_number_of_observations / total_number_of_observations
+  } else if (config$prior_number_of_observations >= 1) {
+    total_number_of_observations <-
+      config$prior_number_of_observations + config$number_of_observations
+    prior_weight <- config$prior_number_of_observations / total_number_of_observations
     weight <- 1 - prior_weight
   }
 
   # Use prior and calibrated parameters to update to posteriors
   posterior_check <-
     bayesian_mnn_checks(
-      prior_means,
-      prior_cov_matrix,
+      config$prior_means,
+      config$prior_cov_matrix,
       calibrated_means,
       calibrated_cov_matrix,
       prior_weight,

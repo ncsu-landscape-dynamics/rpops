@@ -3,10 +3,10 @@
 #' Function with a single input and output list for parsing, transforming,
 #' and performing all checks for all functions to run the pops c++ model
 #'
-#' @param config list of all data necessary used to set up c++ model
+#' @param config the .xlsx or .csv file that contains all of the values needed to run the model.
+#' This file should be in the same folder with all of the files needed to run the simulation.
 #'
-#' @importFrom raster
-#' cellStats  calc extract
+#' @importFrom raster cellStats calc extract
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' rowColFromCell global vect
@@ -21,125 +21,229 @@
 #'
 #' @export
 
-configuration <- function(config) {
-  "%notin%" <- Negate("%in%")
+configuration <- function(config_file) {
 
-  # Check that all data has same length if using multiple species currently
-  # only implemented for auto manage
-  if (config$function_name == "auto-manage") {
-    multispecies_check <-
-      multispecies_checks(
-        config$species,
-        config$infected_files,
-        config$parameter_means,
-        config$parameter_cov_matrix,
-        config$natural_kernel_type,
-        config$anthropogenic_kernel_type,
-        config$natural_dir,
-        config$anthropogenic_dir,
-        config$model_type,
-        config$host_file,
-        config$total_populations_file,
-        config$temp,
-        config$temperature_coefficient_file,
-        config$precip,
-        config$precipitation_coefficient_file,
-        config$latency_period,
-        config$time_step,
-        config$season_month_start,
-        config$season_month_end,
-        config$use_lethal_temperature,
-        config$temperature_file,
-        config$lethal_temperature,
-        config$lethal_temperature_month,
-        config$mortality_on,
-        config$mortality_rate,
-        config$mortality_time_lag,
-        config$movements_file,
-        config$use_movements,
-        config$start_exposed,
-        config$quarantine_areas_file,
-        config$use_quarantine,
-        config$use_spreadrates
-      )
-    if (!multispecies_check$checks_passed) {
-      config$failure <- multispecies_check$failed_check
-      return(config)
-    }
+  config_file <- "C:/Users/Chris/Desktop/pops_test/pops_model_inputs.xlsx"
+  config_data <- readxl::read_xlsx(path = config_file , sheet = 1)
+
+  config <- c()
+  config$failure <- NULL ## maybe remove
+  config$input_folder <- paste0(dirname(config_file), "/")
+  config$output_folder_path <- paste(config$input_folder, "outputs", sep = "/")
+  config$calibrate_folder_path <- paste(config$input_folder, "calibrate", sep = "/")
+  config$validate_folder_path <- paste(config$input_folder, "validate", sep = "/")
+  config$forecast_folder_path <- paste(config$input_folder, "forecast", sep = "/")
+  if (!base::dir.exists(config$output_folder_path)) {
+    stop(output_path_error)
+  }
+  if (!base::dir.exists(config$calibrate_folder_path)) {
+    stop(calibrate_path_error)
+  }
+  if (!base::dir.exists(config$validate_folder_path)) {
+    stop(validate_path_error)
+  }
+  if (!base::dir.exists(config$forecast_folder_path)) {
+    stop(forecast_path_error)
   }
 
-  if (config$function_name == "sensitivity") {
-    config$sensitivity_rcl <- c(0.10, Inf, 1, 0, 0.10, 0)
-    config$sensitivity_rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
+  # Pest/pathogen information
+  config$species_name <- config_data$value[config_data$variable_name == 'species_name']
+  config$latency_period <-
+    as.integer(config_data$value[config_data$variable_name == 'latency_period'])
+  config$start_exposed <-
+    as.logical(config_data$value[config_data$variable_name == 'start_exposed'])
+
+  # Dates and timings
+  config$time_step <- config_data$value[config_data$variable_name == 'time_step']
+  config$output_frequency <- config_data$value[config_data$variable_name == 'output_frequency']
+  config$output_frequency_n <-
+    as.integer(config_data$value[config_data$variable_name == 'output_frequency_n'])
+
+  # Host data
+  config$host_species_name <- config_data$value[config_data$variable_name == 'host_species_name']
+  config$mortality_on <- as.logical(config_data$value[config_data$variable_name == 'mortality_on'])
+  config$mortality_rate <-
+    as.numeric(config_data$value[config_data$variable_name == 'mortality_rate'])
+  config$mortality_time_lag <-
+    as.integer(config_data$value[config_data$variable_name == 'mortality_time_lag'])
+  config$mortality_frequency <-
+    config_data$value[config_data$variable_name == 'mortality_frequency']
+  config$mortality_frequency_n <-
+    as.integer(config_data$value[config_data$variable_name == 'mortality_frequency_n'])
+
+  # Weather values
+  config$season_month_start <-
+    as.integer(config_data$value[config_data$variable_name == 'season_month_start'])
+  config$season_month_end <-
+    as.integer(config_data$value[config_data$variable_name == 'season_month_end'])
+  config$use_temperature <-
+    as.logical(config_data$value[config_data$variable_name == 'use_temperature'])
+  config$use_precipitation <-
+    as.logical(config_data$value[config_data$variable_name == 'use_precipitation'])
+  config$use_lethal_temperature <-
+    as.logical(config_data$value[config_data$variable_name == 'use_lethal_temperature'])
+  config$lethal_temperature <-
+    as.numeric(config_data$value[config_data$variable_name == 'lethal_temperature'])
+  config$lethal_temperature_month <-
+    as.integer(config_data$value[config_data$variable_name == 'lethal_temperature_month'])
+
+  # Dispersal information (doesn't change across stages)
+  config$natural_kernel_type <-
+    config_data$value[config_data$variable_name == 'natural_kernel_type']
+  config$anthropogenic_kernel_type <-
+    config_data$value[config_data$variable_name == 'anthropogenic_kernel_type']
+  config$natural_dir <-
+    config_data$value[config_data$variable_name == 'natural_dir']
+  config$anthropogenic_dir <-
+    config_data$value[config_data$variable_name == 'anthropogenic_dir']
+  config$use_overpopulation_movements <-
+    as.logical(config_data$value[config_data$variable_name == 'use_overpopulation_movements'])
+  config$overpopulation_percentage <-
+    as.numeric(config_data$value[config_data$variable_name == 'overpopulation_percentage'])
+  config$leaving_percentage <-
+    as.numeric(config_data$value[config_data$variable_name == 'leaving_percentage'])
+  config$leaving_scale_coefficient <-
+    as.numeric(config_data$value[config_data$variable_name == 'leaving_scale_coefficient'])
+
+  # Movement information (the movementfile changes across stages)
+  config$use_movements <-
+    as.logical(config_data$value[config_data$variable_name == 'use_movements'])
+
+  # Model information (parameters change across stages)
+  config$model_type <- config_data$value[config_data$variable_name == 'model_type']
+  config$mask <- config_data$value[config_data$variable_name == 'mask']
+  config$use_spreadrates <-
+    as.logical(config_data$value[config_data$variable_name == 'use_spreadrates'])
+  config$use_quarantine <-
+    as.logical(config_data$value[config_data$variable_name == 'use_quarantine'])
+  config$quarantine_areas_file <-
+    paste0(config$input_folder, config_data$value[config_data$variable_name == 'quarantine_areas_file'])
+  config$generate_stochasticity <-
+    as.logical(config_data$value[config_data$variable_name == 'generate_stochasticity'])
+  config$movement_stochasticity <-
+    as.logical(config_data$value[config_data$variable_name == 'movement_stochasticity'])
+  config$dispersal_stochasticity <-
+    as.logical(config_data$value[config_data$variable_name == 'dispersal_stochasticity'])
+  config$dispersal_percentage <-
+    as.numeric(config_data$value[config_data$variable_name == 'dispersal_percentage'])
+  config$establishment_stochasticity <-
+    as.logical(config_data$value[config_data$variable_name == 'establishment_stochasticity'])
+  config$establishment_probability <-
+    as.numeric(config_data$value[config_data$variable_name == 'establishment_probability'])
+  if (is.na(config_data$value[config_data$variable_name == 'random_seed'])) {
+    config$random_seed <- round(stats::runif(1, 1, 1000000))
+  } else {
+    config$random_seed <- as.integer(config_data$value[config_data$variable_name == 'random_seed'])
   }
 
+  # Control Measures (change dates and files change across stages)
+  config$use_management <-
+    as.logical(config_data$value[config_data$variable_name == 'use_management'])
+  config$treatment_dates <- config_data$value[config_data$variable_name == 'treatment_dates']
+  config$treatments_file <-
+    paste0(config$input_folder, config_data$value[config_data$variable_name == 'treatments_file'])
+  config$treatment_method <- config_data$value[config_data$variable_name == 'treatment_method']
+  config$pesticide_duration <-
+    as.integer(config_data$value[config_data$variable_name == 'pesticide_duration'])
+  config$pesticide_efficacy <-
+    as.numeric(config_data$value[config_data$variable_name == 'pesticide_efficacy'])
+
+  # reclass
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
-  config$output_list <- c("all_simulations", "summary_outputs", "None")
-  config$output_write_list <- c("all_simulations", "summary_outputs")
-
-  if (config$write_outputs %notin% config$output_list) {
-    config$failure <- write_outputs_error
-  }
-
-  if (config$write_outputs %in% config$output_write_list) {
-    if (!base::dir.exists(config$output_folder_path)) {
-      config$failure <- output_path_error
-    }
-  }
-
+  # Run through checks for general model parameters
   # ensures correct model type
   if (config$model_type %in%
-    c(
-      "SEI",
-      "susceptible-exposed-infected",
-      "susceptible_exposed_infected",
-      "Susceptible-Exposed-Infected",
-      "Susceptible_Exposed_Infected"
-    )) {
+      c(
+        "SEI",
+        "susceptible-exposed-infected",
+        "susceptible_exposed_infected",
+        "Susceptible-Exposed-Infected",
+        "Susceptible_Exposed_Infected"
+      )) {
     config$model_type <- "SEI"
   } else if (config$model_type %in%
-    c(
-      "SI",
-      "susceptible-infected",
-      "susceptible_infected",
-      "Susceptible-Infected",
-      "Susceptible_Infected"
-    )) {
+             c(
+               "SI",
+               "susceptible-infected",
+               "susceptible_infected",
+               "Susceptible-Infected",
+               "Susceptible_Infected"
+             )) {
     config$model_type <- "SI"
   } else {
-    config$failure <- model_type_error
-    return(config)
+    stop(model_type_error)
   }
 
   seasons <- seq(1, 12, 1)
-  if (config$season_month_start %in% seasons &&
-      config$season_month_end %in% seasons) {
+  if (config$season_month_start %in% seasons && config$season_month_end %in% seasons) {
     season_month_start_end <- c()
     season_month_start_end$start_month <- as.integer(config$season_month_start)
     season_month_start_end$end_month <- as.integer(config$season_month_end)
     config$season_month_start_end <- season_month_start_end
   } else {
-    config$failure <- season_month_error
+    stop(season_month_error)
   }
 
   # ensures latent period is correct for type of model selected
   if (config$model_type == "SEI" && config$latency_period <= 0) {
-    config$failure <- latency_period_error
-    return(config)
+    stop(latency_period_error)
   } else if (config$model_type == "SI" && config$latency_period > 0) {
     config$latency_period <- 0
   }
 
-  # ensure correct treatment method
-  if (!config$treatment_method %in% c("ratio", "all infected")) {
-    config$failure <- treatment_option_error
+  kernel_list <- c(
+    "cauchy",
+    "Cauchy",
+    "exponential",
+    "Exponential",
+    "uniform",
+    "Uniform",
+    "deterministic neighbor",
+    "deterministic-neighbor",
+    "power law",
+    "power-law",
+    "Power-law",
+    "Power-Law",
+    "Power Law",
+    "Power law",
+    "hyperbolic secant",
+    "hyperbolic-secant",
+    "Hyperbolic-secant",
+    "Hyperbolic-Secant",
+    "Hyperbolic secant",
+    "Hyperbolic Secant",
+    "gamma",
+    "Gamma",
+    # "exponential power",
+    # "exponential-power",
+    # "Exponential-power",
+    # "Exponential-Power",
+    # "Exponential power",
+    "weibull",
+    "Weibull",
+    "normal",
+    # "log normal",
+    # "log-normal",
+    # "Log-normal",
+    # "Log-Normal",
+    # "Log normal",
+    # "Log Normal",
+    "logistic",
+    "Logistic",
+    "network",
+    "Network"
+  )
+
+  if (config$natural_kernel_type %notin% kernel_list) {
+    config$failure <- natural_kernel_error
     return(config)
   }
 
-  if (is.null(config$random_seed)) {
-    config$random_seed <- round(stats::runif(1, 1, 1000000))
+  if (config$anthropogenic_kernel_type %notin% kernel_list) {
+    config$failure <- anthropogenic_kernel_error
+    return(config)
   }
 
   ## check output and timestep are correct.
@@ -157,9 +261,110 @@ configuration <- function(config) {
     config$spreadrate_frequency <- config$output_frequency
     config$spreadrate_frequency_n <- config$output_frequency_n
   } else {
-    config$failure <- time_check$failed_check
-    return(config)
+    stop(time_check$failed_check)
   }
+
+
+  # calibrate data
+  config$start_calibration_date <-
+    config_data$value[config_data$variable_name == 'start_calibration_date']
+  config$end_calibration_date <-
+    config_data$value[config_data$variable_name == 'end_calibration_date']
+
+  config$host_file <-
+    paste0(config$input_folder, config_data$value[config_data$variable_name == 'host_file'])
+  config$total_populations_file <-
+    paste0(config$input_folder,
+           config_data$value[config_data$variable_name == 'total_populations_file'])
+  config$temperature_coefficient_file <-
+    paste0(config$input_folder,
+           config_data$value[config_data$variable_name == 'temperature_coefficient_file'])
+  config$precipitation_coefficient_file <-
+    paste0(config$input_folder,
+           config_data$value[config_data$variable_name == 'precipitation_coefficient_file'])
+  config$temperature_file <-
+    paste0(config$input_folder, config_data$value[config_data$variable_name == 'temperature_file'])
+
+  config$movements_file <- config_data$value[config_data$variable_name == 'movements_file']
+
+  # calibration outputs
+  config$parameter_means <- as.numeric(read.csv(
+    paste0(config$input_folder, config_data$value[config_data$variable_name == 'parameter_means']),
+    header = FALSE))
+  config$parameter_cov_matrix <- as.matrix(read.csv(
+    paste0(config$input_folder,config_data$value[config_data$variable_name == 'parameter_cov_matrix']),
+    header = FALSE))
+
+
+
+  # validate data
+
+  # forecast data
+  config$start_forecast_date <-
+    config_data$value[config_data$variable_name == 'start_forecast_date']
+  config$end_forecast_date <-
+    config_data$value[config_data$variable_name == 'end_forecast_date']
+  config$forecast_infected_file <-
+    paste0(config$input_folder,
+           config_data$value[config_data$variable_name == 'forecast_infection_data'])
+
+
+  if (is.na(config$number_of_cores) || config$number_of_cores > parallel::detectCores()) {
+    config$core_count <- parallel::detectCores() - 1
+  } else {
+    config$core_count <- config$number_of_cores
+  }
+
+  if (config$function_name %in%
+      c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")) {
+
+    if (nrow(config$parameter_cov_matrix) != 8 |
+        ncol(config$parameter_cov_matrix) != 8) {
+      config$failure <- covariance_mat_error
+      return(config)
+    }
+
+    if (length(config$parameter_means) != 8) {
+      config$failure <- paramter_means_error
+      return(config)
+    }
+
+    if (config$anthropogenic_kernel_type != "network") {
+      config$parameter_means[7] <- config$res$ew_res / 2
+      config$parameter_means[8] <-
+        min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
+    }
+
+    if (config$parameter_means[7] < config$res$ew_res / 2) {
+      config$failure <- network_min_distance_small_error
+      return(config)
+    }
+
+    if (config$parameter_means[7] > config$parameter_means[8]) {
+      config$failure <- network_min_distance_large_error
+      return(config)
+    }
+
+    if (config$parameter_means[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
+      config$failure <- network_max_distance_large_error
+      return(config)
+    }
+
+    config <- draw_parameters(config)
+
+    if (any(config$percent_natural_dispersal < 1.0)) {
+      config$use_anthropogenic_kernel <- TRUE
+    } else {
+      config$use_anthropogenic_kernel <- FALSE
+    }
+  }
+
+  # ensure correct treatment method
+  if (!config$treatment_method %in% c("ratio", "all infected")) {
+    stop(treatment_option_error)
+  }
+
+
 
   # check that initial raster file exists
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
@@ -176,6 +381,22 @@ configuration <- function(config) {
   } else {
     config$failure <- infected_check$failed_check
     return(config)
+  }
+
+  # setup up movements to be used in the model converts from lat/long to i/j
+  if (config$use_movements) {
+    movements_check <-
+      movement_checks(config$movements_file, infected, config$start_date, config$end_date)
+    if (movements_check$checks_passed) {
+      config$movements <- movements_check$movements
+      config$movements_dates <- movements_check$movements_dates
+    } else {
+      config$failure <- movements_check$failed_check
+      return(config)
+    }
+  } else {
+    config$movements <- list(0, 0, 0, 0, 0)
+    config$movements_dates <- config$start_date
   }
 
   # check that host raster has the same crs, resolution, and extent
@@ -195,7 +416,7 @@ configuration <- function(config) {
     return(config)
   }
 
-  if (!is.null(config$mask)) {
+  if (!file.exists(config$mask)) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
     } else {
@@ -292,7 +513,7 @@ configuration <- function(config) {
 
   # check that temp and precip rasters have the same crs, resolution, and extent
   config$weather <- FALSE
-  if (config$temp == TRUE) {
+  if (config$use_temperature == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       temperature_coefficient_check <-
         secondary_raster_checks(config$temperature_coefficient_file, infected,
@@ -361,6 +582,8 @@ configuration <- function(config) {
 
   config$weather_coefficient <- weather_coefficient
 
+
+  ## Checks for management
   if (config$management == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       treatments_check <-
@@ -403,21 +626,7 @@ configuration <- function(config) {
   rows_cols$num_rows <- terra::nrow(susceptible)
   rows_cols$num_cols <- terra::ncol(susceptible)
   config$rows_cols <- rows_cols
-  # setup up movements to be used in the model converts from lat/long to i/j
-  if (config$use_movements) {
-    movements_check <-
-      movement_checks(config$movements_file, infected, config$start_date, config$end_date)
-    if (movements_check$checks_passed) {
-      config$movements <- movements_check$movements
-      config$movements_dates <- movements_check$movements_dates
-    } else {
-      config$failure <- movements_check$failed_check
-      return(config)
-    }
-  } else {
-    config$movements <- list(0, 0, 0, 0, 0)
-    config$movements_dates <- config$start_date
-  }
+
 
   mortality_tracker <- infected
   terra::values(mortality_tracker) <- 0
@@ -448,59 +657,6 @@ configuration <- function(config) {
       config$failure <- exposed_check$failed_check
       return(config)
     }
-  }
-
-  kernel_list <- c(
-    "cauchy",
-    "Cauchy",
-    "exponential",
-    "Exponential",
-    "uniform",
-    "Uniform",
-    "deterministic neighbor",
-    "deterministic-neighbor",
-    "power law",
-    "power-law",
-    "Power-law",
-    "Power-Law",
-    "Power Law",
-    "Power law",
-    "hyperbolic secant",
-    "hyperbolic-secant",
-    "Hyperbolic-secant",
-    "Hyperbolic-Secant",
-    "Hyperbolic secant",
-    "Hyperbolic Secant",
-    "gamma",
-    "Gamma",
-    # "exponential power",
-    # "exponential-power",
-    # "Exponential-power",
-    # "Exponential-Power",
-    # "Exponential power",
-    "weibull",
-    "Weibull",
-    "normal",
-    # "log normal",
-    # "log-normal",
-    # "Log-normal",
-    # "Log-Normal",
-    # "Log normal",
-    # "Log Normal",
-    "logistic",
-    "Logistic",
-    "network",
-    "Network"
-  )
-
-  if (config$natural_kernel_type %notin% kernel_list) {
-    config$failure <- natural_kernel_error
-    return(config)
-  }
-
-  if (config$anthropogenic_kernel_type %notin% kernel_list) {
-    config$failure <- anthropogenic_kernel_error
-    return(config)
   }
 
   infected <- terra::as.matrix(infected, wide = TRUE)
@@ -546,62 +702,6 @@ configuration <- function(config) {
   config$exposed <- exposed
   config$infected <- infected
 
-  if (config$function_name %in% c("validate", "multirun", "sensitivity")) {
-    if (is.na(config$number_of_cores) ||
-      config$number_of_cores > parallel::detectCores()) {
-      core_count <- parallel::detectCores() - 1
-    } else {
-      core_count <- config$number_of_cores
-    }
-    config$core_count <- core_count
-  }
-
-  if (config$function_name %in%
-    c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")) {
-
-    if (nrow(config$parameter_cov_matrix) != 8 |
-      ncol(config$parameter_cov_matrix) != 8) {
-      config$failure <- covariance_mat_error
-      return(config)
-    }
-
-    if (length(config$parameter_means) != 8) {
-      config$failure <- paramter_means_error
-      return(config)
-    }
-
-    if (config$anthropogenic_kernel_type != "network") {
-      config$parameter_means[7] <- config$res$ew_res / 2
-    }
-
-    if (config$anthropogenic_kernel_type != "network") {
-      config$parameter_means[8] <-
-        min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
-    }
-
-    if (config$parameter_means[7] < config$res$ew_res / 2) {
-      config$failure <- network_min_distance_small_error
-      return(config)
-    }
-
-    if (config$parameter_means[7] > config$parameter_means[8]) {
-      config$failure <- network_min_distance_large_error
-      return(config)
-    }
-
-    if (config$parameter_means[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
-      config$failure <- network_max_distance_large_error
-      return(config)
-    }
-
-    config <- draw_parameters(config)
-
-    if (any(config$percent_natural_dispersal < 1.0)) {
-      config$use_anthropogenic_kernel <- TRUE
-    } else {
-      config$use_anthropogenic_kernel <- FALSE
-    }
-  }
 
   if (config$function_name %in% c("validate", "calibrate")) {
     config$use_anthropogenic_kernel <- TRUE
@@ -626,8 +726,7 @@ configuration <- function(config) {
     config$infection_years2 <- infection_years2
   }
 
-  if (config$function_name %in% c("calibrate") &&
-    config$calibration_method == "ABC") {
+  if (config$function_name %in% c("calibrate") && config$calibration_method == "ABC") {
     config$num_particles <- config$number_of_generations * config$generation_size
     config$total_particles <- 1
     config$current_particles <- 1

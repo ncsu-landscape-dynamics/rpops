@@ -116,7 +116,13 @@ paramter_means_error <-
 write_outputs_error <-
   "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')"
 output_path_error <-
-  "output path doesn't exist"
+  "output folder doesn't exist within the main folder with the excel file"
+calibrate_path_error <-
+  "calibrate folder doesn't exist within the main folder with the excel file"
+validate_path_error <-
+  "validate folder doesn't exist within the main folder with the excel file"
+forecast_path_error <-
+  "forecast folder doesn't exist within the main folder with the excel file"
 model_type_error <-
   "Model type is not a valid type options are 'SI' or 'SEI'"
 season_month_error <-
@@ -131,6 +137,8 @@ network_min_distance_large_error <-
   "network min distance is greater than the network max distance"
 network_max_distance_large_error <-
   "network max distance is greater than the resoultion times the minimum NS or EW extent"
+
+"%notin%" <- Negate("%in%")
 
 infection_years_length_error <- function(num_layers_infected_years, number_of_time_steps) {
   error_message <-
