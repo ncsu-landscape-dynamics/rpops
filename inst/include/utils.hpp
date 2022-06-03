@@ -109,6 +109,21 @@ public:
             ++reverse_it_;
         return *this;
     }
+    ConstEitherWayIterator& operator--()
+    {
+        if (is_forward_)
+            --forward_it_;
+        else
+            --reverse_it_;
+        return *this;
+    }
+    ConstEitherWayIterator operator+(typename Container::difference_type rhs)
+    {
+        if (is_forward_)
+            return ConstEitherWayIterator(forward_it_ + rhs);
+        else
+            return ConstEitherWayIterator(reverse_it_ + rhs);
+    }
     const typename Container::value_type& operator*() const
     {
         if (is_forward_)
@@ -150,6 +165,14 @@ public:
         typename Container::const_reverse_iterator last)
         : begin_(first), end_(last)
     {}
+    typename Container::const_reference front() const
+    {
+        return *(this->begin());
+    }
+    typename Container::const_reference back() const
+    {
+        return *(--(this->end()));
+    }
     ConstEitherWayIterator<Container> begin() const
     {
         return begin_;
@@ -157,6 +180,11 @@ public:
     ConstEitherWayIterator<Container> end() const
     {
         return end_;
+    }
+    typename Container::const_reference
+    operator[](typename Container::size_type pos) const
+    {
+        return *(this->begin() + pos);
     }
 
 private:
@@ -272,7 +300,7 @@ std::string quarantine_enum_to_string(Direction type)
  * size equal to two and contains row and column index. The type was chosen to work well
  * with Rcpp.
  *
- * First template parameter is the index type for the resulting sutibale cell indices.
+ * First template parameter is the index type for the resulting suitable cell indices.
  * Second template parameter is deduced automatically from the function parameter.
  */
 template<typename RasterIndex, typename RasterType>

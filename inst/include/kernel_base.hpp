@@ -1,5 +1,5 @@
 /*
- * PoPS model - disperal kernels
+ * PoPS model - common functionality for dynamic dispersal kernels
  *
  * Copyright (C) 2021 by the authors.
  *
@@ -49,7 +49,7 @@ template<typename ActualKernel, typename Generator>
 class DynamicWrapperKernel : public KernelInterface<Generator>
 {
 public:
-    /** Creates an interal copy of the provided kernel */
+    /** Creates an internal copy of the provided kernel */
     DynamicWrapperKernel(const ActualKernel& kernel) : kernel_(kernel) {}
 
     /** Creates a new internal kernel instance from the provided parameters */

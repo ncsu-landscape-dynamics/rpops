@@ -89,14 +89,14 @@ public:
         IntegerRaster& susceptible,
         IntegerRaster& resistant,
         IntegerRaster& total_hosts,
-        const std::vector<std::vector<int>>& spatial_indeices) = 0;
+        const std::vector<std::vector<int>>& spatial_indices) = 0;
     virtual void end_treatment(
         IntegerRaster& susceptible,
         IntegerRaster& resistant,
-        const std::vector<std::vector<int>>& spatial_indeices) = 0;
+        const std::vector<std::vector<int>>& spatial_indices) = 0;
     virtual void apply_treatment_mortality(
         IntegerRaster& infected,
-        const std::vector<std::vector<int>>& spatial_indeices) = 0;
+        const std::vector<std::vector<int>>& spatial_indices) = 0;
     virtual ~AbstractTreatment() {}
 };
 

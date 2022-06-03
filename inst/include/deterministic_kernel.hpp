@@ -97,7 +97,7 @@ public:
      *
      * When an unsupported (invalid) kernel type is passed as *dispersal_kernel*,
      * std::invalid_argument is thrown when the function call operator is used,
-     * i.e., it is accepted by the constructor. This is to allow for constuction
+     * i.e., it is accepted by the constructor. This is to allow for construction
      * of invalid, but unused kernels which are created as a part of larger kernels.
      *
      * The reference *dispersers* is later used to obtain the current counts of

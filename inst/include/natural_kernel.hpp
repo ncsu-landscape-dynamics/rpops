@@ -1,5 +1,5 @@
 /*
- * PoPS model - main disperal kernel
+ * PoPS model - natural dispersal kernel
  *
  * Copyright (C) 2019-2021 by the authors.
  *
@@ -52,7 +52,7 @@ create_natural_kernel(const Config& config, const IntegerRaster& dispersers)
         return std::unique_ptr<Kernel>(
             new Kernel(direction_from_string(config.natural_direction)));
     }
-    else if (config.deterministic) {
+    else if (!config.dispersal_stochasticity) {
         using Kernel = DynamicWrapperKernel<
             DeterministicDispersalKernel<IntegerRaster>,
             Generator>;

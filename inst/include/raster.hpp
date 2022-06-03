@@ -80,7 +80,7 @@ for_each_zip(InputIt1 first1, InputIt1 last1, InputIt2 first2, BinaryOperation f
  * raster and don't produce a new type of raster based on the scalar
  * type, i.e., `a * 0.5` where `a` is an integral raster type results
  * in the same integral raster type, not floating point raster type.
- * This makes perations such as `*` and `*=` behave the same for
+ * This makes operations such as `*` and `*=` behave the same for
  * scalars.
  *
  * On the other hand, operations involving two rasters of different type

@@ -1,5 +1,5 @@
 /*
- * PoPS model - disperal kernel types
+ * PoPS model - dispersal kernel types
  *
  * Copyright (C) 2015-2020 by the authors.
  *
