@@ -166,6 +166,13 @@
 #' that can't be managed in the auto_manage function.
 #' @param network_filename entire file path for the network file. Used if
 #' anthropogenic_kernel_type = 'network'.
+#' @param use_survival_rates boolean to indicate if the model will use survival rates to limit the
+#' survival or emergence of overwintering generations.
+#' @param survival_rate_month What month do over wintering generations emerge. We suggest using the
+#' month before for this parameter as it is when the survival rates raster will be applied.
+#' @param survival_rate_day what day should the survival rates be applied
+#' @param survival_rates_file Raster file with survival rates from 0 to 1 representing the
+#' percentage of emergence for a cell.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -196,6 +203,10 @@ pops <- function(infected_file,
                  season_month_end = 12,
                  start_date = "2008-01-01",
                  end_date = "2008-12-31",
+                 use_survival_rates = FALSE,
+                 survival_rate_month = 3,
+                 survival_rate_day = 15,
+                 survival_rates_file = "",
                  use_lethal_temperature = FALSE,
                  temperature_file = "",
                  lethal_temperature = -12.87,
@@ -260,6 +271,10 @@ pops <- function(infected_file,
   config$temperature_file <- temperature_file
   config$lethal_temperature <- lethal_temperature
   config$lethal_temperature_month <- lethal_temperature_month
+  config$use_survival_rates <- use_survival_rates
+  config$survival_rate_month <- survival_rate_month
+  config$survival_rate_day <- survival_rate_day
+  config$survival_rates_file <- survival_rates_file
   config$mortality_on <- mortality_on
   config$mortality_rate <- mortality_rate
   config$mortality_time_lag <- mortality_time_lag
@@ -318,6 +333,9 @@ pops <- function(infected_file,
                      use_lethal_temperature = config$use_lethal_temperature,
                      lethal_temperature = config$lethal_temperature,
                      lethal_temperature_month = config$lethal_temperature_month,
+                     use_survival_rates = config$use_survival_rates,
+                     survival_rate_month = config$survival_rate_month,
+                     survival_rate_day = config$survival_rate_day,
                      infected = config$infected,
                      total_exposed = config$total_exposed,
                      exposed = config$exposed,
@@ -337,6 +355,7 @@ pops <- function(infected_file,
                      movements_dates = config$movements_dates,
                      weather = config$weather,
                      temperature = config$temperature,
+                     survival_rates = config$survival_rates,
                      weather_coefficient = config$weather_coefficient,
                      res = config$res,
                      rows_cols = config$rows_cols,

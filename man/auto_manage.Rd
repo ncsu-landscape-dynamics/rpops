@@ -289,9 +289,6 @@ stochasticity in establishment functions default is TRUE}
 \item{movement_stochasticity}{Boolean to indicate whether to use
 stochasticity in movement functions default is TRUE}
 
-\item{deterministic}{Boolean to indicate whether to use a deterministic
-dispersal kernel default is FALSE}
-
 \item{establishment_probability}{Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
 

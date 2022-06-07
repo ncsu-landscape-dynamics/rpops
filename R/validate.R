@@ -64,6 +64,10 @@ validate <- function(infected_years_file,
                      season_month_end = 12,
                      start_date = "2008-01-01",
                      end_date = "2008-12-31",
+                     use_survival_rates = FALSE,
+                     survival_rate_month = 3,
+                     survival_rate_day = 15,
+                     survival_rates_file = "",
                      use_lethal_temperature = FALSE,
                      temperature_file = "",
                      lethal_temperature = -12.87,
@@ -131,6 +135,10 @@ validate <- function(infected_years_file,
   config$temperature_file <- temperature_file
   config$lethal_temperature <- lethal_temperature
   config$lethal_temperature_month <- lethal_temperature_month
+  config$use_survival_rates <- use_survival_rates
+  config$survival_rate_month <- survival_rate_month
+  config$survival_rate_day <- survival_rate_day
+  config$survival_rates_file <- survival_rates_file
   config$mortality_on <- mortality_on
   config$mortality_rate <- mortality_rate
   config$mortality_time_lag <- mortality_time_lag
@@ -206,6 +214,9 @@ validate <- function(infected_years_file,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
+        use_survival_rates = config$use_survival_rates,
+        survival_rate_month = config$survival_rate_month,
+        survival_rate_day = config$survival_rate_day,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -225,6 +236,7 @@ validate <- function(infected_years_file,
         movements_dates = config$movements_dates,
         weather = config$weather,
         temperature = config$temperature,
+        survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
         res = config$res,
         rows_cols = config$rows_cols,

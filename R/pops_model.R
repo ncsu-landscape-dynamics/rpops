@@ -81,6 +81,9 @@ pops_model <-
            use_lethal_temperature,
            lethal_temperature,
            lethal_temperature_month,
+           use_survival_rates,
+           survival_rate_month,
+           survival_rate_day,
            infected,
            total_exposed,
            exposed,
@@ -100,6 +103,7 @@ pops_model <-
            movements_dates,
            weather,
            temperature,
+           survival_rates,
            weather_coefficient,
            res,
            rows_cols,
@@ -197,6 +201,7 @@ pops_model <-
     bool_config$movement_stochasticity <- movement_stochasticity
     bool_config$dispersal_stochasticity <- dispersal_stochasticity
     bool_config$use_overpopulation_movements <- use_overpopulation_movements
+    bool_config$use_survival_rate <- use_survival_rate
 
 
     data <-
@@ -219,6 +224,7 @@ pops_model <-
                      movements = movements,
                      movements_dates = movements_dates,
                      temperature = temperature,
+                     survival_rates = survival_rates,
                      weather_coefficient = weather_coefficient,
                      bbox = bbox,
                      res = res,
