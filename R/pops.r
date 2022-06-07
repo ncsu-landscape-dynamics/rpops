@@ -173,6 +173,10 @@
 #' @param survival_rate_day what day should the survival rates be applied
 #' @param survival_rates_file Raster file with survival rates from 0 to 1 representing the
 #' percentage of emergence for a cell.
+#' @param network_movement What movement type do you want to use in the network kernel either
+#' "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
+#' along the edge. "jump" automatically moves to the nearest node when moving through the network.
+#' "teleport" moves from node to node most likely used for airport and seaport networks.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -247,7 +251,8 @@ pops <- function(infected_file,
                  leaving_scale_coefficient = 1,
                  exposed_file = "",
                  mask = NULL,
-                 network_filename = "") {
+                 network_filename = "",
+                 network_movement = "walk") {
 
   config <- c()
   config$random_seed <- random_seed
