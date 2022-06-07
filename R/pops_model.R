@@ -137,7 +137,7 @@ pops_model <-
            generate_stochasticity = TRUE,
            establishment_stochasticity = TRUE,
            movement_stochasticity = TRUE,
-           deterministic = FALSE,
+           dispersal_stochasticity = FALSE,
            establishment_probability = 0,
            dispersal_percentage = 0.99,
            use_overpopulation_movements = FALSE,
@@ -195,7 +195,7 @@ pops_model <-
     bool_config$generate_stochasticity <- generate_stochasticity
     bool_config$establishment_stochasticity <- establishment_stochasticity
     bool_config$movement_stochasticity <- movement_stochasticity
-    bool_config$deterministic <- deterministic
+    bool_config$dispersal_stochasticity <- dispersal_stochasticity
     bool_config$use_overpopulation_movements <- use_overpopulation_movements
 
 

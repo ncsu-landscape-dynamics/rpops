@@ -100,7 +100,7 @@ List pops_model_cpp(
     config.generate_stochasticity = bool_config["generate_stochasticity"];
     config.establishment_stochasticity = bool_config["establishment_stochasticity"];
     config.movement_stochasticity = bool_config["movement_stochasticity"];
-    config.deterministic = bool_config["deterministic"];
+    config.dispersal_stochasticity = bool_config["dispersal_stochasticity"];
     config.establishment_probability = establishment_probability;
     config.use_lethal_temperature = bool_config["use_lethal_temperature"];
     config.lethal_temperature = lethal_temperature;

@@ -92,7 +92,7 @@ validate <- function(infected_years_file,
                      generate_stochasticity = TRUE,
                      establishment_stochasticity = TRUE,
                      movement_stochasticity = TRUE,
-                     deterministic = FALSE,
+                     dispersal_stochasticity = FALSE,
                      establishment_probability = 0.5,
                      dispersal_percentage = 0.99,
                      quarantine_areas_file = "",
@@ -153,7 +153,7 @@ validate <- function(infected_years_file,
   config$generate_stochasticity <- generate_stochasticity
   config$establishment_stochasticity <- establishment_stochasticity
   config$movement_stochasticity <- movement_stochasticity
-  config$deterministic <- deterministic
+  config$dispersal_stochasticity <- dispersal_stochasticity
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
@@ -262,7 +262,7 @@ validate <- function(infected_years_file,
         generate_stochasticity = config$generate_stochasticity,
         establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
-        deterministic = config$deterministic,
+        dispersal_stochasticity = config$dispersal_stochasticity,
         establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
