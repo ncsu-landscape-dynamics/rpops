@@ -1635,7 +1635,7 @@ test_that(
     system.file("extdata", "simple2x2", "treatments_1_1.tif", package = "PoPS")
   treatment_dates <- c("2008-03-05")
   start_date <- "2008-01-01"
-  end_date <- "2010-12-31"
+  end_date <- "2009-12-31"
   parameter_means <- c(0.8, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
 
@@ -2617,7 +2617,7 @@ test_that(
            generate_stochasticity = FALSE,
            establishment_stochasticity = FALSE,
            movement_stochasticity = FALSE,
-           deterministic = TRUE)
+           dispersal_stochasticity  = TRUE)
     test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
     expect_gte(data$infected[[1]][[1]], test_mat[[1]])
     expect_gte(data$infected[[1]][[2]], test_mat[[2]])
