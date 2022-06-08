@@ -182,6 +182,7 @@ calibrate <- function(infected_years_file,
                       write_outputs = "None",
                       output_folder_path = "",
                       network_filename = "",
+                      network_movement = "walk",
                       use_distance = FALSE,
                       use_rmse = FALSE,
                       use_mcc = FALSE) {
@@ -265,6 +266,7 @@ calibrate <- function(infected_years_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
   config$network_filename <- network_filename
+  config$network_movement <- network_movement
   config$use_distance <- use_distance
   config$use_rmse <- use_rmse
   config$use_mcc <- use_mcc

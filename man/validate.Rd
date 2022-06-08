@@ -72,6 +72,7 @@ validate(
   output_folder_path = "",
   point_file = "",
   network_filename = "",
+  network_movement = "walk",
   use_distance = FALSE,
   use_configuration = FALSE
 )
@@ -310,6 +311,11 @@ the natural kernel (if applicable)}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
+
+\item{network_movement}{What movement type do you want to use in the network kernel either
+"walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
+along the edge. "jump" automatically moves to the nearest node when moving through the network.
+"teleport" moves from node to node most likely used for airport and seaport networks.}
 
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}

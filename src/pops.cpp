@@ -262,6 +262,8 @@ List pops_model_cpp(
         List net_config(network_config);
         config.network_min_distance = net_config["network_min_distance"];
         config.network_max_distance = net_config["network_max_distance"];
+        std::string network_movement = net_config["network_movement"];
+        config.network_movement = network_movement;
         network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
         List net_data_config(network_data_config);
         std::ifstream network_stream{Rcpp::as<std::string>(net_data_config["network_filename"])};

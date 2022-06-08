@@ -327,6 +327,7 @@ pops <- function(infected_file,
   config$mortality_frequency_n <- mortality_frequency_n
 
   config$network_filename <- network_filename
+  config$network_movement <- network_movement
 
   config <- configuration(config)
 

@@ -1,7 +1,7 @@
 /*
  * Tests for the PoPS Config class.
  *
- * Copyright (C) 2020 by the authors.
+ * Copyright (C) 2020-2022 by the authors.
  *
  * Authors: Vaclav Petras <wenzeslaus gmail com>
  *
@@ -46,7 +46,7 @@ public:
     bool generate_stochasticity{true};
     bool establishment_stochasticity{true};
     bool movement_stochasticity{true};
-    bool deterministic{false};
+    bool dispersal_stochasticity{true};
     double establishment_probability{0};
     // Temperature
     bool use_lethal_temperature{false};
@@ -54,6 +54,10 @@ public:
     int lethal_temperature_month{0};
     bool weather{false};
     double reproductive_rate{0};
+    // survival rate
+    bool use_survival_rate{false};
+    int survival_rate_month{0};
+    int survival_rate_day{0};
     // SI/SEI
     std::string model_type;
     int latency_period_steps;
@@ -67,6 +71,7 @@ public:
     std::string anthro_kernel_type;
     double anthro_scale{0};
     std::string anthro_direction;
+    std::string network_movement;  ///< walk, jump, teleport
     double network_min_distance{0};
     double network_max_distance{0};
     double anthro_kappa{0};
@@ -110,6 +115,9 @@ public:
         if (use_lethal_temperature)
             lethal_schedule_ =
                 scheduler_.schedule_action_yearly(lethal_temperature_month, 1);
+        if (use_survival_rate)
+            survival_rate_schedule_ = scheduler_.schedule_action_yearly(
+                survival_rate_month, survival_rate_day);
         if (use_spreadrates)
             spread_rate_schedule_ = schedule_from_string(
                 scheduler_, spreadrate_frequency, spreadrate_frequency_n);
@@ -152,6 +160,17 @@ public:
             throw std::logic_error(
                 "Schedules were not created before calling lethal_schedule()");
         return lethal_schedule_;
+    }
+
+    const std::vector<bool>& survival_rate_schedule() const
+    {
+        if (!use_survival_rate)
+            throw std::logic_error(
+                "survival_rate_schedule() not available when use_survival_rate is false");
+        if (!schedules_created_)
+            throw std::logic_error(
+                "Schedules were not created before calling survival_rate_schedule()");
+        return survival_rate_schedule_;
     }
 
     const std::vector<bool>& spread_rate_schedule() const
@@ -201,6 +220,17 @@ public:
             throw std::logic_error(
                 "Schedules were not created before calling num_lethal()");
         return get_number_of_scheduled_actions(lethal_schedule_);
+    }
+
+    unsigned num_survival_rate()
+    {
+        if (!use_survival_rate)
+            throw std::logic_error(
+                "num_survival_rate() not available when use_survival_rate is false");
+        if (!schedules_created_)
+            throw std::logic_error(
+                "Schedules were not created before calling num_survival_rate()");
+        return get_number_of_scheduled_actions(survival_rate_schedule_);
     }
 
     unsigned rate_num_steps()
@@ -302,6 +332,7 @@ private:
     std::vector<bool> output_schedule_;
     std::vector<bool> mortality_schedule_;
     std::vector<bool> lethal_schedule_;
+    std::vector<bool> survival_rate_schedule_;
     std::vector<bool> spread_rate_schedule_;
     std::vector<bool> quarantine_schedule_;
 };

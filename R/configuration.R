@@ -161,6 +161,12 @@ configuration <- function(config) {
     return(config)
   }
 
+  # check that network movement is one of the correct options
+  network_movement_options <- c("walk", "jump", "teleport")
+  if (config$network_movement %notin% network_movement_options) {
+    config$failure <- network_movement_error
+  }
+
   # check that initial raster file exists
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
     infected_check <- initial_raster_checks(config$infected_file, config$use_s3, config$bucket)

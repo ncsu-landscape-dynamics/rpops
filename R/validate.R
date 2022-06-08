@@ -111,6 +111,7 @@ validate <- function(infected_years_file,
                      output_folder_path = "",
                      point_file = "",
                      network_filename = "",
+                     network_movement = "walk",
                      use_distance = FALSE,
                      use_configuration = FALSE) {
   config <- c()
@@ -185,6 +186,7 @@ validate <- function(infected_years_file,
   config$mortality_frequency_n <- mortality_frequency_n
   config$point_file <- point_file
   config$network_filename <- network_filename
+  config$network_movement <- network_movement
   config$use_configuration <- use_configuration
   config$use_distance <- use_distance
 

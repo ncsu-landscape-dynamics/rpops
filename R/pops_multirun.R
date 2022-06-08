@@ -96,7 +96,8 @@ pops_multirun <- function(infected_file,
                           mask = NULL,
                           write_outputs = "None",
                           output_folder_path = "",
-                          network_filename = "") {
+                          network_filename = "",
+                          network_movement = "walk") {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -168,6 +169,7 @@ pops_multirun <- function(infected_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
   config$network_filename <- network_filename
+  config$network_movement <- network_movement
 
   config <- configuration(config)
 

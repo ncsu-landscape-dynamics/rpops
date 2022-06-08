@@ -151,7 +151,8 @@ pops_model <-
            bbox = NULL,
            network_min_distance = 0,
            network_max_distance = 0,
-           network_filename = "") {
+           network_filename = "",
+           network_movement = "walk") {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
@@ -174,6 +175,7 @@ pops_model <-
       network_config <- c()
       network_config$network_min_distance <- network_min_distance
       network_config$network_max_distance <- network_max_distance
+      network_config$network_movement <- network_movement
 
       network_data_config <- c()
       network_data_config$network_filename <- network_filename
