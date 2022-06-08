@@ -87,6 +87,8 @@ List pops_model_cpp(
     int latency_period = 0,
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
+    int survival_rate_month = 0,
+    int survival_rate_day = 0,
     Nullable<List> overpopulation_config = R_NilValue,
     Nullable<List> network_config = R_NilValue,
     Nullable<List> network_data_config = R_NilValue)
@@ -114,6 +116,10 @@ List pops_model_cpp(
     config.natural_scale = natural_distance_scale;
     config.natural_direction = natural_dir;
     config.natural_kappa = natural_kappa;
+
+    config.use_survival_rate = bool_config["use_survival_rate"];
+    config.survival_rate_day = survival_rate_day;
+    config.survival_rate_month = survival_rate_month;
 
     config.use_anthropogenic_kernel = bool_config["use_anthropogenic_kernel"];
     config.percent_natural_dispersal = percent_natural_dispersal;

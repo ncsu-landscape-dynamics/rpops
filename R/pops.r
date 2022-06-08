@@ -409,7 +409,8 @@ pops <- function(infected_file,
                      bbox = config$bounding_box,
                      network_min_distance = config$network_min_distance[1],
                      network_max_distance = config$network_max_distance[1],
-                     network_filename = config$network_filename
+                     network_filename = config$network_filename,
+                     network_movement = config$network_movement
   )
 
   return(data)

@@ -366,7 +366,8 @@ calibrate <- function(infected_years_file,
         bbox = config$bounding_box,
         network_min_distance = network_min_distance,
         network_max_distance = network_max_distance,
-        network_filename = config$network_filename
+        network_filename = config$network_filename,
+        network_movement = config$network_movement
       )
       return(data)
     }

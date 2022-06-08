@@ -203,7 +203,7 @@ pops_model <-
     bool_config$movement_stochasticity <- movement_stochasticity
     bool_config$dispersal_stochasticity <- dispersal_stochasticity
     bool_config$use_overpopulation_movements <- use_overpopulation_movements
-    bool_config$use_survival_rate <- use_survival_rate
+    bool_config$use_survival_rate <- use_survival_rates
 
 
     data <-
@@ -254,6 +254,8 @@ pops_model <-
                      model_type_ = model_type_,
                      latency_period = latency_period,
                      dispersal_percentage = dispersal_percentage,
+                     survival_rate_month = survival_rate_month,
+                     survival_rate_day = survival_rate_day,
                      establishment_probability = establishment_probability,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
