@@ -89,7 +89,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             generate_stochasticity <- TRUE
             establishment_stochasticity <- TRUE
             movement_stochasticity <- TRUE
-            deterministic <- FALSE
+            dispersal_stochasticity <- FALSE
             establishment_probability <- 0.5
             dispersal_percentage <- 0.99
             quarantine_areas_file <- ""
@@ -108,6 +108,11 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             use_rmse <- FALSE
             network_filename <- ""
             use_mcc <- TRUE
+            use_survival_rates <- FALSE
+            survival_rate_month <- 3
+            survival_rate_day <- 15
+            survival_rates_file <- ""
+            network_movement <- "walk"
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -131,6 +136,10 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               season_month_end,
                               start_date,
                               end_date,
+                              use_survival_rates,
+                              survival_rate_month,
+                              survival_rate_day,
+                              survival_rates_file,
                               use_lethal_temperature,
                               temperature_file,
                               lethal_temperature,
@@ -161,7 +170,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               generate_stochasticity,
                               establishment_stochasticity,
                               movement_stochasticity,
-                              deterministic,
+                              dispersal_stochasticity,
                               establishment_probability,
                               dispersal_percentage,
                               quarantine_areas_file,
@@ -178,6 +187,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               write_outputs,
                               output_folder_path,
                               network_filename,
+                              network_movement,
                               use_distance,
                               use_rmse,
                               use_mcc)
@@ -207,8 +217,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
 test_that("ABC calibration has correctly formatted returns and runs with a
           single output comparison with network", {
             infected_years_file <-
-              system.file("extdata", "simple20x20", "infected_single.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
             number_of_observations <- 68
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
@@ -217,14 +226,11 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
-              system.file("extdata", "simple20x20", "initial_infection.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
             host_file <-
-              system.file("extdata", "simple20x20", "host.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
-              system.file("extdata", "simple20x20", "all_plants.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
             temperature_coefficient_file <- ""
             precip <- FALSE
@@ -270,7 +276,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             generate_stochasticity <- TRUE
             establishment_stochasticity <- TRUE
             movement_stochasticity <- TRUE
-            deterministic <- FALSE
+            dispersal_stochasticity <- FALSE
             establishment_probability <- 0.5
             dispersal_percentage <- 0.99
             quarantine_areas_file <- ""
@@ -289,8 +295,14 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             output_folder_path <- ""
             use_distance <- FALSE
             use_rmse <- FALSE
+            use_mcc <- TRUE
             network_filename <-
               system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
+            use_survival_rates <- FALSE
+            survival_rate_month <- 3
+            survival_rate_day <- 15
+            survival_rates_file <- ""
+            network_movement <- "walk"
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -314,6 +326,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               season_month_end,
                               start_date,
                               end_date,
+                              use_survival_rates,
+                              survival_rate_month,
+                              survival_rate_day,
+                              survival_rates_file,
                               use_lethal_temperature,
                               temperature_file,
                               lethal_temperature,
@@ -344,7 +360,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               generate_stochasticity,
                               establishment_stochasticity,
                               movement_stochasticity,
-                              deterministic,
+                              dispersal_stochasticity,
                               establishment_probability,
                               dispersal_percentage,
                               quarantine_areas_file,
@@ -361,8 +377,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               write_outputs,
                               output_folder_path,
                               network_filename,
+                              network_movement,
                               use_distance,
-                              use_rmse)
+                              use_rmse,
+                              use_mcc)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -454,7 +472,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             generate_stochasticity <- TRUE
             establishment_stochasticity <- TRUE
             movement_stochasticity <- TRUE
-            deterministic <- FALSE
+            dispersal_stochasticity <- FALSE
             establishment_probability <- 0.5
             dispersal_percentage <- 0.99
             quarantine_areas_file <- ""
@@ -473,6 +491,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             use_rmse <- FALSE
             network_filename <- ""
             use_mcc <- TRUE
+            use_survival_rates <- FALSE
+            survival_rate_month <- 3
+            survival_rate_day <- 15
+            survival_rates_file <- ""
+            network_movement <- "walk"
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -496,6 +519,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               season_month_end,
                               start_date,
                               end_date,
+                              use_survival_rates,
+                              survival_rate_month,
+                              survival_rate_day,
+                              survival_rates_file,
                               use_lethal_temperature,
                               temperature_file,
                               lethal_temperature,
@@ -526,7 +553,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               generate_stochasticity,
                               establishment_stochasticity,
                               movement_stochasticity,
-                              deterministic,
+                              dispersal_stochasticity,
                               establishment_probability,
                               dispersal_percentage,
                               quarantine_areas_file,
@@ -543,6 +570,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               write_outputs,
                               output_folder_path,
                               network_filename,
+                              network_movement,
                               use_distance,
                               use_rmse,
                               use_mcc)
@@ -640,7 +668,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             generate_stochasticity <- TRUE
             establishment_stochasticity <- TRUE
             movement_stochasticity <- TRUE
-            deterministic <- FALSE
+            dispersal_stochasticity <- FALSE
             establishment_probability <- 0.5
             dispersal_percentage <- 0.99
             quarantine_areas_file <- ""
@@ -658,6 +686,12 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             use_distance <- FALSE
             use_rmse <- FALSE
             network_filename <- ""
+            use_survival_rates <- FALSE
+            survival_rate_month <- 3
+            survival_rate_day <- 15
+            survival_rates_file <- ""
+            network_movement <- "walk"
+            use_mcc <- TRUE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -681,6 +715,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               season_month_end,
                               start_date,
                               end_date,
+                              use_survival_rates,
+                              survival_rate_month,
+                              survival_rate_day,
+                              survival_rates_file,
                               use_lethal_temperature,
                               temperature_file,
                               lethal_temperature,
@@ -711,7 +749,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               generate_stochasticity,
                               establishment_stochasticity,
                               movement_stochasticity,
-                              deterministic,
+                              dispersal_stochasticity,
                               establishment_probability,
                               dispersal_percentage,
                               quarantine_areas_file,
@@ -728,8 +766,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               write_outputs,
                               output_folder_path,
                               network_filename,
+                              network_movement,
                               use_distance,
-                              use_rmse)
+                              use_rmse,
+                              use_mcc)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
