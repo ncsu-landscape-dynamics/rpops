@@ -141,7 +141,7 @@ pops_model <-
            generate_stochasticity = TRUE,
            establishment_stochasticity = TRUE,
            movement_stochasticity = TRUE,
-           dispersal_stochasticity = FALSE,
+           dispersal_stochasticity = TRUE,
            establishment_probability = 0,
            dispersal_percentage = 0.99,
            use_overpopulation_movements = FALSE,
