@@ -157,6 +157,9 @@ format 'YYYY-MM-DD'}
 \item{temperature}{vector of matrices of temperature values used to check
 against lethal temperature}
 
+\item{survival_rates}{vector of matrices of survival rates used to determine percentage of
+overwinter population that emerges}
+
 \item{weather_coefficient}{vector of matrices of weather coefficients}
 
 \item{res}{vector of east/west resolution and north/south resolution}
@@ -305,9 +308,7 @@ the natural kernel (if applicable)}
 anthropogenic_kernel_type = 'network'.}
 
 \item{network_max_distance}{maximum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.
-#' @param survival_rates vector of matrices of survival rates used to determine percentage of
-overwinter population that emerges}
+anthropogenic_kernel_type = 'network'.}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
