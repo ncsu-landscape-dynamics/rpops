@@ -62,7 +62,7 @@ auto_manage(
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
-  deterministic = FALSE,
+  dispersal_stochasticity = FALSE,
   establishment_probability = 0.5,
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
@@ -288,6 +288,9 @@ stochasticity in establishment functions default is TRUE}
 
 \item{movement_stochasticity}{Boolean to indicate whether to use
 stochasticity in movement functions default is TRUE}
+
+\item{dispersal_stochasticity}{Boolean to indicate whether to use a stochasticity in the
+dispersal kernel default is TRUE}
 
 \item{establishment_probability}{Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}

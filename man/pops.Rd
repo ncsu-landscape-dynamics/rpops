@@ -53,7 +53,7 @@ pops(
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
-  dispersal_stochasticity = FALSE,
+  dispersal_stochasticity = TRUE,
   establishment_probability = 0.5,
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",

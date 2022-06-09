@@ -70,6 +70,8 @@
 #' anthropogenic_kernel_type = 'network'.
 #' @param network_max_distance maximum time a propagule rides on the network. Used if
 #' anthropogenic_kernel_type = 'network'.
+#' #' @param survival_rates vector of matrices of survival rates used to determine percentage of
+#' overwinter population that emerges
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)

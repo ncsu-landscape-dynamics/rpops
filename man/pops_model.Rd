@@ -69,7 +69,7 @@ pops_model(
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
-  dispersal_stochasticity = FALSE,
+  dispersal_stochasticity = TRUE,
   establishment_probability = 0,
   dispersal_percentage = 0.99,
   use_overpopulation_movements = FALSE,
@@ -305,7 +305,9 @@ the natural kernel (if applicable)}
 anthropogenic_kernel_type = 'network'.}
 
 \item{network_max_distance}{maximum time a propagule rides on the network. Used if
-anthropogenic_kernel_type = 'network'.}
+anthropogenic_kernel_type = 'network'.
+#' @param survival_rates vector of matrices of survival rates used to determine percentage of
+overwinter population that emerges}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
