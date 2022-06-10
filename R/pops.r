@@ -137,8 +137,8 @@
 #' stochasticity in establishment functions default is TRUE
 #' @param movement_stochasticity Boolean to indicate whether to use
 #' stochasticity in movement functions default is TRUE
-#' @param deterministic Boolean to indicate whether to use a deterministic
-#' dispersal kernel default is FALSE
+#' @param dispersal_stochasticity Boolean to indicate whether to use a stochasticity in the
+#' dispersal kernel default is TRUE
 #' @param establishment_probability Threshold to determine establishment if
 #' establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)
 #' @param dispersal_percentage  Percentage of dispersal used to calculate the
@@ -166,6 +166,17 @@
 #' that can't be managed in the auto_manage function.
 #' @param network_filename entire file path for the network file. Used if
 #' anthropogenic_kernel_type = 'network'.
+#' @param use_survival_rates boolean to indicate if the model will use survival rates to limit the
+#' survival or emergence of overwintering generations.
+#' @param survival_rate_month What month do over wintering generations emerge. We suggest using the
+#' month before for this parameter as it is when the survival rates raster will be applied.
+#' @param survival_rate_day what day should the survival rates be applied
+#' @param survival_rates_file Raster file with survival rates from 0 to 1 representing the
+#' percentage of emergence for a cell.
+#' @param network_movement What movement type do you want to use in the network kernel either
+#' "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
+#' along the edge. "jump" automatically moves to the nearest node when moving through the network.
+#' "teleport" moves from node to node most likely used for airport and seaport networks.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -196,6 +207,10 @@ pops <- function(infected_file,
                  season_month_end = 12,
                  start_date = "2008-01-01",
                  end_date = "2008-12-31",
+                 use_survival_rates = FALSE,
+                 survival_rate_month = 3,
+                 survival_rate_day = 15,
+                 survival_rates_file = "",
                  use_lethal_temperature = FALSE,
                  temperature_file = "",
                  lethal_temperature = -12.87,
@@ -224,7 +239,7 @@ pops <- function(infected_file,
                  generate_stochasticity = TRUE,
                  establishment_stochasticity = TRUE,
                  movement_stochasticity = TRUE,
-                 deterministic = FALSE,
+                 dispersal_stochasticity = TRUE,
                  establishment_probability = 0.5,
                  dispersal_percentage = 0.99,
                  quarantine_areas_file = "",
@@ -236,7 +251,8 @@ pops <- function(infected_file,
                  leaving_scale_coefficient = 1,
                  exposed_file = "",
                  mask = NULL,
-                 network_filename = "") {
+                 network_filename = "",
+                 network_movement = "walk") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -260,6 +276,10 @@ pops <- function(infected_file,
   config$temperature_file <- temperature_file
   config$lethal_temperature <- lethal_temperature
   config$lethal_temperature_month <- lethal_temperature_month
+  config$use_survival_rates <- use_survival_rates
+  config$survival_rate_month <- survival_rate_month
+  config$survival_rate_day <- survival_rate_day
+  config$survival_rates_file <- survival_rates_file
   config$mortality_on <- mortality_on
   config$mortality_rate <- mortality_rate
   config$mortality_time_lag <- mortality_time_lag
@@ -281,7 +301,7 @@ pops <- function(infected_file,
   config$generate_stochasticity <- generate_stochasticity
   config$establishment_stochasticity <- establishment_stochasticity
   config$movement_stochasticity <- movement_stochasticity
-  config$deterministic <- deterministic
+  config$dispersal_stochasticity <- dispersal_stochasticity
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
@@ -307,6 +327,7 @@ pops <- function(infected_file,
   config$mortality_frequency_n <- mortality_frequency_n
 
   config$network_filename <- network_filename
+  config$network_movement <- network_movement
 
   config <- configuration(config)
 
@@ -318,6 +339,9 @@ pops <- function(infected_file,
                      use_lethal_temperature = config$use_lethal_temperature,
                      lethal_temperature = config$lethal_temperature,
                      lethal_temperature_month = config$lethal_temperature_month,
+                     use_survival_rates = config$use_survival_rates,
+                     survival_rate_month = config$survival_rate_month,
+                     survival_rate_day = config$survival_rate_day,
                      infected = config$infected,
                      total_exposed = config$total_exposed,
                      exposed = config$exposed,
@@ -337,6 +361,7 @@ pops <- function(infected_file,
                      movements_dates = config$movements_dates,
                      weather = config$weather,
                      temperature = config$temperature,
+                     survival_rates = config$survival_rates,
                      weather_coefficient = config$weather_coefficient,
                      res = config$res,
                      rows_cols = config$rows_cols,
@@ -374,7 +399,7 @@ pops <- function(infected_file,
                      generate_stochasticity = config$generate_stochasticity,
                      establishment_stochasticity = config$establishment_stochasticity,
                      movement_stochasticity = config$movement_stochasticity,
-                     deterministic = config$deterministic,
+                     dispersal_stochasticity = config$dispersal_stochasticity,
                      establishment_probability = config$establishment_probability,
                      dispersal_percentage = config$dispersal_percentage,
                      use_overpopulation_movements = config$use_overpopulation_movements,
@@ -384,7 +409,8 @@ pops <- function(infected_file,
                      bbox = config$bounding_box,
                      network_min_distance = config$network_min_distance[1],
                      network_max_distance = config$network_max_distance[1],
-                     network_filename = config$network_filename
+                     network_filename = config$network_filename,
+                     network_movement = config$network_movement
   )
 
   return(data)

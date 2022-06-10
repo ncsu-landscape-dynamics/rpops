@@ -1,5 +1,5 @@
 /*
- * PoPS model - disperal kernel combining natural and anthropogenic dispersals
+ * PoPS model - dispersal kernel combining natural and anthropogenic dispersals
  *
  * Copyright (C) 2015-2020 by the authors.
  *
@@ -30,7 +30,7 @@ namespace pops {
  * This class template can be used for switching between two kernels
  * specified as template parameters where one kernel is assumed to
  * be used natural distance distance dispersal and the other for anthropogenic
- * distance one. The two disperal kernels can be the same or different.
+ * distance one. The two dispersal kernels can be the same or different.
  *
  * There are no assumptions for natural or anthropogenic kernels. We are using
  * these names for clarity since this is how we expect the template

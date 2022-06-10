@@ -1,7 +1,7 @@
 /*
  * PoPS model - network dispersal kernel
  *
- * Copyright (C) 2020-2021 by the authors.
+ * Copyright (C) 2020-2022 by the authors.
  *
  * Authors: Vaclav Petras (wenzeslaus gmail com)
  *
@@ -30,22 +30,143 @@
 
 namespace pops {
 
+/** Edge geometry, i.e., cells connecting two nodes (aka segment) */
+template<typename RasterCell>
+class EdgeGeometry : public std::vector<RasterCell>
+{
+public:
+    using typename std::vector<RasterCell>::const_reference;
+    using typename std::vector<RasterCell>::size_type;
+
+    /** Get index from cost */
+    size_type index_from_cost(double cost) const
+    {
+        // This is like
+        // index = (max_index / total_cost) * cost
+        // but cost_per_cell == total_cost / max_index, so
+        // index = 1 / (total_cost / max_index) * cost.
+        return std::lround(cost / this->cost_per_cell());
+    }
+
+    /** Get cell by cost instead of an index */
+    const_reference cell_by_cost(double cost) const
+    {
+        auto index = this->index_from_cost(cost);
+        return this->operator[](index);
+    }
+
+    /** Get cost of the whole segment (edge). */
+    double cost() const
+    {
+        if (total_cost_)
+            return total_cost_;
+        // This is short for ((size - 2) + (2 * 1/2)) * cost per cell.
+        return (this->size() - 1) * cost_per_cell_;
+    }
+
+    void set_total_cost(double value)
+    {
+        total_cost_ = value;
+    }
+
+    /** Get cost per cell for the segment (edge). */
+    double cost_per_cell() const
+    {
+        if (total_cost_)
+            return total_cost_ / (this->size() - 1);
+        return cost_per_cell_;
+    }
+
+    void set_cost_per_cell(double value)
+    {
+        cost_per_cell_ = value;
+    }
+
+    /** Get probability of an edge */
+    double probability() const
+    {
+        return probability_;
+    }
+
+    /** Set probability of an edge */
+    void set_probability(double value)
+    {
+        probability_ = value;
+    }
+
+private:
+    double cost_per_cell_ = 0;
+    double total_cost_ = 0;
+    double probability_ = 0;
+};
+
+/** Constant view of a edge geometry (to iterate a segment in either direction)
+ *
+ * Notably, the view uses iterators to flip the direction of the geometry,
+ * but the total cost is still for the whole geometry, i.e., this is not view of
+ * a part of the geometry, but view of a potentially reversed geometry.
+ */
+template<typename EdgeGeometryType>
+class EdgeGeometryView : public ContainerView<EdgeGeometryType>
+{
+public:
+    EdgeGeometryView(
+        typename EdgeGeometryType::const_iterator first,
+        typename EdgeGeometryType::const_iterator last,
+        const EdgeGeometryType& segment)
+        : ContainerView<EdgeGeometryType>(first, last), segment_(segment)
+    {}
+    EdgeGeometryView(
+        typename EdgeGeometryType::const_reverse_iterator first,
+        typename EdgeGeometryType::const_reverse_iterator last,
+        const EdgeGeometryType& segment)
+        : ContainerView<EdgeGeometryType>(first, last), segment_(segment)
+    {}
+
+    /** Get cell by cost instead of an index */
+    typename EdgeGeometryType::const_reference cell_by_cost(double cost) const
+    {
+        // The index is without a direction, so we can use it in reverse too.
+        auto index = segment_.index_from_cost(cost);
+        return this->operator[](index);
+    }
+
+    /** Get cost of the whole underlying segment (edge).
+     *
+     * Notably, this function assumes that the view represents the whole segment,
+     * not just part of it.
+     */
+    double cost() const
+    {
+        return segment_.cost();
+    }
+
+    /** Get cost per cell for the underlying segment (edge). */
+    double cost_per_cell() const
+    {
+        return segment_.cost_per_cell();
+    }
+
+private:
+    const EdgeGeometryType& segment_;
+};
+
 /**
  * Network structure and algorithms
  *
  * The network consists of nodes connected by edges. Edges are spatially represented
  * as segments. Edges themselves don't carry cost and have meaning only as indicators of
  * existence of a connection between nodes. Cost for each edge is a travel distance
- * determined by advancing through cells in a segment.
+ * (cost) determined by advancing through all cells in a segment.
  *
  * Nodes are the hop-on locations for dispersers. The dispersers can hop-off anywhere.
  *
- * The general workflow is contructing the object (with the constructor) and loading the
- * data (with the load() function). Then the network is ready to be used for simulating
- * trips over the network (with the travel() function).
+ * The general workflow is constructing the object (with the constructor) and loading
+ * the data (with the load() function). Then the network is ready to be used for
+ * simulating trips over the network (with the walk() or teleport() functions).
  *
- * When the travel() function is used from a kernel, user of the network directly calls
- * only the setup functions.
+ * When the walk() or teleport() functions are used from a kernel, user of the network
+ * directly calls only the setup functions.
  *
  * The class exposes number of functions as public which are meant for testing or other
  * special workflows.
@@ -84,7 +205,7 @@ public:
     /**
      * @brief Create an empty network not meant for futher use.
      *
-     * This is useful when a network object is needed to contruct a kernel, but it will
+     * This is useful when a network object is needed to construct a kernel, but it will
      * not be used in runtime.
      *
      * @return New Network object
@@ -190,6 +311,12 @@ public:
      * representation of the edge (here called a segment). Node coordinates are taken
      * from the first and last coordinate pair in the segment.
      *
+     * Optionally, a header can be provided in the CSV which can specify additional
+     * input format variations. The default format described above has either no header
+     * or `node_1,node_2,geometry`. To specify cost for each edge, an additional cost
+     * column is needed and needs to be placed after the node columns and before the
+     * geometry column, i.e., the header will look like `node_1,node_2,cost,geometry`.
+     *
      * The function can take any input stream which behaves like std::ifstream or
      * std::istringstream. These are also the two expected streams to be used
      * (for reading from a file and reading from a string, respectively).
@@ -224,7 +351,7 @@ public:
      * a segment.
      *
      * Standalone nodes (without any connection) are theoretically allowed in the
-     * internal representation of the netwrok and handled
+     * internal representation of the network and handled
      * as no movement from the source cell, but the input always needs to contain an
      * edge.
      */
@@ -285,7 +412,9 @@ public:
             return pick_random_item(nodes, generator);
         }
         else {
-            throw std::invalid_argument("No nodes at a given row and column");
+            throw std::invalid_argument(
+                "No nodes at a given row and column: " + std::to_string(row) + ", "
+                + std::to_string(col));
         }
     }
 
@@ -320,41 +449,97 @@ public:
     }
 
     /**
-     * Travel given distance in the network from given row and column.
+     * Walk a given distance (cost) in the network from given row and column.
      *
      * All previously visited nodes are tracked and, if possible, excluded
      * from further traveling.
      *
+     * The function assumes there is a node at the given *row* and *column*, i.e., that
+     * the decision to call this function was based on the caller knowing there is a
+     * node. If there is no node, an std::invalid_argument exception is thrown.
+     * If there is more than one node at the given *row* and *column*, a random node is
+     * picked and used as a next walking destination.
+     *
+     * If *jump* is true, then results are snapped to the closest node, otherwise
+     * result can be anywhere in between the nodes based on the edge geomerty (segment).
+     *
      * @returns Final row and column pair
      */
     template<typename Generator>
-    std::tuple<int, int> travel(
-        RasterIndex row, RasterIndex col, double distance, Generator& generator) const
+    std::tuple<int, int> walk(
+        RasterIndex row,
+        RasterIndex col,
+        double distance,
+        Generator& generator,
+        bool jump = false) const
     {
-        // We assume there is a node here, i.e., that we are made decision
-        // to use this kernel knowing there is a node.
         auto node_id = get_random_node_at(row, col, generator);
         std::set<NodeId> visited_nodes;
         while (distance >= 0) {
             auto next_node_id = next_node(node_id, visited_nodes, generator);
+            // We have visited the current node (initial start node or end node from
+            // last iteration. (There is no need to tell next_node that the current node
+            // is visited, but we need to tell it the next time because it won't be
+            // current anymore.)
             visited_nodes.insert(node_id);
             // If there is no segment from the node, return the start cell.
             if (next_node_id == node_id)
                 return std::make_tuple(row, col);
             auto segment = get_segment(node_id, next_node_id);
-            // nodes may need special handling
-            for (const auto& cell : segment) {
-                distance -= distance_per_cell_;
-                if (distance <= 0) {
-                    return cell;
-                    // Given the while condition, this subsequently ends the while loop
-                    // as well.
-                    // break;
-                }
-            }
+            // Set node ID for the next iteration.
             node_id = next_node_id;
+
+            if (distance > segment.cost()) {
+                // Go over the whole segment.
+                distance -= segment.cost();
+                continue;
+            }
+            if (jump) {
+                if (distance < segment.cost() / 2) {
+                    // Less than half snaps to the start node.
+                    return segment.front();
+                }
+                // Half or more snaps to the end node.
+                return segment.back();
+            }
+            // No jumping (snapping), advance in a segment.
+            // This includes the special cases when distance is 0 or total segment cost.
+            return segment.cell_by_cost(distance);
         }
         throw std::invalid_argument("Distance must be greater than or equal to zero");
+    }
+
+    /**
+     * Teleport to a different node in the network from given row and column.
+     *
+     * Returns any node of the nodes connected to the start node possibly based on the
+     * edge probability if probability was assigned to the edges without considering
+     * cost to travel from one node to the next one.
+     *
+     * If *num_steps* is greater than 1, multiple steps are performed and the last node
+     * is returned. In each node, the probability of picking a specific connection is
+     * either determined by the provided edge probabilities or is equal among the
+     * connections. Consequently, previously visited nodes can be visited again. In
+     * other words, for highly probable connections, most likely next step is a step
+     * back to the starting node (or generally previous node for `num_steps >= 3`).
+     *
+     * The function assumes a node is at the *row*, *col* coordinates, i.e., that this
+     * was either checked beforehand or otherwise ensured. If there is no node, an
+     * std::invalid_argument exception is thrown.
+     * If there is more than one node at the given *row* and *column*, a random node is
+     * picked and used.
+     *
+     * @returns Destination row and column pair
+     */
+    template<typename Generator>
+    std::tuple<int, int> teleport(
+        RasterIndex row, RasterIndex col, Generator& generator, int num_steps = 1) const
+    {
+        auto node_id = get_random_node_at(row, col, generator);
+        for (int i = 0; i < num_steps; ++i) {
+            node_id = next_probable_node(node_id, generator);
+        }
+        return get_node_row_col(node_id);
     }
 
     /**
@@ -399,7 +584,7 @@ public:
             }
         }
         stats["num_nodes"] = node_ids.size();
-        // We store segements in both directions, so each segment is stored twice.
+        // We store segments in both directions, so each segment is stored twice.
         stats["num_segments"] = node_matrix_.size() / 2;
         std::set<NodeId> nodes_with_segments;
         for (const auto& item : node_matrix_) {
@@ -464,7 +649,7 @@ public:
         stream << "    distance_per_cell: " << distance_per_cell_ << "\n";
         std::set<std::pair<NodeId, NodeId>> edges;
         for (const auto& item : node_matrix_) {
-            for (const auto& node_id : item.second) {
+            for (const auto& node_id : item.second.second) {
                 edges.emplace(item.first, node_id);
             }
         }
@@ -501,11 +686,18 @@ protected:
      * Connection in both directions is stored explicitly (see load_segments() source
      * code).
      */
-    using NodeMatrix = std::map<NodeId, std::vector<NodeId>>;
+    using NodeMatrix =
+        std::map<NodeId, std::pair<std::vector<double>, std::vector<NodeId>>>;
+
+    /** Smallest component of edge geometry */
+    using Cell = std::pair<RasterIndex, RasterIndex>;
+
     /** Cells connecting two nodes (segment between nodes) */
-    using Segment = std::vector<std::pair<RasterIndex, RasterIndex>>;
+    using Segment = EdgeGeometry<Cell>;
+
     /** Constant view of a segment (to iterate a segment in either direction) */
-    using SegmentView = ContainerView<Segment>;
+    using SegmentView = EdgeGeometryView<Segment>;
+
     /** Segments by nodes (edges) */
     using SegmentsByNodes = std::map<std::pair<NodeId, NodeId>, Segment>;
 
@@ -545,6 +737,126 @@ protected:
     }
 
     /**
+     * @brief Convert string to probability
+     *
+     * @param text String with probability
+     * @return Probability as number
+     */
+    static double probability_from_text(const std::string& text)
+    {
+        double value{0};
+        try {
+            value = std::stod(text);
+        }
+        catch (const std::invalid_argument& err) {
+            if (string_contains(text, '"') || string_contains(text, '\'')) {
+                throw std::invalid_argument(
+                    std::string("Text for connection probabilty cannot contain quotes "
+                                "(only digits are allowed): ")
+                    + text);
+            }
+            if (text.empty()) {
+                throw std::invalid_argument(
+                    "Text for connection probabilty cannot be an empty string");
+            }
+            else {
+                throw std::invalid_argument(
+                    std::string("Text cannot be converted to connection probabilty "
+                                "(only digits are allowed): ")
+                    + text);
+            }
+        }
+        catch (const std::out_of_range& err) {
+            throw std::out_of_range(
+                std::string("Numerical value too large for connection probabilty: ")
+                + text);
+        }
+        if (value < 0) {
+            throw std::invalid_argument(
+                std::string("Probability needs to be >=0, not ") + text);
+        }
+        return value;
+    }
+
+    /**
+     * @brief Convert string to cost
+     *
+     * @param text String with cost
+     * @return Cost as number
+     */
+    static double cost_from_text(const std::string& text)
+    {
+        try {
+            return std::stod(text);
+        }
+        catch (const std::invalid_argument& err) {
+            if (string_contains(text, '"') || string_contains(text, '\'')) {
+                throw std::invalid_argument(
+                    std::string("Text for cost cannot contain quotes "
+                                "(only digits are allowed): ")
+                    + text);
+            }
+            if (text.empty()) {
+                throw std::invalid_argument("Text for cost cannot be an empty string");
+            }
+            else {
+                throw std::invalid_argument(
+                    std::string("Text cannot be converted to cost "
+                                "(only digits are allowed): ")
+                    + text);
+            }
+        }
+        catch (const std::out_of_range& err) {
+            throw std::out_of_range(
+                std::string("Numerical value too large for cost: ") + text);
+        }
+    }
+
+    template<typename InputStream>
+    static std::pair<bool, bool> stream_has_columns(InputStream& stream, char delimeter)
+    {
+        bool has_cost{false};
+        bool has_probability{false};
+        // Get header to determine what is included.
+        auto starting_position = stream.tellg();
+        std::string line;
+        std::getline(stream, line);
+        std::istringstream line_stream{line};
+        std::string label;
+        int column_number = 0;
+        while (std::getline(line_stream, label, delimeter)) {
+            column_number++;
+            if (column_number == 1 && label != "node_1") {
+                // The right label is not there. Assuming it is without a header.
+                stream.seekg(starting_position);
+                break;
+            }
+            if (label == "probability") {
+                if (has_cost) {
+                    // Detailed check to give a more relevant error message.
+                    throw std::runtime_error(
+                        "The cost column must be after the probability column");
+                }
+                if (column_number != 3) {
+                    throw std::runtime_error(
+                        "The probability column must be the third column");
+                }
+                has_probability = true;
+                continue;
+            }
+            if (label == "cost") {
+                if (!(column_number == 3 || column_number == 4)) {
+                    throw std::runtime_error(
+                        "The cost column must be the third or fourth column");
+                }
+                has_cost = true;
+                continue;
+            }
+        }
+        return {has_cost, has_probability};
+    }
+
+    /**
      * @brief Read segments from a stream.
      *
      * @param stream Input stream with segments
@@ -553,10 +865,14 @@ protected:
     template<typename InputStream>
     void load_segments(InputStream& stream)
     {
+        char delimeter{','};
+        bool has_cost{false};
+        bool has_probability{false};
+        std::tie(has_cost, has_probability) = stream_has_columns(stream, delimeter);
+
         std::string line;
         while (std::getline(stream, line)) {
             std::istringstream line_stream{line};
-            char delimeter{','};
             std::string node_1_text;
             std::getline(line_stream, node_1_text, delimeter);
             std::string node_2_text;
@@ -564,22 +880,41 @@ protected:
             auto node_1_id = node_id_from_text(node_1_text);
             auto node_2_id = node_id_from_text(node_2_text);
             if (node_1_id < 1 || node_2_id < 1) {
-                std::runtime_error(std::string(
+                throw std::runtime_error(std::string(
                     "Node ID must be greater than zero: " + node_1_text + " "
                     + node_2_text));
             }
             if (node_1_id == node_2_id) {
-                std::runtime_error(
+                throw std::runtime_error(
                     std::string("Edge cannot begin and end with the same node: ")
                     + node_1_text + " " + node_2_text);
             }
+            Segment segment;
+
+            if (has_probability) {
+                std::string probability_text;
+                std::getline(line_stream, probability_text, delimeter);
+                double connection_probability = probability_from_text(probability_text);
+                segment.set_probability(connection_probability);
+            }
+            if (has_cost) {
+                std::string cost_text;
+                std::getline(line_stream, cost_text, delimeter);
+                double cost = cost_from_text(cost_text);
+                segment.set_total_cost(cost);
+            }
+            else {
+                segment.set_cost_per_cell(distance_per_cell_);
+            }
+
             std::string segment_text;
             std::getline(line_stream, segment_text, delimeter);
             std::istringstream segment_stream{segment_text};
             char in_cell_delimeter{';'};
             std::string x_coord_text;
             std::string y_coord_text;
-            Segment segment;
+
+            long int loaded_coord_pairs = 0;
             while (std::getline(segment_stream, x_coord_text, in_cell_delimeter)
                    && std::getline(segment_stream, y_coord_text, in_cell_delimeter)) {
                 // The same cell is possibly repeated if raster resolution is lower than
@@ -588,7 +923,29 @@ protected:
                 auto new_point = xy_to_row_col(x_coord_text, y_coord_text);
                 if (segment.empty() || segment.back() != new_point)
                     segment.emplace_back(new_point);
+                ++loaded_coord_pairs;
             }
+
+            if (segment.empty()) {
+                throw std::runtime_error(
+                    std::string("Row for an edge between nodes ") + node_1_text
+                    + " and " + node_2_text + " does not have any node coordinates");
+            }
+            if (loaded_coord_pairs < 2) {
+                throw std::runtime_error(
+                    std::string("Row for an edge between nodes ") + node_1_text
+                    + " and " + node_2_text + " has only 1 coordinate pair "
+                    + "(at least two are needed, one for each node), "
+                    + "the one coordinate pair was: " + x_coord_text + ", "
+                    + y_coord_text);
+            }
+            // If the two nodes has the same coordinates (e.g., after computing the cell
+            // from the real-world coordinates, the segment geometry list contains only
+            // one pair, so size equal to one is considered correct.
+            // However, we need put back the missing coordinates for the second node.
+            if (segment.size() == 1)
+                segment.push_back(typename Segment::value_type(segment.back()));
+
             // If either node of the segment is not in the extent, skip the segment.
             // This means that a segment is ignored even if one of the nodes and
             // significant portion of the segment is in the area of iterest.
@@ -602,12 +959,17 @@ protected:
         }
 
         for (const auto& node_segment : segments_by_nodes_) {
-            nodes_by_row_col_[node_segment.second.front()].insert(
-                node_segment.first.first);
-            nodes_by_row_col_[node_segment.second.back()].insert(
-                node_segment.first.second);
-            node_matrix_[node_segment.first.first].push_back(node_segment.first.second);
-            node_matrix_[node_segment.first.second].push_back(node_segment.first.first);
+            const auto& start_node_id{node_segment.first.first};
+            const auto& end_node_id{node_segment.first.second};
+            const auto& segment{node_segment.second};
+            nodes_by_row_col_[segment.front()].insert(start_node_id);
+            nodes_by_row_col_[segment.back()].insert(end_node_id);
+            if (has_probability) {
+                node_matrix_[start_node_id].first.push_back(segment.probability());
+                node_matrix_[end_node_id].first.push_back(segment.probability());
+            }
+            node_matrix_[start_node_id].second.push_back(end_node_id);
+            node_matrix_[end_node_id].second.push_back(start_node_id);
         }
     }
 
@@ -624,13 +986,13 @@ protected:
      */
     SegmentView get_segment(NodeId start, NodeId end) const
     {
-        for (const auto& item : segments_by_nodes_) {
-            const auto& key{item.first};
-            if (key.first == start && key.second == end)
-                return SegmentView(item.second.cbegin(), item.second.cend());
-            if (key.second == start && key.first == end) {
-                return SegmentView(item.second.crbegin(), item.second.crend());
-            }
+        auto it = segments_by_nodes_.find(std::make_pair(start, end));
+        if (it != segments_by_nodes_.end()) {
+            return SegmentView(it->second.cbegin(), it->second.cend(), it->second);
+        }
+        it = segments_by_nodes_.find(std::make_pair(end, start));
+        if (it != segments_by_nodes_.end()) {
+            return SegmentView(it->second.crbegin(), it->second.crend(), it->second);
         }
         throw std::invalid_argument(std::string(
             "No segment for given nodes: " + std::to_string(start) + " "
@@ -645,7 +1007,7 @@ protected:
      */
     const std::vector<NodeId>& nodes_connected_to(NodeId node) const
     {
-        return node_matrix_.at(node);
+        return node_matrix_.at(node).second;
     }
 
     /**
@@ -656,7 +1018,7 @@ protected:
      *
      * The random node is picked from candidate nodes which are nodes connected to
      * a given node. The candidate nodes which are in the *ignore* list are excluded
-     * from the random selection. If all candiate nodes are in the *ignore* list,
+     * from the random selection. If all candidate nodes are in the *ignore* list,
      * the *ignore* list is ignored and all candidate nodes are used.
      *
      * The function always returns a node to go to even if it means going to an ignored
@@ -693,12 +1055,45 @@ protected:
         return pick_random_item(nodes, generator);
     }
 
+    /**
+     * @brief Pick a probable node from the given node.
+     *
+     * If there is more than one edge leading from the given node, a random node is
+     * picked based on edge probabilities. If there are no probabilities assigned, a
+     * random node is picked. If there are no edges leading from the given node, the
+     * node itself is returned.
+     */
+    template<typename Generator>
+    NodeId next_probable_node(NodeId node, Generator& generator) const
+    {
+        // Get all candidate nodes.
+        const auto& record{node_matrix_.at(node)};
+        const auto& probabilities{record.first};
+        const auto& nodes{record.second};
+
+        // Resolve disconnected node and dead end cases.
+        auto num_nodes = nodes.size();
+        if (!num_nodes)
+            return node;
+        else if (num_nodes == 1)
+            return nodes[0];
+
+        // Pick nodes based on edge probabilities if they are available.
+        if (!probabilities.empty()) {
+            std::discrete_distribution<int> dd{
+                probabilities.begin(), probabilities.end()};
+            return nodes.at(dd(generator));
+        }
+        // Pick a connected node with equal edge probabilities.
+        return pick_random_item(nodes, generator);
+    }
+
     BBox<double> bbox_;  ///< Bounding box of the network grid in real world coordinates
     double ew_res_;  ///< East-west resolution of the grid
     double ns_res_;  ///< North-south resolution of the grid
     RasterIndex max_row_;  ///< Maximum row index in the grid
     RasterIndex max_col_;  ///< Maximum column index in the grid
-    double distance_per_cell_;  ///< Distance to travel through one cell (cost)
+    double distance_per_cell_;  ///< Distance (cost) to walk through one cell
     /** Node IDs stored by row and column (multiple nodes per cell) */
     std::map<std::pair<RasterIndex, RasterIndex>, std::set<NodeId>> nodes_by_row_col_;
     NodeMatrix node_matrix_;  ///< List of node neighbors by node ID (edges)

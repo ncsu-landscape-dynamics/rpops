@@ -131,6 +131,7 @@ network_min_distance_large_error <-
   "network min distance is greater than the network max distance"
 network_max_distance_large_error <-
   "network max distance is greater than the resoultion times the minimum NS or EW extent"
+network_movement_error <- "network movement is not of type 'walk', 'jump', or 'teleport'"
 
 infection_years_length_error <- function(num_layers_infected_years, number_of_time_steps) {
   error_message <-

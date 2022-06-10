@@ -1,7 +1,7 @@
 /*
  * Tests for the PoPS Model class.
  *
- * Copyright (C) 2020-2021 by the authors.
+ * Copyright (C) 2020-2022 by the authors.
  *
  * Authors: Vaclav Petras <wenzeslaus gmail com>
  *
@@ -97,7 +97,7 @@ protected:
             uniform_kernel,
             network_kernel,
             natural_neighbor_kernel,
-            config_.deterministic);
+            config_.dispersal_stochasticity);
         return selectable_kernel;
     }
 
@@ -189,6 +189,7 @@ public:
         std::vector<IntegerRaster>& mortality_tracker,
         IntegerRaster& died,
         const std::vector<FloatRaster>& temperatures,
+        const std::vector<FloatRaster>& survival_rates,
         const FloatRaster& weather_coefficient,
         Treatments<IntegerRaster, FloatRaster>& treatments,
         IntegerRaster& resistant,
@@ -210,6 +211,19 @@ public:
                 susceptible,
                 temperatures[lethal_step],
                 config_.lethal_temperature,
+                suitable_cells);
+        }
+        // removal of percentage of dispersers
+        if (config_.use_survival_rate && config_.survival_rate_schedule()[step]) {
+            int survival_step =
+                simulation_step_to_action_step(config_.survival_rate_schedule(), step);
+            simulation_.remove_percentage(
+                infected,
+                susceptible,
+                mortality_tracker,
+                exposed,
+                total_exposed,
+                survival_rates[survival_step],
                 suitable_cells);
         }
         // actual spread

@@ -9,6 +9,9 @@ pops_model(
   use_lethal_temperature,
   lethal_temperature,
   lethal_temperature_month,
+  use_survival_rates,
+  survival_rate_month,
+  survival_rate_day,
   infected,
   total_exposed,
   exposed,
@@ -28,6 +31,7 @@ pops_model(
   movements_dates,
   weather,
   temperature,
+  survival_rates,
   weather_coefficient,
   res,
   rows_cols,
@@ -65,7 +69,7 @@ pops_model(
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
-  deterministic = FALSE,
+  dispersal_stochasticity = TRUE,
   establishment_probability = 0,
   dispersal_percentage = 0.99,
   use_overpopulation_movements = FALSE,
@@ -75,7 +79,8 @@ pops_model(
   bbox = NULL,
   network_min_distance = 0,
   network_max_distance = 0,
-  network_filename = ""
+  network_filename = "",
+  network_movement = "walk"
 )
 }
 \arguments{
@@ -92,6 +97,14 @@ temperature related mortality occurs for your pest or pathogen (-50 to 60)}
 \item{lethal_temperature_month}{the month in which lethal temperature
 related mortality occurs for your pest or pathogen integer value between 1
 and 12}
+
+\item{use_survival_rates}{boolean to indicate if the model will use survival rates to limit the
+survival or emergence of overwintering generations.}
+
+\item{survival_rate_month}{What month do over wintering generations emerge. We suggest using the
+month before for this parameter as it is when the survival rates raster will be applied.}
+
+\item{survival_rate_day}{what day should the survival rates be applied}
 
 \item{infected}{matrix of infected hosts}
 
@@ -143,6 +156,9 @@ format 'YYYY-MM-DD'}
 
 \item{temperature}{vector of matrices of temperature values used to check
 against lethal temperature}
+
+\item{survival_rates}{vector of matrices of survival rates used to determine percentage of
+overwinter population that emerges}
 
 \item{weather_coefficient}{vector of matrices of weather coefficients}
 
@@ -265,8 +281,8 @@ stochasticity in establishment functions default is TRUE}
 \item{movement_stochasticity}{Boolean to indicate whether to use
 stochasticity in movement functions default is TRUE}
 
-\item{deterministic}{Boolean to indicate whether to use a deterministic
-dispersal kernel default is FALSE}
+\item{dispersal_stochasticity}{Boolean to indicate whether to use a stochasticity in the
+dispersal kernel default is TRUE}
 
 \item{establishment_probability}{Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
@@ -296,6 +312,11 @@ anthropogenic_kernel_type = 'network'.}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
+
+\item{network_movement}{What movement type do you want to use in the network kernel either
+"walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
+along the edge. "jump" automatically moves to the nearest node when moving through the network.
+"teleport" moves from node to node most likely used for airport and seaport networks.}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

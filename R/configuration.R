@@ -161,6 +161,12 @@ configuration <- function(config) {
     return(config)
   }
 
+  # check that network movement is one of the correct options
+  network_movement_options <- c("walk", "jump", "teleport")
+  if (config$network_movement %notin% network_movement_options) {
+    config$failure <- network_movement_error
+  }
+
   # check that initial raster file exists
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
     infected_check <- initial_raster_checks(config$infected_file, config$use_s3, config$bucket)
@@ -260,6 +266,35 @@ configuration <- function(config) {
 
   susceptible <- host - infected
   susceptible[susceptible < 0] <- 0
+
+  # check that survival_rates raster has the same crs, resolution, and extent
+  if (config$use_survival_rates == TRUE) {
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      survival_rate_check <-
+        secondary_raster_checks(config$survival_rates_file, infected, config$use_s3, config$bucket)
+    } else {
+      survival_rate_check <- secondary_raster_checks(config$survival_rates_file, infected)
+    }
+    if (survival_rate_check$checks_passed) {
+      survival_rates_stack <- survival_rate_check$raster
+    } else {
+      config$failure <- survival_rate_check$failed_check
+      return(config)
+    }
+
+    survival_rates <- list(terra::as.matrix(survival_rates_stack[[1]], wide = TRUE))
+    if (terra::nlyr(survival_rates_stack) > 1) {
+      for (i in 2:config$number_of_years) {
+        survival_rates[[i]] <- terra::as.matrix(survival_rates_stack[[i]], wide = TRUE)
+      }
+    }
+  } else {
+    survival_rates <- host
+    terra::values(survival_rates) <- 1
+    survival_rates <- list(terra::as.matrix(survival_rates, wide = TRUE))
+  }
+
+  config$survival_rates <- survival_rates
 
   # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {

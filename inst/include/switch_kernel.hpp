@@ -1,5 +1,5 @@
 /*
- * PoPS model - disperal kernels
+ * PoPS model - dispersal kernels
  *
  * Copyright (C) 2019-2021 by the authors.
  *
@@ -45,7 +45,7 @@ protected:
     UniformDispersalKernel uniform_kernel_;
     DeterministicNeighborDispersalKernel deterministic_neighbor_kernel_;
     NetworkDispersalKernel<RasterIndex> network_kernel_;
-    bool deterministic_;
+    bool dispersal_stochasticity_;
 
 public:
     SwitchDispersalKernel(
@@ -56,7 +56,7 @@ public:
         const NetworkDispersalKernel<RasterIndex>& network_kernel,
         const DeterministicNeighborDispersalKernel& deterministic_neighbor_kernel =
             DeterministicNeighborDispersalKernel(Direction::None),
-        const bool deterministic = false)
+        const bool dispersal_stochasticity = true)
         : dispersal_kernel_type_(dispersal_kernel_type),
           // Here we initialize all kernels,
           // although we won't use all of them.
@@ -65,7 +65,7 @@ public:
           uniform_kernel_(uniform_kernel),
           deterministic_neighbor_kernel_(deterministic_neighbor_kernel),
           network_kernel_(network_kernel),
-          deterministic_(deterministic)
+          dispersal_stochasticity_(dispersal_stochasticity)
     {}
 
     /*! \copydoc RadialDispersalKernel::operator()()
@@ -83,7 +83,7 @@ public:
         else if (dispersal_kernel_type_ == DispersalKernelType::Network) {
             return network_kernel_(generator, row, col);
         }
-        else if (deterministic_) {
+        else if (!dispersal_stochasticity_) {
             return deterministic_kernel_(generator, row, col);
         }
         else {
@@ -104,7 +104,7 @@ public:
         else if (dispersal_kernel_type_ == DispersalKernelType::Network) {
             return network_kernel_.is_cell_eligible(row, col);
         }
-        else if (deterministic_) {
+        else if (!dispersal_stochasticity_) {
             return true;
         }
         else {

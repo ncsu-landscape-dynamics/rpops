@@ -39,7 +39,7 @@ typedef std::tuple<bool, DistDir> EscapeDistDir;
 typedef std::vector<EscapeDistDir> EscapeDistDirs;
 
 /**
- * Class storing and computing quarantine escap metrics for one simulation.
+ * Class storing and computing quarantine escape metrics for one simulation.
  */
 template<typename IntegerRaster, typename RasterIndex = int>
 class QuarantineEscape
@@ -269,7 +269,7 @@ std::vector<DistDir> distance_direction_to_quarantine(
 
 /**
  * Writes quarantine escape summary for all steps into a string.
- * Uses CSV fomat with commas (step, probability of escape, distance, direction as
+ * Uses CSV format with commas (step, probability of escape, distance, direction as
  * azimuth from runs). E.g. "0,0.4,1000,0,2000,90,1500,0" If escaped in particular run,
  * there is empty value for that distance and direction
  * (...,1000,0,,,2000,90,...).

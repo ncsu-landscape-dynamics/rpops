@@ -48,6 +48,10 @@ pops_multirun <- function(infected_file,
                           season_month_end = 12,
                           start_date = "2008-01-01",
                           end_date = "2008-12-31",
+                          use_survival_rates = FALSE,
+                          survival_rate_month = 3,
+                          survival_rate_day = 15,
+                          survival_rates_file = "",
                           use_lethal_temperature = FALSE,
                           temperature_file = "",
                           lethal_temperature = -12.87,
@@ -78,7 +82,7 @@ pops_multirun <- function(infected_file,
                           generate_stochasticity = TRUE,
                           establishment_stochasticity = TRUE,
                           movement_stochasticity = TRUE,
-                          deterministic = FALSE,
+                          dispersal_stochasticity = TRUE,
                           establishment_probability = 0.5,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
@@ -92,7 +96,8 @@ pops_multirun <- function(infected_file,
                           mask = NULL,
                           write_outputs = "None",
                           output_folder_path = "",
-                          network_filename = "") {
+                          network_filename = "",
+                          network_movement = "walk") {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -115,6 +120,10 @@ pops_multirun <- function(infected_file,
   config$temperature_file <- temperature_file
   config$lethal_temperature <- lethal_temperature
   config$lethal_temperature_month <- lethal_temperature_month
+  config$use_survival_rates <- use_survival_rates
+  config$survival_rate_month <- survival_rate_month
+  config$survival_rate_day <- survival_rate_day
+  config$survival_rates_file <- survival_rates_file
   config$mortality_on <- mortality_on
   config$mortality_rate <- mortality_rate
   config$mortality_time_lag <- mortality_time_lag
@@ -136,7 +145,7 @@ pops_multirun <- function(infected_file,
   config$generate_stochasticity <- generate_stochasticity
   config$establishment_stochasticity <- establishment_stochasticity
   config$movement_stochasticity <- movement_stochasticity
-  config$deterministic <- deterministic
+  config$dispersal_stochasticity <- dispersal_stochasticity
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
@@ -160,6 +169,7 @@ pops_multirun <- function(infected_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
   config$network_filename <- network_filename
+  config$network_movement <- network_movement
 
   config <- configuration(config)
 
@@ -188,6 +198,9 @@ pops_multirun <- function(infected_file,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
+        use_survival_rates = config$use_survival_rates,
+        survival_rate_month = config$survival_rate_month,
+        survival_rate_day = config$survival_rate_day,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -207,6 +220,7 @@ pops_multirun <- function(infected_file,
         movements_dates = config$movements_dates,
         weather = config$weather,
         temperature = config$temperature,
+        survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
         res = config$res,
         rows_cols = config$rows_cols,
@@ -244,7 +258,7 @@ pops_multirun <- function(infected_file,
         generate_stochasticity = config$generate_stochasticity,
         establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
-        deterministic = config$deterministic,
+        dispersal_stochasticity = config$dispersal_stochasticity,
         establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
@@ -254,7 +268,8 @@ pops_multirun <- function(infected_file,
         bbox = config$bounding_box,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
-        network_filename = config$network_filename
+        network_filename = config$network_filename,
+        network_movement = config$network_movement
       )
 
       run <- c()
