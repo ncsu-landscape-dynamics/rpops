@@ -52,8 +52,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =
-                      system.file("extdata", "simple2x2", "infected.csv",
-                                  package = "PoPS"),
+                      system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
@@ -70,8 +69,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     use_lethal_temperature = TRUE,
                     temperature_file =
-                      system.file("extdata", "simple2x2", "infected.csv",
-                                  package = "PoPS"),
+                      system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
@@ -88,8 +86,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     temp = TRUE,
                     temperature_coefficient_file =
-                      system.file("extdata", "simple2x2", "infected.csv",
-                                  package = "PoPS"),
+                      system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
@@ -106,8 +103,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     precip = TRUE,
                     precipitation_coefficient_file =
-                      system.file("extdata", "simple2x2", "infected.csv",
-                                  package = "PoPS"),
+                      system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
@@ -124,8 +120,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     total_populations_file =  host_file,
                     management = TRUE,
                     treatments_file =
-                      system.file("extdata", "simple2x2", "infected.csv",
-                                  package = "PoPS"),
+                      system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
@@ -293,8 +288,7 @@ test_that("Input raster resolutions, extents, and crs all match", {
   expect_error(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file =
-                      system.file("extdata", "simple5x5", "total_plants.tif",
-                                  package = "PoPS"),
+                      system.file("extdata", "simple5x5", "total_plants.tif", package = "PoPS"),
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                extent_error, fixed = TRUE)
@@ -931,6 +925,67 @@ test_that(
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
                matrix(0, ncol = 2, nrow = 2))
+
+  })
+
+test_that(
+  "Infected results returns less infection after survival rates than before", {
+    infected_file <-
+      system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+    host_file <-
+      system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    coefficient_file <-
+      system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+    survival_rates_file <-
+      system.file("extdata", "simple2x2", "survival_rates.tif", package = "PoPS")
+    start_date <- "2008-01-01"
+    end_date <- "2010-12-31"
+    parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
+    parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+
+    reduced_inf <- matrix(0, ncol = 2, nrow = 2)
+    reduced_inf[1,1] <- 3
+
+    expect_equal(pops(infected_file = infected_file,
+                      host_file = host_file,
+                      total_populations_file = host_file,
+                      use_survival_rates = TRUE,
+                      survival_rates_file = survival_rates_file,
+                      parameter_means = parameter_means,
+                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                 reduced_inf)
+    expect_equal(pops(infected_file = infected_file,
+                      host_file = host_file,
+                      total_populations_file = host_file,
+                      use_survival_rates = TRUE,
+                      survival_rates_file = survival_rates_file,
+                      precip = TRUE,
+                      precipitation_coefficient_file = coefficient_file,
+                      parameter_means = parameter_means,
+                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                 reduced_inf)
+    expect_equal(pops(infected_file = infected_file,
+                      host_file = host_file,
+                      total_populations_file = host_file,
+                      use_survival_rates = TRUE,
+                      survival_rates_file = survival_rates_file,
+                      temp = TRUE,
+                      temperature_coefficient_file = coefficient_file,
+                      parameter_means = parameter_means,
+                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                 reduced_inf)
+    expect_equal(pops(infected_file = infected_file,
+                      host_file = host_file,
+                      total_populations_file = host_file,
+                      use_survival_rates = TRUE,
+                      survival_rates_file = survival_rates_file,
+                      temp = TRUE,
+                      temperature_coefficient_file = coefficient_file,
+                      precip = TRUE,
+                      precipitation_coefficient_file = coefficient_file,
+                      parameter_means = parameter_means,
+                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                 reduced_inf)
 
   })
 

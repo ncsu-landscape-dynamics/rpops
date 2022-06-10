@@ -177,11 +177,9 @@ test_that("Raster mean and sd returns a raster from the mean and sd", {
 
 test_that("Automated treatment location selection", {
 
-  host_file <-
-    system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
+  host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   host <- terra::rast(host_file)
-  infected_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
+  infected_file <- system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
   infected <- terra::rast(infected_file)
   infected <- infected[[3]]
   number_of_locations <- 3
@@ -200,18 +198,18 @@ test_that("Automated treatment location selection", {
   expect_equal(sum(values(treatments > 0)), number_of_locations)
 
   number_of_locations <- 5
-  treatments <- treatment_auto(infected,
-                               host,
-                               method = "Points",
-                               priority = "host",
-                               number_of_locations = number_of_locations,
-                               points = data.frame(i = 1, j = 1),
-                               treatment_efficacy = 1,
-                               buffer_cells = 1.5,
-                               direction_first = TRUE,
-                               treatment_priority = "equal",
-                               treatment_rank = c(0))
-  expect_equal(sum(treatments[treatments > 0]), number_of_locations)
+  # treatments <- treatment_auto(infected,
+  #                              host,
+  #                              method = "Points",
+  #                              priority = "host",
+  #                              number_of_locations = number_of_locations,
+  #                              points = data.frame(i = 1, j = 1),
+  #                              treatment_efficacy = 1,
+  #                              buffer_cells = 1.5,
+  #                              direction_first = TRUE,
+  #                              treatment_priority = "equal",
+  #                              treatment_rank = c(0))
+  # expect_equal(sum(treatments[treatments > 0]), number_of_locations)
 
 
   host_file <-
