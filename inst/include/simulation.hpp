@@ -1,7 +1,7 @@
 /*
  * PoPS model - pest or pathogen spread simulation
  *
- * Copyright (C) 2015-2020 by the authors.
+ * Copyright (C) 2015-2022 by the authors.
  *
  * Authors: Zexi Chen (zchen22 ncsu edu)
  *          Vaclav Petras (wenzeslaus gmail com)
@@ -53,6 +53,31 @@ std::vector<int> draw_n_from_v(std::vector<int> v, unsigned n, Generator& genera
     std::shuffle(v.begin(), v.end(), generator);
     v.erase(v.begin() + n, v.end());
     return v;
+}
+
+/** Draws n elements from a cohort of rasters. Expects n to be equal or less than
+ *  sum of cohorts at cell (i, j).
+ */
+template<typename Generator, typename IntegerRaster, typename RasterIndex = int>
+std::vector<int> draw_n_from_cohorts(
+    std::vector<IntegerRaster>& cohorts,
+    int n,
+    RasterIndex row,
+    RasterIndex col,
+    Generator& generator)
+{
+    std::vector<int> categories;
+    unsigned index = 0;
+    for (auto& raster : cohorts) {
+        categories.insert(categories.end(), raster(row, col), index);
+        index += 1;
+    }
+    std::vector<int> draw = draw_n_from_v(categories, n, generator);
+    std::vector<int> cohort_counts;
+    for (index = 0; index < cohorts.size(); index++) {
+        cohort_counts.push_back(std::count(draw.begin(), draw.end(), index));
+    }
+    return cohort_counts;
 }
 
 /** The type of a epidemiological model (SI or SEI)
@@ -119,7 +144,7 @@ inline ModelType model_type_from_string(const char* text)
  * Template parameter RasterIndex is type used for maximum indices of
  * the used rasters and should be the same as what the actual raster
  * types are using. However, at the same time, comparison with signed
- * type are perfomed and a signed type might be required in the future.
+ * type are performed and a signed type might be required in the future.
  * A default is provided, but it can be changed in the future.
  */
 template<
@@ -203,6 +228,67 @@ public:
                 susceptible(i, j) += infected(i, j);
                 // remove all infestation/infection in the infected class
                 infected(i, j) = 0;
+            }
+        }
+    }
+
+    /** Removes percentage of exposed and infected
+     *
+     * @param infected Currently infected hosts
+     * @param susceptible Currently susceptible hosts
+     * @param mortality_tracker_vector Hosts that are infected at a specific time step
+     * @param exposed Exposed hosts per cohort
+     * @param total_exposed Total exposed in all exposed cohorts
+     * @param survival_rate Raster between 0 and 1 representing pest survival rate
+     * @param suitable_cells used to run model only where host are known to occur
+     */
+    void remove_percentage(
+        IntegerRaster& infected,
+        IntegerRaster& susceptible,
+        std::vector<IntegerRaster>& mortality_tracker_vector,
+        std::vector<IntegerRaster>& exposed,
+        IntegerRaster& total_exposed,
+        const FloatRaster& survival_rate,
+        const std::vector<std::vector<int>>& suitable_cells)
+    {
+        for (auto indices : suitable_cells) {
+            int i = indices[0];
+            int j = indices[1];
+            if (survival_rate(i, j) < 1) {
+                int removed = 0;
+                // remove percentage of infestation/infection in the infected class
+                int removed_infected =
+                    infected(i, j) - std::lround(infected(i, j) * survival_rate(i, j));
+                infected(i, j) -= removed_infected;
+                removed += removed_infected;
+                // remove the removed infected from mortality cohorts
+                if (removed_infected > 0) {
+                    std::vector<int> mortality_draw = draw_n_from_cohorts(
+                        mortality_tracker_vector, removed_infected, i, j, generator_);
+                    int index = 0;
+                    for (auto& raster : mortality_tracker_vector) {
+                        raster(i, j) -= mortality_draw[index];
+                        index += 1;
+                    }
+                }
+                // remove the same percentage for total exposed and remove randomly from
+                // each cohort
+                int total_removed_exposed =
+                    total_exposed(i, j)
+                    - std::lround(total_exposed(i, j) * survival_rate(i, j));
+                total_exposed(i, j) -= total_removed_exposed;
+                removed += total_removed_exposed;
+                if (total_removed_exposed > 0) {
+                    std::vector<int> exposed_draw = draw_n_from_cohorts(
+                        exposed, total_removed_exposed, i, j, generator_);
+                    int index = 0;
+                    for (auto& raster : exposed) {
+                        raster(i, j) -= exposed_draw[index];
+                        index += 1;
+                    }
+                }
+                // move infested/infected host back to susceptible pool
+                susceptible(i, j) += removed;
             }
         }
     }
@@ -347,43 +433,26 @@ public:
             resistant_moved = std::count(draw.begin(), draw.end(), 4);
 
             if (exposed_moved > 0) {
+                std::vector<int> exposed_draw = draw_n_from_cohorts(
+                    exposed, exposed_moved, row_from, col_from, generator_);
                 int index = 0;
                 for (auto& raster : exposed) {
-                    auto exposed_count = raster(row_from, col_from);
-                    exposed_categories.insert(
-                        exposed_categories.end(), exposed_count, index);
-
-                    index += 1;
-                }
-                std::vector<int> exposed_draw =
-                    draw_n_from_v(exposed_categories, exposed_moved, generator_);
-                index = 0;
-                for (auto& raster : exposed) {
-                    auto exposed_moved_in_cohort =
-                        std::count(exposed_draw.begin(), exposed_draw.end(), index);
-                    raster(row_from, col_from) -= exposed_moved_in_cohort;
-                    raster(row_to, col_to) += exposed_moved_in_cohort;
+                    raster(row_from, col_from) -= exposed_draw[index];
+                    raster(row_to, col_to) += exposed_draw[index];
                     index += 1;
                 }
             }
-
             if (infected_moved > 0) {
-                std::vector<int> mortality_categories;
+                std::vector<int> mortality_draw = draw_n_from_cohorts(
+                    mortality_tracker_vector,
+                    infected_moved,
+                    row_from,
+                    col_from,
+                    generator_);
                 int index = 0;
                 for (auto& raster : mortality_tracker_vector) {
-                    auto mortality_count = raster(row_from, col_from);
-                    mortality_categories.insert(
-                        mortality_categories.end(), mortality_count, index);
-                    index += 1;
-                }
-                std::vector<int> mortality_draw =
-                    draw_n_from_v(mortality_categories, infected_moved, generator_);
-                index = 0;
-                for (auto& raster : mortality_tracker_vector) {
-                    auto mortality_moved_in_cohort =
-                        std::count(mortality_draw.begin(), mortality_draw.end(), index);
-                    raster(row_from, col_from) -= mortality_moved_in_cohort;
-                    raster(row_to, col_to) += mortality_moved_in_cohort;
+                    raster(row_from, col_from) -= mortality_draw[index];
+                    raster(row_to, col_to) += mortality_draw[index];
                     index += 1;
                 }
             }
@@ -536,6 +605,7 @@ public:
                     if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
                         // export dispersers dispersed outside of modeled area
                         outside_dispersers.emplace_back(std::make_tuple(row, col));
+                        established_dispersers(i, j) -= 1;
                         continue;
                     }
                     if (susceptible(row, col) > 0) {
@@ -547,7 +617,8 @@ public:
                             establishment_tester = distribution_uniform(generator_);
 
                         if (weather)
-                            probability_of_establishment *= weather_coefficient(i, j);
+                            probability_of_establishment *=
+                                weather_coefficient(row, col);
                         if (establishment_tester < probability_of_establishment) {
                             exposed_or_infected(row, col) += 1;
                             susceptible(row, col) -= 1;
@@ -567,6 +638,9 @@ public:
                         else {
                             established_dispersers(i, j) -= 1;
                         }
+                    }
+                    else {
+                        established_dispersers(i, j) -= 1;
                     }
                 }
             }
@@ -670,9 +744,9 @@ public:
                 infected(row, col) += leaving;
             }
             // More pests than the target cell can accept.
-            // This can happen if there is simply not enough S hosts to accomodate all
+            // This can happen if there is simply not enough S hosts to accommodate all
             // the pests moving from the source or if multiple sources end up in the
-            // same target cell and there is not enough S hosts to accomodate all of
+            // same target cell and there is not enough S hosts to accommodate all of
             // them. The pests just disappear in both cases.
             else {
                 leaving = susceptible(row, col);

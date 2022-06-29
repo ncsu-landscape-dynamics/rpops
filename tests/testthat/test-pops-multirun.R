@@ -26,7 +26,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
 })
 
 test_that("Multirun model outputs work", {
-  skip_on_os("windows")
+  # skip_on_os("windows")
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file <-
@@ -92,6 +92,11 @@ test_that("Multirun model outputs work", {
   write_outputs <- "None"
   output_folder_path <- tempdir()
   network_filename <- ""
+  use_survival_rates <- FALSE
+  survival_rate_month <- 3
+  survival_rate_day <- 15
+  survival_rates_file <- ""
+  network_movement <- "walk"
 
   data <- pops_multirun(infected_file,
                         host_file,
@@ -109,6 +114,10 @@ test_that("Multirun model outputs work", {
                         season_month_end,
                         start_date,
                         end_date,
+                        use_survival_rates,
+                        survival_rate_month,
+                        survival_rate_day,
+                        survival_rates_file,
                         use_lethal_temperature,
                         temperature_file,
                         lethal_temperature,
@@ -152,7 +161,9 @@ test_that("Multirun model outputs work", {
                         exposed_file,
                         mask,
                         write_outputs,
-                        output_folder_path)
+                        output_folder_path,
+                        network_filename,
+                        network_movement)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
@@ -194,6 +205,10 @@ test_that("Multirun model outputs work", {
                         season_month_end,
                         start_date,
                         end_date,
+                        use_survival_rates,
+                        survival_rate_month,
+                        survival_rate_day,
+                        survival_rates_file,
                         use_lethal_temperature,
                         temperature_file,
                         lethal_temperature,
@@ -229,8 +244,17 @@ test_that("Multirun model outputs work", {
                         dispersal_percentage,
                         quarantine_areas_file,
                         use_quarantine,
-                        use_spreadrates)
-
+                        use_spreadrates,
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path,
+                        network_filename,
+                        network_movement)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
@@ -273,6 +297,10 @@ test_that("Multirun model outputs work", {
                         season_month_end,
                         start_date,
                         end_date,
+                        use_survival_rates,
+                        survival_rate_month,
+                        survival_rate_day,
+                        survival_rates_file,
                         use_lethal_temperature,
                         temperature_file,
                         lethal_temperature,
@@ -308,7 +336,17 @@ test_that("Multirun model outputs work", {
                         dispersal_percentage,
                         quarantine_areas_file,
                         use_quarantine,
-                        use_spreadrates)
+                        use_spreadrates,
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path,
+                        network_filename,
+                        network_movement)
 
 
   expect_equal(length(data), 19)
@@ -349,6 +387,10 @@ test_that("Multirun model outputs work", {
                         season_month_end,
                         start_date,
                         end_date,
+                        use_survival_rates,
+                        survival_rate_month,
+                        survival_rate_day,
+                        survival_rates_file,
                         use_lethal_temperature,
                         temperature_file,
                         lethal_temperature,
@@ -384,7 +426,17 @@ test_that("Multirun model outputs work", {
                         dispersal_percentage,
                         quarantine_areas_file,
                         use_quarantine,
-                        use_spreadrates)
+                        use_spreadrates,
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path,
+                        network_filename,
+                        network_movement)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
@@ -409,7 +461,7 @@ test_that("Multirun model outputs work", {
 })
 
 test_that("Multirun model outputs work with mask", {
-  skip_on_os("windows")
+  # skip_on_os("windows")
   infected_file <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <-
@@ -467,6 +519,19 @@ test_that("Multirun model outputs work with mask", {
   output_frequency_n <- 1
   use_spreadrates <- TRUE
   mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
+  use_survival_rates <- FALSE
+  survival_rate_month <- 3
+  survival_rate_day <- 15
+  survival_rates_file <- ""
+  network_movement <- "walk"
+  use_overpopulation_movements <- FALSE
+  overpopulation_percentage <- 0
+  leaving_percentage <- 0
+  leaving_scale_coefficient <- 1
+  exposed_file <- ""
+  write_outputs <- "None"
+  output_folder_path <- tempdir()
+  network_filename <- ""
 
   data <- pops_multirun(infected_file,
                         host_file,
@@ -484,6 +549,10 @@ test_that("Multirun model outputs work with mask", {
                         season_month_end,
                         start_date,
                         end_date,
+                        use_survival_rates,
+                        survival_rate_month,
+                        survival_rate_day,
+                        survival_rates_file,
                         use_lethal_temperature,
                         temperature_file,
                         lethal_temperature,
@@ -520,12 +589,16 @@ test_that("Multirun model outputs work with mask", {
                         quarantine_areas_file,
                         use_quarantine,
                         use_spreadrates,
-                        use_overpopulation_movements = FALSE,
-                        overpopulation_percentage = 0,
-                        leaving_percentage = 0,
-                        leaving_scale_coefficient = 1,
-                        exposed_file = "",
-                        mask = mask)
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path,
+                        network_filename,
+                        network_movement)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),

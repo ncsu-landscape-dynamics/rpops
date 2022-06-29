@@ -87,7 +87,7 @@ test_that(
     generate_stochasticity <- TRUE
     establishment_stochasticity <- TRUE
     movement_stochasticity <- TRUE
-    deterministic <- FALSE
+    dispersal_stochasticity <- FALSE
     establishment_probability <- 0.5
     dispersal_percentage <- 0.99
     quarantine_areas_file <- ""
@@ -101,6 +101,14 @@ test_that(
     write_outputs <- "all_simulations"
     output_folder_path <- tempdir()
     point_file <- ""
+    use_survival_rates <- FALSE
+    survival_rate_month <- 3
+    survival_rate_day <- 15
+    survival_rates_file <- ""
+    network_filename <- ""
+    network_movement <- "walk"
+    use_distance <- FALSE
+    use_configuration <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -122,6 +130,10 @@ test_that(
       season_month_end,
       start_date,
       end_date,
+      use_survival_rates,
+      survival_rate_month,
+      survival_rate_day,
+      survival_rates_file,
       use_lethal_temperature,
       temperature_file,
       lethal_temperature,
@@ -150,7 +162,7 @@ test_that(
       generate_stochasticity,
       establishment_stochasticity,
       movement_stochasticity,
-      deterministic,
+      dispersal_stochasticity,
       establishment_probability,
       dispersal_percentage,
       quarantine_areas_file,
@@ -163,7 +175,11 @@ test_that(
       exposed_file,
       write_outputs,
       output_folder_path,
-      point_file)
+      point_file,
+      network_filename,
+      network_movement,
+      use_distance,
+      use_configuration)
 
     expect_type(outputs, "list")
     expect_length(outputs, 12)
@@ -247,7 +263,7 @@ test_that(
     generate_stochasticity <- TRUE
     establishment_stochasticity <- TRUE
     movement_stochasticity <- TRUE
-    deterministic <- FALSE
+    dispersal_stochasticity <- FALSE
     establishment_probability <- 0.5
     dispersal_percentage <- 0.99
     quarantine_areas_file <- ""
@@ -262,9 +278,14 @@ test_that(
     write_outputs <- "None"
     output_folder_path <- ""
     point_file <- system.file("extdata", "simple20x20", "points.gpkg", package = "PoPS")
+    use_survival_rates <- FALSE
+    survival_rate_month <- 3
+    survival_rate_day <- 15
+    survival_rates_file <- ""
+    network_filename <- ""
+    network_movement <- "walk"
     use_distance <- FALSE
     use_configuration <- FALSE
-    network_filename <- ""
 
     outputs <- validate(
       infected_years_file,
@@ -286,6 +307,10 @@ test_that(
       season_month_end,
       start_date,
       end_date,
+      use_survival_rates,
+      survival_rate_month,
+      survival_rate_day,
+      survival_rates_file,
       use_lethal_temperature,
       temperature_file,
       lethal_temperature,
@@ -314,7 +339,7 @@ test_that(
       generate_stochasticity,
       establishment_stochasticity,
       movement_stochasticity,
-      deterministic,
+      dispersal_stochasticity,
       establishment_probability,
       dispersal_percentage,
       quarantine_areas_file,
@@ -329,6 +354,7 @@ test_that(
       output_folder_path,
       point_file,
       network_filename,
+      network_movement,
       use_distance,
       use_configuration)
 
@@ -414,7 +440,7 @@ test_that(
     generate_stochasticity <- TRUE
     establishment_stochasticity <- TRUE
     movement_stochasticity <- TRUE
-    deterministic <- FALSE
+    dispersal_stochasticity <- FALSE
     establishment_probability <- 0.5
     dispersal_percentage <- 0.99
     quarantine_areas_file <- ""
@@ -429,9 +455,14 @@ test_that(
     write_outputs <- "None"
     output_folder_path <- ""
     point_file <- ""
+    use_survival_rates <- FALSE
+    survival_rate_month <- 3
+    survival_rate_day <- 15
+    survival_rates_file <- ""
+    network_filename <- ""
+    network_movement <- "walk"
     use_distance <- FALSE
     use_configuration <- FALSE
-    network_filename <- ""
 
     outputs <- validate(
       infected_years_file,
@@ -453,6 +484,10 @@ test_that(
       season_month_end,
       start_date,
       end_date,
+      use_survival_rates,
+      survival_rate_month,
+      survival_rate_day,
+      survival_rates_file,
       use_lethal_temperature,
       temperature_file,
       lethal_temperature,
@@ -481,7 +516,7 @@ test_that(
       generate_stochasticity,
       establishment_stochasticity,
       movement_stochasticity,
-      deterministic,
+      dispersal_stochasticity,
       establishment_probability,
       dispersal_percentage,
       quarantine_areas_file,
@@ -496,6 +531,7 @@ test_that(
       output_folder_path,
       point_file,
       network_filename,
+      network_movement,
       use_distance,
       use_configuration)
 

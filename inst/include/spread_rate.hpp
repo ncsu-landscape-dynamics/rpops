@@ -42,7 +42,7 @@ private:
     std::vector<BBoxFloat> rates;
 
     /**
-     * Return tuple of bools indicating
+     * Return tuple of booleans indicating
      * wheather the infection touched the edge cells
      * in each direction, indicating the infection is out of bounds.
      */

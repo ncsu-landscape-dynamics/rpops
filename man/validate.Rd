@@ -25,6 +25,10 @@ validate(
   season_month_end = 12,
   start_date = "2008-01-01",
   end_date = "2008-12-31",
+  use_survival_rates = FALSE,
+  survival_rate_month = 3,
+  survival_rate_day = 15,
+  survival_rates_file = "",
   use_lethal_temperature = FALSE,
   temperature_file = "",
   lethal_temperature = -12.87,
@@ -53,7 +57,7 @@ validate(
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
-  deterministic = FALSE,
+  dispersal_stochasticity = TRUE,
   establishment_probability = 0.5,
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
@@ -68,6 +72,7 @@ validate(
   output_folder_path = "",
   point_file = "",
   network_filename = "",
+  network_movement = "walk",
   use_distance = FALSE,
   use_configuration = FALSE
 )
@@ -149,6 +154,17 @@ or pathogen (integer value between 1 and 12)}
 \item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
 
 \item{end_date}{date to end the simulation with format ('YYYY_MM_DD')}
+
+\item{use_survival_rates}{boolean to indicate if the model will use survival rates to limit the
+survival or emergence of overwintering generations.}
+
+\item{survival_rate_month}{What month do over wintering generations emerge. We suggest using the
+month before for this parameter as it is when the survival rates raster will be applied.}
+
+\item{survival_rate_day}{what day should the survival rates be applied}
+
+\item{survival_rates_file}{Raster file with survival rates from 0 to 1 representing the
+percentage of emergence for a cell.}
 
 \item{use_lethal_temperature}{a boolean to answer the question: does your
 pest or pathogen have a temperature at which it cannot survive?
@@ -251,8 +267,8 @@ stochasticity in establishment functions default is TRUE}
 \item{movement_stochasticity}{Boolean to indicate whether to use
 stochasticity in movement functions default is TRUE}
 
-\item{deterministic}{Boolean to indicate whether to use a deterministic
-dispersal kernel default is FALSE}
+\item{dispersal_stochasticity}{Boolean to indicate whether to use a stochasticity in the
+dispersal kernel default is TRUE}
 
 \item{establishment_probability}{Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
@@ -295,6 +311,11 @@ the natural kernel (if applicable)}
 
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
+
+\item{network_movement}{What movement type do you want to use in the network kernel either
+"walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
+along the edge. "jump" automatically moves to the nearest node when moving through the network.
+"teleport" moves from node to node most likely used for airport and seaport networks.}
 
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}

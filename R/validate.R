@@ -45,6 +45,9 @@ validate <- function(config) {
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
+        use_survival_rates = config$use_survival_rates,
+        survival_rate_month = config$survival_rate_month,
+        survival_rate_day = config$survival_rate_day,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -64,6 +67,7 @@ validate <- function(config) {
         movements_dates = config$movements_dates,
         weather = config$weather,
         temperature = config$temperature,
+        survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
         res = config$res,
         rows_cols = config$rows_cols,
@@ -101,7 +105,7 @@ validate <- function(config) {
         generate_stochasticity = config$generate_stochasticity,
         establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
-        deterministic = config$deterministic,
+        dispersal_stochasticity = config$dispersal_stochasticity,
         establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
@@ -111,7 +115,8 @@ validate <- function(config) {
         bbox = config$bounding_box,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
-        network_filename = config$network_filename
+        network_filename = config$network_filename,
+        network_movement = config$network_movement
       )
 
 
