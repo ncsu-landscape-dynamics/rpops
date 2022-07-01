@@ -18,7 +18,13 @@ this repository.
 
 - `calibrate` can now use the Mathews Correlation Coefficient as the summary statistic of 
   to keep or reject parameter sets (@ChrisJones687, #145).
- 
+  
+- `validate`, `calibrate`, `pops_multirun`,  and `pops` now take use_survival_rates, survival_rate_month, 
+  survival_rate_day, and survival_rates_file (@ChrisJones687, #147).
+  
+ - `validate`, `calibrate`, `pops_multirun`,  and `pops` now take network_movement as a parameter. This 
+    parameter controls how dispersal occurs along the network (@ChrisJones687, #147).
+    
 ### Changed
 - `validate`, `calibrate`, `pops_multirun`, `auto_manage` and `pops` no longer take
   network_min_distance and network_max_distance as these parameters are now passed
@@ -30,6 +36,10 @@ this repository.
   that are exported from the calibration (@ChrisJones687, #140).
   
 - `pops_multirun` removed the ability to write all simulations. (@ChrisJones687, #144).
+
+- the deterministic paramater has been renamed to dispersal_stochasticity. This 
+  was done to be more consistent with generate_stochasticity, movement_stochasticity, and 
+  establishment_stochasticity parameters (@ChrisJones687, #147).
 
 ### Fixed
 
