@@ -138,6 +138,10 @@ network_min_distance_large_error <-
 network_max_distance_large_error <-
   "network max distance is greater than the resoultion times the minimum NS or EW extent"
 network_movement_error <- "network movement is not of type 'walk', 'jump', or 'teleport'"
+natural_direction_error <-
+  "natural direction must be one of 'N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE'"
+anthropogenic_direction_error <-
+  "anthropogenic direction must be one of 'N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE'"
 
 "%notin%" <- Negate("%in%")
 
@@ -148,6 +152,64 @@ infection_years_length_error <- function(num_layers_infected_years, number_of_ti
     "and the number of outputs is", number_of_time_steps, sep = " ")
   return(error_message)
 }
+
+# Various lists for checking that variable values are correct (should also be handled in the excel
+# file).
+seasons <- seq(1, 12, 1)
+
+kernel_list <- c(
+  "cauchy",
+  "Cauchy",
+  "exponential",
+  "Exponential",
+  "uniform",
+  "Uniform",
+  "deterministic neighbor",
+  "deterministic-neighbor",
+  "power law",
+  "power-law",
+  "Power-law",
+  "Power-Law",
+  "Power Law",
+  "Power law",
+  "hyperbolic secant",
+  "hyperbolic-secant",
+  "Hyperbolic-secant",
+  "Hyperbolic-Secant",
+  "Hyperbolic secant",
+  "Hyperbolic Secant",
+  "gamma",
+  "Gamma",
+  # "exponential power",
+  # "exponential-power",
+  # "Exponential-power",
+  # "Exponential-Power",
+  # "Exponential power",
+  "weibull",
+  "Weibull",
+  "normal",
+  # "log normal",
+  # "log-normal",
+  # "Log-normal",
+  # "Log-Normal",
+  # "Log normal",
+  # "Log Normal",
+  "logistic",
+  "Logistic",
+  "network",
+  "Network"
+)
+
+directions <- c('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')
+
+network_movement_options <- c("walk", "jump", "teleport")
+
+sei_model_names <-       c('SEI', 'susceptible-exposed-infected', 'susceptible_exposed_infected',
+  'Susceptible-Exposed-Infected', 'Susceptible_Exposed_Infected')
+
+si_model_names <-   c('SI', 'susceptible-infected', 'susceptible_infected', 'Susceptible-Infected',
+  'Susceptible_Infected')
+
 
 # Uncertainty propagation for raster data sets, expects a spatRaster with 2
 # layers (mean and standard deviation)
