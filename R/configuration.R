@@ -1,4 +1,4 @@
-#' PoPS (configuration
+#' PoPS configuration
 #'
 #' Function with a single input and output list for parsing, transforming,
 #' and performing all checks for all functions to run the pops c++ model
@@ -29,10 +29,10 @@ configuration <- function(config_file) {
   config <- c()
   config$failure <- NULL ## maybe remove
   config$input_folder <- paste0(dirname(config_file), "/")
-  config$output_folder_path <- paste(config$input_folder, "outputs", sep = "/")
-  config$calibrate_folder_path <- paste(config$input_folder, "calibrate", sep = "/")
-  config$validate_folder_path <- paste(config$input_folder, "validate", sep = "/")
-  config$forecast_folder_path <- paste(config$input_folder, "forecast", sep = "/")
+  config$output_folder_path <- paste(config$input_folder, "outputs/", sep = "")
+  config$calibrate_folder_path <- paste(config$input_folder, "calibrate/", sep = "")
+  config$validate_folder_path <- paste(config$input_folder, "validate/", sep = "")
+  config$forecast_folder_path <- paste(config$input_folder, "forecast/", sep = "")
   if (!base::dir.exists(config$output_folder_path)) {
     stop(output_path_error)
   }
@@ -76,6 +76,16 @@ configuration <- function(config_file) {
     as.integer(config_data$value[config_data$variable_name == 'season_month_start'])
   config$season_month_end <-
     as.integer(config_data$value[config_data$variable_name == 'season_month_end'])
+
+  if (config$season_month_start %in% seasons && config$season_month_end %in% seasons) {
+    season_month_start_end <- c()
+    season_month_start_end$start_month <- as.integer(config$season_month_start)
+    season_month_start_end$end_month <- as.integer(config$season_month_end)
+    config$season_month_start_end <- season_month_start_end
+  } else {
+    stop(season_month_error)
+  }
+
   config$use_temperature <-
     as.logical(config_data$value[config_data$variable_name == 'use_temperature'])
   config$use_precipitation <-
@@ -87,15 +97,50 @@ configuration <- function(config_file) {
   config$lethal_temperature_month <-
     as.integer(config_data$value[config_data$variable_name == 'lethal_temperature_month'])
 
+  # Survival Rates
+  config$use_survival_rates <-
+    as.logical(config_data$value[config_data$variable_name == 'use_survival_rates'])
+  config$survival_rate_month <-
+    as.integer(config_data$value[config_data$variable_name == 'survival_rate_month'])
+  config$survival_rate_day <-
+    as.integer(config_data$value[config_data$variable_name == 'survival_rate_day'])
+
   # Dispersal information (doesn't change across stages)
   config$natural_kernel_type <-
     config_data$value[config_data$variable_name == 'natural_kernel_type']
   config$anthropogenic_kernel_type <-
     config_data$value[config_data$variable_name == 'anthropogenic_kernel_type']
+
+  if (config$natural_kernel_type %notin% kernel_list) {
+    stop(natural_kernel_error)
+  }
+  if (config$anthropogenic_kernel_type %notin% kernel_list) {
+    stop(anthropogenic_kernel_error)
+  }
+
   config$natural_dir <-
-    config_data$value[config_data$variable_name == 'natural_dir']
+    config_data$value[config_data$variable_name == 'natural_direction']
   config$anthropogenic_dir <-
-    config_data$value[config_data$variable_name == 'anthropogenic_dir']
+    config_data$value[config_data$variable_name == 'anthropogenic_direction']
+
+  if (config$natural_dir %notin% directions) {
+    stop(natural_direction_error)
+  }
+
+  if (config$anthropogenic_dir %notin% directions) {
+    stop(anthropogenic_direction_error)
+  }
+
+  config$network_file <-
+    paste0(config$input_folder, config_data$value[config_data$variable_name == 'network_file'])
+  config$network_movement <-
+    config_data$value[config_data$variable_name == 'network_movement']
+  # check that network movement is one of the correct options
+  if (config$network_movement %notin% network_movement_options) {
+    config$failure <- network_movement_error
+  }
+
+  # Overpopulation Movements
   config$use_overpopulation_movements <-
     as.logical(config_data$value[config_data$variable_name == 'use_overpopulation_movements'])
   config$overpopulation_percentage <-
@@ -111,13 +156,32 @@ configuration <- function(config_file) {
 
   # Model information (parameters change across stages)
   config$model_type <- config_data$value[config_data$variable_name == 'model_type']
+  if (config$model_type %in% sei_model_names) {
+    config$model_type <- "SEI"
+  } else if (config$model_type %in% si_model_names) {
+    config$model_type <- "SI"
+  } else {
+    stop(model_type_error)
+  }
+
+  # ensures latent period is correct for type of model selected
+  if (config$model_type == "SEI" && config$latency_period <= 0) {
+    stop(latency_period_error)
+  } else if (config$model_type == "SI" && config$latency_period > 0) {
+    config$latency_period <- 0
+  }
   config$mask <- config_data$value[config_data$variable_name == 'mask']
+
+  # determine if you should calculate additional statistics
   config$use_spreadrates <-
     as.logical(config_data$value[config_data$variable_name == 'use_spreadrates'])
   config$use_quarantine <-
     as.logical(config_data$value[config_data$variable_name == 'use_quarantine'])
   config$quarantine_areas_file <-
-    paste0(config$input_folder, config_data$value[config_data$variable_name == 'quarantine_areas_file'])
+    paste0(config$input_folder,
+           config_data$value[config_data$variable_name == 'quarantine_areas_file'])
+
+  # Variables for switching between stochastic and deterministic simulations.
   config$generate_stochasticity <-
     as.logical(config_data$value[config_data$variable_name == 'generate_stochasticity'])
   config$movement_stochasticity <-
@@ -136,114 +200,85 @@ configuration <- function(config_file) {
     config$random_seed <- as.integer(config_data$value[config_data$variable_name == 'random_seed'])
   }
 
+  # S3 bucket
+  config$use_s3 <- as.logical(config_data$value[config_data$variable_name == 'use_s3'])
+
   # Control Measures (change dates and files change across stages)
   config$use_management <-
     as.logical(config_data$value[config_data$variable_name == 'use_management'])
-  config$treatment_dates <- config_data$value[config_data$variable_name == 'treatment_dates']
+  # config$treatment_dates <- config_data$value[config_data$variable_name == 'treatment_dates']
   config$treatments_file <-
     paste0(config$input_folder, config_data$value[config_data$variable_name == 'treatments_file'])
   config$treatment_method <- config_data$value[config_data$variable_name == 'treatment_method']
-  config$pesticide_duration <-
-    as.integer(config_data$value[config_data$variable_name == 'pesticide_duration'])
-  config$pesticide_efficacy <-
-    as.numeric(config_data$value[config_data$variable_name == 'pesticide_efficacy'])
+  # config$pesticide_duration <-
+  #   as.integer(config_data$value[config_data$variable_name == 'pesticide_duration'])
+  # config$pesticide_efficacy <-
+  #   as.numeric(config_data$value[config_data$variable_name == 'pesticide_efficacy'])
+
+  # ensure correct treatment method
+  if (!config$treatment_method %in% c("ratio", "all infected")) {
+    stop(treatment_option_error)
+  }
 
   # reclass
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
-  # Run through checks for general model parameters
-  # ensures correct model type
-  if (config$model_type %in%
-      c(
-        "SEI",
-        "susceptible-exposed-infected",
-        "susceptible_exposed_infected",
-        "Susceptible-Exposed-Infected",
-        "Susceptible_Exposed_Infected"
-      )) {
-    config$model_type <- "SEI"
-  } else if (config$model_type %in%
-             c(
-               "SI",
-               "susceptible-infected",
-               "susceptible_infected",
-               "Susceptible-Infected",
-               "Susceptible_Infected"
-             )) {
-    config$model_type <- "SI"
+  # check that initial raster file exists
+  forecast_infected_file <- paste0(config$forecast_folder_path,
+                      config_data$value[config_data$variable_name == 'forecast_infection_data'])
+
+  if (config$use_s3) {
+    infected_check <- initial_raster_checks(forecast_infected_file, config$use_s3, config$bucket)
   } else {
-    stop(model_type_error)
+    infected_check <- initial_raster_checks(forecast_infected_file)
   }
-
-  seasons <- seq(1, 12, 1)
-  if (config$season_month_start %in% seasons && config$season_month_end %in% seasons) {
-    season_month_start_end <- c()
-    season_month_start_end$start_month <- as.integer(config$season_month_start)
-    season_month_start_end$end_month <- as.integer(config$season_month_end)
-    config$season_month_start_end <- season_month_start_end
+  if (infected_check$checks_passed) {
+    infected <- infected_check$raster
+    if (terra::nlyr(infected) > 1) {
+      infected <- output_from_raster_mean_and_sd(infected)
+    }
+    infected <- terra::classify(infected, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
   } else {
-    stop(season_month_error)
+    stop(infected_check$failed_check)
   }
 
-  # ensures latent period is correct for type of model selected
-  if (config$model_type == "SEI" && config$latency_period <= 0) {
-    stop(latency_period_error)
-  } else if (config$model_type == "SI" && config$latency_period > 0) {
-    config$latency_period <- 0
-  }
+  config$crs <- terra::crs(infected)
+  config$xmax <- terra::xmax(infected)
+  config$xmin <- terra::xmin(infected)
+  config$ymax <- terra::ymax(infected)
+  config$ymin <- terra::ymin(infected)
+  bounding_box <- c()
+  bounding_box$north <- config$ymax
+  bounding_box$south <- config$ymin
+  bounding_box$west <- config$xmin
+  bounding_box$east <- config$xmax
+  config$bounding_box <- bounding_box
 
-  kernel_list <- c(
-    "cauchy",
-    "Cauchy",
-    "exponential",
-    "Exponential",
-    "uniform",
-    "Uniform",
-    "deterministic neighbor",
-    "deterministic-neighbor",
-    "power law",
-    "power-law",
-    "Power-law",
-    "Power-Law",
-    "Power Law",
-    "Power law",
-    "hyperbolic secant",
-    "hyperbolic-secant",
-    "Hyperbolic-secant",
-    "Hyperbolic-Secant",
-    "Hyperbolic secant",
-    "Hyperbolic Secant",
-    "gamma",
-    "Gamma",
-    # "exponential power",
-    # "exponential-power",
-    # "Exponential-power",
-    # "Exponential-Power",
-    # "Exponential power",
-    "weibull",
-    "Weibull",
-    "normal",
-    # "log normal",
-    # "log-normal",
-    # "Log-normal",
-    # "Log-Normal",
-    # "Log normal",
-    # "Log Normal",
-    "logistic",
-    "Logistic",
-    "network",
-    "Network"
-  )
 
-  if (config$natural_kernel_type %notin% kernel_list) {
-    config$failure <- natural_kernel_error
-    return(config)
-  }
 
-  if (config$anthropogenic_kernel_type %notin% kernel_list) {
-    config$failure <- anthropogenic_kernel_error
-    return(config)
+  # set up mask matrix
+  if (!file.exists(config$mask)) {
+    if (config$use_s3) {
+      mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
+    } else {
+      mask_check <- secondary_raster_checks(config$mask, infected)
+    }
+    if (mask_check$checks_passed) {
+      mask <- mask_check$raster
+      mask <- terra::classify(mask, config$rclmat)
+      host_mask <- terra::classify(host, config$rclmat)
+      mask <- terra::mask(host_mask, mask, maskvalues = NA, updatevalue = NA)
+      config$mask <- mask
+      config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
+    } else {
+      config$failure <- mask_check$failed_check
+      return(config)
+    }
+  } else {
+    mask <- terra::classify(host, config$rclmat)
+    config$mask <- mask
+    config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
   }
 
   ## check output and timestep are correct.
@@ -263,7 +298,6 @@ configuration <- function(config_file) {
   } else {
     stop(time_check$failed_check)
   }
-
 
   # calibrate data
   config$start_calibration_date <-
@@ -294,8 +328,6 @@ configuration <- function(config_file) {
   config$parameter_cov_matrix <- as.matrix(read.csv(
     paste0(config$input_folder,config_data$value[config_data$variable_name == 'parameter_cov_matrix']),
     header = FALSE))
-
-
 
   # validate data
 
@@ -359,33 +391,6 @@ configuration <- function(config_file) {
     }
   }
 
-  # ensure correct treatment method
-  if (!config$treatment_method %in% c("ratio", "all infected")) {
-    stop(treatment_option_error)
-  }
-
-  # check that network movement is one of the correct options
-  network_movement_options <- c("walk", "jump", "teleport")
-  if (config$network_movement %notin% network_movement_options) {
-    config$failure <- network_movement_error
-  }
-
-  # check that initial raster file exists
-  if (config$function_name %in% c("casestudy_creation", "model_api")) {
-    infected_check <- initial_raster_checks(config$infected_file, config$use_s3, config$bucket)
-  } else {
-    infected_check <- initial_raster_checks(config$infected_file)
-  }
-  if (infected_check$checks_passed) {
-    infected <- infected_check$raster
-    if (terra::nlyr(infected) > 1) {
-      infected <- output_from_raster_mean_and_sd(infected)
-    }
-    infected <- terra::classify(infected, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
-  } else {
-    config$failure <- infected_check$failed_check
-    return(config)
-  }
 
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
@@ -420,29 +425,6 @@ configuration <- function(config_file) {
     return(config)
   }
 
-  if (!file.exists(config$mask)) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
-      mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
-    } else {
-      mask_check <- secondary_raster_checks(config$mask, infected)
-    }
-    if (mask_check$checks_passed) {
-      mask <- mask_check$raster
-      mask <- terra::classify(mask, config$rclmat)
-      host_mask <- terra::classify(host, config$rclmat)
-      mask <- terra::mask(host_mask, mask, maskvalues = NA, updatevalue = NA)
-      config$mask <- mask
-      config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
-    } else {
-      config$failure <- mask_check$failed_check
-      return(config)
-    }
-  } else {
-    mask <- terra::classify(host, config$rclmat)
-    config$mask <- mask
-    config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
-  }
-
   suitable <- host + infected
   suitable_points <- terra::as.points(suitable)
   names(suitable_points) <- "data"
@@ -458,11 +440,9 @@ configuration <- function(config_file) {
   spatial_indices2 <- unname(spatial_indices2)
   spatial_indices2 <- as.matrix(spatial_indices2)
   spatial_indices <- list()
-  # movements_date
   for (i in seq_len(terra::nrow(spatial_indices2))) {
     spatial_indices[[i]] <- spatial_indices2[i, 1:2]
   }
-
   spatial_indices <- unname(spatial_indices)
   config$spatial_indices <- spatial_indices
 
@@ -782,18 +762,6 @@ configuration <- function(config_file) {
   } else {
     config$output_folder_path <- paste(config$output_folder_path, "/", sep = "")
   }
-
-  config$crs <- terra::crs(config$host)
-  config$xmax <- terra::xmax(config$host)
-  config$xmin <- terra::xmin(config$host)
-  config$ymax <- terra::ymax(config$host)
-  config$ymin <- terra::ymin(config$host)
-  bounding_box <- c()
-  bounding_box$north <- config$ymax
-  bounding_box$south <- config$ymin
-  bounding_box$west <- config$xmin
-  bounding_box$east <- config$xmax
-  config$bounding_box <- bounding_box
 
   return(config)
 }
