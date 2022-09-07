@@ -396,7 +396,7 @@ calibrate <- function(infected_years_file,
     rmse_threshold <- 7 # starting threshold for RMSE (root mean squared error)
     distance_threshold <- 1000 # starting threshold for distance between simulated
     # and observed data in units
-    mcc_threshold <- 0.50 # starting threshold for Mathews Coorelation coefficient
+    mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
     acceptance_rate_particle_check <- seq(60, 200, 20)
 
     # loop through until all generations are complete
@@ -409,16 +409,25 @@ calibrate <- function(infected_years_file,
         # generation values
         if (config$current_bin == 1) {
           proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
-          proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
+          if (config$res$ew_res > 1000 || config$res$ns_res > 1000) {
+            proposed_natural_distance_scale <- round(runif(1, 0.5, 500), digits = 1) * 10
+            if (params_to_estimate[4]) {
+              proposed_anthropogenic_distance_scale <- round(runif(1, 30, 800), digits = 0) * 100
+            } else {
+              proposed_anthropogenic_distance_scale <- 0.1
+            }
+          } else {
+            proposed_natural_distance_scale <- round(runif(1, 0.5, 500), digits = 1)
+            if (params_to_estimate[4]) {
+              proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
+            } else {
+              proposed_anthropogenic_distance_scale <- 0.1
+            }
+          }
           if (params_to_estimate[3]) {
             proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
           } else {
             proposed_percent_natural_dispersal <- 1.0
-          }
-          if (params_to_estimate[4]) {
-            proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
-          } else {
-            proposed_anthropogenic_distance_scale <- 0.1
           }
           if (params_to_estimate[5]) {
             proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
