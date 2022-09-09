@@ -26,6 +26,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -38,7 +40,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">PoPS</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">2.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.1</span>
       </span>
     </div>
 
@@ -65,7 +67,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/ncsu-landscape-dynamics/rpops/">
+  <a href="https://github.com/ncsu-landscape-dynamics/rpops/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -82,41 +84,41 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="pops-pest-or-pathogen-spread-r-package-" class="section level1">
+<div class="section level1">
 
 <!-- badges: start -->
 
-<div id="overview" class="section level2">
-<h2 class="hasAnchor">
-<a href="#overview" class="anchor"></a>Overview</h2>
-<p>This is the R package for simulating spread of pests and pathogens. The package is an R package with multiple functions built around the PoPS (Pest or Pathogen Spread) model implemented in the C++ library maintained in the <a href="https://github.com/ncsu-landscape-dynamics/pops-core">PoPS Core Repository</a>.</p>
-<p>PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit <a href="https://popsmodel.org/">popsmodel.org</a>. The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use <a href="https://github.com/ncsu-landscape-dynamics/r.pops.spread">r.pops.spread</a> to run the model in GRASS GIS.</p>
+<div class="section level2">
+<h2 id="overview">Overview<a class="anchor" aria-label="anchor" href="#overview"></a>
+</h2>
+<p>This is the R package for simulating spread of pests and pathogens. The package is an R package with multiple functions built around the PoPS (Pest or Pathogen Spread) model implemented in the C++ library maintained in the <a href="https://github.com/ncsu-landscape-dynamics/pops-core" class="external-link">PoPS Core Repository</a>.</p>
+<p>PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit <a href="https://popsmodel.org/" class="external-link">popsmodel.org</a>. The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use <a href="https://github.com/ncsu-landscape-dynamics/r.pops.spread" class="external-link">r.pops.spread</a> to run the model in GRASS GIS.</p>
 </div>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
-<p>If you are on Windows, you need to first install <a href="https://cran.r-project.org/bin/windows/Rtools/">Rtools</a> to get a C++ compiler that R can use.</p>
-<div id="version-specific" class="section level3">
-<h3 class="hasAnchor">
-<a href="#version-specific" class="anchor"></a>Version Specific</h3>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>If you are on Windows, you need to first install <a href="https://cran.r-project.org/bin/windows/Rtools/" class="external-link">Rtools</a> to get a C++ compiler that R can use.</p>
+<div class="section level3">
+<h3 id="version-specific">Version Specific<a class="anchor" aria-label="anchor" href="#version-specific"></a>
+</h3>
 <p>If you want to install a specific version just change the version number.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"ncsu-landscape-dynamics/rpops"</span>, ref <span class="op">=</span> <span class="st">"v2.0.0"</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.github.com/ncsu-landscape-dynamics/rpops">PoPS</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ncsu-landscape-dynamics/rpops"</span>, ref <span class="op">=</span> <span class="st">"v2.0.0"</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.github.com/ncsu-landscape-dynamics/rpops" class="external-link">PoPS</a></span><span class="op">)</span></code></pre></div>
 </div>
-<div id="development-version" class="section level3">
-<h3 class="hasAnchor">
-<a href="#development-version" class="anchor"></a>Development Version</h3>
+<div class="section level3">
+<h3 id="development-version">Development Version<a class="anchor" aria-label="anchor" href="#development-version"></a>
+</h3>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span>
-<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html">install_github</a></span><span class="op">(</span><span class="st">"ncsu-landscape-dynamics/rpops"</span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="http://www.github.com/ncsu-landscape-dynamics/rpops">PoPS</a></span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"remotes"</span><span class="op">)</span>
+<span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"ncsu-landscape-dynamics/rpops"</span><span class="op">)</span>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://www.github.com/ncsu-landscape-dynamics/rpops" class="external-link">PoPS</a></span><span class="op">)</span></code></pre></div>
 </div>
 </div>
-<div id="features" class="section level2">
-<h2 class="hasAnchor">
-<a href="#features" class="anchor"></a>Features</h2>
+<div class="section level2">
+<h2 id="features">Features<a class="anchor" aria-label="anchor" href="#features"></a>
+</h2>
 <p>the PoPS package in R is built on top of PoPS Core C++ library includes:</p>
 <ul>
 <li>Susceptible-infected (<code>SI</code>) and susceptible-exposed-infected (<code>SEI</code>) model types (<code>model_type</code>, <code>latency_period</code>).</li>
@@ -136,9 +138,9 @@
 <li>Overpopulation function (individuals in areas of high population leave the area and disperse longer distances on average) (<code>use_overpopulation</code>, <code>overpopulation_percentage</code>, <code>leaving_percentage</code>, <code>leaving_scale_coefficient</code>).</li>
 <li>Flexible output frequency with n number of days, weeks, months, or years as options (<code>output_frequency</code>, <code>output_frequency_n</code>).</li>
 </ul>
-<div id="functions-in-rpops" class="section level3">
-<h3 class="hasAnchor">
-<a href="#functions-in-rpops" class="anchor"></a>Functions in rpops</h3>
+<div class="section level3">
+<h3 id="functions-in-rpops">Functions in rpops<a class="anchor" aria-label="anchor" href="#functions-in-rpops"></a>
+</h3>
 <ul>
 <li>
 <code>calibrate:</code> Calibration of the model parameters using either MCMC (markov chain monte carlo) or ABC (approximate bayesian computation).</li>
@@ -151,36 +153,36 @@
 </ul>
 </div>
 </div>
-<div id="how-to-cite" class="section level2">
-<h2 class="hasAnchor">
-<a href="#how-to-cite" class="anchor"></a>How to cite</h2>
+<div class="section level2">
+<h2 id="how-to-cite">How to cite<a class="anchor" aria-label="anchor" href="#how-to-cite"></a>
+</h2>
 <p>If you use this software or code, please cite the following papers:</p>
 <ul>
-<li>Jones, C., Jones, S., Petrasova, A., Petras, V., Gaydos, D., Skrip, M., Takeuchi, Y., Bigsby, K., and Meentemeyer, R., 2021. Iteratively forecasting biological invasions with PoPS and a little help from our friends. <em>Frontiers in Ecology and the Environment</em> <a href="https://doi.org/10.1002/fee.2357">DOI: 10.1002/fee.2357</a>
+<li>Jones, C., Jones, S., Petrasova, A., Petras, V., Gaydos, D., Skrip, M., Takeuchi, Y., Bigsby, K., and Meentemeyer, R., 2021. Iteratively forecasting biological invasions with PoPS and a little help from our friends. <em>Frontiers in Ecology and the Environment</em> <a href="https://doi.org/10.1002/fee.2357" class="external-link">DOI: 10.1002/fee.2357</a>
 </li>
 </ul>
 <p>In case you are using the automatic management feature in rpops or the steering version of r.pops.spread (from the branch steering), please cite also:</p>
 <ul>
-<li>Petrasova, A., Gaydos, D.A., Petras, V., Jones, C.M., Mitasova, H. and Meentemeyer, R.K., 2020. Geospatial simulation steering for adaptive management. <em>Environmental Modelling &amp; Software</em> 133: 104801. <a href="https://doi.org/10.1016/j.envsoft.2020.104801">DOI: 10.1016/j.envsoft.2020.104801</a>
+<li>Petrasova, A., Gaydos, D.A., Petras, V., Jones, C.M., Mitasova, H. and Meentemeyer, R.K., 2020. Geospatial simulation steering for adaptive management. <em>Environmental Modelling &amp; Software</em> 133: 104801. <a href="https://doi.org/10.1016/j.envsoft.2020.104801" class="external-link">DOI: 10.1016/j.envsoft.2020.104801</a>
 </li>
 </ul>
 <p>In addition to citing the above paper, we also encourage you to reference, link, and/or acknowledge specific version of the software you are using for example:</p>
 <ul>
 <li>
-<em>We have used rpops R package version 1.0.0 from <a href="https://github.com/ncsu-landscape-dynamics/rpops" class="uri">https://github.com/ncsu-landscape-dynamics/rpops</a></em>.</li>
+<em>We have used rpops R package version 1.0.0 from <a href="https://github.com/ncsu-landscape-dynamics/rpops" class="external-link uri">https://github.com/ncsu-landscape-dynamics/rpops</a></em>.</li>
 </ul>
 </div>
-<div id="contributing" class="section level2">
-<h2 class="hasAnchor">
-<a href="#contributing" class="anchor"></a>Contributing</h2>
-<p>Please see the <a href="https://github.com/ncsu-landscape-dynamics/pops-core#readme">pops-core</a> repository for contributing best practices and release policies. Other than that, just open pull requests against this repo. We suggest following the <a href="http://adv-r.had.co.nz/Style.html">Style Guide from Hadley</a> for R code.</p>
+<div class="section level2">
+<h2 id="contributing">Contributing<a class="anchor" aria-label="anchor" href="#contributing"></a>
+</h2>
+<p>Please see the <a href="https://github.com/ncsu-landscape-dynamics/pops-core#readme" class="external-link">pops-core</a> repository for contributing best practices and release policies. Other than that, just open pull requests against this repo. We suggest following the <a href="http://adv-r.had.co.nz/Style.html" class="external-link">Style Guide from Hadley</a> for R code.</p>
 </div>
-<div id="authors-and-contributors" class="section level2">
-<h2 class="hasAnchor">
-<a href="#authors-and-contributors" class="anchor"></a>Authors and contributors</h2>
-<div id="authors" class="section level3">
-<h3 class="hasAnchor">
-<a href="#authors" class="anchor"></a>Authors</h3>
+<div class="section level2">
+<h2 id="authors-and-contributors">Authors and contributors<a class="anchor" aria-label="anchor" href="#authors-and-contributors"></a>
+</h2>
+<div class="section level3">
+<h3 id="authors">Authors<a class="anchor" aria-label="anchor" href="#authors"></a>
+</h3>
 <p><em>(alphabetical order)</em></p>
 <ul>
 <li>Chris Jones</li>
@@ -189,9 +191,9 @@
 <li>Anna Petrasova</li>
 </ul>
 </div>
-<div id="contributors" class="section level3">
-<h3 class="hasAnchor">
-<a href="#contributors" class="anchor"></a>Contributors</h3>
+<div class="section level3">
+<h3 id="contributors">Contributors<a class="anchor" aria-label="anchor" href="#contributors"></a>
+</h3>
 <p><em>(alphabetical order)</em></p>
 <ul>
 <li>Zexi Chen</li>
@@ -202,9 +204,9 @@
 <p>See Git commit history, GitHub insights, or CHANGELOG.md file for details about contributions.</p>
 </div>
 </div>
-<div id="license" class="section level2">
-<h2 class="hasAnchor">
-<a href="#license" class="anchor"></a>License</h2>
+<div class="section level2">
+<h2 id="license">License<a class="anchor" aria-label="anchor" href="#license"></a>
+</h2>
 <p>Permission to use, copy, modify, and distribute this software and its documentation under the terms of the GNU General Public License version 2 or higher is hereby granted. No representations are made about the suitability of this software for any purpose. It is provided “as is” without express or implied warranty. See the GNU General Public License for more details.</p>
 </div>
 </div>
@@ -212,58 +214,69 @@
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Browse source code at <br><a href="https://github.com/ncsu-landscape-dynamics/rpops/">https://​github.com/​ncsu-landscape-dynamics/​rpops/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/ncsu-landscape-dynamics/rpops/issues">https://​github.com/​ncsu-landscape-dynamics/​rpops/​issues</a>
-</li>
+<li><a href="https://github.com/ncsu-landscape-dynamics/rpops/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/ncsu-landscape-dynamics/rpops/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
+
 <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li>
-<a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a> | file <a href="LICENSE-text.html">LICENSE</a>
+<a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a> | file <a href="LICENSE-text.html">LICENSE</a>
 </li>
 </ul>
 </div>
+
 <div class="community">
-<h2>Community</h2>
+<h2 data-toc-skip>Community</h2>
 <ul class="list-unstyled">
 <li><a href="CONTRIBUTING.html">Contributing guide</a></li>
 <li><a href="CODE_OF_CONDUCT.html">Code of conduct</a></li>
 </ul>
 </div>
-<div class="developers">
-<h2>Developers</h2>
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li>Chris Jones <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-0229-2970" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Vaclav Petras <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-5566-9236" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
-<li>Anna Petrasova <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-5120-5538" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li><a href="authors.html#citation">Citing PoPS</a></li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li><a href="https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check"><img src="https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3Alint"><img src="https://github.com/ncsu-landscape-dynamics/rpops/workflows/lint/badge.svg" alt="lint"></a></li>
-<li><a href="https://travis-ci.org/ncsu-landscape-dynamics/rpops"><img src="https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=master" alt="Build Status"></a></li>
-<li><a href="https://codecov.io/gh/ncsu-landscape-dynamics/rpops"><img src="https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/main/graph/badge.svg" alt="codecov"></a></li>
-<li><a href="https://zenodo.org/badge/latestdoi/143435350"><img src="https://zenodo.org/badge/143435350.svg" alt="DOI"></a></li>
+<li>Chris Jones <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-0229-2970" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Vaclav Petras <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0001-5566-9236" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Anna Petrasova <br><small class="roles"> Author </small> <a href="https://orcid.org/0000-0002-5120-5538" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
+
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check" class="external-link"><img src="https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3Alint" class="external-link"><img src="https://github.com/ncsu-landscape-dynamics/rpops/workflows/lint/badge.svg" alt="lint"></a></li>
+<li><a href="https://travis-ci.org/ncsu-landscape-dynamics/rpops" class="external-link"><img src="https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=master" alt="Build Status"></a></li>
+<li><a href="https://codecov.io/gh/ncsu-landscape-dynamics/rpops" class="external-link"><img src="https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/main/graph/badge.svg" alt="codecov"></a></li>
+<li><a href="https://zenodo.org/badge/latestdoi/143435350" class="external-link"><img src="https://zenodo.org/badge/143435350.svg" alt="DOI"></a></li>
+</ul>
 </div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Chris Jones, Vaclav Petras, Anna Petrasova.</p>
+  <p></p>
+<p>Developed by Chris Jones, Vaclav Petras, Anna Petrasova.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
 </div>
 
       </footer>
@@ -271,6 +284,8 @@
 
   
 
+
+  
 
   </body>
 </html>
