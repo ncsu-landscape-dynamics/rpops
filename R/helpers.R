@@ -198,6 +198,60 @@ distance_list <- c("distance", "mcc and distance", "rmse and distance")
 mcc_list <- c("mcc", "mcc and quantity", "mcc and distance", "mcc and configuration",
               "mcc, quantity, and configuration")
 
+set_success_metrics <- function(config) {
+  config$use_quantity <- FALSE
+  config$use_allocation <- FALSE
+  config$use_configuration <- FALSE
+  config$use_accuracy <- FALSE
+  config$use_precision <- FALSE
+  config$use_recall <- FALSE
+  config$use_specificity <- FALSE
+  config$use_rmse <- FALSE
+  config$use_distance <- FALSE
+  config$use_mcc <- FALSE
+
+  if (config$success_metric %in% quantity_list) {
+    config$use_quantity <- TRUE
+  }
+
+  if (config$success_metric %in% allocation_list) {
+    config$use_allocation <- TRUE
+  }
+
+  if (config$success_metric %in% configuration_list) {
+    config$use_configuration <- TRUE
+  }
+
+  if (config$success_metric %in% accurracy_list) {
+    config$use_accuracy <- TRUE
+  }
+
+  if (config$success_metric %in% precision_list) {
+    config$use_precision <- TRUE
+  }
+
+  if (config$success_metric %in% recall_list) {
+    config$use_recall <- TRUE
+  }
+
+  if (config$success_metric %in% specificity_list) {
+    config$use_specificity <- TRUE
+  }
+
+  if (config$success_metric %in% rmse_list) {
+    config$use_rmse <- TRUE
+  }
+
+  if (config$success_metric %in% distance_list) {
+    config$use_distance <- TRUE
+  }
+
+  if (config$success_metric %in% mcc_list) {
+    config$use_mcc <- TRUE
+  }
+
+}
+
 
 # Uncertainty propagation for raster data sets, expects a spatRaster with 2
 # layers (mean and standard deviation)
