@@ -141,6 +141,7 @@ infection_years_length_error <- function(num_layers_infected_years, number_of_ti
   return(error_message)
 }
 
+success_metric_error <- "success_metric is not one of the listed options."
 
 ## calibration success metric option
 success_metric_options <- c("quantity", "allocation", "configuration", "quantity and allocation",
@@ -197,6 +198,8 @@ distance_list <- c("distance", "mcc and distance", "rmse and distance")
 
 mcc_list <- c("mcc", "mcc and quantity", "mcc and distance", "mcc and configuration",
               "mcc, quantity, and configuration")
+
+"%notin%" <- Negate("%in%")
 
 set_success_metrics <- function(config) {
   config$use_quantity <- FALSE

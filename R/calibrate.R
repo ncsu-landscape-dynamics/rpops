@@ -280,6 +280,10 @@ calibrate <- function(infected_years_file,
     stop(config$failure)
   }
 
+  if (config$success_metric %notin% success_metric_options) {
+    stop(success_metric_error)
+  }
+
   config <- set_success_metrics(config)
 
   # set the parameter function to only need the parameters that change so that
