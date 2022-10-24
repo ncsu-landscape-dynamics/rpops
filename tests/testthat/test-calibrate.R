@@ -104,10 +104,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "summary_outputs"
             output_folder_path <- tempdir()
-            use_distance <- FALSE
-            use_rmse <- FALSE
+            success_metric = "mcc"
             network_filename <- ""
-            use_mcc <- TRUE
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
@@ -188,9 +186,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               output_folder_path,
                               network_filename,
                               network_movement,
-                              use_distance,
-                              use_rmse,
-                              use_mcc)
+                              success_metric)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -293,9 +289,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
-            use_distance <- FALSE
-            use_rmse <- FALSE
-            use_mcc <- TRUE
+            success_metric <- "mcc and quantity"
             network_filename <-
               system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
             use_survival_rates <- FALSE
@@ -378,9 +372,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               output_folder_path,
                               network_filename,
                               network_movement,
-                              use_distance,
-                              use_rmse,
-                              use_mcc)
+                              success_metric)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -487,10 +479,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
-            use_distance <- FALSE
-            use_rmse <- FALSE
+            success_metric <- "quantity"
             network_filename <- ""
-            use_mcc <- TRUE
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
@@ -571,9 +561,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               output_folder_path,
                               network_filename,
                               network_movement,
-                              use_distance,
-                              use_rmse,
-                              use_mcc)
+                              success_metric)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -683,15 +671,13 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
-            use_distance <- FALSE
-            use_rmse <- FALSE
             network_filename <- ""
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
             survival_rates_file <- ""
             network_movement <- "walk"
-            use_mcc <- TRUE
+            success_metric <- "rmse"
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -767,9 +753,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               output_folder_path,
                               network_filename,
                               network_movement,
-                              use_distance,
-                              use_rmse,
-                              use_mcc)
+                              success_metric)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -782,7 +766,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
             expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
+            expect_gte(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
             expect_equal(nrow(data$posterior_cov_matrix), 8)

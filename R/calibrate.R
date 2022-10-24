@@ -898,7 +898,10 @@ calibrate <- function(infected_years_file,
       )
 
     params <-
-      data.frame(accuracy = rep(0, config$number_of_iterations),
+      data.frame(quantity = rep(0, config$number_of_iterations),
+                 allocation = rep(0, config$number_of_iterations),
+                 configuration = rep(0, config$number_of_iterations),
+                 accuracy = rep(0, config$number_of_iterations),
                  precision = rep(0, config$number_of_iterations),
                  recall = rep(0, config$number_of_iterations),
                  specificity = rep(0, config$number_of_iterations),
