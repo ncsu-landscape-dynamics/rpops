@@ -250,6 +250,7 @@ set_success_metrics <- function(config) {
     config$use_mcc <- TRUE
   }
 
+  return(config)
 }
 
 

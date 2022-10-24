@@ -79,9 +79,7 @@ calibrate(
   output_folder_path = "",
   network_filename = "",
   network_movement = "walk",
-  use_distance = FALSE,
-  use_rmse = FALSE,
-  use_mcc = FALSE
+  success_metric = "mcc"
 )
 }
 \arguments{
@@ -385,14 +383,17 @@ anthropogenic_kernel_type = 'network'.}
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
 "teleport" moves from node to node most likely used for airport and seaport networks.}
 
-\item{use_distance}{Boolean if you want to compare distance between
-simulations and observations. Default is FALSE.}
-
-\item{use_rmse}{Boolean if you want to calibrate based on rmse. This is
-useful if you have very good population level observations. Default is FALSE.}
-
-\item{use_mcc}{Boolean if you want the calibration to be based on the Mathews Correlation
-coefficient. This}
+\item{success_metric}{Choose the success metric that is most relevant to your system or data for
+comparing simulations vs. observations. Must be one of "quantity", "allocation", "configuration",
+"quantity and allocation","quantity and configuration", "allocation and configuration",
+"quantity, allocation, and configuration", "accuracy", "precision", "recall", "specificity",
+"accuracy and precision", "accuracy and specificity", "accuracy and recall",
+"precision and recall", "precision and specificity", "recall and specificity",
+"accuracy, precision, and recall", "accuracy, precision, and specificity",
+"accuracy, recall, and specificity", "precision, recall, and specificity",
+"accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
+"mcc and distance", "rmse and distance", "mcc and configuration",
+"mcc, quantity, and configuration"). Default is "mcc"}
 }
 \value{
 a dataframe of the variables saved and their success metrics for
