@@ -158,9 +158,7 @@ the total number of iterations specified.</p>
   output_folder_path <span class="op">=</span> <span class="st">""</span>,
   network_filename <span class="op">=</span> <span class="st">""</span>,
   network_movement <span class="op">=</span> <span class="st">"walk"</span>,
-  use_distance <span class="op">=</span> <span class="cn">FALSE</span>,
-  use_rmse <span class="op">=</span> <span class="cn">FALSE</span>,
-  use_mcc <span class="op">=</span> <span class="cn">FALSE</span>
+  success_metric <span class="op">=</span> <span class="st">"mcc"</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -466,15 +464,18 @@ anthropogenic_kernel_type = 'network'.</p></dd>
 "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
 "teleport" moves from node to node most likely used for airport and seaport networks.</p></dd>
-<dt>use_distance</dt>
-<dd><p>Boolean if you want to compare distance between
-simulations and observations. Default is FALSE.</p></dd>
-<dt>use_rmse</dt>
-<dd><p>Boolean if you want to calibrate based on rmse. This is
-useful if you have very good population level observations. Default is FALSE.</p></dd>
-<dt>use_mcc</dt>
-<dd><p>Boolean if you want the calibration to be based on the Mathews Correlation
-coefficient. This</p></dd>
+<dt>success_metric</dt>
+<dd><p>Choose the success metric that is most relevant to your system or data for
+comparing simulations vs. observations. Must be one of "quantity", "allocation", "configuration",
+"quantity and allocation","quantity and configuration", "allocation and configuration",
+"quantity, allocation, and configuration", "accuracy", "precision", "recall", "specificity",
+"accuracy and precision", "accuracy and specificity", "accuracy and recall",
+"precision and recall", "precision and specificity", "recall and specificity",
+"accuracy, precision, and recall", "accuracy, precision, and specificity",
+"accuracy, recall, and specificity", "precision, recall, and specificity",
+"accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
+"mcc and distance", "rmse and distance", "mcc and configuration",
+"mcc, quantity, and configuration"). Default is "mcc"</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
