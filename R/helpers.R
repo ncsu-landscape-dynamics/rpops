@@ -141,6 +141,122 @@ infection_years_length_error <- function(num_layers_infected_years, number_of_ti
   return(error_message)
 }
 
+success_metric_error <- "success_metric is not one of the listed options."
+
+## calibration success metric option
+success_metric_options <- c("quantity", "allocation", "configuration", "quantity and allocation",
+                            "quantity and configuration", "allocation and configuration",
+                            "quantity, allocation, and configuration", "accuracy", "precision",
+                            "recall", "specificity", "accuracy and precision",
+                            "accuracy and specificity", "accuracy and recall",
+                            "precision and recall", "precision and specificity",
+                            "recall and specificity", "accuracy, precision, and recall",
+                            "accuracy, precision, and specificity",
+                            "accuracy, recall, and specificity",
+                            "precision, recall, and specificity",
+                            "accuracy, precision, recall, and specificity",
+                            "rmse", "distance", "mcc", "mcc and quantity", "mcc and distance",
+                            "rmse and distance", "mcc and configuration",
+                            "mcc, quantity, and configuration")
+
+quantity_list <- c("quantity", "quantity and allocation", "quantity and configuration",
+                   "quantity, allocation, and configuration", "mcc and quantity",
+                   "mcc, quantity, and configuration")
+
+allocation_list <- c("allocation", "quantity and allocation", "allocation and configuration",
+                     "quantity, allocation, and configuration")
+
+configuration_list <- c("configuration",  "quantity and configuration",
+                        "allocation and configuration", "quantity, allocation, and configuration",
+                        "mcc and configuration", "mcc, quantity, and configuration")
+
+accurracy_list <- c("accuracy", "accuracy and precision", "accuracy and specificity",
+                    "accuracy and recall", "accuracy, precision, and recall",
+                    "accuracy, precision, and specificity",
+                    "accuracy, recall, and specificity",
+                    "accuracy, precision, recall, and specificity")
+
+precision_list <- c("precision", "accuracy and precision", "precision and recall",
+                    "precision and specificity", "accuracy, precision, and recall",
+                    "accuracy, precision, and specificity",
+                    "precision, recall, and specificity",
+                    "accuracy, precision, recall, and specificity")
+
+recall_list <- c("recall", "accuracy and recall", "precision and recall", "recall and specificity",
+                 "accuracy, precision, and recall", "accuracy, recall, and specificity",
+                 "precision, recall, and specificity",
+                 "accuracy, precision, recall, and specificity")
+
+specificity_list <- c("specificity", "accuracy and specificity", "precision and specificity",
+                      "recall and specificity", "accuracy, precision, and specificity",
+                      "accuracy, recall, and specificity",  "precision, recall, and specificity",
+                      "accuracy, precision, recall, and specificity")
+
+rmse_list <- c("rmse", "rmse and distance")
+
+distance_list <- c("distance", "mcc and distance", "rmse and distance")
+
+mcc_list <- c("mcc", "mcc and quantity", "mcc and distance", "mcc and configuration",
+              "mcc, quantity, and configuration")
+
+"%notin%" <- Negate("%in%")
+
+set_success_metrics <- function(config) {
+  config$use_quantity <- FALSE
+  config$use_allocation <- FALSE
+  config$use_configuration <- FALSE
+  config$use_accuracy <- FALSE
+  config$use_precision <- FALSE
+  config$use_recall <- FALSE
+  config$use_specificity <- FALSE
+  config$use_rmse <- FALSE
+  config$use_distance <- FALSE
+  config$use_mcc <- FALSE
+
+  if (config$success_metric %in% quantity_list) {
+    config$use_quantity <- TRUE
+  }
+
+  if (config$success_metric %in% allocation_list) {
+    config$use_allocation <- TRUE
+  }
+
+  if (config$success_metric %in% configuration_list) {
+    config$use_configuration <- TRUE
+  }
+
+  if (config$success_metric %in% accurracy_list) {
+    config$use_accuracy <- TRUE
+  }
+
+  if (config$success_metric %in% precision_list) {
+    config$use_precision <- TRUE
+  }
+
+  if (config$success_metric %in% recall_list) {
+    config$use_recall <- TRUE
+  }
+
+  if (config$success_metric %in% specificity_list) {
+    config$use_specificity <- TRUE
+  }
+
+  if (config$success_metric %in% rmse_list) {
+    config$use_rmse <- TRUE
+  }
+
+  if (config$success_metric %in% distance_list) {
+    config$use_distance <- TRUE
+  }
+
+  if (config$success_metric %in% mcc_list) {
+    config$use_mcc <- TRUE
+  }
+
+  return(config)
+}
+
+
 # Uncertainty propagation for raster data sets, expects a spatRaster with 2
 # layers (mean and standard deviation)
 output_from_raster_mean_and_sd <- function(x) {
