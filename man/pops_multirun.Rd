@@ -70,7 +70,9 @@ pops_multirun(
   write_outputs = "None",
   output_folder_path = "",
   network_filename = "",
-  network_movement = "walk"
+  network_movement = "walk",
+  use_initial_condition_uncertainty = FALSE,
+  use_host_uncertainty = FALSE
 )
 }
 \arguments{
@@ -316,6 +318,16 @@ anthropogenic_kernel_type = 'network'.}
 "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
 "teleport" moves from node to node most likely used for airport and seaport networks.}
+
+\item{use_initial_condition_uncertainty}{boolean to indicate whether or not to propagate and
+partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+one with the mean value and one with the standard deviation. If an SEI model is used the
+exposed_file needs to have 2 layers one with the mean value and one with the standard
+deviation}
+
+\item{use_host_uncertainty}{boolean to indicate whether or not to propagate and partition
+uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
+and one with the standard deviation.}
 }
 \value{
 list of infected and susceptible per year

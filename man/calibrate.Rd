@@ -79,7 +79,9 @@ calibrate(
   output_folder_path = "",
   network_filename = "",
   network_movement = "walk",
-  success_metric = "mcc"
+  success_metric = "mcc",
+  use_initial_condition_uncertainty = FALSE,
+  use_host_uncertainty = FALSE
 )
 }
 \arguments{
@@ -394,6 +396,16 @@ comparing simulations vs. observations. Must be one of "quantity", "allocation",
 "accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
 "mcc and distance", "rmse and distance", "mcc and configuration",
 "mcc, quantity, and configuration"). Default is "mcc"}
+
+\item{use_initial_condition_uncertainty}{boolean to indicate whether or not to propagate and
+partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+one with the mean value and one with the standard deviation. If an SEI model is used the
+exposed_file needs to have 2 layers one with the mean value and one with the standard
+deviation}
+
+\item{use_host_uncertainty}{boolean to indicate whether or not to propagate and partition
+uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
+and one with the standard deviation.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for
