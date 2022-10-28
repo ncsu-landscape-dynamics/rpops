@@ -35,11 +35,25 @@ this repository.
   during calibration and they are now part of the parameter_means and parameter_cov_matrix
   that are exported from the calibration (@ChrisJones687, #140).
   
+  - `calibrate` has more flexible success metric options removes use_distance, use_rmse, and use_mcc
+  parameters and replaces it with the more flexible success_metrics parameter. Users can now
+  select multiple combinations of different success metrics for the calibration 
+  (@ChrisJones687, #150).
+  
 - `pops_multirun` removed the ability to write all simulations. (@ChrisJones687, #144).
 
-- the deterministic paramater has been renamed to dispersal_stochasticity. This 
+- the deterministic parameter has been renamed to dispersal_stochasticity. This 
   was done to be more consistent with generate_stochasticity, movement_stochasticity, and 
   establishment_stochasticity parameters (@ChrisJones687, #147).
+  
+  - `validate`, `calibrate`, `pops_multirun`, and `pops` now propogate uncertainty from host and 
+  initial conditions. This adds the parameters use_initial_condition_uncertainty and
+  use_host_uncertainty. If use_initial_condition_uncertainty is TRUE the infected_file and/or
+  exposed_file need to have 2 layers a mean and standard deviation. If use_host_uncertainty is
+  is TRUE the host_file needs to have 2 layers a mean and standard deviation. For each model run
+  a host and/or initial conditions are drawn from the mean and sd layers so that each run has a
+  unique host and/or initial conditions this will allow for both propogation of uncertainty from 
+  these sources but also partitioning (@ChrisJones687, #151).
 
 ### Fixed
 
