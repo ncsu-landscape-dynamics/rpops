@@ -623,9 +623,9 @@ test_that("Multirun model outputs work with mask", {
   use_initial_condition_uncertainty <- TRUE
   use_host_uncertainty <- TRUE
   infected_file <-
-    system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
   host_file <-
-    system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+    system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
 
   data <- pops_multirun(infected_file,
                         host_file,

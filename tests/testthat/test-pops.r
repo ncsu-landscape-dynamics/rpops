@@ -2715,9 +2715,9 @@ test_that(
 test_that(
   "uncertainty propogation works as expected", {
     infected_file <-
-      system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+      system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
     host_file <-
-      system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+      system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
     start_date <- "2008-01-01"
@@ -2749,7 +2749,7 @@ test_that(
 
     infected_file <-
     infected_file <-
-      system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+      system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
     host_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -2783,7 +2783,7 @@ test_that(
     infected_file <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
     host_file <-
-      system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+      system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
     start_date <- "2008-01-01"

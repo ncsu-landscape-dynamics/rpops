@@ -568,9 +568,9 @@ test_that(
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
     checks <- c(500, 60000, 900, 1000)
     infected_file <-
-      system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+      system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
     host_file <-
-      system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+      system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
     temp <- FALSE
