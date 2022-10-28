@@ -2710,3 +2710,105 @@ test_that(
     expect_gte(data$infected[[1]][[3]], test_mat[[3]])
     expect_gte(data$infected[[1]][[4]], test_mat[[4]])
   })
+
+
+test_that(
+  "uncertainty propogation works as expected", {
+    infected_file <-
+      system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+    host_file <-
+      system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+    total_populations_file <-
+      system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+    start_date <- "2008-01-01"
+    end_date <- "2008-03-31"
+    parameter_means <- c(2, 21, 1, 500, 0, 0, 100, 1000)
+    parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    anthropogenic_kernel_type <- "cauchy"
+    use_initial_condition_uncertainty <- TRUE
+    use_host_uncertainty <- TRUE
+
+    data <-
+      pops(infected_file = infected_file,
+           host_file = host_file,
+           total_populations_file = total_populations_file,
+           parameter_means = parameter_means,
+           parameter_cov_matrix = parameter_cov_matrix,
+           start_date = start_date,
+           end_date = end_date,
+           anthropogenic_kernel_type = anthropogenic_kernel_type,
+           use_initial_condition_uncertainty = use_initial_condition_uncertainty,
+           use_host_uncertainty = use_host_uncertainty)
+
+    test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+    expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+    expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+    expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+    expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+
+
+    infected_file <-
+    infected_file <-
+      system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+    host_file <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+    total_populations_file <-
+      system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+    start_date <- "2008-01-01"
+    end_date <- "2008-03-31"
+    parameter_means <- c(2, 21, 1, 500, 0, 0, 100, 1000)
+    parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    anthropogenic_kernel_type <- "cauchy"
+    use_initial_condition_uncertainty <- TRUE
+    use_host_uncertainty <- FALSE
+
+    data <-
+      pops(infected_file = infected_file,
+           host_file = host_file,
+           total_populations_file = total_populations_file,
+           parameter_means = parameter_means,
+           parameter_cov_matrix = parameter_cov_matrix,
+           start_date = start_date,
+           end_date = end_date,
+           anthropogenic_kernel_type = anthropogenic_kernel_type,
+           use_initial_condition_uncertainty = use_initial_condition_uncertainty,
+           use_host_uncertainty = use_host_uncertainty)
+
+    test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+    expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+    expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+    expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+    expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+
+
+    infected_file <-
+      system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
+    host_file <-
+      system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+    total_populations_file <-
+      system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+    start_date <- "2008-01-01"
+    end_date <- "2008-03-31"
+    parameter_means <- c(2, 21, 1, 500, 0, 0, 100, 1000)
+    parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    anthropogenic_kernel_type <- "cauchy"
+    use_initial_condition_uncertainty <- FALSE
+    use_host_uncertainty <- TRUE
+
+    data <-
+      pops(infected_file = infected_file,
+           host_file = host_file,
+           total_populations_file = total_populations_file,
+           parameter_means = parameter_means,
+           parameter_cov_matrix = parameter_cov_matrix,
+           start_date = start_date,
+           end_date = end_date,
+           anthropogenic_kernel_type = anthropogenic_kernel_type,
+           use_initial_condition_uncertainty = use_initial_condition_uncertainty,
+           use_host_uncertainty = use_host_uncertainty)
+
+    test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+    expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+    expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+    expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+    expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  })

@@ -815,10 +815,10 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <- "C:/Users/Chris/Desktop/Projects/rpops/inst/extdata/simple20x20/infected_wsd.tif"
-            # system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
-            host_file <- "C:/Users/Chris/Desktop/Projects/rpops/inst/extdata/simple20x20/host_w_sd2.tif"
-            # system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+            infected_file <-
+              system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+            host_file <-
+              system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
@@ -1000,8 +1000,7 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
 test_that("MCMC calibration has correctly formatted returns with multiple output
           comparisons", {
             infected_years_file <-
-              system.file("extdata", "simple20x20", "infected_years.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
             number_of_observations <- 68
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
@@ -1010,14 +1009,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
-              system.file("extdata", "simple20x20", "initial_infection.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
             host_file <-
-              system.file("extdata", "simple20x20", "host.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
-              system.file("extdata", "simple20x20", "all_plants.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
             temperature_coefficient_file <- ""
             precip <- FALSE
@@ -1191,8 +1187,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             skip_on_ci()
             skip_on_covr()
             infected_years_file <-
-              system.file("extdata", "simple20x20", "infected_years.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
             number_of_observations <- 68
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
@@ -1201,14 +1196,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
-              system.file("extdata", "simple20x20", "initial_infection.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
             host_file <-
-              system.file("extdata", "simple20x20", "host.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
-              system.file("extdata", "simple20x20", "all_plants.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
             temperature_coefficient_file <- ""
             precip <- FALSE
@@ -1241,8 +1233,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             anthropogenic_kappa <- 0
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
-            mask <- system.file("extdata", "simple20x20", "mask.tif",
-                                package = "PoPS")
+            mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -1383,8 +1374,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             skip_on_ci()
             skip_on_covr()
             infected_years_file <-
-              system.file("extdata", "simple20x20", "infected_years.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
             number_of_observations <- 68
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
@@ -1393,14 +1383,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
-              system.file("extdata", "simple20x20", "initial_infection.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
             host_file <-
-              system.file("extdata", "simple20x20", "host.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
-              system.file("extdata", "simple20x20", "all_plants.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
             temperature_coefficient_file <- ""
             precip <- FALSE
@@ -1433,8 +1420,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             anthropogenic_kappa <- 0
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
-            mask <- system.file("extdata", "simple20x20", "mask.tif",
-                                package = "PoPS")
+            mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -1776,10 +1762,10 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             params_to_estimate <- c(T, T, T, T, F, F)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <- "C:/Users/Chris/Desktop/Projects/rpops/inst/extdata/simple20x20/infected_wsd.tif"
-            # system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
-            host_file <- "C:/Users/Chris/Desktop/Projects/rpops/inst/extdata/simple20x20/host_w_sd2.tif"
-            # system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+            infected_file <-
+            system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+            host_file <-
+            system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
@@ -1814,8 +1800,7 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             anthropogenic_kappa <- 0
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
-            mask <- system.file("extdata", "simple20x20", "mask.tif",
-                                package = "PoPS")
+            mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""

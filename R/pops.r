@@ -177,6 +177,14 @@
 #' "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 #' along the edge. "jump" automatically moves to the nearest node when moving through the network.
 #' "teleport" moves from node to node most likely used for airport and seaport networks.
+#' @param use_initial_condition_uncertainty boolean to indicate whether or not to propagate and
+#' partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+#' one with the mean value and one with the standard deviation. If an SEI model is used the
+#' exposed_file needs to have 2 layers one with the mean value and one with the standard
+#' deviation
+#' @param use_host_uncertainty boolean to indicate whether or not to propagate and partition
+#' uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
+#' and one with the standard deviation.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -252,7 +260,9 @@ pops <- function(infected_file,
                  exposed_file = "",
                  mask = NULL,
                  network_filename = "",
-                 network_movement = "walk") {
+                 network_movement = "walk",
+                 use_initial_condition_uncertainty = FALSE,
+                 use_host_uncertainty = FALSE) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -328,11 +338,48 @@ pops <- function(infected_file,
 
   config$network_filename <- network_filename
   config$network_movement <- network_movement
+  config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
+  config$use_host_uncertainty <- use_host_uncertainty
 
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
     stop(config$failure)
+  }
+
+  config <- draw_parameters(config) # draws parameter set for the run
+
+  if (config$use_initial_condition_uncertainty) {
+    config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+    exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+    exposed <- config$exposed
+    exposed[[config$latency_period + 1]] <- exposed2
+    config$exposed <- exposed
+  } else {
+    config$infected <- config$infected_mean
+    exposed2 <- config$exposed_mean
+    exposed <- config$exposed
+    exposed[[config$latency_period + 1]] <- exposed2
+    config$exposed <- exposed
+  }
+
+  if (config$use_host_uncertainty) {
+    config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+  } else {
+    config$host <- config$host_mean
+  }
+
+  susceptible <- config$host - config$infected - exposed2
+  susceptible[susceptible < 0] <- 0
+
+  config$susceptible <- susceptible
+  config$total_hosts <- config$host
+  config$total_exposed <- exposed2
+
+  if (config$mortality_on) {
+    mortality_tracker2 <- config$mortality_tracker
+    mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
+    config$mortality_tracker <- mortality_tracker2
   }
 
   data <- pops_model(random_seed = config$random_seed,

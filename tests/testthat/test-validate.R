@@ -567,10 +567,10 @@ test_that(
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
     checks <- c(500, 60000, 900, 1000)
-    infected_file <- "C:/Users/Chris/Desktop/Projects/rpops/inst/extdata/simple20x20/infected_wsd.tif"
-      # system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
-    host_file <- "C:/Users/Chris/Desktop/Projects/rpops/inst/extdata/simple20x20/host_w_sd2.tif"
-      # system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
+    infected_file <-
+      system.file("extdata", "simple2x2", "infected_wsd.tif", package = "PoPS")
+    host_file <-
+      system.file("extdata", "simple2x2", "host_w_sd2.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
     temp <- FALSE
