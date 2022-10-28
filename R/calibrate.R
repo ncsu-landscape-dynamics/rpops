@@ -541,32 +541,32 @@ calibrate <- function(infected_years_file,
         mcc <- all_disagreement$mcc
 
         # Check that statistics are improvements
-        model_improved <- FALSE
-        if (config$use_quantity) {
-          if (quantity >= quantity_threshold) {
+        model_improved <- TRUE
+        if (config$use_quantity && model_improved) {
+          if (quantity <= quantity_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
           }
         }
 
-        if (config$use_allocation) {
-          if (allocation >= allocation_threshold) {
+        if (config$use_allocation && model_improved) {
+          if (allocation <= allocation_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
           }
         }
 
-        if (config$use_configuration) {
-          if (configuration_dis >= configuration_threshold) {
+        if (config$use_configuration && model_improved) {
+          if (configuration_dis <= configuration_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
           }
         }
 
-        if (config$use_accuracy) {
+        if (config$use_accuracy && model_improved) {
           if (accuracy >= accuracy_threshold) {
             model_improved <- TRUE
           } else {
@@ -574,7 +574,7 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (config$use_precision) {
+        if (config$use_precision && model_improved) {
           if (precision >= precision_threshold) {
             model_improved <- TRUE
           } else {
@@ -582,7 +582,7 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (config$use_recall) {
+        if (config$use_recall && model_improved) {
           if (recall >= recall_threshold) {
             model_improved <- TRUE
           } else {
@@ -590,7 +590,7 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (config$use_specificity) {
+        if (config$use_specificity && model_improved) {
           if (specificity >= specificity_threshold) {
             model_improved <- TRUE
           } else {
@@ -598,7 +598,7 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (config$use_mcc) {
+        if (config$use_mcc && model_improved) {
           if (mcc >= mcc_threshold) {
             model_improved <- TRUE
           } else {
@@ -606,7 +606,7 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (config$use_distance) {
+        if (config$use_distance && model_improved) {
           if (distance_difference <= distance_threshold) {
             model_improved <- TRUE
           } else {
@@ -614,7 +614,7 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (config$use_rmse) {
+        if (config$use_rmse && model_improved) {
           if (rmse <= rmse_threshold) {
             model_improved <- TRUE
           } else {
@@ -1101,17 +1101,18 @@ calibrate <- function(infected_years_file,
       # higher values are better so the proposed parameter is in the numerator,
       # for rmse and distance lower values are improvements and the proposed
       # value is in the denominator.
-      quantity_test <- min(1, proposed$quantity_disagreement / current$quantity_disagreement)
-      allocation_test <- min(1, proposed$allocation_disagreement / current$allocation_disagreement)
+      quantity_test <- min(1, current$quantity_disagreement / proposed$quantity_disagreement)
+      allocation_test <- min(1, current$allocation_disagreement / proposed$allocation_disagreement)
       configuration_test <-
-        min(1, proposed$configuration_disagreement / current$configuration_disagreement)
+        min(1, current$configuration_disagreement / proposed$configuration_disagreement)
+      rmse_test <- min(1, current$rmse / proposed$rmse)
+      distance_test <- min(1, current$distance / proposed$distance)
+
       accurracy_test <- min(1, proposed$accuracy / current$accuracy)
       precision_test <- min(1, proposed$precision / current$precision)
       recall_test <- min(1, proposed$recall / current$recall)
       specificity_test <- min(1, proposed$specificity / current$specificity)
-      rmse_test <- min(1, current$rmse / proposed$rmse)
-      distance_test <- min(1, current$distance / proposed$distance)
-      mcc_test <- min(1, current$mcc / proposed$mcc)
+      mcc_test <- min(1, proposed$mcc / current$mcc)
 
       quantity_pass <- runif(1) <= quantity_test
       allocation_pass <- runif(1) <= allocation_test
@@ -1124,8 +1125,8 @@ calibrate <- function(infected_years_file,
       distance_pass <- runif(1) <= distance_test
       mcc_pass <- runif(1) <= mcc_test
 
-      proposed_accepted <- FALSE
-      if (config$use_quantity) {
+      proposed_accepted <- TRUE
+      if (config$use_quantity && proposed_accepted) {
         if (quantity_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1133,7 +1134,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_allocation) {
+      if (config$use_allocation && proposed_accepted) {
         if (allocation_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1141,7 +1142,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_configuration) {
+      if (config$use_configuration && proposed_accepted) {
         if (configuration_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1149,7 +1150,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_accuracy) {
+      if (config$use_accuracy && proposed_accepted) {
         if (accurracy_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1157,7 +1158,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_precision) {
+      if (config$use_precision && proposed_accepted) {
         if (precision_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1165,7 +1166,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_recall) {
+      if (config$use_recall && proposed_accepted) {
         if (recall_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1173,7 +1174,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_specificity) {
+      if (config$use_specificity && proposed_accepted) {
         if (specificity_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1181,7 +1182,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_mcc) {
+      if (config$use_mcc && proposed_accepted) {
         if (mcc_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1189,7 +1190,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_distance) {
+      if (config$use_distance && proposed_accepted) {
         if (distance_pass) {
           proposed_accepted <- TRUE
         } else {
@@ -1197,7 +1198,7 @@ calibrate <- function(infected_years_file,
         }
       }
 
-      if (config$use_rmse) {
+      if (config$use_rmse && proposed_accepted) {
         if (rmse_pass) {
           proposed_accepted <- TRUE
         } else {
