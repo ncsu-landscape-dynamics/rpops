@@ -235,11 +235,11 @@ configuration <- function(config) {
     return(config)
   }
 
-  zero_matrix <- infected
+  zero_matrix <- infected[[1]]
   terra::values(zero_matrix) <- 0
   zero_matrix <- terra::as.matrix(zero_matrix, wide = TRUE)
 
-  one_matrix <- infected
+  one_matrix <- infected[[1]]
   terra::values(one_matrix) <- 0
   one_matrix <- terra::as.matrix(one_matrix, wide = TRUE)
 
@@ -564,7 +564,7 @@ configuration <- function(config) {
       return(config)
     }
   } else {
-    mask <- terra::classify(host, config$rclmat)
+    mask <- terra::classify(host[[1]], config$rclmat)
     config$mask <- mask
     config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
   }
