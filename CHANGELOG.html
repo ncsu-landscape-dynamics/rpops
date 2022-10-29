@@ -72,9 +72,17 @@
 <div class="section level3">
 <h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
 <ul><li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, <code>auto_manage</code> and <code>pops</code> no longer take network_min_distance and network_max_distance as these parameters are now passed in through the parameter_means and parameter_cov_matrix parameters and are calibrated as part of the calibration if network kernel is selected (@ChrisJones687, #140).</p></li>
-<li><p><code>calibrate</code> now calibrates the network_min_distance and network_max_distance parameters during calibration and they are now part of the parameter_means and parameter_cov_matrix that are exported from the calibration (@ChrisJones687, #140).</p></li>
+<li>
+<p><code>calibrate</code> now calibrates the network_min_distance and network_max_distance parameters during calibration and they are now part of the parameter_means and parameter_cov_matrix that are exported from the calibration (@ChrisJones687, #140).</p>
+<ul><li>
+<code>calibrate</code> has more flexible success metric options removes use_distance, use_rmse, and use_mcc parameters and replaces it with the more flexible success_metrics parameter. Users can now select multiple combinations of different success metrics for the calibration (@ChrisJones687, #150).</li>
+</ul></li>
 <li><p><code>pops_multirun</code> removed the ability to write all simulations. (@ChrisJones687, #144).</p></li>
-<li><p>the deterministic paramater has been renamed to dispersal_stochasticity. This was done to be more consistent with generate_stochasticity, movement_stochasticity, and establishment_stochasticity parameters (@ChrisJones687, #147).</p></li>
+<li>
+<p>the deterministic parameter has been renamed to dispersal_stochasticity. This was done to be more consistent with generate_stochasticity, movement_stochasticity, and establishment_stochasticity parameters (@ChrisJones687, #147).</p>
+<ul><li>
+<code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, and <code>pops</code> now propogate uncertainty from host and initial conditions. This adds the parameters use_initial_condition_uncertainty and use_host_uncertainty. If use_initial_condition_uncertainty is TRUE the infected_file and/or exposed_file need to have 2 layers a mean and standard deviation. If use_host_uncertainty is is TRUE the host_file needs to have 2 layers a mean and standard deviation. For each model run a host and/or initial conditions are drawn from the mean and sd layers so that each run has a unique host and/or initial conditions this will allow for both propogation of uncertainty from these sources but also partitioning (@ChrisJones687, #151).</li>
+</ul></li>
 </ul></div>
 <div class="section level3">
 <h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>

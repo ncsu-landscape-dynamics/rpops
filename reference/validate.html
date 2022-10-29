@@ -143,7 +143,9 @@ then the model can be validated for the final 2 years.</p>
   network_filename <span class="op">=</span> <span class="st">""</span>,
   network_movement <span class="op">=</span> <span class="st">"walk"</span>,
   use_distance <span class="op">=</span> <span class="cn">FALSE</span>,
-  use_configuration <span class="op">=</span> <span class="cn">FALSE</span>
+  use_configuration <span class="op">=</span> <span class="cn">FALSE</span>,
+  use_initial_condition_uncertainty <span class="op">=</span> <span class="cn">FALSE</span>,
+  use_host_uncertainty <span class="op">=</span> <span class="cn">FALSE</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -394,6 +396,16 @@ simulations and observations. Default is FALSE.</p></dd>
 <dt>use_configuration</dt>
 <dd><p>Boolean if you want to use configuration
 disagreement for comparing model runs. Default is FALSE.</p></dd>
+<dt>use_initial_condition_uncertainty</dt>
+<dd><p>boolean to indicate whether or not to propagate and
+partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+one with the mean value and one with the standard deviation. If an SEI model is used the
+exposed_file needs to have 2 layers one with the mean value and one with the standard
+deviation</p></dd>
+<dt>use_host_uncertainty</dt>
+<dd><p>boolean to indicate whether or not to propagate and partition
+uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
+and one with the standard deviation.</p></dd>
 </dl></div>
     <div id="value">
     <h2>Value</h2>
