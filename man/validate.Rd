@@ -74,7 +74,9 @@ validate(
   network_filename = "",
   network_movement = "walk",
   use_distance = FALSE,
-  use_configuration = FALSE
+  use_configuration = FALSE,
+  use_initial_condition_uncertainty = FALSE,
+  use_host_uncertainty = FALSE
 )
 }
 \arguments{
@@ -322,6 +324,16 @@ simulations and observations. Default is FALSE.}
 
 \item{use_configuration}{Boolean if you want to use configuration
 disagreement for comparing model runs. Default is FALSE.}
+
+\item{use_initial_condition_uncertainty}{boolean to indicate whether or not to propagate and
+partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+one with the mean value and one with the standard deviation. If an SEI model is used the
+exposed_file needs to have 2 layers one with the mean value and one with the standard
+deviation}
+
+\item{use_host_uncertainty}{boolean to indicate whether or not to propagate and partition
+uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
+and one with the standard deviation.}
 }
 \value{
 a data frame of statistical measures of model performance.

@@ -89,6 +89,60 @@ configuration <- function(config) {
     }
   }
 
+  # Check for correct kernel options
+  kernel_list <- c(
+    "cauchy",
+    "Cauchy",
+    "exponential",
+    "Exponential",
+    "uniform",
+    "Uniform",
+    "deterministic neighbor",
+    "deterministic-neighbor",
+    "power law",
+    "power-law",
+    "Power-law",
+    "Power-Law",
+    "Power Law",
+    "Power law",
+    "hyperbolic secant",
+    "hyperbolic-secant",
+    "Hyperbolic-secant",
+    "Hyperbolic-Secant",
+    "Hyperbolic secant",
+    "Hyperbolic Secant",
+    "gamma",
+    "Gamma",
+    # "exponential power",
+    # "exponential-power",
+    # "Exponential-power",
+    # "Exponential-Power",
+    # "Exponential power",
+    "weibull",
+    "Weibull",
+    "normal",
+    # "log normal",
+    # "log-normal",
+    # "Log-normal",
+    # "Log-Normal",
+    # "Log normal",
+    # "Log Normal",
+    "logistic",
+    "Logistic",
+    "network",
+    "Network"
+  )
+
+  if (config$natural_kernel_type %notin% kernel_list) {
+    config$failure <- natural_kernel_error
+    return(config)
+  }
+
+  if (config$anthropogenic_kernel_type %notin% kernel_list) {
+    config$failure <- anthropogenic_kernel_error
+    return(config)
+  }
+
   # ensures correct model type
   if (config$model_type %in%
     c(
@@ -142,7 +196,7 @@ configuration <- function(config) {
     config$random_seed <- round(stats::runif(1, 1, 1000000))
   }
 
-  ## check output and timestep are correct.
+  # check output and timestep are correct.
   time_check <- time_checks(
     config$end_date, config$start_date,
     config$time_step, config$output_frequency, config$output_frequency_n
@@ -175,14 +229,19 @@ configuration <- function(config) {
   }
   if (infected_check$checks_passed) {
     infected <- infected_check$raster
-    if (terra::nlyr(infected) > 1) {
-      infected <- output_from_raster_mean_and_sd(infected)
-    }
     infected <- terra::classify(infected, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
   } else {
     config$failure <- infected_check$failed_check
     return(config)
   }
+
+  zero_matrix <- infected[[1]]
+  terra::values(zero_matrix) <- 0
+  zero_matrix <- terra::as.matrix(zero_matrix, wide = TRUE)
+
+  one_matrix <- infected[[1]]
+  terra::values(one_matrix) <- 0
+  one_matrix <- terra::as.matrix(one_matrix, wide = TRUE)
 
   # check that host raster has the same crs, resolution, and extent
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
@@ -192,60 +251,11 @@ configuration <- function(config) {
   }
   if (host_check$checks_passed) {
     host <- host_check$raster
-    if (terra::nlyr(host) > 1) {
-      host <- output_from_raster_mean_and_sd(host)
-    }
     config$host <- host
   } else {
     config$failure <- host_check$failed_check
     return(config)
   }
-
-  if (!is.null(config$mask)) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
-      mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
-    } else {
-      mask_check <- secondary_raster_checks(config$mask, infected)
-    }
-    if (mask_check$checks_passed) {
-      mask <- mask_check$raster
-      mask <- terra::classify(mask, config$rclmat)
-      host_mask <- terra::classify(host, config$rclmat)
-      mask <- terra::mask(host_mask, mask, maskvalues = NA, updatevalue = NA)
-      config$mask <- mask
-      config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
-    } else {
-      config$failure <- mask_check$failed_check
-      return(config)
-    }
-  } else {
-    mask <- terra::classify(host, config$rclmat)
-    config$mask <- mask
-    config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
-  }
-
-  suitable <- host + infected
-  suitable_points <- terra::as.points(suitable)
-  names(suitable_points) <- "data"
-  suitable_points <- suitable_points[suitable_points$data > 0]
-  suitable_cells <- terra::extract(suitable, suitable_points, cells = TRUE)$cell
-  suitable_row <- terra::rowFromCell(suitable, suitable_cells)
-  suitable_row <- suitable_row - 1
-  suitable_row <- as.integer(suitable_row)
-  suitable_col <- terra::colFromCell(suitable, suitable_cells)
-  suitable_col <- suitable_col - 1
-  suitable_col <- as.integer(suitable_col)
-  spatial_indices2 <- data.frame(row = suitable_row, col = suitable_col)
-  spatial_indices2 <- unname(spatial_indices2)
-  spatial_indices2 <- as.matrix(spatial_indices2)
-  spatial_indices <- list()
-  # movements_date
-  for (i in seq_len(terra::nrow(spatial_indices2))) {
-    spatial_indices[[i]] <- spatial_indices2[i, 1:2]
-  }
-
-  spatial_indices <- unname(spatial_indices)
-  config$spatial_indices <- spatial_indices
 
   # check that total populations raster has the same crs, resolution, and extent
   if (config$function_name %in% c("casestudy_creation", "model_api")) {
@@ -256,16 +266,10 @@ configuration <- function(config) {
   }
   if (total_populations_check$checks_passed) {
     total_populations <- total_populations_check$raster
-    if (terra::nlyr(total_populations) > 1) {
-      total_populations <- output_from_raster_mean_and_sd(total_populations)
-    }
   } else {
     config$failure <- total_populations_check$failed_check
     return(config)
   }
-
-  susceptible <- host - infected
-  susceptible[susceptible < 0] <- 0
 
   # check that survival_rates raster has the same crs, resolution, and extent
   if (config$use_survival_rates == TRUE) {
@@ -289,9 +293,7 @@ configuration <- function(config) {
       }
     }
   } else {
-    survival_rates <- host
-    terra::values(survival_rates) <- 1
-    survival_rates <- list(terra::as.matrix(survival_rates, wide = TRUE))
+    survival_rates <- list(one_matrix)
   }
 
   config$survival_rates <- survival_rates
@@ -318,9 +320,7 @@ configuration <- function(config) {
       }
     }
   } else {
-    temperature <- host
-    terra::values(temperature) <- 1
-    temperature <- list(terra::as.matrix(temperature, wide = TRUE))
+    temperature <- list(one_matrix)
   }
 
   config$temperature <- temperature
@@ -389,9 +389,7 @@ configuration <- function(config) {
       weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
     }
   } else {
-    weather_coefficient <- host
-    terra::values(weather_coefficient) <- 1
-    weather_coefficient <- list(terra::as.matrix(weather_coefficient, wide = TRUE))
+    weather_coefficient <- list(one_matrix)
   }
 
   config$weather_coefficient <- weather_coefficient
@@ -424,20 +422,10 @@ configuration <- function(config) {
       return(config)
     }
   } else {
-    treatment_map <- host
-    treatment_map[] <- 0
-    config$treatment_maps <- list(terra::as.matrix(treatment_map, wide = TRUE))
+    config$treatment_maps <- list(zero_matrix)
     config$treatment_dates <- c(config$start_date)
   }
 
-  res <- c()
-  res$ew_res <- terra::xres(susceptible)
-  res$ns_res <- terra::yres(susceptible)
-  config$res <- res
-  rows_cols <- c()
-  rows_cols$num_rows <- terra::nrow(susceptible)
-  rows_cols$num_cols <- terra::ncol(susceptible)
-  config$rows_cols <- rows_cols
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <-
@@ -454,15 +442,12 @@ configuration <- function(config) {
     config$movements_dates <- config$start_date
   }
 
-  mortality_tracker <- infected
-  terra::values(mortality_tracker) <- 0
-  mortality_tracker <- terra::as.matrix(mortality_tracker, wide = TRUE)
-  exposed <- list(mortality_tracker)
-  config$total_exposed <- mortality_tracker
+  exposed <- list(zero_matrix)
+  config$total_exposed <- zero_matrix
 
   if (config$model_type == "SEI" & config$latency_period > 1) {
     for (ex in 2:(config$latency_period + 1)) {
-      exposed[[ex]] <- mortality_tracker
+      exposed[[ex]] <- zero_matrix
     }
   }
 
@@ -475,75 +460,143 @@ configuration <- function(config) {
     }
     if (exposed_check$checks_passed) {
       exposed2 <- exposed_check$raster
-      susceptible <- susceptible - exposed2
-      susceptible[susceptible < 0] <- 0
-      exposed[[config$latency_period + 1]] <- terra::as.matrix(exposed2, wide = TRUE)
-      config$total_exposed <- terra::as.matrix(exposed2, wide = TRUE)
+      if (config$use_initial_condition_uncertainty) {
+        if (terra::nlyr(exposed2) == 2) {
+          exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
+          exposed_sd <- terra::as.matrix(exposed2[[2]], wide = TRUE)
+        } else {
+          config$failure <- initial_cond_uncert_error
+          return(config)
+        }
+      } else {
+        exposed_mean <- terra::as.matrix(exposed2, wide = TRUE)
+        exposed_sd <- zero_matrix
+      }
     } else {
       config$failure <- exposed_check$failed_check
       return(config)
     }
+  } else {
+    exposed_mean <- zero_matrix
+    exposed_sd <- zero_matrix
   }
 
-  kernel_list <- c(
-    "cauchy",
-    "Cauchy",
-    "exponential",
-    "Exponential",
-    "uniform",
-    "Uniform",
-    "deterministic neighbor",
-    "deterministic-neighbor",
-    "power law",
-    "power-law",
-    "Power-law",
-    "Power-Law",
-    "Power Law",
-    "Power law",
-    "hyperbolic secant",
-    "hyperbolic-secant",
-    "Hyperbolic-secant",
-    "Hyperbolic-Secant",
-    "Hyperbolic secant",
-    "Hyperbolic Secant",
-    "gamma",
-    "Gamma",
-    # "exponential power",
-    # "exponential-power",
-    # "Exponential-power",
-    # "Exponential-Power",
-    # "Exponential power",
-    "weibull",
-    "Weibull",
-    "normal",
-    # "log normal",
-    # "log-normal",
-    # "Log-normal",
-    # "Log-Normal",
-    # "Log normal",
-    # "Log Normal",
-    "logistic",
-    "Logistic",
-    "network",
-    "Network"
-  )
+  config$exposed_mean <- exposed_mean
+  config$exposed_sd <- exposed_sd
 
-  if (config$natural_kernel_type %notin% kernel_list) {
-    config$failure <- natural_kernel_error
-    return(config)
+  # create spatial indices for computational speed up.
+  suitable <- host[[1]] + infected[[1]]
+  if (config$use_host_uncertainty && terra::nlyr(host) > 1) {
+    suitable <- suitable + host[[2]]
+  }
+  if (config$use_initial_condition_uncertainty && terra::nlyr(infected) > 1) {
+    suitable <- suitable + infected[[2]]
+  }
+  if (config$model_type == "SEI" & config$start_exposed) {
+    suitable <- suitable + exposed2[[1]]
+    if (config$use_initial_condition_uncertainty && terra::nlyr(exposed2) > 1) {
+      suitable <- suitable + exposed2[[2]]
+    }
+  }
+  suitable_points <- terra::as.points(suitable)
+  names(suitable_points) <- "data"
+  suitable_points <- suitable_points[suitable_points$data > 0]
+  suitable_cells <- terra::extract(suitable, suitable_points, cells = TRUE)$cell
+  suitable_row <- terra::rowFromCell(suitable, suitable_cells)
+  suitable_row <- suitable_row - 1
+  suitable_row <- as.integer(suitable_row)
+  suitable_col <- terra::colFromCell(suitable, suitable_cells)
+  suitable_col <- suitable_col - 1
+  suitable_col <- as.integer(suitable_col)
+  spatial_indices2 <- data.frame(row = suitable_row, col = suitable_col)
+  spatial_indices2 <- unname(spatial_indices2)
+  spatial_indices2 <- as.matrix(spatial_indices2)
+  spatial_indices <- list()
+  for (i in seq_len(terra::nrow(spatial_indices2))) {
+    spatial_indices[[i]] <- spatial_indices2[i, 1:2]
+  }
+  spatial_indices <- unname(spatial_indices)
+  config$spatial_indices <- spatial_indices
+
+  res <- c()
+  res$ew_res <- terra::xres(infected)
+  res$ns_res <- terra::yres(infected)
+  config$res <- res
+  rows_cols <- c()
+  rows_cols$num_rows <- terra::nrow(infected)
+  rows_cols$num_cols <- terra::ncol(infected)
+  config$rows_cols <- rows_cols
+
+  if (config$use_host_uncertainty) {
+    if (terra::nlyr(host) == 2) {
+      host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
+      host_sd <- terra::as.matrix(host[[2]], wide = TRUE)
+    } else {
+      config$failure <- host_uncert_error
+      return(config)
+    }
+  } else {
+    host_mean <- terra::as.matrix(host, wide = TRUE)
+    host_sd <- zero_matrix
+  }
+  config$host_mean <- host_mean
+  config$host_sd <- host_sd
+
+  if (!is.null(config$mask)) {
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
+    } else {
+      mask_check <- secondary_raster_checks(config$mask, infected)
+    }
+    if (mask_check$checks_passed) {
+      mask <- mask_check$raster
+      mask <- terra::classify(mask, config$rclmat)
+      host_mask <- terra::classify(host[[1]], config$rclmat)
+      if (config$use_host_uncertainty && terra::nlyr(host) > 1) {
+        host_mask2 <- terra::classify(host[[2]], config$rclmat)
+        host_mask <- terra::mask(host_mask2, host_mask, maskvalues = NA, updatevalue = NA)
+      }
+      mask <- terra::mask(host_mask, mask, maskvalues = NA, updatevalue = NA)
+      config$mask <- mask
+      config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
+    } else {
+      config$failure <- mask_check$failed_check
+      return(config)
+    }
+  } else {
+    mask <- terra::classify(host[[1]], config$rclmat)
+    config$mask <- mask
+    config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
   }
 
-  if (config$anthropogenic_kernel_type %notin% kernel_list) {
-    config$failure <- anthropogenic_kernel_error
-    return(config)
+  if (config$use_initial_condition_uncertainty) {
+    if (terra::nlyr(infected) == 2) {
+      infected_mean <- terra::as.matrix(infected[[1]], wide = TRUE)
+      infected_sd <- terra::as.matrix(infected[[2]], wide = TRUE)
+    } else {
+      config$failure <- initial_cond_uncert_error
+      return(config)
+    }
+  } else {
+    infected_mean <- terra::as.matrix(infected, wide = TRUE)
+    infected_sd <- zero_matrix
   }
 
-  infected <- terra::as.matrix(infected, wide = TRUE)
-  config$susceptible <- terra::as.matrix(susceptible, wide = TRUE)
+  config$infected_mean <- infected_mean
+  config$infected_sd <- infected_sd
+
+  exposed[[config$latency_period + 1]] <- exposed_mean
+  config$total_exposed <- exposed_mean
+  config$exposed <- exposed
+
+  susceptible_mean <- host_mean - infected_mean - exposed_mean
+  susceptible_mean[susceptible_mean < 0] <- 0
+  config$susceptible_mean <- terra::as.matrix(susceptible_mean, wide = TRUE)
+
   config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
-  config$total_hosts <- terra::as.matrix(host, wide = TRUE)
-  config$mortality <- mortality_tracker
-  config$resistant <- mortality_tracker
+  # config$total_hosts_mean <- terra::as.matrix(host_mean, wide = TRUE)
+  config$mortality <- zero_matrix
+  config$resistant <- zero_matrix
 
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
@@ -563,9 +616,10 @@ configuration <- function(config) {
     }
   } else {
     # set quarantine areas to all zeros. meaning no quarantine areas are considered
-    config$quarantine_areas <- mortality_tracker
+    config$quarantine_areas <- zero_matrix
   }
 
+  mortality_tracker <- zero_matrix
   mortality_tracker2 <- list(mortality_tracker)
   if (config$mortality_on) {
     mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
@@ -573,13 +627,14 @@ configuration <- function(config) {
       mortality_tracker2[[mt]] <- mortality_tracker
     }
   }
-  ## add currently infected cells to last element of the mortality tracker so
-  ## that mortality occurs at the appropriate interval
-  mortality_tracker2[[length(mortality_tracker2)]] <- infected
+  # add currently infected cells to last element of the mortality tracker so
+  # that mortality occurs at the appropriate interval
+  if (config$mortality_on) {
+    mortality_tracker2[[length(mortality_tracker2)]] <- infected_mean
+  }
+
 
   config$mortality_tracker <- mortality_tracker2
-  config$exposed <- exposed
-  config$infected <- infected
 
   if (config$function_name %in% c("validate", "multirun", "sensitivity")) {
     if (is.na(config$number_of_cores) ||

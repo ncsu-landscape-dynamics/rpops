@@ -86,6 +86,8 @@ config$use_survival_rates <- FALSE
 config$survival_rate_month <- 0
 config$survival_rate_day <- 0
 config$survival_rates_file <- ""
+config$use_initial_condition_uncertainty <- FALSE
+config$use_host_uncertainty <- FALSE
 
 test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)
@@ -485,5 +487,13 @@ test_that("configuration returns proper errors", {
   config2 <- configuration(config)
   expect_equal(config2$failure, network_max_distance_large_error)
 
+  config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 0, 0)
+  config$use_initial_condition_uncertainty <- TRUE
+  config2 <- configuration(config)
+  expect_equal(config2$failure, initial_cond_uncert_error)
 
+  config$use_initial_condition_uncertainty <- FALSE
+  config$use_host_uncertainty <- TRUE
+  config2 <- configuration(config)
+  expect_equal(config2$failure, host_uncert_error)
 })

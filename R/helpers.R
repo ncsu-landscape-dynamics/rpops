@@ -143,6 +143,14 @@ infection_years_length_error <- function(num_layers_infected_years, number_of_ti
 
 success_metric_error <- "success_metric is not one of the listed options."
 
+initial_cond_uncert_error <-
+  "use_initial_condition_uncertainty is TRUE but the number of layers in the infected file is not 2.
+  This should be a raster file with 2 layers the first being the mean value and the second the
+  stadard deviation"
+
+host_uncert_error <-
+  "use_host_uncertainty is TRUE but the number of layers in the host file is not 2. This should be
+  a raster file with 2 layers the first being the mean value and the second the stadard deviation."
 ## calibration success metric option
 success_metric_options <- c("quantity", "allocation", "configuration", "quantity and allocation",
                             "quantity and configuration", "allocation and configuration",
@@ -256,6 +264,16 @@ set_success_metrics <- function(config) {
   return(config)
 }
 
+# creates a matrix from a matrix of mean values and a matrix of standard deviations. The two
+# matrices must be the same size.
+matrix_norm_distribution <- function(mean_matrix, sd_matrix) {
+  new_matrix <-
+    round(matrix(mapply(function(x, y) {rnorm(x, y, n = 1)}, x = mean_matrix, y = sd_matrix),
+                 nrow(mean_matrix), ncol(mean_matrix)))
+  new_matrix[is.na(new_matrix)] <- 0
+  new_matrix[new_matrix < 0] <- 0
+  return(new_matrix)
+}
 
 # Uncertainty propagation for raster data sets, expects a spatRaster with 2
 # layers (mean and standard deviation)

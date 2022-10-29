@@ -188,7 +188,9 @@ calibrate <- function(infected_years_file,
                       output_folder_path = "",
                       network_filename = "",
                       network_movement = "walk",
-                      success_metric = "mcc") {
+                      success_metric = "mcc",
+                      use_initial_condition_uncertainty = FALSE,
+                      use_host_uncertainty = FALSE) {
 
   # add all data to config list
   config <- c()
@@ -271,6 +273,8 @@ calibrate <- function(infected_years_file,
   config$network_filename <- network_filename
   config$network_movement <- network_movement
   config$success_metric <- success_metric
+  config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
+  config$use_host_uncertainty <- use_host_uncertainty
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -297,7 +301,41 @@ calibrate <- function(infected_years_file,
              anthropogenic_kappa,
              network_min_distance,
              network_max_distance) {
-      config$random_seed <- round(runif(1, 1, 1000000))
+
+      config$random_seed <- round(stats::runif(1, 1, 1000000))
+      if (config$use_initial_condition_uncertainty) {
+        config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+        exposed <- config$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        config$exposed <- exposed
+      } else {
+        config$infected <- config$infected_mean
+        exposed2 <- config$exposed_mean
+        exposed <- config$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        config$exposed <- exposed
+      }
+
+      if (config$use_host_uncertainty) {
+        config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+      } else {
+        config$host <- config$host_mean
+      }
+
+      susceptible <- config$host - config$infected - exposed2
+      susceptible[susceptible < 0] <- 0
+
+      config$susceptible <- susceptible
+      config$total_hosts <- config$host
+      config$total_exposed <- exposed2
+
+      if (config$mortality_on) {
+        mortality_tracker2 <- config$mortality_tracker
+        mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
+        config$mortality_tracker <- mortality_tracker2
+      }
+
       data <- pops_model(
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
@@ -514,11 +552,11 @@ calibrate <- function(infected_years_file,
             .packages = c("terra", "PoPS"),
             .final = colSums
           ) %do% {
-            comparison <- terra::rast(config$infected_file)
-            reference <- terra::rast(config$infected_file)
+            comparison <- terra::rast(config$infected_file)[[1]]
+            reference <- terra::rast(config$infected_file)[[1]]
             terra::values(comparison) <- data$infected[[q]]
             terra::values(reference) <- config$infection_years2[[q]]
-            mask <- terra::rast(config$infected_file)
+            mask <- terra::rast(config$infected_file)[[1]]
             terra::values(mask) <- config$mask_matrix
             quantity_allocation_disagreement(reference,
                                              comparison,
@@ -861,15 +899,15 @@ calibrate <- function(infected_years_file,
         .packages = c("terra", "PoPS"),
         .final = colSums
       ) %do% {
-        comparison <- terra::rast(config$infected_file)
-        reference <- terra::rast(config$infected_file)
+        comparison <- terra::rast(config$infected_file)[[1]]
+        reference <- terra::rast(config$infected_file)[[1]]
         terra::values(comparison) <- data$infected[[q]]
         terra::values(reference) <- config$infection_years2[[q]]
-        mask <- terra::rast(config$infected_file)
+        mask <- terra::rast(config$infected_file)[[1]]
         terra::values(mask) <- config$mask_matrix
         quantity_allocation_disagreement(reference,
                                          comparison,
-                                         use_configuration = FALSE,
+                                         use_configuration = config$use_configuration,
                                          mask = mask,
                                          use_distance = config$use_distance)
       }
@@ -1035,11 +1073,11 @@ calibrate <- function(infected_years_file,
           .packages = c("terra", "PoPS"),
           .final = colSums
         ) %do% {
-          comparison <- terra::rast(config$infected_file)
-          reference <- terra::rast(config$infected_file)
+          comparison <- terra::rast(config$infected_file)[[1]]
+          reference <- terra::rast(config$infected_file)[[1]]
           terra::values(comparison) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
-          mask <- terra::rast(config$infected_file)
+          mask <- terra::rast(config$infected_file)[[1]]
           terra::values(mask) <- config$mask_matrix
           quantity_allocation_disagreement(reference,
                                            comparison,
