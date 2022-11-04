@@ -164,7 +164,7 @@ success_metric_options <- c("quantity", "allocation", "configuration", "quantity
                             "precision, recall, and specificity",
                             "accuracy, precision, recall, and specificity",
                             "rmse", "distance", "mcc", "mcc and quantity", "mcc and distance",
-                            "rmse and distance", "mcc and configuration",
+                            "rmse and distance", "mcc and configuration", "mcc and RMSE",
                             "mcc, quantity, and configuration")
 
 quantity_list <- c("quantity", "quantity and allocation", "quantity and configuration",
@@ -200,12 +200,12 @@ specificity_list <- c("specificity", "accuracy and specificity", "precision and 
                       "accuracy, recall, and specificity",  "precision, recall, and specificity",
                       "accuracy, precision, recall, and specificity")
 
-rmse_list <- c("rmse", "rmse and distance")
+rmse_list <- c("rmse", "rmse and distance", "mcc and RMSE")
 
 distance_list <- c("distance", "mcc and distance", "rmse and distance")
 
 mcc_list <- c("mcc", "mcc and quantity", "mcc and distance", "mcc and configuration",
-              "mcc, quantity, and configuration")
+              "mcc and RMSE", "mcc, quantity, and configuration")
 
 "%notin%" <- Negate("%in%")
 
