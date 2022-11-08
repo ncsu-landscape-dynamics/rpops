@@ -220,7 +220,10 @@ quantity_allocation_disagreement <-
       sim_points <- terra::as.points(comp)
       names(sim_points) <- "data"
       sim_points <- sim_points[sim_points$data > 0]
-      dist <- terra::distance(obs_points, sim_points)
+      ref_points <- terra::as.points(ref)
+      names(ref_points) <- "data"
+      ref_points <- ref_points[ref_points$data > 0]
+      dist <- terra::distance(ref_points, sim_points)
       if (is(dist, "matrix")) {
         distance_differences <- apply(dist, 2, min)
       }
