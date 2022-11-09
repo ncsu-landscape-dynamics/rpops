@@ -168,6 +168,9 @@ quantity_allocation_disagreement <-
     positives_in_reference <- sum(terra::values(reference) == 1, na.rm = TRUE)
     positives_in_comparison <- sum(terra::values(comparison) == 1, na.rm = TRUE)
 
+    positives_in_ref <- sum(terra::values(ref), na.rm = TRUE)
+    positives_in_comp <- sum(terra::values(comp), na.rm = TRUE)
+
     ## calculate confusion matrix for accuracy assessment
     true_negative <- sum(terra::values(reference) == 0 &
                            terra::values(comparison) == 0, na.rm = TRUE)
@@ -202,8 +205,10 @@ quantity_allocation_disagreement <-
     allocation_disagreement <- 2 * min(false_negative, false_positive)
     total_disagreement <- quantity_disagreement + allocation_disagreement
 
-    # calculate RMSE for comparison
-    obs_points <- terra::as.points(ref)
+    # calculate RMSE for comparison (only accounts for areas that are infected or predicted to
+    # be infected)
+    totals <- ref + comp
+    obs_points <- terra::as.points(totals)
     names(obs_points) <- "data"
     obs_points <- obs_points[obs_points$data > 0]
     actual <- terra::extract(ref, obs_points)
@@ -215,7 +220,10 @@ quantity_allocation_disagreement <-
       sim_points <- terra::as.points(comp)
       names(sim_points) <- "data"
       sim_points <- sim_points[sim_points$data > 0]
-      dist <- terra::distance(obs_points, sim_points)
+      ref_points <- terra::as.points(ref)
+      names(ref_points) <- "data"
+      ref_points <- ref_points[ref_points$data > 0]
+      dist <- terra::distance(ref_points, sim_points)
       if (is(dist, "matrix")) {
         distance_differences <- apply(dist, 2, min)
       }
@@ -269,9 +277,12 @@ quantity_allocation_disagreement <-
     output$configuration_disagreement <- configuration_disagreement
     output$odds_ratio <- odds_ratio
     output$residual_error <- terra::global(abs(ref - comp), "sum", na.rm = TRUE)[[1]]
-    output$true_infected <- positives_in_reference
-    output$simulated_infected <- positives_in_comparison
-    output$infected_difference <- positives_in_comparison - positives_in_reference
+    output$true_infected_locations <- positives_in_reference
+    output$simulated_infected_locations <- positives_in_comparison
+    output$infected_locations_difference <- positives_in_comparison - positives_in_reference
+    output$true_infecteds <- positives_in_ref
+    output$simulated_infecteds <- positives_in_comp
+    output$infecteds_difference <- positives_in_comp - positives_in_ref
     output$rmse <- RMSE
     output$distance_difference <- distance_difference
     output$mcc <- mcc

@@ -394,7 +394,7 @@ comparing simulations vs. observations. Must be one of "quantity", "allocation",
 "accuracy, precision, and recall", "accuracy, precision, and specificity",
 "accuracy, recall, and specificity", "precision, recall, and specificity",
 "accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
-"mcc and distance", "rmse and distance", "mcc and configuration",
+"mcc and distance", "rmse and distance", "mcc and configuration", "mcc and RMSE",
 "mcc, quantity, and configuration"). Default is "mcc"}
 
 \item{use_initial_condition_uncertainty}{boolean to indicate whether or not to propagate and

@@ -184,7 +184,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 12)
     data <- outputs[[1]]
-    expect_length(data, 23)
+    expect_length(data, 26)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
@@ -197,9 +197,9 @@ test_that(
     expect_vector(data$unknown_negatives, size = number_of_iterations)
     expect_vector(data$odds_ratio, size = number_of_iterations)
     expect_vector(data$residual_error, size = number_of_iterations)
-    expect_vector(data$true_infected, size = number_of_iterations)
-    expect_vector(data$simulated_infected, size = number_of_iterations)
-    expect_vector(data$infected_difference, size = number_of_iterations)
+    expect_vector(data$true_infecteds, size = number_of_iterations)
+    expect_vector(data$simulated_infecteds, size = number_of_iterations)
+    expect_vector(data$infecteds_difference, size = number_of_iterations)
   }
 )
 
@@ -361,7 +361,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 32)
+    expect_length(data, 35)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
@@ -374,9 +374,9 @@ test_that(
     expect_vector(data$unknown_negatives, size = number_of_iterations)
     expect_vector(data$odds_ratio, size = number_of_iterations)
     expect_vector(data$residual_error, size = number_of_iterations)
-    expect_vector(data$true_infected, size = number_of_iterations)
-    expect_vector(data$simulated_infected, size = number_of_iterations)
-    expect_vector(data$infected_difference, size = number_of_iterations)
+    expect_vector(data$true_infecteds, size = number_of_iterations)
+    expect_vector(data$simulated_infecteds, size = number_of_iterations)
+    expect_vector(data$infecteds_difference, size = number_of_iterations)
   }
 )
 
@@ -538,7 +538,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 23)
+    expect_length(data, 26)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
@@ -551,9 +551,9 @@ test_that(
     expect_vector(data$unknown_negatives, size = number_of_iterations)
     expect_vector(data$odds_ratio, size = number_of_iterations)
     expect_vector(data$residual_error, size = number_of_iterations)
-    expect_vector(data$true_infected, size = number_of_iterations)
-    expect_vector(data$simulated_infected, size = number_of_iterations)
-    expect_vector(data$infected_difference, size = number_of_iterations)
+    expect_vector(data$true_infecteds, size = number_of_iterations)
+    expect_vector(data$simulated_infecteds, size = number_of_iterations)
+    expect_vector(data$infecteds_difference, size = number_of_iterations)
   }
 )
 
@@ -719,7 +719,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 23)
+    expect_length(data, 26)
     expect_vector(data$quantity_disagreement, size = number_of_iterations)
     expect_vector(data$allocation_disagreement, size = number_of_iterations)
     expect_vector(data$total_disagreement, size = number_of_iterations)
@@ -732,8 +732,8 @@ test_that(
     expect_vector(data$unknown_negatives, size = number_of_iterations)
     expect_vector(data$odds_ratio, size = number_of_iterations)
     expect_vector(data$residual_error, size = number_of_iterations)
-    expect_vector(data$true_infected, size = number_of_iterations)
-    expect_vector(data$simulated_infected, size = number_of_iterations)
-    expect_vector(data$infected_difference, size = number_of_iterations)
+    expect_vector(data$true_infecteds, size = number_of_iterations)
+    expect_vector(data$simulated_infecteds, size = number_of_iterations)
+    expect_vector(data$infecteds_difference, size = number_of_iterations)
   }
 )

@@ -94,7 +94,7 @@
 #' "accuracy, precision, and recall", "accuracy, precision, and specificity",
 #' "accuracy, recall, and specificity", "precision, recall, and specificity",
 #' "accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
-#' "mcc and distance", "rmse and distance", "mcc and configuration",
+#' "mcc and distance", "rmse and distance", "mcc and configuration", "mcc and RMSE",
 #' "mcc, quantity, and configuration"). Default is "mcc"
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
@@ -441,7 +441,7 @@ calibrate <- function(infected_years_file,
     precision_threshold <- 0.70 # starting threshold for model precision
     recall_threshold <- 0.70 # starting threshold for model recall
     specificity_threshold <- 0.70 # starting threshold for model
-    rmse_threshold <- 7 # starting threshold for RMSE (root mean squared error)
+    rmse_threshold <- 5 # starting threshold for RMSE (root mean squared error)
     distance_threshold <- 1000 # starting threshold for distance between simulated
     # and observed data in units
     mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
