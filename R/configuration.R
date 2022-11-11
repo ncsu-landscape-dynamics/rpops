@@ -469,7 +469,7 @@ configuration <- function(config) {
           return(config)
         }
       } else {
-        exposed_mean <- terra::as.matrix(exposed2, wide = TRUE)
+        exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
         exposed_sd <- zero_matrix
       }
     } else {
@@ -536,7 +536,7 @@ configuration <- function(config) {
       return(config)
     }
   } else {
-    host_mean <- terra::as.matrix(host, wide = TRUE)
+    host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
     host_sd <- zero_matrix
   }
   config$host_mean <- host_mean
@@ -578,7 +578,7 @@ configuration <- function(config) {
       return(config)
     }
   } else {
-    infected_mean <- terra::as.matrix(infected, wide = TRUE)
+    infected_mean <- terra::as.matrix(infected[[1]], wide = TRUE)
     infected_sd <- zero_matrix
   }
 
