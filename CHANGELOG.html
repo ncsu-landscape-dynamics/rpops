@@ -62,7 +62,11 @@
 <p>The <em>Unreleased</em> section should become the release once the release is ready and the text can be used as part of the release description.</p>
 <p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/" class="external-link">Keep a Changelog</a>, and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" class="external-link">Semantic Versioning</a> with an additional rule that interfaces to the core library follow the same numbering although they are in separate repositories, so increasing version number there increases version here although there is no specific tag or release for that in this repository.</p>
 <div class="section level2">
-<h2 id="unreleased"><a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...main" class="external-link">Unreleased</a><a class="anchor" aria-label="anchor" href="#unreleased"></a></h2>
+<h2 id="unreleased"><a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/main...v2.0.1" class="external-link">Unreleased</a><a class="anchor" aria-label="anchor" href="#unreleased"></a></h2>
+</div>
+<div class="section level2">
+<h2 id="201-2022-11-16">
+<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...v2.0.1" class="external-link">2.0.1</a> 2022-11-16<a class="anchor" aria-label="anchor" href="#201-2022-11-16"></a></h2>
 <div class="section level3">
 <h3 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a></h3>
 <ul><li><p><code>calibrate</code> can now use the Mathews Correlation Coefficient as the summary statistic of to keep or reject parameter sets (@ChrisJones687, #145).</p></li>
@@ -72,17 +76,11 @@
 <div class="section level3">
 <h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
 <ul><li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, <code>auto_manage</code> and <code>pops</code> no longer take network_min_distance and network_max_distance as these parameters are now passed in through the parameter_means and parameter_cov_matrix parameters and are calibrated as part of the calibration if network kernel is selected (@ChrisJones687, #140).</p></li>
-<li>
-<p><code>calibrate</code> now calibrates the network_min_distance and network_max_distance parameters during calibration and they are now part of the parameter_means and parameter_cov_matrix that are exported from the calibration (@ChrisJones687, #140).</p>
-<ul><li>
-<code>calibrate</code> has more flexible success metric options removes use_distance, use_rmse, and use_mcc parameters and replaces it with the more flexible success_metrics parameter. Users can now select multiple combinations of different success metrics for the calibration (@ChrisJones687, #150).</li>
-</ul></li>
+<li><p><code>calibrate</code> now calibrates the network_min_distance and network_max_distance parameters during calibration and they are now part of the parameter_means and parameter_cov_matrix that are exported from the calibration (@ChrisJones687, #140).</p></li>
+<li><p><code>calibrate</code> has more flexible success metric options removes use_distance, use_rmse, and use_mcc parameters and replaces it with the more flexible success_metrics parameter. Users can now select multiple combinations of different success metrics for the calibration (@ChrisJones687, #150).</p></li>
 <li><p><code>pops_multirun</code> removed the ability to write all simulations. (@ChrisJones687, #144).</p></li>
-<li>
-<p>the deterministic parameter has been renamed to dispersal_stochasticity. This was done to be more consistent with generate_stochasticity, movement_stochasticity, and establishment_stochasticity parameters (@ChrisJones687, #147).</p>
-<ul><li>
-<code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, and <code>pops</code> now propogate uncertainty from host and initial conditions. This adds the parameters use_initial_condition_uncertainty and use_host_uncertainty. If use_initial_condition_uncertainty is TRUE the infected_file and/or exposed_file need to have 2 layers a mean and standard deviation. If use_host_uncertainty is is TRUE the host_file needs to have 2 layers a mean and standard deviation. For each model run a host and/or initial conditions are drawn from the mean and sd layers so that each run has a unique host and/or initial conditions this will allow for both propogation of uncertainty from these sources but also partitioning (@ChrisJones687, #151).</li>
-</ul></li>
+<li><p>the deterministic parameter has been renamed to dispersal_stochasticity. This was done to be more consistent with generate_stochasticity, movement_stochasticity, and establishment_stochasticity parameters (@ChrisJones687, #147).</p></li>
+<li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, and <code>pops</code> now propogate uncertainty from host and initial conditions. This adds the parameters use_initial_condition_uncertainty and use_host_uncertainty. If use_initial_condition_uncertainty is TRUE the infected_file and/or exposed_file need to have 2 layers a mean and standard deviation. If use_host_uncertainty is is TRUE the host_file needs to have 2 layers a mean and standard deviation. For each model run a host and/or initial conditions are drawn from the mean and sd layers so that each run has a unique host and/or initial conditions this will allow for both propogation of uncertainty from these sources but also partitioning (@ChrisJones687, #151).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
