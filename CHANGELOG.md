@@ -14,6 +14,8 @@ this repository.
 
 ## [Unreleased]
 
+## [2.0.1] 2022-11-16
+
 ### Added
 
 - `calibrate` can now use the Mathews Correlation Coefficient as the summary statistic of 
@@ -35,7 +37,7 @@ this repository.
   during calibration and they are now part of the parameter_means and parameter_cov_matrix
   that are exported from the calibration (@ChrisJones687, #140).
   
-  - `calibrate` has more flexible success metric options removes use_distance, use_rmse, and use_mcc
+- `calibrate` has more flexible success metric options removes use_distance, use_rmse, and use_mcc
   parameters and replaces it with the more flexible success_metrics parameter. Users can now
   select multiple combinations of different success metrics for the calibration 
   (@ChrisJones687, #150).
@@ -46,7 +48,7 @@ this repository.
   was done to be more consistent with generate_stochasticity, movement_stochasticity, and 
   establishment_stochasticity parameters (@ChrisJones687, #147).
   
-  - `validate`, `calibrate`, `pops_multirun`, and `pops` now propogate uncertainty from host and 
+- `validate`, `calibrate`, `pops_multirun`, and `pops` now propogate uncertainty from host and 
   initial conditions. This adds the parameters use_initial_condition_uncertainty and
   use_host_uncertainty. If use_initial_condition_uncertainty is TRUE the infected_file and/or
   exposed_file need to have 2 layers a mean and standard deviation. If use_host_uncertainty is
@@ -202,7 +204,8 @@ Version 1.0.0 of the _PoPS Core_ C++ library and its interfaces: _rpops_ R packa
 - Probability of quarantine escape (`escape_probability`).
 
 
-[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...main
+[unreleased]: https://github.com/ncsu-landscape-dynamics/rpops/compare/main...v2.0.1
+[2.0.1]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/ncsu-landscape-dynamics/rpops/compare/1.1.0...v2.0.0
 [1.1.0]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...1.1.0
 [1.0.2]: https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.0...v1.0.2
