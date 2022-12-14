@@ -462,6 +462,9 @@ configuration <- function(config) {
       config$movements_dates <- movements_check$movements_dates
     } else {
       config$failure <- movements_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$movements_file)
+      }
       return(config)
     }
   } else {
