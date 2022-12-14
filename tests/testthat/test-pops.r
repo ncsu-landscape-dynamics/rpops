@@ -1,10 +1,8 @@
 context("test-pops")
 
 test_that("Model stops if files don't exist or aren't the correct extension", {
-  infected_file <-
-    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  infected_file <- ""
+  host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
     system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
   temperature_file <-
@@ -14,41 +12,48 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
 
-  expect_error(pops(infected_file = "",
+  expect_error(pops(infected_file = infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(infected_file))
 
+  infected_file <- system.file("extdata", "simple2x2", "infected.csv", package = "PoPS")
  expect_error(pops(
-    infected_file =  system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
+    infected_file =  infected_file,
     host_file =  host_file,
     total_populations_file =  host_file,
     parameter_means = parameter_means,
     parameter_cov_matrix = parameter_cov_matrix),
     raster_type_error, fixed = TRUE)
 
+ host_file <- ""
+ infected_file <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   expect_error(pops(infected_file =  infected_file,
                     host_file = "",
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error)
+               detailed_file_exists_error(host_file))
 
+  host_file <- system.file("extdata", "simple2x2", "infected.csv", package = "PoPS")
   expect_error(pops(infected_file =  infected_file,
-                    host_file =
-                      system.file("extdata", "simple2x2", "infected.csv", package = "PoPS"),
+                    host_file = host_file,
                     total_populations_file =  host_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
+
+  host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  total_populations_file <- ""
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
-                    total_populations_file = "",
+                    total_populations_file =  total_populations_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(total_populations_file))
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =
@@ -56,14 +61,17 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
+
+  temperature_file <- ""
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     use_lethal_temperature = TRUE,
-                    temperature_file = "",
+                    temperature_file = temperature_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(temperature_file))
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -73,14 +81,19 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
+
+  temperature_file <-
+    system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
+  temperature_coefficient_file <- ""
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     temp = TRUE,
-                    temperature_coefficient_file = "",
+                    temperature_coefficient_file = temperature_coefficient_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(temperature_coefficient_file))
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -90,6 +103,8 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
+
+  precipitation_coefficient_file <- ""
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -97,7 +112,8 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     precipitation_coefficient_file = "",
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(precipitation_coefficient_file))
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -107,14 +123,17 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
+
+  treatments_file <- ""
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     management = TRUE,
-                    treatments_file = "",
+                    treatments_file = treatments_file,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(treatments_file))
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -124,30 +143,36 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
                raster_type_error, fixed = TRUE)
+
+  exposed_file <- ""
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     model_type = "SEI",
-                    exposed_file = "",
+                    exposed_file = exposed_file,
                     latency_period = 2,
                     start_exposed = TRUE,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(exposed_file))
+
+  quarantine_areas_file <- ""
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
-                    quarantine_areas_file = "",
+                    quarantine_areas_file = quarantine_areas_file,
                     use_quarantine = TRUE,
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(quarantine_areas_file))
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
                     parameter_means = c(0, 0, 0, 0),
                     parameter_cov_matrix = parameter_cov_matrix),
                paramter_means_error, fixed = TRUE)
+
   expect_error(pops(infected_file =  infected_file,
                     host_file =  host_file,
                     total_populations_file =  host_file,
@@ -2518,9 +2543,7 @@ test_that("Movements works as expected", {
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   use_movements <- TRUE
-  movements_file <-
-    system.file("extdata", "simple20x20", "movements.tif", package = "PoPS")
-
+  movements_file <- system.file("extdata", "simple20x20", "movements.tif", package = "PoPS")
   expect_error(pops(output_frequency = "month",
                     time_step = "month",
                     treatment_dates = start_date,
@@ -2534,11 +2557,9 @@ test_that("Movements works as expected", {
                     use_movements = use_movements,
                     movements_file = movements_file,
                     random_seed = 42),
-               file_exists_error, fixed = TRUE)
+               detailed_file_exists_error(movements_file))
 
-
-  movements_file <-
-    system.file("extdata", "simple20x20", "movements.csv", package = "PoPS")
+  movements_file <- system.file("extdata", "simple20x20", "movements.csv", package = "PoPS")
   data <- pops(output_frequency = "month",
                time_step = "month",
                treatment_dates = start_date,
