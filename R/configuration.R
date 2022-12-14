@@ -232,6 +232,9 @@ configuration <- function(config) {
     infected <- terra::classify(infected, matrix(c(NA, 0), ncol = 2, byrow = TRUE), right = NA)
   } else {
     config$failure <- infected_check$failed_check
+    if (config$failure == file_exists_error) {
+      config$failure <- detailed_file_exists_error(config$infected_file)
+    }
     return(config)
   }
 
@@ -254,6 +257,9 @@ configuration <- function(config) {
     config$host <- host
   } else {
     config$failure <- host_check$failed_check
+    if (config$failure == file_exists_error) {
+      config$failure <- detailed_file_exists_error(config$host_file)
+    }
     return(config)
   }
 
@@ -268,6 +274,9 @@ configuration <- function(config) {
     total_populations <- total_populations_check$raster
   } else {
     config$failure <- total_populations_check$failed_check
+    if (config$failure == file_exists_error) {
+      config$failure <- detailed_file_exists_error(config$total_populations_file)
+    }
     return(config)
   }
 
@@ -283,6 +292,9 @@ configuration <- function(config) {
       survival_rates_stack <- survival_rate_check$raster
     } else {
       config$failure <- survival_rate_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$survival_rates_file)
+      }
       return(config)
     }
 
@@ -310,6 +322,9 @@ configuration <- function(config) {
       temperature_stack <- temperature_check$raster
     } else {
       config$failure <- temperature_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$temperature_file)
+      }
       return(config)
     }
 
@@ -340,6 +355,9 @@ configuration <- function(config) {
       temperature_coefficient <- temperature_coefficient_check$raster
     } else {
       config$failure <- temperature_coefficient_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$temperature_coefficient_file)
+      }
       return(config)
     }
 
@@ -358,6 +376,9 @@ configuration <- function(config) {
         precipitation_coefficient <- precipitation_coefficient_check$raster
       } else {
         config$failure <- precipitation_coefficient_check$failed_check
+        if (config$failure == file_exists_error) {
+          config$failure <- detailed_file_exists_error(config$precipitation_coefficient_file)
+        }
         return(config)
       }
 
@@ -376,6 +397,9 @@ configuration <- function(config) {
       precipitation_coefficient <- precipitation_coefficient_check$raster
     } else {
       config$failure <- precipitation_coefficient_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$precipitation_coefficient_file)
+      }
       return(config)
     }
 
@@ -406,6 +430,9 @@ configuration <- function(config) {
       treatment_stack <- treatments_check$raster
     } else {
       config$failure <- treatments_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$treatments_file)
+      }
       return(config)
     }
 
@@ -474,6 +501,9 @@ configuration <- function(config) {
       }
     } else {
       config$failure <- exposed_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$exposed_file)
+      }
       return(config)
     }
   } else {
@@ -561,6 +591,9 @@ configuration <- function(config) {
       config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
     } else {
       config$failure <- mask_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$mask)
+      }
       return(config)
     }
   } else {
@@ -612,6 +645,9 @@ configuration <- function(config) {
       config$quarantine_areas <- terra::as.matrix(quarantine_areas, wide = TRUE)
     } else {
       config$failure <- quarantine_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$quarantine_areas_file)
+      }
       return(config)
     }
   } else {
