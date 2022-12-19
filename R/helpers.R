@@ -2,8 +2,13 @@
 # and past code across main functions
 
 # add error variables that can be returned from functions and used in tests
-file_exists_error <-
-  "file does not exist"
+file_exists_error <- "does not exist."
+
+detailed_file_exists_error <- function(file_name) {
+  error_message <-
+    paste( deparse(substitute(file_name)), "does not exist. Current path is", file_name, sep = " ")
+  return(error_message)
+}
 frequency_error <-
   "Output frequency must be either 'week', 'month', 'day', 'year', 'time_step', or 'every_n_steps'"
 raster_type_error <-
