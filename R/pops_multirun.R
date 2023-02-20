@@ -562,10 +562,8 @@ pops_multirun <- function(infected_file,
     }
 
     raster_stacks2 <- do.call(cbind, raster_stacks)
-    raster_stacks2 <-
-      array(raster_stacks2, dim = c(dim(raster_stacks[[1]]), length(raster_stacks)))
-    sim_mean <-
-      round(apply(raster_stacks2, c(1, 2), mean, na.rm = TRUE), digits = 0)
+    raster_stacks2 <- array(raster_stacks2, dim = c(dim(raster_stacks[[1]]), length(raster_stacks)))
+    sim_mean <- apply(raster_stacks2, c(1, 2), mean, na.rm = TRUE)
     sim_sd <- apply(raster_stacks2, c(1, 2), sd, na.rm = TRUE)
 
     simulation_mean <-
