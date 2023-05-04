@@ -115,7 +115,9 @@ validate <- function(infected_years_file,
                      use_distance = FALSE,
                      use_configuration = FALSE,
                      use_initial_condition_uncertainty = FALSE,
-                     use_host_uncertainty = FALSE) {
+                     use_host_uncertainty = FALSE,
+                     weather_type = "deterministic",
+                     dispersers_to_soils_percentage = 0) {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -193,6 +195,8 @@ validate <- function(infected_years_file,
   config$use_distance <- use_distance
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
 
   config <- configuration(config)
 
@@ -324,7 +328,10 @@ validate <- function(infected_years_file,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
         network_filename = config$network_filename,
-        network_movement = config$network_movement
+        network_movement = config$network_movement,
+        weather_size = config$weather_size,
+        weather_type = config$weather_type,
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
       )
 
 

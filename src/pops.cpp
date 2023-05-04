@@ -91,7 +91,10 @@ List pops_model_cpp(
     int survival_rate_day = 0,
     Nullable<List> overpopulation_config = R_NilValue,
     Nullable<List> network_config = R_NilValue,
-    Nullable<List> network_data_config = R_NilValue)
+    Nullable<List> network_data_config = R_NilValue,
+    int weather_size = 0,
+    std::string weather_type = "deterministic",
+    double dispersers_to_soils_percentage = 0)
 {
     Config config;
     config.random_seed = random_seed;
@@ -105,10 +108,14 @@ List pops_model_cpp(
     config.movement_stochasticity = bool_config["movement_stochasticity"];
     config.dispersal_stochasticity = bool_config["dispersal_stochasticity"];
     config.establishment_probability = establishment_probability;
+
     config.use_lethal_temperature = bool_config["use_lethal_temperature"];
     config.lethal_temperature = lethal_temperature;
     config.lethal_temperature_month = lethal_temperature_month;
     config.weather = bool_config["weather"];
+    config.weather_size = weather_size;
+    config.weather_type = weather_type;
+
     config.reproductive_rate = reproductive_rate;
     config.model_type = model_type_;
     config.latency_period_steps = latency_period;
@@ -177,6 +184,7 @@ List pops_model_cpp(
     int start_month = season_month_start_end["start_month"];
     int end_month = season_month_start_end["end_month"];
     config.set_season_start_end_month(start_month, end_month);
+    congif.dispesers_to_soil_perctage;
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;

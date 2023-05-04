@@ -185,6 +185,11 @@
 #' @param use_host_uncertainty boolean to indicate whether or not to propagate and partition
 #' uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
 #' and one with the standard deviation.
+#' @param weather_type string indicating how the weather data is passed in  either
+#' as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+#' series ("deterministic")
+#' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
+#' of dispersers that fall to the soil and survive.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -262,7 +267,9 @@ pops <- function(infected_file,
                  network_filename = "",
                  network_movement = "walk",
                  use_initial_condition_uncertainty = FALSE,
-                 use_host_uncertainty = FALSE) {
+                 use_host_uncertainty = FALSE,
+                 weather_type = "deterministic",
+                 dispersers_to_soils_percentage = 0) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -340,6 +347,8 @@ pops <- function(infected_file,
   config$network_movement <- network_movement
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
 
   config <- configuration(config)
 
@@ -457,7 +466,10 @@ pops <- function(infected_file,
                      network_min_distance = config$network_min_distance[1],
                      network_max_distance = config$network_max_distance[1],
                      network_filename = config$network_filename,
-                     network_movement = config$network_movement
+                     network_movement = config$network_movement,
+                     weather_size = config$weather_size,
+                     weather_type = config$weather_type,
+                     dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
   )
 
   return(data)

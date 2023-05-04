@@ -408,11 +408,14 @@ configuration <- function(config) {
   }
 
   if (config$weather == TRUE) {
+    config$weather_size <- terra::nlyr(weather_coefficient)
     weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]], wide = TRUE))
     for (i in 2:terra::nlyr(weather_coefficient_stack)) {
       weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
     }
   } else {
+    config$weather_size <- 0
+    config$weather_type <- "None"
     weather_coefficient <- list(one_matrix)
   }
 

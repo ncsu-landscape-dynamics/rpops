@@ -99,7 +99,9 @@ pops_multirun <- function(infected_file,
                           network_filename = "",
                           network_movement = "walk",
                           use_initial_condition_uncertainty = FALSE,
-                          use_host_uncertainty = FALSE) {
+                          use_host_uncertainty = FALSE,
+                          weather_type = "deterministic",
+                          dispersers_to_soils_percentage = 0) {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -174,6 +176,8 @@ pops_multirun <- function(infected_file,
   config$network_movement <- network_movement
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
 
   config <- configuration(config)
 
@@ -306,7 +310,10 @@ pops_multirun <- function(infected_file,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
         network_filename = config$network_filename,
-        network_movement = config$network_movement
+        network_movement = config$network_movement,
+        weather_size = config$weather_size,
+        weather_type = config$weather_type,
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
       )
 
       run <- c()

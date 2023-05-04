@@ -190,7 +190,9 @@ calibrate <- function(infected_years_file,
                       network_movement = "walk",
                       success_metric = "mcc",
                       use_initial_condition_uncertainty = FALSE,
-                      use_host_uncertainty = FALSE) {
+                      use_host_uncertainty = FALSE,
+                      weather_type = "deterministic",
+                      dispersers_to_soils_percentage = 0) {
 
   # add all data to config list
   config <- c()
@@ -275,6 +277,8 @@ calibrate <- function(infected_years_file,
   config$success_metric <- success_metric
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -412,7 +416,10 @@ calibrate <- function(infected_years_file,
         network_min_distance = network_min_distance,
         network_max_distance = network_max_distance,
         network_filename = config$network_filename,
-        network_movement = config$network_movement
+        network_movement = config$network_movement,
+        weather_size = config$weather_size,
+        weather_type = config$weather_type,
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
       )
       return(data)
     }

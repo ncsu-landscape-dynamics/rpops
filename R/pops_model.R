@@ -72,6 +72,12 @@
 #' anthropogenic_kernel_type = 'network'.
 #' @param survival_rates vector of matrices of survival rates used to determine percentage of
 #' overwinter population that emerges
+#' @param weather_size the number of matrices in a list or layers in a raster object
+#' @param weather_type string indicating how the weather data is passed in  either
+#' as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+#' series ("deterministic")
+#' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
+#' of dispersers that fall to the soil and survive.
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -154,7 +160,10 @@ pops_model <-
            network_min_distance = 0,
            network_max_distance = 0,
            network_filename = "",
-           network_movement = "walk") {
+           network_movement = "walk",
+           weather_size = 0,
+           weather_type = "deterministic",
+           dispersers_to_soils_percentage = 0) {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
@@ -261,7 +270,10 @@ pops_model <-
                      establishment_probability = establishment_probability,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
-                     network_data_config = network_data_config
+                     network_data_config = network_data_config,
+                     weather_size = weather_size,
+                     weather_type = weather_type,
+                     dispersers_to_soils_percentage = dispersers_to_soils_percentag
     )
 
   }
