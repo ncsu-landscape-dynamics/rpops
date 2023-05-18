@@ -2,6 +2,7 @@
 
 export(calibrate)
 export(configuration)
+export(optimize)
 export(pops)
 export(pops_model)
 export(pops_multirun)
