@@ -253,7 +253,9 @@ estimate_initial_threshold <- function(points,
     results_list[[run]] <- run_pops(config, treatment$raster)
   }
   scores <- sapply(results_list, scoring, baseline, score_weights)
-  return(quantile(scores, probs = 0.1))
+  threshold <- quantile(scores, probs = 0.1)
+  threshold_step <- abs(threshold - quantile(scores, probs = 0.2))
+  return(list(threshold = threshold, threshold_step = threshold_step))
 }
 
 scoring <- function(simulated, baseline, weights=c(1, 1)) {
@@ -309,6 +311,7 @@ generation <- function(points,
                        min_particles,
                        threshold_percentile,
                        threshold,
+                       threshold_step,
                        baseline,
                        score_weights,
                        config) {
@@ -354,12 +357,25 @@ generation <- function(points,
         ", best score: ", best$score
       )
     }
+    if ((tested == 50) && (acceptance_rate < 0.05 || acceptance_rate > 0.15)) {
+      if (acceptance_rate < 0.05) {
+        threshold <- threshold + threshold_step
+      } else {
+        threshold <- threshold - threshold_step
+      }
+      particle_count <- 0
+      tested <- 0
+      best$score <- 1
+      new_weights <- setNames(as.list(rep(0, length(points$cat))), points$cat)
+    }
   }
   new_threshold <- quantile(score_list, probs = threshold_percentile / 100)
+  threshold_step <- abs(new_threshold - quantile(score_list, probs = (threshold_percentile + 10) / 100))
   output <- list(
     weights = new_weights,
     acceptance_rate = acceptance_rate,
     threshold = new_threshold,
+    threshold_step = threshold_step,
     best = best
   )
   return(output)
@@ -548,7 +564,8 @@ optimize <- function(infestation_potential_file,
 
   # initial threshold
   thresholds <- c()
-  thresholds[1] <- estimate_initial_threshold(
+
+  initial_threshold <- estimate_initial_threshold(
     infected_points,
     weight_column,
     treatments_raster,
@@ -558,6 +575,8 @@ optimize <- function(infestation_potential_file,
     score_weights,
     config
   )
+  thresholds[1] <- initial_threshold$threshold
+  threshold_step <- initial_threshold$threshold_step
 
   filtered_points <- infected_points
   tmp_points <- infected_points
@@ -576,12 +595,14 @@ optimize <- function(infestation_potential_file,
       min_particles,
       threshold_percentile,
       thresholds[length(thresholds)],
+      threshold_step,
       baseline,
       score_weights,
       config
     )
     acceptance_rates <- append(acceptance_rates, results$acceptance_rate)
     thresholds <- append(thresholds, results$threshold)
+    threshold_step <- results$threshold_step
     new_weight_column <- paste0("weight_", iteration + 1)
     new_weights <- results$weights
     filtered_points[[new_weight_column]] <- results$weights[match(
@@ -645,6 +666,8 @@ optimize <- function(infestation_potential_file,
     terra::writeRaster(results$best$treatment, file_name, overwrite = TRUE)
     file_name <- file.path(output_folder_path, "best_guess_candidate.gpkg")
     terra::writeVector(best_guess$result$candidate, file_name, overwrite = TRUE)
+    file_name <- file.path(output_folder_path, "output.rdata")
+    save(output, file = file_name)
   }
   return(output)
 }
