@@ -504,6 +504,7 @@
       "Version": "1.6.2",
       "Source": "Repository",
       "Repository": "CRAN",
+
       "Requirements": [
         "R",
         "methods"
@@ -1353,6 +1354,16 @@
       ],
       "Hash": "8548b44f79a35ba1791308b61e6012d7"
     },
+    "timechange": {
+      "Package": "timechange",
+      "Version": "0.2.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "8548b44f79a35ba1791308b61e6012d7",
+      "Requirements": [
+        "cpp11"
+      ]
+    },
     "tinytex": {
       "Package": "tinytex",
       "Version": "0.45",
@@ -1426,6 +1437,7 @@
       "Version": "2.5.0",
       "Source": "Repository",
       "Repository": "CRAN",
+
       "Requirements": [
         "R",
         "grDevices",
