@@ -65,7 +65,6 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           # install spatial dependencies
-          rm '/usr/local/bin/gfortran'
           brew install pkg-config gdal proj geos harfbuzz fribidi
           export LDFLAGS="-L/usr/local/opt/libpq/lib"
           export CPPFLAGS="-I/usr/local/opt/libpq/include"
