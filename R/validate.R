@@ -64,6 +64,10 @@ validate <- function(infected_years_file,
                      season_month_end = 12,
                      start_date = "2008-01-01",
                      end_date = "2008-12-31",
+                     use_survival_rates = FALSE,
+                     survival_rate_month = 3,
+                     survival_rate_day = 15,
+                     survival_rates_file = "",
                      use_lethal_temperature = FALSE,
                      temperature_file = "",
                      lethal_temperature = -12.87,
@@ -92,7 +96,7 @@ validate <- function(infected_years_file,
                      generate_stochasticity = TRUE,
                      establishment_stochasticity = TRUE,
                      movement_stochasticity = TRUE,
-                     deterministic = FALSE,
+                     dispersal_stochasticity = TRUE,
                      establishment_probability = 0.5,
                      dispersal_percentage = 0.99,
                      quarantine_areas_file = "",
@@ -107,8 +111,11 @@ validate <- function(infected_years_file,
                      output_folder_path = "",
                      point_file = "",
                      network_filename = "",
+                     network_movement = "walk",
                      use_distance = FALSE,
-                     use_configuration = FALSE) {
+                     use_configuration = FALSE,
+                     use_initial_condition_uncertainty = FALSE,
+                     use_host_uncertainty = FALSE) {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -131,6 +138,10 @@ validate <- function(infected_years_file,
   config$temperature_file <- temperature_file
   config$lethal_temperature <- lethal_temperature
   config$lethal_temperature_month <- lethal_temperature_month
+  config$use_survival_rates <- use_survival_rates
+  config$survival_rate_month <- survival_rate_month
+  config$survival_rate_day <- survival_rate_day
+  config$survival_rates_file <- survival_rates_file
   config$mortality_on <- mortality_on
   config$mortality_rate <- mortality_rate
   config$mortality_time_lag <- mortality_time_lag
@@ -153,7 +164,7 @@ validate <- function(infected_years_file,
   config$generate_stochasticity <- generate_stochasticity
   config$establishment_stochasticity <- establishment_stochasticity
   config$movement_stochasticity <- movement_stochasticity
-  config$deterministic <- deterministic
+  config$dispersal_stochasticity <- dispersal_stochasticity
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
@@ -177,8 +188,11 @@ validate <- function(infected_years_file,
   config$mortality_frequency_n <- mortality_frequency_n
   config$point_file <- point_file
   config$network_filename <- network_filename
+  config$network_movement <- network_movement
   config$use_configuration <- use_configuration
   config$use_distance <- use_distance
+  config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
+  config$use_host_uncertainty <- use_host_uncertainty
 
   config <- configuration(config)
 
@@ -199,13 +213,49 @@ validate <- function(infected_years_file,
     ) %dopar% {
 
       config$random_seed <- round(stats::runif(1, 1, 1000000))
-      config <- draw_parameters(config)
+      config <- draw_parameters(config) # draws parameter set for the run
+
+      if (config$use_initial_condition_uncertainty) {
+        config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+        exposed <- config$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        config$exposed <- exposed
+      } else {
+        config$infected <- config$infected_mean
+        exposed2 <- config$exposed_mean
+        exposed <- config$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        config$exposed <- exposed
+      }
+
+      if (config$use_host_uncertainty) {
+        config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+      } else {
+        config$host <- config$host_mean
+      }
+
+      susceptible <- config$host - config$infected - exposed2
+      susceptible[susceptible < 0] <- 0
+
+      config$susceptible <- susceptible
+      config$total_hosts <- config$host
+      config$total_exposed <- exposed2
+
+      if (config$mortality_on) {
+        mortality_tracker2 <- config$mortality_tracker
+        mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
+        config$mortality_tracker <- mortality_tracker2
+      }
 
       data <- pops_model(
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
+        use_survival_rates = config$use_survival_rates,
+        survival_rate_month = config$survival_rate_month,
+        survival_rate_day = config$survival_rate_day,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -225,6 +275,7 @@ validate <- function(infected_years_file,
         movements_dates = config$movements_dates,
         weather = config$weather,
         temperature = config$temperature,
+        survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
         res = config$res,
         rows_cols = config$rows_cols,
@@ -262,7 +313,7 @@ validate <- function(infected_years_file,
         generate_stochasticity = config$generate_stochasticity,
         establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
-        deterministic = config$deterministic,
+        dispersal_stochasticity = config$dispersal_stochasticity,
         establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
@@ -272,7 +323,8 @@ validate <- function(infected_years_file,
         bbox = config$bounding_box,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
-        network_filename = config$network_filename
+        network_filename = config$network_filename,
+        network_movement = config$network_movement
       )
 
 
@@ -283,11 +335,11 @@ validate <- function(infected_years_file,
         ) %do% {
           # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers and pointers using %dopar%
-          comparison <- terra::rast(config$infected_file)
-          reference <- terra::rast(config$infected_file)
+          comparison <- terra::rast(config$infected_file)[[1]]
+          reference <- terra::rast(config$infected_file)[[1]]
           terra::values(comparison) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
-          mask <- terra::rast(config$infected_file)
+          mask <- terra::rast(config$infected_file)[[1]]
           terra::values(mask) <- config$mask_matrix
           ad <-
             quantity_allocation_disagreement(reference,

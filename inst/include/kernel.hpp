@@ -1,5 +1,5 @@
 /*
- * PoPS model - main disperal kernel
+ * PoPS model - main dispersal kernel
  *
  * Copyright (C) 2019-2021 by the authors.
  *

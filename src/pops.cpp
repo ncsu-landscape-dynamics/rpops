@@ -58,6 +58,7 @@ List pops_model_cpp(
     std::vector<std::vector<int>> movements,
     std::vector<std::string> movements_dates,
     std::vector<NumericMatrix> temperature,
+    std::vector<NumericMatrix> survival_rates,
     std::vector<NumericMatrix> weather_coefficient,
     List bbox,
     List res,
@@ -86,6 +87,8 @@ List pops_model_cpp(
     int latency_period = 0,
     double establishment_probability = 0,
     double dispersal_percentage = 0.99,
+    int survival_rate_month = 0,
+    int survival_rate_day = 0,
     Nullable<List> overpopulation_config = R_NilValue,
     Nullable<List> network_config = R_NilValue,
     Nullable<List> network_data_config = R_NilValue)
@@ -100,7 +103,7 @@ List pops_model_cpp(
     config.generate_stochasticity = bool_config["generate_stochasticity"];
     config.establishment_stochasticity = bool_config["establishment_stochasticity"];
     config.movement_stochasticity = bool_config["movement_stochasticity"];
-    config.deterministic = bool_config["deterministic"];
+    config.dispersal_stochasticity = bool_config["dispersal_stochasticity"];
     config.establishment_probability = establishment_probability;
     config.use_lethal_temperature = bool_config["use_lethal_temperature"];
     config.lethal_temperature = lethal_temperature;
@@ -113,6 +116,10 @@ List pops_model_cpp(
     config.natural_scale = natural_distance_scale;
     config.natural_direction = natural_dir;
     config.natural_kappa = natural_kappa;
+
+    config.use_survival_rate = bool_config["use_survival_rate"];
+    config.survival_rate_day = survival_rate_day;
+    config.survival_rate_month = survival_rate_month;
 
     config.use_anthropogenic_kernel = bool_config["use_anthropogenic_kernel"];
     config.percent_natural_dispersal = percent_natural_dispersal;
@@ -261,6 +268,8 @@ List pops_model_cpp(
         List net_config(network_config);
         config.network_min_distance = net_config["network_min_distance"];
         config.network_max_distance = net_config["network_max_distance"];
+        std::string network_movement = net_config["network_movement"];
+        config.network_movement = network_movement;
         network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
         List net_data_config(network_data_config);
         std::ifstream network_stream{Rcpp::as<std::string>(net_data_config["network_filename"])};
@@ -289,6 +298,7 @@ List pops_model_cpp(
             mortality_tracker,
             mortality,
             temperature,
+            survival_rates,
             weather_coefficient[current_index],
             treatments,
             resistant,

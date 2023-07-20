@@ -27,6 +27,10 @@ calibrate(
   season_month_end = 12,
   start_date = "2008-01-01",
   end_date = "2008-12-31",
+  use_survival_rates = FALSE,
+  survival_rate_month = 3,
+  survival_rate_day = 15,
+  survival_rates_file = "",
   use_lethal_temperature = FALSE,
   temperature_file = "",
   lethal_temperature = -12.87,
@@ -57,7 +61,7 @@ calibrate(
   generate_stochasticity = TRUE,
   establishment_stochasticity = TRUE,
   movement_stochasticity = TRUE,
-  deterministic = FALSE,
+  dispersal_stochasticity = TRUE,
   establishment_probability = 0.5,
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
@@ -74,9 +78,10 @@ calibrate(
   write_outputs = "None",
   output_folder_path = "",
   network_filename = "",
-  use_distance = FALSE,
-  use_rmse = FALSE,
-  use_mcc = FALSE
+  network_movement = "walk",
+  success_metric = "mcc",
+  use_initial_condition_uncertainty = FALSE,
+  use_host_uncertainty = FALSE
 )
 }
 \arguments{
@@ -200,6 +205,17 @@ or pathogen (integer value between 1 and 12)}
 
 \item{end_date}{date to end the simulation with format ('YYYY_MM_DD')}
 
+\item{use_survival_rates}{boolean to indicate if the model will use survival rates to limit the
+survival or emergence of overwintering generations.}
+
+\item{survival_rate_month}{What month do over wintering generations emerge. We suggest using the
+month before for this parameter as it is when the survival rates raster will be applied.}
+
+\item{survival_rate_day}{what day should the survival rates be applied}
+
+\item{survival_rates_file}{Raster file with survival rates from 0 to 1 representing the
+percentage of emergence for a cell.}
+
 \item{use_lethal_temperature}{a boolean to answer the question: does your
 pest or pathogen have a temperature at which it cannot survive?
 (TRUE or FALSE)}
@@ -309,8 +325,8 @@ stochasticity in establishment functions default is TRUE}
 \item{movement_stochasticity}{Boolean to indicate whether to use
 stochasticity in movement functions default is TRUE}
 
-\item{deterministic}{Boolean to indicate whether to use a deterministic
-dispersal kernel default is FALSE}
+\item{dispersal_stochasticity}{Boolean to indicate whether to use a stochasticity in the
+dispersal kernel default is TRUE}
 
 \item{establishment_probability}{Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
@@ -364,14 +380,32 @@ Defaults if FALSE.}
 \item{network_filename}{entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
 
-\item{use_distance}{Boolean if you want to compare distance between
-simulations and observations. Default is FALSE.}
+\item{network_movement}{What movement type do you want to use in the network kernel either
+"walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
+along the edge. "jump" automatically moves to the nearest node when moving through the network.
+"teleport" moves from node to node most likely used for airport and seaport networks.}
 
-\item{use_rmse}{Boolean if you want to calibrate based on rmse. This is
-useful if you have very good population level observations. Default is FALSE.}
+\item{success_metric}{Choose the success metric that is most relevant to your system or data for
+comparing simulations vs. observations. Must be one of "quantity", "allocation", "configuration",
+"quantity and allocation","quantity and configuration", "allocation and configuration",
+"quantity, allocation, and configuration", "accuracy", "precision", "recall", "specificity",
+"accuracy and precision", "accuracy and specificity", "accuracy and recall",
+"precision and recall", "precision and specificity", "recall and specificity",
+"accuracy, precision, and recall", "accuracy, precision, and specificity",
+"accuracy, recall, and specificity", "precision, recall, and specificity",
+"accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
+"mcc and distance", "rmse and distance", "mcc and configuration", "mcc and RMSE",
+"mcc, quantity, and configuration"). Default is "mcc"}
 
-\item{use_mcc}{Boolean if you want the calibration to be based on the Mathews Correlation
-coefficient. This}
+\item{use_initial_condition_uncertainty}{boolean to indicate whether or not to propagate and
+partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+one with the mean value and one with the standard deviation. If an SEI model is used the
+exposed_file needs to have 2 layers one with the mean value and one with the standard
+deviation}
+
+\item{use_host_uncertainty}{boolean to indicate whether or not to propagate and partition
+uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
+and one with the standard deviation.}
 }
 \value{
 a dataframe of the variables saved and their success metrics for

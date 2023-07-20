@@ -85,12 +85,17 @@
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
-#' @param use_distance Boolean if you want to compare distance between
-#' simulations and observations. Default is FALSE.
-#' @param use_rmse Boolean if you want to calibrate based on rmse. This is
-#' useful if you have very good population level observations. Default is FALSE.
-#' @param use_mcc Boolean if you want the calibration to be based on the Mathews Correlation
-#' coefficient. This
+#' @param success_metric Choose the success metric that is most relevant to your system or data for
+#' comparing simulations vs. observations. Must be one of "quantity", "allocation", "configuration",
+#' "quantity and allocation","quantity and configuration", "allocation and configuration",
+#' "quantity, allocation, and configuration", "accuracy", "precision", "recall", "specificity",
+#' "accuracy and precision", "accuracy and specificity", "accuracy and recall",
+#' "precision and recall", "precision and specificity", "recall and specificity",
+#' "accuracy, precision, and recall", "accuracy, precision, and specificity",
+#' "accuracy, recall, and specificity", "precision, recall, and specificity",
+#' "accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
+#' "mcc and distance", "rmse and distance", "mcc and configuration", "mcc and RMSE",
+#' "mcc, quantity, and configuration"). Default is "mcc"
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
@@ -131,6 +136,10 @@ calibrate <- function(infected_years_file,
                       season_month_end = 12,
                       start_date = "2008-01-01",
                       end_date = "2008-12-31",
+                      use_survival_rates = FALSE,
+                      survival_rate_month = 3,
+                      survival_rate_day = 15,
+                      survival_rates_file = "",
                       use_lethal_temperature = FALSE,
                       temperature_file = "",
                       lethal_temperature = -12.87,
@@ -161,7 +170,7 @@ calibrate <- function(infected_years_file,
                       generate_stochasticity = TRUE,
                       establishment_stochasticity = TRUE,
                       movement_stochasticity = TRUE,
-                      deterministic = FALSE,
+                      dispersal_stochasticity = TRUE,
                       establishment_probability = 0.5,
                       dispersal_percentage = 0.99,
                       quarantine_areas_file = "",
@@ -178,9 +187,10 @@ calibrate <- function(infected_years_file,
                       write_outputs = "None",
                       output_folder_path = "",
                       network_filename = "",
-                      use_distance = FALSE,
-                      use_rmse = FALSE,
-                      use_mcc = FALSE) {
+                      network_movement = "walk",
+                      success_metric = "mcc",
+                      use_initial_condition_uncertainty = FALSE,
+                      use_host_uncertainty = FALSE) {
 
   # add all data to config list
   if (!exists('config$saved_calibration') || !config$saved_calibration) {
@@ -212,6 +222,10 @@ calibrate <- function(infected_years_file,
   config$temperature_file <- temperature_file
   config$lethal_temperature <- lethal_temperature
   config$lethal_temperature_month <- lethal_temperature_month
+  config$use_survival_rates <- use_survival_rates
+  config$survival_rate_month <- survival_rate_month
+  config$survival_rate_day <- survival_rate_day
+  config$survival_rates_file <- survival_rates_file
   config$mortality_on <- mortality_on
   config$mortality_rate <- mortality_rate
   config$mortality_time_lag <- mortality_time_lag
@@ -236,7 +250,7 @@ calibrate <- function(infected_years_file,
   config$generate_stochasticity <- generate_stochasticity
   config$establishment_stochasticity <- establishment_stochasticity
   config$movement_stochasticity <- movement_stochasticity
-  config$deterministic <- deterministic
+  config$dispersal_stochasticity <- dispersal_stochasticity
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
@@ -259,9 +273,10 @@ calibrate <- function(infected_years_file,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
   config$network_filename <- network_filename
-  config$use_distance <- use_distance
-  config$use_rmse <- use_rmse
-  config$use_mcc <- use_mcc
+  config$network_movement <- network_movement
+  config$success_metric <- success_metric
+  config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
+  config$use_host_uncertainty <- use_host_uncertainty
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -270,6 +285,12 @@ calibrate <- function(infected_years_file,
   if (!is.null(config$failure)) {
     stop(config$failure)
   }
+
+  if (config$success_metric %notin% success_metric_options) {
+    stop(success_metric_error)
+  }
+
+  config <- set_success_metrics(config)
 
   # set the parameter function to only need the parameters that change so that
   # each call to param func needs to pass in the parameters being calibrated
@@ -282,12 +303,49 @@ calibrate <- function(infected_years_file,
              anthropogenic_kappa,
              network_min_distance,
              network_max_distance) {
-      config$random_seed <- round(runif(1, 1, 1000000))
+
+      config$random_seed <- round(stats::runif(1, 1, 1000000))
+      if (config$use_initial_condition_uncertainty) {
+        config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+        exposed <- config$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        config$exposed <- exposed
+      } else {
+        config$infected <- config$infected_mean
+        exposed2 <- config$exposed_mean
+        exposed <- config$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        config$exposed <- exposed
+      }
+
+      if (config$use_host_uncertainty) {
+        config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+      } else {
+        config$host <- config$host_mean
+      }
+
+      susceptible <- config$host - config$infected - exposed2
+      susceptible[susceptible < 0] <- 0
+
+      config$susceptible <- susceptible
+      config$total_hosts <- config$host
+      config$total_exposed <- exposed2
+
+      if (config$mortality_on) {
+        mortality_tracker2 <- config$mortality_tracker
+        mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
+        config$mortality_tracker <- mortality_tracker2
+      }
+
       data <- pops_model(
         random_seed = config$random_seed,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
+        use_survival_rates = config$use_survival_rates,
+        survival_rate_month = config$survival_rate_month,
+        survival_rate_day = config$survival_rate_day,
         infected = config$infected,
         total_exposed = config$total_exposed,
         exposed = config$exposed,
@@ -307,6 +365,7 @@ calibrate <- function(infected_years_file,
         movements_dates = config$movements_dates,
         weather = config$weather,
         temperature = config$temperature,
+        survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
         res = config$res,
         rows_cols = config$rows_cols,
@@ -344,7 +403,7 @@ calibrate <- function(infected_years_file,
         generate_stochasticity = config$generate_stochasticity,
         establishment_stochasticity = config$establishment_stochasticity,
         movement_stochasticity = config$movement_stochasticity,
-        deterministic = config$deterministic,
+        dispersal_stochasticity = config$dispersal_stochasticity,
         establishment_probability = config$establishment_probability,
         dispersal_percentage = config$dispersal_percentage,
         use_overpopulation_movements = config$use_overpopulation_movements,
@@ -354,7 +413,8 @@ calibrate <- function(infected_years_file,
         bbox = config$bounding_box,
         network_min_distance = network_min_distance,
         network_max_distance = network_max_distance,
-        network_filename = config$network_filename
+        network_filename = config$network_filename,
+        network_movement = config$network_movement
       )
       return(data)
     }
@@ -381,14 +441,17 @@ calibrate <- function(infected_years_file,
     distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
 
     # assign thresholds for summary static values to be compared to the
+    quantity_threshold <- 40 # starting threshold for quantity disagreement
+    allocation_threshold <- 40 # starting threshold for allocation disagreement
+    configuration_threshold <- 0.20 # starting threshold for configuration disagreement
     accuracy_threshold <- 0.70 # starting threshold for model accuracy
     precision_threshold <- 0.70 # starting threshold for model precision
     recall_threshold <- 0.70 # starting threshold for model recall
     specificity_threshold <- 0.70 # starting threshold for model
-    rmse_threshold <- 7 # starting threshold for RMSE (root mean squared error)
+    rmse_threshold <- 5 # starting threshold for RMSE (root mean squared error)
     distance_threshold <- 1000 # starting threshold for distance between simulated
     # and observed data in units
-    mcc_threshold <- 0.50 # starting threshold for Mathews Coorelation coefficient
+    mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
     acceptance_rate_particle_check <- seq(60, 200, 20)
 
     # loop through until all generations are complete
@@ -401,16 +464,25 @@ calibrate <- function(infected_years_file,
         # generation values
         if (config$current_bin == 1) {
           proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
-          proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
+          if (config$res$ew_res > 1000 || config$res$ns_res > 1000) {
+            proposed_natural_distance_scale <- round(runif(1, 0.5, 500), digits = 1) * 10
+            if (params_to_estimate[4]) {
+              proposed_anthropogenic_distance_scale <- round(runif(1, 30, 800), digits = 0) * 100
+            } else {
+              proposed_anthropogenic_distance_scale <- 0.1
+            }
+          } else {
+            proposed_natural_distance_scale <- round(runif(1, 0.5, 500), digits = 1)
+            if (params_to_estimate[4]) {
+              proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
+            } else {
+              proposed_anthropogenic_distance_scale <- 0.1
+            }
+          }
           if (params_to_estimate[3]) {
             proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
           } else {
             proposed_percent_natural_dispersal <- 1.0
-          }
-          if (params_to_estimate[4]) {
-            proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
-          } else {
-            proposed_anthropogenic_distance_scale <- 0.1
           }
           if (params_to_estimate[5]) {
             proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
@@ -487,21 +559,24 @@ calibrate <- function(infected_years_file,
             .packages = c("terra", "PoPS"),
             .final = colSums
           ) %do% {
-            comparison <- terra::rast(config$infected_file)
-            reference <- terra::rast(config$infected_file)
+            comparison <- terra::rast(config$infected_file)[[1]]
+            reference <- terra::rast(config$infected_file)[[1]]
             terra::values(comparison) <- data$infected[[q]]
             terra::values(reference) <- config$infection_years2[[q]]
-            mask <- terra::rast(config$infected_file)
+            mask <- terra::rast(config$infected_file)[[1]]
             terra::values(mask) <- config$mask_matrix
             quantity_allocation_disagreement(reference,
                                              comparison,
-                                             use_configuration = FALSE,
+                                             use_configuration = config$use_configuration,
                                              mask = mask,
                                              use_distance = config$use_distance)
           }
 
         all_disagreement <- as.data.frame(t(all_disagreement))
         all_disagreement <- all_disagreement / length(data$infected)
+        quantity <- all_disagreement$quantity_disagreement
+        allocation <- all_disagreement$allocation_disagreement
+        configuration_dis <- all_disagreement$configuration_disagreement
         accuracy <- all_disagreement$accuracy
         precision <- all_disagreement$precision
         recall <- all_disagreement$recall
@@ -511,53 +586,84 @@ calibrate <- function(infected_years_file,
         mcc <- all_disagreement$mcc
 
         # Check that statistics are improvements
-        model_improved <- FALSE
-        if (config$use_mcc) {
-          if (mcc >= mcc_threshold) {
-            if (config$use_distance) {
-              if (distance_difference <= distance_threshold) {
-                model_improved <- TRUE
-              } else {
-                model_improved <- FALSE
-              }
-            } else {
-              model_improved <- TRUE
-            }
-
-            if (config$use_rmse) {
-              if (rmse <= rmse_threshold) {
-                model_improved <- TRUE
-              } else {
-                model_improved <- FALSE
-              }
-            } else {
-              model_improved <- TRUE
-            }
+        model_improved <- TRUE
+        if (config$use_quantity && model_improved) {
+          if (quantity <= quantity_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
           }
-        } else {
-          if (accuracy >= accuracy_threshold &&
-              precision >= precision_threshold &&
-              recall >= recall_threshold &&
-              specificity >= specificity_threshold) {
-            if (config$use_distance) {
-              if (distance_difference <= distance_threshold) {
-                model_improved <- TRUE
-              } else {
-                model_improved <- FALSE
-              }
-            } else {
-              model_improved <- TRUE
-            }
+        }
 
-            if (config$use_rmse) {
-              if (rmse <= rmse_threshold) {
-                model_improved <- TRUE
-              } else {
-                model_improved <- FALSE
-              }
-            } else {
-              model_improved <- TRUE
-            }
+        if (config$use_allocation && model_improved) {
+          if (allocation <= allocation_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_configuration && model_improved) {
+          if (configuration_dis <= configuration_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_accuracy && model_improved) {
+          if (accuracy >= accuracy_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_precision && model_improved) {
+          if (precision >= precision_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_recall && model_improved) {
+          if (recall >= recall_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_specificity && model_improved) {
+          if (specificity >= specificity_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_mcc && model_improved) {
+          if (mcc >= mcc_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_distance && model_improved) {
+          if (distance_difference <= distance_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
+          }
+        }
+
+        if (config$use_rmse && model_improved) {
+          if (rmse <= rmse_threshold) {
+            model_improved <- TRUE
+          } else {
+            model_improved <- FALSE
           }
         }
 
@@ -580,6 +686,7 @@ calibrate <- function(infected_years_file,
               distance_difference,
               mcc
             )
+
           if (config$current_bin == 1 && config$proposed_particles <= 200) {
             parameters_test[config$proposed_particles, ] <-
               c(
@@ -806,15 +913,15 @@ calibrate <- function(infected_years_file,
         .packages = c("terra", "PoPS"),
         .final = colSums
       ) %do% {
-        comparison <- terra::rast(config$infected_file)
-        reference <- terra::rast(config$infected_file)
+        comparison <- terra::rast(config$infected_file)[[1]]
+        reference <- terra::rast(config$infected_file)[[1]]
         terra::values(comparison) <- data$infected[[q]]
         terra::values(reference) <- config$infection_years2[[q]]
-        mask <- terra::rast(config$infected_file)
+        mask <- terra::rast(config$infected_file)[[1]]
         terra::values(mask) <- config$mask_matrix
         quantity_allocation_disagreement(reference,
                                          comparison,
-                                         use_configuration = FALSE,
+                                         use_configuration = config$use_configuration,
                                          mask = mask,
                                          use_distance = config$use_distance)
       }
@@ -831,21 +938,26 @@ calibrate <- function(infected_years_file,
 
     ## save current state of the system
     current <-
-      data.frame(all_disagreement[, c("accuracy", "precision", "recall",
-                                      "specificity", "rmse",
-                                      "distance_difference", "false_negatives",
-                                      "false_positives", "true_positives",
+      data.frame(all_disagreement[, c("quantity_disagreement", "allocation_disagreement",
+                                      "configuration_disagreement", "accuracy", "precision",
+                                      "recall", "specificity", "rmse", "distance_difference",
+                                      "false_negatives", "false_positives", "true_positives",
                                       "true_negatives", "odds_ratio", "mcc")],
                  reproductive_rate = proposed_reproductive_rate,
                  natural_distance_scale = proposed_natural_distance_scale,
                  anthropogenic_distance_scale = proposed_anthropogenic_distance_scale,
                  percent_natural_dispersal = proposed_percent_natural_dispersal,
                  natural_kappa = proposed_natural_kappa,
-                 anthropogenic_kappa = proposed_anthropogenic_kappa
+                 anthropogenic_kappa = proposed_anthropogenic_kappa,
+                 network_min_distance = proposed_network_min_distance,
+                 network_max_distance = proposed_network_max_distance
       )
 
     params <-
-      data.frame(accuracy = rep(0, config$number_of_iterations),
+      data.frame(quantity = rep(0, config$number_of_iterations),
+                 allocation = rep(0, config$number_of_iterations),
+                 configuration = rep(0, config$number_of_iterations),
+                 accuracy = rep(0, config$number_of_iterations),
                  precision = rep(0, config$number_of_iterations),
                  recall = rep(0, config$number_of_iterations),
                  specificity = rep(0, config$number_of_iterations),
@@ -975,11 +1087,11 @@ calibrate <- function(infected_years_file,
           .packages = c("terra", "PoPS"),
           .final = colSums
         ) %do% {
-          comparison <- terra::rast(config$infected_file)
-          reference <- terra::rast(config$infected_file)
+          comparison <- terra::rast(config$infected_file)[[1]]
+          reference <- terra::rast(config$infected_file)[[1]]
           terra::values(comparison) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
-          mask <- terra::rast(config$infected_file)
+          mask <- terra::rast(config$infected_file)[[1]]
           terra::values(mask) <- config$mask_matrix
           quantity_allocation_disagreement(reference,
                                            comparison,
@@ -991,10 +1103,10 @@ calibrate <- function(infected_years_file,
       all_disagreement <- as.data.frame(t(all_disagreement))
       all_disagreement <- all_disagreement / length(data$infected)
       proposed <-
-        data.frame(all_disagreement[, c("accuracy", "precision", "recall",
-                                        "specificity", "rmse",
-                                        "distance_difference", "false_negatives",
-                                        "false_positives", "true_positives",
+        data.frame(all_disagreement[, c("quantity_disagreement", "allocation_disagreement",
+                                        "configuration_disagreement", "accuracy", "precision",
+                                        "recall", "specificity", "rmse", "distance_difference",
+                                        "false_negatives", "false_positives", "true_positives",
                                         "true_negatives", "odds_ratio", "mcc")],
                    reproductive_rate = proposed_reproductive_rate,
                    natural_distance_scale = proposed_natural_distance_scale,
@@ -1009,6 +1121,15 @@ calibrate <- function(infected_years_file,
 
       # make sure no proposed statistics are 0 or the calculation fails
       # instead set them all to the lowest possible non-zero value
+      if (proposed$quantity_disagreement == 0) {
+        proposed$quantity_disagreement <- 0.001
+      }
+      if (proposed$allocation_disagreement == 0) {
+        proposed$allocation_disagreement <- 0.001
+      }
+      if (proposed$configuration_disagreement == 0) {
+        proposed$configuration_disagreement <- 0.001
+      }
       if (proposed$accuracy == 0) {
         proposed$accuracy <- 0.001
       }
@@ -1032,14 +1153,22 @@ calibrate <- function(infected_years_file,
       # higher values are better so the proposed parameter is in the numerator,
       # for rmse and distance lower values are improvements and the proposed
       # value is in the denominator.
+      quantity_test <- min(1, current$quantity_disagreement / proposed$quantity_disagreement)
+      allocation_test <- min(1, current$allocation_disagreement / proposed$allocation_disagreement)
+      configuration_test <-
+        min(1, current$configuration_disagreement / proposed$configuration_disagreement)
+      rmse_test <- min(1, current$rmse / proposed$rmse)
+      distance_test <- min(1, current$distance / proposed$distance)
+
       accurracy_test <- min(1, proposed$accuracy / current$accuracy)
       precision_test <- min(1, proposed$precision / current$precision)
       recall_test <- min(1, proposed$recall / current$recall)
       specificity_test <- min(1, proposed$specificity / current$specificity)
-      rmse_test <- min(1, current$rmse / proposed$rmse)
-      distance_test <- min(1, current$distance / proposed$distance)
-      mcc_test <- min(1, current$mcc / proposed$mcc)
+      mcc_test <- min(1, proposed$mcc / current$mcc)
 
+      quantity_pass <- runif(1) <= quantity_test
+      allocation_pass <- runif(1) <= allocation_test
+      configuration_pass <- runif(1) <= configuration_test
       accurracy_pass <- runif(1) <= accurracy_test
       precision_pass <- runif(1) <= precision_test
       recall_pass <- runif(1) <= recall_test
@@ -1048,55 +1177,86 @@ calibrate <- function(infected_years_file,
       distance_pass <- runif(1) <= distance_test
       mcc_pass <- runif(1) <= mcc_test
 
-      proposed_accepted <- FALSE
-      if (use_mcc) {
-        if (mcc_pass) {
-
-          if (config$use_distance) {
-            if (distance_pass) {
-              proposed_accepted <- TRUE
-            } else {
-              proposed_accepted <- FALSE
-            }
-          } else {
-            proposed_accepted <- TRUE
-          }
-
-          if (config$use_rmse) {
-            if (rmse_pass) {
-              proposed_accepted <- TRUE
-            } else {
-              proposed_accepted <- FALSE
-            }
-          } else {
-            proposed_accepted <- TRUE
-          }
-        }
-      } else {
-        if (accurracy_pass && precision_pass && recall_pass && specificity_pass) {
-
-          if (config$use_distance) {
-            if (distance_pass) {
-              proposed_accepted <- TRUE
-            } else {
-              proposed_accepted <- FALSE
-            }
-          } else {
-            proposed_accepted <- TRUE
-          }
-
-          if (config$use_rmse) {
-            if (rmse_pass) {
-              proposed_accepted <- TRUE
-            } else {
-              proposed_accepted <- FALSE
-            }
-          } else {
-            proposed_accepted <- TRUE
-          }
+      proposed_accepted <- TRUE
+      if (config$use_quantity && proposed_accepted) {
+        if (quantity_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
         }
       }
 
+      if (config$use_allocation && proposed_accepted) {
+        if (allocation_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_configuration && proposed_accepted) {
+        if (configuration_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_accuracy && proposed_accepted) {
+        if (accurracy_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_precision && proposed_accepted) {
+        if (precision_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_recall && proposed_accepted) {
+        if (recall_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_specificity && proposed_accepted) {
+        if (specificity_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_mcc && proposed_accepted) {
+        if (mcc_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_distance && proposed_accepted) {
+        if (distance_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
+
+      if (config$use_rmse && proposed_accepted) {
+        if (rmse_pass) {
+          proposed_accepted <- TRUE
+        } else {
+          proposed_accepted <- FALSE
+        }
+      }
 
       if (proposed_accepted) {
         current <- proposed

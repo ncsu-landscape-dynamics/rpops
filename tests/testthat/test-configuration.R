@@ -81,6 +81,13 @@ config$output_folder_path <- ""
 config$network_min_distance <- 0
 config$network_max_distance <- 0
 config$network_filename <- ""
+config$network_movement <- "walk"
+config$use_survival_rates <- FALSE
+config$survival_rate_month <- 0
+config$survival_rate_day <- 0
+config$survival_rates_file <- ""
+config$use_initial_condition_uncertainty <- FALSE
+config$use_host_uncertainty <- FALSE
 
 test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)
@@ -401,6 +408,14 @@ test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)
   expect_equal(config2$failure, NULL)
 
+  config$network_movement <- "jump"
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
+
+  config$network_movement <- "teleport"
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
+
   config$infected_files <-
     c(system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS"))
   config$parameter_means <- list(c(0.2, 20, 0.99, 6000, 0, 0, 0, 0))
@@ -451,10 +466,15 @@ test_that("configuration returns proper errors", {
   config2 <- configuration(config)
   expect_equal(config2$failure, output_path_error)
 
+  config$network_movement <- "hello"
+  config$output_folder_path <- ""
+  config2 <- configuration(config)
+  expect_equal(config2$failure, network_movement_error)
+
   config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 25, 150)
   config$function_name <- "pops"
   config$write_outputs <- "None"
-  config$output_folder_path <- ""
+  config$network_movement <- "walk"
   config$anthropogenic_kernel_type <- "network"
   config2 <- configuration(config)
   expect_equal(config2$failure, network_min_distance_small_error)
@@ -467,4 +487,13 @@ test_that("configuration returns proper errors", {
   config2 <- configuration(config)
   expect_equal(config2$failure, network_max_distance_large_error)
 
+  config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 0, 0)
+  config$use_initial_condition_uncertainty <- TRUE
+  config2 <- configuration(config)
+  expect_equal(config2$failure, initial_cond_uncert_error)
+
+  config$use_initial_condition_uncertainty <- FALSE
+  config$use_host_uncertainty <- TRUE
+  config2 <- configuration(config)
+  expect_equal(config2$failure, host_uncert_error)
 })

@@ -200,7 +200,7 @@ time_checks <- function(end_date, start_date, time_step,
   }
 
   if (checks_passed && !(output_frequency %in% list(
-    "week", "month", "day", "year", "time_step", "every_n_steps"
+    "week", "month", "day", "year", "time_step", "every_n_steps", "final_step"
   ))) {
     checks_passed <- FALSE
     failed_check <- output_type_error

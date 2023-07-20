@@ -70,6 +70,8 @@
 #' anthropogenic_kernel_type = 'network'.
 #' @param network_max_distance maximum time a propagule rides on the network. Used if
 #' anthropogenic_kernel_type = 'network'.
+#' @param survival_rates vector of matrices of survival rates used to determine percentage of
+#' overwinter population that emerges
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -81,6 +83,9 @@ pops_model <-
            use_lethal_temperature,
            lethal_temperature,
            lethal_temperature_month,
+           use_survival_rates,
+           survival_rate_month,
+           survival_rate_day,
            infected,
            total_exposed,
            exposed,
@@ -100,6 +105,7 @@ pops_model <-
            movements_dates,
            weather,
            temperature,
+           survival_rates,
            weather_coefficient,
            res,
            rows_cols,
@@ -137,7 +143,7 @@ pops_model <-
            generate_stochasticity = TRUE,
            establishment_stochasticity = TRUE,
            movement_stochasticity = TRUE,
-           deterministic = FALSE,
+           dispersal_stochasticity = TRUE,
            establishment_probability = 0,
            dispersal_percentage = 0.99,
            use_overpopulation_movements = FALSE,
@@ -147,7 +153,8 @@ pops_model <-
            bbox = NULL,
            network_min_distance = 0,
            network_max_distance = 0,
-           network_filename = "") {
+           network_filename = "",
+           network_movement = "walk") {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
@@ -170,6 +177,7 @@ pops_model <-
       network_config <- c()
       network_config$network_min_distance <- network_min_distance
       network_config$network_max_distance <- network_max_distance
+      network_config$network_movement <- network_movement
 
       network_data_config <- c()
       network_data_config$network_filename <- network_filename
@@ -195,8 +203,9 @@ pops_model <-
     bool_config$generate_stochasticity <- generate_stochasticity
     bool_config$establishment_stochasticity <- establishment_stochasticity
     bool_config$movement_stochasticity <- movement_stochasticity
-    bool_config$deterministic <- deterministic
+    bool_config$dispersal_stochasticity <- dispersal_stochasticity
     bool_config$use_overpopulation_movements <- use_overpopulation_movements
+    bool_config$use_survival_rate <- use_survival_rates
 
 
     data <-
@@ -219,6 +228,7 @@ pops_model <-
                      movements = movements,
                      movements_dates = movements_dates,
                      temperature = temperature,
+                     survival_rates = survival_rates,
                      weather_coefficient = weather_coefficient,
                      bbox = bbox,
                      res = res,
@@ -246,6 +256,8 @@ pops_model <-
                      model_type_ = model_type_,
                      latency_period = latency_period,
                      dispersal_percentage = dispersal_percentage,
+                     survival_rate_month = survival_rate_month,
+                     survival_rate_day = survival_rate_day,
                      establishment_probability = establishment_probability,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
