@@ -53,7 +53,7 @@ optimize(
   pesticide_duration = 0,
   pesticide_efficacy = 1,
   random_seed = NULL,
-  output_frequency = "year",
+  output_frequency = "final_step",
   output_frequency_n = 1,
   movements_file = "",
   use_movements = FALSE,
@@ -65,7 +65,6 @@ optimize(
   establishment_probability = 0.5,
   dispersal_percentage = 0.99,
   quarantine_areas_file = "",
-  quarantine_directions = "",
   use_quarantine = FALSE,
   use_spreadrates = FALSE,
   use_overpopulation_movements = FALSE,
@@ -262,8 +261,7 @@ successfully treats 70 percent of the plants or animals)}
 \item{random_seed}{sets the random seed for the simulation used for
 reproducibility}
 
-\item{output_frequency}{sets when outputs occur either ('year', 'month',
-'week', 'day', 'time step', or 'every_n_steps')}
+\item{output_frequency}{Default is final_step, no need for yearly output}
 
 \item{output_frequency_n}{sets number of units from output_frequency in which
 to export model results if mortality_frequency is 'every_n_steps'.

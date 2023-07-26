@@ -415,7 +415,9 @@ filter_particles <- function(points, weight_column, iteration, percentile) {
 #' @param filter_percentile Lower value removes fewer pixels from the pool,
 #' resulting in more iterations and lower acceptance rate, but potentially better results.
 #' @param threshold_percentile Determines threshold for next iteration.
+#' @param output_frequency Default is final_step, no need for yearly output
 
+#' @importFrom stats quantile setNames weighted.mean
 #' @useDynLib PoPS, .registration = TRUE
 #' @return results
 #' @export
@@ -469,6 +471,7 @@ optimize <- function(infestation_potential_file,
                      pesticide_efficacy = 1.0,
                      random_seed = NULL,
                      output_frequency = "final_step",
+                     output_frequency_n = 1,
                      movements_file = "",
                      use_movements = FALSE,
                      start_exposed = FALSE,
@@ -479,7 +482,6 @@ optimize <- function(infestation_potential_file,
                      establishment_probability = 0.5,
                      dispersal_percentage = 0.99,
                      quarantine_areas_file = "",
-                     quarantine_directions = "",
                      use_quarantine = FALSE,
                      use_spreadrates = FALSE,
                      use_overpopulation_movements = FALSE,
@@ -664,7 +666,7 @@ optimize <- function(infestation_potential_file,
     file_name <- file.path(output_folder_path, "best_treatment.tif")
     terra::writeRaster(results$best$treatment, file_name, overwrite = TRUE)
     file_name <- file.path(output_folder_path, "best_guess_candidate.gpkg")
-    terra::writeVector(best_guess$result$candidate, file_name, overwrite = TRUE)
+    terra::writeVector(best_guess$candidate, file_name, overwrite = TRUE)
     file_name <- file.path(output_folder_path, "output.rdata")
     save(output, file = file_name)
   }
