@@ -149,6 +149,9 @@
 #' @param use_quarantine boolean to indicate whether or not there is a
 #' quarantine area if TRUE must pass in a raster file indicating the
 #' quarantine areas (default = FALSE)
+#' @param quarantine_directions string with comma separated directions to include
+#' in the quarantine direction analysis, e.g., 'N,E'. By default all directions
+#' (N, S, E, W) are considered
 #' @param use_spreadrates boolean to indicate whether or not to calculate
 #' spread rates
 #' @param use_overpopulation_movements boolean to indicate whether to use
@@ -252,6 +255,7 @@ pops <- function(infected_file,
                  dispersal_percentage = 0.99,
                  quarantine_areas_file = "",
                  use_quarantine = FALSE,
+                 quarantine_directions = "",
                  use_spreadrates = FALSE,
                  use_overpopulation_movements = FALSE,
                  overpopulation_percentage = 0,
@@ -316,6 +320,7 @@ pops <- function(infected_file,
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
+  config$quarantine_directions <- quarantine_directions
   config$use_spreadrates <- use_spreadrates
   config$use_overpopulation_movements <- use_overpopulation_movements
   config$overpopulation_percentage <- overpopulation_percentage
@@ -399,6 +404,7 @@ pops <- function(infected_file,
                      mortality_tracker = config$mortality_tracker,
                      mortality = config$mortality,
                      quarantine_areas = config$quarantine_areas,
+                     quarantine_directions = config$quarantine_directions,
                      treatment_maps = config$treatment_maps,
                      treatment_dates = config$treatment_dates,
                      pesticide_duration = config$pesticide_duration,

@@ -102,6 +102,7 @@
 #'                                     establishment_probability = 0.5,
 #'                                     dispersal_percentage = 0.99,
 #'                                     quarantine_areas_file = "",
+#'                                     quarantine_directions = "",
 #'                                     use_quarantine = FALSE,
 #'                                     use_spreadrates = FALSE) {
 #'
@@ -163,6 +164,7 @@
 #'   config$establishment_probability <- establishment_probability
 #'   config$dispersal_percentage <- dispersal_percentage
 #'   config$quarantine_areas_file <- quarantine_areas_file
+#'   config$quarantine_directions <- quarantine_directions
 #'   config$use_quarantine <- use_quarantine
 #'   config$use_spreadrates <- use_spreadrates
 #'   config$percent_natural_dispersal <- percent_natural_dispersal
@@ -496,6 +498,7 @@
 #'                            mortality_tracker = mortality_tracker,
 #'                            mortality = mortality,
 #'                            quarantine_areas = quarantine_areas,
+#'                            quarantine_directions = quarantine_directions,
 #'                            treatment_maps = treatment_maps,
 #'                            treatment_dates = treatment_dates,
 #'                            pesticide_duration = pesticide_duration,

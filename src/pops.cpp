@@ -51,6 +51,7 @@ List pops_model_cpp(
     std::vector<IntegerMatrix> mortality_tracker,
     IntegerMatrix mortality,
     IntegerMatrix quarantine_areas,
+    std::string quarantine_directions,
     std::vector<NumericMatrix> treatment_maps,
     std::vector<std::string> treatment_dates,
     std::vector<int> pesticide_duration,
@@ -156,6 +157,7 @@ List pops_model_cpp(
     config.output_frequency = output_frequency;
     config.quarantine_frequency = quarantine_frequency;
     config.use_quarantine = bool_config["use_quarantine"];
+    config.quarantine_directions = quarantine_directions;
     config.spreadrate_frequency = spreadrate_frequency;
     config.mortality_frequency = mortality_frequency;
     config.use_spreadrates = bool_config["use_spreadrates"];
@@ -249,7 +251,12 @@ List pops_model_cpp(
     }
 
     QuarantineEscape<IntegerMatrix> quarantine(
-            quarantine_areas, config.ew_res, config.ns_res, quarantine_outputs, spatial_indices);
+        quarantine_areas,
+        config.ew_res,
+        config.ns_res,
+        quarantine_outputs,
+        spatial_indices,
+        config.quarantine_directions);
     bool quarantine_escape;
     std::vector<bool> quarantine_escapes;
     int escape_dist;
@@ -272,7 +279,8 @@ List pops_model_cpp(
         config.network_movement = network_movement;
         network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
         List net_data_config(network_data_config);
-        std::ifstream network_stream{Rcpp::as<std::string>(net_data_config["network_filename"])};
+        std::ifstream network_stream{
+            Rcpp::as<std::string>(net_data_config["network_filename"])};
         network->load(network_stream);
     }
 
@@ -343,10 +351,8 @@ List pops_model_cpp(
 
             num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
-            area_infect = area_of_infected(infected,
-                                           config.ew_res,
-                                           config.ns_res,
-                                           spatial_indices);
+            area_infect = area_of_infected(
+                infected, config.ew_res, config.ns_res, spatial_indices);
             area_infected.push_back(area_infect);
             total_dispersers(config.rows, config.cols);
         }
