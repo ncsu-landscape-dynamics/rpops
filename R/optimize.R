@@ -1,5 +1,26 @@
+quarantine_distance <- function(quarantine_areas, quarantine_directions) {
+  bboxrast <- terra::subst(terra::trim(quarantine_areas, value=0), 1, 0)
+  ncols <- terra::ncol(bboxrast)
+  nrows <- terra::nrow(bboxrast)
+  if (is.null(quarantine_directions) || grepl("N", quarantine_directions)) {
+    bboxrast[terra::cellFromRowCol(bboxrast, 1, 1:ncols)] <- 1
+  }
+  if (is.null(quarantine_directions) || grepl("S", quarantine_directions)) {
+    bboxrast[terra::cellFromRowCol(bboxrast, nrows, 1:ncols)] <- 1
+  }
+  if (is.null(quarantine_directions) || grepl("E", quarantine_directions)) {
+    bboxrast[terra::cellFromRowCol(bboxrast, 1:nrows, ncols)] <- 1
+  }
+  if (is.null(quarantine_directions) || grepl("W", quarantine_directions)) {
+    bboxrast[terra::cellFromRowCol(bboxrast, 1:nrows, 1)] <- 1
+  }
+  return(terra::gridDist(bboxrast, target=1))
+}
 
-prior_weight <- function(cost_column, potential_column) {
+prior_weight <- function(cost_column,
+                         potential_column,
+                         quarantine_column,
+                         score_weights) {
   minmax_scale <- function(column) {
     if (max(column) - min(column) > 0) {
       return(scales::rescale(column, to = c(0, 1)))
@@ -9,6 +30,12 @@ prior_weight <- function(cost_column, potential_column) {
   }
   cost_norm <- minmax_scale(cost_column)
   potential_norm <- minmax_scale(potential_column)
+  if (!is.null(quarantine_column)) {
+    quarantine_column <- minmax_scale(quarantine_column)
+    weights <- score_weights / sum(score_weights)
+    return((weights[1] * potential_norm +
+            1 - cost_norm + weights[2] * (1 - quarantine_column)) / 3)
+  }
   return((potential_norm + 1 - cost_norm) / 2)
 }
 
@@ -357,12 +384,13 @@ generation <- function(points,
         ", best score: ", best$score
       )
     }
-    if ((tested == 50) && (acceptance_rate < 0.05 || acceptance_rate > 0.15)) {
-      if (acceptance_rate < 0.05) {
+    if ((tested == 50) && (acceptance_rate < 0.1 || acceptance_rate > 0.2)) {
+      if (acceptance_rate < 0.1) {
         threshold <- threshold + threshold_step
       } else {
         threshold <- threshold - threshold_step
       }
+      message("Adjust threshold to: ", threshold)
       particle_count <- 0
       tested <- 0
       best$score <- 1
@@ -519,13 +547,20 @@ optimize <- function(infestation_potential_file,
     infected_points <- terra::extract(buffer_size_raster, infected_points, bind = TRUE)
   }
   buffer_size_raster <- NULL
+  if (!is.null(quarantine_areas_file)) {
+    bboxrast <- quarantine_distance(terra::rast(quarantine_areas_file), "")
+    names(bboxrast) <- "quarantine_distance"
+    infected_points <- terra::extract(bboxrast, infected_points, bind = TRUE)
+  }
 
   # prior weights
   iteration <- 1
   weight_column <- paste0("weight_", iteration)
   infected_points[[weight_column]] <- prior_weight(
     infected_points$cost,
-    infected_points$potential
+    infected_points$potential,
+    infected_points$quarantine_distance,
+    score_weights
   )
 
   # prepare treatment raster
