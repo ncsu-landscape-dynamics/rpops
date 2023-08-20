@@ -24,6 +24,7 @@
 #ifndef POPS_MODEL_HPP
 #define POPS_MODEL_HPP
 
+#include "environment.hpp"
 #include "config.hpp"
 #include "treatments.hpp"
 #include "spread_rate.hpp"
@@ -32,6 +33,7 @@
 #include "kernel.hpp"
 #include "scheduling.hpp"
 #include "quarantine.hpp"
+#include "soils.hpp"
 
 #include <vector>
 
@@ -55,6 +57,15 @@ protected:
     DeterministicNeighborDispersalKernel anthro_neighbor_kernel;
     Simulation<IntegerRaster, FloatRaster, RasterIndex, Generator> simulation_;
     KernelFactory& kernel_factory_;
+    /**
+     * Surrounding environment (currently used for soils only)
+     */
+    Environment<IntegerRaster, FloatRaster, RasterIndex> environment_;
+    /**
+     * Optionally created soil pool
+     */
+    std::shared_ptr<SoilPool<IntegerRaster, FloatRaster, RasterIndex>> soil_pool_{
+        nullptr};
     unsigned last_index{0};
 
     /**
@@ -122,7 +133,9 @@ public:
               config.establishment_stochasticity,
               config.movement_stochasticity),
           kernel_factory_(kernel_factory)
-    {}
+    {
+        simulation_.set_environment(&this->environment());
+    }
 
     /**
      * @brief Run one step of the simulation.
@@ -190,7 +203,6 @@ public:
         IntegerRaster& died,
         const std::vector<FloatRaster>& temperatures,
         const std::vector<FloatRaster>& survival_rates,
-        const FloatRaster& weather_coefficient,
         Treatments<IntegerRaster, FloatRaster>& treatments,
         IntegerRaster& resistant,
         std::vector<std::tuple<int, int>>& outside_dispersers,  // out
@@ -201,6 +213,9 @@ public:
         const Network<RasterIndex>& network,
         std::vector<std::vector<int>>& suitable_cells)
     {
+        // Soil step is the same as simulation step.
+        if (soil_pool_)
+            soil_pool_->next_step(step);
 
         // removal of dispersers due to lethal temperatures
         if (config_.use_lethal_temperature && config_.lethal_schedule()[step]) {
@@ -233,7 +248,6 @@ public:
                 established_dispersers,
                 infected,
                 config_.weather,
-                weather_coefficient,
                 config_.reproductive_rate,
                 suitable_cells);
 
@@ -253,7 +267,6 @@ public:
                 total_exposed,
                 outside_dispersers,
                 config_.weather,
-                weather_coefficient,
                 dispersal_kernel,
                 suitable_cells,
                 config_.establishment_probability);
@@ -328,6 +341,44 @@ public:
             quarantine.infection_escape_quarantine(
                 infected, quarantine_areas, action_step, suitable_cells);
         }
+    }
+
+    /**
+     * @brief Get the associated random number generator
+     * @return Reference to the generator
+     */
+    Generator& random_number_generator()
+    {
+        return simulation_.random_number_generator();
+    }
+
+    /**
+     * @brief Get surrounding environment
+     * @return Environment object by reference
+     */
+    Environment<IntegerRaster, FloatRaster, RasterIndex>& environment()
+    {
+        return environment_;
+    }
+
+    /**
+     * @brief Activate movement to and from soil pool
+     *
+     * The size of vector of rasters for cohorts is the number of simulation steps
+     * dispersers stay in the soil.
+     *
+     * @param rasters Vector of rasters for cohorts
+     */
+    void activate_soils(std::vector<IntegerRaster>& rasters)
+    {
+        // The soil pool is created again for every new activation.
+        this->soil_pool_.reset(new SoilPool<IntegerRaster, FloatRaster, RasterIndex>(
+            rasters,
+            this->environment_,
+            config_.generate_stochasticity,
+            config_.establishment_stochasticity));
+        this->simulation_.activate_soils(
+            this->soil_pool_, config_.dispersers_to_soils_percentage);
     }
 };
 
