@@ -408,8 +408,8 @@ pops_multirun <- function(infected_file,
         length(probability_runs[[p]])) {
       escape_probability <- escape_probability + quarantine_escape_runs[[p]]
       quarantine_escapes[p, ] <- quarantine_escape_runs[[p]]
-      quarantine_escape_distances <- quarantine_escape_distance_runs[[p]]
-      quarantine_escape_directions <- quarantine_escape_directions_runs[[p]]
+      quarantine_escape_distances[p, ] <- quarantine_escape_distance_runs[[p]]
+      quarantine_escape_directions[p, ] <- quarantine_escape_directions_runs[[p]]
     }
   }
 
