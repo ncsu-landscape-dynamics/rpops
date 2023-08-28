@@ -86,6 +86,7 @@ pops_multirun <- function(infected_file,
                           establishment_probability = 0.5,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
+                          quarantine_directions = "",
                           use_quarantine = FALSE,
                           use_spreadrates = FALSE,
                           use_overpopulation_movements = FALSE,
@@ -153,6 +154,7 @@ pops_multirun <- function(infected_file,
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
+  config$quarantine_directions <- quarantine_directions
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
   config$use_overpopulation_movements <- use_overpopulation_movements
@@ -252,6 +254,7 @@ pops_multirun <- function(infected_file,
         mortality_tracker = config$mortality_tracker,
         mortality = config$mortality,
         quarantine_areas = config$quarantine_areas,
+        quarantine_directions = config$quarantine_directions,
         treatment_maps = config$treatment_maps,
         treatment_dates = config$treatment_dates,
         pesticide_duration = config$pesticide_duration,
