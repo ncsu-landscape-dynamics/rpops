@@ -1,3 +1,0 @@
-[submodule "inst/cpp/pops-core"]
-	path = inst/cpp/pops-core
-	url = https://github.com/ncsu-landscape-dynamics/pops-core
