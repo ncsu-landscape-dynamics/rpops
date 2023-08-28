@@ -26,6 +26,7 @@
 
 #include "normal_distribution_with_uniform_fallback.hpp"
 #include "utils.hpp"
+#include "generator_provider.hpp"
 
 namespace pops {
 
@@ -93,6 +94,7 @@ public:
      *
      * @param mean Raster of mean weather coefficient for each cell
      * @param stddev Raster of standard deviation of weather coefficient for each cell
+     * @param generator Random number generator provider
      *
      * @throw std::invalid_argument when dimensions of *mean* and *stddev* differ or
      * when mean is out of range
@@ -136,7 +138,7 @@ public:
                     stddev(i, j),
                     weather_coefficient_min,
                     weather_coefficient_max};
-                stored_weather_coefficient(i, j) = distribution(generator);
+                stored_weather_coefficient(i, j) = distribution(generator.weather());
             }
         }
         current_weather_coefficient = &stored_weather_coefficient;

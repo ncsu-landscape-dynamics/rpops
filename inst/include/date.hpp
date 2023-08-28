@@ -103,7 +103,8 @@ Date::Date(std::string date)
     date.erase(0, pos + 1);
     day_ = std::stoi(date);
     if (month_ <= 0 || month_ > 12 || day_ > day_in_month[1][month_])
-        throw std::invalid_argument("Invalid date specified");
+        throw std::invalid_argument(
+            "Invalid date specified: " + date + " (provide YYYY-MM-DD)");
 }
 
 std::ostream& operator<<(std::ostream& os, const Date& d)

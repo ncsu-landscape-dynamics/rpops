@@ -37,6 +37,40 @@ std::ostream& operator<<(std::ostream& os, const Direction& obj)
 typedef std::tuple<double, Direction> DistDir;
 typedef std::tuple<bool, DistDir> EscapeDistDir;
 typedef std::vector<EscapeDistDir> EscapeDistDirs;
+typedef std::map<Direction, bool> Directions;
+
+/*! Get a map with direction and bool parsed from string with letters N S E W
+ *  separated by delimeter. Empty string means all directions are true.
+ *
+ * Throws an std::invalid_argument exception if the value was not
+ * found or is not supported (which is the same thing).
+ */
+Directions directions_from_string(const std::string& text, char delimiter = ',')
+{
+    Directions directions;
+    for (auto& direction : {Direction::N, Direction::E, Direction::S, Direction::W})
+        directions[direction] = text.empty() ? true : false;
+
+    if (text.empty())
+        return directions;
+    std::string direction;
+    std::istringstream directionStream(text);
+    while (std::getline(directionStream, direction, delimiter)) {
+        std::map<std::string, Direction> mapping{
+            {"N", Direction::N},
+            {"E", Direction::E},
+            {"S", Direction::S},
+            {"W", Direction::W}};
+        try {
+            directions[mapping.at(direction)] = true;
+        }
+        catch (const std::out_of_range&) {
+            throw std::invalid_argument(
+                "directions_from_string: Invalid value '" + direction + "' provided");
+        }
+    }
+    return directions;
+}
 
 /**
  * Class storing and computing quarantine escape metrics for one simulation.
@@ -53,6 +87,7 @@ private:
     double north_south_resolution_;
     unsigned num_steps;
     std::vector<BBoxInt> boundaries;
+    Directions directions_;
     // mapping between quarantine areas is from map and index
     std::map<int, int> boundary_id_idx_map;
     std::vector<EscapeDistDir> escape_dist_dirs;
@@ -110,19 +145,21 @@ private:
         int mindist = std::numeric_limits<int>::max();
         std::tie(n, s, e, w) = boundary;
         DistDir closest;
-        if ((i - n) * north_south_resolution_ < mindist) {
+        if (directions_.at(Direction::N)
+            && (i - n) * north_south_resolution_ < mindist) {
             mindist = (i - n) * north_south_resolution_;
             closest = std::make_tuple(mindist, Direction::N);
         }
-        if ((s - i) * north_south_resolution_ < mindist) {
+        if (directions_.at(Direction::S)
+            && (s - i) * north_south_resolution_ < mindist) {
             mindist = (s - i) * north_south_resolution_;
             closest = std::make_tuple(mindist, Direction::S);
         }
-        if ((e - j) * west_east_resolution_ < mindist) {
+        if (directions_.at(Direction::E) && (e - j) * west_east_resolution_ < mindist) {
             mindist = (e - j) * west_east_resolution_;
             closest = std::make_tuple(mindist, Direction::E);
         }
-        if ((j - w) * west_east_resolution_ < mindist) {
+        if (directions_.at(Direction::W) && (j - w) * west_east_resolution_ < mindist) {
             mindist = (j - w) * west_east_resolution_;
             closest = std::make_tuple(mindist, Direction::W);
         }
@@ -134,12 +171,14 @@ public:
         const IntegerRaster& quarantine_areas,
         double ew_res,
         double ns_res,
-        unsigned num_steps)
+        unsigned num_steps,
+        std::string directions = "")
         : width_(quarantine_areas.cols()),
           height_(quarantine_areas.rows()),
           west_east_resolution_(ew_res),
           north_south_resolution_(ns_res),
           num_steps(num_steps),
+          directions_(directions_from_string(directions)),
           escape_dist_dirs(
               num_steps,
               std::make_tuple(
