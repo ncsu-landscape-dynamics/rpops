@@ -99,11 +99,7 @@ inline ModelType model_type_from_string(const char* text)
  * type are performed and a signed type might be required in the future.
  * A default is provided, but it can be changed in the future.
  */
-template<
-    typename IntegerRaster,
-    typename FloatRaster,
-    typename RasterIndex = int,
-    typename Generator = std::default_random_engine>
+template<typename IntegerRaster, typename FloatRaster, typename RasterIndex = int>
 class Simulation
 {
 private:
@@ -114,7 +110,6 @@ private:
     bool movement_stochasticity_;
     ModelType model_type_;
     unsigned latency_period_;
-    Generator generator_;
     /// Non-owning pointer to environment for weather
     const Environment<IntegerRaster, FloatRaster, RasterIndex>* environment_{nullptr};
     /**
@@ -151,6 +146,7 @@ private:
      *
      * @throw std::runtime_error if model type is unsupported (i.e., not SI or SEI)
      */
+    template<typename Generator>
     int disperser_to(
         RasterIndex row,
         RasterIndex col,
@@ -160,7 +156,8 @@ private:
         const IntegerRaster& total_populations,
         IntegerRaster& total_exposed,
         bool weather,
-        double establishment_probability)
+        double establishment_probability,
+        Generator& generator)
     {
         std::uniform_real_distribution<double> distribution_uniform(0.0, 1.0);
         if (susceptible(row, col) > 0) {
@@ -168,7 +165,7 @@ private:
                 (double)(susceptible(row, col)) / total_populations(row, col);
             double establishment_tester = 1 - establishment_probability;
             if (establishment_stochasticity_)
-                establishment_tester = distribution_uniform(generator_);
+                establishment_tester = distribution_uniform(generator);
 
             if (weather)
                 probability_of_establishment *=
@@ -213,7 +210,6 @@ public:
      * @param movement_stochasticity Enable stochasticity in movement of hosts
      */
     Simulation(
-        unsigned random_seed,
         RasterIndex rows,
         RasterIndex cols,
         ModelType model_type = ModelType::SusceptibleInfected,
@@ -228,9 +224,7 @@ public:
           movement_stochasticity_(movement_stochasticity),
           model_type_(model_type),
           latency_period_(latency_period)
-    {
-        generator_.seed(random_seed);
-    }
+    {}
 
     Simulation() = delete;
 
@@ -295,6 +289,7 @@ public:
      * @param survival_rate Raster between 0 and 1 representing pest survival rate
      * @param suitable_cells used to run model only where host are known to occur
      */
+    template<typename GeneratorProvider>
     void remove_percentage(
         IntegerRaster& infected,
         IntegerRaster& susceptible,
@@ -302,7 +297,8 @@ public:
         std::vector<IntegerRaster>& exposed,
         IntegerRaster& total_exposed,
         const FloatRaster& survival_rate,
-        const std::vector<std::vector<int>>& suitable_cells)
+        const std::vector<std::vector<int>>& suitable_cells,
+        GeneratorProvider& generator)
     {
         for (auto indices : suitable_cells) {
             int i = indices[0];
@@ -317,7 +313,11 @@ public:
                 // remove the removed infected from mortality cohorts
                 if (removed_infected > 0) {
                     std::vector<int> mortality_draw = draw_n_from_cohorts(
-                        mortality_tracker_vector, removed_infected, i, j, generator_);
+                        mortality_tracker_vector,
+                        removed_infected,
+                        i,
+                        j,
+                        generator.survival_rate());
                     int index = 0;
                     for (auto& raster : mortality_tracker_vector) {
                         raster(i, j) -= mortality_draw[index];
@@ -333,7 +333,11 @@ public:
                 removed += total_removed_exposed;
                 if (total_removed_exposed > 0) {
                     std::vector<int> exposed_draw = draw_n_from_cohorts(
-                        exposed, total_removed_exposed, i, j, generator_);
+                        exposed,
+                        total_removed_exposed,
+                        i,
+                        j,
+                        generator.survival_rate());
                     int index = 0;
                     for (auto& raster : exposed) {
                         raster(i, j) -= exposed_draw[index];
@@ -429,6 +433,7 @@ public:
      *
      * @note Mortality and non-host individuals are not supported in movements.
      */
+    template<typename GeneratorProvider>
     unsigned movement(
         IntegerRaster& infected,
         IntegerRaster& susceptible,
@@ -441,7 +446,8 @@ public:
         unsigned last_index,
         const std::vector<std::vector<int>>& movements,
         std::vector<unsigned> movement_schedule,
-        std::vector<std::vector<int>>& suitable_cells)
+        std::vector<std::vector<int>>& suitable_cells,
+        GeneratorProvider& generator)
     {
         for (unsigned i = last_index; i < movements.size(); i++) {
             auto moved = movements[i];
@@ -479,7 +485,7 @@ public:
             categories.insert(categories.end(), resist, 4);
 
             std::vector<int> draw =
-                draw_n_from_v(categories, total_hosts_moved, generator_);
+                draw_n_from_v(categories, total_hosts_moved, generator.movement());
             infected_moved = std::count(draw.begin(), draw.end(), 1);
             susceptible_moved = std::count(draw.begin(), draw.end(), 2);
             exposed_moved = std::count(draw.begin(), draw.end(), 3);
@@ -487,7 +493,7 @@ public:
 
             if (exposed_moved > 0) {
                 std::vector<int> exposed_draw = draw_n_from_cohorts(
-                    exposed, exposed_moved, row_from, col_from, generator_);
+                    exposed, exposed_moved, row_from, col_from, generator.movement());
                 int index = 0;
                 for (auto& raster : exposed) {
                     raster(row_from, col_from) -= exposed_draw[index];
@@ -501,7 +507,7 @@ public:
                     infected_moved,
                     row_from,
                     col_from,
-                    generator_);
+                    generator.movement());
                 int index = 0;
                 for (auto& raster : mortality_tracker_vector) {
                     raster(row_from, col_from) -= mortality_draw[index];
@@ -547,13 +553,15 @@ public:
      *        coefficient is not used)
      * @param[in] suitable_cells List of indices of cells with hosts
      */
+    template<typename GeneratorProvider>
     void generate(
         IntegerRaster& dispersers,
         IntegerRaster& established_dispersers,
         const IntegerRaster& infected,
         bool weather,
         double reproductive_rate,
-        const std::vector<std::vector<int>>& suitable_cells)
+        const std::vector<std::vector<int>>& suitable_cells,
+        GeneratorProvider& generator)
     {
         double lambda = reproductive_rate;
         for (auto indices : suitable_cells) {
@@ -567,7 +575,8 @@ public:
                 if (dispersers_stochasticity_) {
                     std::poisson_distribution<int> distribution(lambda);
                     for (int k = 0; k < infected(i, j); k++) {
-                        dispersers_from_cell += distribution(generator_);
+                        dispersers_from_cell +=
+                            distribution(generator.disperser_generation());
                     }
                 }
                 else {
@@ -578,7 +587,8 @@ public:
                     // same cell and don't participate in the kernel-driven dispersal.
                     auto dispersers_to_soil =
                         std::round(to_soil_percentage_ * dispersers_from_cell);
-                    soil_pool_->dispersers_to(dispersers_to_soil, i, j, generator_);
+                    soil_pool_->dispersers_to(
+                        dispersers_to_soil, i, j, generator.soil());
                     dispersers_from_cell -= dispersers_to_soil;
                 }
                 dispersers(i, j) = dispersers_from_cell;
@@ -635,7 +645,7 @@ public:
      * @note If the parameters or their default values don't correspond
      * with the disperse_and_infect() function, it is a bug.
      */
-    template<typename DispersalKernel>
+    template<typename DispersalKernel, typename GeneratorProvider>
     void disperse(
         const IntegerRaster& dispersers,
         IntegerRaster& established_dispersers,
@@ -648,7 +658,8 @@ public:
         bool weather,
         DispersalKernel& dispersal_kernel,
         const std::vector<std::vector<int>>& suitable_cells,
-        double establishment_probability = 0.5)
+        double establishment_probability,
+        GeneratorProvider& generator)
     {
         std::uniform_real_distribution<double> distribution_uniform(0.0, 1.0);
         int row;
@@ -659,7 +670,7 @@ public:
             int j = indices[1];
             if (dispersers(i, j) > 0) {
                 for (int k = 0; k < dispersers(i, j); k++) {
-                    std::tie(row, col) = dispersal_kernel(generator_, i, j);
+                    std::tie(row, col) = dispersal_kernel(generator, i, j);
                     if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
                         // export dispersers dispersed outside of modeled area
                         outside_dispersers.emplace_back(std::make_tuple(row, col));
@@ -676,7 +687,8 @@ public:
                         total_populations,
                         total_exposed,
                         weather,
-                        establishment_probability);
+                        establishment_probability,
+                        generator.establishment());
                     if (!dispersed) {
                         established_dispersers(i, j) -= 1;
                     }
@@ -684,7 +696,8 @@ public:
             }
             if (soil_pool_) {
                 // Get dispersers from the soil if there are any.
-                auto num_dispersers = soil_pool_->dispersers_from(i, j, generator_);
+                auto num_dispersers =
+                    soil_pool_->dispersers_from(i, j, generator.soil());
                 // Put each disperser to the host pool.
                 for (int k = 0; k < num_dispersers; k++) {
                     disperser_to(
@@ -696,7 +709,8 @@ public:
                         total_populations,
                         total_exposed,
                         weather,
-                        establishment_probability);
+                        establishment_probability,
+                        generator.soil());
                 }
             }
         }
@@ -733,7 +747,7 @@ public:
      * @note Mortality is not supported by this function, i.e., the mortality rasters
      *       are not modified while the infected are.
      */
-    template<typename DispersalKernel>
+    template<typename DispersalKernel, typename GeneratorProvider>
     void move_overpopulated_pests(
         IntegerRaster& susceptible,
         IntegerRaster& infected,
@@ -742,7 +756,8 @@ public:
         DispersalKernel& dispersal_kernel,
         const std::vector<std::vector<int>>& suitable_cells,
         double overpopulation_percentage,
-        double leaving_percentage)
+        double leaving_percentage,
+        GeneratorProvider& generator)
     {
         struct Move
         {
@@ -766,7 +781,7 @@ public:
             if (ratio >= overpopulation_percentage) {
                 int row;
                 int col;
-                std::tie(row, col) = dispersal_kernel(generator_, i, j);
+                std::tie(row, col) = dispersal_kernel(generator.overpopulation(), i, j);
                 // for leaving_percentage == 0.5
                 // 2 infected -> 1 leaving
                 // 3 infected -> 1 leaving
@@ -913,7 +928,7 @@ public:
      * has parameter *exposed* which is the same as the one from the
      * infect_exposed() function.
      */
-    template<typename DispersalKernel>
+    template<typename DispersalKernel, typename GeneratorProvider>
     void disperse_and_infect(
         unsigned step,
         const IntegerRaster& dispersers,
@@ -928,7 +943,8 @@ public:
         bool weather,
         DispersalKernel& dispersal_kernel,
         const std::vector<std::vector<int>>& suitable_cells,
-        double establishment_probability = 0.5)
+        double establishment_probability,
+        GeneratorProvider& generator)
     {
         auto* infected_or_exposed = &infected;
         if (model_type_ == ModelType::SusceptibleExposedInfected) {
@@ -948,7 +964,8 @@ public:
             weather,
             dispersal_kernel,
             suitable_cells,
-            establishment_probability);
+            establishment_probability,
+            generator);
         if (model_type_ == ModelType::SusceptibleExposedInfected) {
             this->infect_exposed(
                 step, exposed, infected, mortality_tracker, total_exposed);
@@ -977,11 +994,6 @@ public:
     {
         this->soil_pool_ = soil_pool;
         this->to_soil_percentage_ = dispersers_percentage;
-    }
-
-    Generator& random_number_generator()
-    {
-        return generator_;
     }
 };
 

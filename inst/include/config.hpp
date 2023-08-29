@@ -28,14 +28,100 @@
 #include "utils.hpp"
 
 #include <vector>
+#include <iostream>
+#include <regex>
+#include <string>
+#include <sstream>
 
 namespace pops {
 
+/**
+ * Read key-value pairs from text into a map
+ *
+ * Text can be, e.g., comma-separated pairs of key and value where
+ * key and value are separated by equal (key=value,key2=value2) or
+ * YAML-style lines of `key: value`.
+ *
+ * Both separators are a single character and need to be different from
+ * each other. Common separators such as comma, semicolor, or colon will
+ * work. Special characters for regular expressions such as bracket or asterisk
+ * will confuse the parser.
+ *
+ * @param stream Text as stream
+ * @param record_separator Character which separates individual records
+ * @param key_value_separator Character which separates the key and value
+ * @param conversion Function to convert string to value (use lambda)
+ *
+ * @see Other overloads.
+ */
+template<typename Value, typename Conversion>
+std::map<std::string, Value> read_key_value_pairs(
+    std::istream& stream,
+    char record_separator,
+    char key_value_separator,
+    Conversion conversion)
+{
+    std::map<std::string, Value> config;
+    std::string line;
+    std::string expression_string(R"(\s*([^= ]+)[\s]*=[\s]*([^ ]+))");
+    std::replace(
+        expression_string.begin(), expression_string.end(), '=', key_value_separator);
+    std::regex expression(expression_string);
+    while (std::getline(stream, line, record_separator)) {
+        std::smatch match;
+        if (regex_search(line, match, expression) && match.size() == 3) {
+            std::string value(match[2]);
+            config[match[1]] = conversion(value.c_str());
+        }
+        else {
+            throw std::invalid_argument(std::string("Incorrect format of: ") + line);
+        }
+    }
+    return config;
+}
+
+/**
+ * Read key-value pairs from text into a map
+ *
+ * @see Other overloads.
+ */
+template<typename Value, typename Conversion>
+std::map<std::string, Value> read_key_value_pairs(
+    const std::string& text,
+    char record_separator,
+    char key_value_separator,
+    Conversion conversion)
+{
+    std::istringstream stream(text);
+    return read_key_value_pairs<Value>(
+        stream, record_separator, key_value_separator, conversion);
+}
+
+/**
+ * Read key-value pairs from text into a map
+ *
+ * @see Other overloads.
+ */
+template<typename Value, typename Conversion>
+std::map<std::string, Value> read_key_value_pairs(
+    const char* text,
+    char record_separator,
+    char key_value_separator,
+    Conversion conversion)
+{
+    std::string std_text(text);
+    return read_key_value_pairs<Value>(
+        std_text, record_separator, key_value_separator, conversion);
+}
+
+/** Configuration for Model */
 class Config
 {
 public:
     // Seed
     int random_seed{0};
+    bool multiple_random_seeds{false};
+    std::map<std::string, unsigned> random_seeds;
     // Size
     int rows{0};
     int cols{0};
@@ -90,6 +176,7 @@ public:
     bool use_quarantine{false};
     std::string quarantine_frequency;
     unsigned quarantine_frequency_n;
+    std::string quarantine_directions;
     // Movements
     bool use_movements{false};
     std::vector<unsigned> movement_schedule;
@@ -349,6 +436,53 @@ public:
     {
         season_start_month_ = std::stoi(start);
         season_end_month_ = std::stoi(end);
+    }
+
+    /**
+     * Read seeds from text.
+     *
+     * @note All seeds are mandatory regardless of the other configuration value.
+     *
+     * @see read_key_value_pairs() for parameters and behavior.
+     */
+    void
+    read_seeds(const std::string& text, char record_separator, char key_value_separator)
+    {
+        this->random_seeds = read_key_value_pairs<unsigned>(
+            text, record_separator, key_value_separator, [](std::string text) {
+                return std::stoul(text);
+            });
+        this->multiple_random_seeds = true;
+    }
+
+    /**
+     * Read seeds from vector unsigned ints (list of integers).
+     *
+     * @note All seeds are mandatory regardless of the other configuration value.
+     */
+    void read_seeds(const std::vector<unsigned>& seeds)
+    {
+        static const std::vector<std::string> names{
+            "disperser_generation",
+            "natural_dispersal",
+            "anthropogenic_dispersal",
+            "establishment",
+            "weather",
+            "movement",
+            "overpopulation",
+            "survival_rate",
+            "soil"};
+        if (names.size() != seeds.size()) {
+            throw std::invalid_argument(
+                "read_seeds: wrong number of seeds (" + std::to_string(seeds.size())
+                + " instead of " + std::to_string(names.size()) + ")");
+        }
+        size_t i = 0;
+        for (const auto& name : names) {
+            this->random_seeds[name] = seeds.at(i);
+            ++i;
+        }
+        this->multiple_random_seeds = true;
     }
 
 private:
