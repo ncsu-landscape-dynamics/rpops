@@ -40,6 +40,8 @@ using namespace pops;
 // [[Rcpp::export]]
 List pops_model_cpp(
     int random_seed,
+    bool mulitple_random_seeds,
+    std::map<std::string, unsigned> random_seeds,
     double lethal_temperature,
     int lethal_temperature_month,
     IntegerMatrix infected,

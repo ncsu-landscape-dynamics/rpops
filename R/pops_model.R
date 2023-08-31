@@ -275,7 +275,7 @@ pops_model <-
                      network_data_config = network_data_config,
                      weather_size = weather_size,
                      weather_type = weather_type,
-                     dispersers_to_soils_percentage = dispersers_to_soils_percentag
+                     dispersers_to_soils_percentage = dispersers_to_soils_percentage
     )
 
   }

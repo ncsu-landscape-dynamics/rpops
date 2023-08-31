@@ -189,10 +189,14 @@
 #' uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
 #' and one with the standard deviation.
 #' @param weather_type string indicating how the weather data is passed in  either
-#' as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+#' as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 #' series ("deterministic")
 #' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
 #' of dispersers that fall to the soil and survive.
+#' @param multiple_random_seeds boolean to indicate if the model should use multiple random seeds
+#' (allows for performing uncertainty partitioning) or a single random seed (backwards
+#' compatibility option).
+#' @param random_seeds key value pair
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
