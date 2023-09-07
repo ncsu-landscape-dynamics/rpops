@@ -86,6 +86,8 @@
 
 pops_model <-
   function(random_seed,
+           multiple_random_seeds,
+           random_seeds,
            use_lethal_temperature,
            lethal_temperature,
            lethal_temperature_month,
@@ -220,6 +222,8 @@ pops_model <-
 
     data <-
       pops_model_cpp(random_seed = random_seed,
+                     multiple_random_seeds,
+                     random_seeds,
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
                      infected = infected,
