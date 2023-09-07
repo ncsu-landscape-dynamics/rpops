@@ -40,8 +40,8 @@ using namespace pops;
 // [[Rcpp::export]]
 List pops_model_cpp(
     int random_seed,
-    bool mulitple_random_seeds,
-    std::map<std::string, unsigned> random_seeds,
+    bool multiple_random_seeds,
+    std::vector<unsigned> random_seeds,
     double lethal_temperature,
     int lethal_temperature_month,
     IntegerMatrix infected,
@@ -188,7 +188,7 @@ List pops_model_cpp(
     int start_month = season_month_start_end["start_month"];
     int end_month = season_month_start_end["end_month"];
     config.set_season_start_end_month(start_month, end_month);
-    congif.dispesers_to_soil_perctage;
+    config.dispersers_to_soils_percentage = dispersers_to_soils_percentage;
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
@@ -265,7 +265,6 @@ List pops_model_cpp(
         config.ew_res,
         config.ns_res,
         quarantine_outputs,
-        spatial_indices,
         config.quarantine_directions);
     bool quarantine_escape;
     std::vector<bool> quarantine_escapes;
@@ -296,7 +295,7 @@ List pops_model_cpp(
 
     ModelType mt = model_type_from_string(config.model_type);
     Simulation<IntegerMatrix, NumericMatrix> simulation(
-        config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
+        config.rows, config.cols, mt, config.latency_period_steps);
 
     Model<IntegerMatrix, NumericMatrix, int> model(config);
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
@@ -317,7 +316,6 @@ List pops_model_cpp(
             mortality,
             temperature,
             survival_rates,
-            weather_coefficient[current_index],
             treatments,
             resistant,
             outside_dispersers,
