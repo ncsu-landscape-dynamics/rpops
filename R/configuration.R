@@ -76,6 +76,19 @@ configuration <- function(config) {
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
+  if(config$multiple_random_seeds) {
+    if(!is.null(config$random_seeds)) {
+      ## check random seed file
+      random_seeds_file_check <- check_random_seeds_file(config$random_seeds)
+      if(!random_seeds_file_check$checks_passed) {
+        config$failure <- random_seeds_file_check$failed_check
+        return(config)
+      }
+    } else {
+      config$random_seeds <- create_random_seeds(1)
+    }
+  } 
+  
   config$output_list <- c("all_simulations", "summary_outputs", "None")
   config$output_write_list <- c("all_simulations", "summary_outputs")
 
@@ -193,7 +206,7 @@ configuration <- function(config) {
   }
 
   if (is.null(config$random_seed)) {
-    config$random_seed <- round(stats::runif(1, 1, 1000000))
+    config$random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
   }
 
   # check output and timestep are correct.
