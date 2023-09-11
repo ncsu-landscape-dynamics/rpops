@@ -156,6 +156,11 @@ initial_cond_uncert_error <-
 host_uncert_error <-
   "use_host_uncertainty is TRUE but the number of layers in the host file is not 2. This should be
   a raster file with 2 layers the first being the mean value and the second the stadard deviation."
+
+random_seeds_dimensions_error <-
+  "Either number of rows and columns in random_seeds_file does not equal the number_of_iterations
+  set in the model or the number of columns does not equal the number of unique random seeds"
+
 ## calibration success metric option
 success_metric_options <- c("quantity", "allocation", "configuration", "quantity and allocation",
                             "quantity and configuration", "allocation and configuration",
