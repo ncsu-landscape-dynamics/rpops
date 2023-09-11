@@ -42,8 +42,7 @@
 #' coefficients). We convert raw precipitation values to coefficients that
 #' affect the reproduction and survival of the pest all values in the raster are
 #' between 0 and 1.
-#' @param time_step how often should spread occur options: ('day', 'week',
-#' 'month').
+#' @param time_step how often should spread occur options: ('day', 'week', 'month').
 #' @param season_month_start when does spread first start occurring in the year
 #' for your pest or pathogen (integer value between 1 and 12)
 #' @param season_month_end when does spread end during the year for your pest
@@ -103,8 +102,7 @@
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the
 #' disease or killing the pest (if this is 0.70 then when applied it
 #' successfully treats 70 percent of the plants or animals)
-#' @param random_seed sets the random seed for the simulation used for
-#' reproducibility
+#' @param random_seed sets the random seed for the simulation used for reproducibility
 #' @param output_frequency sets when outputs occur either ('year', 'month',
 #' 'week', 'day', 'time step', or 'every_n_steps')
 #' @param output_frequency_n sets number of units from output_frequency in which
@@ -193,10 +191,14 @@
 #' series ("deterministic")
 #' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
 #' of dispersers that fall to the soil and survive.
+#' @param soil_starting_pest_file path to the raster file with the starting
+#' amount of pest or pathogen.
 #' @param multiple_random_seeds boolean to indicate if the model should use multiple random seeds
 #' (allows for performing uncertainty partitioning) or a single random seed (backwards
-#' compatibility option).
-#' @param random_seeds key value pair
+#' compatibility option). Default is FALSE.
+#' @param random_seeds A file path to the file with the .csv file containing random_seeds table. 
+#' Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
+#' default. Default is Null which draws the seed numbers for each. 
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -264,7 +266,6 @@ pops <- function(infected_file,
                  dispersal_percentage = 0.99,
                  quarantine_areas_file = "",
                  use_quarantine = FALSE,
-                 quarantine_directions = "",
                  use_spreadrates = FALSE,
                  use_overpopulation_movements = FALSE,
                  overpopulation_percentage = 0,
@@ -277,7 +278,10 @@ pops <- function(infected_file,
                  use_initial_condition_uncertainty = FALSE,
                  use_host_uncertainty = FALSE,
                  weather_type = "deterministic",
-                 dispersers_to_soils_percentage = 0) {
+                 dispersers_to_soils_percentage = 0,
+                 quarantine_directions = "",
+                 multiple_random_seeds = FALSE,
+                 random_seeds = NULL) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -358,6 +362,8 @@ pops <- function(infected_file,
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
+  config$multiple_random_seeds <- multiple_random_seeds
+  config$random_seeds <-random_seeds
 
   config <- configuration(config)
 
@@ -400,7 +406,9 @@ pops <- function(infected_file,
     config$mortality_tracker <- mortality_tracker2
   }
 
-  data <- pops_model(random_seed = config$random_seed,
+  data <- pops_model(random_seed = config$random_seed[1],
+                     multiple_random_seeds = config$multiple_random_seeds,
+                     random_seeds = config$random_seeds,
                      use_lethal_temperature = config$use_lethal_temperature,
                      lethal_temperature = config$lethal_temperature,
                      lethal_temperature_month = config$lethal_temperature_month,

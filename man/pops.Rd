@@ -68,7 +68,12 @@ pops(
   network_filename = "",
   network_movement = "walk",
   use_initial_condition_uncertainty = FALSE,
-  use_host_uncertainty = FALSE
+  use_host_uncertainty = FALSE,
+  weather_type = "deterministic",
+  dispersers_to_soils_percentage = 0,
+  quarantine_directions = "",
+  multiple_random_seeds = FALSE,
+  random_seeds = NULL
 )
 }
 \arguments{
@@ -132,8 +137,7 @@ are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 populations become infected/infested. This is an integer value and must be
 greater than 0 if model type is SEI.}
 
-\item{time_step}{how often should spread occur options: ('day', 'week',
-'month').}
+\item{time_step}{how often should spread occur options: ('day', 'week', 'month').}
 
 \item{season_month_start}{when does spread first start occurring in the year
 for your pest or pathogen (integer value between 1 and 12)}
@@ -228,8 +232,7 @@ is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
 disease or killing the pest (if this is 0.70 then when applied it
 successfully treats 70 percent of the plants or animals)}
 
-\item{random_seed}{sets the random seed for the simulation used for
-reproducibility}
+\item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
 \item{output_frequency}{sets when outputs occur either ('year', 'month',
 'week', 'day', 'time step', or 'every_n_steps')}
@@ -312,6 +315,28 @@ deviation}
 \item{use_host_uncertainty}{boolean to indicate whether or not to propagate and partition
 uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
 and one with the standard deviation.}
+
+\item{weather_type}{string indicating how the weather data is passed in  either
+as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
+series ("deterministic")}
+
+\item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage
+of dispersers that fall to the soil and survive.}
+
+\item{quarantine_directions}{string with comma separated directions to include
+in the quarantine direction analysis, e.g., 'N,E'. By default all directions
+(N, S, E, W) are considered}
+
+\item{multiple_random_seeds}{boolean to indicate if the model should use multiple random seeds
+(allows for performing uncertainty partitioning) or a single random seed (backwards
+compatibility option). Default is FALSE.}
+
+\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table. 
+Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
+default. Default is Null which draws the seed numbers for each.}
+
+\item{soil_starting_pest_file}{path to the raster file with the starting
+amount of pest or pathogen.}
 }
 \value{
 list of infected and susceptible per year

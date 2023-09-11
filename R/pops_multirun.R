@@ -86,7 +86,6 @@ pops_multirun <- function(infected_file,
                           establishment_probability = 0.5,
                           dispersal_percentage = 0.99,
                           quarantine_areas_file = "",
-                          quarantine_directions = "",
                           use_quarantine = FALSE,
                           use_spreadrates = FALSE,
                           use_overpopulation_movements = FALSE,
@@ -102,7 +101,10 @@ pops_multirun <- function(infected_file,
                           use_initial_condition_uncertainty = FALSE,
                           use_host_uncertainty = FALSE,
                           weather_type = "deterministic",
-                          dispersers_to_soils_percentage = 0) {
+                          dispersers_to_soils_percentage = 0,
+                          quarantine_directions = "",
+                          multiple_random_seeds = FALSE,
+                          random_seeds = NULL) {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -180,6 +182,8 @@ pops_multirun <- function(infected_file,
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
+  config$multiple_random_seeds <- multiple_random_seeds
+  config$random_seeds <-random_seeds
 
   config <- configuration(config)
 
@@ -200,7 +204,6 @@ pops_multirun <- function(infected_file,
       .packages = c("PoPS", "terra")
     ) %dopar% {
 
-      config$random_seed <- round(stats::runif(1, 1, 1000000))
       config <- draw_parameters(config) # draws parameter set for the run
 
       if (config$use_initial_condition_uncertainty) {
@@ -237,7 +240,9 @@ pops_multirun <- function(infected_file,
       }
 
       data <- PoPS::pops_model(
-        random_seed = config$random_seed,
+        random_seed = config$random_seed[1],
+        multiple_random_seeds = config$multiple_random_seeds,
+        random_seeds = config$random_seeds,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,

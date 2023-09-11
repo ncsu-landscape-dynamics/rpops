@@ -90,17 +90,15 @@ pops_model(
 )
 }
 \arguments{
-\item{random_seed}{sets the random seed for the simulation used for
-reproducibility}
+\item{random_seed}{sets the random seed for the simulation used for reproducibility}
 
 \item{multiple_random_seeds}{boolean to indicate if the model should use multiple random seeds
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.}
 
-\item{random_seeds}{key value pair for multiple random seeds 
-"disperser_generation", "natural_dispersal", "anthropogenic_dispersal",
-"establishment", "weather", "movement", "overpopulation", "survival_rate",
-and "soil". Default is Null which draws the seed numbers for each.}
+\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table. 
+Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
+default. Default is Null which draws the seed numbers for each.}
 
 \item{use_lethal_temperature}{a boolean to answer the question: does your
 pest or pathogen have a temperature at which it cannot survive?
@@ -185,8 +183,7 @@ overwinter population that emerges}
 
 \item{rows_cols}{vector of number of rows and columns in the raster files}
 
-\item{time_step}{how often should spread occur options: ('day', 'week',
-'month').}
+\item{time_step}{how often should spread occur options: ('day', 'week', 'month').}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single
 host under optimal weather conditions}

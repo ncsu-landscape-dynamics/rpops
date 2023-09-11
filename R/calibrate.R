@@ -174,7 +174,6 @@ calibrate <- function(infected_years_file,
                       establishment_probability = 0.5,
                       dispersal_percentage = 0.99,
                       quarantine_areas_file = "",
-                      quarantine_directions = "",
                       use_quarantine = FALSE,
                       use_spreadrates = FALSE,
                       use_overpopulation_movements = FALSE,
@@ -193,7 +192,10 @@ calibrate <- function(infected_years_file,
                       use_initial_condition_uncertainty = FALSE,
                       use_host_uncertainty = FALSE,
                       weather_type = "deterministic",
-                      dispersers_to_soils_percentage = 0) {
+                      dispersers_to_soils_percentage = 0,
+                      quarantine_directions = "",
+                      multiple_random_seeds = FALSE,
+                      random_seeds = NULL) {
 
   # add all data to config list
   config <- c()
@@ -281,6 +283,9 @@ calibrate <- function(infected_years_file,
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
+  config$multiple_random_seeds <- multiple_random_seeds
+  config$random_seeds <-random_seeds
+  
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -344,6 +349,8 @@ calibrate <- function(infected_years_file,
 
       data <- pops_model(
         random_seed = config$random_seed,
+        multiple_random_seeds = config$multiple_random_seeds,
+        random_seeds = config$random_seeds,
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
