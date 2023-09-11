@@ -408,7 +408,7 @@ pops <- function(infected_file,
 
   data <- pops_model(random_seed = config$random_seed[1],
                      multiple_random_seeds = config$multiple_random_seeds,
-                     random_seeds = config$random_seeds,
+                     random_seeds = as.matrix(config$random_seeds[1,])[1,],
                      use_lethal_temperature = config$use_lethal_temperature,
                      lethal_temperature = config$lethal_temperature,
                      lethal_temperature_month = config$lethal_temperature_month,
@@ -487,8 +487,7 @@ pops <- function(infected_file,
                      network_movement = config$network_movement,
                      weather_size = config$weather_size,
                      weather_type = config$weather_type,
-                     dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
-  )
+                     dispersers_to_soils_percentage = config$dispersers_to_soils_percentage)
 
   return(data)
 }

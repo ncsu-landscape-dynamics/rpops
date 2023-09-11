@@ -85,9 +85,11 @@ configuration <- function(config) {
         return(config)
       }
     } else {
-      config$random_seeds <- create_random_seeds(1)
+      config$random_seeds <- create_random_seeds(config$number_of_iterations)
     }
-  } 
+  } else {
+    config$random_seeds <- create_random_seeds(1)
+  }
   
   config$output_list <- c("all_simulations", "summary_outputs", "None")
   config$output_write_list <- c("all_simulations", "summary_outputs")

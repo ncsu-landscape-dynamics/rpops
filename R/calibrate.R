@@ -313,7 +313,8 @@ calibrate <- function(infected_years_file,
              network_min_distance,
              network_max_distance) {
 
-      config$random_seed <- round(stats::runif(1, 1, 1000000))
+      config$random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
+      random_seeds <- create_random_seeds(1)
       if (config$use_initial_condition_uncertainty) {
         config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
         exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
@@ -350,7 +351,7 @@ calibrate <- function(infected_years_file,
       data <- pops_model(
         random_seed = config$random_seed,
         multiple_random_seeds = config$multiple_random_seeds,
-        random_seeds = config$random_seeds,
+        random_seeds = as.matix(random_seeds[1,])[1,],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
@@ -897,6 +898,7 @@ calibrate <- function(infected_years_file,
         min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
     }
 
+    random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
     data <-
       param_func(
         proposed_reproductive_rate,

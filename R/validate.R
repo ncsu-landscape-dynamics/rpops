@@ -260,7 +260,7 @@ validate <- function(infected_years_file,
       data <- pops_model(
         random_seed = config$random_seed[i],
         multiple_random_seeds = config$multiple_random_seeds,
-        random_seeds = config$random_seeds,
+        random_seeds = as.matrix(config$random_seeds[i,])[1,],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
