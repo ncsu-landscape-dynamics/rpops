@@ -302,6 +302,28 @@ configuration <- function(config) {
     return(config)
   }
 
+  # check that soils raster has the same crs, resolutin, and extent.
+  if (config$use_soils) {
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      soils_check <-
+        secondary_raster_checks(config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
+    } else {
+      soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
+    }
+    if (soils_check$checks_passed) {
+      soil_pests <- soils_check$raster
+      config$soil_pests <- terra::as.matrix(soil_pests, wide = TRUE)
+    } else {
+      config$failure <- soils_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$soil_starting_pest_file)
+      }
+      return(config)
+    }
+  } else {
+    config$soil_pests <- zero_matrix
+  }
+  
   # check that survival_rates raster has the same crs, resolution, and extent
   if (config$use_survival_rates == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {

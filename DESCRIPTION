@@ -17,7 +17,7 @@ Authors@R:
              family = "Petrasova", 
              role = c("aut"),
              comment = c(ORCID = "0000-0002-5120-5538")))
-Depends: R (>= 3.3.0)
+Depends: R (>= 4.0.0)
 Imports: 
     raster (>= 3.5-15),
     terra (>= 1.5-17),
@@ -26,7 +26,6 @@ Imports:
     foreach,
     parallel,
     doParallel,
-    iterators,
     landscapemetrics,
     lubridate,
     sp,
@@ -41,7 +40,6 @@ URL: http://www.github.com/ncsu-landscape-dynamics/rpops
 Encoding: UTF-8
 LazyData: true
 SystemRequirements: 
-    C++11,
     GNU make
 Suggests: 
     testthat,

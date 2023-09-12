@@ -122,7 +122,9 @@ validate <- function(infected_years_file,
                      dispersers_to_soils_percentage = 0,
                      quarantine_directions = "",
                      multiple_random_seeds = FALSE,
-                     random_seeds = NULL) {
+                     random_seeds = NULL,
+                     use_soils = FALSE,
+                     soil_starting_pest_file = "") {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -207,6 +209,8 @@ validate <- function(infected_years_file,
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
   config$random_seeds <-random_seeds
+  config$use_soils <- use_soils
+  config$soil_starting_pest_file <- soil_starting_pest_file
 
   config <- configuration(config)
 

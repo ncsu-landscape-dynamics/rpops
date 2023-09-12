@@ -193,6 +193,8 @@
 #' of dispersers that fall to the soil and survive.
 #' @param soil_starting_pest_file path to the raster file with the starting
 #' amount of pest or pathogen.
+#' @param use_soils boolean to indicate if pests establish in the soil and spread out from there.
+#' Typically used for soil borne pathogens.
 #' @param multiple_random_seeds boolean to indicate if the model should use multiple random seeds
 #' (allows for performing uncertainty partitioning) or a single random seed (backwards
 #' compatibility option). Default is FALSE.
@@ -293,7 +295,9 @@ pops <- function(infected_file,
                  dispersers_to_soils_percentage = 0,
                  quarantine_directions = "",
                  multiple_random_seeds = FALSE,
-                 random_seeds = NULL) {
+                 random_seeds = NULL,
+                 use_soils = FALSE,
+                 soil_starting_pest_file = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -378,6 +382,8 @@ pops <- function(infected_file,
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
   config$random_seeds <-random_seeds
+  config$use_soils <- use_soils
+  config$soil_starting_pest_file <- soil_starting_pest_file
 
   config <- configuration(config)
 

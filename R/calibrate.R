@@ -197,7 +197,9 @@ calibrate <- function(infected_years_file,
                       dispersers_to_soils_percentage = 0,
                       quarantine_directions = "",
                       multiple_random_seeds = FALSE,
-                      random_seeds = NULL) {
+                      random_seeds = NULL,
+                      use_soils = FALSE,
+                      soil_starting_pest_file = "") {
 
   # add all data to config list
   config <- c()
@@ -289,7 +291,8 @@ calibrate <- function(infected_years_file,
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
   config$random_seeds <-random_seeds
-  
+  config$use_soils <- use_soils
+  config$soil_starting_pest_file <- soil_starting_pest_file
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
