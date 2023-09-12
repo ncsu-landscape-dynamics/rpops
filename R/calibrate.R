@@ -190,7 +190,16 @@ calibrate <- function(infected_years_file,
                       network_movement = "walk",
                       success_metric = "mcc",
                       use_initial_condition_uncertainty = FALSE,
-                      use_host_uncertainty = FALSE) {
+                      use_host_uncertainty = FALSE,
+                      weather_type = "deterministic",
+                      temperature_coefficient_sd_file = "",
+                      precipitation_coefficient_sd_file = "",
+                      dispersers_to_soils_percentage = 0,
+                      quarantine_directions = "",
+                      multiple_random_seeds = FALSE,
+                      random_seeds = NULL,
+                      use_soils = FALSE,
+                      soil_starting_pest_file = "") {
 
   # add all data to config list
   config <- c()
@@ -252,6 +261,7 @@ calibrate <- function(infected_years_file,
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
+  config$quarantine_directions <- quarantine_directions
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
   config$use_overpopulation_movements <- use_overpopulation_movements
@@ -275,6 +285,14 @@ calibrate <- function(infected_years_file,
   config$success_metric <- success_metric
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$temperature_coefficient_sd_file <- temperature_coefficient_sd_file
+  config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
+  config$multiple_random_seeds <- multiple_random_seeds
+  config$random_seeds <-random_seeds
+  config$use_soils <- use_soils
+  config$soil_starting_pest_file <- soil_starting_pest_file
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -302,7 +320,8 @@ calibrate <- function(infected_years_file,
              network_min_distance,
              network_max_distance) {
 
-      config$random_seed <- round(stats::runif(1, 1, 1000000))
+      config$random_seed <- sample(1:999999999999, 1, replace = FALSE)
+      random_seeds <- create_random_seeds(1)
       if (config$use_initial_condition_uncertainty) {
         config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
         exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
@@ -338,6 +357,8 @@ calibrate <- function(infected_years_file,
 
       data <- pops_model(
         random_seed = config$random_seed,
+        multiple_random_seeds = config$multiple_random_seeds,
+        random_seeds = as.matrix(random_seeds[1,])[1,],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
@@ -354,6 +375,7 @@ calibrate <- function(infected_years_file,
         mortality_tracker = config$mortality_tracker,
         mortality = config$mortality,
         quarantine_areas = config$quarantine_areas,
+        quarantine_directions = config$quarantine_directions,
         treatment_maps = config$treatment_maps,
         treatment_dates = config$treatment_dates,
         pesticide_duration = config$pesticide_duration,
@@ -365,6 +387,7 @@ calibrate <- function(infected_years_file,
         temperature = config$temperature,
         survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
+        weather_coefficient_sd = config$weather_coefficient_sd,
         res = config$res,
         rows_cols = config$rows_cols,
         time_step = config$time_step,
@@ -412,7 +435,10 @@ calibrate <- function(infected_years_file,
         network_min_distance = network_min_distance,
         network_max_distance = network_max_distance,
         network_filename = config$network_filename,
-        network_movement = config$network_movement
+        network_movement = config$network_movement,
+        weather_size = config$weather_size,
+        weather_type = config$weather_type,
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
       )
       return(data)
     }
@@ -880,6 +906,7 @@ calibrate <- function(infected_years_file,
         min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
     }
 
+    random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
     data <-
       param_func(
         proposed_reproductive_rate,

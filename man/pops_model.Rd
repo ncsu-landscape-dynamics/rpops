@@ -6,6 +6,8 @@
 \usage{
 pops_model(
   random_seed,
+  multiple_random_seeds,
+  random_seeds,
   use_lethal_temperature,
   lethal_temperature,
   lethal_temperature_month,
@@ -22,6 +24,7 @@ pops_model(
   mortality_tracker,
   mortality,
   quarantine_areas,
+  quarantine_directions,
   treatment_maps,
   treatment_dates,
   pesticide_duration,
@@ -33,6 +36,7 @@ pops_model(
   temperature,
   survival_rates,
   weather_coefficient,
+  weather_coefficient_sd,
   res,
   rows_cols,
   time_step,
@@ -80,12 +84,22 @@ pops_model(
   network_min_distance = 0,
   network_max_distance = 0,
   network_filename = "",
-  network_movement = "walk"
+  network_movement = "walk",
+  weather_size = 0,
+  weather_type = "deterministic",
+  dispersers_to_soils_percentage = 0
 )
 }
 \arguments{
-\item{random_seed}{sets the random seed for the simulation used for
-reproducibility}
+\item{random_seed}{sets the random seed for the simulation used for reproducibility}
+
+\item{multiple_random_seeds}{boolean to indicate if the model should use multiple random seeds
+(allows for performing uncertainty partitioning) or a single random seed (backwards
+compatibility option). Default is FALSE.}
+
+\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table. 
+Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
+default. Default is Null which draws the seed numbers for each.}
 
 \item{use_lethal_temperature}{a boolean to answer the question: does your
 pest or pathogen have a temperature at which it cannot survive?
@@ -130,6 +144,10 @@ model type}
 \item{quarantine_areas}{areas that are set as quarantined for computing
 escape from quarantine statistics.}
 
+\item{quarantine_directions}{string with comma separated directions to include
+in the quarantine direction analysis, e.g., 'N,E'. By default all directions
+(N, S, E, W) are considered}
+
 \item{treatment_maps}{list of matrices where treatment or management has
 occurred in a given year}
 
@@ -162,12 +180,13 @@ overwinter population that emerges}
 
 \item{weather_coefficient}{vector of matrices of weather coefficients}
 
+\item{weather_coefficient_sd}{vector of matrices of weather coefficient standard deviations.}
+
 \item{res}{vector of east/west resolution and north/south resolution}
 
 \item{rows_cols}{vector of number of rows and columns in the raster files}
 
-\item{time_step}{how often should spread occur options: ('day', 'week',
-'month').}
+\item{time_step}{how often should spread occur options: ('day', 'week', 'month').}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single
 host under optimal weather conditions}
@@ -317,6 +336,15 @@ anthropogenic_kernel_type = 'network'.}
 "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
 "teleport" moves from node to node most likely used for airport and seaport networks.}
+
+\item{weather_size}{the number of matrices in a list or layers in a raster object}
+
+\item{weather_type}{string indicating how the weather data is passed in  either
+as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+series ("deterministic")}
+
+\item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage
+of dispersers that fall to the soil and survive.}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

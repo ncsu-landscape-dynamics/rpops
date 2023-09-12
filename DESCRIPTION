@@ -1,5 +1,5 @@
 Package: PoPS
-Version: 2.0.1
+Version: 2.1.0
 Title: Pest or Pathogen Spread Model
 Description: A generalized stochastic geospatial model for pest or pathogen spread in 
     forest and agricultural systems.
@@ -17,7 +17,7 @@ Authors@R:
              family = "Petrasova", 
              role = c("aut"),
              comment = c(ORCID = "0000-0002-5120-5538")))
-Depends: R (>= 3.3.0)
+Depends: R (>= 4.0.0)
 Imports: 
     raster (>= 3.5-15),
     terra (>= 1.5-17),
@@ -26,7 +26,6 @@ Imports:
     foreach,
     parallel,
     doParallel,
-    iterators,
     landscapemetrics,
     lubridate,
     sp,
@@ -41,7 +40,6 @@ URL: http://www.github.com/ncsu-landscape-dynamics/rpops
 Encoding: UTF-8
 LazyData: true
 SystemRequirements: 
-    C++11,
     GNU make
 Suggests: 
     testthat,
@@ -57,5 +55,5 @@ Suggests:
     pkgdown
 LinkingTo: 
     Rcpp
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr

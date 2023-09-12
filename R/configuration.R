@@ -76,6 +76,25 @@ configuration <- function(config) {
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
+  if (is.null(config$random_seed)) {
+    config$random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
+  }
+  
+  if(config$multiple_random_seeds) {
+    if(!is.null(config$random_seeds)) {
+      ## check random seed file
+      random_seeds_file_check <- random_seeds_file_checks(config$random_seeds)
+      if(!random_seeds_file_check$checks_passed) {
+        config$failure <- random_seeds_file_check$failed_check
+        return(config)
+      }
+    } else {
+      config$random_seeds <- create_random_seeds(config$number_of_iterations)
+    }
+  } else {
+    config$random_seeds <- create_random_seeds(1)
+  }
+  
   config$output_list <- c("all_simulations", "summary_outputs", "None")
   config$output_write_list <- c("all_simulations", "summary_outputs")
 
@@ -192,10 +211,6 @@ configuration <- function(config) {
     return(config)
   }
 
-  if (is.null(config$random_seed)) {
-    config$random_seed <- round(stats::runif(1, 1, 1000000))
-  }
-
   # check output and timestep are correct.
   time_check <- time_checks(
     config$end_date, config$start_date,
@@ -219,6 +234,13 @@ configuration <- function(config) {
   network_movement_options <- c("walk", "jump", "teleport")
   if (config$network_movement %notin% network_movement_options) {
     config$failure <- network_movement_error
+    return(config)
+  }
+  
+  # check that weather_type is correct
+  if (config$weather_type %notin% weather_type_list) {
+    config$failure <- weather_type_error
+    return(config)
   }
 
   # check that initial raster file exists
@@ -280,6 +302,28 @@ configuration <- function(config) {
     return(config)
   }
 
+  # check that soils raster has the same crs, resolutin, and extent.
+  if (config$use_soils) {
+    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      soils_check <-
+        secondary_raster_checks(config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
+    } else {
+      soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
+    }
+    if (soils_check$checks_passed) {
+      soil_pests <- soils_check$raster
+      config$soil_pests <- terra::as.matrix(soil_pests, wide = TRUE)
+    } else {
+      config$failure <- soils_check$failed_check
+      if (config$failure == file_exists_error) {
+        config$failure <- detailed_file_exists_error(config$soil_starting_pest_file)
+      }
+      return(config)
+    }
+  } else {
+    config$soil_pests <- zero_matrix
+  }
+  
   # check that survival_rates raster has the same crs, resolution, and extent
   if (config$use_survival_rates == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
@@ -309,7 +353,6 @@ configuration <- function(config) {
   }
 
   config$survival_rates <- survival_rates
-
   # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
@@ -347,10 +390,20 @@ configuration <- function(config) {
       temperature_coefficient_check <-
         secondary_raster_checks(config$temperature_coefficient_file, infected,
                                 config$use_s3, config$bucket)
+      if (config$weather_type == "probabilistic") {
+        temperature_coefficient_sd_check <-
+          secondary_raster_checks(config$temperature_coefficient_sd_file, infected,
+                                  config$use_s3, config$bucket)
+      }
     } else {
       temperature_coefficient_check <-
         secondary_raster_checks(config$temperature_coefficient_file, infected)
+      if (config$weather_type == "probabilistic") {
+        temperature_coefficient_sd_check <-
+          secondary_raster_checks(config$temperature_coefficient_sd_file, infected)
+      }
     }
+    
     if (temperature_coefficient_check$checks_passed) {
       temperature_coefficient <- temperature_coefficient_check$raster
     } else {
@@ -360,18 +413,45 @@ configuration <- function(config) {
       }
       return(config)
     }
-
+    
+    if (config$weather_type == "probabilistic") {
+      if (temperature_coefficient_sd_check$checks_passed) {
+        temperature_coefficient_sd <- temperature_coefficient_sd_check$raster
+      } else {
+        config$failure <- temperature_coefficient_sd_check$failed_check
+        if (config$failure == file_exists_error) {
+          config$failure <- detailed_file_exists_error(config$temperature_coefficient_sd_file)
+        }
+        return(config)
+      }
+    }
+    
     config$weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
+    if (config$weather_type == "probabilistic") {
+      weather_coefficient_sd_stack <- temperature_coefficient_sd 
+    }
+    
     if (config$precip == TRUE) {
       if (config$function_name %in% c("casestudy_creation", "model_api")) {
         precipitation_coefficient_check <-
           secondary_raster_checks(config$precipitation_coefficient_file, infected,
                                   config$use_s3, config$bucket)
+        if (config$weather_type == "probabilistic") {
+          precipitation_coefficient_sd_check <-
+            secondary_raster_checks(config$precipitation_coefficient_sd_file, infected,
+                                    config$use_s3, config$bucket)
+        }
+
       } else {
         precipitation_coefficient_check <-
           secondary_raster_checks(config$precipitation_coefficient_file, infected)
+        if (config$weather_type == "probabilistic") {
+          precipitation_coefficient_sd_check <-
+            secondary_raster_checks(config$precipitation_coefficient_sd_file, infected)
+        }
       }
+      
       if (precipitation_coefficient_check$checks_passed) {
         precipitation_coefficient <- precipitation_coefficient_check$raster
       } else {
@@ -381,18 +461,43 @@ configuration <- function(config) {
         }
         return(config)
       }
+      
+      if (config$weather_type == "probabilistic") {
+        if (precipitation_coefficient_sd_check$checks_passed) {
+          precipitation_coefficient_sd <- precipitation_coefficient_sd_check$raster
+        } else {
+          config$failure <- precipitation_coefficient_sd_check$failed_check
+          if (config$failure == file_exists_error) {
+            config$failure <- detailed_file_exists_error(config$precipitation_coefficient_sd_file)
+          }
+          return(config)
+        }
+      }
 
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
+      if (config$weather_type == "probabilistic") {
+        weather_coefficient_sd_stack <- weather_coefficient_sd_stack * precipitation_coefficient_sd
+      }
     }
   } else if (config$precip == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {
       precipitation_coefficient_check <-
         secondary_raster_checks(config$precipitation_coefficient_file, infected,
                                 config$use_s3, config$bucket)
+      if (config$weather_type == "probabilistic") {
+        precipitation_coefficient_sd_check <-
+          secondary_raster_checks(config$precipitation_coefficient_sd_file, infected,
+                                  config$use_s3, config$bucket)
+      }
     } else {
       precipitation_coefficient_check <-
         secondary_raster_checks(config$precipitation_coefficient_file, infected)
+      if (config$weather_type == "probabilistic") {
+        precipitation_coefficient_sd_check <-
+          secondary_raster_checks(config$precipitation_coefficient_sd_file, infected) 
+      }
     }
+    
     if (precipitation_coefficient_check$checks_passed) {
       precipitation_coefficient <- precipitation_coefficient_check$raster
     } else {
@@ -402,21 +507,51 @@ configuration <- function(config) {
       }
       return(config)
     }
+    
+    if (config$weather_type == "probabilistic") {
+      if (precipitation_coefficient_sd_check$checks_passed) {
+        precipitation_coefficient_sd <- precipitation_coefficient_sd_check$raster
+      } else {
+        config$failure <- precipitation_coefficient_sd_check$failed_check
+        if (config$failure == file_exists_error) {
+          config$failure <- detailed_file_exists_error(config$precipitation_coefficient_sd_file)
+        }
+        return(config)
+      } 
+    }
 
     config$weather <- TRUE
+    
     weather_coefficient_stack <- precipitation_coefficient
+    if (config$weather_type == "probabilistic") {
+      weather_coefficient_sd_stack <- precipitation_coefficient_sd
+    }
   }
 
   if (config$weather == TRUE) {
+    config$weather_size <- terra::nlyr(weather_coefficient_stack)
     weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]], wide = TRUE))
     for (i in 2:terra::nlyr(weather_coefficient_stack)) {
       weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
     }
+    if (config$weather_type == "probabilistic") {
+      weather_coefficient_sd <- list(terra::as.matrix(weather_coefficient_sd_stack[[1]], wide = TRUE))
+      for (i in 2:terra::nlyr(weather_coefficient_sd_stack)) {
+        weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]], wide = TRUE)
+      }
+    } else {
+      weather_coefficient_sd <- list(zero_matrix)
+    }
   } else {
+    config$weather_size <- 1
+    config$weather_type <- "None"
     weather_coefficient <- list(one_matrix)
+    weather_coefficient_sd <- list(zero_matrix)
+    config$weather_type <- "none"
   }
 
   config$weather_coefficient <- weather_coefficient
+  config$weather_coefficient_sd <- weather_coefficient_sd
 
   if (config$management == TRUE) {
     if (config$function_name %in% c("casestudy_creation", "model_api")) {

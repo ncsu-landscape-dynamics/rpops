@@ -40,6 +40,8 @@ using namespace pops;
 // [[Rcpp::export]]
 List pops_model_cpp(
     int random_seed,
+    bool multiple_random_seeds,
+    std::vector<int> random_seeds,
     double lethal_temperature,
     int lethal_temperature_month,
     IntegerMatrix infected,
@@ -51,6 +53,7 @@ List pops_model_cpp(
     std::vector<IntegerMatrix> mortality_tracker,
     IntegerMatrix mortality,
     IntegerMatrix quarantine_areas,
+    std::string quarantine_directions,
     std::vector<NumericMatrix> treatment_maps,
     std::vector<std::string> treatment_dates,
     std::vector<int> pesticide_duration,
@@ -60,6 +63,7 @@ List pops_model_cpp(
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> survival_rates,
     std::vector<NumericMatrix> weather_coefficient,
+    std::vector<NumericMatrix> weather_coefficient_sd,
     List bbox,
     List res,
     List rows_cols,
@@ -91,7 +95,10 @@ List pops_model_cpp(
     int survival_rate_day = 0,
     Nullable<List> overpopulation_config = R_NilValue,
     Nullable<List> network_config = R_NilValue,
-    Nullable<List> network_data_config = R_NilValue)
+    Nullable<List> network_data_config = R_NilValue,
+    int weather_size = 0,
+    std::string weather_type = "deterministic",
+    double dispersers_to_soils_percentage = 0)
 {
     Config config;
     config.random_seed = random_seed;
@@ -105,10 +112,14 @@ List pops_model_cpp(
     config.movement_stochasticity = bool_config["movement_stochasticity"];
     config.dispersal_stochasticity = bool_config["dispersal_stochasticity"];
     config.establishment_probability = establishment_probability;
+
     config.use_lethal_temperature = bool_config["use_lethal_temperature"];
     config.lethal_temperature = lethal_temperature;
     config.lethal_temperature_month = lethal_temperature_month;
     config.weather = bool_config["weather"];
+    config.weather_size = weather_size;
+    config.weather_type = weather_type;
+
     config.reproductive_rate = reproductive_rate;
     config.model_type = model_type_;
     config.latency_period_steps = latency_period;
@@ -156,6 +167,7 @@ List pops_model_cpp(
     config.output_frequency = output_frequency;
     config.quarantine_frequency = quarantine_frequency;
     config.use_quarantine = bool_config["use_quarantine"];
+    config.quarantine_directions = quarantine_directions;
     config.spreadrate_frequency = spreadrate_frequency;
     config.mortality_frequency = mortality_frequency;
     config.use_spreadrates = bool_config["use_spreadrates"];
@@ -177,6 +189,7 @@ List pops_model_cpp(
     int start_month = season_month_start_end["start_month"];
     int end_month = season_month_start_end["end_month"];
     config.set_season_start_end_month(start_month, end_month);
+    config.dispersers_to_soils_percentage = dispersers_to_soils_percentage;
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
@@ -249,7 +262,11 @@ List pops_model_cpp(
     }
 
     QuarantineEscape<IntegerMatrix> quarantine(
-            quarantine_areas, config.ew_res, config.ns_res, quarantine_outputs, spatial_indices);
+        quarantine_areas,
+        config.ew_res,
+        config.ns_res,
+        quarantine_outputs,
+        config.quarantine_directions);
     bool quarantine_escape;
     std::vector<bool> quarantine_escapes;
     int escape_dist;
@@ -272,19 +289,33 @@ List pops_model_cpp(
         config.network_movement = network_movement;
         network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
         List net_data_config(network_data_config);
-        std::ifstream network_stream{Rcpp::as<std::string>(net_data_config["network_filename"])};
+        std::ifstream network_stream{
+            Rcpp::as<std::string>(net_data_config["network_filename"])};
         network->load(network_stream);
     }
 
     ModelType mt = model_type_from_string(config.model_type);
+    WeatherType weather_typed = weather_type_from_string(config.weather_type);
+    
     Simulation<IntegerMatrix, NumericMatrix> simulation(
-        config.random_seed, config.rows, config.cols, mt, config.latency_period_steps);
+        config.rows, config.cols, mt, config.latency_period_steps);
 
     Model<IntegerMatrix, NumericMatrix, int> model(config);
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
 
-        IntegerMatrix dispersers(config.rows, config.cols);
+      IntegerMatrix dispersers(config.rows, config.cols);
+      
+      auto weather_step = config.simulation_step_to_weather_step(current_index);
+      if (weather_typed == WeatherType::Probabilistic) {
+        model.environment().update_weather_from_distribution(
+            weather_coefficient[weather_step], weather_coefficient_sd[weather_step],
+            model.random_number_generator());
+      }
+      else if (weather_typed == WeatherType::Deterministic) {
+        model.environment().update_weather_coefficient(weather_coefficient[weather_step]);
+      }
+      
         model.run_step(
             current_index,
             infected,
@@ -299,7 +330,6 @@ List pops_model_cpp(
             mortality,
             temperature,
             survival_rates,
-            weather_coefficient[current_index],
             treatments,
             resistant,
             outside_dispersers,
@@ -343,10 +373,8 @@ List pops_model_cpp(
 
             num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
-            area_infect = area_of_infected(infected,
-                                           config.ew_res,
-                                           config.ns_res,
-                                           spatial_indices);
+            area_infect = area_of_infected(
+                infected, config.ew_res, config.ns_res, spatial_indices);
             area_infected.push_back(area_infect);
             total_dispersers(config.rows, config.cols);
         }

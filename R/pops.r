@@ -42,8 +42,7 @@
 #' coefficients). We convert raw precipitation values to coefficients that
 #' affect the reproduction and survival of the pest all values in the raster are
 #' between 0 and 1.
-#' @param time_step how often should spread occur options: ('day', 'week',
-#' 'month').
+#' @param time_step how often should spread occur options: ('day', 'week', 'month').
 #' @param season_month_start when does spread first start occurring in the year
 #' for your pest or pathogen (integer value between 1 and 12)
 #' @param season_month_end when does spread end during the year for your pest
@@ -103,8 +102,7 @@
 #' @param pesticide_efficacy how effictive is the pesticide at preventing the
 #' disease or killing the pest (if this is 0.70 then when applied it
 #' successfully treats 70 percent of the plants or animals)
-#' @param random_seed sets the random seed for the simulation used for
-#' reproducibility
+#' @param random_seed sets the random seed for the simulation used for reproducibility
 #' @param output_frequency sets when outputs occur either ('year', 'month',
 #' 'week', 'day', 'time step', or 'every_n_steps')
 #' @param output_frequency_n sets number of units from output_frequency in which
@@ -149,6 +147,9 @@
 #' @param use_quarantine boolean to indicate whether or not there is a
 #' quarantine area if TRUE must pass in a raster file indicating the
 #' quarantine areas (default = FALSE)
+#' @param quarantine_directions string with comma separated directions to include
+#' in the quarantine direction analysis, e.g., 'N,E'. By default all directions
+#' (N, S, E, W) are considered
 #' @param use_spreadrates boolean to indicate whether or not to calculate
 #' spread rates
 #' @param use_overpopulation_movements boolean to indicate whether to use
@@ -185,6 +186,31 @@
 #' @param use_host_uncertainty boolean to indicate whether or not to propagate and partition
 #' uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
 #' and one with the standard deviation.
+#' @param weather_type string indicating how the weather data is passed in  either
+#' as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
+#' series ("deterministic")
+#' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
+#' of dispersers that fall to the soil and survive.
+#' @param soil_starting_pest_file path to the raster file with the starting
+#' amount of pest or pathogen.
+#' @param use_soils boolean to indicate if pests establish in the soil and spread out from there.
+#' Typically used for soil borne pathogens.
+#' @param multiple_random_seeds boolean to indicate if the model should use multiple random seeds
+#' (allows for performing uncertainty partitioning) or a single random seed (backwards
+#' compatibility option). Default is FALSE.
+#' @param random_seeds A file path to the file with the .csv file containing random_seeds table. 
+#' Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
+#' default. Default is Null which draws the seed numbers for each. 
+#' @param temperature_coefficient_sd_file Raster file with temperature coefficient standard 
+#' deviation data for the timestep and time period specified (e.g. if timestep = week this file 
+#' would have 52 bands with data being weekly temperature coefficient standard deviations). We 
+#' convert raw temperature values to coefficients that affect the reproduction and survival of 
+#' the pest all values in the raster are between 0 and 1.
+#' @param precipitation_coefficient_sd_file Raster file with precipitation coefficient standard 
+#' deviation data for the timestep and time period specified (e.g. if timestep = week this file 
+#' would have 52 bands with data being weekly precipitation coefficient standard deviations). We 
+#' convert raw precipitation values to coefficients that affect the reproduction and survival of 
+#' the pest all values in the raster are between 0 and 1.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
@@ -262,7 +288,16 @@ pops <- function(infected_file,
                  network_filename = "",
                  network_movement = "walk",
                  use_initial_condition_uncertainty = FALSE,
-                 use_host_uncertainty = FALSE) {
+                 use_host_uncertainty = FALSE,
+                 weather_type = "deterministic",
+                 temperature_coefficient_sd_file = "",
+                 precipitation_coefficient_sd_file = "",
+                 dispersers_to_soils_percentage = 0,
+                 quarantine_directions = "",
+                 multiple_random_seeds = FALSE,
+                 random_seeds = NULL,
+                 use_soils = FALSE,
+                 soil_starting_pest_file = "") {
 
   config <- c()
   config$random_seed <- random_seed
@@ -316,6 +351,7 @@ pops <- function(infected_file,
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
   config$use_quarantine <- use_quarantine
+  config$quarantine_directions <- quarantine_directions
   config$use_spreadrates <- use_spreadrates
   config$use_overpopulation_movements <- use_overpopulation_movements
   config$overpopulation_percentage <- overpopulation_percentage
@@ -340,6 +376,14 @@ pops <- function(infected_file,
   config$network_movement <- network_movement
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$temperature_coefficient_sd_file <- temperature_coefficient_sd_file
+  config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
+  config$multiple_random_seeds <- multiple_random_seeds
+  config$random_seeds <-random_seeds
+  config$use_soils <- use_soils
+  config$soil_starting_pest_file <- soil_starting_pest_file
 
   config <- configuration(config)
 
@@ -382,7 +426,9 @@ pops <- function(infected_file,
     config$mortality_tracker <- mortality_tracker2
   }
 
-  data <- pops_model(random_seed = config$random_seed,
+  data <- pops_model(random_seed = config$random_seed[1],
+                     multiple_random_seeds = config$multiple_random_seeds,
+                     random_seeds = unname(as.matrix(config$random_seeds[1,])[1,]),
                      use_lethal_temperature = config$use_lethal_temperature,
                      lethal_temperature = config$lethal_temperature,
                      lethal_temperature_month = config$lethal_temperature_month,
@@ -399,6 +445,7 @@ pops <- function(infected_file,
                      mortality_tracker = config$mortality_tracker,
                      mortality = config$mortality,
                      quarantine_areas = config$quarantine_areas,
+                     quarantine_directions = config$quarantine_directions,
                      treatment_maps = config$treatment_maps,
                      treatment_dates = config$treatment_dates,
                      pesticide_duration = config$pesticide_duration,
@@ -410,6 +457,7 @@ pops <- function(infected_file,
                      temperature = config$temperature,
                      survival_rates = config$survival_rates,
                      weather_coefficient = config$weather_coefficient,
+                     weather_coefficient_sd = config$weather_coefficient_sd,
                      res = config$res,
                      rows_cols = config$rows_cols,
                      time_step = config$time_step,
@@ -457,8 +505,10 @@ pops <- function(infected_file,
                      network_min_distance = config$network_min_distance[1],
                      network_max_distance = config$network_max_distance[1],
                      network_filename = config$network_filename,
-                     network_movement = config$network_movement
-  )
+                     network_movement = config$network_movement,
+                     weather_size = config$weather_size,
+                     weather_type = config$weather_type,
+                     dispersers_to_soils_percentage = config$dispersers_to_soils_percentage)
 
   return(data)
 }

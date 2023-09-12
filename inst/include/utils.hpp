@@ -16,6 +16,9 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+#ifdef UNUSED
+#undef UNUSED
+#endif
 /*!
  * Macro to mark unused variables (including parameters) and silence the warning
  * while documenting that it is intentionally unused.
@@ -29,11 +32,19 @@
  * ```
  *
  * To be replaced by `[[maybe_unused]]` once we migrate to C++17 or higher.
+ *
+ * We remove any existing UNUSED definition from elsewhere, to ensure we have one
+ * which is compatible with our code.
  */
 #define UNUSED(expr) (void)(expr)
 
+// We assume that if the constants are defined elsewhere, they can be used instead.
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
+#ifndef PI
 #define PI M_PI
+#endif
 
 #include <algorithm>
 #include <array>
@@ -82,6 +93,56 @@ pick_random_item(const Container& container, Generator& generator)
     auto index = distribution(generator);
     // For small containers, this is expected to be fast for both sets and vectors.
     return *std::next(container.begin(), index);
+}
+
+/** Rotate elements in a container to the left by one
+ *
+ * Rotates (moves) elements in a container to the left (anticlockwise)
+ * by one. The second element is moved to the front and the first
+ * element is moved to the back.
+ */
+template<typename Container>
+void rotate_left_by_one(Container& container)
+{
+    std::rotate(container.begin(), container.begin() + 1, container.end());
+}
+
+/** Draws n elements from a vector. Expects n to be equal or less than v.size().
+ */
+template<typename Generator>
+std::vector<int> draw_n_from_v(std::vector<int> v, unsigned n, Generator& generator)
+{
+    if (n > v.size())
+        n = v.size();
+
+    std::shuffle(v.begin(), v.end(), generator);
+    v.erase(v.begin() + n, v.end());
+    return v;
+}
+
+/** Draws n elements from a cohort of rasters. Expects n to be equal or less than
+ *  sum of cohorts at cell (i, j).
+ */
+template<typename Generator, typename IntegerRaster, typename RasterIndex = int>
+std::vector<int> draw_n_from_cohorts(
+    std::vector<IntegerRaster>& cohorts,
+    int n,
+    RasterIndex row,
+    RasterIndex col,
+    Generator& generator)
+{
+    std::vector<int> categories;
+    unsigned index = 0;
+    for (auto& raster : cohorts) {
+        categories.insert(categories.end(), raster(row, col), index);
+        index += 1;
+    }
+    std::vector<int> draw = draw_n_from_v(categories, n, generator);
+    std::vector<int> cohort_counts;
+    for (index = 0; index < cohorts.size(); index++) {
+        cohort_counts.push_back(std::count(draw.begin(), draw.end(), index));
+    }
+    return cohort_counts;
 }
 
 /**

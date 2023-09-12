@@ -138,6 +138,15 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             survival_rate_day <- 15
             survival_rates_file <- ""
             network_movement <- "walk"
+            use_initial_condition_uncertainty <- FALSE
+            use_host_uncertainty <- FALSE
+            weather_type <- "deterministic"
+            temperature_coefficient_sd_file <- ""
+            precipitation_coefficient_sd_file <- ""
+            dispersers_to_soils_percentage <- 0
+            quarantine_directions <- ""
+            multiple_random_seeds <- FALSE
+            random_seeds <- NULL
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -213,7 +222,16 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               output_folder_path,
                               network_filename,
                               network_movement,
-                              success_metric)
+                              success_metric,
+                              use_initial_condition_uncertainty,
+                              use_host_uncertainty,
+                              weather_type,
+                              temperature_coefficient_sd_file,
+                              precipitation_coefficient_sd_file,
+                              dispersers_to_soils_percentage,
+                              quarantine_directions,
+                              multiple_random_seeds,
+                              random_seeds)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)

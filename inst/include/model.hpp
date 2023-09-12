@@ -24,6 +24,7 @@
 #ifndef POPS_MODEL_HPP
 #define POPS_MODEL_HPP
 
+#include "environment.hpp"
 #include "config.hpp"
 #include "treatments.hpp"
 #include "spread_rate.hpp"
@@ -32,6 +33,8 @@
 #include "kernel.hpp"
 #include "scheduling.hpp"
 #include "quarantine.hpp"
+#include "soils.hpp"
+#include "generator_provider.hpp"
 
 #include <vector>
 
@@ -48,13 +51,23 @@ class Model
 {
 protected:
     Config config_;
+    RandomNumberGeneratorProvider<Generator> generator_provider_;
     DispersalKernelType natural_kernel;
     DispersalKernelType anthro_kernel;
     UniformDispersalKernel uniform_kernel;
     DeterministicNeighborDispersalKernel natural_neighbor_kernel;
     DeterministicNeighborDispersalKernel anthro_neighbor_kernel;
-    Simulation<IntegerRaster, FloatRaster, RasterIndex, Generator> simulation_;
+    Simulation<IntegerRaster, FloatRaster, RasterIndex> simulation_;
     KernelFactory& kernel_factory_;
+    /**
+     * Surrounding environment (currently used for soils only)
+     */
+    Environment<IntegerRaster, FloatRaster, RasterIndex> environment_;
+    /**
+     * Optionally created soil pool
+     */
+    std::shared_ptr<SoilPool<IntegerRaster, FloatRaster, RasterIndex>> soil_pool_{
+        nullptr};
     unsigned last_index{0};
 
     /**
@@ -107,13 +120,13 @@ public:
         KernelFactory& kernel_factory =
             create_dynamic_kernel<Generator, IntegerRaster, RasterIndex>)
         : config_(config),
+          generator_provider_(config),
           natural_kernel(kernel_type_from_string(config.natural_kernel_type)),
           anthro_kernel(kernel_type_from_string(config.anthro_kernel_type)),
           uniform_kernel(config.rows, config.cols),
           natural_neighbor_kernel(direction_from_string(config.natural_direction)),
           anthro_neighbor_kernel(direction_from_string(config.anthro_direction)),
           simulation_(
-              config.random_seed,
               config.rows,
               config.cols,
               model_type_from_string(config.model_type),
@@ -122,7 +135,9 @@ public:
               config.establishment_stochasticity,
               config.movement_stochasticity),
           kernel_factory_(kernel_factory)
-    {}
+    {
+        simulation_.set_environment(&this->environment());
+    }
 
     /**
      * @brief Run one step of the simulation.
@@ -190,7 +205,6 @@ public:
         IntegerRaster& died,
         const std::vector<FloatRaster>& temperatures,
         const std::vector<FloatRaster>& survival_rates,
-        const FloatRaster& weather_coefficient,
         Treatments<IntegerRaster, FloatRaster>& treatments,
         IntegerRaster& resistant,
         std::vector<std::tuple<int, int>>& outside_dispersers,  // out
@@ -201,6 +215,9 @@ public:
         const Network<RasterIndex>& network,
         std::vector<std::vector<int>>& suitable_cells)
     {
+        // Soil step is the same as simulation step.
+        if (soil_pool_)
+            soil_pool_->next_step(step);
 
         // removal of dispersers due to lethal temperatures
         if (config_.use_lethal_temperature && config_.lethal_schedule()[step]) {
@@ -224,7 +241,8 @@ public:
                 exposed,
                 total_exposed,
                 survival_rates[survival_step],
-                suitable_cells);
+                suitable_cells,
+                generator_provider_);
         }
         // actual spread
         if (config_.spread_schedule()[step]) {
@@ -233,9 +251,9 @@ public:
                 established_dispersers,
                 infected,
                 config_.weather,
-                weather_coefficient,
                 config_.reproductive_rate,
-                suitable_cells);
+                suitable_cells,
+                generator_provider_);
 
             auto dispersal_kernel = kernel_factory_(config_, dispersers, network);
             auto overpopulation_kernel =
@@ -253,10 +271,10 @@ public:
                 total_exposed,
                 outside_dispersers,
                 config_.weather,
-                weather_coefficient,
                 dispersal_kernel,
                 suitable_cells,
-                config_.establishment_probability);
+                config_.establishment_probability,
+                generator_provider_);
             if (config_.use_overpopulation_movements) {
                 simulation_.move_overpopulated_pests(
                     susceptible,
@@ -266,7 +284,8 @@ public:
                     overpopulation_kernel,
                     suitable_cells,
                     config_.overpopulation_percentage,
-                    config_.leaving_percentage);
+                    config_.leaving_percentage,
+                    generator_provider_);
             }
             if (config_.use_movements) {
                 // to do fix movements to use entire mortality tracker
@@ -282,7 +301,8 @@ public:
                     last_index,
                     movements,
                     config_.movement_schedule,
-                    suitable_cells);
+                    suitable_cells,
+                    generator_provider_);
             }
         }
         // treatments
@@ -328,6 +348,44 @@ public:
             quarantine.infection_escape_quarantine(
                 infected, quarantine_areas, action_step, suitable_cells);
         }
+    }
+
+    /**
+     * @brief Get the associated random number generator provider
+     * @return Reference to the generator provider
+     */
+    RandomNumberGeneratorProvider<Generator>& random_number_generator()
+    {
+        return generator_provider_;
+    }
+
+    /**
+     * @brief Get surrounding environment
+     * @return Environment object by reference
+     */
+    Environment<IntegerRaster, FloatRaster, RasterIndex>& environment()
+    {
+        return environment_;
+    }
+
+    /**
+     * @brief Activate movement to and from soil pool
+     *
+     * The size of vector of rasters for cohorts is the number of simulation steps
+     * dispersers stay in the soil.
+     *
+     * @param rasters Vector of rasters for cohorts
+     */
+    void activate_soils(std::vector<IntegerRaster>& rasters)
+    {
+        // The soil pool is created again for every new activation.
+        this->soil_pool_.reset(new SoilPool<IntegerRaster, FloatRaster, RasterIndex>(
+            rasters,
+            this->environment_,
+            config_.generate_stochasticity,
+            config_.establishment_stochasticity));
+        this->simulation_.activate_soils(
+            this->soil_pool_, config_.dispersers_to_soils_percentage);
     }
 };
 

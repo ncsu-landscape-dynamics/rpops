@@ -17,16 +17,14 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     }
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in%
-    c("grd", "tif", "img", "vrt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% c("grd", "tif", "img", "vrt")))) {
     checks_passed <- FALSE
     failed_check <- raster_type_error
   }
 
   if (checks_passed) {
     if (use_s3) {
-      aws.s3::save_object(object = x, bucket = bucket,
-                          file = x, check_region = FALSE)
+      aws.s3::save_object(object = x, bucket = bucket, file = x, check_region = FALSE)
       r <- terra::rast(x)
     } else {
       r <- terra::rast(x)
@@ -605,9 +603,7 @@ movement_checks <- function(x, rast, start_date, end_date) {
 
 draw_parameters <- function(config) {
   parameters <-
-    MASS::mvrnorm(1,
-                  config$parameter_means,
-                  config$parameter_cov_matrix)
+    MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
   while (any(parameters[1] < 0 |
              parameters[2] <= 0 |
              parameters[3] > 1 |
@@ -660,4 +656,51 @@ draw_parameters <- function(config) {
   config$network_max_distance <- parameters[8]
 
   return(config)
+}
+
+create_random_seeds <- function(n) {
+  random_seeds <- 
+    data.frame(disperser_generation = sample(1:999999999, n, replace = FALSE),
+               natural_dispersal = sample(1:999999999, n, replace = FALSE),
+               anthropogenic_dispersal = sample(1:999999999999, 1, replace = FALSE),
+               establishment = sample(1:999999999, n, replace = FALSE),
+               weather = sample(1:999999999, n, replace = FALSE),
+               movement = sample(1:999999999, n, replace = FALSE),
+               overpopulation = sample(1:999999999, n, replace = FALSE),
+               survival_rate = sample(1:999999999, n, replace = FALSE),
+               soil = sample(1:999999999, n, replace = FALSE))
+  
+  return(random_seeds)
+}
+
+random_seeds_file_checks <- function(x, number_of_iterations = 1) {
+  checks_passed <- TRUE
+  if(!all(file.exists(x))) {
+    checks_passed <- FALSE
+    failed_check <- file_exists_error
+  }
+  
+  if (checks_passed && !all((tools::file_ext(x) %in% c("csv", "txt")))) {
+    checks_passed <- FALSE
+    failed_check <- file_type_error
+  }
+  
+  if(checks_passed) {
+    random_seeds <- read.csv(x)
+    if(NCOL(random_seeds) != 9 && NROW(random_seeds != number_of_iterations)) {
+      checks_passed <- FALSE
+      failed_check <- random_seeds_dimensions_error
+    }
+  }
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, random_seeds)
+    names(outs) <-
+      c("checks_passed", "random_seeds")
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c("checks_passed", "failed_check")
+    return(outs)
+  }
 }

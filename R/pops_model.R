@@ -21,6 +21,7 @@
 #' @param temperature vector of matrices of temperature values used to check
 #' against lethal temperature
 #' @param weather_coefficient vector of matrices of weather coefficients
+#' @param weather_coefficient_sd vector of matrices of weather coefficient standard deviations.
 #' @param res  vector of east/west resolution and north/south resolution
 #' @param rows_cols vector of number of rows and columns in the raster files
 #' @param season_month_start_end vector of months when spread starts and stops
@@ -72,6 +73,12 @@
 #' anthropogenic_kernel_type = 'network'.
 #' @param survival_rates vector of matrices of survival rates used to determine percentage of
 #' overwinter population that emerges
+#' @param weather_size the number of matrices in a list or layers in a raster object
+#' @param weather_type string indicating how the weather data is passed in  either
+#' as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+#' series ("deterministic")
+#' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
+#' of dispersers that fall to the soil and survive.
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -80,6 +87,8 @@
 
 pops_model <-
   function(random_seed,
+           multiple_random_seeds,
+           random_seeds,
            use_lethal_temperature,
            lethal_temperature,
            lethal_temperature_month,
@@ -96,6 +105,7 @@ pops_model <-
            mortality_tracker,
            mortality,
            quarantine_areas,
+           quarantine_directions,
            treatment_maps,
            treatment_dates,
            pesticide_duration,
@@ -107,6 +117,7 @@ pops_model <-
            temperature,
            survival_rates,
            weather_coefficient,
+           weather_coefficient_sd,
            res,
            rows_cols,
            time_step,
@@ -154,7 +165,10 @@ pops_model <-
            network_min_distance = 0,
            network_max_distance = 0,
            network_filename = "",
-           network_movement = "walk") {
+           network_movement = "walk",
+           weather_size = 0,
+           weather_type = "deterministic",
+           dispersers_to_soils_percentage = 0) {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
@@ -210,6 +224,8 @@ pops_model <-
 
     data <-
       pops_model_cpp(random_seed = random_seed,
+                     multiple_random_seeds,
+                     random_seeds,
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
                      infected = infected,
@@ -221,6 +237,7 @@ pops_model <-
                      mortality_tracker = mortality_tracker,
                      mortality = mortality,
                      quarantine_areas = quarantine_areas,
+                     quarantine_directions = quarantine_directions,
                      treatment_maps = treatment_maps,
                      treatment_dates = treatment_dates,
                      pesticide_duration = pesticide_duration,
@@ -230,6 +247,7 @@ pops_model <-
                      temperature = temperature,
                      survival_rates = survival_rates,
                      weather_coefficient = weather_coefficient,
+                     weather_coefficient_sd = weather_coefficient_sd,
                      bbox = bbox,
                      res = res,
                      rows_cols = rows_cols,
@@ -261,7 +279,10 @@ pops_model <-
                      establishment_probability = establishment_probability,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
-                     network_data_config = network_data_config
+                     network_data_config = network_data_config,
+                     weather_size = weather_size,
+                     weather_type = weather_type,
+                     dispersers_to_soils_percentage = dispersers_to_soils_percentage
     )
 
   }

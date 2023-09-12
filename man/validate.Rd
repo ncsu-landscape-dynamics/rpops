@@ -76,7 +76,16 @@ validate(
   use_distance = FALSE,
   use_configuration = FALSE,
   use_initial_condition_uncertainty = FALSE,
-  use_host_uncertainty = FALSE
+  use_host_uncertainty = FALSE,
+  weather_type = "deterministic",
+  temperature_coefficient_sd_file = "",
+  precipitation_coefficient_sd_file = "",
+  dispersers_to_soils_percentage = 0,
+  quarantine_directions = "",
+  multiple_random_seeds = FALSE,
+  random_seeds = NULL,
+  use_soils = FALSE,
+  soil_starting_pest_file = ""
 )
 }
 \arguments{
@@ -144,8 +153,7 @@ are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 populations become infected/infested. This is an integer value and must be
 greater than 0 if model type is SEI.}
 
-\item{time_step}{how often should spread occur options: ('day', 'week',
-'month').}
+\item{time_step}{how often should spread occur options: ('day', 'week', 'month').}
 
 \item{season_month_start}{when does spread first start occurring in the year
 for your pest or pathogen (integer value between 1 and 12)}
@@ -334,6 +342,43 @@ deviation}
 \item{use_host_uncertainty}{boolean to indicate whether or not to propagate and partition
 uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
 and one with the standard deviation.}
+
+\item{weather_type}{string indicating how the weather data is passed in  either
+as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
+series ("deterministic")}
+
+\item{temperature_coefficient_sd_file}{Raster file with temperature coefficient standard 
+deviation data for the timestep and time period specified (e.g. if timestep = week this file 
+would have 52 bands with data being weekly temperature coefficient standard deviations). We 
+convert raw temperature values to coefficients that affect the reproduction and survival of 
+the pest all values in the raster are between 0 and 1.}
+
+\item{precipitation_coefficient_sd_file}{Raster file with precipitation coefficient standard 
+deviation data for the timestep and time period specified (e.g. if timestep = week this file 
+would have 52 bands with data being weekly precipitation coefficient standard deviations). We 
+convert raw precipitation values to coefficients that affect the reproduction and survival of 
+the pest all values in the raster are between 0 and 1.}
+
+\item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage
+of dispersers that fall to the soil and survive.}
+
+\item{quarantine_directions}{string with comma separated directions to include
+in the quarantine direction analysis, e.g., 'N,E'. By default all directions
+(N, S, E, W) are considered}
+
+\item{multiple_random_seeds}{boolean to indicate if the model should use multiple random seeds
+(allows for performing uncertainty partitioning) or a single random seed (backwards
+compatibility option). Default is FALSE.}
+
+\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table. 
+Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
+default. Default is Null which draws the seed numbers for each.}
+
+\item{use_soils}{boolean to indicate if pests establish in the soil and spread out from there.
+Typically used for soil borne pathogens.}
+
+\item{soil_starting_pest_file}{path to the raster file with the starting
+amount of pest or pathogen.}
 }
 \value{
 a data frame of statistical measures of model performance.
