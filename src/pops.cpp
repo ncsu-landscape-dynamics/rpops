@@ -41,7 +41,7 @@ using namespace pops;
 List pops_model_cpp(
     int random_seed,
     bool multiple_random_seeds,
-    std::vector<unsigned> random_seeds,
+    std::vector<int> random_seeds,
     double lethal_temperature,
     int lethal_temperature_month,
     IntegerMatrix infected,
@@ -63,6 +63,7 @@ List pops_model_cpp(
     std::vector<NumericMatrix> temperature,
     std::vector<NumericMatrix> survival_rates,
     std::vector<NumericMatrix> weather_coefficient,
+    std::vector<NumericMatrix> weather_coefficient_sd,
     List bbox,
     List res,
     List rows_cols,
@@ -294,6 +295,8 @@ List pops_model_cpp(
     }
 
     ModelType mt = model_type_from_string(config.model_type);
+    WeatherType weather_typed = weather_type_from_string(config.weather_type);
+    
     Simulation<IntegerMatrix, NumericMatrix> simulation(
         config.rows, config.cols, mt, config.latency_period_steps);
 
@@ -301,7 +304,18 @@ List pops_model_cpp(
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
 
-        IntegerMatrix dispersers(config.rows, config.cols);
+      IntegerMatrix dispersers(config.rows, config.cols);
+      
+      auto weather_step = config.simulation_step_to_weather_step(current_index);
+      if (weather_typed == WeatherType::Probabilistic) {
+        model.environment().update_weather_from_distribution(
+            weather_coefficient[weather_step], weather_coefficient_sd[weather_step],
+            model.random_number_generator());
+      }
+      else if (weather_typed == WeatherType::Deterministic) {
+        model.environment().update_weather_coefficient(weather_coefficient[weather_step]);
+      }
+      
         model.run_step(
             current_index,
             infected,
