@@ -78,6 +78,8 @@ validate(
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
+  temperature_coefficient_sd_file = "",
+  precipitation_coefficient_sd_file = "",
   dispersers_to_soils_percentage = 0,
   quarantine_directions = "",
   multiple_random_seeds = FALSE,
@@ -342,6 +344,18 @@ and one with the standard deviation.}
 \item{weather_type}{string indicating how the weather data is passed in  either
 as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 series ("deterministic")}
+
+\item{temperature_coefficient_sd_file}{Raster file with temperature coefficient standard 
+deviation data for the timestep and time period specified (e.g. if timestep = week this file 
+would have 52 bands with data being weekly temperature coefficient standard deviations). We 
+convert raw temperature values to coefficients that affect the reproduction and survival of 
+the pest all values in the raster are between 0 and 1.}
+
+\item{precipitation_coefficient_sd_file}{Raster file with precipitation coefficient standard 
+deviation data for the timestep and time period specified (e.g. if timestep = week this file 
+would have 52 bands with data being weekly precipitation coefficient standard deviations). We 
+convert raw precipitation values to coefficients that affect the reproduction and survival of 
+the pest all values in the raster are between 0 and 1.}
 
 \item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage
 of dispersers that fall to the soil and survive.}

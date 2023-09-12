@@ -161,6 +161,8 @@ random_seeds_dimensions_error <-
   "Either number of rows and columns in random_seeds_file does not equal the number_of_iterations
   set in the model or the number of columns does not equal the number of unique random seeds"
 
+weather_type_error <- "Weather type is not one of 'probabilistic', 'deterministic', or 'none'"
+
 ## calibration success metric option
 success_metric_options <- c("quantity", "allocation", "configuration", "quantity and allocation",
                             "quantity and configuration", "allocation and configuration",
@@ -216,6 +218,8 @@ distance_list <- c("distance", "mcc and distance", "rmse and distance")
 
 mcc_list <- c("mcc", "mcc and quantity", "mcc and distance", "mcc and configuration",
               "mcc and RMSE", "mcc, quantity, and configuration")
+
+weather_type_list <- c("deterministic", "probabilistic", "none")
 
 "%notin%" <- Negate("%in%")
 

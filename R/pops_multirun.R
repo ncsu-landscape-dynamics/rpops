@@ -101,6 +101,8 @@ pops_multirun <- function(infected_file,
                           use_initial_condition_uncertainty = FALSE,
                           use_host_uncertainty = FALSE,
                           weather_type = "deterministic",
+                          temperature_coefficient_sd_file = "",
+                          precipitation_coefficient_sd_file = "",
                           dispersers_to_soils_percentage = 0,
                           quarantine_directions = "",
                           multiple_random_seeds = FALSE,
@@ -181,6 +183,8 @@ pops_multirun <- function(infected_file,
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
+  config$temperature_coefficient_sd_file <- temperature_coefficient_sd_file
+  config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
   config$random_seeds <-random_seeds
@@ -271,6 +275,7 @@ pops_multirun <- function(infected_file,
         temperature = config$temperature,
         survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
+        weather_coefficient_sd = config$weather_coefficient_sd,
         res = config$res,
         rows_cols = config$rows_cols,
         time_step = config$time_step,

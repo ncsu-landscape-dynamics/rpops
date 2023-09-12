@@ -36,6 +36,7 @@ pops_model(
   temperature,
   survival_rates,
   weather_coefficient,
+  weather_coefficient_sd,
   res,
   rows_cols,
   time_step,
@@ -178,6 +179,8 @@ against lethal temperature}
 overwinter population that emerges}
 
 \item{weather_coefficient}{vector of matrices of weather coefficients}
+
+\item{weather_coefficient_sd}{vector of matrices of weather coefficient standard deviations.}
 
 \item{res}{vector of east/west resolution and north/south resolution}
 

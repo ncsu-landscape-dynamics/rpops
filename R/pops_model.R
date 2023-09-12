@@ -21,6 +21,7 @@
 #' @param temperature vector of matrices of temperature values used to check
 #' against lethal temperature
 #' @param weather_coefficient vector of matrices of weather coefficients
+#' @param weather_coefficient_sd vector of matrices of weather coefficient standard deviations.
 #' @param res  vector of east/west resolution and north/south resolution
 #' @param rows_cols vector of number of rows and columns in the raster files
 #' @param season_month_start_end vector of months when spread starts and stops
@@ -116,6 +117,7 @@ pops_model <-
            temperature,
            survival_rates,
            weather_coefficient,
+           weather_coefficient_sd,
            res,
            rows_cols,
            time_step,
@@ -245,6 +247,7 @@ pops_model <-
                      temperature = temperature,
                      survival_rates = survival_rates,
                      weather_coefficient = weather_coefficient,
+                     weather_coefficient_sd = weather_coefficient_sd,
                      bbox = bbox,
                      res = res,
                      rows_cols = rows_cols,

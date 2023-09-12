@@ -673,7 +673,7 @@ create_random_seeds <- function(n) {
   return(random_seeds)
 }
 
-check_random_seeds_file <- function(file) {
+random_seeds_file_checks <- function(x, number_of_iterations = 1) {
   checks_passed <- TRUE
   if(!all(file.exists(x))) {
     checks_passed <- FALSE
@@ -686,22 +686,21 @@ check_random_seeds_file <- function(file) {
   }
   
   if(checks_passed) {
-    random_seeds <- read.csv(config$random_seeds)
-    if(NCOL(randoms_seeds) != 9 && NROW(random_seeds != config$number_of_iterations)) {
+    random_seeds <- read.csv(x)
+    if(NCOL(random_seeds) != 9 && NROW(random_seeds != number_of_iterations)) {
       checks_passed <- FALSE
       failed_check <- random_seeds_dimensions_error
     }
-    
-    if (checks_passed) {
-      outs <- list(checks_passed, random_seeds)
-      names(outs) <-
-        c("checks_passed", "random_seeds")
-      return(outs)
-    } else {
-      outs <- list(checks_passed, failed_check)
-      names(outs) <- c("checks_passed", "failed_check")
-      return(outs)
-    }
   }
-   
+  
+  if (checks_passed) {
+    outs <- list(checks_passed, random_seeds)
+    names(outs) <-
+      c("checks_passed", "random_seeds")
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- c("checks_passed", "failed_check")
+    return(outs)
+  }
 }
