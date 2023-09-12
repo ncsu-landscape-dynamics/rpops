@@ -93,6 +93,8 @@ config$use_host_uncertainty <- FALSE
 config$multiple_random_seeds <- FALSE
 config$random_seeds <- NULL
 config$weather_type <- "deterministic"
+config$use_soils <- FALSE
+config$soil_starting_pest_file <- ""
 
 test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)
