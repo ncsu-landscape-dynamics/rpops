@@ -1595,5 +1595,22 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         use_spreadrates)
   expect_equal(multispecies_check$checks_passed, FALSE)
   expect_equal(multispecies_check$failed_check, PoPS:::species_length_error)
+})
 
+test_that("Multiple random seed draws and checks work", {
+  randoms_file <- "NULL.fs"
+  randoms <- random_seeds_file_checks(randoms_file)
+  expect_equal(randoms$checks_passed, FALSE)
+  expect_equal(randoms$failed_check, PoPS:::file_exists_error)
+  
+  randoms_file <-
+    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  randoms <- random_seeds_file_checks(randoms_file)
+  expect_equal(randoms$checks_passed, FALSE)
+  expect_equal(randoms$failed_check, PoPS:::file_type_error)
+  
+  randoms_file <-
+    system.file("extdata", "simple2x2", "randoms.csv", package = "PoPS")
+  randoms <- random_seeds_file_checks(randoms_file)
+  expect_equal(randoms$checks_passed, TRUE)
 })

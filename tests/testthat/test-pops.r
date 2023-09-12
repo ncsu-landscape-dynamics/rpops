@@ -696,7 +696,7 @@ test_that("Input raster resolutions, extents, and crs all match", {
 
 
 test_that(
-"Infected results return initial infected if reproductive rate isset to 0", {
+"Infected results return initial infected if reproductive rate is set to 0", {
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file <-
