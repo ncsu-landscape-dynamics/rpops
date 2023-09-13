@@ -22,51 +22,8 @@
 #' @export
 
 configuration <- function(config) {
-  "%notin%" <- Negate("%in%")
 
-  # Check that all data has same length if using multiple species currently
-  # only implemented for auto manage
-  if (config$function_name == "auto-manage") {
-    multispecies_check <-
-      multispecies_checks(
-        config$species,
-        config$infected_files,
-        config$parameter_means,
-        config$parameter_cov_matrix,
-        config$natural_kernel_type,
-        config$anthropogenic_kernel_type,
-        config$natural_dir,
-        config$anthropogenic_dir,
-        config$model_type,
-        config$host_file,
-        config$total_populations_file,
-        config$temp,
-        config$temperature_coefficient_file,
-        config$precip,
-        config$precipitation_coefficient_file,
-        config$latency_period,
-        config$time_step,
-        config$season_month_start,
-        config$season_month_end,
-        config$use_lethal_temperature,
-        config$temperature_file,
-        config$lethal_temperature,
-        config$lethal_temperature_month,
-        config$mortality_on,
-        config$mortality_rate,
-        config$mortality_time_lag,
-        config$movements_file,
-        config$use_movements,
-        config$start_exposed,
-        config$quarantine_areas_file,
-        config$use_quarantine,
-        config$use_spreadrates
-      )
-    if (!multispecies_check$checks_passed) {
-      config$failure <- multispecies_check$failed_check
-      return(config)
-    }
-  }
+  "%notin%" <- Negate("%in%")
 
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
