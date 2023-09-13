@@ -969,7 +969,7 @@ test_that(
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
 
     reduced_inf <- matrix(0, ncol = 2, nrow = 2)
-    reduced_inf[1,1] <- 3
+    reduced_inf[1, 1] <- 3
 
     expect_equal(pops(infected_file = infected_file,
                       host_file = host_file,

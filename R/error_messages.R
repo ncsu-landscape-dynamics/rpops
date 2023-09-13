@@ -4,7 +4,7 @@ file_exists_error <- "does not exist."
 
 detailed_file_exists_error <- function(file_name) {
   error_message <-
-    paste( deparse(substitute(file_name)), "does not exist. Current path is", file_name, sep = " ")
+    paste(deparse(substitute(file_name)), "does not exist. Current path is", file_name, sep = " ")
   return(error_message)
 }
 frequency_error <-

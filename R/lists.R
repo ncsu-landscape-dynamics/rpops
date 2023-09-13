@@ -104,10 +104,10 @@ kernel_list <- c(
 output_list <- c("all_simulations", "summary_outputs", "None")
 output_write_list <- c("all_simulations", "summary_outputs")
 
-si_list <- c("SEI", "susceptible-exposed-infected", "susceptible_exposed_infected", 
+si_list <- c("SEI", "susceptible-exposed-infected", "susceptible_exposed_infected",
              "Susceptible-Exposed-Infected", "Susceptible_Exposed_Infected")
 
-sei_list <- c("SI", "susceptible-infected", "susceptible_infected", "Susceptible-Infected", 
+sei_list <- c("SI", "susceptible-infected", "susceptible_infected", "Susceptible-Infected",
               "Susceptible_Infected")
 
 treatment_list <- c("ratio", "all infected")
@@ -116,8 +116,8 @@ aws_bucket_list <- c("casestudy_creation", "model_api")
 parallel_function_list <- c("validate", "multirun", "sensitivity")
 parameter_draw_list <- c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")
 val_cal_list <- c("validate", "calibrate")
-raster_list <-c("grd", "tif", "img", "vrt")
+raster_list <- c("grd", "tif", "img", "vrt")
 failed_check_list <- c("checks_passed", "failed_check")
-output_frequency_list <- 
+output_frequency_list <-
   c("week", "month", "day", "year", "time_step", "every_n_steps", "final_step")
 csv_list <- c("csv", "txt")

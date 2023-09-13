@@ -62,7 +62,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -263,7 +263,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -453,7 +453,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -641,7 +641,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -830,7 +830,7 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1023,7 +1023,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1210,7 +1210,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1397,7 +1397,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1585,7 +1585,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1777,7 +1777,7 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-

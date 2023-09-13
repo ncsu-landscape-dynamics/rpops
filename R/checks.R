@@ -37,7 +37,7 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -105,7 +105,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -153,7 +153,7 @@ treatment_checks <- function(treatment_stack,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -172,7 +172,7 @@ treatment_metric_checks <- function(treatment_method) {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -265,12 +265,12 @@ time_checks <- function(end_date, start_date, time_step,
       checks_passed, number_of_time_steps, number_of_years,
       number_of_outputs, output_frequency
     )
-    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years", 
+    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years",
                      "number_of_outputs", "output_frequency")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -308,7 +308,7 @@ bayesian_mnn_checks <- function(prior_means,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -509,7 +509,7 @@ multispecies_checks <- function(species,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -591,7 +591,7 @@ movement_checks <- function(x, rast, start_date, end_date) {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -608,18 +608,22 @@ draw_parameters <- function(config) {
              parameters[6] < 0 |
              parameters[7] < config$res$ew_res / 2 |
              parameters[7] > parameters[8] |
-             parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
+             parameters[8] >
+             min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
 
-    config$number_of_draws <- nrow(parameters[parameters[1] < 0 |
-                                                parameters[2] <= 0 |
-                                                parameters[3] > 1 |
-                                                parameters[3] <= 0 |
-                                                parameters[4] <= 0 |
-                                                parameters[5] < 0 |
-                                                parameters[6] < 0 |
-                                                parameters[7] < config$res$ew_res / 2 |
-                                                parameters[7] > parameters[8] |
-                                                parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res])
+    config$number_of_draws <-
+      nrow(parameters[parameters[1] < 0 |
+                      parameters[2] <= 0 |
+                      parameters[3] > 1 |
+                      parameters[3] <= 0 |
+                      parameters[4] <= 0 |
+                      parameters[5] < 0 |
+                      parameters[6] < 0 |
+                      parameters[7] < config$res$ew_res / 2 |
+                      parameters[7] > parameters[8] |
+                      parameters[8] >
+                      min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
+                      ])
 
     if (is.null(config$number_of_draws)) {
       config$number_of_draws <- 1
@@ -634,7 +638,8 @@ draw_parameters <- function(config) {
                  parameters[6] < 0 |
                  parameters[7] < config$res$ew_res / 2 |
                  parameters[7] > parameters[8] |
-                 parameters[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)] <-
+                 parameters[8] >
+                 (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)] <-
       MASS::mvrnorm(
         config$number_of_draws,
         config$parameter_means,
@@ -654,7 +659,7 @@ draw_parameters <- function(config) {
 }
 
 create_random_seeds <- function(n) {
-  random_seeds <- 
+  random_seeds <-
     data.frame(disperser_generation = sample(1:999999999, n, replace = FALSE),
                natural_dispersal = sample(1:999999999, n, replace = FALSE),
                anthropogenic_dispersal = sample(1:999999999999, 1, replace = FALSE),
@@ -664,30 +669,30 @@ create_random_seeds <- function(n) {
                overpopulation = sample(1:999999999, n, replace = FALSE),
                survival_rate = sample(1:999999999, n, replace = FALSE),
                soil = sample(1:999999999, n, replace = FALSE))
-  
+
   return(random_seeds)
 }
 
 random_seeds_file_checks <- function(x, number_of_iterations = 1) {
   checks_passed <- TRUE
-  if(!all(file.exists(x))) {
+  if (!all(file.exists(x))) {
     checks_passed <- FALSE
     failed_check <- file_exists_error
   }
-  
+
   if (checks_passed && !all((tools::file_ext(x) %in% csv_list))) {
     checks_passed <- FALSE
     failed_check <- file_type_error
   }
-  
-  if(checks_passed) {
+
+  if (checks_passed) {
     random_seeds <- read.csv(x)
-    if(NCOL(random_seeds) != 9 && NROW(random_seeds != number_of_iterations)) {
+    if (NCOL(random_seeds) != 9 && NROW(random_seeds != number_of_iterations)) {
       checks_passed <- FALSE
       failed_check <- random_seeds_dimensions_error
     }
   }
-  
+
   if (checks_passed) {
     outs <- list(checks_passed, random_seeds)
     names(outs) <-
@@ -695,7 +700,7 @@ random_seeds_file_checks <- function(x, number_of_iterations = 1) {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- failed_check_list 
+    names(outs) <- failed_check_list
     return(outs)
   }
 }

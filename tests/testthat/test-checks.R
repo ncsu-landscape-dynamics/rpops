@@ -1602,13 +1602,13 @@ test_that("Multiple random seed draws and checks work", {
   randoms <- random_seeds_file_checks(randoms_file)
   expect_equal(randoms$checks_passed, FALSE)
   expect_equal(randoms$failed_check, PoPS:::file_exists_error)
-  
+
   randoms_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   randoms <- random_seeds_file_checks(randoms_file)
   expect_equal(randoms$checks_passed, FALSE)
   expect_equal(randoms$failed_check, PoPS:::file_type_error)
-  
+
   randoms_file <-
     system.file("extdata", "simple2x2", "randoms.csv", package = "PoPS")
   randoms <- random_seeds_file_checks(randoms_file)

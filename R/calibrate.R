@@ -119,7 +119,7 @@ calibrate <- function(infected_years_file,
                       prior_number_of_observations = 0,
                       prior_means = c(0, 0, 0, 0, 0, 0),
                       prior_cov_matrix = matrix(0, 6, 6),
-                      params_to_estimate = c(T, T, T, T, F, F),
+                      params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
                       number_of_generations = 7,
                       generation_size = 1000,
                       infected_file,
@@ -290,7 +290,7 @@ calibrate <- function(infected_years_file,
   config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
-  config$random_seeds <-random_seeds
+  config$random_seeds <- random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
 
@@ -358,7 +358,7 @@ calibrate <- function(infected_years_file,
       data <- pops_model(
         random_seed = config$random_seed,
         multiple_random_seeds = config$multiple_random_seeds,
-        random_seeds = as.matrix(random_seeds[1,])[1,],
+        random_seeds = as.matrix(random_seeds[1, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
@@ -532,17 +532,17 @@ calibrate <- function(infected_years_file,
           # parameters are within their allowed range
           proposed_parameters <-
             MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
-          while (proposed_parameters[1] < 0.1 |
-                 proposed_parameters[2] < 0.1 |
-                 proposed_parameters[3] > 1.00 |
-                 proposed_parameters[3] <= 0.92 |
-                 proposed_parameters[4] < 0.1 |
-                 proposed_parameters[5] < 0 |
-                 proposed_parameters[6] < 0 |
-                 proposed_parameters[7] < config$res$ew_res / 2 |
-                 proposed_parameters[7] > proposed_parameters[8] |
+          while (proposed_parameters[1] < 0.1 ||
+                 proposed_parameters[2] < 0.1 ||
+                 proposed_parameters[3] > 1.00 ||
+                 proposed_parameters[3] <= 0.92 ||
+                 proposed_parameters[4] < 0.1 ||
+                 proposed_parameters[5] < 0 ||
+                 proposed_parameters[6] < 0 ||
+                 proposed_parameters[7] < config$res$ew_res / 2 ||
+                 proposed_parameters[7] > proposed_parameters[8] ||
                  proposed_parameters[8] >
-                 min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res) {
+                  min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res) {
             proposed_parameters <-
               MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           }
@@ -686,7 +686,7 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (model_improved & config$total_particles <= config$num_particles) {
+        if (model_improved && config$total_particles <= config$num_particles) {
           parameters_kept[config$total_particles, ] <-
             c(
               proposed_reproductive_rate,
@@ -853,7 +853,8 @@ calibrate <- function(infected_years_file,
       precision_thresholds[config$current_bin] <- precision_threshold
       recall_thresholds[config$current_bin] <- recall_threshold
       rmse_thresholds[config$current_bin] <- rmse_threshold
-      distance_threshold[config$current_bin] <- distance_threshold
+      distance_thresholds[config$current_bin] <- distance_threshold
+      specificity_thresholds[config$current_bin] <- specificity_threshold
       accuracy_threshold <- median(parameters_kept[start_index:end_index, 9])
       precision_threshold <- median(parameters_kept[start_index:end_index, 10])
       recall_threshold <- median(parameters_kept[start_index:end_index, 11])
@@ -906,7 +907,6 @@ calibrate <- function(infected_years_file,
         min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
     }
 
-    random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
     data <-
       param_func(
         proposed_reproductive_rate,
@@ -1021,7 +1021,7 @@ calibrate <- function(infected_years_file,
 
       if (config$params_to_estimate[4]) {
         proposed_anthropogenic_distance_scale <- 0
-        while (proposed_anthropogenic_distance_scale <= 1 |
+        while (proposed_anthropogenic_distance_scale <= 1 ||
                proposed_anthropogenic_distance_scale > 100000) {
           proposed_anthropogenic_distance_scale <-
             round(rnorm(1, mean = current$anthropogenic_distance_scale,

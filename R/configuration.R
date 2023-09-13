@@ -74,12 +74,12 @@ configuration <- function(config) {
   if (is.null(config$random_seed)) {
     config$random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
   }
-  
-  if(config$multiple_random_seeds) {
-    if(!is.null(config$random_seeds)) {
+
+  if (config$multiple_random_seeds) {
+    if (!is.null(config$random_seeds)) {
       ## check random seed file
       random_seeds_file_check <- random_seeds_file_checks(config$random_seeds)
-      if(!random_seeds_file_check$checks_passed) {
+      if (!random_seeds_file_check$checks_passed) {
         config$failure <- random_seeds_file_check$failed_check
         return(config)
       }
@@ -89,7 +89,7 @@ configuration <- function(config) {
   } else {
     config$random_seeds <- create_random_seeds(1)
   }
-  
+
   if (config$write_outputs %notin% output_list) {
     config$failure <- write_outputs_error
   }
@@ -169,7 +169,7 @@ configuration <- function(config) {
     config$failure <- network_movement_error
     return(config)
   }
-  
+
   # check that weather_type is correct
   if (config$weather_type %notin% weather_type_list) {
     config$failure <- weather_type_error
@@ -239,7 +239,8 @@ configuration <- function(config) {
   if (config$use_soils) {
     if (config$function_name %in% aws_bucket_list) {
       soils_check <-
-        secondary_raster_checks(config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
+        secondary_raster_checks(
+          config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
     } else {
       soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
     }
@@ -256,7 +257,7 @@ configuration <- function(config) {
   } else {
     config$soil_pests <- zero_matrix
   }
-  
+
   # check that survival_rates raster has the same crs, resolution, and extent
   if (config$use_survival_rates == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
@@ -336,7 +337,7 @@ configuration <- function(config) {
           secondary_raster_checks(config$temperature_coefficient_sd_file, infected)
       }
     }
-    
+
     if (temperature_coefficient_check$checks_passed) {
       temperature_coefficient <- temperature_coefficient_check$raster
     } else {
@@ -346,7 +347,7 @@ configuration <- function(config) {
       }
       return(config)
     }
-    
+
     if (config$weather_type == "probabilistic") {
       if (temperature_coefficient_sd_check$checks_passed) {
         temperature_coefficient_sd <- temperature_coefficient_sd_check$raster
@@ -358,13 +359,13 @@ configuration <- function(config) {
         return(config)
       }
     }
-    
+
     config$weather <- TRUE
     weather_coefficient_stack <- temperature_coefficient
     if (config$weather_type == "probabilistic") {
-      weather_coefficient_sd_stack <- temperature_coefficient_sd 
+      weather_coefficient_sd_stack <- temperature_coefficient_sd
     }
-    
+
     if (config$precip == TRUE) {
       if (config$function_name %in% aws_bucket_list) {
         precipitation_coefficient_check <-
@@ -384,7 +385,7 @@ configuration <- function(config) {
             secondary_raster_checks(config$precipitation_coefficient_sd_file, infected)
         }
       }
-      
+
       if (precipitation_coefficient_check$checks_passed) {
         precipitation_coefficient <- precipitation_coefficient_check$raster
       } else {
@@ -394,7 +395,7 @@ configuration <- function(config) {
         }
         return(config)
       }
-      
+
       if (config$weather_type == "probabilistic") {
         if (precipitation_coefficient_sd_check$checks_passed) {
           precipitation_coefficient_sd <- precipitation_coefficient_sd_check$raster
@@ -427,10 +428,10 @@ configuration <- function(config) {
         secondary_raster_checks(config$precipitation_coefficient_file, infected)
       if (config$weather_type == "probabilistic") {
         precipitation_coefficient_sd_check <-
-          secondary_raster_checks(config$precipitation_coefficient_sd_file, infected) 
+          secondary_raster_checks(config$precipitation_coefficient_sd_file, infected)
       }
     }
-    
+
     if (precipitation_coefficient_check$checks_passed) {
       precipitation_coefficient <- precipitation_coefficient_check$raster
     } else {
@@ -440,7 +441,7 @@ configuration <- function(config) {
       }
       return(config)
     }
-    
+
     if (config$weather_type == "probabilistic") {
       if (precipitation_coefficient_sd_check$checks_passed) {
         precipitation_coefficient_sd <- precipitation_coefficient_sd_check$raster
@@ -450,11 +451,11 @@ configuration <- function(config) {
           config$failure <- detailed_file_exists_error(config$precipitation_coefficient_sd_file)
         }
         return(config)
-      } 
+      }
     }
 
     config$weather <- TRUE
-    
+
     weather_coefficient_stack <- precipitation_coefficient
     if (config$weather_type == "probabilistic") {
       weather_coefficient_sd_stack <- precipitation_coefficient_sd
@@ -468,9 +469,11 @@ configuration <- function(config) {
       weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
     }
     if (config$weather_type == "probabilistic") {
-      weather_coefficient_sd <- list(terra::as.matrix(weather_coefficient_sd_stack[[1]], wide = TRUE))
+      weather_coefficient_sd <-
+        list(terra::as.matrix(weather_coefficient_sd_stack[[1]], wide = TRUE))
       for (i in 2:terra::nlyr(weather_coefficient_sd_stack)) {
-        weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]], wide = TRUE)
+        weather_coefficient_sd[[i]] <-
+          terra::as.matrix(weather_coefficient_sd_stack[[i]], wide = TRUE)
       }
     } else {
       weather_coefficient_sd <- list(zero_matrix)
@@ -543,13 +546,13 @@ configuration <- function(config) {
   exposed <- list(zero_matrix)
   config$total_exposed <- zero_matrix
 
-  if (config$model_type == "SEI" & config$latency_period > 1) {
+  if (config$model_type == "SEI" && config$latency_period > 1) {
     for (ex in 2:(config$latency_period + 1)) {
       exposed[[ex]] <- zero_matrix
     }
   }
 
-  if (config$model_type == "SEI" & config$start_exposed) {
+  if (config$model_type == "SEI" && config$start_exposed) {
     if (config$function_name %in% aws_bucket_list) {
       exposed_check <-
         secondary_raster_checks(config$exposed_file, infected, config$use_s3, config$bucket)
@@ -593,7 +596,7 @@ configuration <- function(config) {
   if (config$use_initial_condition_uncertainty && terra::nlyr(infected) > 1) {
     suitable <- suitable + infected[[2]]
   }
-  if (config$model_type == "SEI" & config$start_exposed) {
+  if (config$model_type == "SEI" && config$start_exposed) {
     suitable <- suitable + exposed2[[1]]
     if (config$use_initial_condition_uncertainty && terra::nlyr(exposed2) > 1) {
       suitable <- suitable + exposed2[[2]]
@@ -698,7 +701,6 @@ configuration <- function(config) {
   config$susceptible_mean <- terra::as.matrix(susceptible_mean, wide = TRUE)
 
   config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
-  # config$total_hosts_mean <- terra::as.matrix(host_mean, wide = TRUE)
   config$mortality <- zero_matrix
   config$resistant <- zero_matrix
 
@@ -755,7 +757,7 @@ configuration <- function(config) {
 
   if (config$function_name %in% parameter_draw_list) {
 
-    if (nrow(config$parameter_cov_matrix) != 8 |
+    if (nrow(config$parameter_cov_matrix) != 8 ||
       ncol(config$parameter_cov_matrix) != 8) {
       config$failure <- covariance_mat_error
       return(config)
@@ -785,7 +787,8 @@ configuration <- function(config) {
       return(config)
     }
 
-    if (config$parameter_means[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
+    if (config$parameter_means[8] >
+        (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
       config$failure <- network_max_distance_large_error
       return(config)
     }

@@ -282,7 +282,7 @@ treatment_auto <- function(rasts,
           for (m in seq_len(nrow(managed_group))) {
             i <- managed_group$i[m]
             j <- managed_group$j[m]
-            if (treatment[i, j] < 1 & (rast[i, j] | rast2[i, j])) {
+            if (treatment[i, j] < 1 && (rast[i, j] || rast2[i, j])) {
               value <- min(1, treatment[i, j]$treatment + 1)
               if (value > treatment[i, j]) {
                 cells_treated <- cells_treated + value - treatment[i, j]
@@ -304,12 +304,12 @@ treatment_auto <- function(rasts,
             j_s <- j_s[j_s > 0]
             for (s in seq_len(length(i_s))) {
               for (n in seq_len(length(j_s))) {
-                if (treatment[i_s[s], j_s[n]] < 1 &
-                    (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
+                if (treatment[i_s[s], j_s[n]] < 1 &&
+                    (rast[i_s[s], j_s[n]] || rast2[i_s[s], j_s[n]])) {
                   if (cells_treated >= number_of_locations) {
                     break
                   }
-                  if (abs(i - i_s[s]) > buffer_cells |
+                  if (abs(i - i_s[s]) > buffer_cells ||
                       abs(j - j_s[n]) > buffer_cells) {
                     value <-
                       min(1, treatment[i_s[s], j_s[n]]$treatment +
@@ -320,7 +320,7 @@ treatment_auto <- function(rasts,
                       cells_treated <- cells_treated + value
                     }
                     treatment[i_s[s], j_s[n]] <- value
-                  } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
+                  } else if (rast[i_s[s], j_s[n]] || rast2[i_s[s], j_s[n]]) {
                     if (treatment[i_s[s], j_s[n]] < 1) {
                       if (cells_treated >= number_of_locations) {
                         break
@@ -374,9 +374,9 @@ treatment_auto <- function(rasts,
               if (cells_treated >= number_of_locations) {
                 break
                 }
-              if (treatment[i_s[s], j_s[n]] < 1 &
-                  (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
-                if (abs(i - i_s[s]) > buffer_cells |
+              if (treatment[i_s[s], j_s[n]] < 1 &&
+                  (rast[i_s[s], j_s[n]] || rast2[i_s[s], j_s[n]])) {
+                if (abs(i - i_s[s]) > buffer_cells ||
                     abs(j - j_s[n]) > buffer_cells) {
                   value <-
                     min(1, treatment[i_s[s], j_s[n]]$treatment +
@@ -387,7 +387,7 @@ treatment_auto <- function(rasts,
                     cells_treated <- cells_treated + value
                   }
                   treatment[i_s[s], j_s[n]] <- value
-                } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
+                } else if (rast[i_s[s], j_s[n]] || rast2[i_s[s], j_s[n]]) {
                   if (treatment[i_s[s], j_s[n]] < 1) {
                     cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
                     treatment[i_s[s], j_s[n]] <- 1
@@ -428,9 +428,9 @@ treatment_auto <- function(rasts,
               if (cells_treated >= number_of_locations) {
                 break
               }
-              if (treatment[i_s[s], j_s[n]] < 1 &
-                  (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
-                if (abs(i - i_s[s]) > buffer_cells |
+              if (treatment[i_s[s], j_s[n]] < 1 &&
+                  (rast[i_s[s], j_s[n]] || rast2[i_s[s], j_s[n]])) {
+                if (abs(i - i_s[s]) > buffer_cells ||
                     abs(j - j_s[n]) > buffer_cells) {
                   value <-
                     min(1, treatment[i_s[s], j_s[n]]$treatment +
@@ -441,7 +441,7 @@ treatment_auto <- function(rasts,
                     cells_treated <- cells_treated + value
                   }
                   treatment[i_s[s], j_s[n]] <- value
-                } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
+                } else if (rast[i_s[s], j_s[n]] || rast2[i_s[s], j_s[n]]) {
                   if (treatment[i_s[s], j_s[n]] < 1) {
                     cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
                     treatment[i_s[s], j_s[n]] <- 1

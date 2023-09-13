@@ -189,7 +189,7 @@ pops_multirun <- function(infected_file,
   config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
-  config$random_seeds <-random_seeds
+  config$random_seeds <- random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
 
@@ -250,7 +250,7 @@ pops_multirun <- function(infected_file,
       data <- PoPS::pops_model(
         random_seed = config$random_seed[1],
         multiple_random_seeds = config$multiple_random_seeds,
-        random_seeds = as.matrix(config$random_seeds[i,])[1,],
+        random_seeds = as.matrix(config$random_seeds[i, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
@@ -420,7 +420,7 @@ pops_multirun <- function(infected_file,
       north_rates[p, ] <- 0
     }
 
-    if (config$use_quarantine & length(quarantine_escape_runs[[p]]) ==
+    if (config$use_quarantine && length(quarantine_escape_runs[[p]]) ==
         length(probability_runs[[p]])) {
       escape_probability <- escape_probability + quarantine_escape_runs[[p]]
       quarantine_escapes[p, ] <- quarantine_escape_runs[[p]]
