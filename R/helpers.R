@@ -1,8 +1,6 @@
 # These functions are designed to reduce code complexity and the need to copy
 # and past code across main functions
 
-"%notin%" <- Negate("%in%")
-
 set_success_metrics <- function(config) {
   config$use_quantity <- FALSE
   config$use_allocation <- FALSE
@@ -14,48 +12,193 @@ set_success_metrics <- function(config) {
   config$use_rmse <- FALSE
   config$use_distance <- FALSE
   config$use_mcc <- FALSE
+  config$acceptance_rate_info <- paste(
+    "generation:            ",
+    config$current_bin,
+    "\nparticle:              ",
+    config$current_particles,
+    "\nacceptance rate:       ",
+    format(acceptance_rate, digits = 5), sep = " ")
 
   if (config$success_metric %in% quantity_list) {
     config$use_quantity <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nquantity:              ",
+                                         quantity,
+                                         "\nquantity threshold:    ",
+                                         allocation_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% allocation_list) {
     config$use_allocation <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nallocation:            ",
+                                         allocation,
+                                         "\nallocation threshold:  ",
+                                         allocation_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% configuration_list) {
     config$use_configuration <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nconfiguration:         ",
+                                         configuration,
+                                         "\nconfiguration threshold: ",
+                                         configuration_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% accurracy_list) {
     config$use_accuracy <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\naccuracy:              ",
+                                         accuracy,
+                                         "\naccuracy threshold:    ",
+                                         accuracy_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% precision_list) {
     config$use_precision <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nprecision:             ",
+                                         precision,
+                                         "\nprecision threshold:   ",
+                                         precision_threshold,
+                                         sep = " ")
+
   }
 
   if (config$success_metric %in% recall_list) {
     config$use_recall <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nrecall:                ",
+                                         recall,
+                                         "\nrecall threshold:      ",
+                                         recall_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% specificity_list) {
     config$use_specificity <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nspecificity:           ",
+                                         specificity,
+                                         "\nspecificity threshold: ",
+                                         specificity_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% rmse_list) {
     config$use_rmse <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nrmse:                  ",
+                                         rmse,
+                                         "\nrmse threshold:        ",
+                                         rmse_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% distance_list) {
     config$use_distance <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\ndistance difference:   ",
+                                         distance_difference,
+                                         "\ndistance threshold:    ",
+                                         distance_threshold,
+                                         sep = " ")
   }
 
   if (config$success_metric %in% mcc_list) {
     config$use_mcc <- TRUE
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nMCC:                   ",
+                                         mcc,
+                                         "\nMCC threshold:         ",
+                                         mcc_threshold,
+                                         sep = " ")
   }
 
   return(config)
+}
+
+draw_parameters <- function(config) {
+  parameters <-
+    MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
+  while (any(parameters[1] < 0 |
+             parameters[2] <= 0 |
+             parameters[3] > 1 |
+             parameters[3] <= 0 |
+             parameters[4] <= 0 |
+             parameters[5] < 0 |
+             parameters[6] < 0 |
+             parameters[7] < config$res$ew_res / 2 |
+             parameters[7] > parameters[8] |
+             parameters[8] >
+             min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
+
+    config$number_of_draws <-
+      nrow(parameters[parameters[1] < 0 |
+                        parameters[2] <= 0 |
+                        parameters[3] > 1 |
+                        parameters[3] <= 0 |
+                        parameters[4] <= 0 |
+                        parameters[5] < 0 |
+                        parameters[6] < 0 |
+                        parameters[7] < config$res$ew_res / 2 |
+                        parameters[7] > parameters[8] |
+                        parameters[8] >
+                        min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
+      ])
+
+    if (is.null(config$number_of_draws)) {
+      config$number_of_draws <- 1
+    }
+
+    parameters[parameters[1] < 0 |
+                 parameters[2] <= 0 |
+                 parameters[3] > 1 |
+                 parameters[3] <= 0 |
+                 parameters[4] <= 0 |
+                 parameters[5] < 0 |
+                 parameters[6] < 0 |
+                 parameters[7] < config$res$ew_res / 2 |
+                 parameters[7] > parameters[8] |
+                 parameters[8] >
+                 (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)] <-
+      MASS::mvrnorm(
+        config$number_of_draws,
+        config$parameter_means,
+        config$parameter_cov_matrix
+      )
+  }
+  config$reproductive_rate <- parameters[1]
+  config$natural_distance_scale <- parameters[2]
+  config$percent_natural_dispersal <- parameters[3]
+  config$anthropogenic_distance_scale <- parameters[4]
+  config$natural_kappa <- parameters[5]
+  config$anthropogenic_kappa <- parameters[6]
+  config$network_min_distance <- parameters[7]
+  config$network_max_distance <- parameters[8]
+
+  return(config)
+}
+
+create_random_seeds <- function(n) {
+  random_seeds <-
+    data.frame(disperser_generation = sample(1:999999999, n, replace = FALSE),
+               natural_dispersal = sample(1:999999999, n, replace = FALSE),
+               anthropogenic_dispersal = sample(1:999999999999, 1, replace = FALSE),
+               establishment = sample(1:999999999, n, replace = FALSE),
+               weather = sample(1:999999999, n, replace = FALSE),
+               movement = sample(1:999999999, n, replace = FALSE),
+               overpopulation = sample(1:999999999, n, replace = FALSE),
+               survival_rate = sample(1:999999999, n, replace = FALSE),
+               soil = sample(1:999999999, n, replace = FALSE))
+
+  return(random_seeds)
 }
 
 # creates a matrix from a matrix of mean values and a matrix of standard deviations. The two
