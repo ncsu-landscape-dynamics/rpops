@@ -17,7 +17,7 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     }
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in% c("grd", "tif", "img", "vrt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% raster_list))) {
     checks_passed <- FALSE
     failed_check <- raster_type_error
   }
@@ -37,7 +37,7 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -59,8 +59,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     }
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in%
-    c("grd", "tif", "img", "vrt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% raster_list))) {
     checks_passed <- FALSE
     failed_check <- raster_type_error
   }
@@ -106,7 +105,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -154,7 +153,7 @@ treatment_checks <- function(treatment_stack,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -173,7 +172,7 @@ treatment_metric_checks <- function(treatment_method) {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -197,9 +196,7 @@ time_checks <- function(end_date, start_date, time_step,
     failed_check <- date_format_error
   }
 
-  if (checks_passed && !(output_frequency %in% list(
-    "week", "month", "day", "year", "time_step", "every_n_steps", "final_step"
-  ))) {
+  if (checks_passed && !(output_frequency %in% output_frequency_list)) {
     checks_passed <- FALSE
     failed_check <- output_type_error
   }
@@ -268,14 +265,12 @@ time_checks <- function(end_date, start_date, time_step,
       checks_passed, number_of_time_steps, number_of_years,
       number_of_outputs, output_frequency
     )
-    names(outs) <- c(
-      "checks_passed", "number_of_time_steps",
-      "number_of_years", "number_of_outputs", "output_frequency"
-    )
+    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years", 
+                     "number_of_outputs", "output_frequency")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -313,7 +308,7 @@ bayesian_mnn_checks <- function(prior_means,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -514,7 +509,7 @@ multispecies_checks <- function(species,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -527,7 +522,7 @@ movement_checks <- function(x, rast, start_date, end_date) {
     failed_check <- file_exists_error
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in% c("csv", "txt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% csv_list))) {
     checks_passed <- FALSE
     failed_check <- file_type_error
   }
@@ -596,7 +591,7 @@ movement_checks <- function(x, rast, start_date, end_date) {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
@@ -680,7 +675,7 @@ random_seeds_file_checks <- function(x, number_of_iterations = 1) {
     failed_check <- file_exists_error
   }
   
-  if (checks_passed && !all((tools::file_ext(x) %in% c("csv", "txt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% csv_list))) {
     checks_passed <- FALSE
     failed_check <- file_type_error
   }
@@ -700,7 +695,7 @@ random_seeds_file_checks <- function(x, number_of_iterations = 1) {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list 
     return(outs)
   }
 }
