@@ -68,11 +68,6 @@ configuration <- function(config) {
     }
   }
 
-  if (config$function_name == "sensitivity") {
-    config$sensitivity_rcl <- c(0.10, Inf, 1, 0, 0.10, 0)
-    config$sensitivity_rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
-  }
-
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
@@ -95,62 +90,15 @@ configuration <- function(config) {
     config$random_seeds <- create_random_seeds(1)
   }
   
-  config$output_list <- c("all_simulations", "summary_outputs", "None")
-  config$output_write_list <- c("all_simulations", "summary_outputs")
-
-  if (config$write_outputs %notin% config$output_list) {
+  if (config$write_outputs %notin% output_list) {
     config$failure <- write_outputs_error
   }
 
-  if (config$write_outputs %in% config$output_write_list) {
+  if (config$write_outputs %in% output_write_list) {
     if (!base::dir.exists(config$output_folder_path)) {
       config$failure <- output_path_error
     }
   }
-
-  # Check for correct kernel options
-  kernel_list <- c(
-    "cauchy",
-    "Cauchy",
-    "exponential",
-    "Exponential",
-    "uniform",
-    "Uniform",
-    "deterministic neighbor",
-    "deterministic-neighbor",
-    "power law",
-    "power-law",
-    "Power-law",
-    "Power-Law",
-    "Power Law",
-    "Power law",
-    "hyperbolic secant",
-    "hyperbolic-secant",
-    "Hyperbolic-secant",
-    "Hyperbolic-Secant",
-    "Hyperbolic secant",
-    "Hyperbolic Secant",
-    "gamma",
-    "Gamma",
-    # "exponential power",
-    # "exponential-power",
-    # "Exponential-power",
-    # "Exponential-Power",
-    # "Exponential power",
-    "weibull",
-    "Weibull",
-    "normal",
-    # "log normal",
-    # "log-normal",
-    # "Log-normal",
-    # "Log-Normal",
-    # "Log normal",
-    # "Log Normal",
-    "logistic",
-    "Logistic",
-    "network",
-    "Network"
-  )
 
   if (config$natural_kernel_type %notin% kernel_list) {
     config$failure <- natural_kernel_error
@@ -163,23 +111,9 @@ configuration <- function(config) {
   }
 
   # ensures correct model type
-  if (config$model_type %in%
-    c(
-      "SEI",
-      "susceptible-exposed-infected",
-      "susceptible_exposed_infected",
-      "Susceptible-Exposed-Infected",
-      "Susceptible_Exposed_Infected"
-    )) {
+  if (config$model_type %in% si_list) {
     config$model_type <- "SEI"
-  } else if (config$model_type %in%
-    c(
-      "SI",
-      "susceptible-infected",
-      "susceptible_infected",
-      "Susceptible-Infected",
-      "Susceptible_Infected"
-    )) {
+  } else if (config$model_type %in% sei_list) {
     config$model_type <- "SI"
   } else {
     config$failure <- model_type_error
@@ -206,7 +140,7 @@ configuration <- function(config) {
   }
 
   # ensure correct treatment method
-  if (!config$treatment_method %in% c("ratio", "all infected")) {
+  if (!config$treatment_method %in% treatment_list) {
     config$failure <- treatment_option_error
     return(config)
   }
@@ -231,7 +165,6 @@ configuration <- function(config) {
   }
 
   # check that network movement is one of the correct options
-  network_movement_options <- c("walk", "jump", "teleport")
   if (config$network_movement %notin% network_movement_options) {
     config$failure <- network_movement_error
     return(config)
@@ -244,7 +177,7 @@ configuration <- function(config) {
   }
 
   # check that initial raster file exists
-  if (config$function_name %in% c("casestudy_creation", "model_api")) {
+  if (config$function_name %in% aws_bucket_list) {
     infected_check <- initial_raster_checks(config$infected_file, config$use_s3, config$bucket)
   } else {
     infected_check <- initial_raster_checks(config$infected_file)
@@ -269,7 +202,7 @@ configuration <- function(config) {
   one_matrix <- terra::as.matrix(one_matrix, wide = TRUE)
 
   # check that host raster has the same crs, resolution, and extent
-  if (config$function_name %in% c("casestudy_creation", "model_api")) {
+  if (config$function_name %in% aws_bucket_list) {
     host_check <- secondary_raster_checks(config$host_file, infected, config$use_s3, config$bucket)
   } else {
     host_check <- secondary_raster_checks(config$host_file, infected)
@@ -286,7 +219,7 @@ configuration <- function(config) {
   }
 
   # check that total populations raster has the same crs, resolution, and extent
-  if (config$function_name %in% c("casestudy_creation", "model_api")) {
+  if (config$function_name %in% aws_bucket_list) {
     total_populations_check <-
       secondary_raster_checks(config$total_populations_file, infected, config$use_s3, config$bucket)
   } else {
@@ -304,7 +237,7 @@ configuration <- function(config) {
 
   # check that soils raster has the same crs, resolutin, and extent.
   if (config$use_soils) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       soils_check <-
         secondary_raster_checks(config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
     } else {
@@ -326,7 +259,7 @@ configuration <- function(config) {
   
   # check that survival_rates raster has the same crs, resolution, and extent
   if (config$use_survival_rates == TRUE) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       survival_rate_check <-
         secondary_raster_checks(config$survival_rates_file, infected, config$use_s3, config$bucket)
     } else {
@@ -355,7 +288,7 @@ configuration <- function(config) {
   config$survival_rates <- survival_rates
   # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       temperature_check <-
         secondary_raster_checks(config$temperature_file, infected, config$use_s3, config$bucket)
     } else {
@@ -386,7 +319,7 @@ configuration <- function(config) {
   # check that temp and precip rasters have the same crs, resolution, and extent
   config$weather <- FALSE
   if (config$temp == TRUE) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       temperature_coefficient_check <-
         secondary_raster_checks(config$temperature_coefficient_file, infected,
                                 config$use_s3, config$bucket)
@@ -433,7 +366,7 @@ configuration <- function(config) {
     }
     
     if (config$precip == TRUE) {
-      if (config$function_name %in% c("casestudy_creation", "model_api")) {
+      if (config$function_name %in% aws_bucket_list) {
         precipitation_coefficient_check <-
           secondary_raster_checks(config$precipitation_coefficient_file, infected,
                                   config$use_s3, config$bucket)
@@ -480,7 +413,7 @@ configuration <- function(config) {
       }
     }
   } else if (config$precip == TRUE) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       precipitation_coefficient_check <-
         secondary_raster_checks(config$precipitation_coefficient_file, infected,
                                 config$use_s3, config$bucket)
@@ -554,7 +487,7 @@ configuration <- function(config) {
   config$weather_coefficient_sd <- weather_coefficient_sd
 
   if (config$management == TRUE) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       treatments_check <-
         secondary_raster_checks(config$treatments_file, infected, config$use_s3, config$bucket)
     } else {
@@ -617,7 +550,7 @@ configuration <- function(config) {
   }
 
   if (config$model_type == "SEI" & config$start_exposed) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       exposed_check <-
         secondary_raster_checks(config$exposed_file, infected, config$use_s3, config$bucket)
     } else {
@@ -711,7 +644,7 @@ configuration <- function(config) {
   config$host_sd <- host_sd
 
   if (!is.null(config$mask)) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
     } else {
       mask_check <- secondary_raster_checks(config$mask, infected)
@@ -771,7 +704,7 @@ configuration <- function(config) {
 
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
-    if (config$function_name %in% c("casestudy_creation", "model_api")) {
+    if (config$function_name %in% aws_bucket_list) {
       quarantine_check <-
         secondary_raster_checks(config$quarantine_areas_file, host, config$use_s3, config$bucket)
     } else {
@@ -810,7 +743,7 @@ configuration <- function(config) {
 
   config$mortality_tracker <- mortality_tracker2
 
-  if (config$function_name %in% c("validate", "multirun", "sensitivity")) {
+  if (config$function_name %in% parallel_function_list) {
     if (is.na(config$number_of_cores) ||
       config$number_of_cores > parallel::detectCores()) {
       core_count <- parallel::detectCores() - 1
@@ -820,8 +753,7 @@ configuration <- function(config) {
     config$core_count <- core_count
   }
 
-  if (config$function_name %in%
-    c("validate", "pops", "multirun", "sensitivity", "casestudy_creation")) {
+  if (config$function_name %in% parameter_draw_list) {
 
     if (nrow(config$parameter_cov_matrix) != 8 |
       ncol(config$parameter_cov_matrix) != 8) {
@@ -867,7 +799,7 @@ configuration <- function(config) {
     }
   }
 
-  if (config$function_name %in% c("validate", "calibrate")) {
+  if (config$function_name %in% val_cal_list) {
     config$use_anthropogenic_kernel <- TRUE
     # Load observed data on occurrence
     infection_years <- terra::rast(config$infected_years_file)
