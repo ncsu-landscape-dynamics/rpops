@@ -223,7 +223,7 @@ pops_model <-
 
 
     data <-
-      pops_model_cpp(random_seed = random_seed,
+      suppressWarnings(pops_model_cpp(random_seed = random_seed,
                      multiple_random_seeds,
                      random_seeds,
                      lethal_temperature = lethal_temperature,
@@ -283,7 +283,7 @@ pops_model <-
                      weather_size = weather_size,
                      weather_type = weather_type,
                      dispersers_to_soils_percentage = dispersers_to_soils_percentage
-    )
+    ))
 
     return(data)
   }

@@ -349,7 +349,9 @@ pops_multirun <- function(infected_file,
       #   susectible_out <- terra::rast(config$infected_file)
       #   exposed_out <- terra::rast(config$infected_file)
       #   for (q in seq_len(length(data$infected))) {
-      #     values(infected_out[[q]]) <- values(terra::rast(data$infected[[q]], crs = crs(infected_out), extent = ext(infected_out)))
+      #     values(infected_out[[q]]) <-
+      #        values(terra::rast(data$infected[[q]],
+      #                           crs = crs(infected_out), extent = ext(infected_out)))
       #     terra::values(infected_out[[q]]) <- data$infected[[q]]
       #     terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
       #     for (p in seq_len(length(data$exposed[[q]])))
@@ -359,7 +361,8 @@ pops_multirun <- function(infected_file,
       #   dir.create(paste(config$output_folder_path, "pops_runs/", sep = ""))
       #   file_name <- paste(config$output_folder_path, "pops_runs/infected_", i, ".tif", sep = "")
       #   terra::writeRaster(infected_out, file_name, overwrite = TRUE)
-      #   file_name <- paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
+      #   file_name <-
+      #   paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
       #   terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
       #   file_name <- paste(config$output_folder_path, "pops_runs/exposed_", i, ".tif", sep = "")
       #   terra::writeRaster(exposed_out, file_name, overwrite = TRUE)

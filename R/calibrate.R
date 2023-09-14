@@ -450,7 +450,7 @@ calibrate <- function(infected_years_file,
     parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
     parameters_test <- matrix(ncol = 15, nrow = 200)
     config$acceptance_rate <- 1
-    acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
 
     config$accuracy_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$precision_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
@@ -766,11 +766,13 @@ calibrate <- function(infected_years_file,
             config$accuracy_threshold <-
               mean(c(median(parameters_test[, 9], na.rm = TRUE), config$accuracy_threshold)) - 0.03
             config$precision_threshold <-
-              mean(c(median(parameters_test[, 10], na.rm = TRUE), config$precision_threshold)) - 0.03
+              mean(c(median(parameters_test[, 10], na.rm = TRUE), config$precision_threshold))
+              - 0.03
             config$recall_threshold <-
               mean(c(median(parameters_test[, 11], na.rm = TRUE), config$recall_threshold)) - 0.03
             config$specificity_threshold <-
-              mean(c(median(parameters_test[, 12], na.rm = TRUE), config$specificity_threshold)) - 0.03
+              mean(c(median(parameters_test[, 12], na.rm = TRUE), config$specificity_threshold))
+              - 0.03
             config$rmse_threshold <-
               mean(c(median(parameters_test[, 13], na.rm = TRUE), config$rmse_threshold)) + 2
             config$distance_threshold <-
@@ -905,13 +907,13 @@ calibrate <- function(infected_years_file,
 
     all_disagreement <- as.data.frame(t(all_disagreement))
     all_disagreement <- all_disagreement / length(data$infected)
-    accuracy <- all_disagreement$accuracy
-    precision <- all_disagreement$precision
-    recall <- all_disagreement$recall
-    specificity <- all_disagreement$specificity
-    rmse <- all_disagreement$rmse
-    distance_difference <- all_disagreement$distance_difference
-    mcc <- all_disagreement$mcc
+    config$accuracy <- all_disagreement$accuracy
+    config$precision <- all_disagreement$precision
+    config$recall <- all_disagreement$recall
+    config$specificity <- all_disagreement$specificity
+    config$rmse <- all_disagreement$rmse
+    config$distance_difference <- all_disagreement$distance_difference
+    config$mcc <- all_disagreement$mcc
 
     ## save current state of the system
     current <-
