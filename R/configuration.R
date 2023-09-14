@@ -23,8 +23,6 @@
 
 configuration <- function(config) {
 
-  "%notin%" <- Negate("%in%")
-
   config$rcl <- c(1, Inf, 1, 0, 0.99, NA)
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 

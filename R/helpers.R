@@ -1,5 +1,6 @@
 # These functions are designed to reduce code complexity and the need to copy
 # and past code across main functions
+"%notin%" <- Negate("%in%")
 
 set_success_metrics <- function(config) {
   config$use_quantity <- FALSE
@@ -12,112 +13,148 @@ set_success_metrics <- function(config) {
   config$use_rmse <- FALSE
   config$use_distance <- FALSE
   config$use_mcc <- FALSE
+
+  if (config$success_metric %in% quantity_list) {
+    config$use_quantity <- TRUE
+  }
+
+  if (config$success_metric %in% allocation_list) {
+    config$use_allocation <- TRUE
+  }
+
+  if (config$success_metric %in% configuration_list) {
+    config$use_configuration <- TRUE
+  }
+
+  if (config$success_metric %in% accurracy_list) {
+    config$use_accuracy <- TRUE
+  }
+
+  if (config$success_metric %in% precision_list) {
+    config$use_precision <- TRUE
+
+  }
+
+  if (config$success_metric %in% recall_list) {
+    config$use_recall <- TRUE
+  }
+
+  if (config$success_metric %in% specificity_list) {
+    config$use_specificity <- TRUE
+  }
+
+  if (config$success_metric %in% rmse_list) {
+    config$use_rmse <- TRUE
+  }
+
+  if (config$success_metric %in% distance_list) {
+    config$use_distance <- TRUE
+  }
+
+  if (config$success_metric %in% mcc_list) {
+    config$use_mcc <- TRUE
+  }
+
+  return(config)
+}
+
+create_cal_print <- function(config) {
   config$acceptance_rate_info <- paste(
     "generation:            ",
     config$current_bin,
     "\nparticle:              ",
     config$current_particles,
     "\nacceptance rate:       ",
-    format(acceptance_rate, digits = 5), sep = " ")
+    format(config$acceptance_rate, digits = 5), sep = " ")
 
-  if (config$success_metric %in% quantity_list) {
-    config$use_quantity <- TRUE
+  if (config$use_quantity) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nquantity:              ",
-                                         quantity,
+                                         config$quantity,
                                          "\nquantity threshold:    ",
-                                         allocation_threshold,
+                                         config$allocation_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% allocation_list) {
-    config$use_allocation <- TRUE
+  if (config$use_allocation) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nallocation:            ",
-                                         allocation,
+                                         config$allocation,
                                          "\nallocation threshold:  ",
-                                         allocation_threshold,
+                                         config$allocation_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% configuration_list) {
-    config$use_configuration <- TRUE
+  if (config$use_configuration) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nconfiguration:         ",
-                                         configuration,
+                                         config$configuration_dis,
                                          "\nconfiguration threshold: ",
-                                         configuration_threshold,
+                                         config$configuration_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% accurracy_list) {
-    config$use_accuracy <- TRUE
+  if (config$use_accuracy) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\naccuracy:              ",
-                                         accuracy,
+                                         config$accuracy,
                                          "\naccuracy threshold:    ",
-                                         accuracy_threshold,
+                                         config$accuracy_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% precision_list) {
-    config$use_precision <- TRUE
+  if (config$use_precision) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nprecision:             ",
-                                         precision,
+                                         config$precision,
                                          "\nprecision threshold:   ",
-                                         precision_threshold,
+                                         config$precision_threshold,
                                          sep = " ")
 
   }
 
-  if (config$success_metric %in% recall_list) {
-    config$use_recall <- TRUE
+  if (config$use_recall) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nrecall:                ",
-                                         recall,
+                                         config$recall,
                                          "\nrecall threshold:      ",
-                                         recall_threshold,
+                                         config$recall_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% specificity_list) {
-    config$use_specificity <- TRUE
+  if (config$use_specificity) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nspecificity:           ",
-                                         specificity,
+                                         config$specificity,
                                          "\nspecificity threshold: ",
-                                         specificity_threshold,
+                                         config$specificity_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% rmse_list) {
-    config$use_rmse <- TRUE
+  if (config$use_rmse) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nrmse:                  ",
-                                         rmse,
+                                         config$rmse,
                                          "\nrmse threshold:        ",
-                                         rmse_threshold,
+                                         config$rmse_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% distance_list) {
-    config$use_distance <- TRUE
+  if (config$use_distance) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\ndistance difference:   ",
-                                         distance_difference,
+                                         config$distance_difference,
                                          "\ndistance threshold:    ",
-                                         distance_threshold,
+                                         config$distance_threshold,
                                          sep = " ")
   }
 
-  if (config$success_metric %in% mcc_list) {
-    config$use_mcc <- TRUE
+  if (config$use_mcc) {
     config$acceptance_rate_info <- paste(config$acceptance_rate_info,
                                          "\nMCC:                   ",
-                                         mcc,
+                                         config$mcc,
                                          "\nMCC threshold:         ",
-                                         mcc_threshold,
+                                         config$mcc_threshold,
                                          sep = " ")
   }
 
