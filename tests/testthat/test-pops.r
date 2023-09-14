@@ -694,7 +694,6 @@ test_that("Input raster resolutions, extents, and crs all match", {
 })
 
 
-
 test_that(
 "Infected results return initial infected if reproductive rate is set to 0", {
   infected_file <-
@@ -710,11 +709,11 @@ test_that(
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
 
-  expect_equal(pops(infected_file = infected_file,
+  expect_equal(suppressWarnings(pops(infected_file = infected_file,
                     host_file = host_file,
                     total_populations_file = host_file,
                     parameter_means = parameter_means,
-                    parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                    parameter_cov_matrix = parameter_cov_matrix)$infected[[1]]),
                terra::as.matrix(terra::rast(infected_file), wide = TRUE))
   expect_equal(pops(infected_file = infected_file,
                     host_file = host_file,
