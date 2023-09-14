@@ -449,28 +449,28 @@ calibrate <- function(infected_years_file,
     # set up data structures for storing results
     parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
     parameters_test <- matrix(ncol = 15, nrow = 200)
-    acceptance_rate <- 1
+    config$acceptance_rate <- 1
     acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
 
-    accuracy_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    precision_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    recall_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    specificity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    rmse_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$accuracy_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$precision_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$recall_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$specificity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$rmse_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
 
     # assign thresholds for summary static values to be compared to the
-    quantity_threshold <- 40 # starting threshold for quantity disagreement
-    allocation_threshold <- 40 # starting threshold for allocation disagreement
-    configuration_threshold <- 0.20 # starting threshold for configuration disagreement
-    accuracy_threshold <- 0.70 # starting threshold for model accuracy
-    precision_threshold <- 0.70 # starting threshold for model precision
-    recall_threshold <- 0.70 # starting threshold for model recall
-    specificity_threshold <- 0.70 # starting threshold for model
-    rmse_threshold <- 5 # starting threshold for RMSE (root mean squared error)
-    distance_threshold <- 1000 # starting threshold for distance between simulated
+    config$quantity_threshold <- 40 # starting threshold for quantity disagreement
+    config$allocation_threshold <- 40 # starting threshold for allocation disagreement
+    config$configuration_threshold <- 0.20 # starting threshold for configuration disagreement
+    config$accuracy_threshold <- 0.70 # starting threshold for model accuracy
+    config$precision_threshold <- 0.70 # starting threshold for model precision
+    config$recall_threshold <- 0.70 # starting threshold for model recall
+    config$specificity_threshold <- 0.70 # starting threshold for model
+    config$rmse_threshold <- 5 # starting threshold for RMSE (root mean squared error)
+    config$distance_threshold <- 1000 # starting threshold for distance between simulated
     # and observed data in units
-    mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
+    config$mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
     acceptance_rate_particle_check <- seq(60, 200, 20)
 
     # loop through until all generations are complete
@@ -593,21 +593,21 @@ calibrate <- function(infected_years_file,
 
         all_disagreement <- as.data.frame(t(all_disagreement))
         all_disagreement <- all_disagreement / length(data$infected)
-        quantity <- all_disagreement$quantity_disagreement
-        allocation <- all_disagreement$allocation_disagreement
-        configuration_dis <- all_disagreement$configuration_disagreement
-        accuracy <- all_disagreement$accuracy
-        precision <- all_disagreement$precision
-        recall <- all_disagreement$recall
-        specificity <- all_disagreement$specificity
-        rmse <- all_disagreement$rmse
-        distance_difference <- all_disagreement$distance_difference
-        mcc <- all_disagreement$mcc
+        config$quantity <- all_disagreement$quantity_disagreement
+        config$allocation <- all_disagreement$allocation_disagreement
+        config$configuration_dis <- all_disagreement$configuration_disagreement
+        config$accuracy <- all_disagreement$accuracy
+        config$precision <- all_disagreement$precision
+        config$recall <- all_disagreement$recall
+        config$specificity <- all_disagreement$specificity
+        config$rmse <- all_disagreement$rmse
+        config$distance_difference <- all_disagreement$distance_difference
+        config$mcc <- all_disagreement$mcc
 
         # Check that statistics are improvements
         model_improved <- TRUE
         if (config$use_quantity && model_improved) {
-          if (quantity <= quantity_threshold) {
+          if (config$quantity <= config$quantity_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -615,7 +615,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_allocation && model_improved) {
-          if (allocation <= allocation_threshold) {
+          if (config$allocation <= config$allocation_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -623,7 +623,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_configuration && model_improved) {
-          if (configuration_dis <= configuration_threshold) {
+          if (config$configuration_dis <= config$configuration_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -631,7 +631,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_accuracy && model_improved) {
-          if (accuracy >= accuracy_threshold) {
+          if (config$accuracy >= config$accuracy_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -639,7 +639,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_precision && model_improved) {
-          if (precision >= precision_threshold) {
+          if (config$precision >= config$precision_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -647,7 +647,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_recall && model_improved) {
-          if (recall >= recall_threshold) {
+          if (config$recall >= config$recall_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -655,7 +655,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_specificity && model_improved) {
-          if (specificity >= specificity_threshold) {
+          if (config$specificity >= config$specificity_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -663,7 +663,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_mcc && model_improved) {
-          if (mcc >= mcc_threshold) {
+          if (config$mcc >= config$mcc_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -671,7 +671,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_distance && model_improved) {
-          if (distance_difference <= distance_threshold) {
+          if (config$distance_difference <= config$distance_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -679,7 +679,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (config$use_rmse && model_improved) {
-          if (rmse <= rmse_threshold) {
+          if (config$rmse <= config$rmse_threshold) {
             model_improved <- TRUE
           } else {
             model_improved <- FALSE
@@ -697,13 +697,13 @@ calibrate <- function(infected_years_file,
               proposed_anthropogenic_kappa,
               proposed_network_min_distance,
               proposed_network_max_distance,
-              accuracy,
-              precision,
-              recall,
-              specificity,
-              rmse,
-              distance_difference,
-              mcc
+              config$accuracy,
+              config$precision,
+              config$recall,
+              config$specificity,
+              config$rmse,
+              config$distance_difference,
+              config$mcc
             )
 
           if (config$current_bin == 1 && config$proposed_particles <= 200) {
@@ -717,13 +717,13 @@ calibrate <- function(infected_years_file,
                 proposed_anthropogenic_kappa,
                 proposed_network_min_distance,
                 proposed_network_max_distance,
-                accuracy,
-                precision,
-                recall,
-                specificity,
-                rmse,
-                distance_difference,
-                mcc
+                config$accuracy,
+                config$precision,
+                config$recall,
+                config$specificity,
+                config$rmse,
+                config$distance_difference,
+                config$mcc
               )
           }
           config$current_particles <- config$current_particles + 1
@@ -741,56 +741,20 @@ calibrate <- function(infected_years_file,
                 proposed_anthropogenic_kappa,
                 proposed_network_min_distance,
                 proposed_network_max_distance,
-                accuracy,
-                precision,
-                recall,
-                specificity,
-                rmse,
-                distance_difference,
-                mcc
+                config$accuracy,
+                config$precision,
+                config$recall,
+                config$specificity,
+                config$rmse,
+                config$distance_difference,
+                config$mcc
               )
           }
           config$proposed_particles <- config$proposed_particles + 1
         }
 
-        acceptance_rate <- config$current_particles / config$proposed_particles
-        acceptance_rate_info <- paste(
-                            "generation:            ",
-                            config$current_bin,
-                            "\nparticle:              ",
-                            config$current_particles,
-                            "\nacceptance rate:       ",
-                            format(acceptance_rate, digits = 5),
-                            "\naccuracy:              ",
-                            accuracy,
-                            "\naccuracy threshold:    ",
-                            accuracy_threshold,
-                            "\nprecision:             ",
-                            precision,
-                            "\nprecision threshold:   ",
-                            precision_threshold,
-                            "\nrecall:                ",
-                            recall,
-                            "\nrecall threshold:      ",
-                            recall_threshold,
-                            "\nspecificity:           ",
-                            specificity,
-                            "\nspecificity threshold: ",
-                            specificity_threshold,
-                            "\nMCC:                   ",
-                            mcc,
-                            "\nMCC threshold:         ",
-                            mcc_threshold,
-                            "\nrmse:                  ",
-                            rmse,
-                            "\nrmse threshold:        ",
-                            rmse_threshold,
-                            "\ndistance difference:   ",
-                            distance_difference,
-                            "\ndistance threshold:    ",
-                            distance_threshold,
-                            "\n\n",
-                            sep = " ")
+        config$acceptance_rate <- config$current_particles / config$proposed_particles
+        config <- create_cal_print(config)
 
         ## Check that acceptance rates are within a range for the first generation
         ## if the acceptance rate is less than 5% or greater than 15% adjust the
@@ -798,35 +762,35 @@ calibrate <- function(infected_years_file,
         if (config$proposed_particles %in% acceptance_rate_particle_check &&
             config$current_bin == 1
             ) {
-          if (acceptance_rate < 0.05) {
-            accuracy_threshold <-
-              mean(c(median(parameters_test[, 9], na.rm = TRUE), accuracy_threshold)) - 0.03
-            precision_threshold <-
-              mean(c(median(parameters_test[, 10], na.rm = TRUE), precision_threshold)) - 0.03
-            recall_threshold <-
-              mean(c(median(parameters_test[, 11], na.rm = TRUE), recall_threshold)) - 0.03
-            specificity_threshold <-
-              mean(c(median(parameters_test[, 12], na.rm = TRUE), specificity_threshold)) - 0.03
-            rmse_threshold <-
-              mean(c(median(parameters_test[, 13], na.rm = TRUE), rmse_threshold)) + 2
-            distance_threshold <-
-              mean(c(median(parameters_test[, 14], na.rm = TRUE), distance_threshold)) + 10
-            mcc_threshold <-
-              mean(c(median(parameters_test[, 15], na.rm = TRUE), mcc_threshold)) - 0.02
+          if (config$acceptance_rate < 0.05) {
+            config$accuracy_threshold <-
+              mean(c(median(parameters_test[, 9], na.rm = TRUE), config$accuracy_threshold)) - 0.03
+            config$precision_threshold <-
+              mean(c(median(parameters_test[, 10], na.rm = TRUE), config$precision_threshold)) - 0.03
+            config$recall_threshold <-
+              mean(c(median(parameters_test[, 11], na.rm = TRUE), config$recall_threshold)) - 0.03
+            config$specificity_threshold <-
+              mean(c(median(parameters_test[, 12], na.rm = TRUE), config$specificity_threshold)) - 0.03
+            config$rmse_threshold <-
+              mean(c(median(parameters_test[, 13], na.rm = TRUE), config$rmse_threshold)) + 2
+            config$distance_threshold <-
+              mean(c(median(parameters_test[, 14], na.rm = TRUE), config$distance_threshold)) + 10
+            config$mcc_threshold <-
+              mean(c(median(parameters_test[, 15], na.rm = TRUE), config$mcc_threshold)) - 0.02
             ## reset starting point of parameters kept and acceptance rate
             parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
             parameters_test <- matrix(ncol = 15, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
-          } else if (acceptance_rate > 0.15) {
-            accuracy_threshold <- median(parameters_kept[, 9], na.rm = TRUE)
-            precision_threshold <- median(parameters_kept[, 10], na.rm = TRUE)
-            recall_threshold <- median(parameters_kept[, 11], na.rm = TRUE)
-            specificity_threshold <- median(parameters_kept[, 12], na.rm = TRUE)
-            rmse_threshold <- median(parameters_kept[, 13], na.rm = TRUE)
-            distance_threshold <- median(parameters_kept[, 14], na.rm = TRUE)
-            mcc_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
+          } else if (config$acceptance_rate > 0.15) {
+            config$accuracy_threshold <- median(parameters_kept[, 9], na.rm = TRUE)
+            config$precision_threshold <- median(parameters_kept[, 10], na.rm = TRUE)
+            config$recall_threshold <- median(parameters_kept[, 11], na.rm = TRUE)
+            config$specificity_threshold <- median(parameters_kept[, 12], na.rm = TRUE)
+            config$rmse_threshold <- median(parameters_kept[, 13], na.rm = TRUE)
+            config$distance_threshold <- median(parameters_kept[, 14], na.rm = TRUE)
+            config$mcc_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
             ## reset starting point of parameters kept and acceptance rate
             parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
             parameters_test <- matrix(ncol = 15, nrow = 200)
@@ -837,7 +801,7 @@ calibrate <- function(infected_years_file,
         }
 
         if (verbose) {
-          cat(acceptance_rate_info)
+          cat(config$acceptance_rate_info)
         }
       }
 
@@ -848,20 +812,20 @@ calibrate <- function(infected_years_file,
 
       config$current_particles <- 1
       config$proposed_particles <- 1
-      acceptance_rates[config$current_bin] <- acceptance_rate
-      accuracy_thresholds[config$current_bin] <- accuracy_threshold
-      precision_thresholds[config$current_bin] <- precision_threshold
-      recall_thresholds[config$current_bin] <- recall_threshold
-      rmse_thresholds[config$current_bin] <- rmse_threshold
-      distance_thresholds[config$current_bin] <- distance_threshold
-      specificity_thresholds[config$current_bin] <- specificity_threshold
-      accuracy_threshold <- median(parameters_kept[start_index:end_index, 9])
-      precision_threshold <- median(parameters_kept[start_index:end_index, 10])
-      recall_threshold <- median(parameters_kept[start_index:end_index, 11])
-      specificity_threshold <- median(parameters_kept[start_index:end_index, 12])
-      rmse_threshold <- median(parameters_kept[start_index:end_index, 13])
-      distance_threshold <- median(parameters_kept[start_index:end_index, 14])
-      mcc_threshold <- median(parameters_kept[start_index:end_index, 15])
+      config$acceptance_rates[config$current_bin] <- config$acceptance_rate
+      config$accuracy_thresholds[config$current_bin] <- config$accuracy_threshold
+      config$precision_thresholds[config$current_bin] <- config$precision_threshold
+      config$recall_thresholds[config$current_bin] <- config$recall_threshold
+      config$rmse_thresholds[config$current_bin] <- config$rmse_threshold
+      config$distance_thresholds[config$current_bin] <- config$distance_threshold
+      config$specificity_thresholds[config$current_bin] <- config$specificity_threshold
+      config$accuracy_threshold <- median(parameters_kept[start_index:end_index, 9])
+      config$precision_threshold <- median(parameters_kept[start_index:end_index, 10])
+      config$recall_threshold <- median(parameters_kept[start_index:end_index, 11])
+      config$specificity_threshold <- median(parameters_kept[start_index:end_index, 12])
+      config$rmse_threshold <- median(parameters_kept[start_index:end_index, 13])
+      config$distance_threshold <- median(parameters_kept[start_index:end_index, 14])
+      config$mcc_threshold <- median(parameters_kept[start_index:end_index, 15])
       config$current_bin <- config$current_bin + 1
     }
 
