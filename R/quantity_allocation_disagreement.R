@@ -70,7 +70,9 @@ quantity_allocation_disagreement <-
 
         # calculate the mean euclidean distance between patches
         if (np_comp > 1) {
-          enn_mn_comps <- landscapemetrics::lsm_c_enn_mn(comparison, directions = 8, verbose = TRUE)
+          enn_mn_comps <-
+            suppressWarnings(
+              landscapemetrics::lsm_c_enn_mn(comparison, directions = 8, verbose = TRUE))
           if (any(unique(enn_mn_comps$class) %in% 1)) {
             enn_mn_comp <- enn_mn_comps$value[enn_mn_comps$class == 1]
           } else {

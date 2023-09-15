@@ -447,17 +447,21 @@ calibrate <- function(infected_years_file,
   # Computation or Markov Chain Monte Carlo.
   if (config$calibration_method == "ABC") {
     # set up data structures for storing results
-    parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
-    parameters_test <- matrix(ncol = 15, nrow = 200)
+    parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
+    parameters_test <- matrix(ncol = 18, nrow = 200)
     config$acceptance_rate <- 1
     config$acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
 
+    config$quantity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$allocation_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$configuration_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$accuracy_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$precision_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$recall_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$specificity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$rmse_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$mcc_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
 
     # assign thresholds for summary static values to be compared to the
     config$quantity_threshold <- 40 # starting threshold for quantity disagreement
@@ -703,7 +707,10 @@ calibrate <- function(infected_years_file,
               config$specificity,
               config$rmse,
               config$distance_difference,
-              config$mcc
+              config$mcc,
+              config$quantity,
+              config$allocation,
+              config$configuration_dis
             )
 
           if (config$current_bin == 1 && config$proposed_particles <= 200) {
@@ -723,7 +730,10 @@ calibrate <- function(infected_years_file,
                 config$specificity,
                 config$rmse,
                 config$distance_difference,
-                config$mcc
+                config$mcc,
+                config$quantity,
+                config$allocation,
+                config$configuration_dis
               )
           }
           config$current_particles <- config$current_particles + 1
@@ -747,7 +757,10 @@ calibrate <- function(infected_years_file,
                 config$specificity,
                 config$rmse,
                 config$distance_difference,
-                config$mcc
+                config$mcc,
+                config$quantity,
+                config$allocation,
+                config$configuration_dis
               )
           }
           config$proposed_particles <- config$proposed_particles + 1
@@ -779,9 +792,15 @@ calibrate <- function(infected_years_file,
               mean(c(median(parameters_test[, 14], na.rm = TRUE), config$distance_threshold)) + 10
             config$mcc_threshold <-
               mean(c(median(parameters_test[, 15], na.rm = TRUE), config$mcc_threshold)) - 0.02
+            config$quantity_threshold_threshold <-
+              mean(c(median(parameters_test[, 16], na.rm = TRUE), config$quantity)) - 0.02
+            config$allocation_threshold <-
+              mean(c(median(parameters_test[, 17], na.rm = TRUE), config$allocation)) - 0.02
+            config$configuration_threshold<-
+              mean(c(median(parameters_test[, 18], na.rm = TRUE), config$configuration_dis)) - 0.02
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 15, nrow = 200)
+            parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
+            parameters_test <- matrix(ncol = 18, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
@@ -793,9 +812,12 @@ calibrate <- function(infected_years_file,
             config$rmse_threshold <- median(parameters_kept[, 13], na.rm = TRUE)
             config$distance_threshold <- median(parameters_kept[, 14], na.rm = TRUE)
             config$mcc_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
+            config$quantity_threshold <- median(parameters_kept[, 16], na.rm = TRUE)
+            config$allocation_threshold <- median(parameters_kept[, 17], na.rm = TRUE)
+            config$configuration_threshold<- median(parameters_kept[, 18], na.rm = TRUE)
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 15, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 15, nrow = 200)
+            parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
+            parameters_test <- matrix(ncol = 18, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
@@ -814,6 +836,9 @@ calibrate <- function(infected_years_file,
 
       config$current_particles <- 1
       config$proposed_particles <- 1
+      config$quantity_thresholds <- config$quantity_threshold
+      config$allocation_threshold <- config$allocation_threshold
+      config$configuration_threshold <- config$configuration_dis_threshold
       config$acceptance_rates[config$current_bin] <- config$acceptance_rate
       config$accuracy_thresholds[config$current_bin] <- config$accuracy_threshold
       config$precision_thresholds[config$current_bin] <- config$precision_threshold
@@ -828,6 +853,9 @@ calibrate <- function(infected_years_file,
       config$rmse_threshold <- median(parameters_kept[start_index:end_index, 13])
       config$distance_threshold <- median(parameters_kept[start_index:end_index, 14])
       config$mcc_threshold <- median(parameters_kept[start_index:end_index, 15])
+      config$quantity_threshold <- median(parameters_kept[start_index:end_index, 16])
+      config$allocation_threshold <- median(parameters_kept[start_index:end_index, 17])
+      config$configuration_threshold<- median(parameters_kept[start_index:end_index, 18])
       config$current_bin <- config$current_bin + 1
     }
 

@@ -437,8 +437,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
 
           })
 
-
-
 test_that("ABC calibration has correctly formatted returns and runs with a
           single output comparison with network", {
             infected_years_file <-
