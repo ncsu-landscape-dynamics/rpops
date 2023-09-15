@@ -967,4 +967,3 @@ test_that("Multirun model outputs work with mask", {
   expect_equal(data$north_rate[[1]], 0)
   expect_equal(data$north_rate[[2]], 0)
 })
-

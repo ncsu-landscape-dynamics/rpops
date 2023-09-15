@@ -7,7 +7,7 @@ config$number_of_observations <- 68
 config$prior_number_of_observations <- 0
 config$prior_means <- c(1, 1, 0.99, 1000, 0, 0, 0, 0)
 config$prior_cov_matrix <- matrix(ncol = 8, nrow = 8, 0.1)
-config$params_to_estimate <- c(T, T, T, T, F, F)
+config$params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
 config$number_of_generations <- 4
 config$generation_size <- 10
 config$checks <- c(1200, 100000, 900, 1000)
@@ -422,7 +422,7 @@ test_that("Configuration returns proper values when no errors present", {
   config$network_movement <- "teleport"
   config2 <- configuration(config)
   expect_equal(config2$failure, NULL)
-  
+
   config$use_multiple_random_seeds <- TRUE
   config2 <- configuration(config)
   expect_equal(config2$failure, NULL)
@@ -507,7 +507,7 @@ test_that("configuration returns proper errors", {
   config$use_host_uncertainty <- TRUE
   config2 <- configuration(config)
   expect_equal(config2$failure, host_uncert_error)
-  
+
   config$use_host_uncertainty <- FALSE
   config$weather_type <- "s"
   config2 <- configuration(config)

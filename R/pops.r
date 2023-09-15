@@ -198,28 +198,27 @@
 #' @param multiple_random_seeds boolean to indicate if the model should use multiple random seeds
 #' (allows for performing uncertainty partitioning) or a single random seed (backwards
 #' compatibility option). Default is FALSE.
-#' @param random_seeds A file path to the file with the .csv file containing random_seeds table. 
-#' Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
-#' default. Default is Null which draws the seed numbers for each. 
-#' @param temperature_coefficient_sd_file Raster file with temperature coefficient standard 
-#' deviation data for the timestep and time period specified (e.g. if timestep = week this file 
-#' would have 52 bands with data being weekly temperature coefficient standard deviations). We 
-#' convert raw temperature values to coefficients that affect the reproduction and survival of 
+#' @param random_seeds A file path to the file with the .csv file containing random_seeds table.
+#' Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
+#' default. Default is Null which draws the seed numbers for each.
+#' @param temperature_coefficient_sd_file Raster file with temperature coefficient standard
+#' deviation data for the timestep and time period specified (e.g. if timestep = week this file
+#' would have 52 bands with data being weekly temperature coefficient standard deviations). We
+#' convert raw temperature values to coefficients that affect the reproduction and survival of
 #' the pest all values in the raster are between 0 and 1.
-#' @param precipitation_coefficient_sd_file Raster file with precipitation coefficient standard 
-#' deviation data for the timestep and time period specified (e.g. if timestep = week this file 
-#' would have 52 bands with data being weekly precipitation coefficient standard deviations). We 
-#' convert raw precipitation values to coefficients that affect the reproduction and survival of 
+#' @param precipitation_coefficient_sd_file Raster file with precipitation coefficient standard
+#' deviation data for the timestep and time period specified (e.g. if timestep = week this file
+#' would have 52 bands with data being weekly precipitation coefficient standard deviations). We
+#' convert raw precipitation values to coefficients that affect the reproduction and survival of
 #' the pest all values in the raster are between 0 and 1.
 #'
 #' @useDynLib PoPS, .registration = TRUE
-#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' @importFrom Rcpp sourceCpp evalCpp
-#' @importFrom  stats runif
+#' @importFrom stats runif
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom utils read.csv
-#' @importFrom sp SpatialPointsDataFrame CRS spTransform
 #' @importFrom  methods is
 #' @return list of infected and susceptible per year
 #' @export
@@ -381,7 +380,7 @@ pops <- function(infected_file,
   config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
-  config$random_seeds <-random_seeds
+  config$random_seeds <- random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
 
@@ -428,7 +427,7 @@ pops <- function(infected_file,
 
   data <- pops_model(random_seed = config$random_seed[1],
                      multiple_random_seeds = config$multiple_random_seeds,
-                     random_seeds = unname(as.matrix(config$random_seeds[1,])[1,]),
+                     random_seeds = unname(as.matrix(config$random_seeds[1, ])[1, ]),
                      use_lethal_temperature = config$use_lethal_temperature,
                      lethal_temperature = config$lethal_temperature,
                      lethal_temperature_month = config$lethal_temperature_month,

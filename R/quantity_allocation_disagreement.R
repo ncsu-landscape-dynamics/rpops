@@ -70,7 +70,9 @@ quantity_allocation_disagreement <-
 
         # calculate the mean euclidean distance between patches
         if (np_comp > 1) {
-          enn_mn_comps <- landscapemetrics::lsm_c_enn_mn(comparison, directions = 8, verbose = TRUE)
+          enn_mn_comps <-
+            suppressWarnings(
+              landscapemetrics::lsm_c_enn_mn(comparison, directions = 8, verbose = TRUE))
           if (any(unique(enn_mn_comps$class) %in% 1)) {
             enn_mn_comp <- enn_mn_comps$value[enn_mn_comps$class == 1]
           } else {
@@ -189,18 +191,18 @@ quantity_allocation_disagreement <-
     precision <- true_positive / (true_positive + false_positive)
     recall <- true_positive / (true_positive + false_negative)
     specificity <- true_negative / (true_negative + false_positive)
-    
+
     ## calculate MCC value
     tp_fp <- as.double((true_positive + false_positive))
     tp_fn <- as.double((true_positive + false_negative))
     tn_fp <- as.double((true_negative + false_positive))
     tn_fn <- as.double((true_negative + false_negative))
-    
+
     if (is.nan(tp_fp) || tp_fp == 0) {tp_fp <- 1}
     if (is.nan(tp_fn) || tp_fn == 0) {tp_fn <- 1}
     if (is.nan(tn_fp) || tn_fp == 0) {tn_fp <- 1}
     if (is.nan(tn_fn) || tn_fn == 0) {tn_fn <- 1}
-    
+
     mcc <- ((true_positive * true_negative) - (false_positive * false_negative)) /
       sqrt(tp_fp * tp_fn * tn_fp * tn_fn)
 

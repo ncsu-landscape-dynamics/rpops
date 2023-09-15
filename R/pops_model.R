@@ -185,9 +185,9 @@ pops_model <-
     frequencies_n_config$mortality_frequency_n <- mortality_frequency_n
 
     # Network configuration
-    network_config <- NULL;
-    network_data_config <- NULL;
-    if (!(is.na(network_filename) || is.null(network_filename) || network_filename == '')) {
+    network_config <- NULL
+    network_data_config <- NULL
+    if (!(is.na(network_filename) || is.null(network_filename) || network_filename == "")) {
       network_config <- c()
       network_config$network_min_distance <- network_min_distance
       network_config$network_max_distance <- network_max_distance
@@ -223,7 +223,7 @@ pops_model <-
 
 
     data <-
-      pops_model_cpp(random_seed = random_seed,
+      suppressWarnings(pops_model_cpp(random_seed = random_seed,
                      multiple_random_seeds,
                      random_seeds,
                      lethal_temperature = lethal_temperature,
@@ -283,6 +283,7 @@ pops_model <-
                      weather_size = weather_size,
                      weather_type = weather_type,
                      dispersers_to_soils_percentage = dispersers_to_soils_percentage
-    )
+    ))
 
+    return(data)
   }

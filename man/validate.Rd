@@ -347,16 +347,16 @@ and one with the standard deviation.}
 as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 series ("deterministic")}
 
-\item{temperature_coefficient_sd_file}{Raster file with temperature coefficient standard 
-deviation data for the timestep and time period specified (e.g. if timestep = week this file 
-would have 52 bands with data being weekly temperature coefficient standard deviations). We 
-convert raw temperature values to coefficients that affect the reproduction and survival of 
+\item{temperature_coefficient_sd_file}{Raster file with temperature coefficient standard
+deviation data for the timestep and time period specified (e.g. if timestep = week this file
+would have 52 bands with data being weekly temperature coefficient standard deviations). We
+convert raw temperature values to coefficients that affect the reproduction and survival of
 the pest all values in the raster are between 0 and 1.}
 
-\item{precipitation_coefficient_sd_file}{Raster file with precipitation coefficient standard 
-deviation data for the timestep and time period specified (e.g. if timestep = week this file 
-would have 52 bands with data being weekly precipitation coefficient standard deviations). We 
-convert raw precipitation values to coefficients that affect the reproduction and survival of 
+\item{precipitation_coefficient_sd_file}{Raster file with precipitation coefficient standard
+deviation data for the timestep and time period specified (e.g. if timestep = week this file
+would have 52 bands with data being weekly precipitation coefficient standard deviations). We
+convert raw precipitation values to coefficients that affect the reproduction and survival of
 the pest all values in the raster are between 0 and 1.}
 
 \item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage
@@ -370,8 +370,8 @@ in the quarantine direction analysis, e.g., 'N,E'. By default all directions
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.}
 
-\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table. 
-Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the 
+\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table.
+Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
 default. Default is Null which draws the seed numbers for each.}
 
 \item{use_soils}{boolean to indicate if pests establish in the soil and spread out from there.

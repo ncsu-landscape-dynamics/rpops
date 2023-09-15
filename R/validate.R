@@ -31,7 +31,7 @@
 #' @param use_configuration Boolean if you want to use configuration
 #' disagreement for comparing model runs. Default is FALSE.
 #'
-#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
@@ -208,7 +208,7 @@ validate <- function(infected_years_file,
   config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
-  config$random_seeds <-random_seeds
+  config$random_seeds <- random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
 
@@ -268,7 +268,7 @@ validate <- function(infected_years_file,
       data <- pops_model(
         random_seed = config$random_seed[i],
         multiple_random_seeds = config$multiple_random_seeds,
-        random_seeds = as.matrix(config$random_seeds[i,])[1,],
+        random_seeds = as.matrix(config$random_seeds[i, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
