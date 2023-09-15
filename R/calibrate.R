@@ -796,7 +796,7 @@ calibrate <- function(infected_years_file,
               mean(c(median(parameters_test[, 16], na.rm = TRUE), config$quantity)) - 0.02
             config$allocation_threshold <-
               mean(c(median(parameters_test[, 17], na.rm = TRUE), config$allocation)) - 0.02
-            config$configuration_threshold<-
+            config$configuration_threshold <-
               mean(c(median(parameters_test[, 18], na.rm = TRUE), config$configuration_dis)) - 0.02
             ## reset starting point of parameters kept and acceptance rate
             parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
@@ -814,7 +814,7 @@ calibrate <- function(infected_years_file,
             config$mcc_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
             config$quantity_threshold <- median(parameters_kept[, 16], na.rm = TRUE)
             config$allocation_threshold <- median(parameters_kept[, 17], na.rm = TRUE)
-            config$configuration_threshold<- median(parameters_kept[, 18], na.rm = TRUE)
+            config$configuration_threshold <- median(parameters_kept[, 18], na.rm = TRUE)
             ## reset starting point of parameters kept and acceptance rate
             parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
             parameters_test <- matrix(ncol = 18, nrow = 200)
@@ -855,7 +855,7 @@ calibrate <- function(infected_years_file,
       config$mcc_threshold <- median(parameters_kept[start_index:end_index, 15])
       config$quantity_threshold <- median(parameters_kept[start_index:end_index, 16])
       config$allocation_threshold <- median(parameters_kept[start_index:end_index, 17])
-      config$configuration_threshold<- median(parameters_kept[start_index:end_index, 18])
+      config$configuration_threshold <- median(parameters_kept[start_index:end_index, 18])
       config$current_bin <- config$current_bin + 1
     }
 
