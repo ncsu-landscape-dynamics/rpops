@@ -20,7 +20,7 @@
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
-#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel

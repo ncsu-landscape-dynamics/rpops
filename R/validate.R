@@ -31,7 +31,7 @@
 #' @param use_configuration Boolean if you want to use configuration
 #' disagreement for comparing model runs. Default is FALSE.
 #'
-#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel

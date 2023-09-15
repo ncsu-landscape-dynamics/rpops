@@ -528,20 +528,12 @@ movement_checks <- function(x, rast, start_date, end_date) {
 
   if (checks_passed) {
     moves <- read.csv(x, header = TRUE)
-    movement_from <- sp::SpatialPointsDataFrame(moves[, 1:2],
-      data = moves[, c(1:2, 5:6)],
-      proj4string = sp::CRS("+init=epsg:4326")
-    )
-    movement_to <- sp::SpatialPointsDataFrame(moves[, 3:4],
-      data = moves[, 3:6],
-      proj4string = sp::CRS("+init=epsg:4326")
-    )
-    movement_from <-
-      suppressWarnings(sp::spTransform(movement_from, CRSobj = terra::crs(rast)))
-    movement_to <-
-      suppressWarnings(sp::spTransform(movement_to, CRSobj = terra::crs(rast)))
-    move_from <- terra::vect(movement_from)
-    move_to <- terra::vect(movement_to)
+    movement_from <- moves[, c(1:2, 5:6)]
+    movement_to <- moves[, c(3:4, 5:6)]
+    movement_from <- vect(movement_from, geom = c("from_long", "from_lat"), crs = "+init=epsg:4326")
+    movement_to <- vect(movement_to, geom = c("to_long", "to_lat"), crs = "+init=epsg:4326")
+    move_from <- terra::project(movement_from, rast)
+    move_to <- terra::project(movement_to, rast)
     cell_from <- terra::extract(rast, move_from, cells = TRUE)
     cell_to <- terra::extract(rast, move_to, cells = TRUE)
     rowcol_from <- terra::rowColFromCell(rast, cell_from[, 3])
@@ -585,8 +577,7 @@ movement_checks <- function(x, rast, start_date, end_date) {
 
   if (checks_passed) {
     outs <- list(checks_passed, movement, movements_dates, movements_r)
-    names(outs) <-
-      c("checks_passed", "movements", "movements_dates", "movements_r")
+    names(outs) <- c("checks_passed", "movements", "movements_dates", "movements_r")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)

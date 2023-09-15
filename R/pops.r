@@ -213,13 +213,12 @@
 #' the pest all values in the raster are between 0 and 1.
 #'
 #' @useDynLib PoPS, .registration = TRUE
-#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' @importFrom Rcpp sourceCpp evalCpp
-#' @importFrom  stats runif
+#' @importFrom stats runif
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom utils read.csv
-#' @importFrom sp SpatialPointsDataFrame CRS spTransform
 #' @importFrom  methods is
 #' @return list of infected and susceptible per year
 #' @export

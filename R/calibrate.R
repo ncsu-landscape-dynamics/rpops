@@ -97,7 +97,7 @@
 #' "mcc and distance", "rmse and distance", "mcc and configuration", "mcc and RMSE",
 #' "mcc, quantity, and configuration"). Default is "mcc"
 #'
-#' @importFrom terra global rast xres yres classify extract ext as.points ncol
+#' @importFrom terra global rast xres yres classify extract ext as.points ncol project
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
 #' crs app vect
 #' @importFrom stats runif rnorm cov
