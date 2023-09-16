@@ -27,7 +27,6 @@ reference:
     contents:
     - pops
     - pops_multirun
-    - auto_manage
   - title: "Iternal data handlers"
     desc: "Functions for error checks and data handling for pops setup"
     contents:
