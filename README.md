@@ -3,7 +3,6 @@
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check)
 [![lint](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/lint.yaml/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/lint.yaml)
-[![Build Status](https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=master)](https://travis-ci.org/ncsu-landscape-dynamics/rpops)
 [![codecov](https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/main/graph/badge.svg)](https://codecov.io/gh/ncsu-landscape-dynamics/rpops)
 [![DOI](https://zenodo.org/badge/143435350.svg)](https://zenodo.org/badge/latestdoi/143435350)
   <!-- badges: end -->
