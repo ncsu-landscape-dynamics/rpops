@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">PoPS</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -26,7 +26,7 @@
   <a href="reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -63,18 +63,33 @@
 <p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/" class="external-link">Keep a Changelog</a>, and this project adheres to <a href="https://semver.org/spec/v2.0.0.html" class="external-link">Semantic Versioning</a> with an additional rule that interfaces to the core library follow the same numbering although they are in separate repositories, so increasing version number there increases version here although there is no specific tag or release for that in this repository.</p>
 <div class="section level2">
 <h2 id="unreleased"><a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/main...v2.0.1" class="external-link">Unreleased</a><a class="anchor" aria-label="anchor" href="#unreleased"></a></h2>
-</div>
-<div class="section level2">
-<h2 id="201-2022-11-16">
-<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...v2.0.1" class="external-link">2.0.1</a> 2022-11-16<a class="anchor" aria-label="anchor" href="#201-2022-11-16"></a></h2>
 <div class="section level3">
 <h3 id="added">Added<a class="anchor" aria-label="anchor" href="#added"></a></h3>
+<ul><li><p>Final step as an option for output frequency in all functions (@petrasovaa, #163).</p></li>
+<li><p>Added ability to use mean and sd for temp and precip coefficient. Uses 3 new parameters: weather_type, temperature_coefficient_sd_file, and precipitation_coefficient_sd_file. This is added to help understand uncertainty in model predictions due to weather drivers (@ChrisJones687, #168).</p></li>
+<li><p>Added the ability to use different seeds for all processes within pops-core. Adds 2 new parameters: multiple_random_seeds (boolean for using this functionality) and random_seeds (set to NULL to allow internal model selection of kernels or pass a CSV with the number of rows being the number of model runs and columns being the kernels in order (@ChrisJones687, #168).</p></li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
+<ul><li>Quarantine directions can now be calculated only for directions of interest (@petrasovaa, #168).</li>
+</ul></div>
+<div class="section level3">
+<h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
+<ul><li><p>Fixed MCC calculations that returned NaN with very large datasets (@ChrisJones687, #161).</p></li>
+<li><p>Fixed quarantine directions outputs in pops-multirun (@petrasovaa, #162).</p></li>
+</ul></div>
+</div>
+<div class="section level2">
+<h2 id="id_201-2022-11-16">
+<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v2.0.0...v2.0.1" class="external-link">2.0.1</a> 2022-11-16<a class="anchor" aria-label="anchor" href="#id_201-2022-11-16"></a></h2>
+<div class="section level3">
+<h3 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a></h3>
 <ul><li><p><code>calibrate</code> can now use the Mathews Correlation Coefficient as the summary statistic of to keep or reject parameter sets (@ChrisJones687, #145).</p></li>
 <li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, and <code>pops</code> now take use_survival_rates, survival_rate_month, survival_rate_day, and survival_rates_file (@ChrisJones687, #147).</p></li>
 <li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, and <code>pops</code> now take network_movement as a parameter. This parameter controls how dispersal occurs along the network (@ChrisJones687, #147).</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
+<h3 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a></h3>
 <ul><li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, <code>auto_manage</code> and <code>pops</code> no longer take network_min_distance and network_max_distance as these parameters are now passed in through the parameter_means and parameter_cov_matrix parameters and are calibrated as part of the calibration if network kernel is selected (@ChrisJones687, #140).</p></li>
 <li><p><code>calibrate</code> now calibrates the network_min_distance and network_max_distance parameters during calibration and they are now part of the parameter_means and parameter_cov_matrix that are exported from the calibration (@ChrisJones687, #140).</p></li>
 <li><p><code>calibrate</code> has more flexible success metric options removes use_distance, use_rmse, and use_mcc parameters and replaces it with the more flexible success_metrics parameter. Users can now select multiple combinations of different success metrics for the calibration (@ChrisJones687, #150).</p></li>
@@ -83,20 +98,20 @@
 <li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, and <code>pops</code> now propogate uncertainty from host and initial conditions. This adds the parameters use_initial_condition_uncertainty and use_host_uncertainty. If use_initial_condition_uncertainty is TRUE the infected_file and/or exposed_file need to have 2 layers a mean and standard deviation. If use_host_uncertainty is is TRUE the host_file needs to have 2 layers a mean and standard deviation. For each model run a host and/or initial conditions are drawn from the mean and sd layers so that each run has a unique host and/or initial conditions this will allow for both propogation of uncertainty from these sources but also partitioning (@ChrisJones687, #151).</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
+<h3 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a></h3>
 <ul><li>fixed error on parameter draws in select situations (@ChrisJones687, #146).</li>
 </ul></div>
 </div>
 <div class="section level2">
-<h2 id="200---2021-12-14">
-<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/1.1.0...v2.0.0" class="external-link">2.0.0</a> - 2021-12-14<a class="anchor" aria-label="anchor" href="#200---2021-12-14"></a></h2>
+<h2 id="id_200---2021-12-14">
+<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/1.1.0...v2.0.0" class="external-link">2.0.0</a> - 2021-12-14<a class="anchor" aria-label="anchor" href="#id_200---2021-12-14"></a></h2>
 <div class="section level3">
-<h3 id="added-1">Added<a class="anchor" aria-label="anchor" href="#added-1"></a></h3>
+<h3 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a></h3>
 <ul><li><p><code>quantity_allocation_disagreement</code> now takes in the use_distance parameter which is FALSE by default. This allows the model to commute the minimum total distance between observed and simulated infestations (@ChrisJones687, #130).</p></li>
 <li><p><code>validate</code>, <code>calibrate</code>, <code>pops_multirun</code>, <code>auto_manage</code> and <code>pops</code> now take in network_min_distance, network_max_distance, and network_filename parameters these are used when the anthropogenic_kernel_type = “network”. This allows directed spread along a network such as a railroad (@ChrisJones687 and @wenzeslaus, #131)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="changed-1">Changed<a class="anchor" aria-label="anchor" href="#changed-1"></a></h3>
+<h3 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a></h3>
 <ul><li><p><code>validate</code> now takes the variable point_file and uses it to calculate statistics based on the point_file in addition to the raster file also calculates new measures of model performance accuracy, precision, recall, and specificity (@ChrisJones687, #124).</p></li>
 <li><p><code>calibrate</code> no longer uses success_metrics and checks parameters as these are both handled internally by auto updating if the values are too far of in the first generation. This makes for a simpler and faster user experience (@ChrisJones687, #130).</p></li>
 <li><p><code>validate</code> no longer uses success_metrics parameter but now has the added parameters use_rmse and use_distance that are used in <code>quantity_allocation_disagreement</code>. This allows for a more intuitive user interface (@ChrisJones687, #130).</p></li>
@@ -105,10 +120,10 @@
 </ul></div>
 </div>
 <div class="section level2">
-<h2 id="110---2021-06-22">
-<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...1.1.0" class="external-link">1.1.0</a> - 2021-06-22<a class="anchor" aria-label="anchor" href="#110---2021-06-22"></a></h2>
+<h2 id="id_110---2021-06-22">
+<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.2...1.1.0" class="external-link">1.1.0</a> - 2021-06-22<a class="anchor" aria-label="anchor" href="#id_110---2021-06-22"></a></h2>
 <div class="section level3">
-<h3 id="added-2">Added<a class="anchor" aria-label="anchor" href="#added-2"></a></h3>
+<h3 id="added-3">Added<a class="anchor" aria-label="anchor" href="#added-3"></a></h3>
 <ul><li>
 <p>New dispersal kernels added: Uniform, Power-law, Deterministic neighbor, Hyperbolic-Secant, Gamma, Weibull, Normal, and Logistic (@ChrisJones687, #73).</p>
 <ul><li>These kernels are usable for both (<code>natural_dispersal_kernel</code>, <code>anthropogenic_dispersal_kernel</code>).</li>
@@ -118,7 +133,7 @@
 <li><p>Spatial Index to increase computational speed (@ChrisJones687, #67)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="changed-2">Changed<a class="anchor" aria-label="anchor" href="#changed-2"></a></h3>
+<h3 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a></h3>
 <ul><li><p>Exposed and Infected populations can both be present at the start of a simulation (@ChrisJones687, #92).</p></li>
 <li>
 <p>Internal functions for data handling have switched from the raster package to the terra package (@ChrisJones687, #79).</p>
@@ -144,34 +159,34 @@
 <li><p>Treatments now update total_hosts (@ChrisJones687, #122)</p></li>
 </ul></div>
 <div class="section level3">
-<h3 id="fixed-1">Fixed<a class="anchor" aria-label="anchor" href="#fixed-1"></a></h3>
+<h3 id="fixed-2">Fixed<a class="anchor" aria-label="anchor" href="#fixed-2"></a></h3>
 <ul><li><p>Mask parameter works as intended in validate function after terra update (@ChrisJones687, #104).</p></li>
 <li><p>Improved pops_model documentation updating (@ChrisJones687, #94).</p></li>
 <li><p><code>Output_frequency</code> can now be <code>every_n_steps</code> (@ChrisJones, #118).</p></li>
 </ul></div>
 </div>
 <div class="section level2">
-<h2 id="102---2020-10-09">
-<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.0...v1.0.2" class="external-link">1.0.2</a> - 2020-10-09<a class="anchor" aria-label="anchor" href="#102---2020-10-09"></a></h2>
+<h2 id="id_102---2020-10-09">
+<a href="https://github.com/ncsu-landscape-dynamics/rpops/compare/v1.0.0...v1.0.2" class="external-link">1.0.2</a> - 2020-10-09<a class="anchor" aria-label="anchor" href="#id_102---2020-10-09"></a></h2>
 <div class="section level3">
-<h3 id="changed-3">Changed<a class="anchor" aria-label="anchor" href="#changed-3"></a></h3>
+<h3 id="changed-4">Changed<a class="anchor" aria-label="anchor" href="#changed-4"></a></h3>
 <ul><li>Exposed populations now exported each time-step (@ChrisJones687, #64).</li>
 </ul></div>
 <div class="section level3">
-<h3 id="fixed-2">Fixed<a class="anchor" aria-label="anchor" href="#fixed-2"></a></h3>
+<h3 id="fixed-3">Fixed<a class="anchor" aria-label="anchor" href="#fixed-3"></a></h3>
 <ul><li><p>Multirun and validate draw a parameter set from the distribution for each run as intended</p></li>
 <li><p>Fixed error when calibrating for less than 4 parameters</p></li>
 </ul></div>
 </div>
 <div class="section level2">
-<h2 id="101---2020-09-16">
-<a href="https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0" class="external-link">1.0.1</a> - 2020-09-16<a class="anchor" aria-label="anchor" href="#101---2020-09-16"></a></h2>
+<h2 id="id_101---2020-09-16">
+<a href="https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0" class="external-link">1.0.1</a> - 2020-09-16<a class="anchor" aria-label="anchor" href="#id_101---2020-09-16"></a></h2>
 <ul><li>
 <a href="https://github.com/ncsu-landscape-dynamics/r.pops.spread/releases/tag/v1.0.1" class="external-link">Patch release of r.pops.spread</a> (no changes in rpops)</li>
 </ul></div>
 <div class="section level2">
-<h2 id="100---2020-09-16">
-<a href="https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0" class="external-link">1.0.0</a> - 2020-09-16<a class="anchor" aria-label="anchor" href="#100---2020-09-16"></a></h2>
+<h2 id="id_100---2020-09-16">
+<a href="https://github.com/ncsu-landscape-dynamics/rpops/releases/tag/v1.0.0" class="external-link">1.0.0</a> - 2020-09-16<a class="anchor" aria-label="anchor" href="#id_100---2020-09-16"></a></h2>
 <p>Version 1.0.0 of the <em>PoPS Core</em> C++ library and its interfaces: <em>rpops</em> R package and <em>r.pops.spread</em> GRASS GIS module. The release of rpops includes:</p>
 <ul><li><p>Susceptible-infected (<code>SI</code>) and susceptible-exposed-infected (<code>SEI</code>) host phases (<code>model_type</code>, <code>latency_period</code>).</p></li>
 <li><p>Host mortality tracking (<code>mortality_rate</code>, <code>mortality</code>).</p></li>
@@ -208,7 +223,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>

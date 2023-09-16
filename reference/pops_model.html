@@ -22,7 +22,7 @@ future."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mat
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">PoPS</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -31,7 +31,7 @@ future."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mat
   <a href="../reference/index.html">Reference</a>
 </li>
 <li class="dropdown">
-  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
      
     <span class="caret"></span>
@@ -73,326 +73,521 @@ future.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">pops_model</span><span class="op">(</span>
-  <span class="va">random_seed</span>,
-  <span class="va">use_lethal_temperature</span>,
-  <span class="va">lethal_temperature</span>,
-  <span class="va">lethal_temperature_month</span>,
-  <span class="va">use_survival_rates</span>,
-  <span class="va">survival_rate_month</span>,
-  <span class="va">survival_rate_day</span>,
-  <span class="va">infected</span>,
-  <span class="va">total_exposed</span>,
-  <span class="va">exposed</span>,
-  <span class="va">susceptible</span>,
-  <span class="va">total_populations</span>,
-  <span class="va">total_hosts</span>,
-  <span class="va">mortality_on</span>,
-  <span class="va">mortality_tracker</span>,
-  <span class="va">mortality</span>,
-  <span class="va">quarantine_areas</span>,
-  <span class="va">treatment_maps</span>,
-  <span class="va">treatment_dates</span>,
-  <span class="va">pesticide_duration</span>,
-  <span class="va">resistant</span>,
-  <span class="va">use_movements</span>,
-  <span class="va">movements</span>,
-  <span class="va">movements_dates</span>,
-  <span class="va">weather</span>,
-  <span class="va">temperature</span>,
-  <span class="va">survival_rates</span>,
-  <span class="va">weather_coefficient</span>,
-  <span class="va">res</span>,
-  <span class="va">rows_cols</span>,
-  <span class="va">time_step</span>,
-  <span class="va">reproductive_rate</span>,
-  <span class="va">spatial_indices</span>,
-  <span class="va">season_month_start_end</span>,
-  mortality_rate <span class="op">=</span> <span class="fl">0</span>,
-  mortality_time_lag <span class="op">=</span> <span class="fl">2</span>,
-  start_date <span class="op">=</span> <span class="st">"2018-01-01"</span>,
-  end_date <span class="op">=</span> <span class="st">"2018-12-31"</span>,
-  treatment_method <span class="op">=</span> <span class="st">"ratio"</span>,
-  natural_kernel_type <span class="op">=</span> <span class="st">"cauchy"</span>,
-  anthropogenic_kernel_type <span class="op">=</span> <span class="st">"cauchy"</span>,
-  use_anthropogenic_kernel <span class="op">=</span> <span class="cn">FALSE</span>,
-  percent_natural_dispersal <span class="op">=</span> <span class="fl">0</span>,
-  natural_distance_scale <span class="op">=</span> <span class="fl">21</span>,
-  anthropogenic_distance_scale <span class="op">=</span> <span class="fl">0</span>,
-  natural_dir <span class="op">=</span> <span class="st">"NONE"</span>,
-  natural_kappa <span class="op">=</span> <span class="fl">0</span>,
-  anthropogenic_dir <span class="op">=</span> <span class="st">"NONE"</span>,
-  anthropogenic_kappa <span class="op">=</span> <span class="fl">0</span>,
-  output_frequency <span class="op">=</span> <span class="st">"year"</span>,
-  output_frequency_n <span class="op">=</span> <span class="fl">1</span>,
-  quarantine_frequency <span class="op">=</span> <span class="st">"year"</span>,
-  quarantine_frequency_n <span class="op">=</span> <span class="fl">1</span>,
-  use_quarantine <span class="op">=</span> <span class="cn">FALSE</span>,
-  spreadrate_frequency <span class="op">=</span> <span class="st">"year"</span>,
-  spreadrate_frequency_n <span class="op">=</span> <span class="fl">1</span>,
-  mortality_frequency <span class="op">=</span> <span class="st">"year"</span>,
-  mortality_frequency_n <span class="op">=</span> <span class="fl">1</span>,
-  use_spreadrates <span class="op">=</span> <span class="cn">FALSE</span>,
-  model_type_ <span class="op">=</span> <span class="st">"SI"</span>,
-  latency_period <span class="op">=</span> <span class="fl">0</span>,
-  generate_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,
-  establishment_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,
-  movement_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,
-  dispersal_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,
-  establishment_probability <span class="op">=</span> <span class="fl">0</span>,
-  dispersal_percentage <span class="op">=</span> <span class="fl">0.99</span>,
-  use_overpopulation_movements <span class="op">=</span> <span class="cn">FALSE</span>,
-  overpopulation_percentage <span class="op">=</span> <span class="fl">0</span>,
-  leaving_percentage <span class="op">=</span> <span class="fl">0</span>,
-  leaving_scale_coefficient <span class="op">=</span> <span class="fl">1</span>,
-  bbox <span class="op">=</span> <span class="cn">NULL</span>,
-  network_min_distance <span class="op">=</span> <span class="fl">0</span>,
-  network_max_distance <span class="op">=</span> <span class="fl">0</span>,
-  network_filename <span class="op">=</span> <span class="st">""</span>,
-  network_movement <span class="op">=</span> <span class="st">"walk"</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pops_model</span><span class="op">(</span></span>
+<span>  <span class="va">random_seed</span>,</span>
+<span>  <span class="va">multiple_random_seeds</span>,</span>
+<span>  <span class="va">random_seeds</span>,</span>
+<span>  <span class="va">use_lethal_temperature</span>,</span>
+<span>  <span class="va">lethal_temperature</span>,</span>
+<span>  <span class="va">lethal_temperature_month</span>,</span>
+<span>  <span class="va">use_survival_rates</span>,</span>
+<span>  <span class="va">survival_rate_month</span>,</span>
+<span>  <span class="va">survival_rate_day</span>,</span>
+<span>  <span class="va">infected</span>,</span>
+<span>  <span class="va">total_exposed</span>,</span>
+<span>  <span class="va">exposed</span>,</span>
+<span>  <span class="va">susceptible</span>,</span>
+<span>  <span class="va">total_populations</span>,</span>
+<span>  <span class="va">total_hosts</span>,</span>
+<span>  <span class="va">mortality_on</span>,</span>
+<span>  <span class="va">mortality_tracker</span>,</span>
+<span>  <span class="va">mortality</span>,</span>
+<span>  <span class="va">quarantine_areas</span>,</span>
+<span>  <span class="va">quarantine_directions</span>,</span>
+<span>  <span class="va">treatment_maps</span>,</span>
+<span>  <span class="va">treatment_dates</span>,</span>
+<span>  <span class="va">pesticide_duration</span>,</span>
+<span>  <span class="va">resistant</span>,</span>
+<span>  <span class="va">use_movements</span>,</span>
+<span>  <span class="va">movements</span>,</span>
+<span>  <span class="va">movements_dates</span>,</span>
+<span>  <span class="va">weather</span>,</span>
+<span>  <span class="va">temperature</span>,</span>
+<span>  <span class="va">survival_rates</span>,</span>
+<span>  <span class="va">weather_coefficient</span>,</span>
+<span>  <span class="va">weather_coefficient_sd</span>,</span>
+<span>  <span class="va">res</span>,</span>
+<span>  <span class="va">rows_cols</span>,</span>
+<span>  <span class="va">time_step</span>,</span>
+<span>  <span class="va">reproductive_rate</span>,</span>
+<span>  <span class="va">spatial_indices</span>,</span>
+<span>  <span class="va">season_month_start_end</span>,</span>
+<span>  mortality_rate <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  mortality_time_lag <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>  start_date <span class="op">=</span> <span class="st">"2018-01-01"</span>,</span>
+<span>  end_date <span class="op">=</span> <span class="st">"2018-12-31"</span>,</span>
+<span>  treatment_method <span class="op">=</span> <span class="st">"ratio"</span>,</span>
+<span>  natural_kernel_type <span class="op">=</span> <span class="st">"cauchy"</span>,</span>
+<span>  anthropogenic_kernel_type <span class="op">=</span> <span class="st">"cauchy"</span>,</span>
+<span>  use_anthropogenic_kernel <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  percent_natural_dispersal <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  natural_distance_scale <span class="op">=</span> <span class="fl">21</span>,</span>
+<span>  anthropogenic_distance_scale <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  natural_dir <span class="op">=</span> <span class="st">"NONE"</span>,</span>
+<span>  natural_kappa <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  anthropogenic_dir <span class="op">=</span> <span class="st">"NONE"</span>,</span>
+<span>  anthropogenic_kappa <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  output_frequency <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  output_frequency_n <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  quarantine_frequency <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  quarantine_frequency_n <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  use_quarantine <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  spreadrate_frequency <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  spreadrate_frequency_n <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  mortality_frequency <span class="op">=</span> <span class="st">"year"</span>,</span>
+<span>  mortality_frequency_n <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  use_spreadrates <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  model_type_ <span class="op">=</span> <span class="st">"SI"</span>,</span>
+<span>  latency_period <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  generate_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  establishment_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  movement_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  dispersal_stochasticity <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  establishment_probability <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  dispersal_percentage <span class="op">=</span> <span class="fl">0.99</span>,</span>
+<span>  use_overpopulation_movements <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  overpopulation_percentage <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  leaving_percentage <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  leaving_scale_coefficient <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  bbox <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  network_min_distance <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  network_max_distance <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  network_filename <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  network_movement <span class="op">=</span> <span class="st">"walk"</span>,</span>
+<span>  weather_size <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  weather_type <span class="op">=</span> <span class="st">"deterministic"</span>,</span>
+<span>  dispersers_to_soils_percentage <span class="op">=</span> <span class="fl">0</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>random_seed</dt>
-<dd><p>sets the random seed for the simulation used for
-reproducibility</p></dd>
+<dd><p>sets the random seed for the simulation used for reproducibility</p></dd>
+
+
+<dt>multiple_random_seeds</dt>
+<dd><p>boolean to indicate if the model should use multiple random seeds
+(allows for performing uncertainty partitioning) or a single random seed (backwards
+compatibility option). Default is FALSE.</p></dd>
+
+
+<dt>random_seeds</dt>
+<dd><p>A file path to the file with the .csv file containing random_seeds table.
+Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
+default. Default is Null which draws the seed numbers for each.</p></dd>
+
+
 <dt>use_lethal_temperature</dt>
 <dd><p>a boolean to answer the question: does your
 pest or pathogen have a temperature at which it cannot survive?
 (TRUE or FALSE)</p></dd>
+
+
 <dt>lethal_temperature</dt>
 <dd><p>the temperature in degrees C at which lethal
 temperature related mortality occurs for your pest or pathogen (-50 to 60)</p></dd>
+
+
 <dt>lethal_temperature_month</dt>
 <dd><p>the month in which lethal temperature
 related mortality occurs for your pest or pathogen integer value between 1
 and 12</p></dd>
+
+
 <dt>use_survival_rates</dt>
 <dd><p>boolean to indicate if the model will use survival rates to limit the
 survival or emergence of overwintering generations.</p></dd>
+
+
 <dt>survival_rate_month</dt>
 <dd><p>What month do over wintering generations emerge. We suggest using the
 month before for this parameter as it is when the survival rates raster will be applied.</p></dd>
+
+
 <dt>survival_rate_day</dt>
 <dd><p>what day should the survival rates be applied</p></dd>
+
+
 <dt>infected</dt>
 <dd><p>matrix of infected hosts</p></dd>
+
+
 <dt>total_exposed</dt>
 <dd><p>sum of all exposed cohorts in exposed class for use with
 "SEI" model type</p></dd>
+
+
 <dt>exposed</dt>
 <dd><p>vector of matrices of the exposed class for use with "SEI"
 model type</p></dd>
+
+
 <dt>susceptible</dt>
 <dd><p>matrix of susceptible hosts</p></dd>
+
+
 <dt>total_populations</dt>
 <dd><p>matrix of total populations</p></dd>
+
+
 <dt>total_hosts</dt>
 <dd><p>matrix of all hosts</p></dd>
+
+
 <dt>mortality_on</dt>
 <dd><p>boolean to turn host mortality on and off
 (TRUE or FALSE)</p></dd>
+
+
 <dt>mortality_tracker</dt>
 <dd><p>matrix of 0's to track mortality per year</p></dd>
+
+
 <dt>mortality</dt>
 <dd><p>matrix to track cumulative mortality</p></dd>
+
+
 <dt>quarantine_areas</dt>
 <dd><p>areas that are set as quarantined for computing
 escape from quarantine statistics.</p></dd>
+
+
+<dt>quarantine_directions</dt>
+<dd><p>string with comma separated directions to include
+in the quarantine direction analysis, e.g., 'N,E'. By default all directions
+(N, S, E, W) are considered</p></dd>
+
+
 <dt>treatment_maps</dt>
 <dd><p>list of matrices where treatment or management has
 occurred in a given year</p></dd>
+
+
 <dt>treatment_dates</dt>
 <dd><p>dates in which to apply treatment list with format
 ('YYYY_MM_DD') (needs to be the same length as treatment_file and
 pesticide_duration)</p></dd>
+
+
 <dt>pesticide_duration</dt>
 <dd><p>how long does the pestcide (herbicide, vaccine,
 etc..) last before the host is susceptible again. If value is 0 treatment
 is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
  same length as treatment_dates and treatment_file)</p></dd>
+
+
 <dt>resistant</dt>
 <dd><p>matrix to track resistant population over time</p></dd>
+
+
 <dt>use_movements</dt>
 <dd><p>this is a boolean to turn on use of the movement module.</p></dd>
+
+
 <dt>movements</dt>
 <dd><p>a matrix with columns lon_from, lat_from, lon_to, lat_to,
 number of animals, and date.</p></dd>
+
+
 <dt>movements_dates</dt>
 <dd><p>this is a list of dates passed as strings in the
 format 'YYYY-MM-DD'</p></dd>
+
+
 <dt>weather</dt>
 <dd><p>Boolean that is true if weather is used</p></dd>
+
+
 <dt>temperature</dt>
 <dd><p>vector of matrices of temperature values used to check
 against lethal temperature</p></dd>
+
+
 <dt>survival_rates</dt>
 <dd><p>vector of matrices of survival rates used to determine percentage of
 overwinter population that emerges</p></dd>
+
+
 <dt>weather_coefficient</dt>
 <dd><p>vector of matrices of weather coefficients</p></dd>
+
+
+<dt>weather_coefficient_sd</dt>
+<dd><p>vector of matrices of weather coefficient standard deviations.</p></dd>
+
+
 <dt>res</dt>
 <dd><p>vector of east/west resolution and north/south resolution</p></dd>
+
+
 <dt>rows_cols</dt>
 <dd><p>vector of number of rows and columns in the raster files</p></dd>
+
+
 <dt>time_step</dt>
-<dd><p>how often should spread occur options: ('day', 'week',
-'month').</p></dd>
+<dd><p>how often should spread occur options: ('day', 'week', 'month').</p></dd>
+
+
 <dt>reproductive_rate</dt>
 <dd><p>number of spores or pest units produced by a single
 host under optimal weather conditions</p></dd>
+
+
 <dt>spatial_indices</dt>
 <dd><p>list of all spatial locations with suitable hosts</p></dd>
+
+
 <dt>season_month_start_end</dt>
 <dd><p>vector of months when spread starts and stops</p></dd>
+
+
 <dt>mortality_rate</dt>
 <dd><p>rate at which mortality occurs value between 0 and 1</p></dd>
+
+
 <dt>mortality_time_lag</dt>
 <dd><p>time lag from infection until mortality can occur
 in time steps integer &gt;= 1</p></dd>
+
+
 <dt>start_date</dt>
 <dd><p>date to start the simulation with format ('YYYY_MM_DD')</p></dd>
+
+
 <dt>end_date</dt>
 <dd><p>date to end the simulation with format ('YYYY_MM_DD')</p></dd>
+
+
 <dt>treatment_method</dt>
 <dd><p>what method to use when applying treatment one of
 ("ratio" or "all infected"). ratio removes a portion of all infected and
 susceptibles, all infected removes all infected a portion of susceptibles.</p></dd>
+
+
 <dt>natural_kernel_type</dt>
 <dd><p>what type of dispersal kernel should be used for
 natural dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
  'hyperbolic secant', 'gamma', 'weibull',
  'logistic')</p></dd>
+
+
 <dt>anthropogenic_kernel_type</dt>
 <dd><p>what type of dispersal kernel should be
 used for anthropogenic dispersal. Current dispersal kernel options are
  ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
  'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')</p></dd>
+
+
 <dt>use_anthropogenic_kernel</dt>
 <dd><p>A boolean that turns on the use of the
 anthropogenic or long distance dispersal portion of the 2 scale dispersal
 kernel function</p></dd>
+
+
 <dt>percent_natural_dispersal</dt>
 <dd><p>what percentage of dispersal is natural
 range versus anthropogenic range value between 0 and 1</p></dd>
+
+
 <dt>natural_distance_scale</dt>
 <dd><p>distance scale parameter for natural range
 dispersal kernel numeric value &gt; 0</p></dd>
+
+
 <dt>anthropogenic_distance_scale</dt>
 <dd><p>distance scale parameter for
 anthropogenic range dispersal kernel numeric value &gt; 0</p></dd>
+
+
 <dt>natural_dir</dt>
 <dd><p>sets the predominate direction of natural dispersal
 usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
 'NONE')</p></dd>
+
+
 <dt>natural_kappa</dt>
 <dd><p>sets the strength of the natural direction in the
 von-mises distribution numeric value between 0.01 and 12</p></dd>
+
+
 <dt>anthropogenic_dir</dt>
 <dd><p>sets the predominate direction of anthropogenic
 dispersal usually due to human movement typically over long distances (e.g.
 nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
 'SE', 'E', 'NE', 'NONE')</p></dd>
+
+
 <dt>anthropogenic_kappa</dt>
 <dd><p>sets the strength of the anthropogenic direction
 in the von-mises distribution numeric value between 0.01 and 12</p></dd>
+
+
 <dt>output_frequency</dt>
 <dd><p>sets when outputs occur either ('year', 'month',
 'week', 'day', 'time step', or 'every_n_steps')</p></dd>
+
+
 <dt>output_frequency_n</dt>
 <dd><p>sets number of units from output_frequency in which
 to export model results if mortality_frequency is 'every_n_steps'.
 Must be an integer &gt;= 1.</p></dd>
+
+
 <dt>quarantine_frequency</dt>
 <dd><p>sets how often the quarantine statistics are
 calculated either ('year', 'month', 'week', 'day' or 'time step')
 (default is year)</p></dd>
+
+
 <dt>quarantine_frequency_n</dt>
 <dd><p>sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export quarantine statistics.</p></dd>
+
+
 <dt>use_quarantine</dt>
 <dd><p>boolean to indicate whether or not there is a
 quarantine area if TRUE must pass in a raster file indicating the
 quarantine areas (default = FALSE)</p></dd>
+
+
 <dt>spreadrate_frequency</dt>
 <dd><p>sets how often the spread rate statistics are
 calculated either ('year', 'month', 'week', 'day' or 'time step')
 (default is year)</p></dd>
+
+
 <dt>spreadrate_frequency_n</dt>
 <dd><p>sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export spread rate
 statistics.</p></dd>
+
+
 <dt>mortality_frequency</dt>
 <dd><p>sets the frequency of mortality calculations occur
 either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')</p></dd>
+
+
 <dt>mortality_frequency_n</dt>
 <dd><p>sets number of units from mortality_frequency in
 which to run the mortality calculation if mortality_frequency is
 'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
+
+
 <dt>use_spreadrates</dt>
 <dd><p>boolean to indicate whether or not to calculate
 spread rates</p></dd>
+
+
 <dt>model_type_</dt>
 <dd><p>What type of model most represents your system. Options
 are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 (Susceptible - Infected/Infested). Default value is "SI".</p></dd>
+
+
 <dt>latency_period</dt>
 <dd><p>How many times steps does it take to for exposed
 populations become infected/infested. This is an integer value and must be
 greater than 0 if model type is SEI.</p></dd>
+
+
 <dt>generate_stochasticity</dt>
 <dd><p>Boolean to indicate whether to use
 stochasticity in reproductive functions default is TRUE</p></dd>
+
+
 <dt>establishment_stochasticity</dt>
 <dd><p>Boolean to indicate whether to use
 stochasticity in establishment functions default is TRUE</p></dd>
+
+
 <dt>movement_stochasticity</dt>
 <dd><p>Boolean to indicate whether to use
 stochasticity in movement functions default is TRUE</p></dd>
+
+
 <dt>dispersal_stochasticity</dt>
 <dd><p>Boolean to indicate whether to use a stochasticity in the
 dispersal kernel default is TRUE</p></dd>
+
+
 <dt>establishment_probability</dt>
 <dd><p>Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)</p></dd>
+
+
 <dt>dispersal_percentage</dt>
 <dd><p>Percentage of dispersal used to calculate the
 bounding box for deterministic dispersal</p></dd>
+
+
 <dt>use_overpopulation_movements</dt>
 <dd><p>boolean to indicate whether to use
 the overpopulation pest movement module (driven by the natural kernel with
 its scale parameter modified by a coefficient)</p></dd>
+
+
 <dt>overpopulation_percentage</dt>
 <dd><p>percentage of occupied hosts when the cell
 is considered to be overpopulated</p></dd>
+
+
 <dt>leaving_percentage</dt>
 <dd><p>percentage of pests leaving an overpopulated cell</p></dd>
+
+
 <dt>leaving_scale_coefficient</dt>
 <dd><p>coefficient to multiply scale parameter of
 the natural kernel (if applicable)</p></dd>
+
+
 <dt>bbox</dt>
 <dd><p>bounding box for network kernel</p></dd>
+
+
 <dt>network_min_distance</dt>
 <dd><p>minimum time a propagule rides on the network. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
+
+
 <dt>network_max_distance</dt>
 <dd><p>maximum time a propagule rides on the network. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
+
+
 <dt>network_filename</dt>
 <dd><p>entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
+
+
 <dt>network_movement</dt>
 <dd><p>What movement type do you want to use in the network kernel either
 "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
 "teleport" moves from node to node most likely used for airport and seaport networks.</p></dd>
+
+
+<dt>weather_size</dt>
+<dd><p>the number of matrices in a list or layers in a raster object</p></dd>
+
+
+<dt>weather_type</dt>
+<dd><p>string indicating how the weather data is passed in  either
+as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+series ("deterministic")</p></dd>
+
+
+<dt>dispersers_to_soils_percentage</dt>
+<dd><p>range from 0 to 1 representing the percentage
+of dispersers that fall to the soil and survive.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>list of vector matrices of infected and susceptible hosts per
+    
+
+<p>list of vector matrices of infected and susceptible hosts per
 simulated year and associated statistics (e.g. spread rate)</p>
     </div>
 
@@ -408,7 +603,7 @@ simulated year and associated statistics (e.g. spread rate)</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer></div>
