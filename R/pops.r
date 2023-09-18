@@ -198,8 +198,8 @@
 #' @param multiple_random_seeds boolean to indicate if the model should use multiple random seeds
 #' (allows for performing uncertainty partitioning) or a single random seed (backwards
 #' compatibility option). Default is FALSE.
-#' @param random_seeds A file path to the file with the .csv file containing random_seeds table.
-#' Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
+#' @param file_random_seeds A file path to the file with the .csv file containing random_seeds
+#' table. Use if you are trying to recreate an exact analysis otherwise we suggest leaving the
 #' default. Default is Null which draws the seed numbers for each.
 #' @param temperature_coefficient_sd_file Raster file with temperature coefficient standard
 #' deviation data for the timestep and time period specified (e.g. if timestep = week this file
@@ -294,7 +294,7 @@ pops <- function(infected_file,
                  dispersers_to_soils_percentage = 0,
                  quarantine_directions = "",
                  multiple_random_seeds = FALSE,
-                 random_seeds = NULL,
+                 file_random_seeds = NULL,
                  use_soils = FALSE,
                  soil_starting_pest_file = "") {
 
@@ -380,7 +380,7 @@ pops <- function(infected_file,
   config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
-  config$random_seeds <- random_seeds
+  config$file_random_seeds <- file_random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
 

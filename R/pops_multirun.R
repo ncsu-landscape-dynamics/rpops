@@ -106,7 +106,7 @@ pops_multirun <- function(infected_file,
                           dispersers_to_soils_percentage = 0,
                           quarantine_directions = "",
                           multiple_random_seeds = FALSE,
-                          random_seeds = NULL,
+                          file_random_seeds = NULL,
                           use_soils = FALSE,
                           soil_starting_pest_file = "") {
   config <- c()
@@ -189,7 +189,7 @@ pops_multirun <- function(infected_file,
   config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
-  config$random_seeds <- random_seeds
+  config$file_random_seeds <- file_random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
 

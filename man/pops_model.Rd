@@ -97,10 +97,6 @@ pops_model(
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.}
 
-\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table.
-Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
-default. Default is Null which draws the seed numbers for each.}
-
 \item{use_lethal_temperature}{a boolean to answer the question: does your
 pest or pathogen have a temperature at which it cannot survive?
 (TRUE or FALSE)}

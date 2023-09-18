@@ -79,7 +79,7 @@ pops_multirun(
   dispersers_to_soils_percentage = 0,
   quarantine_directions = "",
   multiple_random_seeds = FALSE,
-  random_seeds = NULL,
+  file_random_seeds = NULL,
   use_soils = FALSE,
   soil_starting_pest_file = ""
 )
@@ -363,8 +363,8 @@ in the quarantine direction analysis, e.g., 'N,E'. By default all directions
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.}
 
-\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table.
-Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
+\item{file_random_seeds}{A file path to the file with the .csv file containing random_seeds
+table. Use if you are trying to recreate an exact analysis otherwise we suggest leaving the
 default. Default is Null which draws the seed numbers for each.}
 
 \item{use_soils}{boolean to indicate if pests establish in the soil and spread out from there.

@@ -31,12 +31,14 @@ configuration <- function(config) {
   }
 
   if (config$multiple_random_seeds) {
-    if (!is.null(config$random_seeds)) {
+    if (!is.null(config$file_random_seeds)) {
       ## check random seed file
-      random_seeds_file_check <- random_seeds_file_checks(config$random_seeds)
+      random_seeds_file_check <- random_seeds_file_checks(config$file_random_seeds)
       if (!random_seeds_file_check$checks_passed) {
         config$failure <- random_seeds_file_check$failed_check
         return(config)
+      } else {
+        config$random_seeds <- random_seeds_file_check$random_seeds
       }
     } else {
       config$random_seeds <- create_random_seeds(config$number_of_iterations)
