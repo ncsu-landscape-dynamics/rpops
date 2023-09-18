@@ -2773,7 +2773,7 @@ test_that("multiple_random seeds works and reutrns expected results", {
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   anthropogenic_kernel_type <- "cauchy"
   multiple_random_seeds <- TRUE
-  random_seeds <- NULL
+  file_random_seeds <- NULL
 
   data <-
     pops(infected_file = infected_file,
@@ -2785,7 +2785,27 @@ test_that("multiple_random seeds works and reutrns expected results", {
          end_date = end_date,
          anthropogenic_kernel_type = anthropogenic_kernel_type,
          multiple_random_seeds = multiple_random_seeds,
-         random_seeds = random_seeds)
+         file_random_seeds = file_random_seeds)
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+
+  file_random_seeds <- system.file("extdata", "simple2x2", "randoms.csv", package = "PoPS")
+
+  data <-
+    pops(infected_file = infected_file,
+         host_file = host_file,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         start_date = start_date,
+         end_date = end_date,
+         anthropogenic_kernel_type = anthropogenic_kernel_type,
+         multiple_random_seeds = multiple_random_seeds,
+         file_random_seeds = file_random_seeds)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
   expect_gte(data$infected[[1]][[1]], test_mat[[1]])
@@ -2793,3 +2813,5 @@ test_that("multiple_random seeds works and reutrns expected results", {
   expect_gte(data$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$infected[[1]][[4]], test_mat[[4]])
 })
+
+
