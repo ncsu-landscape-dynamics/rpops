@@ -2312,7 +2312,8 @@ test_that("Quarantine and spread rates work at all timings", {
                start_date = start_date,
                end_date = end_date, use_quarantine = TRUE,
                use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+               quarantine_areas_file = quarantine_areas_file,
+               quarantine_directions = "N,E,S,W")
   expect_equal(length(data$infected), 364)
   expect_equal(length(data$quarantine_escape), 364)
   expect_equal(length(data$quarantine_escape_distance), 364)
@@ -2331,7 +2332,8 @@ test_that("Quarantine and spread rates work at all timings", {
                end_date = end_date,
                use_quarantine = TRUE,
                use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+               quarantine_areas_file = quarantine_areas_file,
+               quarantine_directions = "N")
   expect_equal(length(data$infected), 364)
   expect_equal(length(data$quarantine_escape), 364)
   expect_equal(length(data$quarantine_escape_distance), 364)
