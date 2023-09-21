@@ -19,21 +19,19 @@ Authors@R:
              comment = c(ORCID = "0000-0002-5120-5538")))
 Depends: R (>= 4.0.0)
 Imports: 
-    raster (>= 3.5-15),
-    terra (>= 1.5-17),
-    Rcpp (>= 0.12.19),
+    terra,
+    Rcpp,
     stats,
     foreach,
     parallel,
     doParallel,
     landscapemetrics,
     lubridate,
-    sp,
     utils,
     MASS,
-    methods,
     aws.s3,
-    Metrics
+    Metrics,
+    raster
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 URL: http://www.github.com/ncsu-landscape-dynamics/rpops
@@ -44,6 +42,7 @@ SystemRequirements:
 Suggests: 
     testthat,
     rgdal,
+    sp,
     rlist,
     knitr,
     rmarkdown,
