@@ -231,7 +231,7 @@ create_random_seeds <- function(n) {
   random_seeds <-
     data.frame(disperser_generation = sample(1:999999999, n, replace = FALSE),
                natural_dispersal = sample(1:999999999, n, replace = FALSE),
-               anthropogenic_dispersal = sample(1:999999999999, 1, replace = FALSE),
+               anthropogenic_dispersal = sample(1:999999999999, n, replace = FALSE),
                establishment = sample(1:999999999, n, replace = FALSE),
                weather = sample(1:999999999, n, replace = FALSE),
                movement = sample(1:999999999, n, replace = FALSE),
