@@ -1524,6 +1524,7 @@ test_that("Infected results with weather are less than those without weather", {
   end_date <- "2010-12-31"
   parameter_means <- c(0.4, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  coefficient_sd_file <- system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
 
   data <-
     pops(infected_file = infected_file,
@@ -1534,6 +1535,7 @@ test_that("Infected results with weather are less than those without weather", {
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
+
   data_temp <-
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -1545,6 +1547,7 @@ test_that("Infected results with weather are less than those without weather", {
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
+
   data_precip <-
     pops(infected_file = infected_file,
          host_file = host_file,
@@ -1556,18 +1559,66 @@ test_that("Infected results with weather are less than those without weather", {
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
+
   data_weather <-
     pops(infected_file = infected_file,
          host_file = host_file,
          total_populations_file = host_file,
          temp = TRUE,
          temperature_coefficient_file = coefficient_file,
-         precip = TRUE, precipitation_coefficient_file = coefficient_file,
+         precip = TRUE,
+         precipitation_coefficient_file = coefficient_file,
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
+
+  data_temp_wsd <-
+    pops(infected_file = infected_file,
+         host_file = host_file,
+         total_populations_file = host_file,
+         temp = TRUE,
+         temperature_coefficient_file = coefficient_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         random_seed = 42,
+         start_date = start_date,
+         end_date = end_date,
+         weather_type = "probabilistic",
+         temperature_coefficient_sd_file = coefficient_sd_file)
+
+
+  data_precip_wsd <-
+    pops(infected_file = infected_file,
+         host_file = host_file,
+         total_populations_file = host_file,
+         precip = TRUE,
+         precipitation_coefficient_file = coefficient_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         random_seed = 42,
+         start_date = start_date,
+         end_date = end_date,
+         weather_type = "probabilistic",
+         precipitation_coefficient_sd_file = coefficient_sd_file)
+
+  data_weather_wsd <-
+    pops(infected_file = infected_file,
+         host_file = host_file,
+         total_populations_file = host_file,
+         temp = TRUE,
+         temperature_coefficient_file = coefficient_file,
+         precip = TRUE,
+         precipitation_coefficient_file = coefficient_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         random_seed = 42,
+         start_date = start_date,
+         end_date = end_date,
+         weather_type = "probabilistic",
+         temperature_coefficient_sd_file = coefficient_sd_file,
+         precipitation_coefficient_sd_file = coefficient_sd_file)
 
   expect_gte(sum(data$infected[[1]]), sum(data_temp$infected[[1]]))
   expect_gte(sum(data$infected[[2]]), sum(data_temp$infected[[2]]))
@@ -1581,6 +1632,17 @@ test_that("Infected results with weather are less than those without weather", {
   expect_gte(sum(data$infected[[2]]), sum(data_weather$infected[[2]]))
   expect_gte(sum(data$infected[[3]]), sum(data_weather$infected[[3]]))
 
+  expect_gte(sum(data$infected[[2]]), sum(data_temp_wsd$infected[[2]]))
+  expect_gte(sum(data$infected[[3]]), sum(data_temp_wsd$infected[[3]]))
+  expect_gte(sum(data$infected[[1]]), sum(data_temp_wsd$infected[[1]]))
+
+  expect_gte(sum(data$infected[[1]]), sum(data_precip_wsd$infected[[1]]))
+  expect_gte(sum(data$infected[[2]]), sum(data_precip_wsd$infected[[2]]))
+  expect_gte(sum(data$infected[[3]]), sum(data_precip_wsd$infected[[3]]))
+
+  expect_gte(sum(data$infected[[1]]), sum(data_weather_wsd$infected[[1]]))
+  expect_gte(sum(data$infected[[2]]), sum(data_weather_wsd$infected[[2]]))
+  expect_gte(sum(data$infected[[3]]), sum(data_weather_wsd$infected[[3]]))
 })
 
 test_that(
@@ -2763,7 +2825,7 @@ test_that("uncertainty propogation works as expected", {
   expect_gte(data$infected[[1]][[4]], test_mat[[4]])
 })
 
-test_that("multiple_random seeds works and reutrns expected results", {
+test_that("multiple_random seeds works and returns expected results", {
   infected_file <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
@@ -2814,6 +2876,58 @@ test_that("multiple_random seeds works and reutrns expected results", {
   expect_gte(data$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+})
+
+
+test_that("Using soils returns expected results", {
+  infected_file <-
+    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
+  host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
+  total_populations_file <-
+    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2008-03-31"
+  parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+
+  #
+  # data <-
+  #   pops(infected_file = infected_file,
+  #        host_file = host_file,
+  #        total_populations_file = total_populations_file,
+  #        parameter_means = parameter_means,
+  #        parameter_cov_matrix = parameter_cov_matrix,
+  #        start_date = start_date,
+  #        end_date = end_date,
+  #        anthropogenic_kernel_type = anthropogenic_kernel_type,
+  #        multiple_random_seeds = multiple_random_seeds,
+  #        file_random_seeds = file_random_seeds)
+  #
+  # test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+  # expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+  # expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+  # expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+  # expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  #
+  # file_random_seeds <- system.file("extdata", "simple2x2", "randoms.csv", package = "PoPS")
+  #
+  # data <-
+  #   pops(infected_file = infected_file,
+  #        host_file = host_file,
+  #        total_populations_file = total_populations_file,
+  #        parameter_means = parameter_means,
+  #        parameter_cov_matrix = parameter_cov_matrix,
+  #        start_date = start_date,
+  #        end_date = end_date,
+  #        anthropogenic_kernel_type = anthropogenic_kernel_type,
+  #        multiple_random_seeds = multiple_random_seeds,
+  #        file_random_seeds = file_random_seeds)
+  #
+  # test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+  # expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+  # expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+  # expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+  # expect_gte(data$infected[[1]][[4]], test_mat[[4]])
 })
 
 
