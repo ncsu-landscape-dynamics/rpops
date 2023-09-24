@@ -264,3 +264,9 @@ output_from_raster_mean_and_sd <- function(x) {
   x2 <- suppressWarnings(terra::app(x, fun))
   return(x2)
 }
+
+# Combine two standard deviation spatRasters
+combined_sd <- function(v1, v2, m1, m2, n1, n2) {
+  (((n1 - 1) * v1 + (n2 - 1) * v2) / (n1 + n2 -1)) +
+    (((n1 * n2) * (m1 - m2)^2) / ((n1 +n2) * (n1 + n2 -1)))
+}

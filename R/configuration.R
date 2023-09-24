@@ -367,7 +367,10 @@ configuration <- function(config) {
 
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
       if (config$weather_type == "probabilistic") {
-        weather_coefficient_sd_stack <- weather_coefficient_sd_stack * precipitation_coefficient_sd
+        # compute sd from combined sd of the two rasters hard coded 10 years as our current
+        weather_coefficient_sd_stack <-
+          combined_sd(temperature_coefficient_sd, precipitation_coefficient_sd,
+                      temperature_coefficient, precipitation_coefficient, 10, 10)
       }
     }
   } else if (config$precip == TRUE) {
