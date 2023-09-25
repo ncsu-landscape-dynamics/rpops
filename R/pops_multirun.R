@@ -108,7 +108,8 @@ pops_multirun <- function(infected_file,
                           multiple_random_seeds = FALSE,
                           file_random_seeds = NULL,
                           use_soils = FALSE,
-                          soil_starting_pest_file = "") {
+                          soil_starting_pest_file = "",
+                          start_with_soil_populations = FALSE) {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -192,6 +193,7 @@ pops_multirun <- function(infected_file,
   config$file_random_seeds <- file_random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
+  config$start_with_soil_populations <- start_with_soil_populations
 
   config <- configuration(config)
 

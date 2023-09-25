@@ -194,22 +194,26 @@ configuration <- function(config) {
 
   # check that soils raster has the same crs, resolutin, and extent.
   if (config$use_soils) {
-    if (config$function_name %in% aws_bucket_list) {
-      soils_check <-
-        secondary_raster_checks(
-          config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
-    } else {
-      soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
-    }
-    if (soils_check$checks_passed) {
-      soil_pests <- soils_check$raster
-      config$soil_pests <- terra::as.matrix(soil_pests, wide = TRUE)
-    } else {
-      config$failure <- soils_check$failed_check
-      if (config$failure == file_exists_error) {
-        config$failure <- detailed_file_exists_error(config$soil_starting_pest_file)
+    if (config$start_with_soil_populations) {
+      if (config$function_name %in% aws_bucket_list) {
+        soils_check <-
+          secondary_raster_checks(
+            config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
+      } else {
+        soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
       }
-      return(config)
+      if (soils_check$checks_passed) {
+        soil_pests <- soils_check$raster
+        config$soil_pests <- terra::as.matrix(soil_pests, wide = TRUE)
+      } else {
+        config$failure <- soils_check$failed_check
+        if (config$failure == file_exists_error) {
+          config$failure <- detailed_file_exists_error(config$soil_starting_pest_file)
+        }
+        return(config)
+      }
+    } else {
+      config$soil_pests <- zero_matrix
     }
   } else {
     config$soil_pests <- zero_matrix
