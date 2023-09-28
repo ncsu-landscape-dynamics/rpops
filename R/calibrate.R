@@ -396,6 +396,7 @@ calibrate <- function(infected_years_file,
         reproductive_rate = reproductive_rate,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
+        soil_reservoirs = config$soil_reservoirs,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
@@ -440,8 +441,8 @@ calibrate <- function(infected_years_file,
         network_movement = config$network_movement,
         weather_size = config$weather_size,
         weather_type = config$weather_type,
-        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
-      )
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
+        use_soils = config$use_soils)
       return(data)
     }
 

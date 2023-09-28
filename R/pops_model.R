@@ -79,6 +79,7 @@
 #' series ("deterministic")
 #' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
 #' of dispersers that fall to the soil and survive.
+#' @param soil_reservoirs list of matrices with soil pests created from soil_pest_file.
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -124,6 +125,7 @@ pops_model <-
            reproductive_rate,
            spatial_indices,
            season_month_start_end,
+           soil_reservoirs,
            mortality_rate = 0.0,
            mortality_time_lag = 2,
            start_date = "2018-01-01",
@@ -168,7 +170,8 @@ pops_model <-
            network_movement = "walk",
            weather_size = 0,
            weather_type = "deterministic",
-           dispersers_to_soils_percentage = 0) {
+           dispersers_to_soils_percentage = 0,
+           use_soils = FALSE) {
 
     # List of overpopulation parameters of type double
     overpopulation_config <- c()
@@ -220,6 +223,7 @@ pops_model <-
     bool_config$dispersal_stochasticity <- dispersal_stochasticity
     bool_config$use_overpopulation_movements <- use_overpopulation_movements
     bool_config$use_survival_rate <- use_survival_rates
+    bool_config$use_soils <- use_soils
 
 
     data <-
@@ -251,6 +255,7 @@ pops_model <-
                      bbox = bbox,
                      res = res,
                      rows_cols = rows_cols,
+                     soil_reservoirs = soil_reservoirs,
                      reproductive_rate = reproductive_rate,
                      spatial_indices = spatial_indices,
                      season_month_start_end = season_month_start_end,

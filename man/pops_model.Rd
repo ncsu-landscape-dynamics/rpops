@@ -43,6 +43,7 @@ pops_model(
   reproductive_rate,
   spatial_indices,
   season_month_start_end,
+  soil_reservoirs,
   mortality_rate = 0,
   mortality_time_lag = 2,
   start_date = "2018-01-01",
@@ -87,7 +88,8 @@ pops_model(
   network_movement = "walk",
   weather_size = 0,
   weather_type = "deterministic",
-  dispersers_to_soils_percentage = 0
+  dispersers_to_soils_percentage = 0,
+  use_soils = FALSE
 )
 }
 \arguments{
@@ -184,6 +186,8 @@ host under optimal weather conditions}
 \item{spatial_indices}{list of all spatial locations with suitable hosts}
 
 \item{season_month_start_end}{vector of months when spread starts and stops}
+
+\item{soil_reservoirs}{list of matrices with soil pests created from soil_pest_file.}
 
 \item{mortality_rate}{Rate at which mortality occurs value between 0 and 1}
 
@@ -325,6 +329,9 @@ series ("deterministic")}
 
 \item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage
 of dispersers that fall to the soil and survive.}
+
+\item{use_soils}{Boolean to indicate if pests establish in the soil and spread out from there.
+Typically used for soil borne pathogens.}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

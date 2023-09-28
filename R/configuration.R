@@ -150,9 +150,9 @@ configuration <- function(config) {
     return(config)
   }
 
-  zero_matrix <- infected[[1]]
-  terra::values(zero_matrix) <- 0
-  zero_matrix <- terra::as.matrix(zero_matrix, wide = TRUE)
+  zero_rast <- infected[[1]]
+  terra::values(zero_rast) <- 0
+  zero_matrix <- terra::as.matrix(zero_rast, wide = TRUE)
 
   one_matrix <- infected[[1]]
   terra::values(one_matrix) <- 0
@@ -194,6 +194,11 @@ configuration <- function(config) {
 
   # check that soils raster has the same crs, resolutin, and extent.
   if (config$use_soils) {
+    config$soil_survival_steps <- ceiling(1 / config$dispersers_to_soils_percentage)
+    soil_reservoirs <- list(zero_matrix)
+    for (sr in 2:(config$soil_survival_steps)) {
+      soil_reservoirs[[sr]] <- zero_matrix
+    }
     if (config$start_with_soil_populations) {
       if (config$function_name %in% aws_bucket_list) {
         soils_check <-
@@ -204,7 +209,7 @@ configuration <- function(config) {
       }
       if (soils_check$checks_passed) {
         soil_pests <- soils_check$raster
-        config$soil_pests <- terra::as.matrix(soil_pests, wide = TRUE)
+        soil_reservoirs[[config$soil_survival_steps]] <- terra::as.matrix(soil_pests, wide = TRUE)
       } else {
         config$failure <- soils_check$failed_check
         if (config$failure == file_exists_error) {
@@ -212,11 +217,10 @@ configuration <- function(config) {
         }
         return(config)
       }
-    } else {
-      config$soil_pests <- zero_matrix
     }
+    config$soil_reservoirs <- soil_reservoirs
   } else {
-    config$soil_pests <- zero_matrix
+    config$soil_reservoirs <- list(zero_matrix)
   }
 
   # check that survival_rates raster has the same crs, resolution, and extent
