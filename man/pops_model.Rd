@@ -99,6 +99,10 @@ pops_model(
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.}
 
+\item{random_seeds}{vector of random seeds in the order of "disperser_generation",
+"natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
+"overpopulation", "survival_rate", "soil"}
+
 \item{use_lethal_temperature}{A boolean to answer the question: does your pest or pathogen have
 a temperature at which it cannot survive? (TRUE or FALSE)}
 
@@ -324,7 +328,7 @@ along the edge. "jump" automatically moves to the nearest node when moving throu
 \item{weather_size}{the number of matrices in a list or layers in a raster object}
 
 \item{weather_type}{string indicating how the weather data is passed in  either
-as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 series ("deterministic")}
 
 \item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage

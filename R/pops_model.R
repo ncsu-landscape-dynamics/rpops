@@ -75,11 +75,14 @@
 #' overwinter population that emerges
 #' @param weather_size the number of matrices in a list or layers in a raster object
 #' @param weather_type string indicating how the weather data is passed in  either
-#' as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+#' as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 #' series ("deterministic")
 #' @param dispersers_to_soils_percentage range from 0 to 1 representing the percentage
 #' of dispersers that fall to the soil and survive.
 #' @param soil_reservoirs list of matrices with soil pests created from soil_pest_file.
+#' @param random_seeds vector of random seeds in the order of "disperser_generation",
+#' "natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
+#' "overpopulation", "survival_rate", "soil"
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
