@@ -432,11 +432,29 @@ configuration <- function(config) {
 
   if (config$weather == TRUE) {
     config$weather_size <- terra::nlyr(weather_coefficient_stack)
+    if (config$weather_type == "deterministic") {
+      if (config$number_of_time_steps > config$weather_size) {
+        config$failure <- weather_size_deterministic_error
+        return(config)
+      }
+    }
+
     weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]], wide = TRUE))
     for (i in 2:terra::nlyr(weather_coefficient_stack)) {
       weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
     }
+
     if (config$weather_type == "probabilistic") {
+      if (config$number_of_time_steps > config$weather_size) {
+        config$failure <- weather_size_probabilitic_error
+        return(config)
+      }
+
+      if (config$weather_size != terra::nlyr(weather_coefficient_sd_stack)) {
+        config$failure <- weather_sd_layer_error
+        return(config)
+      }
+
       weather_coefficient_sd <-
         list(terra::as.matrix(weather_coefficient_sd_stack[[1]], wide = TRUE))
       for (i in 2:terra::nlyr(weather_coefficient_sd_stack)) {

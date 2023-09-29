@@ -234,11 +234,6 @@ List pops_model_cpp(
         }
     }
 
-    unsigned count_weather = get_number_of_scheduled_actions(config.spread_schedule());
-    if (config.weather && count_weather > weather_coefficient.size()) {
-        Rcerr << "Not enough indices of weather coefficient data" << std::endl;
-    }
-
     unsigned spread_rate_outputs;
     if (config.use_spreadrates) {
         spread_rate_outputs = config.rate_num_steps();
