@@ -40,7 +40,8 @@
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
 #' @importFrom Metrics rmse
-#' @importFrom utils write.csv
+#' @importFrom utils write.csv read.table read.csv
+#' @importFrom methods is
 #'
 #' @return a data frame of statistical measures of model performance.
 #' @export

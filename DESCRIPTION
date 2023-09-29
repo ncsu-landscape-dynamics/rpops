@@ -31,7 +31,8 @@ Imports:
     MASS,
     aws.s3,
     Metrics,
-    raster
+    raster,
+    methods
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 URL: http://www.github.com/ncsu-landscape-dynamics/rpops

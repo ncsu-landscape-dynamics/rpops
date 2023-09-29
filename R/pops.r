@@ -192,7 +192,8 @@
 #' @importFrom Rcpp sourceCpp evalCpp
 #' @importFrom stats runif
 #' @importFrom lubridate interval time_length mdy %within%
-#' @importFrom utils read.csv
+#' @importFrom utils read.csv read.table
+#' @importFrom methods is
 #' @return list of infected and susceptible per year
 #' @export
 #'
