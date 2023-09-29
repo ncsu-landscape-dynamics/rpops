@@ -2703,7 +2703,6 @@ test_that("Deterministic dispersal works as expected", {
   expect_gte(data$infected[[1]][[4]], test_mat[[4]])
 })
 
-
 test_that("Network dispersal works as expected", {
   infected_file <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
@@ -2793,7 +2792,6 @@ test_that("uncertainty propogation works as expected", {
   expect_gte(data$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$infected[[1]][[4]], test_mat[[4]])
-
 
   infected_file <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
@@ -2888,7 +2886,7 @@ test_that("Using soils returns expected results", {
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
-  end_date <- "2008-12-31"
+  end_date <- "2009-12-31"
   parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   use_soils <- TRUE
@@ -2915,7 +2913,8 @@ test_that("Using soils returns expected results", {
   expect_gte(data$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$infected[[1]][[4]], test_mat[[4]])
-  expect_equal(length(data$soil_reservoirs[1]), 20)
+  expect_equal(length(data$soil_reservoirs[[1]]), 20)
+  expect_equal(length(data$soil_reservoirs[[2]]), 20)
 
   data <-
     pops(infected_file = infected_file,
@@ -2931,10 +2930,12 @@ test_that("Using soils returns expected results", {
          dispersers_to_soils_percentage = dispersers_to_soils_percentage,
          soil_starting_pest_file = infected_file,
          start_with_soil_populations = TRUE)
-  #
-  # test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
-  # expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  # expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  # expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  # expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file), wide = TRUE)
+  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_equal(length(data$soil_reservoirs[[1]]), 20)
+  expect_equal(length(data$soil_reservoirs[[2]]), 20)
 })

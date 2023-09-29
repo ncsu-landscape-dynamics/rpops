@@ -390,7 +390,6 @@ List pops_model_cpp(
             exposed_vector.push_back(exposed_v);
             soil_reservoirs_vector.push_back(soil_v);
 
-
             num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
             area_infect = area_of_infected(
@@ -437,5 +436,5 @@ List pops_model_cpp(
         _["quarantine_escape_distance"] = escape_dists,
         _["quarantine_escape_directions"] = escape_directions,
         _["spatial_indices"] = spatial_indices,
-        _["soil_reservoirs"] = soil_v);
+        _["soil_reservoirs"] = soil_reservoirs_vector);
 }
