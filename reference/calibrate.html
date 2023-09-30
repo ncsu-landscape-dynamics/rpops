@@ -167,9 +167,10 @@ the total number of iterations specified.</p>
 <span>  dispersers_to_soils_percentage <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  quarantine_directions <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  multiple_random_seeds <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  random_seeds <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  file_random_seeds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_soils <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  soil_starting_pest_file <span class="op">=</span> <span class="st">""</span></span>
+<span>  soil_starting_pest_file <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  start_with_soil_populations <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -250,96 +251,89 @@ accurate the model parameters selected will be.</p></dd>
 
 
 <dt>infected_file</dt>
-<dd><p>Raster file with initial infections. Units for
-infections are based on data availability and the way the units used for your
-host file is created (e.g. percent area, # of hosts per cell, etc.).</p></dd>
+<dd><p>Raster file with initial infections. Units for infections are based on data
+availability and the way the units used for your host file is created (e.g. percent area, # of
+hosts per cell, etc.).</p></dd>
 
 
 <dt>host_file</dt>
-<dd><p>path to raster files with number of hosts and standard
-deviation on those estimates can be based in 3 formats (a single file with
-number of hosts, a single file with 2 layers number of hosts and standard
-deviation, or two files 1 with number of hosts and the other with standard
-deviation of those estimates). The units for this can be of many formats the
-two most common that we use are either percent area (0 to 100) or # of hosts
-in the cell. Usually depends on data available and estimation methods.</p></dd>
+<dd><p>path to raster files with number of hosts and standard deviation on those
+estimates can be based in 3 formats (a single file with number of hosts, a single file with 2
+layers number of hosts and standard deviation, or two files 1 with number of hosts and the other
+with standard deviation of those estimates). The units for this can be of many formats the two
+most common that we use are either percent area (0 to 100) or # of hosts in the cell. Usually
+depends on data available and estimation methods.</p></dd>
 
 
 <dt>total_populations_file</dt>
-<dd><p>path to raster file with number of total
-populations of all hosts and non-hosts. This depends on how your host data is
-set up. If host is percent area then this should be a raster with values
-that are 100 anywhere with host. If host file is # of hosts in a cell then
-this should be a raster with values that are the max of the host raster any
-where the # of hosts is greater than 0.</p></dd>
+<dd><p>path to raster file with number of total populations of all hosts
+and non-hosts. This depends on how your host data is set up. If host is percent area then this
+should be a raster with values that are 100 anywhere with host. If host file is # of hosts in a
+cell then this should be a raster with values that are the max of the host raster any where the
+# of hosts is greater than 0.</p></dd>
 
 
 <dt>temp</dt>
-<dd><p>boolean that allows the use of temperature coefficients to
-modify spread (TRUE or FALSE)</p></dd>
+<dd><p>boolean that allows the use of temperature coefficients to modify spread
+(TRUE or FALSE)</p></dd>
 
 
 <dt>temperature_coefficient_file</dt>
-<dd><p>path to raster file with temperature
-coefficient data for the timestep and and time period specified (e.g. if timestep
-= week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
-have 52 * 3 bands = 156 bands with data being weekly precipitation
-coefficients). We convert raw precipitation values to coefficients that
-affect the reproduction and survival of the pest all values in the raster are
-between 0 and 1.</p></dd>
+<dd><p>path to raster file with temperature coefficient data for the
+timestep and and time period specified (e.g. if timestep = week and start_date = 2017_01_01 and
+end_date = 2019_12_31 this file would have 52 * 3 bands = 156 bands with data being weekly
+precipitation coefficients). We convert raw precipitation values to coefficients that affect the
+reproduction and survival of the pest all values in the raster are between 0 and 1.</p></dd>
 
 
 <dt>precip</dt>
-<dd><p>boolean that allows the use of precipitation coefficients to
-modify spread (TRUE or FALSE)</p></dd>
+<dd><p>boolean that allows the use of precipitation coefficients to modify spread
+(TRUE or FALSE)</p></dd>
 
 
 <dt>precipitation_coefficient_file</dt>
-<dd><p>Raster file with precipitation
-coefficient data for the timestep and time period specified (e.g. if timestep
-= week and start_date = 2017_01_01 and end_date = 2019_12_31 this file would
-have 52 * 3 bands = 156 bands with data being weekly precipitation
-coefficients). We convert raw precipitation values to coefficients that
-affect the reproduction and survival of the pest all values in the raster are
-between 0 and 1.</p></dd>
+<dd><p>Raster file with precipitation coefficient data for the
+timestep and time period specified (e.g. if timestep = week and start_date = 2017_01_01 and
+end_date = 2019_12_31 this file would have 52 * 3 bands = 156 bands with data being weekly
+precipitation coefficients). We convert raw precipitation values to coefficients that affect the
+reproduction and survival of the pest all values in the raster are between 0 and 1.</p></dd>
 
 
 <dt>model_type</dt>
-<dd><p>What type of model most represents your system. Options
-are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
-(Susceptible - Infected/Infested). Default value is "SI".</p></dd>
+<dd><p>What type of model most represents your system. Options are "SEI"
+(Susceptible - Exposed - Infected/Infested) or "SI" (Susceptible - Infected/Infested). Default
+value is "SI".</p></dd>
 
 
 <dt>latency_period</dt>
-<dd><p>How many times steps does it take to for exposed
-populations become infected/infested. This is an integer value and must be
-greater than 0 if model type is SEI.</p></dd>
+<dd><p>How many times steps does it take to for exposed populations become
+infected/infested. This is an integer value and must be greater than 0 if model type is SEI.</p></dd>
 
 
 <dt>time_step</dt>
-<dd><p>how often should spread occur options: ('day', 'week', 'month').</p></dd>
+<dd><p>How often should spread occur options: ('day', 'week', 'month').</p></dd>
 
 
 <dt>season_month_start</dt>
-<dd><p>when does spread first start occurring in the year
-for your pest or pathogen (integer value between 1 and 12)</p></dd>
+<dd><p>When does spread first start occurring in the year for your pest or
+pathogen (integer value between 1 and 12)</p></dd>
 
 
 <dt>season_month_end</dt>
-<dd><p>when does spread end during the year for your pest
+<dd><p>When does spread end during the year for your pest
 or pathogen (integer value between 1 and 12)</p></dd>
 
 
 <dt>start_date</dt>
-<dd><p>date to start the simulation with format ('YYYY_MM_DD')</p></dd>
+<dd><p>Date to start the simulation with format ('YYYY_MM_DD')</p></dd>
 
 
 <dt>end_date</dt>
-<dd><p>date to end the simulation with format ('YYYY_MM_DD')</p></dd>
+<dd><p>Date to end the simulation with format ('YYYY_MM_DD')</p></dd>
 
 
 <dt>use_survival_rates</dt>
-<dd><p>boolean to indicate if the model will use survival rates to limit the
+<dd><p>Boolean to indicate if the model will use survival rates to limit the
 survival or emergence of overwintering generations.</p></dd>
 
 
@@ -349,7 +343,7 @@ month before for this parameter as it is when the survival rates raster will be 
 
 
 <dt>survival_rate_day</dt>
-<dd><p>what day should the survival rates be applied</p></dd>
+<dd><p>What day should the survival rates be applied</p></dd>
 
 
 <dt>survival_rates_file</dt>
@@ -358,93 +352,83 @@ percentage of emergence for a cell.</p></dd>
 
 
 <dt>use_lethal_temperature</dt>
-<dd><p>a boolean to answer the question: does your
-pest or pathogen have a temperature at which it cannot survive?
-(TRUE or FALSE)</p></dd>
+<dd><p>A boolean to answer the question: does your pest or pathogen have
+a temperature at which it cannot survive? (TRUE or FALSE)</p></dd>
 
 
 <dt>temperature_file</dt>
-<dd><p>path to raster file with temperature data for
-minimum temperature</p></dd>
+<dd><p>Path to raster file with temperature data for minimum temperature</p></dd>
 
 
 <dt>lethal_temperature</dt>
-<dd><p>the temperature in degrees C at which lethal
-temperature related mortality occurs for your pest or pathogen (-50 to 60)</p></dd>
+<dd><p>The temperature in degrees C at which lethal temperature related
+mortality occurs for your pest or pathogen (-50 to 60)</p></dd>
 
 
 <dt>lethal_temperature_month</dt>
-<dd><p>the month in which lethal temperature
-related mortality occurs for your pest or pathogen integer value between 1
-and 12</p></dd>
+<dd><p>The month in which lethal temperature related mortality occurs
+for your pest or pathogen integer value between 1 and 12</p></dd>
 
 
 <dt>mortality_on</dt>
-<dd><p>boolean to turn host mortality on and off
-(TRUE or FALSE)</p></dd>
+<dd><p>Boolean to turn host mortality on and off (TRUE or FALSE)</p></dd>
 
 
 <dt>mortality_rate</dt>
-<dd><p>rate at which mortality occurs value between 0 and 1</p></dd>
+<dd><p>Rate at which mortality occurs value between 0 and 1</p></dd>
 
 
 <dt>mortality_time_lag</dt>
-<dd><p>time lag from infection until mortality can occur
-in time steps integer &gt;= 1</p></dd>
+<dd><p>Time lag from infection until mortality can occur in time steps
+integer &gt;= 1</p></dd>
 
 
 <dt>mortality_frequency</dt>
-<dd><p>sets the frequency of mortality calculations occur
-either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')</p></dd>
+<dd><p>Sets the frequency of mortality calculations occur either ('year',
+'month', week', 'day', 'time step', or 'every_n_steps')</p></dd>
 
 
 <dt>mortality_frequency_n</dt>
-<dd><p>sets number of units from mortality_frequency in
-which to run the mortality calculation if mortality_frequency is
-'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
+<dd><p>Sets number of units from mortality_frequency in which to run the
+mortality calculation if mortality_frequency is 'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
 
 
 <dt>management</dt>
-<dd><p>boolean to allow use of management (TRUE or FALSE)</p></dd>
+<dd><p>Boolean to allow use of management (TRUE or FALSE)</p></dd>
 
 
 <dt>treatment_dates</dt>
-<dd><p>dates in which to apply treatment list with format
-('YYYY_MM_DD') (needs to be the same length as treatment_file and
-pesticide_duration)</p></dd>
+<dd><p>Dates in which to apply treatment list with format ('YYYY_MM_DD')
+(needs to be the same length as treatment_file and pesticide_duration)</p></dd>
 
 
 <dt>treatments_file</dt>
-<dd><p>path to raster files with treatment data by dates.
-Needs to be a list of files the same length as treatment_dates and
-pesticide_duration.</p></dd>
+<dd><p>Path to raster files with treatment data by dates. Needs to be a list of
+files the same length as treatment_dates and pesticide_duration.</p></dd>
 
 
 <dt>treatment_method</dt>
-<dd><p>what method to use when applying treatment one of
-("ratio" or "all infected"). ratio removes a portion of all infected and
-susceptibles, all infected removes all infected a portion of susceptibles.</p></dd>
+<dd><p>What method to use when applying treatment one of ("ratio" or "all
+infected"). ratio removes a portion of all infected and susceptibles, all infected removes all
+infected a portion of susceptibles.</p></dd>
 
 
 <dt>natural_kernel_type</dt>
-<dd><p>what type of dispersal kernel should be used for
-natural dispersal. Current dispersal kernel options are
- ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')</p></dd>
+<dd><p>What type of dispersal kernel should be used for natural dispersal.
+Current dispersal kernel options are ('Cauchy', 'exponential', 'uniform',
+'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic')</p></dd>
 
 
 <dt>anthropogenic_kernel_type</dt>
-<dd><p>what type of dispersal kernel should be
-used for anthropogenic dispersal. Current dispersal kernel options are
- ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')</p></dd>
+<dd><p>What type of dispersal kernel should be used for anthropogenic
+dispersal. Current dispersal kernel options are ('cauchy', 'exponential', 'uniform',
+'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic',
+'network')</p></dd>
 
 
 <dt>natural_dir</dt>
-<dd><p>sets the predominate direction of natural dispersal
-usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
-'NONE')</p></dd>
+<dd><p>Sets the predominate direction of natural dispersal usually due to wind values
+('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')</p></dd>
 
 
 <dt>natural_kappa</dt>
@@ -453,10 +437,9 @@ von-mises distribution numeric value between 0.01 and 12</p></dd>
 
 
 <dt>anthropogenic_dir</dt>
-<dd><p>sets the predominate direction of anthropogenic
-dispersal usually due to human movement typically over long distances (e.g.
-nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
-'SE', 'E', 'NE', 'NONE')</p></dd>
+<dd><p>Sets the predominate direction of anthropogenic dispersal usually due
+to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)
+('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')</p></dd>
 
 
 <dt>anthropogenic_kappa</dt>
@@ -465,16 +448,15 @@ in the von-mises distribution numeric value between 0.01 and 12</p></dd>
 
 
 <dt>pesticide_duration</dt>
-<dd><p>how long does the pestcide (herbicide, vaccine,
-etc..) last before the host is susceptible again. If value is 0 treatment
-is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
- same length as treatment_dates and treatment_file)</p></dd>
+<dd><p>How long does the pesticide (herbicide, vaccine, etc..) last before the
+host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a
+pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)</p></dd>
 
 
 <dt>pesticide_efficacy</dt>
-<dd><p>how effictive is the pesticide at preventing the
-disease or killing the pest (if this is 0.70 then when applied it
-successfully treats 70 percent of the plants or animals)</p></dd>
+<dd><p>How effective is the pesticide at preventing the disease or killing the
+pest (if this is 0.70 then when applied it successfully treats 70 percent of the plants or
+animals).</p></dd>
 
 
 <dt>mask</dt>
@@ -486,44 +468,43 @@ from the statistics.</p></dd>
 
 
 <dt>output_frequency</dt>
-<dd><p>sets when outputs occur either ('year', 'month',
-'week', 'day', 'time step', or 'every_n_steps')</p></dd>
+<dd><p>Sets when outputs occur either ('year', 'month', week', 'day',
+'time step', or 'every_n_steps')</p></dd>
 
 
 <dt>output_frequency_n</dt>
-<dd><p>sets number of units from output_frequency in which
-to export model results if mortality_frequency is 'every_n_steps'.
-Must be an integer &gt;= 1.</p></dd>
+<dd><p>Sets number of units from output_frequency in which to export model
+results if mortality_frequency is 'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
 
 
 <dt>movements_file</dt>
-<dd><p>this is a csv file with columns lon_from, lat_from,
-lon_to, lat_to, number of animals, and date.</p></dd>
+<dd><p>This is a csv file with columns lon_from, lat_from, lon_to, lat_to, number
+of animals, and date.</p></dd>
 
 
 <dt>use_movements</dt>
-<dd><p>this is a boolean to turn on use of the movement module.</p></dd>
+<dd><p>This is a boolean to turn on use of the movement module.</p></dd>
 
 
 <dt>start_exposed</dt>
-<dd><p>Do your initial conditions start as exposed or infected
-(only used if model_type is "SEI"). Default False. If this is TRUE need to
-have both an infected_file (this can be a raster of all 0's) and exposed_file</p></dd>
+<dd><p>Do your initial conditions start as exposed or infected (only used if
+model_type is "SEI"). Default False. If this is TRUE need to have both an infected_file (this
+can be a raster of all 0's) and exposed_file</p></dd>
 
 
 <dt>generate_stochasticity</dt>
-<dd><p>Boolean to indicate whether to use
-stochasticity in reproductive functions default is TRUE</p></dd>
+<dd><p>Boolean to indicate whether to use stochasticity in reproductive
+functions default is TRUE</p></dd>
 
 
 <dt>establishment_stochasticity</dt>
-<dd><p>Boolean to indicate whether to use
-stochasticity in establishment functions default is TRUE</p></dd>
+<dd><p>Boolean to indicate whether to use stochasticity in
+establishment functions default is TRUE</p></dd>
 
 
 <dt>movement_stochasticity</dt>
-<dd><p>Boolean to indicate whether to use
-stochasticity in movement functions default is TRUE</p></dd>
+<dd><p>Boolean to indicate whether to use stochasticity in movement
+functions default is TRUE</p></dd>
 
 
 <dt>dispersal_stochasticity</dt>
@@ -537,45 +518,41 @@ establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)</p></dd>
 
 
 <dt>dispersal_percentage</dt>
-<dd><p>Percentage of dispersal used to calculate the
-bounding box for deterministic dispersal</p></dd>
+<dd><p>Percentage of dispersal used to calculate the bounding box for
+deterministic dispersal</p></dd>
 
 
 <dt>quarantine_areas_file</dt>
-<dd><p>path to raster file with quarantine boundaries
-used in calculating likelihood of quarantine escape if use_quarantine is
-TRUE</p></dd>
+<dd><p>Path to raster file with quarantine boundaries used in calculating
+likelihood of quarantine escape if use_quarantine is TRUE</p></dd>
 
 
 <dt>use_quarantine</dt>
-<dd><p>boolean to indicate whether or not there is a
-quarantine area if TRUE must pass in a raster file indicating the
-quarantine areas (default = FALSE)</p></dd>
+<dd><p>Boolean to indicate whether or not there is a quarantine area if TRUE must
+pass in a raster file indicating the quarantine areas (default = FALSE)</p></dd>
 
 
 <dt>use_spreadrates</dt>
-<dd><p>boolean to indicate whether or not to calculate
-spread rates</p></dd>
+<dd><p>Boolean to indicate whether or not to calculate spread rates</p></dd>
 
 
 <dt>use_overpopulation_movements</dt>
-<dd><p>boolean to indicate whether to use
-the overpopulation pest movement module (driven by the natural kernel with
-its scale parameter modified by a coefficient)</p></dd>
+<dd><p>Boolean to indicate whether to use the overpopulation pest
+movement module (driven by the natural kernel with its scale parameter modified by a coefficient)</p></dd>
 
 
 <dt>overpopulation_percentage</dt>
-<dd><p>percentage of occupied hosts when the cell
-is considered to be overpopulated</p></dd>
+<dd><p>Percentage of occupied hosts when the cell is considered to be
+overpopulated</p></dd>
 
 
 <dt>leaving_percentage</dt>
-<dd><p>percentage of pests leaving an overpopulated cell</p></dd>
+<dd><p>Percentage of pests leaving an overpopulated cell</p></dd>
 
 
 <dt>leaving_scale_coefficient</dt>
-<dd><p>coefficient to multiply scale parameter of
-the natural kernel (if applicable)</p></dd>
+<dd><p>Coefficient to multiply scale parameter of the natural kernel
+(if applicable)</p></dd>
 
 
 <dt>calibration_method</dt>
@@ -591,7 +568,7 @@ preferably 1 million).</p></dd>
 
 
 <dt>exposed_file</dt>
-<dd><p>a file with the exposed for the current</p></dd>
+<dd><p>A file with the exposed for the current</p></dd>
 
 
 <dt>verbose</dt>
@@ -611,7 +588,7 @@ Defaults if FALSE.</p></dd>
 
 
 <dt>network_filename</dt>
-<dd><p>entire file path for the network file. Used if
+<dd><p>The entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
 
 
@@ -637,7 +614,7 @@ comparing simulations vs. observations. Must be one of "quantity", "allocation",
 
 
 <dt>use_initial_condition_uncertainty</dt>
-<dd><p>boolean to indicate whether or not to propagate and
+<dd><p>Boolean to indicate whether or not to propagate and
 partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
 one with the mean value and one with the standard deviation. If an SEI model is used the
 exposed_file needs to have 2 layers one with the mean value and one with the standard
@@ -645,15 +622,15 @@ deviation</p></dd>
 
 
 <dt>use_host_uncertainty</dt>
-<dd><p>boolean to indicate whether or not to propagate and partition
+<dd><p>Boolean to indicate whether or not to propagate and partition
 uncertainty from host data. If TRUE the host_file needs to have 2 layers one with the mean value
 and one with the standard deviation.</p></dd>
 
 
 <dt>weather_type</dt>
-<dd><p>string indicating how the weather data is passed in  either
-as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
-series ("deterministic")</p></dd>
+<dd><p>string indicating how the weather data is passed in  either as a mean and
+standard deviation to represent uncertainty ("probabilistic") or as a time series
+("deterministic")</p></dd>
 
 
 <dt>temperature_coefficient_sd_file</dt>
@@ -673,36 +650,40 @@ the pest all values in the raster are between 0 and 1.</p></dd>
 
 
 <dt>dispersers_to_soils_percentage</dt>
-<dd><p>range from 0 to 1 representing the percentage
-of dispersers that fall to the soil and survive.</p></dd>
+<dd><p>Range from 0 to 1 representing the percentage of dispersers
+that fall to the soil and survive.</p></dd>
 
 
 <dt>quarantine_directions</dt>
-<dd><p>string with comma separated directions to include
-in the quarantine direction analysis, e.g., 'N,E'. By default all directions
-(N, S, E, W) are considered</p></dd>
+<dd><p>String with comma separated directions to include in the quarantine
+direction analysis, e.g., 'N,E'. By default all directions (N, S, E, W) are considered</p></dd>
 
 
 <dt>multiple_random_seeds</dt>
-<dd><p>boolean to indicate if the model should use multiple random seeds
+<dd><p>Boolean to indicate if the model should use multiple random seeds
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.</p></dd>
 
 
-<dt>random_seeds</dt>
-<dd><p>A file path to the file with the .csv file containing random_seeds table.
-Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
+<dt>file_random_seeds</dt>
+<dd><p>A file path to the file with the .csv file containing random_seeds
+table. Use if you are trying to recreate an exact analysis otherwise we suggest leaving the
 default. Default is Null which draws the seed numbers for each.</p></dd>
 
 
 <dt>use_soils</dt>
-<dd><p>boolean to indicate if pests establish in the soil and spread out from there.
+<dd><p>Boolean to indicate if pests establish in the soil and spread out from there.
 Typically used for soil borne pathogens.</p></dd>
 
 
 <dt>soil_starting_pest_file</dt>
-<dd><p>path to the raster file with the starting
-amount of pest or pathogen.</p></dd>
+<dd><p>path to the raster file with the starting amount of pest or
+pathogen.</p></dd>
+
+
+<dt>start_with_soil_populations</dt>
+<dd><p>Boolean to indicate whether to use a starting soil pest or
+pathogen population if TRUE then soil_starting_pest_file is required.</p></dd>
 
 </dl></div>
     <div id="value">

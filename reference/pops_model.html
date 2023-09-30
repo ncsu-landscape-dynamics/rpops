@@ -112,6 +112,7 @@ future.</p>
 <span>  <span class="va">reproductive_rate</span>,</span>
 <span>  <span class="va">spatial_indices</span>,</span>
 <span>  <span class="va">season_month_start_end</span>,</span>
+<span>  <span class="va">soil_reservoirs</span>,</span>
 <span>  mortality_rate <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  mortality_time_lag <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  start_date <span class="op">=</span> <span class="st">"2018-01-01"</span>,</span>
@@ -156,47 +157,46 @@ future.</p>
 <span>  network_movement <span class="op">=</span> <span class="st">"walk"</span>,</span>
 <span>  weather_size <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  weather_type <span class="op">=</span> <span class="st">"deterministic"</span>,</span>
-<span>  dispersers_to_soils_percentage <span class="op">=</span> <span class="fl">0</span></span>
+<span>  dispersers_to_soils_percentage <span class="op">=</span> <span class="fl">0</span>,</span>
+<span>  use_soils <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>random_seed</dt>
-<dd><p>sets the random seed for the simulation used for reproducibility</p></dd>
+<dd><p>Sets the random seed for the simulation used for reproducibility</p></dd>
 
 
 <dt>multiple_random_seeds</dt>
-<dd><p>boolean to indicate if the model should use multiple random seeds
+<dd><p>Boolean to indicate if the model should use multiple random seeds
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.</p></dd>
 
 
 <dt>random_seeds</dt>
-<dd><p>A file path to the file with the .csv file containing random_seeds table.
-Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
-default. Default is Null which draws the seed numbers for each.</p></dd>
+<dd><p>vector of random seeds in the order of "disperser_generation",
+"natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
+"overpopulation", "survival_rate", "soil"</p></dd>
 
 
 <dt>use_lethal_temperature</dt>
-<dd><p>a boolean to answer the question: does your
-pest or pathogen have a temperature at which it cannot survive?
-(TRUE or FALSE)</p></dd>
+<dd><p>A boolean to answer the question: does your pest or pathogen have
+a temperature at which it cannot survive? (TRUE or FALSE)</p></dd>
 
 
 <dt>lethal_temperature</dt>
-<dd><p>the temperature in degrees C at which lethal
-temperature related mortality occurs for your pest or pathogen (-50 to 60)</p></dd>
+<dd><p>The temperature in degrees C at which lethal temperature related
+mortality occurs for your pest or pathogen (-50 to 60)</p></dd>
 
 
 <dt>lethal_temperature_month</dt>
-<dd><p>the month in which lethal temperature
-related mortality occurs for your pest or pathogen integer value between 1
-and 12</p></dd>
+<dd><p>The month in which lethal temperature related mortality occurs
+for your pest or pathogen integer value between 1 and 12</p></dd>
 
 
 <dt>use_survival_rates</dt>
-<dd><p>boolean to indicate if the model will use survival rates to limit the
+<dd><p>Boolean to indicate if the model will use survival rates to limit the
 survival or emergence of overwintering generations.</p></dd>
 
 
@@ -206,7 +206,7 @@ month before for this parameter as it is when the survival rates raster will be 
 
 
 <dt>survival_rate_day</dt>
-<dd><p>what day should the survival rates be applied</p></dd>
+<dd><p>What day should the survival rates be applied</p></dd>
 
 
 <dt>infected</dt>
@@ -236,8 +236,7 @@ model type</p></dd>
 
 
 <dt>mortality_on</dt>
-<dd><p>boolean to turn host mortality on and off
-(TRUE or FALSE)</p></dd>
+<dd><p>Boolean to turn host mortality on and off (TRUE or FALSE)</p></dd>
 
 
 <dt>mortality_tracker</dt>
@@ -254,9 +253,8 @@ escape from quarantine statistics.</p></dd>
 
 
 <dt>quarantine_directions</dt>
-<dd><p>string with comma separated directions to include
-in the quarantine direction analysis, e.g., 'N,E'. By default all directions
-(N, S, E, W) are considered</p></dd>
+<dd><p>String with comma separated directions to include in the quarantine
+direction analysis, e.g., 'N,E'. By default all directions (N, S, E, W) are considered</p></dd>
 
 
 <dt>treatment_maps</dt>
@@ -265,16 +263,14 @@ occurred in a given year</p></dd>
 
 
 <dt>treatment_dates</dt>
-<dd><p>dates in which to apply treatment list with format
-('YYYY_MM_DD') (needs to be the same length as treatment_file and
-pesticide_duration)</p></dd>
+<dd><p>Dates in which to apply treatment list with format ('YYYY_MM_DD')
+(needs to be the same length as treatment_file and pesticide_duration)</p></dd>
 
 
 <dt>pesticide_duration</dt>
-<dd><p>how long does the pestcide (herbicide, vaccine,
-etc..) last before the host is susceptible again. If value is 0 treatment
-is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
- same length as treatment_dates and treatment_file)</p></dd>
+<dd><p>How long does the pesticide (herbicide, vaccine, etc..) last before the
+host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a
+pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)</p></dd>
 
 
 <dt>resistant</dt>
@@ -326,7 +322,7 @@ overwinter population that emerges</p></dd>
 
 
 <dt>time_step</dt>
-<dd><p>how often should spread occur options: ('day', 'week', 'month').</p></dd>
+<dd><p>How often should spread occur options: ('day', 'week', 'month').</p></dd>
 
 
 <dt>reproductive_rate</dt>
@@ -342,42 +338,44 @@ host under optimal weather conditions</p></dd>
 <dd><p>vector of months when spread starts and stops</p></dd>
 
 
+<dt>soil_reservoirs</dt>
+<dd><p>list of matrices with soil pests created from soil_pest_file.</p></dd>
+
+
 <dt>mortality_rate</dt>
-<dd><p>rate at which mortality occurs value between 0 and 1</p></dd>
+<dd><p>Rate at which mortality occurs value between 0 and 1</p></dd>
 
 
 <dt>mortality_time_lag</dt>
-<dd><p>time lag from infection until mortality can occur
-in time steps integer &gt;= 1</p></dd>
+<dd><p>Time lag from infection until mortality can occur in time steps
+integer &gt;= 1</p></dd>
 
 
 <dt>start_date</dt>
-<dd><p>date to start the simulation with format ('YYYY_MM_DD')</p></dd>
+<dd><p>Date to start the simulation with format ('YYYY_MM_DD')</p></dd>
 
 
 <dt>end_date</dt>
-<dd><p>date to end the simulation with format ('YYYY_MM_DD')</p></dd>
+<dd><p>Date to end the simulation with format ('YYYY_MM_DD')</p></dd>
 
 
 <dt>treatment_method</dt>
-<dd><p>what method to use when applying treatment one of
-("ratio" or "all infected"). ratio removes a portion of all infected and
-susceptibles, all infected removes all infected a portion of susceptibles.</p></dd>
+<dd><p>What method to use when applying treatment one of ("ratio" or "all
+infected"). ratio removes a portion of all infected and susceptibles, all infected removes all
+infected a portion of susceptibles.</p></dd>
 
 
 <dt>natural_kernel_type</dt>
-<dd><p>what type of dispersal kernel should be used for
-natural dispersal. Current dispersal kernel options are
- ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')</p></dd>
+<dd><p>What type of dispersal kernel should be used for natural dispersal.
+Current dispersal kernel options are ('Cauchy', 'exponential', 'uniform',
+'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic')</p></dd>
 
 
 <dt>anthropogenic_kernel_type</dt>
-<dd><p>what type of dispersal kernel should be
-used for anthropogenic dispersal. Current dispersal kernel options are
- ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')</p></dd>
+<dd><p>What type of dispersal kernel should be used for anthropogenic
+dispersal. Current dispersal kernel options are ('cauchy', 'exponential', 'uniform',
+'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic',
+'network')</p></dd>
 
 
 <dt>use_anthropogenic_kernel</dt>
@@ -402,9 +400,8 @@ anthropogenic range dispersal kernel numeric value &gt; 0</p></dd>
 
 
 <dt>natural_dir</dt>
-<dd><p>sets the predominate direction of natural dispersal
-usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
-'NONE')</p></dd>
+<dd><p>Sets the predominate direction of natural dispersal usually due to wind values
+('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')</p></dd>
 
 
 <dt>natural_kappa</dt>
@@ -413,10 +410,9 @@ von-mises distribution numeric value between 0.01 and 12</p></dd>
 
 
 <dt>anthropogenic_dir</dt>
-<dd><p>sets the predominate direction of anthropogenic
-dispersal usually due to human movement typically over long distances (e.g.
-nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
-'SE', 'E', 'NE', 'NONE')</p></dd>
+<dd><p>Sets the predominate direction of anthropogenic dispersal usually due
+to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)
+('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')</p></dd>
 
 
 <dt>anthropogenic_kappa</dt>
@@ -425,14 +421,13 @@ in the von-mises distribution numeric value between 0.01 and 12</p></dd>
 
 
 <dt>output_frequency</dt>
-<dd><p>sets when outputs occur either ('year', 'month',
-'week', 'day', 'time step', or 'every_n_steps')</p></dd>
+<dd><p>Sets when outputs occur either ('year', 'month', week', 'day',
+'time step', or 'every_n_steps')</p></dd>
 
 
 <dt>output_frequency_n</dt>
-<dd><p>sets number of units from output_frequency in which
-to export model results if mortality_frequency is 'every_n_steps'.
-Must be an integer &gt;= 1.</p></dd>
+<dd><p>Sets number of units from output_frequency in which to export model
+results if mortality_frequency is 'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
 
 
 <dt>quarantine_frequency</dt>
@@ -447,9 +442,8 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
 
 
 <dt>use_quarantine</dt>
-<dd><p>boolean to indicate whether or not there is a
-quarantine area if TRUE must pass in a raster file indicating the
-quarantine areas (default = FALSE)</p></dd>
+<dd><p>Boolean to indicate whether or not there is a quarantine area if TRUE must
+pass in a raster file indicating the quarantine areas (default = FALSE)</p></dd>
 
 
 <dt>spreadrate_frequency</dt>
@@ -465,19 +459,17 @@ statistics.</p></dd>
 
 
 <dt>mortality_frequency</dt>
-<dd><p>sets the frequency of mortality calculations occur
-either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')</p></dd>
+<dd><p>Sets the frequency of mortality calculations occur either ('year',
+'month', week', 'day', 'time step', or 'every_n_steps')</p></dd>
 
 
 <dt>mortality_frequency_n</dt>
-<dd><p>sets number of units from mortality_frequency in
-which to run the mortality calculation if mortality_frequency is
-'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
+<dd><p>Sets number of units from mortality_frequency in which to run the
+mortality calculation if mortality_frequency is 'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
 
 
 <dt>use_spreadrates</dt>
-<dd><p>boolean to indicate whether or not to calculate
-spread rates</p></dd>
+<dd><p>Boolean to indicate whether or not to calculate spread rates</p></dd>
 
 
 <dt>model_type_</dt>
@@ -487,24 +479,23 @@ are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 
 
 <dt>latency_period</dt>
-<dd><p>How many times steps does it take to for exposed
-populations become infected/infested. This is an integer value and must be
-greater than 0 if model type is SEI.</p></dd>
+<dd><p>How many times steps does it take to for exposed populations become
+infected/infested. This is an integer value and must be greater than 0 if model type is SEI.</p></dd>
 
 
 <dt>generate_stochasticity</dt>
-<dd><p>Boolean to indicate whether to use
-stochasticity in reproductive functions default is TRUE</p></dd>
+<dd><p>Boolean to indicate whether to use stochasticity in reproductive
+functions default is TRUE</p></dd>
 
 
 <dt>establishment_stochasticity</dt>
-<dd><p>Boolean to indicate whether to use
-stochasticity in establishment functions default is TRUE</p></dd>
+<dd><p>Boolean to indicate whether to use stochasticity in
+establishment functions default is TRUE</p></dd>
 
 
 <dt>movement_stochasticity</dt>
-<dd><p>Boolean to indicate whether to use
-stochasticity in movement functions default is TRUE</p></dd>
+<dd><p>Boolean to indicate whether to use stochasticity in movement
+functions default is TRUE</p></dd>
 
 
 <dt>dispersal_stochasticity</dt>
@@ -518,28 +509,27 @@ establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)</p></dd>
 
 
 <dt>dispersal_percentage</dt>
-<dd><p>Percentage of dispersal used to calculate the
-bounding box for deterministic dispersal</p></dd>
+<dd><p>Percentage of dispersal used to calculate the bounding box for
+deterministic dispersal</p></dd>
 
 
 <dt>use_overpopulation_movements</dt>
-<dd><p>boolean to indicate whether to use
-the overpopulation pest movement module (driven by the natural kernel with
-its scale parameter modified by a coefficient)</p></dd>
+<dd><p>Boolean to indicate whether to use the overpopulation pest
+movement module (driven by the natural kernel with its scale parameter modified by a coefficient)</p></dd>
 
 
 <dt>overpopulation_percentage</dt>
-<dd><p>percentage of occupied hosts when the cell
-is considered to be overpopulated</p></dd>
+<dd><p>Percentage of occupied hosts when the cell is considered to be
+overpopulated</p></dd>
 
 
 <dt>leaving_percentage</dt>
-<dd><p>percentage of pests leaving an overpopulated cell</p></dd>
+<dd><p>Percentage of pests leaving an overpopulated cell</p></dd>
 
 
 <dt>leaving_scale_coefficient</dt>
-<dd><p>coefficient to multiply scale parameter of
-the natural kernel (if applicable)</p></dd>
+<dd><p>Coefficient to multiply scale parameter of the natural kernel
+(if applicable)</p></dd>
 
 
 <dt>bbox</dt>
@@ -557,7 +547,7 @@ anthropogenic_kernel_type = 'network'.</p></dd>
 
 
 <dt>network_filename</dt>
-<dd><p>entire file path for the network file. Used if
+<dd><p>The entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
 
 
@@ -574,13 +564,18 @@ along the edge. "jump" automatically moves to the nearest node when moving throu
 
 <dt>weather_type</dt>
 <dd><p>string indicating how the weather data is passed in  either
-as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 series ("deterministic")</p></dd>
 
 
 <dt>dispersers_to_soils_percentage</dt>
 <dd><p>range from 0 to 1 representing the percentage
 of dispersers that fall to the soil and survive.</p></dd>
+
+
+<dt>use_soils</dt>
+<dd><p>Boolean to indicate if pests establish in the soil and spread out from there.
+Typically used for soil borne pathogens.</p></dd>
 
 </dl></div>
     <div id="value">
