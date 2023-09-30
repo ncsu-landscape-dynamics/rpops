@@ -67,6 +67,7 @@ List pops_model_cpp(
     List bbox,
     List res,
     List rows_cols,
+    std::vector<IntegerMatrix> soil_reservoirs,
     double reproductive_rate,
     std::vector<std::vector<int>> spatial_indices,
     List season_month_start_end,
@@ -189,6 +190,8 @@ List pops_model_cpp(
     int start_month = season_month_start_end["start_month"];
     int end_month = season_month_start_end["end_month"];
     config.set_season_start_end_month(start_month, end_month);
+
+    bool use_soils = bool_config["use_soils"];
     config.dispersers_to_soils_percentage = dispersers_to_soils_percentage;
 
     std::vector<std::array<double, 4>> spread_rates_vector;
@@ -210,6 +213,8 @@ List pops_model_cpp(
     std::vector<IntegerMatrix> dispersers_vector;
     std::vector<IntegerMatrix> exposed_v;
     std::vector<std::vector<IntegerMatrix>> exposed_vector;
+    std::vector<std::vector<IntegerMatrix>> soil_reservoirs_vector;
+    std::vector<IntegerMatrix> soil_v;
 
     config.create_schedules();
 
@@ -227,11 +232,6 @@ List pops_model_cpp(
         if (config.num_lethal() > temperature.size()) {
             Rcerr << "Not enough years of temperature data" << std::endl;
         }
-    }
-
-    unsigned count_weather = get_number_of_scheduled_actions(config.spread_schedule());
-    if (config.weather && count_weather > weather_coefficient.size()) {
-        Rcerr << "Not enough indices of weather coefficient data" << std::endl;
     }
 
     unsigned spread_rate_outputs;
@@ -296,16 +296,20 @@ List pops_model_cpp(
 
     ModelType mt = model_type_from_string(config.model_type);
     WeatherType weather_typed = weather_type_from_string(config.weather_type);
-    
+
     Simulation<IntegerMatrix, NumericMatrix> simulation(
         config.rows, config.cols, mt, config.latency_period_steps);
 
     Model<IntegerMatrix, NumericMatrix, int> model(config);
+    if (use_soils) {
+      model.activate_soils(soil_reservoirs);
+    }
+
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
 
       IntegerMatrix dispersers(config.rows, config.cols);
-      
+
       auto weather_step = config.simulation_step_to_weather_step(current_index);
       if (weather_typed == WeatherType::Probabilistic) {
         model.environment().update_weather_from_distribution(
@@ -315,7 +319,7 @@ List pops_model_cpp(
       else if (weather_typed == WeatherType::Deterministic) {
         model.environment().update_weather_coefficient(weather_coefficient[weather_step]);
       }
-      
+
         model.run_step(
             current_index,
             infected,
@@ -368,8 +372,18 @@ List pops_model_cpp(
                 exposed_v = exposed;
             }
 
-            // exposed_v = exposed;
+            if (use_soils) {
+              soil_v.clear();
+              for (unsigned s = 0; s < soil_reservoirs.size(); s++) {
+                soil_v.push_back(Rcpp::clone(soil_reservoirs[s]));
+              }
+            }
+            else{
+              soil_v = soil_reservoirs;
+            }
+
             exposed_vector.push_back(exposed_v);
+            soil_reservoirs_vector.push_back(soil_v);
 
             num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
@@ -416,5 +430,6 @@ List pops_model_cpp(
         _["quarantine_escape"] = quarantine_escapes,
         _["quarantine_escape_distance"] = escape_dists,
         _["quarantine_escape_directions"] = escape_directions,
-        _["spatial_indices"] = spatial_indices);
+        _["spatial_indices"] = spatial_indices,
+        _["soil_reservoirs"] = soil_reservoirs_vector);
 }

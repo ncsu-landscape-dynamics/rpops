@@ -107,7 +107,8 @@
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
 #' @importFrom Metrics rmse
-#' @importFrom utils write.csv
+#' @importFrom utils write.csv read.table read.csv
+#' @importFrom methods is
 #'
 #' @return a dataframe of the variables saved and their success metrics for
 #' each run
@@ -197,9 +198,10 @@ calibrate <- function(infected_years_file,
                       dispersers_to_soils_percentage = 0,
                       quarantine_directions = "",
                       multiple_random_seeds = FALSE,
-                      random_seeds = NULL,
+                      file_random_seeds = NULL,
                       use_soils = FALSE,
-                      soil_starting_pest_file = "") {
+                      soil_starting_pest_file = "",
+                      start_with_soil_populations = FALSE) {
 
   # add all data to config list
   config <- c()
@@ -290,9 +292,10 @@ calibrate <- function(infected_years_file,
   config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
   config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
   config$multiple_random_seeds <- multiple_random_seeds
-  config$random_seeds <- random_seeds
+  config$file_random_seeds <- file_random_seeds
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
+  config$start_with_soil_populations <- start_with_soil_populations
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -394,6 +397,7 @@ calibrate <- function(infected_years_file,
         reproductive_rate = reproductive_rate,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
+        soil_reservoirs = config$soil_reservoirs,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
@@ -438,8 +442,8 @@ calibrate <- function(infected_years_file,
         network_movement = config$network_movement,
         weather_size = config$weather_size,
         weather_type = config$weather_type,
-        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
-      )
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
+        use_soils = config$use_soils)
       return(data)
     }
 

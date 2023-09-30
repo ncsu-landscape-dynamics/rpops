@@ -21,6 +21,7 @@
 ^CHANGELOG\.md$
 ^CODE_OF_CONDUCT\.md$
 ^CONTRIBUTING\.md$
+^.lintr
 
 ^inst/cpp/pops-core/contributing\.md$
 ^inst/cpp/pops-core/LICENSE$

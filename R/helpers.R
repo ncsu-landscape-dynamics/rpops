@@ -231,7 +231,7 @@ create_random_seeds <- function(n) {
   random_seeds <-
     data.frame(disperser_generation = sample(1:999999999, n, replace = FALSE),
                natural_dispersal = sample(1:999999999, n, replace = FALSE),
-               anthropogenic_dispersal = sample(1:999999999999, 1, replace = FALSE),
+               anthropogenic_dispersal = sample(1:999999999999, n, replace = FALSE),
                establishment = sample(1:999999999, n, replace = FALSE),
                weather = sample(1:999999999, n, replace = FALSE),
                movement = sample(1:999999999, n, replace = FALSE),
@@ -263,4 +263,10 @@ output_from_raster_mean_and_sd <- function(x) {
   }
   x2 <- suppressWarnings(terra::app(x, fun))
   return(x2)
+}
+
+# Combine two standard deviation spatRasters
+combined_sd <- function(v1, v2, m1, m2, n1, n2) {
+  (((n1 - 1) * v1 + (n2 - 1) * v2) / (n1 + n2 - 1)) +
+    (((n1 * n2) * (m1 - m2)^2) / ((n1 + n2) * (n1 + n2 - 1)))
 }

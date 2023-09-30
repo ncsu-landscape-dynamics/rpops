@@ -146,6 +146,8 @@ infection_years_length_error <- function(num_layers_infected_years, number_of_ti
 
 success_metric_error <- "success_metric is not one of the listed options."
 
+
+
 initial_cond_uncert_error <-
   "use_initial_condition_uncertainty is TRUE but the number of layers in the infected file is not 2.
   This should be a raster file with 2 layers the first being the mean value and the second the
@@ -160,3 +162,15 @@ random_seeds_dimensions_error <-
   set in the model or the number of columns does not equal the number of unique random seeds"
 
 weather_type_error <- "Weather type is not one of 'probabilistic', 'deterministic', or 'none'"
+
+weather_size_deterministic_error <-
+  "Weather coeeficient number of layers with deterministic is not equal to the total number of time
+  steps."
+
+weather_size_probabilitic_error <-
+  "Weather coefficient number of layers with probablisitc is not equal to the total number of time
+  steps annual."
+
+weather_sd_layer_error <-
+  "weather coefficient sd file number of layers not equal to number of layers in weather coefficient
+  file"

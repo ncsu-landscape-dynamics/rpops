@@ -43,6 +43,7 @@ pops_model(
   reproductive_rate,
   spatial_indices,
   season_month_start_end,
+  soil_reservoirs,
   mortality_rate = 0,
   mortality_time_lag = 2,
   start_date = "2018-01-01",
@@ -87,38 +88,37 @@ pops_model(
   network_movement = "walk",
   weather_size = 0,
   weather_type = "deterministic",
-  dispersers_to_soils_percentage = 0
+  dispersers_to_soils_percentage = 0,
+  use_soils = FALSE
 )
 }
 \arguments{
-\item{random_seed}{sets the random seed for the simulation used for reproducibility}
+\item{random_seed}{Sets the random seed for the simulation used for reproducibility}
 
-\item{multiple_random_seeds}{boolean to indicate if the model should use multiple random seeds
+\item{multiple_random_seeds}{Boolean to indicate if the model should use multiple random seeds
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.}
 
-\item{random_seeds}{A file path to the file with the .csv file containing random_seeds table.
-Use a file if you are trying to recreate an exact analysis otherwise we suggest leaving the
-default. Default is Null which draws the seed numbers for each.}
+\item{random_seeds}{vector of random seeds in the order of "disperser_generation",
+"natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
+"overpopulation", "survival_rate", "soil"}
 
-\item{use_lethal_temperature}{a boolean to answer the question: does your
-pest or pathogen have a temperature at which it cannot survive?
-(TRUE or FALSE)}
+\item{use_lethal_temperature}{A boolean to answer the question: does your pest or pathogen have
+a temperature at which it cannot survive? (TRUE or FALSE)}
 
-\item{lethal_temperature}{the temperature in degrees C at which lethal
-temperature related mortality occurs for your pest or pathogen (-50 to 60)}
+\item{lethal_temperature}{The temperature in degrees C at which lethal temperature related
+mortality occurs for your pest or pathogen (-50 to 60)}
 
-\item{lethal_temperature_month}{the month in which lethal temperature
-related mortality occurs for your pest or pathogen integer value between 1
-and 12}
+\item{lethal_temperature_month}{The month in which lethal temperature related mortality occurs
+for your pest or pathogen integer value between 1 and 12}
 
-\item{use_survival_rates}{boolean to indicate if the model will use survival rates to limit the
+\item{use_survival_rates}{Boolean to indicate if the model will use survival rates to limit the
 survival or emergence of overwintering generations.}
 
 \item{survival_rate_month}{What month do over wintering generations emerge. We suggest using the
 month before for this parameter as it is when the survival rates raster will be applied.}
 
-\item{survival_rate_day}{what day should the survival rates be applied}
+\item{survival_rate_day}{What day should the survival rates be applied}
 
 \item{infected}{matrix of infected hosts}
 
@@ -134,8 +134,7 @@ model type}
 
 \item{total_hosts}{matrix of all hosts}
 
-\item{mortality_on}{boolean to turn host mortality on and off
-(TRUE or FALSE)}
+\item{mortality_on}{Boolean to turn host mortality on and off (TRUE or FALSE)}
 
 \item{mortality_tracker}{matrix of 0's to track mortality per year}
 
@@ -144,21 +143,18 @@ model type}
 \item{quarantine_areas}{areas that are set as quarantined for computing
 escape from quarantine statistics.}
 
-\item{quarantine_directions}{string with comma separated directions to include
-in the quarantine direction analysis, e.g., 'N,E'. By default all directions
-(N, S, E, W) are considered}
+\item{quarantine_directions}{String with comma separated directions to include in the quarantine
+direction analysis, e.g., 'N,E'. By default all directions (N, S, E, W) are considered}
 
 \item{treatment_maps}{list of matrices where treatment or management has
 occurred in a given year}
 
-\item{treatment_dates}{dates in which to apply treatment list with format
-('YYYY_MM_DD') (needs to be the same length as treatment_file and
-pesticide_duration)}
+\item{treatment_dates}{Dates in which to apply treatment list with format ('YYYY_MM_DD')
+(needs to be the same length as treatment_file and pesticide_duration)}
 
-\item{pesticide_duration}{how long does the pestcide (herbicide, vaccine,
-etc..) last before the host is susceptible again. If value is 0 treatment
-is a culling (i.e. host removal) not a pesticide treatment. (needs to be the
- same length as treatment_dates and treatment_file)}
+\item{pesticide_duration}{How long does the pesticide (herbicide, vaccine, etc..) last before the
+host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a
+pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
 
 \item{resistant}{matrix to track resistant population over time}
 
@@ -186,7 +182,7 @@ overwinter population that emerges}
 
 \item{rows_cols}{vector of number of rows and columns in the raster files}
 
-\item{time_step}{how often should spread occur options: ('day', 'week', 'month').}
+\item{time_step}{How often should spread occur options: ('day', 'week', 'month').}
 
 \item{reproductive_rate}{number of spores or pest units produced by a single
 host under optimal weather conditions}
@@ -195,29 +191,29 @@ host under optimal weather conditions}
 
 \item{season_month_start_end}{vector of months when spread starts and stops}
 
-\item{mortality_rate}{rate at which mortality occurs value between 0 and 1}
+\item{soil_reservoirs}{list of matrices with soil pests created from soil_pest_file.}
 
-\item{mortality_time_lag}{time lag from infection until mortality can occur
-in time steps integer >= 1}
+\item{mortality_rate}{Rate at which mortality occurs value between 0 and 1}
 
-\item{start_date}{date to start the simulation with format ('YYYY_MM_DD')}
+\item{mortality_time_lag}{Time lag from infection until mortality can occur in time steps
+integer >= 1}
 
-\item{end_date}{date to end the simulation with format ('YYYY_MM_DD')}
+\item{start_date}{Date to start the simulation with format ('YYYY_MM_DD')}
 
-\item{treatment_method}{what method to use when applying treatment one of
-("ratio" or "all infected"). ratio removes a portion of all infected and
-susceptibles, all infected removes all infected a portion of susceptibles.}
+\item{end_date}{Date to end the simulation with format ('YYYY_MM_DD')}
 
-\item{natural_kernel_type}{what type of dispersal kernel should be used for
-natural dispersal. Current dispersal kernel options are
- ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull',
- 'logistic')}
+\item{treatment_method}{What method to use when applying treatment one of ("ratio" or "all
+infected"). ratio removes a portion of all infected and susceptibles, all infected removes all
+infected a portion of susceptibles.}
 
-\item{anthropogenic_kernel_type}{what type of dispersal kernel should be
-used for anthropogenic dispersal. Current dispersal kernel options are
- ('cauchy', 'exponential', 'uniform', 'deterministic neighbor','power law',
- 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network')}
+\item{natural_kernel_type}{What type of dispersal kernel should be used for natural dispersal.
+Current dispersal kernel options are ('Cauchy', 'exponential', 'uniform',
+'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic')}
+
+\item{anthropogenic_kernel_type}{What type of dispersal kernel should be used for anthropogenic
+dispersal. Current dispersal kernel options are ('cauchy', 'exponential', 'uniform',
+'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic',
+'network')}
 
 \item{use_anthropogenic_kernel}{A boolean that turns on the use of the
 anthropogenic or long distance dispersal portion of the 2 scale dispersal
@@ -232,27 +228,24 @@ dispersal kernel numeric value > 0}
 \item{anthropogenic_distance_scale}{distance scale parameter for
 anthropogenic range dispersal kernel numeric value > 0}
 
-\item{natural_dir}{sets the predominate direction of natural dispersal
-usually due to wind values ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE',
-'NONE')}
+\item{natural_dir}{Sets the predominate direction of natural dispersal usually due to wind values
+('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
 \item{natural_kappa}{sets the strength of the natural direction in the
 von-mises distribution numeric value between 0.01 and 12}
 
-\item{anthropogenic_dir}{sets the predominate direction of anthropogenic
-dispersal usually due to human movement typically over long distances (e.g.
-nursery trade, movement of firewood, etc..) ('N', 'NW', 'W', 'SW', 'S',
-'SE', 'E', 'NE', 'NONE')}
+\item{anthropogenic_dir}{Sets the predominate direction of anthropogenic dispersal usually due
+to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)
+('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
 \item{anthropogenic_kappa}{sets the strength of the anthropogenic direction
 in the von-mises distribution numeric value between 0.01 and 12}
 
-\item{output_frequency}{sets when outputs occur either ('year', 'month',
-'week', 'day', 'time step', or 'every_n_steps')}
+\item{output_frequency}{Sets when outputs occur either ('year', 'month', week', 'day',
+'time step', or 'every_n_steps')}
 
-\item{output_frequency_n}{sets number of units from output_frequency in which
-to export model results if mortality_frequency is 'every_n_steps'.
-Must be an integer >= 1.}
+\item{output_frequency_n}{Sets number of units from output_frequency in which to export model
+results if mortality_frequency is 'every_n_steps'. Must be an integer >= 1.}
 
 \item{quarantine_frequency}{sets how often the quarantine statistics are
 calculated either ('year', 'month', 'week', 'day' or 'time step')
@@ -261,9 +254,8 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
 \item{quarantine_frequency_n}{sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export quarantine statistics.}
 
-\item{use_quarantine}{boolean to indicate whether or not there is a
-quarantine area if TRUE must pass in a raster file indicating the
-quarantine areas (default = FALSE)}
+\item{use_quarantine}{Boolean to indicate whether or not there is a quarantine area if TRUE must
+pass in a raster file indicating the quarantine areas (default = FALSE)}
 
 \item{spreadrate_frequency}{sets how often the spread rate statistics are
 calculated either ('year', 'month', 'week', 'day' or 'time step')
@@ -273,32 +265,29 @@ calculated either ('year', 'month', 'week', 'day' or 'time step')
 'day' or 'time step') in which to calculate and export spread rate
 statistics.}
 
-\item{mortality_frequency}{sets the frequency of mortality calculations occur
-either ('year', 'month', week', 'day', 'time step', or 'every_n_steps')}
+\item{mortality_frequency}{Sets the frequency of mortality calculations occur either ('year',
+'month', week', 'day', 'time step', or 'every_n_steps')}
 
-\item{mortality_frequency_n}{sets number of units from mortality_frequency in
-which to run the mortality calculation if mortality_frequency is
-'every_n_steps'. Must be an integer >= 1.}
+\item{mortality_frequency_n}{Sets number of units from mortality_frequency in which to run the
+mortality calculation if mortality_frequency is 'every_n_steps'. Must be an integer >= 1.}
 
-\item{use_spreadrates}{boolean to indicate whether or not to calculate
-spread rates}
+\item{use_spreadrates}{Boolean to indicate whether or not to calculate spread rates}
 
 \item{model_type_}{What type of model most represents your system. Options
 are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 (Susceptible - Infected/Infested). Default value is "SI".}
 
-\item{latency_period}{How many times steps does it take to for exposed
-populations become infected/infested. This is an integer value and must be
-greater than 0 if model type is SEI.}
+\item{latency_period}{How many times steps does it take to for exposed populations become
+infected/infested. This is an integer value and must be greater than 0 if model type is SEI.}
 
-\item{generate_stochasticity}{Boolean to indicate whether to use
-stochasticity in reproductive functions default is TRUE}
+\item{generate_stochasticity}{Boolean to indicate whether to use stochasticity in reproductive
+functions default is TRUE}
 
-\item{establishment_stochasticity}{Boolean to indicate whether to use
-stochasticity in establishment functions default is TRUE}
+\item{establishment_stochasticity}{Boolean to indicate whether to use stochasticity in
+establishment functions default is TRUE}
 
-\item{movement_stochasticity}{Boolean to indicate whether to use
-stochasticity in movement functions default is TRUE}
+\item{movement_stochasticity}{Boolean to indicate whether to use stochasticity in movement
+functions default is TRUE}
 
 \item{dispersal_stochasticity}{Boolean to indicate whether to use a stochasticity in the
 dispersal kernel default is TRUE}
@@ -306,20 +295,19 @@ dispersal kernel default is TRUE}
 \item{establishment_probability}{Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)}
 
-\item{dispersal_percentage}{Percentage of dispersal used to calculate the
-bounding box for deterministic dispersal}
+\item{dispersal_percentage}{Percentage of dispersal used to calculate the bounding box for
+deterministic dispersal}
 
-\item{use_overpopulation_movements}{boolean to indicate whether to use
-the overpopulation pest movement module (driven by the natural kernel with
-its scale parameter modified by a coefficient)}
+\item{use_overpopulation_movements}{Boolean to indicate whether to use the overpopulation pest
+movement module (driven by the natural kernel with its scale parameter modified by a coefficient)}
 
-\item{overpopulation_percentage}{percentage of occupied hosts when the cell
-is considered to be overpopulated}
+\item{overpopulation_percentage}{Percentage of occupied hosts when the cell is considered to be
+overpopulated}
 
-\item{leaving_percentage}{percentage of pests leaving an overpopulated cell}
+\item{leaving_percentage}{Percentage of pests leaving an overpopulated cell}
 
-\item{leaving_scale_coefficient}{coefficient to multiply scale parameter of
-the natural kernel (if applicable)}
+\item{leaving_scale_coefficient}{Coefficient to multiply scale parameter of the natural kernel
+(if applicable)}
 
 \item{bbox}{bounding box for network kernel}
 
@@ -329,7 +317,7 @@ anthropogenic_kernel_type = 'network'.}
 \item{network_max_distance}{maximum time a propagule rides on the network. Used if
 anthropogenic_kernel_type = 'network'.}
 
-\item{network_filename}{entire file path for the network file. Used if
+\item{network_filename}{The entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
 
 \item{network_movement}{What movement type do you want to use in the network kernel either
@@ -340,11 +328,14 @@ along the edge. "jump" automatically moves to the nearest node when moving throu
 \item{weather_size}{the number of matrices in a list or layers in a raster object}
 
 \item{weather_type}{string indicating how the weather data is passed in  either
-as a mean and standard deviation to represent uncertainty ("probablisticc") or as a time
+as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 series ("deterministic")}
 
 \item{dispersers_to_soils_percentage}{range from 0 to 1 representing the percentage
 of dispersers that fall to the soil and survive.}
+
+\item{use_soils}{Boolean to indicate if pests establish in the soil and spread out from there.
+Typically used for soil borne pathogens.}
 }
 \value{
 list of vector matrices of infected and susceptible hosts per

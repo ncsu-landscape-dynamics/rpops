@@ -31,12 +31,14 @@ configuration <- function(config) {
   }
 
   if (config$multiple_random_seeds) {
-    if (!is.null(config$random_seeds)) {
+    if (!is.null(config$file_random_seeds)) {
       ## check random seed file
-      random_seeds_file_check <- random_seeds_file_checks(config$random_seeds)
+      random_seeds_file_check <- random_seeds_file_checks(config$file_random_seeds)
       if (!random_seeds_file_check$checks_passed) {
         config$failure <- random_seeds_file_check$failed_check
         return(config)
+      } else {
+        config$random_seeds <- random_seeds_file_check$random_seeds
       }
     } else {
       config$random_seeds <- create_random_seeds(config$number_of_iterations)
@@ -148,9 +150,9 @@ configuration <- function(config) {
     return(config)
   }
 
-  zero_matrix <- infected[[1]]
-  terra::values(zero_matrix) <- 0
-  zero_matrix <- terra::as.matrix(zero_matrix, wide = TRUE)
+  zero_rast <- infected[[1]]
+  terra::values(zero_rast) <- 0
+  zero_matrix <- terra::as.matrix(zero_rast, wide = TRUE)
 
   one_matrix <- infected[[1]]
   terra::values(one_matrix) <- 0
@@ -192,25 +194,33 @@ configuration <- function(config) {
 
   # check that soils raster has the same crs, resolutin, and extent.
   if (config$use_soils) {
-    if (config$function_name %in% aws_bucket_list) {
-      soils_check <-
-        secondary_raster_checks(
-          config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
-    } else {
-      soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
+    config$soil_survival_steps <- ceiling(1 / config$dispersers_to_soils_percentage)
+    soil_reservoirs <- list(zero_matrix)
+    for (sr in 2:(config$soil_survival_steps)) {
+      soil_reservoirs[[sr]] <- zero_matrix
     }
-    if (soils_check$checks_passed) {
-      soil_pests <- soils_check$raster
-      config$soil_pests <- terra::as.matrix(soil_pests, wide = TRUE)
-    } else {
-      config$failure <- soils_check$failed_check
-      if (config$failure == file_exists_error) {
-        config$failure <- detailed_file_exists_error(config$soil_starting_pest_file)
+    if (config$start_with_soil_populations) {
+      if (config$function_name %in% aws_bucket_list) {
+        soils_check <-
+          secondary_raster_checks(
+            config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
+      } else {
+        soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
       }
-      return(config)
+      if (soils_check$checks_passed) {
+        soil_pests <- soils_check$raster
+        soil_reservoirs[[config$soil_survival_steps]] <- terra::as.matrix(soil_pests, wide = TRUE)
+      } else {
+        config$failure <- soils_check$failed_check
+        if (config$failure == file_exists_error) {
+          config$failure <- detailed_file_exists_error(config$soil_starting_pest_file)
+        }
+        return(config)
+      }
     }
+    config$soil_reservoirs <- soil_reservoirs
   } else {
-    config$soil_pests <- zero_matrix
+    config$soil_reservoirs <- list(zero_matrix)
   }
 
   # check that survival_rates raster has the same crs, resolution, and extent
@@ -365,7 +375,10 @@ configuration <- function(config) {
 
       weather_coefficient_stack <- weather_coefficient_stack * precipitation_coefficient
       if (config$weather_type == "probabilistic") {
-        weather_coefficient_sd_stack <- weather_coefficient_sd_stack * precipitation_coefficient_sd
+        # compute sd from combined sd of the two rasters hard coded 10 years as our current
+        weather_coefficient_sd_stack <-
+          combined_sd(temperature_coefficient_sd, precipitation_coefficient_sd,
+                      temperature_coefficient, precipitation_coefficient, 10, 10)
       }
     }
   } else if (config$precip == TRUE) {
@@ -419,11 +432,29 @@ configuration <- function(config) {
 
   if (config$weather == TRUE) {
     config$weather_size <- terra::nlyr(weather_coefficient_stack)
+    if (config$weather_type == "deterministic") {
+      if (config$number_of_time_steps > config$weather_size) {
+        config$failure <- weather_size_deterministic_error
+        return(config)
+      }
+    }
+
     weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]], wide = TRUE))
     for (i in 2:terra::nlyr(weather_coefficient_stack)) {
       weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
     }
+
     if (config$weather_type == "probabilistic") {
+      if (config$number_of_time_steps > config$weather_size) {
+        config$failure <- weather_size_probabilitic_error
+        return(config)
+      }
+
+      if (config$weather_size != terra::nlyr(weather_coefficient_sd_stack)) {
+        config$failure <- weather_sd_layer_error
+        return(config)
+      }
+
       weather_coefficient_sd <-
         list(terra::as.matrix(weather_coefficient_sd_stack[[1]], wide = TRUE))
       for (i in 2:terra::nlyr(weather_coefficient_sd_stack)) {
