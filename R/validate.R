@@ -221,6 +221,8 @@ validate <- function(infected_years_file,
     stop(config$failure)
   }
 
+  write.csv(config$random_seeds, paste0(output_folder_path,"validation_random_seeds.csv"))
+
   i <- NULL
 
   cl <- makeCluster(config$core_count)

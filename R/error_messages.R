@@ -146,8 +146,6 @@ infection_years_length_error <- function(num_layers_infected_years, number_of_ti
 
 success_metric_error <- "success_metric is not one of the listed options."
 
-
-
 initial_cond_uncert_error <-
   "use_initial_condition_uncertainty is TRUE but the number of layers in the infected file is not 2.
   This should be a raster file with 2 layers the first being the mean value and the second the

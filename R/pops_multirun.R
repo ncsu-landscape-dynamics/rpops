@@ -202,6 +202,7 @@ pops_multirun <- function(infected_file,
     stop(config$failure)
   }
 
+  write.csv(config$random_seeds, paste0(output_folder_path,"forecast_random_seeds.csv"))
   config$crs <- terra::crs(config$host)
 
   i <- NULL
