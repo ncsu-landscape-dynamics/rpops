@@ -212,11 +212,11 @@ dispersal. Current dispersal kernel options are ('cauchy', 'exponential', 'unifo
 to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)
 ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')}
 
-\item{number_of_iterations}{how many iterations do you want to run to allow
-the calibration to converge at least 10}
+\item{number_of_iterations}{how many iterations do you want to run to allow the calibration to
+converge at least 10}
 
-\item{number_of_cores}{enter how many cores you want to use (default = NA).
-If not set uses the # of CPU cores - 1. must be an integer >= 1}
+\item{number_of_cores}{enter how many cores you want to use (default = NA). If not set uses the
+# of CPU cores - 1. must be an integer >= 1}
 
 \item{pesticide_duration}{How long does the pesticide (herbicide, vaccine, etc..) last before the
 host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a
@@ -286,8 +286,8 @@ overpopulated}
 comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). This
 can also be used to mask out areas that can't be managed in the auto_manage function.}
 
-\item{write_outputs}{Either c("summary_outputs", or
-"None"). If not "None" output folder path must be provided.}
+\item{write_outputs}{Either c("summary_outputs", "all_simulations", or "None"). If not
+"None" output folder path must be provided.}
 
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}

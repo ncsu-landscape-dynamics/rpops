@@ -29,8 +29,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
 })
 
 test_that(
-  "Validation has correctly formatted returns with multiple output
-  comparisons", {
+  "Validation has correctly formatted returns with multiple output comparisons", {
     skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
@@ -38,8 +37,7 @@ test_that(
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
     infected_file <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-    host_file <-
-      system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
+    host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
     temp <- FALSE
@@ -109,6 +107,18 @@ test_that(
     network_movement <- "walk"
     use_distance <- FALSE
     use_configuration <- FALSE
+    use_initial_condition_uncertainty <- FALSE
+    use_host_uncertainty <- FALSE
+    weather_type <- "deterministic"
+    temperature_coefficient_sd_file <- ""
+    precipitation_coefficient_sd_file <- ""
+    dispersers_to_soils_percentage <- 0
+    quarantine_directions <- ""
+    multiple_random_seeds <- TRUE
+    file_random_seeds <- NULL
+    use_soils <- FALSE
+    soil_starting_pest_file <- ""
+    start_with_soil_populations <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -179,7 +189,19 @@ test_that(
       network_filename,
       network_movement,
       use_distance,
-      use_configuration)
+      use_configuration,
+      use_initial_condition_uncertainty,
+      use_host_uncertainty,
+      weather_type,
+      temperature_coefficient_sd_file,
+      precipitation_coefficient_sd_file,
+      dispersers_to_soils_percentage,
+      quarantine_directions,
+      multiple_random_seeds,
+      file_random_seeds,
+      use_soils,
+      soil_starting_pest_file,
+      start_with_soil_populations)
 
     expect_type(outputs, "list")
     expect_length(outputs, 12)
@@ -204,8 +226,7 @@ test_that(
 )
 
 test_that(
-  "Validation has correctly formatted returns and runs with a
-  single output comparison", {
+  "Validation has correctly formatted returns and runs with a single output comparison", {
     skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
@@ -286,6 +307,18 @@ test_that(
     network_movement <- "walk"
     use_distance <- FALSE
     use_configuration <- FALSE
+    use_initial_condition_uncertainty <- FALSE
+    use_host_uncertainty <- FALSE
+    weather_type <- "deterministic"
+    temperature_coefficient_sd_file <- ""
+    precipitation_coefficient_sd_file <- ""
+    dispersers_to_soils_percentage <- 0
+    quarantine_directions <- ""
+    multiple_random_seeds <- FALSE
+    file_random_seeds <- NULL
+    use_soils <- FALSE
+    soil_starting_pest_file <- ""
+    start_with_soil_populations <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -356,7 +389,19 @@ test_that(
       network_filename,
       network_movement,
       use_distance,
-      use_configuration)
+      use_configuration,
+      use_initial_condition_uncertainty,
+      use_host_uncertainty,
+      weather_type,
+      temperature_coefficient_sd_file,
+      precipitation_coefficient_sd_file,
+      dispersers_to_soils_percentage,
+      quarantine_directions,
+      multiple_random_seeds,
+      file_random_seeds,
+      use_soils,
+      soil_starting_pest_file,
+      start_with_soil_populations)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)
@@ -463,6 +508,18 @@ test_that(
     network_movement <- "walk"
     use_distance <- FALSE
     use_configuration <- FALSE
+    use_initial_condition_uncertainty <- FALSE
+    use_host_uncertainty <- FALSE
+    weather_type <- "deterministic"
+    temperature_coefficient_sd_file <- ""
+    precipitation_coefficient_sd_file <- ""
+    dispersers_to_soils_percentage <- 0
+    quarantine_directions <- ""
+    multiple_random_seeds <- FALSE
+    file_random_seeds <- NULL
+    use_soils <- FALSE
+    soil_starting_pest_file <- ""
+    start_with_soil_populations <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -533,7 +590,19 @@ test_that(
       network_filename,
       network_movement,
       use_distance,
-      use_configuration)
+      use_configuration,
+      use_initial_condition_uncertainty,
+      use_host_uncertainty,
+      weather_type,
+      temperature_coefficient_sd_file,
+      precipitation_coefficient_sd_file,
+      dispersers_to_soils_percentage,
+      quarantine_directions,
+      multiple_random_seeds,
+      file_random_seeds,
+      use_soils,
+      soil_starting_pest_file,
+      start_with_soil_populations)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)
@@ -642,6 +711,16 @@ test_that(
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- TRUE
     use_host_uncertainty <- TRUE
+    weather_type <- "deterministic"
+    temperature_coefficient_sd_file <- ""
+    precipitation_coefficient_sd_file <- ""
+    dispersers_to_soils_percentage <- 0
+    quarantine_directions <- ""
+    multiple_random_seeds <- FALSE
+    file_random_seeds <- NULL
+    use_soils <- FALSE
+    soil_starting_pest_file <- ""
+    start_with_soil_populations <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -714,7 +793,17 @@ test_that(
       use_distance,
       use_configuration,
       use_initial_condition_uncertainty,
-      use_host_uncertainty)
+      use_host_uncertainty,
+      weather_type,
+      temperature_coefficient_sd_file,
+      precipitation_coefficient_sd_file,
+      dispersers_to_soils_percentage,
+      quarantine_directions,
+      multiple_random_seeds,
+      file_random_seeds,
+      use_soils,
+      soil_starting_pest_file,
+      start_with_soil_populations)
 
     expect_type(outputs, "list")
     expect_length(outputs, 2)

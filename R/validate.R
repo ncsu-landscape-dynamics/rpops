@@ -21,7 +21,7 @@
 #' (posterior means)
 #' @param parameter_cov_matrix the parameter covariance matrix from the ABC
 #' calibration function (posterior covariance matrix)
-#' @param write_outputs Either c("summary_outputs", or "None"). If not
+#' @param write_outputs Either c("summary_outputs", "all_simulations", or "None"). If not
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
@@ -221,7 +221,11 @@ validate <- function(infected_years_file,
     stop(config$failure)
   }
 
-  write.csv(config$random_seeds, paste0(output_folder_path,"validation_random_seeds.csv"))
+  if (config$multiple_random_seeds && is.null(config$file_random_seeds) &&
+      dir.exists(config$output_folder_path)) {
+    write.csv(config$random_seeds, paste0(config$output_folder_path, "validation_random_seeds.csv"))
+
+  }
 
   i <- NULL
 
