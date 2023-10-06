@@ -370,10 +370,10 @@ validate <- function(infected_years_file,
           # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers and pointers using %dopar%
           comparison <- terra::rast(config$infected_file)[[1]]
-          reference <- terra::rast(config$infected_file)[[1]]
+          reference <- comparison
+          mask <- comparison
           terra::values(comparison) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
-          mask <- terra::rast(config$infected_file)[[1]]
           terra::values(mask) <- config$mask_matrix
           ad <-
             quantity_allocation_disagreement(reference,
