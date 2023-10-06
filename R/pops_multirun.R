@@ -355,13 +355,10 @@ pops_multirun <- function(infected_file,
       run$exposed_runs <- data$exposed
 
       if (config$write_outputs == "all_simulations") {
-        infected_out <- terra::rast(config$infected_file)
-        susectible_out <- terra::rast(config$infected_file)
-        exposed_out <- terra::rast(config$infected_file)
+        infected_out <- terra::rast(config$infected_file)[[1]]
+        susectible_out <- infected_out
+        exposed_out <- infected_out
         for (q in seq_len(length(data$infected))) {
-          terra::values(infected_out[[q]]) <-
-            terra::values(terra::rast(data$infected[[q]],
-                                      crs = crs(infected_out), extent = ext(infected_out)))
           terra::values(infected_out[[q]]) <- data$infected[[q]]
           terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
           for (p in seq_len(length(data$exposed[[q]])))
