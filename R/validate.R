@@ -223,7 +223,8 @@ validate <- function(infected_years_file,
 
   if (config$multiple_random_seeds && is.null(config$file_random_seeds) &&
       dir.exists(config$output_folder_path)) {
-    write.csv(config$random_seeds, paste0(config$output_folder_path, "validation_random_seeds.csv"))
+    write.csv(config$random_seeds, paste0(config$output_folder_path, "validation_random_seeds.csv"),
+              row.names = FALSE)
 
   }
 
