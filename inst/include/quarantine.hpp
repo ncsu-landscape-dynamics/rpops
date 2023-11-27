@@ -76,7 +76,7 @@ Directions directions_from_string(const std::string& text, char delimiter = ',')
  * Class storing and computing quarantine escape metrics for one simulation.
  */
 template<typename IntegerRaster, typename RasterIndex = int>
-class QuarantineEscape
+class QuarantineEscapeAction
 {
 private:
     RasterIndex width_;
@@ -167,7 +167,7 @@ private:
     }
 
 public:
-    QuarantineEscape(
+    QuarantineEscapeAction(
         const IntegerRaster& quarantine_areas,
         double ew_res,
         double ns_res,
@@ -188,26 +188,24 @@ public:
         quarantine_boundary(quarantine_areas);
     }
 
-    QuarantineEscape() = delete;
+    QuarantineEscapeAction() = delete;
 
     /**
      * Computes whether infection in certain step escaped from quarantine areas
      * and if not, computes and saves minimum distance and direction to quarantine areas
      * for the specified step. Aggregates over all quarantine areas.
      */
-    void infection_escape_quarantine(
-        const IntegerRaster& infected,
-        const IntegerRaster& quarantine_areas,
-        unsigned step,
-        const std::vector<std::vector<int>>& suitable_cells)
+    template<typename Hosts>
+    void
+    action(const Hosts& hosts, const IntegerRaster& quarantine_areas, unsigned step)
     {
 
         DistDir min_dist_dir =
             std::make_tuple(std::numeric_limits<double>::max(), Direction::None);
-        for (auto indices : suitable_cells) {
+        for (auto indices : hosts.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            if (!infected(i, j))
+            if (!hosts.infected_at(i, j))
                 continue;
             int area = quarantine_areas(i, j);
             if (area == 0) {
@@ -270,7 +268,8 @@ public:
  */
 template<typename IntegerRaster>
 double quarantine_escape_probability(
-    const std::vector<QuarantineEscape<IntegerRaster>> escape_infos, unsigned step)
+    const std::vector<QuarantineEscapeAction<IntegerRaster>> escape_infos,
+    unsigned step)
 {
     bool escape;
     DistDir distdir;
@@ -290,7 +289,8 @@ double quarantine_escape_probability(
  */
 template<typename IntegerRaster>
 std::vector<DistDir> distance_direction_to_quarantine(
-    const std::vector<QuarantineEscape<IntegerRaster>> escape_infos, unsigned step)
+    const std::vector<QuarantineEscapeAction<IntegerRaster>> escape_infos,
+    unsigned step)
 {
     bool escape;
     DistDir distdir;
@@ -312,7 +312,8 @@ std::vector<DistDir> distance_direction_to_quarantine(
  */
 template<typename IntegerRaster>
 std::string write_quarantine_escape(
-    const std::vector<QuarantineEscape<IntegerRaster>> escape_infos, unsigned num_steps)
+    const std::vector<QuarantineEscapeAction<IntegerRaster>> escape_infos,
+    unsigned num_steps)
 {
     std::stringstream ss;
     ss << std::setprecision(1) << std::fixed;

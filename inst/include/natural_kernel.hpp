@@ -33,7 +33,9 @@ namespace pops {
  *
  * Kernel parameters are taken from the configuration.
  *
+ * @param config Configuration for the kernel
  * @param dispersers The disperser raster (reference, for deterministic kernel)
+ *
  * @return Created kernel
  */
 template<typename Generator, typename IntegerRaster, typename RasterIndex>

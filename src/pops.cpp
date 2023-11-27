@@ -196,6 +196,7 @@ List pops_model_cpp(
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
+    IntegerMatrix dispersers(config.rows, config.cols);
     IntegerMatrix total_dispersers(config.rows, config.cols);
     IntegerMatrix established_dispersers(config.rows, config.cols);
 
@@ -218,7 +219,45 @@ List pops_model_cpp(
 
     config.create_schedules();
 
-    Treatments<IntegerMatrix, NumericMatrix> treatments(config.scheduler());
+    ModelType mt = model_type_from_string(config.model_type);
+    using PoPSModel = Model<IntegerMatrix, NumericMatrix, int>;
+    PoPSModel model(config);
+
+    PestHostUseTable<PoPSModel::StandardSingleHostPool> pest_host_use_table(
+        config, model.environment());
+    CompetencyTable<PoPSModel::StandardSingleHostPool, int> competency_table(
+        config, model.environment());
+    PoPSModel::StandardSingleHostPool host_pool(
+        mt,
+        susceptible,
+        exposed,
+        config.latency_period_steps,
+        infected,
+        total_exposed,
+        resistant,
+        mortality_tracker,
+        mortality,
+        total_hosts,
+        model.environment(),
+        config.generate_stochasticity,
+        config.reproductive_rate,
+        config.establishment_stochasticity,
+        config.establishment_probability,
+        config.rows,
+        config.cols,
+        spatial_indices);
+
+    model.environment().add_host(&host_pool);
+    competency_table.add_host_competencies({1}, 1);
+    PoPSModel::StandardMultiHostPool multi_host_pool({&host_pool}, config);
+    multi_host_pool.set_pest_host_use_table(pest_host_use_table);
+    multi_host_pool.set_competency_table(competency_table);
+    PoPSModel::StandardPestPool pest_pool(
+        dispersers,
+        established_dispersers,
+        outside_dispersers);
+
+    Treatments<PoPSModel::StandardSingleHostPool, NumericMatrix> treatments(config.scheduler());
     for (unsigned t = 0; t < treatment_maps.size(); t++) {
         treatments.add_treatment(
             treatment_maps[t],
@@ -241,8 +280,13 @@ List pops_model_cpp(
     else {
         spread_rate_outputs = 0;
     }
-    SpreadRate<IntegerMatrix> spreadrate(
-        infected, config.ew_res, config.ns_res, spread_rate_outputs, spatial_indices);
+    SpreadRateAction<PoPSModel::StandardMultiHostPool, int> spreadrate(
+        multi_host_pool,
+        config.rows,
+        config.cols,
+        config.ew_res,
+        config.ns_res,
+        spread_rate_outputs);
     unsigned move_scheduled;
     if (config.use_movements) {
         for (unsigned move = 0; move < movements_dates.size(); ++move) {
@@ -261,7 +305,7 @@ List pops_model_cpp(
         quarantine_outputs = 0;
     }
 
-    QuarantineEscape<IntegerMatrix> quarantine(
+    QuarantineEscapeAction<IntegerMatrix> quarantine(
         quarantine_areas,
         config.ew_res,
         config.ns_res,
@@ -294,21 +338,14 @@ List pops_model_cpp(
         network->load(network_stream);
     }
 
-    ModelType mt = model_type_from_string(config.model_type);
     WeatherType weather_typed = weather_type_from_string(config.weather_type);
 
-    Simulation<IntegerMatrix, NumericMatrix> simulation(
-        config.rows, config.cols, mt, config.latency_period_steps);
-
-    Model<IntegerMatrix, NumericMatrix, int> model(config);
     if (use_soils) {
       model.activate_soils(soil_reservoirs);
     }
 
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
-
-      IntegerMatrix dispersers(config.rows, config.cols);
 
       auto weather_step = config.simulation_step_to_weather_step(current_index);
       if (weather_typed == WeatherType::Probabilistic) {
@@ -322,27 +359,18 @@ List pops_model_cpp(
 
         model.run_step(
             current_index,
-            infected,
-            susceptible,
-            total_populations,
-            total_hosts,
+            multi_host_pool,
+            pest_pool,
             dispersers,
-            established_dispersers,
-            total_exposed,
-            exposed,
-            mortality_tracker,
-            mortality,
+            total_populations,
+            treatments,
             temperature,
             survival_rates,
-            treatments,
-            resistant,
-            outside_dispersers,
             spreadrate,
             quarantine,
             quarantine_areas,
             movements,
-            network ? *network : Network<int>::null_network(),
-            spatial_indices);
+            network ? *network : Network<int>::null_network());
 
         // keeps track of cumulative dispersers or propagules from a site.
         if (config.spread_schedule()[current_index]) {

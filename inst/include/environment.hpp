@@ -24,8 +24,10 @@
 #include <string>
 #include <stdexcept>
 
+#include "environment_interface.hpp"
 #include "normal_distribution_with_uniform_fallback.hpp"
 #include "utils.hpp"
+#include "host_pool_interface.hpp"
 #include "generator_provider.hpp"
 
 namespace pops {
@@ -64,8 +66,13 @@ inline WeatherType weather_type_from_string(const std::string& text)
  *
  * Currently, only handles weather coefficient for soils. Holds only the current state.
  */
-template<typename IntegerRaster, typename FloatRaster, typename RasterIndex = int>
+template<
+    typename IntegerRaster,
+    typename FloatRaster,
+    typename RasterIndex,
+    typename Generator>
 class Environment
+    : public EnvironmentInterface<IntegerRaster, FloatRaster, RasterIndex, Generator>
 {
 public:
     Environment() {}
@@ -75,9 +82,10 @@ public:
      *
      * @param raster Raster with the weather coefficient.
      */
-    void update_weather_coefficient(const FloatRaster& raster)
+    void update_weather_coefficient(const FloatRaster& raster) override
     {
         current_weather_coefficient = &raster;
+        weather_ = true;
     }
 
     /**
@@ -99,9 +107,10 @@ public:
      * @throw std::invalid_argument when dimensions of *mean* and *stddev* differ or
      * when mean is out of range
      */
-    template<typename Generator>
     void update_weather_from_distribution(
-        const FloatRaster& mean, const FloatRaster& stddev, Generator& generator)
+        const FloatRaster& mean,
+        const FloatRaster& stddev,
+        Generator& generator) override
     {
         if (mean.rows() != stddev.rows()) {
             throw std::invalid_argument(
@@ -142,6 +151,7 @@ public:
             }
         }
         current_weather_coefficient = &stored_weather_coefficient;
+        weather_ = true;
     }
 
     /**
@@ -153,12 +163,77 @@ public:
      *
      * @throw std::logic_error when coefficient is not set
      */
-    double weather_coefficient_at(RasterIndex row, RasterIndex col) const
+    double weather_coefficient_at(RasterIndex row, RasterIndex col) const override
     {
         if (!current_weather_coefficient) {
             throw std::logic_error("Weather coefficient used, but not provided");
         }
         return current_weather_coefficient->operator()(row, col);
+    }
+
+    double influence_reproductive_rate_at(
+        RasterIndex row, RasterIndex col, double value) const override
+    {
+        if (!weather_)
+            return value;
+        return value * weather_coefficient_at(row, col);
+    }
+
+    double influence_probability_of_establishment_at(
+        RasterIndex row, RasterIndex col, double value) const override
+    {
+        if (!weather_)
+            return value;
+        return value * weather_coefficient_at(row, col);
+    }
+
+    int total_population_at(RasterIndex row, RasterIndex col) const override
+    {
+        // If total population is used, use that instead of computing it.
+        if (total_population_)
+            return total_population_->operator()(row, col);
+        int sum = 0;
+        if (other_individuals_)
+            sum += other_individuals_->operator()(row, col);
+        for (const auto& host : hosts_)
+            sum += host->total_hosts_at(row, col);
+        return sum;
+    }
+
+    std::vector<bool> host_presence_at(RasterIndex row, RasterIndex col) const override
+    {
+        std::vector<bool> presence;
+        presence.reserve(hosts_.size());
+        for (const auto& host : hosts_)
+            presence.push_back(host->total_hosts_at(row, col));
+        return presence;
+    }
+
+    void set_other_individuals(const IntegerRaster* individuals) override
+    {
+        other_individuals_ = individuals;
+    }
+
+    void set_total_population(const IntegerRaster* individuals) override
+    {
+        total_population_ = individuals;
+    }
+
+    void add_host(const HostPoolInterface<RasterIndex>* host) override
+    {
+        // no-op if already there, may become an error in the future
+        if (container_contains(hosts_, host))
+            return;
+        hosts_.push_back(host);
+    }
+
+    size_t host_index(const HostPoolInterface<RasterIndex>* host) const override
+    {
+        auto it = std::find(hosts_.begin(), hosts_.end(), host);
+        if (it == hosts_.end())
+            throw std::invalid_argument(
+                "Environment::host_index: Host is not in the environment");
+        return std::distance(hosts_.begin(), it);
     }
 
     /**
@@ -168,12 +243,25 @@ public:
      *
      * @throw std::logic_error when coefficient is not set
      */
-    const FloatRaster& weather_coefficient() const
+    const FloatRaster& weather_coefficient() const override
     {
         if (!current_weather_coefficient) {
             throw std::logic_error("Weather coefficient used, but not provided");
         }
         return *current_weather_coefficient;
+    }
+
+    void update_temperature(const FloatRaster& raster) override
+    {
+        temperature_ = &raster;
+    }
+
+    double temperature_at(RasterIndex row, RasterIndex col) const override
+    {
+        if (!temperature_) {
+            throw std::logic_error("Temperature used, but not provided");
+        }
+        return temperature_->operator()(row, col);
     }
 
 protected:
@@ -187,6 +275,13 @@ protected:
      */
     const FloatRaster* current_weather_coefficient{nullptr};
     FloatRaster stored_weather_coefficient;
+    bool weather_{false};
+
+    std::vector<const HostPoolInterface<RasterIndex>*> hosts_;  // host, non-owning
+    const IntegerRaster* other_individuals_{nullptr};  // non-hosts, non-owning
+    const IntegerRaster* total_population_{nullptr};  // non-hosts, non-owning
+
+    const FloatRaster* temperature_{nullptr};
 };
 
 }  // namespace pops
