@@ -573,7 +573,7 @@ pops_multirun <- function(infected_file,
     west_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
   }
 
-  which_median <- function(x) raster::which.min(abs(x - median(x)))
+  which_median <- function(x) which.min(abs(x - median(x)))
 
   median_run_index <- which_median(infected_number[[ncol(infected_number)]])
   min_run_index <- which.min(infected_number[[ncol(infected_number)]])
