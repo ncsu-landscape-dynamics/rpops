@@ -118,12 +118,20 @@ std::map<std::string, Value> read_key_value_pairs(
 class Config
 {
 public:
+    /**
+     * @brief Row of a table with pest-host-use data
+     *
+     * One row is stored for each host.
+     */
     struct PestHostUseTableDataRow
     {
-        double susceptibility;
-        double mortality_rate;
-        double mortality_time_lag;
+        double susceptibility;  ///< Susceptibility for a given host
+        double mortality_rate;  ///< Mortality rate for a given host
+        double mortality_time_lag;  ///< Time lag of mortality in mortality steps
     };
+    /**
+     * @brief Row of a table with competency data
+     */
     struct CompetencyTableDataRow
     {
         std::vector<bool> presence_absence;
@@ -182,8 +190,13 @@ public:
     bool use_mortality{false};
     std::string mortality_frequency;
     unsigned mortality_frequency_n;
+    /** Mortality rate if used without pest-host-use table
+     *
+     * @see read_pest_host_use_table()
+     */
     double mortality_rate{0};
-    int mortality_time_lag{0};  // Time lag of mortality in mortality steps
+    /** Time lag of mortality in simulation steps if used without pest-host-use table */
+    int mortality_time_lag{0};
     // Quarantine
     bool use_quarantine{false};
     std::string quarantine_frequency;
@@ -450,6 +463,10 @@ public:
         season_end_month_ = std::stoi(end);
     }
 
+    /**
+     * @brief Set disperser arrival behavior for model
+     * @param value Arrival behavior string "infect" or "land"
+     */
     void set_arrival_behavior(std::string value)
     {
         if (value != "infect" && value != "land") {
@@ -459,6 +476,10 @@ public:
         arrival_behavior_ = value;
     }
 
+    /**
+     * @brief Get disperser arrival behavior for model
+     * @return Arrival behavior as string "infect" or "land"
+     */
     const std::string& arrival_behavior() const
     {
         return arrival_behavior_;
@@ -512,15 +533,36 @@ public:
         this->multiple_random_seeds = true;
     }
 
+    /**
+     * @brief Get data for the pest-host-use table
+     * @return Reference to the internal table
+     *
+     * @see PestHostUseTableDataRow
+     */
     const std::vector<PestHostUseTableDataRow>& pest_host_use_table_data() const
     {
         return pest_host_use_table_data_;
     }
+
+    /**
+     * @brief Get data for the competency table
+     * @return Reference to the internal table
+     *
+     * @see CompetencyTableDataRow
+     */
     const std::vector<CompetencyTableDataRow>& competency_table_data() const
     {
         return competency_table_data_;
     }
 
+    /**
+     * @brief Read pest-host-use table data from vector of vectors of doubles
+     *
+     * The nested vectors need to be of size 3. The order of values is susceptibility,
+     * mortality rate, and mortality time lag.
+     *
+     * @param values Table data
+     */
     void read_pest_host_use_table(const std::vector<std::vector<double>>& values)
     {
         for (const auto& row : values) {
@@ -536,6 +578,18 @@ public:
         }
     }
 
+    /**
+     * @brief Use existing config parameters to create pest-host-use table
+     *
+     * This will create table with date for the given number of hosts with values for
+     * all hosts being the same. Susceptibility is set to 1 and mortality is taken from
+     * existing config attributes *mortality_rate* and *mortality_time_lag*.
+     *
+     * @param num_of_hosts Number of hosts
+     *
+     * @see #mortality_rate
+     * @see #mortality_time_lag
+     */
     void create_pest_host_use_table_from_parameters(int num_of_hosts)
     {
         for (int i = 0; i < num_of_hosts; ++i) {
@@ -547,6 +601,31 @@ public:
         }
     }
 
+    /**
+     * @brief Read competency table from vector of vectors of doubles
+     *
+     * The nested vectors are rows of the table which need to have size 2 or higher.
+     * Each vector contains the combination of hosts and competency score.
+     *
+     * First n-1 items are the host presence and absence data which will be converted
+     * from double to bool, i.e., use 0 for absence, 1 for presence. The number of these
+     * items should be the number of hosts. Last (the nth) item in each vector is the
+     * competency score for the given combination and will be used as double.
+     *
+     * For 1 host with competency 1, the table is `{{1, 1}, {0, 0}}`. For 2 hosts, the
+     * table may look like this:
+     *
+     * ```
+     * {
+     *   {1, 0, 0.1},
+     *   {0, 1, 0.4},
+     *   {1, 1, 0.8},
+     *   {0, 0, 0}
+     * }
+     * ```
+     *
+     * @param values Table data
+     */
     void read_competency_table(const std::vector<std::vector<double>>& values)
     {
         for (const auto& row : values) {
@@ -576,7 +655,7 @@ private:
     Scheduler scheduler_{date_start_, date_end_, step_unit_, step_num_units_};
     bool schedules_created_{false};
 
-    std::string arrival_behavior_{"infect"};
+    std::string arrival_behavior_{"infect"};  ///< Disperser arrival behavior
 
     std::vector<bool> spread_schedule_;
     std::vector<bool> output_schedule_;
@@ -587,7 +666,9 @@ private:
     std::vector<bool> quarantine_schedule_;
     std::vector<unsigned> weather_table_;
 
+    /** Storage for the pest-host-use table data */
     std::vector<PestHostUseTableDataRow> pest_host_use_table_data_;
+    /** Storage for the competency table data */
     std::vector<CompetencyTableDataRow> competency_table_data_;
 };
 

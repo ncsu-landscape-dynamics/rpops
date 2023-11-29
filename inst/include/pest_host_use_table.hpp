@@ -24,13 +24,29 @@
 
 namespace pops {
 
+/**
+ * Pest-host-use table holding susceptibilities, mortality rates, and mortality time
+ * lags for multiple hosts.
+ */
 template<typename HostPool>
 class PestHostUseTable
 {
 public:
     using Environment = typename HostPool::Environment;
 
+    /**
+     * @brief Create an empty pest-host-use table
+     *
+     * @param environment Reference to the environment
+     */
     PestHostUseTable(const Environment& environment) : environment_(environment) {}
+
+    /**
+     * @brief Create a pest-host-use table using values in config
+     *
+     * @param config Configuration with pest-host-use table data
+     * @param environment Reference to the environment
+     */
     PestHostUseTable(const Config& config, const Environment& environment)
         : environment_(environment)
     {
@@ -41,6 +57,15 @@ public:
         }
     }
 
+    /**
+     * @brief Add info for one host to the table
+     *
+     * Order of addition matters and should be the same as additions to the environment.
+     *
+     * @param susceptibility Host susceptibility
+     * @param mortality_rate Host mortality rate
+     * @param mortality_time_lag Host mortality time lag
+     */
     void
     add_host_info(double susceptibility, double mortality_rate, int mortality_time_lag)
     {
@@ -49,6 +74,11 @@ public:
         mortality_time_lags_.push_back(mortality_time_lag);
     }
 
+    /**
+     * @brief Get susceptibility for the given host
+     * @param host Pointer to the host to get the information for
+     * @return Susceptibility score
+     */
     double susceptibility(const HostPool* host) const
     {
         // This is using index because the environment is part of competency table,
@@ -57,12 +87,22 @@ public:
         return susceptibilities_.at(host_index);
     }
 
+    /**
+     * @brief Get mortality rate for the given host
+     * @param host Pointer to the host to get the information for
+     * @return Mortality rate value
+     */
     double mortality_rate(const HostPool* host) const
     {
         auto host_index = environment_.host_index(host);
         return mortality_rates_.at(host_index);
     }
 
+    /**
+     * @brief Get mortality time lag for the given host
+     * @param host Pointer to the host to get the information for
+     * @return Mortality time lag value
+     */
     double mortality_time_lag(const HostPool* host) const
     {
         auto host_index = environment_.host_index(host);
@@ -70,10 +110,10 @@ public:
     }
 
 private:
-    std::vector<double> susceptibilities_;
-    std::vector<double> mortality_rates_;
-    std::vector<int> mortality_time_lags_;
-    const Environment& environment_;
+    std::vector<double> susceptibilities_;  ///< List of susceptibilities for hosts
+    std::vector<double> mortality_rates_;  ///< List of mortality_rates for hosts
+    std::vector<int> mortality_time_lags_;  ///< List of mortality time lags for hosts
+    const Environment& environment_;  ///< Environment used for host indexing
 };
 
 }  // namespace pops

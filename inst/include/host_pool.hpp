@@ -84,6 +84,9 @@ public:
      * host infection over time. Expectation is that mortality tracker is of
      * length (1/mortality_rate + mortality_time_lag).
      *
+     * Host is added to the environment by the constructor. Afterwards, the environment
+     * is not modified.
+     *
      * @param model_type Type of the model (SI or SEI)
      * @param susceptible Raster of susceptible hosts
      * @param exposed Raster of exposed or infected hosts
@@ -114,7 +117,7 @@ public:
         std::vector<IntegerRaster>& mortality_tracker_vector,
         IntegerRaster& died,
         IntegerRaster& total_hosts,
-        const Environment& environment,
+        Environment& environment,
         bool dispersers_stochasticity,
         double reproductive_rate,
         bool establishment_stochasticity,
@@ -140,15 +143,39 @@ public:
           rows_(rows),
           cols_(cols),
           suitable_cells_(suitable_cells)
-    {}
+    {
+        environment.add_host(this);
+    }
 
+    /**
+     * @brief Set pest-host-use table
+     *
+     * If set, apply_mortality_at(RasterIndex, RasterIndex) can be used instead of the
+     * version which takes mortality parameters directly. Susceptibility is used
+     * automatically if the table is set.
+     *
+     * Pointer to the existing object is stored and used. So, the table can be modified,
+     * but the table object needs to exists during the lifetime of this object.
+     *
+     * @param pest_host_use_table Reference to the table
+     */
     void set_pest_host_use_table(const PestHostUseTable<HostPool>& pest_host_use_table)
     {
         this->pest_host_use_table_ = &pest_host_use_table;
     }
 
-    void
-    set_competency_table(const CompetencyTable<HostPool, RasterIndex>& competency_table)
+    /**
+     * @brief Set competency table
+     *
+     * Competency is used automatically if the table is set. No competency is considered
+     * if the table is not set.
+     *
+     * Pointer to the existing object is stored and used. So, the table can be modified,
+     * but the table object needs to exists during the lifetime of this object.
+     *
+     * @param competency_table Reference to the table
+     */
+    void set_competency_table(const CompetencyTable<HostPool>& competency_table)
     {
         this->competency_table_ = &competency_table;
     }
@@ -186,6 +213,19 @@ public:
         return 0;
     }
 
+    /**
+     * @brief Test whether a disperser can establish
+     *
+     * This static (object-idependent) function to test disperser establishement allows
+     * code reuse between a single host and a multi-host case.
+     *
+     * @param probability_of_establishment Probability of establishment
+     * @param establishment_stochasticity true if establishment stochasticity is enabled
+     * @param deterministic_establishment_probability Establishment probability for
+     * deterministic establishment
+     * @param generator Random number generator (used with enabled stochasticity)
+     * @return true if disperser can establish, false otherwise
+     */
     static bool can_disperser_establish(
         double probability_of_establishment,
         bool establishment_stochasticity,
@@ -605,9 +645,10 @@ public:
     }
 
     /**
-     * @brief Remove percentage of infestation/infection
+     * @brief Remove percentage of infestation/infection (I->S)
      *
-     * remove the same percentage for total exposed and remove randomly from each cohort
+     * Besides removing percentage of infected, it removes the same percentage for total
+     * exposed and remove individuals randomly from each cohort.
      *
      * @param row Row index of the cell
      * @param col Column index of the cell
@@ -1061,6 +1102,14 @@ public:
         return suitable_cells_;
     }
 
+    /**
+     * @brief Get list with this host pools
+     *
+     * This is for compatibility with multi-host pool. In case of this host pool, it
+     * returns one item which is a pointer to this host pool.
+     *
+     * @return Read-write reference to a vector of size 1.
+     */
     std::vector<HostPool*>& host_pools()
     {
         return host_pools_;
@@ -1108,8 +1157,10 @@ private:
     bool establishment_stochasticity_{true};
     double deterministic_establishment_probability_{0};
 
+    /** Pest-host-use table */
     const PestHostUseTable<HostPool>* pest_host_use_table_{nullptr};
-    const CompetencyTable<HostPool, RasterIndex>* competency_table_{nullptr};
+    /** Competency table */
+    const CompetencyTable<HostPool>* competency_table_{nullptr};
 
     RasterIndex rows_{0};
     RasterIndex cols_{0};

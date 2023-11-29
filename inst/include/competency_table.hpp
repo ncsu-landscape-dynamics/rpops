@@ -24,13 +24,30 @@
 
 namespace pops {
 
-template<typename HostPool, typename RasterIndex>
+/**
+ * Competency table holding combinations of host presences and absences and the
+ * corresponding competency score.
+ */
+template<typename HostPool>
 class CompetencyTable
 {
 public:
+    using RasterIndex = typename HostPool::RasterIndex;
     using Environment = typename HostPool::Environment;
 
+    /**
+     * @brief Create an empty competency table
+     *
+     * @param environment Reference to the environment
+     */
     CompetencyTable(const Environment& environment) : environment_(environment) {}
+
+    /**
+     * @brief Create a competency table using values in config
+     *
+     * @param config Configuration with competency table data
+     * @param environment Reference to the environment
+     */
     CompetencyTable(const Config& config, const Environment& environment)
         : environment_(environment)
     {
@@ -39,12 +56,34 @@ public:
         }
     }
 
+    /**
+     * @brief Add competencies for a combination of host presences and absences
+     *
+     * Order of presence-absence data needs to be the same as host order in the
+     * environment.
+     *
+     * Order of calls does not matter.
+     *
+     * @param presence_absence Presence (true) and absence (false) for each host.
+     * @param competency Competency for a given presence-absence combination.
+     */
     void
     add_host_competencies(const std::vector<bool>& presence_absence, double competency)
     {
         competency_table_.emplace_back(presence_absence, competency);
     }
 
+    /**
+     * @brief Get competency at a given cell
+     *
+     * @param row Row index of the cell
+     * @param col Column index of the cell
+     * @param host Pointer to a specific host pool which is asking about competency
+     *
+     * @return Competency score
+     *
+     * @see find_competency()
+     */
     double competency_at(RasterIndex row, RasterIndex col, const HostPool* host) const
     {
         auto presence_absence = environment_.host_presence_at(row, col);
@@ -52,6 +91,18 @@ public:
         return find_competency(presence_absence, host_index);
     }
 
+private:
+    /**
+     * @brief Find competency score in the table
+     *
+     * The *host_index* parameter is used to skip records which don't include the given
+     * host.
+     *
+     * @param presence_absence Actual presence-absence data at a given place (cell)
+     * @param host_index Index of the specific pool host originating the request
+     *
+     * @return Competency score
+     */
     double
     find_competency(const std::vector<bool>& presence_absence, size_t host_index) const
     {
@@ -89,7 +140,9 @@ public:
         return competency;
     }
 
-private:
+    /**
+     * @brief One row of the comptenecy table
+     */
     struct TableRow
     {
         std::vector<bool> presence_absence;
@@ -100,8 +153,8 @@ private:
             : presence_absence(presence_absence), competency(competency)
         {}
     };
-    std::vector<TableRow> competency_table_;
-    const Environment& environment_;
+    std::vector<TableRow> competency_table_;  ///< Internal table for lookup
+    const Environment& environment_;  ///< Environment (for host index)
 };
 
 }  // namespace pops

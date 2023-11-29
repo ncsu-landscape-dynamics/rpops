@@ -126,17 +126,20 @@ protected:
     }
 
 public:
+    /** Type for single-host pool */
     using StandardSingleHostPool = HostPool<
         IntegerRaster,
         FloatRaster,
         RasterIndex,
         RandomNumberGeneratorProvider<Generator>>;
+    /** Type for multi-host pool */
     using StandardMultiHostPool = MultiHostPool<
         StandardSingleHostPool,
         IntegerRaster,
         FloatRaster,
         RasterIndex,
         RandomNumberGeneratorProvider<Generator>>;
+    /** Type for pest pool */
     using StandardPestPool = PestPool<IntegerRaster, FloatRaster, RasterIndex>;
 
     Model(
@@ -259,7 +262,6 @@ public:
             step,
             multi_host_pool,
             pest_pool,
-            dispersers,
             total_populations,
             treatments,
             temperatures,
@@ -277,7 +279,6 @@ public:
      * @param step Step number in the simulation
      * @param host_pool Host pool
      * @param pest_pool Pest pool
-     * @param[out] dispersers Dispersing individuals (used directly for kernels)
      * @param[in,out] total_populations All host and non-host individuals in the area
      * @param[in,out] treatments Treatments to be applied (also tracks use of
      * treatments)
@@ -294,7 +295,6 @@ public:
         int step,
         StandardMultiHostPool& host_pool,
         StandardPestPool& pest_pool,
-        IntegerRaster& dispersers,
         IntegerRaster& total_populations,
         Treatments<StandardSingleHostPool, FloatRaster>& treatments,
         const std::vector<FloatRaster>& temperatures,
@@ -332,9 +332,10 @@ public:
         }
         // actual spread
         if (config_.spread_schedule()[step]) {
-            auto dispersal_kernel = kernel_factory_(config_, dispersers, network);
+            auto dispersal_kernel =
+                kernel_factory_(config_, pest_pool.dispersers(), network);
             auto overpopulation_kernel =
-                create_overpopulation_movement_kernel(dispersers, network);
+                create_overpopulation_movement_kernel(pest_pool.dispersers(), network);
             SpreadAction<
                 StandardMultiHostPool,
                 StandardPestPool,

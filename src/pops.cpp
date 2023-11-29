@@ -196,7 +196,7 @@ List pops_model_cpp(
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
-    IntegerMatrix dispersers(config.rows, config.cols);
+    IntegerMatrix dispersers(config.rows, config.cols, 0);
     IntegerMatrix total_dispersers(config.rows, config.cols);
     IntegerMatrix established_dispersers(config.rows, config.cols);
 
@@ -225,7 +225,7 @@ List pops_model_cpp(
 
     PestHostUseTable<PoPSModel::StandardSingleHostPool> pest_host_use_table(
         config, model.environment());
-    CompetencyTable<PoPSModel::StandardSingleHostPool, int> competency_table(
+    CompetencyTable<PoPSModel::StandardSingleHostPool> competency_table(
         config, model.environment());
     PoPSModel::StandardSingleHostPool host_pool(
         mt,
@@ -247,7 +247,6 @@ List pops_model_cpp(
         config.cols,
         spatial_indices);
 
-    model.environment().add_host(&host_pool);
     competency_table.add_host_competencies({1}, 1);
     PoPSModel::StandardMultiHostPool multi_host_pool({&host_pool}, config);
     multi_host_pool.set_pest_host_use_table(pest_host_use_table);
@@ -361,7 +360,6 @@ List pops_model_cpp(
             current_index,
             multi_host_pool,
             pest_pool,
-            dispersers,
             total_populations,
             treatments,
             temperature,

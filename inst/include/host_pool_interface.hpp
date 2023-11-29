@@ -28,10 +28,12 @@ namespace pops {
  * functionally different hosts or if we have dependencies which the interface would
  * address.
  */
-template<typename RasterIndex>
+template<typename RasterIndexType>
 class HostPoolInterface
 {
 public:
+    using RasterIndex = RasterIndexType;
+
     virtual ~HostPoolInterface() {}
 
     /**

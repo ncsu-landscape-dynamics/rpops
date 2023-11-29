@@ -79,7 +79,7 @@ public:
      *
      * @param table Reference to the table object
      */
-    void set_competency_table(const CompetencyTable<HostPool, RasterIndex>& table)
+    void set_competency_table(const CompetencyTable<HostPool>& table)
     {
         for (auto& host_pool : host_pools_) {
             host_pool->set_competency_table(table);

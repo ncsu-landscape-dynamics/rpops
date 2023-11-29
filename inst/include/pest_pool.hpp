@@ -72,6 +72,17 @@ public:
         return dispersers_(row, col);
     }
     /**
+     * @brief Get raster of dispersers
+     *
+     * @note Most interaction should be done by dispersers_at().
+     *
+     * @return Read-only reference to dispersers raster
+     */
+    const IntegerRaster& dispersers()
+    {
+        return dispersers_;
+    }
+    /**
      * @brief Set number of established dispersers
      *
      * Established are dispersers which left cell (row, col) and established themselves

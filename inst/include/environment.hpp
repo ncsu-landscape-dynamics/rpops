@@ -200,6 +200,11 @@ public:
         return sum;
     }
 
+    /**
+     * @copydoc EnvironmentInterface::host_presence_at()
+     *
+     * Hosts are in the order of how host pools were registered to the environment.
+     */
     std::vector<bool> host_presence_at(RasterIndex row, RasterIndex col) const override
     {
         std::vector<bool> presence;
@@ -219,14 +224,35 @@ public:
         total_population_ = individuals;
     }
 
+    // While copydoc generates correct doc here, it triggers a
+    // warning with Doxygen 1.8.17, so using see here for now.
+    /**
+     * @see EnvironmentInterface::add_host()
+     *
+     * @note The function is no-op if host pool already registered. This may throw an
+     * exception in the future.
+     */
     void add_host(const HostPoolInterface<RasterIndex>* host) override
     {
-        // no-op if already there, may become an error in the future
         if (container_contains(hosts_, host))
             return;
         hosts_.push_back(host);
     }
 
+    /**
+     * @brief Remove all hosts from the environment.
+     *
+     * This function is useful for reusing an environment object in different contexts,
+     * especially in tests, but it does not have an epidemiological meaning.
+     */
+    void remove_hosts()
+    {
+        hosts_.clear();
+    }
+
+    /**
+     * @copydoc EnvironmentInterface::host_index()
+     */
     size_t host_index(const HostPoolInterface<RasterIndex>* host) const override
     {
         auto it = std::find(hosts_.begin(), hosts_.end(), host);

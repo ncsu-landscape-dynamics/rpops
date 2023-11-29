@@ -38,12 +38,30 @@ public:
     virtual double influence_probability_of_establishment_at(
         RasterIndex row, RasterIndex col, double value) const = 0;
     virtual int total_population_at(RasterIndex row, RasterIndex col) const = 0;
+    /**
+     * @brief Get presence-absence for host at a given cell
+     *
+     * @param row Row index of the cell
+     * @param col Column index of the cell
+     *
+     * @return Vector of presence-absence data
+     */
     virtual std::vector<bool>
     host_presence_at(RasterIndex row, RasterIndex col) const = 0;
     // in general, we may have other individuals-non const
     virtual void set_other_individuals(const IntegerRaster* individuals) = 0;
     virtual void set_total_population(const IntegerRaster* individuals) = 0;
+    /**
+     * @brief Register a host pool in the environment
+     * @param host Host pool to add
+     */
     virtual void add_host(const HostPoolInterface<RasterIndex>* host) = 0;
+    /**
+     * @brief Get index of a host pool in the environment
+     * @param host Pointer to a specific host pool
+     * @return Index based on the order within the environment
+     * @throw std::invalid_argument if host is not present
+     */
     virtual size_t host_index(const HostPoolInterface<RasterIndex>* host) const = 0;
     virtual const FloatRaster& weather_coefficient() const = 0;
     virtual void update_temperature(const FloatRaster& raster) = 0;

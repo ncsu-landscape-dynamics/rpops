@@ -362,7 +362,7 @@ std::string quarantine_enum_to_string(Direction type)
 }
 
 /**
- * Create a list of suitable cells in from a host raster.
+ * Create a list of suitable cells from a host raster.
  *
  * Suitable cell is defined as cell with value higher than zero, i.e., there is at least
  * one host.
@@ -390,6 +390,11 @@ std::vector<std::vector<RasterIndex>> find_suitable_cells(const RasterType& rast
     return cells;
 }
 
+/**
+ * Create a list of suitable cells from a list of host rasters.
+ *
+ * @see find_suitable_cells(const RasterType&)
+ */
 template<typename RasterIndex, typename RasterType>
 std::vector<std::vector<RasterIndex>>
 find_suitable_cells(const std::vector<const RasterType*>& rasters)
