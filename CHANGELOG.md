@@ -32,6 +32,10 @@ this repository.
 
 - Fixed quarantine directions outputs in pops-multirun (@petrasovaa, #162).
 
+### Removed
+
+- Removed dependencies: packages rgdal, raster, sp
+
 ## [2.0.1] 2022-11-16
 
 ### Added
