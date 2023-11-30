@@ -569,26 +569,6 @@
       ],
       "Hash": "7e5e3cbd2a7bc07880c94e22348fb661"
     },
-    "igraph": {
-      "Package": "igraph",
-      "Version": "1.4.3",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "Matrix",
-        "R",
-        "cpp11",
-        "grDevices",
-        "graphics",
-        "magrittr",
-        "methods",
-        "pkgconfig",
-        "rlang",
-        "stats",
-        "utils"
-      ],
-      "Hash": "f7f74f5fbff27d52b1283ac512bc5430"
-    },
     "isoband": {
       "Package": "isoband",
       "Version": "0.2.7",
@@ -660,7 +640,7 @@
     },
     "landscapemetrics": {
       "Package": "landscapemetrics",
-      "Version": "1.5.6",
+      "Version": "2.0.0",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -670,12 +650,11 @@
         "cli",
         "ggplot2",
         "methods",
-        "raster",
-        "sp",
         "stats",
+        "terra",
         "tibble"
       ],
-      "Hash": "6c43fba1dd83b549ef471a36599898de"
+      "Hash": "101466a15b865990cd6e376df3f439de"
     },
     "lattice": {
       "Package": "lattice",
@@ -1005,20 +984,6 @@
       ],
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d"
     },
-    "raster": {
-      "Package": "raster",
-      "Version": "3.6-20",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "Rcpp",
-        "methods",
-        "sp",
-        "terra"
-      ],
-      "Hash": "ebebd9f0f203a129eb2da96470191b82"
-    },
     "rcmdcheck": {
       "Package": "rcmdcheck",
       "Version": "1.4.0",
@@ -1084,22 +1049,6 @@
         "lazyeval"
       ],
       "Hash": "ae34cd56890607370665bee5bd17812f"
-    },
-    "rgdal": {
-      "Package": "rgdal",
-      "Version": "1.6-7",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "grDevices",
-        "graphics",
-        "methods",
-        "sp",
-        "stats",
-        "utils"
-      ],
-      "Hash": "10b777236c9e7855bc9dea8e347e30b7"
     },
     "rlang": {
       "Package": "rlang",
@@ -1204,23 +1153,6 @@
         "utils"
       ],
       "Hash": "3f9796a8d0a0e8c6eb49a4b029359d1f"
-    },
-    "sp": {
-      "Package": "sp",
-      "Version": "1.6-1",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Requirements": [
-        "R",
-        "grDevices",
-        "graphics",
-        "grid",
-        "lattice",
-        "methods",
-        "stats",
-        "utils"
-      ],
-      "Hash": "ca27b2643e3593b7688244d035f2cd92"
     },
     "stringi": {
       "Package": "stringi",
@@ -1353,16 +1285,6 @@
         "cpp11"
       ],
       "Hash": "8548b44f79a35ba1791308b61e6012d7"
-    },
-    "timechange": {
-      "Package": "timechange",
-      "Version": "0.2.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "8548b44f79a35ba1791308b61e6012d7",
-      "Requirements": [
-        "cpp11"
-      ]
     },
     "tinytex": {
       "Package": "tinytex",

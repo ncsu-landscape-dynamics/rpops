@@ -5,8 +5,6 @@
 #'
 #' @param config list of all data necessary used to set up c++ model
 #'
-#' @importFrom raster
-#' cellStats  calc extract
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' rowColFromCell global vect

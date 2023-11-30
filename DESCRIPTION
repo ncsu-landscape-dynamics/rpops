@@ -31,7 +31,6 @@ Imports:
     MASS,
     aws.s3,
     Metrics,
-    raster,
     methods
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
@@ -42,8 +41,6 @@ SystemRequirements:
     GNU make
 Suggests: 
     testthat,
-    rgdal,
-    sp,
     rlist,
     knitr,
     rmarkdown,
