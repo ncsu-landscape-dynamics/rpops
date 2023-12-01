@@ -223,6 +223,47 @@ List pops_model_cpp(
 
     ModelType mt = model_type_from_string(config.model_type);
     using PoPSModel = Model<IntegerMatrix, NumericMatrix, int>;
+
+    Treatments<PoPSModel::StandardSingleHostPool, NumericMatrix> treatments(config.scheduler());
+    for (unsigned t = 0; t < treatment_maps.size(); t++) {
+      treatments.add_treatment(
+        treatment_maps[t],
+                      pops::Date(treatment_dates[t]),
+                      pesticide_duration[t],
+                                        treatment_application);
+      config.use_treatments = true;
+    }
+
+    unsigned move_scheduled;
+    if (config.use_movements) {
+      for (unsigned move = 0; move < movements_dates.size(); ++move) {
+        pops::Date movement_date(movements_dates[move]);
+        move_scheduled =
+          unsigned(config.scheduler().schedule_action_date(movement_date));
+        config.movement_schedule.push_back(move_scheduled);
+      }
+    }
+
+    std::unique_ptr<Network<int>> network{nullptr};
+    if (network_config.isNotNull() && network_data_config.isNotNull()) {
+      // The best place for bbox handling would be with rows, cols, and
+      // resolution, but since it is required only for network, it is here.
+      config.bbox.north = bbox["north"];
+      config.bbox.south = bbox["south"];
+      config.bbox.east = bbox["east"];
+      config.bbox.west = bbox["west"];
+      List net_config(network_config);
+      config.network_min_distance = net_config["network_min_distance"];
+      config.network_max_distance = net_config["network_max_distance"];
+      std::string network_movement = net_config["network_movement"];
+      config.network_movement = network_movement;
+      network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
+      List net_data_config(network_data_config);
+      std::ifstream network_stream{
+        Rcpp::as<std::string>(net_data_config["network_filename"])};
+      network->load(network_stream);
+    }
+
     PoPSModel model(config);
 
     PestHostUseTable<PoPSModel::StandardSingleHostPool> pest_host_use_table(
@@ -258,16 +299,6 @@ List pops_model_cpp(
         established_dispersers,
         outside_dispersers);
 
-    Treatments<PoPSModel::StandardSingleHostPool, NumericMatrix> treatments(config.scheduler());
-    for (unsigned t = 0; t < treatment_maps.size(); t++) {
-        treatments.add_treatment(
-            treatment_maps[t],
-            pops::Date(treatment_dates[t]),
-            pesticide_duration[t],
-            treatment_application);
-        config.use_treatments = true;
-    }
-
     if (config.use_lethal_temperature) {
         if (config.num_lethal() > temperature.size()) {
             Rcerr << "Not enough years of temperature data" << std::endl;
@@ -288,15 +319,6 @@ List pops_model_cpp(
         config.ew_res,
         config.ns_res,
         spread_rate_outputs);
-    unsigned move_scheduled;
-    if (config.use_movements) {
-        for (unsigned move = 0; move < movements_dates.size(); ++move) {
-            pops::Date movement_date(movements_dates[move]);
-            move_scheduled =
-                unsigned(config.scheduler().schedule_action_date(movement_date));
-            config.movement_schedule.push_back(move_scheduled);
-        }
-    }
 
     unsigned quarantine_outputs;
     if (config.use_quarantine) {
@@ -318,26 +340,6 @@ List pops_model_cpp(
     std::vector<int> escape_dists;
     Direction escape_direction;
     std::vector<std::string> escape_directions;
-
-    std::unique_ptr<Network<int>> network{nullptr};
-    if (network_config.isNotNull() && network_data_config.isNotNull()) {
-        // The best place for bbox handling would be with rows, cols, and
-        // resolution, but since it is required only for network, it is here.
-        config.bbox.north = bbox["north"];
-        config.bbox.south = bbox["south"];
-        config.bbox.east = bbox["east"];
-        config.bbox.west = bbox["west"];
-        List net_config(network_config);
-        config.network_min_distance = net_config["network_min_distance"];
-        config.network_max_distance = net_config["network_max_distance"];
-        std::string network_movement = net_config["network_movement"];
-        config.network_movement = network_movement;
-        network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
-        List net_data_config(network_data_config);
-        std::ifstream network_stream{
-            Rcpp::as<std::string>(net_data_config["network_filename"])};
-        network->load(network_stream);
-    }
 
     WeatherType weather_typed = weather_type_from_string(config.weather_type);
 
