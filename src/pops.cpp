@@ -194,7 +194,7 @@ List pops_model_cpp(
     bool use_soils = bool_config["use_soils"];
     config.dispersers_to_soils_percentage = dispersers_to_soils_percentage;
 
-    config.create_pest_host_use_table_from_parameters(1);
+    config.create_pest_host_table_from_parameters(1);
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
@@ -263,10 +263,14 @@ List pops_model_cpp(
         Rcpp::as<std::string>(net_data_config["network_filename"])};
       network->load(network_stream);
     }
+    std::vector<std::vector<double>> competency_table_data;
+    competency_table_data.push_back({1, 1});
+    competency_table_data.push_back({0, 0});
+    config.read_competency_table(competency_table_data);
 
     PoPSModel model(config);
 
-    PestHostUseTable<PoPSModel::StandardSingleHostPool> pest_host_use_table(
+    PestHostTable<PoPSModel::StandardSingleHostPool> pest_host_table(
         config, model.environment());
     CompetencyTable<PoPSModel::StandardSingleHostPool> competency_table(
         config, model.environment());
@@ -290,9 +294,8 @@ List pops_model_cpp(
         config.cols,
         spatial_indices);
 
-    competency_table.add_host_competencies({1}, 1);
     PoPSModel::StandardMultiHostPool multi_host_pool({&host_pool}, config);
-    multi_host_pool.set_pest_host_use_table(pest_host_use_table);
+    multi_host_pool.set_pest_host_table(pest_host_table);
     multi_host_pool.set_competency_table(competency_table);
     PoPSModel::StandardPestPool pest_pool(
         dispersers,

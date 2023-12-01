@@ -22,7 +22,7 @@
 
 #include "competency_table.hpp"
 #include "config.hpp"
-#include "pest_host_use_table.hpp"
+#include "pest_host_table.hpp"
 #include "utils.hpp"
 
 namespace pops {
@@ -59,16 +59,16 @@ public:
     {}
 
     /**
-     * @brief Set pest-host-use table for all hosts
+     * @brief Set pest-host table for all hosts
      *
      * The existing object will be used (not copy is performed).
      *
      * @param table Reference to the table object
      */
-    void set_pest_host_use_table(const PestHostUseTable<HostPool>& table)
+    void set_pest_host_table(const PestHostTable<HostPool>& table)
     {
         for (auto& host_pool : host_pools_) {
-            host_pool->set_pest_host_use_table(table);
+            host_pool->set_pest_host_table(table);
         }
     }
 

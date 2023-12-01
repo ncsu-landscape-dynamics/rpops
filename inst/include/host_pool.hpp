@@ -25,7 +25,7 @@
 #include "model_type.hpp"
 #include "environment_interface.hpp"
 #include "competency_table.hpp"
-#include "pest_host_use_table.hpp"
+#include "pest_host_table.hpp"
 
 namespace pops {
 
@@ -148,7 +148,7 @@ public:
     }
 
     /**
-     * @brief Set pest-host-use table
+     * @brief Set pest-host table
      *
      * If set, apply_mortality_at(RasterIndex, RasterIndex) can be used instead of the
      * version which takes mortality parameters directly. Susceptibility is used
@@ -157,11 +157,11 @@ public:
      * Pointer to the existing object is stored and used. So, the table can be modified,
      * but the table object needs to exists during the lifetime of this object.
      *
-     * @param pest_host_use_table Reference to the table
+     * @param table Reference to the table
      */
-    void set_pest_host_use_table(const PestHostUseTable<HostPool>& pest_host_use_table)
+    void set_pest_host_table(const PestHostTable<HostPool>& table)
     {
-        this->pest_host_use_table_ = &pest_host_use_table;
+        this->pest_host_table_ = &table;
     }
 
     /**
@@ -173,11 +173,11 @@ public:
      * Pointer to the existing object is stored and used. So, the table can be modified,
      * but the table object needs to exists during the lifetime of this object.
      *
-     * @param competency_table Reference to the table
+     * @param table Reference to the table
      */
-    void set_competency_table(const CompetencyTable<HostPool>& competency_table)
+    void set_competency_table(const CompetencyTable<HostPool>& table)
     {
-        this->competency_table_ = &competency_table;
+        this->competency_table_ = &table;
     }
 
     /**
@@ -324,8 +324,8 @@ public:
         double probability_of_establishment =
             (double)(susceptible_(row, col))
             / environment_.total_population_at(row, col);
-        if (pest_host_use_table_) {
-            probability_of_establishment *= pest_host_use_table_->susceptibility(this);
+        if (pest_host_table_) {
+            probability_of_establishment *= pest_host_table_->susceptibility(this);
         }
         return environment_.influence_probability_of_establishment_at(
             row, col, probability_of_establishment);
@@ -851,7 +851,7 @@ public:
     /**
      * @brief Apply mortality at a given cell
      *
-     * Uses pest-host-use table for mortality parameters.
+     * Uses pest-host table for mortality parameters.
      *
      * @param row Row index of the cell
      * @param col Column index of the cell
@@ -860,16 +860,16 @@ public:
      */
     void apply_mortality_at(RasterIndex row, RasterIndex col)
     {
-        if (!pest_host_use_table_) {
+        if (!pest_host_table_) {
             throw std::invalid_argument(
-                "Set pest-host-use table before calling apply_mortality_at "
+                "Set pest-host table before calling apply_mortality_at "
                 "or provide parameters in the function call");
         }
         this->apply_mortality_at(
             row,
             col,
-            pest_host_use_table_->mortality_rate(this),
-            pest_host_use_table_->mortality_time_lag(this));
+            pest_host_table_->mortality_rate(this),
+            pest_host_table_->mortality_time_lag(this));
     }
 
     /**
@@ -1157,8 +1157,8 @@ private:
     bool establishment_stochasticity_{true};
     double deterministic_establishment_probability_{0};
 
-    /** Pest-host-use table */
-    const PestHostUseTable<HostPool>* pest_host_use_table_{nullptr};
+    /** pest-host table */
+    const PestHostTable<HostPool>* pest_host_table_{nullptr};
     /** Competency table */
     const CompetencyTable<HostPool>* competency_table_{nullptr};
 

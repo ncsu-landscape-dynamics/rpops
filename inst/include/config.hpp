@@ -27,6 +27,7 @@
 #include "scheduling.hpp"
 #include "utils.hpp"
 
+#include <cmath>
 #include <vector>
 #include <iostream>
 #include <regex>
@@ -119,11 +120,11 @@ class Config
 {
 public:
     /**
-     * @brief Row of a table with pest-host-use data
+     * @brief Row of a table with pest-host data
      *
      * One row is stored for each host.
      */
-    struct PestHostUseTableDataRow
+    struct PestHostTableDataRow
     {
         double susceptibility;  ///< Susceptibility for a given host
         double mortality_rate;  ///< Mortality rate for a given host
@@ -190,12 +191,12 @@ public:
     bool use_mortality{false};
     std::string mortality_frequency;
     unsigned mortality_frequency_n;
-    /** Mortality rate if used without pest-host-use table
+    /** Mortality rate if used without pest-host table
      *
-     * @see read_pest_host_use_table()
+     * @see read_pest_host_table()
      */
     double mortality_rate{0};
-    /** Time lag of mortality in simulation steps if used without pest-host-use table */
+    /** Time lag of mortality in simulation steps if used without pest-host table */
     int mortality_time_lag{0};
     // Quarantine
     bool use_quarantine{false};
@@ -534,14 +535,14 @@ public:
     }
 
     /**
-     * @brief Get data for the pest-host-use table
+     * @brief Get data for the pest-host table
      * @return Reference to the internal table
      *
-     * @see PestHostUseTableDataRow
+     * @see PestHostTableDataRow
      */
-    const std::vector<PestHostUseTableDataRow>& pest_host_use_table_data() const
+    const std::vector<PestHostTableDataRow>& pest_host_table_data() const
     {
-        return pest_host_use_table_data_;
+        return pest_host_table_data_;
     }
 
     /**
@@ -556,30 +557,30 @@ public:
     }
 
     /**
-     * @brief Read pest-host-use table data from vector of vectors of doubles
+     * @brief Read pest-host table data from vector of vectors of doubles
      *
      * The nested vectors need to be of size 3. The order of values is susceptibility,
      * mortality rate, and mortality time lag.
      *
      * @param values Table data
      */
-    void read_pest_host_use_table(const std::vector<std::vector<double>>& values)
+    void read_pest_host_table(const std::vector<std::vector<double>>& values)
     {
         for (const auto& row : values) {
             if (row.size() < 3) {
                 throw std::invalid_argument(
-                    "3 values are required for each pest-host-use table row");
+                    "3 values are required for each pest-host table row");
             }
-            PestHostUseTableDataRow resulting_row;
+            PestHostTableDataRow resulting_row;
             resulting_row.susceptibility = row[0];
             resulting_row.mortality_rate = row[1];
             resulting_row.mortality_time_lag = row[2];
-            pest_host_use_table_data_.push_back(std::move(resulting_row));
+            pest_host_table_data_.push_back(std::move(resulting_row));
         }
     }
 
     /**
-     * @brief Use existing config parameters to create pest-host-use table
+     * @brief Use existing config parameters to create pest-host table
      *
      * This will create table with date for the given number of hosts with values for
      * all hosts being the same. Susceptibility is set to 1 and mortality is taken from
@@ -590,14 +591,14 @@ public:
      * @see #mortality_rate
      * @see #mortality_time_lag
      */
-    void create_pest_host_use_table_from_parameters(int num_of_hosts)
+    void create_pest_host_table_from_parameters(int num_of_hosts)
     {
         for (int i = 0; i < num_of_hosts; ++i) {
-            PestHostUseTableDataRow resulting_row;
+            PestHostTableDataRow resulting_row;
             resulting_row.susceptibility = 1;
             resulting_row.mortality_rate = this->mortality_rate;
             resulting_row.mortality_time_lag = this->mortality_time_lag;
-            pest_host_use_table_data_.push_back(std::move(resulting_row));
+            pest_host_table_data_.push_back(std::move(resulting_row));
         }
     }
 
@@ -625,13 +626,29 @@ public:
      * ```
      *
      * @param values Table data
+     *
+     * @throw std::invalid_argument when rows have different sizes
+     * @throw std::invalid_argument when row size is less then 2
      */
     void read_competency_table(const std::vector<std::vector<double>>& values)
     {
+        size_t first_row_size{0};
+        bool first_row{true};
         for (const auto& row : values) {
+            if (!first_row && row.size() != first_row_size) {
+                throw std::invalid_argument(
+                    "All competency table rows must be the same size ("
+                    + std::to_string(row.size())
+                    + " != " + std::to_string(first_row_size) + ")");
+            }
+            else {
+                first_row_size = row.size();
+                first_row = false;
+            }
             if (row.size() < 2) {
                 throw std::invalid_argument(
-                    "At least 2 values are required for each competency table row");
+                    "At least 2 values are required for each competency table row (not "
+                    + std::to_string(row.size()) + ")");
             }
             CompetencyTableDataRow resulting_row;
             for (auto it = row.begin(); it < std::prev(row.end()); ++it) {
@@ -640,6 +657,26 @@ public:
             resulting_row.competency = row.back();
             competency_table_data_.push_back(std::move(resulting_row));
         }
+    }
+
+    /**
+     * @brief Test if the competency table is complete
+     *
+     * Complete comptenecy table has 2^N rows where N is number of hosts, i.e., number
+     * of columns used for the host presence-absence information.
+     *
+     * @return true if complete, false otherwise
+     */
+    bool competency_table_is_complete() const
+    {
+        size_t num_of_rows{competency_table_data().size()};
+        if (num_of_rows == 0)
+            return false;
+        // Number of presence-absence records is assumed to be number of hosts.
+        size_t presence_size{competency_table_data().at(0).presence_absence.size()};
+        if (num_of_rows == std::pow(2, presence_size))
+            return true;
+        return false;
     }
 
 private:
@@ -666,8 +703,8 @@ private:
     std::vector<bool> quarantine_schedule_;
     std::vector<unsigned> weather_table_;
 
-    /** Storage for the pest-host-use table data */
-    std::vector<PestHostUseTableDataRow> pest_host_use_table_data_;
+    /** Storage for the pest-host table data */
+    std::vector<PestHostTableDataRow> pest_host_table_data_;
     /** Storage for the competency table data */
     std::vector<CompetencyTableDataRow> competency_table_data_;
 };

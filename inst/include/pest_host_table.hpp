@@ -1,5 +1,5 @@
 /*
- * PoPS model - Pest-host-use table for hosts and pest
+ * PoPS model - Pest-host table for hosts and pest
  *
  * Copyright (C) 2023 by the authors.
  *
@@ -13,8 +13,8 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-#ifndef POPS_PEST_HOST_USE_TABLE_HPP
-#define POPS_PEST_HOST_USE_TABLE_HPP
+#ifndef POPS_PEST_HOST_TABLE_HPP
+#define POPS_PEST_HOST_TABLE_HPP
 
 #include <vector>
 #include <stdexcept>
@@ -25,32 +25,32 @@
 namespace pops {
 
 /**
- * Pest-host-use table holding susceptibilities, mortality rates, and mortality time
+ * Pest-host table holding susceptibilities, mortality rates, and mortality time
  * lags for multiple hosts.
  */
 template<typename HostPool>
-class PestHostUseTable
+class PestHostTable
 {
 public:
     using Environment = typename HostPool::Environment;
 
     /**
-     * @brief Create an empty pest-host-use table
+     * @brief Create an empty pest-host table
      *
      * @param environment Reference to the environment
      */
-    PestHostUseTable(const Environment& environment) : environment_(environment) {}
+    PestHostTable(const Environment& environment) : environment_(environment) {}
 
     /**
-     * @brief Create a pest-host-use table using values in config
+     * @brief Create a pest-host table using values in config
      *
-     * @param config Configuration with pest-host-use table data
+     * @param config Configuration with pest-host table data
      * @param environment Reference to the environment
      */
-    PestHostUseTable(const Config& config, const Environment& environment)
+    PestHostTable(const Config& config, const Environment& environment)
         : environment_(environment)
     {
-        for (const auto& row : config.pest_host_use_table_data()) {
+        for (const auto& row : config.pest_host_table_data()) {
             susceptibilities_.push_back(row.susceptibility);
             mortality_rates_.push_back(row.mortality_rate);
             mortality_time_lags_.push_back(row.mortality_time_lag);
@@ -118,4 +118,4 @@ private:
 
 }  // namespace pops
 
-#endif  // POPS_PEST_HOST_USE_TABLE_HPP
+#endif  // POPS_PEST_HOST_TABLE_HPP
