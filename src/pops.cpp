@@ -194,6 +194,8 @@ List pops_model_cpp(
     bool use_soils = bool_config["use_soils"];
     config.dispersers_to_soils_percentage = dispersers_to_soils_percentage;
 
+    config.create_pest_host_use_table_from_parameters(1);
+
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
     IntegerMatrix dispersers(config.rows, config.cols);
