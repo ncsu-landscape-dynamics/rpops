@@ -196,7 +196,7 @@ List pops_model_cpp(
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
-    IntegerMatrix dispersers(config.rows, config.cols, 0);
+    IntegerMatrix dispersers(config.rows, config.cols);
     IntegerMatrix total_dispersers(config.rows, config.cols);
     IntegerMatrix established_dispersers(config.rows, config.cols);
 
