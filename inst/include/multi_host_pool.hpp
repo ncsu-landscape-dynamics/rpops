@@ -430,17 +430,28 @@ private:
      * The probabilities are used as weights so they don't need to be 0-1 nor they need
      * to add up to 1. However, their sum needs to be >0.
      *
+     * If there is only one hosts, it returns that host without using the random number
+     * generator.
+     *
      * @param hosts List of pointers to host pools
      * @param probabilities Probability values for each host pool
      * @param generator Random number generator
      *
      * @return Pointer to selected host pool
+     *
+     * @throw std::invalid_argument if *hosts* is empty.
      */
     static HostPool* pick_host_by_probability(
         std::vector<HostPool*>& hosts,
         const std::vector<double>& probabilities,
         Generator& generator)
     {
+        if (!hosts.size()) {
+            std::invalid_argument("List of hosts is empty in multi host pool");
+        }
+        if (hosts.size() == 1) {
+            return hosts[0];
+        }
         std::discrete_distribution<int> distribution{
             probabilities.begin(), probabilities.end()};
         return hosts.at(distribution(generator));

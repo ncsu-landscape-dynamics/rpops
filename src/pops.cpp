@@ -228,9 +228,9 @@ List pops_model_cpp(
     for (unsigned t = 0; t < treatment_maps.size(); t++) {
       treatments.add_treatment(
         treatment_maps[t],
-                      pops::Date(treatment_dates[t]),
-                      pesticide_duration[t],
-                                        treatment_application);
+        pops::Date(treatment_dates[t]),
+        pesticide_duration[t],
+        treatment_application);
       config.use_treatments = true;
     }
 
