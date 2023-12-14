@@ -35,8 +35,8 @@ public:
     virtual double weather_coefficient_at(RasterIndex row, RasterIndex col) const = 0;
     virtual double influence_reproductive_rate_at(
         RasterIndex row, RasterIndex col, double value) const = 0;
-    virtual double influence_probability_of_establishment_at(
-        RasterIndex row, RasterIndex col, double value) const = 0;
+    virtual double
+    influence_suitability_at(RasterIndex row, RasterIndex col, double value) const = 0;
     virtual int total_population_at(RasterIndex row, RasterIndex col) const = 0;
     /**
      * @brief Get presence-absence for host at a given cell

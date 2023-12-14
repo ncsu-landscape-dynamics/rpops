@@ -179,7 +179,7 @@ public:
         return value * weather_coefficient_at(row, col);
     }
 
-    double influence_probability_of_establishment_at(
+    double influence_suitability_at(
         RasterIndex row, RasterIndex col, double value) const override
     {
         if (!weather_)

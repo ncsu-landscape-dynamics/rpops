@@ -31,7 +31,7 @@ namespace pops {
  * Host pool for multiple hosts
  *
  * Keeps the same interface as (single) HostPool given that HostPool has methods to
- * behave in a mutli-host way if needed. This allows most external operations such as
+ * behave in a multi-host way if needed. This allows most external operations such as
  * actions to work without distinguishing single- and multi-host pools.
  */
 template<
@@ -313,7 +313,7 @@ public:
      *
      * Config::arrival_behavior() is used to determine if the dispersers should be
      * landing in a cell (`"land"`) or infecting a specific host directly (`"infect"`).
-     * Landing performs the establishment test on a combined probability from all hosts
+     * Landing performs the establishment test on a combined suitability from all hosts
      * in a cell and then uses one host to add the  new disperser to. Infecting picks a
      * host and lets the host accept or reject the disperser based on its own
      * establishment test.
@@ -321,8 +321,7 @@ public:
      * Uses static function HostPool::can_disperser_establish() from HostPool class to
      * do the test for multiple hosts for landing, so any host pool class needs to
      * implement that besides its disperser methods. It assumes that the configuration
-     * for multi-host is applicable for the combined establishment probability of
-     * individual hosts.
+     * for multi-host is applicable for the combined suitability of individual hosts.
      *
      * For one single host pool only and host pool which implements its `disperser_to()`
      * using `can_disperser_establish()` and `add_disperser_at()`, this gives identical
@@ -338,33 +337,36 @@ public:
      */
     int disperser_to(RasterIndex row, RasterIndex col, Generator& generator)
     {
-        std::vector<double> probabilities;
-        double total_s_score = 0;
+        std::vector<double> suitabilities;
+        double total_suitability_score = 0;
         for (auto& host_pool : host_pools_) {
-            // The probability accounts for weather and, importantly, number of
+            // The suitability accounts for weather and, importantly, number of
             // susceptible hosts, so host pool without available hosts in a given cell
             // is less likely to be selected over a host pool with available hosts
             // (however, it can happen in case zeros are not exactly zeros in the
             // discrete distribution used later and code checks can't tell, so we need
             // to account for that case later anyway).
-            double s_for_item = host_pool->establishment_probability_at(row, col);
-            // The resulting s can be 0-1. While the probabilities are used as weights
-            // for picking the host, so their absolute range does not matter, the total
-            // is used as probablity in a stochastic test. The stochastic challenge may
-            // be against 0.5 + 0.7 = 1.2 which which is fine as long as we are fine
-            // with probabilities 0.5 and 0.7 from two host translating to 100%
-            // probability.
-            probabilities.push_back(s_for_item);
-            total_s_score += s_for_item;
+            double suitability = host_pool->suitability_at(row, col);
+            // The resulting individual suitability can be 0-1. The individual
+            // suitabilities are used as weights for picking the host, so their absolute
+            // range does not matter. The total is used in a stochastic test and should
+            // be <=1 which should be ensured in the input data.
+            suitabilities.push_back(suitability);
+            total_suitability_score += suitability;
         }
-        if (total_s_score <= 0) {
-            // While the score should always be >= 0, it may be == 0 if no hosts are
-            // present. No hosts present cause all probabilities to be zero which is not
-            // permissible for the host picking later and it is enough information for
-            // us to know there won't be any establishment.
+        if (total_suitability_score <= 0) {
+            // While the score should always be >= 0, it may be == 0 if no hosts (host
+            // individuals) are present. No hosts present cause all suitabilities to be
+            // zero which is not permissible for the host picking later and it is enough
+            // information for us to know there won't be any establishment.
             return 0;
         }
-        auto host = pick_host_by_probability(host_pools_, probabilities, generator);
+        if (total_suitability_score > 1) {
+            throw std::invalid_argument(
+                "Total suitability score is " + std::to_string(total_suitability_score)
+                + " but it needs to be <=1");
+        }
+        auto host = pick_host_by_weight(host_pools_, suitabilities, generator);
         if (config_.arrival_behavior() == "land") {
             // The operations are ordered so that for single host, this gives an
             // identical results to the infect behavior (influenced by usage of random
@@ -372,7 +374,7 @@ public:
             if (host->susceptible_at(row, col) <= 0)
                 return 0;
             bool establish = HostPool::can_disperser_establish(
-                total_s_score,
+                total_suitability_score,
                 config_.establishment_stochasticity,
                 config_.establishment_probability,
                 generator);
@@ -389,7 +391,7 @@ public:
     /**
      * @brief Move hosts from a cell to a cell (multi-host)
      *
-     * Currenty just works for first host.
+     * Currently just works for first host.
      *
      * @param row_from Row index of the source cell
      * @param col_from Column index of the source cell
@@ -425,25 +427,25 @@ public:
 
 private:
     /**
-     * @brief Pick a host given a probability for each host
+     * @brief Pick a host given a weight for each host
      *
-     * The probabilities are used as weights so they don't need to be 0-1 nor they need
-     * to add up to 1. However, their sum needs to be >0.
+     * The weights don't need to be 0-1 nor they need to add up to 1. However, their sum
+     * needs to be >0.
      *
-     * If there is only one hosts, it returns that host without using the random number
+     * If there is only one host, it returns that host without using the random number
      * generator.
      *
      * @param hosts List of pointers to host pools
-     * @param probabilities Probability values for each host pool
+     * @param weights Weight values for each host pool
      * @param generator Random number generator
      *
      * @return Pointer to selected host pool
      *
      * @throw std::invalid_argument if *hosts* is empty.
      */
-    static HostPool* pick_host_by_probability(
+    static HostPool* pick_host_by_weight(
         std::vector<HostPool*>& hosts,
-        const std::vector<double>& probabilities,
+        const std::vector<double>& weights,
         Generator& generator)
     {
         if (!hosts.size()) {
@@ -452,8 +454,7 @@ private:
         if (hosts.size() == 1) {
             return hosts[0];
         }
-        std::discrete_distribution<int> distribution{
-            probabilities.begin(), probabilities.end()};
+        std::discrete_distribution<int> distribution{weights.begin(), weights.end()};
         return hosts.at(distribution(generator));
     }
 
