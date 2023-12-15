@@ -258,6 +258,9 @@ validate <- function(infected_years_file,
 
       if (config$use_host_uncertainty) {
         config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+        while (all(config$host > config$total_populations)) {
+          config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+        }
       } else {
         config$host <- config$host_mean
       }
