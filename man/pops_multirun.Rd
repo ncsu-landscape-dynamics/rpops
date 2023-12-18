@@ -112,14 +112,14 @@ estimation ordered from (reproductive_rate, natural_dispersal_distance,
 percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
 network_min_distance, and network_max_distance) Should be 8x8 matrix.}
 
-\item{pest_host_table}{The file path to a csv that contains the susceptibility, mortality rate,
-and mortality time lag as columns with each row being the species. Host species must be in the
-same order in the host_file_list, infected_file_list, pest_host_table rows, and competency_table
-columns.}
+\item{pest_host_table}{The file path to a csv that has these columns in this order
+susceptibility, mortality rate, and mortality time lag as columns with each row being the
+species. Host species must be in the same order in the host_file_list, infected_file_list,
+pest_host_table rows, and competency_table columns.}
 
 \item{competency_table}{A csv with the hosts as the first n columns (n being the number of hosts)
-and the last column being the competency value. Each row is a set of booleans for host presence
-and the competency value for that combination of hosts in a cell.}
+and the last column being the competency value. Each row is a set of Boolean for host presence
+and the competency value (between 0 and 1) for that combination of hosts in a cell.}
 
 \item{temp}{boolean that allows the use of temperature coefficients to modify spread
 (TRUE or FALSE)}

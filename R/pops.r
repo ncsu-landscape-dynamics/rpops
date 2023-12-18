@@ -182,13 +182,13 @@
 #' the pest all values in the raster are between 0 and 1.
 #' @param start_with_soil_populations Boolean to indicate whether to use a starting soil pest or
 #' pathogen population if TRUE then soil_starting_pest_file is required.
-#' @param pest_host_table The file path to a csv that contains the susceptibility, mortality rate,
-#' and mortality time lag as columns with each row being the species. Host species must be in the
-#' same order in the host_file_list, infected_file_list, pest_host_table rows, and competency_table
-#' columns.
+#' @param pest_host_table The file path to a csv that has these columns in this order
+#' susceptibility, mortality rate, and mortality time lag as columns with each row being the
+#' species. Host species must be in the same order in the host_file_list, infected_file_list,
+#' pest_host_table rows, and competency_table columns.
 #' @param competency_table A csv with the hosts as the first n columns (n being the number of hosts)
-#' and the last column being the competency value. Each row is a set of booleans for host presence
-#' and the competency value for that combination of hosts in a cell.
+#' and the last column being the competency value. Each row is a set of Boolean for host presence
+#' and the competency value (between 0 and 1) for that combination of hosts in a cell.
 #'
 #'
 #' @useDynLib PoPS, .registration = TRUE

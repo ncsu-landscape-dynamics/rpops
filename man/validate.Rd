@@ -104,14 +104,14 @@ If not set uses the # of CPU cores - 1. must be an integer >= 1}
 \item{parameter_cov_matrix}{the parameter covariance matrix from the ABC
 calibration function (posterior covariance matrix)}
 
-\item{pest_host_table}{The file path to a csv that contains the susceptibility, mortality rate,
-and mortality time lag as columns with each row being the species. Host species must be in the
-same order in the host_file_list, infected_file_list, pest_host_table rows, and competency_table
-columns.}
+\item{pest_host_table}{The file path to a csv that has these columns in this order
+susceptibility, mortality rate, and mortality time lag as columns with each row being the
+species. Host species must be in the same order in the host_file_list, infected_file_list,
+pest_host_table rows, and competency_table columns.}
 
 \item{competency_table}{A csv with the hosts as the first n columns (n being the number of hosts)
-and the last column being the competency value. Each row is a set of booleans for host presence
-and the competency value for that combination of hosts in a cell.}
+and the last column being the competency value. Each row is a set of Boolean for host presence
+and the competency value (between 0 and 1) for that combination of hosts in a cell.}
 
 \item{infected_file_list}{paths to raster files with initial infections and standard deviation
 for each host can be based in 2 formats (a single file with number of hosts or a single file with
