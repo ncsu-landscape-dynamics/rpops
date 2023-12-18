@@ -38,6 +38,7 @@ pops_multirun <- function(infected_file_list,
                           total_populations_file,
                           parameter_means,
                           parameter_cov_matrix,
+                          pest_host_table,
                           temp = FALSE,
                           temperature_coefficient_file = "",
                           precip = FALSE,
@@ -57,9 +58,6 @@ pops_multirun <- function(infected_file_list,
                           temperature_file = "",
                           lethal_temperature = -12.87,
                           lethal_temperature_month = 1,
-                          mortality_on = FALSE,
-                          mortality_rate = 0,
-                          mortality_time_lag = 0,
                           mortality_frequency = "year",
                           mortality_frequency_n = 1,
                           management = FALSE,
@@ -137,9 +135,6 @@ pops_multirun <- function(infected_file_list,
   config$survival_rate_month <- survival_rate_month
   config$survival_rate_day <- survival_rate_day
   config$survival_rates_file <- survival_rates_file
-  config$mortality_on <- mortality_on
-  config$mortality_rate <- mortality_rate
-  config$mortality_time_lag <- mortality_time_lag
   config$management <- management
   config$treatment_dates <- treatment_dates
   config$treatments_file <- treatments_file
@@ -195,6 +190,7 @@ pops_multirun <- function(infected_file_list,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$pest_host_table <- pest_host_table
 
   config <- configuration(config)
 
@@ -305,8 +301,6 @@ pops_multirun <- function(infected_file_list,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
         soil_reservoirs = config$soil_reservoirs,
-        mortality_rate = config$mortality_rate,
-        mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
         end_date = config$end_date,
         treatment_method = config$treatment_method,

@@ -123,6 +123,7 @@ calibrate <- function(infected_years_file,
                       params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
                       number_of_generations = 7,
                       generation_size = 1000,
+                      pest_host_table,
                       infected_file_list,
                       host_file_list,
                       total_populations_file,
@@ -145,9 +146,6 @@ calibrate <- function(infected_years_file,
                       temperature_file = "",
                       lethal_temperature = -12.87,
                       lethal_temperature_month = 1,
-                      mortality_on = FALSE,
-                      mortality_rate = 0,
-                      mortality_time_lag = 0,
                       mortality_frequency = "year",
                       mortality_frequency_n = 1,
                       management = FALSE,
@@ -235,9 +233,6 @@ calibrate <- function(infected_years_file,
   config$survival_rate_month <- survival_rate_month
   config$survival_rate_day <- survival_rate_day
   config$survival_rates_file <- survival_rates_file
-  config$mortality_on <- mortality_on
-  config$mortality_rate <- mortality_rate
-  config$mortality_time_lag <- mortality_time_lag
   config$management <- management
   config$treatment_dates <- treatment_dates
   config$treatments_file <- treatments_file
@@ -296,6 +291,7 @@ calibrate <- function(infected_years_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$pest_host_table <- pest_host_table
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -407,8 +403,6 @@ calibrate <- function(infected_years_file,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
         soil_reservoirs = config$soil_reservoirs,
-        mortality_rate = config$mortality_rate,
-        mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
         end_date = config$end_date,
         treatment_method = config$treatment_method,

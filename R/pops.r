@@ -51,10 +51,6 @@
 #' mortality occurs for your pest or pathogen (-50 to 60)
 #' @param lethal_temperature_month The month in which lethal temperature related mortality occurs
 #' for your pest or pathogen integer value between 1 and 12
-#' @param mortality_on  Boolean to turn host mortality on and off (TRUE or FALSE)
-#' @param mortality_rate Rate at which mortality occurs value between 0 and 1
-#' @param mortality_time_lag Time lag from infection until mortality can occur in time steps
-#' integer >= 1
 #' @param mortality_frequency Sets the frequency of mortality calculations occur either ('year',
 #' 'month', week', 'day', 'time step', or 'every_n_steps')
 #' @param mortality_frequency_n Sets number of units from mortality_frequency in which to run the
@@ -186,6 +182,10 @@
 #' the pest all values in the raster are between 0 and 1.
 #' @param start_with_soil_populations Boolean to indicate whether to use a starting soil pest or
 #' pathogen population if TRUE then soil_starting_pest_file is required.
+#' @param pest_host_table The file path to a csv that contains the susceptibility, mortality rate,
+#' and mortality time lag as columns with each row being the species. Host species must be in the
+#' same order in the host_file_list, infected_file_list, pest_host_table rows, and competency_table
+#' columns.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
@@ -204,6 +204,7 @@ pops <- function(infected_file_list,
                  total_populations_file,
                  parameter_means,
                  parameter_cov_matrix,
+                 pest_host_table,
                  temp = FALSE,
                  temperature_coefficient_file = "",
                  precip = FALSE,
@@ -223,9 +224,6 @@ pops <- function(infected_file_list,
                  temperature_file = "",
                  lethal_temperature = -12.87,
                  lethal_temperature_month = 1,
-                 mortality_on = FALSE,
-                 mortality_rate = 0,
-                 mortality_time_lag = 0,
                  mortality_frequency = "year",
                  mortality_frequency_n = 1,
                  management = FALSE,
@@ -300,9 +298,6 @@ pops <- function(infected_file_list,
   config$survival_rate_month <- survival_rate_month
   config$survival_rate_day <- survival_rate_day
   config$survival_rates_file <- survival_rates_file
-  config$mortality_on <- mortality_on
-  config$mortality_rate <- mortality_rate
-  config$mortality_time_lag <- mortality_time_lag
   config$management <- management
   config$treatment_dates <- treatment_dates
   config$treatments_file <- treatments_file
@@ -360,6 +355,7 @@ pops <- function(infected_file_list,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$pest_host_table <- pest_host_table
 
   config <- configuration(config)
 
@@ -450,8 +446,6 @@ pops <- function(infected_file_list,
                      spatial_indices = config$spatial_indices,
                      season_month_start_end = config$season_month_start_end,
                      soil_reservoirs = config$soil_reservoirs,
-                     mortality_rate = config$mortality_rate,
-                     mortality_time_lag = config$mortality_time_lag,
                      start_date = config$start_date,
                      end_date = config$end_date,
                      treatment_method = config$treatment_method,
