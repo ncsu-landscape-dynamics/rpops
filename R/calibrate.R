@@ -330,7 +330,7 @@ calibrate <- function(infected_years_file,
         }
         exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
         while (any(exposed2 < 0)) {
-          exposed2 <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+          exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
         }
         exposed <- config$exposed
         exposed[[config$latency_period + 1]] <- exposed2
