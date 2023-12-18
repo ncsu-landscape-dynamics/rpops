@@ -247,7 +247,7 @@ create_random_seeds <- function(n) {
 matrix_norm_distribution <- function(mean_matrix, sd_matrix) {
   new_matrix <-
     round(matrix(mapply(function(x, y) {rnorm(x, y, n = 1)}, x = mean_matrix, y = sd_matrix),
-                 nrow(mean_matrix), ncol(mean_matrix)))
+                 nrow(mean_matrix), ncol(mean_matrix)), digits = 0)
   new_matrix[is.na(new_matrix)] <- 0
   new_matrix[new_matrix < 0] <- 0
   return(new_matrix)

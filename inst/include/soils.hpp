@@ -33,7 +33,11 @@ namespace pops {
  *
  * Takes care of adding dispersers to the pool and of taking them out.
  */
-template<typename IntegerRaster, typename FloatRaster, typename RasterIndex = int>
+template<
+    typename IntegerRaster,
+    typename FloatRaster,
+    typename RasterIndex,
+    typename GeneratorProvider>
 class SoilPool
 {
 public:
@@ -51,7 +55,8 @@ public:
      */
     SoilPool(
         std::vector<IntegerRaster>& rasters,
-        const Environment<IntegerRaster, FloatRaster, RasterIndex>& environment,
+        const Environment<IntegerRaster, FloatRaster, RasterIndex, GeneratorProvider>&
+            environment,
         bool generate_stochasticity = true,
         bool establishment_stochasticity = true,
         double fixed_establishment_probability = 0)
@@ -63,7 +68,7 @@ public:
     {
         if (rasters.empty()) {
             throw std::logic_error(
-                "List of rasters of SpoilPool needs to have at least one item");
+                "List of rasters of SoilPool needs to have at least one item");
         }
     }
 
@@ -163,7 +168,8 @@ protected:
     /**
      * Surrounding environment
      */
-    const Environment<IntegerRaster, FloatRaster, RasterIndex>* environment_{nullptr};
+    const Environment<IntegerRaster, FloatRaster, RasterIndex, GeneratorProvider>*
+        environment_{nullptr};
     bool generate_stochasticity_{false};  ///< Outgoing dispersers stochasticity
     bool establishment_stochasticity_{false};  ///< Incoming dispersers
     /**

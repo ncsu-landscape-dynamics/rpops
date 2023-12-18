@@ -507,7 +507,7 @@ test_that("Multirun model outputs work with mask", {
   end_date <- "2019-12-31"
   lethal_temperature <- -35
   lethal_temperature_month <- 1
-  random_seed <- 42
+  random_seed <- NA
   treatments_file <- ""
   treatment_dates <- c("2019-11-01")
   treatment_method <- "ratio"

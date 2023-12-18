@@ -446,9 +446,10 @@ int Date::weeks_from_date(Date start)
 
 /*!
  * Returns the current date as a string
- * Will be replaced by C++20 format function
- * \param Date, current date
- * \return String, current date as string
+ *
+ * Will be replaced by C++20 format function.
+ *
+ * \return current date as a string
  */
 std::string Date::to_string()
 {

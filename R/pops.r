@@ -370,7 +370,13 @@ pops <- function(infected_file,
 
   if (config$use_initial_condition_uncertainty) {
     config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+    while (any(config$infected < 0)) {
+      config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+    }
     exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+    while (any(exposed2 < 0)) {
+      exposed2 <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+    }
     exposed <- config$exposed
     exposed[[config$latency_period + 1]] <- exposed2
     config$exposed <- exposed
@@ -384,6 +390,9 @@ pops <- function(infected_file,
 
   if (config$use_host_uncertainty) {
     config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+    while (any(config$host > config$total_populations)) {
+      config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+    }
   } else {
     config$host <- config$host_mean
   }

@@ -139,7 +139,6 @@ public:
             }
         }
         throw std::invalid_argument("unable to find solution to gamma icdf ");
-        return -1;
     }
 };
 
