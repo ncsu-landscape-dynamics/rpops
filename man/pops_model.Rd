@@ -134,7 +134,7 @@ model type}
 
 \item{total_hosts}{matrix of all hosts}
 
-\item{mortality_on}{Boolean to turn host mortality on and off (TRUE or FALSE)}
+\item{mortality_on}{Boolean to indicate if mortality is used}
 
 \item{mortality_tracker}{matrix of 0's to track mortality per year}
 
@@ -192,11 +192,6 @@ host under optimal weather conditions}
 \item{season_month_start_end}{vector of months when spread starts and stops}
 
 \item{soil_reservoirs}{list of matrices with soil pests created from soil_pest_file.}
-
-\item{mortality_rate}{Rate at which mortality occurs value between 0 and 1}
-
-\item{mortality_time_lag}{Time lag from infection until mortality can occur in time steps
-integer >= 1}
 
 \item{start_date}{Date to start the simulation with format ('YYYY_MM_DD')}
 

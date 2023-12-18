@@ -5,11 +5,12 @@
 \title{PoPS (Pest or Pathogen Spread) model Multiple Runs}
 \usage{
 pops_multirun(
-  infected_file,
-  host_file,
+  infected_file_list,
+  host_file_list,
   total_populations_file,
   parameter_means,
   parameter_cov_matrix,
+  pest_host_table,
   temp = FALSE,
   temperature_coefficient_file = "",
   precip = FALSE,
@@ -29,9 +30,6 @@ pops_multirun(
   temperature_file = "",
   lethal_temperature = -12.87,
   lethal_temperature_month = 1,
-  mortality_on = FALSE,
-  mortality_rate = 0,
-  mortality_time_lag = 0,
   mortality_frequency = "year",
   mortality_frequency_n = 1,
   management = FALSE,
@@ -86,14 +84,15 @@ pops_multirun(
 )
 }
 \arguments{
-\item{infected_file}{Raster file with initial infections. Units for infections are based on data
+\item{infected_file_list}{paths to raster files with initial infections and standard deviation
+for each host can be based in 2 formats (a single file with number of hosts or a single file with
+2 layers number of hosts and standard deviation).. Units for infections are based on data
 availability and the way the units used for your host file is created (e.g. percent area, # of
 hosts per cell, etc.).}
 
-\item{host_file}{path to raster files with number of hosts and standard deviation on those
-estimates can be based in 3 formats (a single file with number of hosts, a single file with 2
-layers number of hosts and standard deviation, or two files 1 with number of hosts and the other
-with standard deviation of those estimates). The units for this can be of many formats the two
+\item{host_file_list}{paths to raster files with number of hosts and standard deviation on those
+estimates can be based in 2 formats (a single file with number of hosts or a single file with 2
+layers number of hosts and standard deviation). The units for this can be of many formats the two
 most common that we use are either percent area (0 to 100) or # of hosts in the cell. Usually
 depends on data available and estimation methods.}
 
@@ -111,6 +110,11 @@ kappa, anthropogenic kappa, network_min_distance, and network_max_distance). 1x8
 estimation ordered from (reproductive_rate, natural_dispersal_distance,
 percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
 network_min_distance, and network_max_distance) Should be 8x8 matrix.}
+
+\item{pest_host_table}{The file path to a csv that contains the susceptibility, mortality rate,
+and mortality time lag as columns with each row being the species. Host species must be in the
+same order in the host_file_list, infected_file_list, pest_host_table rows, and competency_table
+columns.}
 
 \item{temp}{boolean that allows the use of temperature coefficients to modify spread
 (TRUE or FALSE)}
@@ -170,13 +174,6 @@ mortality occurs for your pest or pathogen (-50 to 60)}
 
 \item{lethal_temperature_month}{The month in which lethal temperature related mortality occurs
 for your pest or pathogen integer value between 1 and 12}
-
-\item{mortality_on}{Boolean to turn host mortality on and off (TRUE or FALSE)}
-
-\item{mortality_rate}{Rate at which mortality occurs value between 0 and 1}
-
-\item{mortality_time_lag}{Time lag from infection until mortality can occur in time steps
-integer >= 1}
 
 \item{mortality_frequency}{Sets the frequency of mortality calculations occur either ('year',
 'month', week', 'day', 'time step', or 'every_n_steps')}
@@ -240,8 +237,8 @@ of animals, and date.}
 \item{use_movements}{This is a boolean to turn on use of the movement module.}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected (only used if
-model_type is "SEI"). Default False. If this is TRUE need to have both an infected_file (this
-can be a raster of all 0's) and exposed_file}
+model_type is "SEI"). Default False. If this is TRUE need to have both infected_files (this
+can be a raster of all 0's) and exposed_files}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use stochasticity in reproductive
 functions default is TRUE}
@@ -301,7 +298,7 @@ along the edge. "jump" automatically moves to the nearest node when moving throu
 "teleport" moves from node to node most likely used for airport and seaport networks.}
 
 \item{use_initial_condition_uncertainty}{Boolean to indicate whether or not to propagate and
-partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+partition uncertainty from initial conditions. If TRUE the infected_files needs to have 2 layers
 one with the mean value and one with the standard deviation. If an SEI model is used the
 exposed_file needs to have 2 layers one with the mean value and one with the standard
 deviation}
