@@ -312,6 +312,36 @@ bayesian_mnn_checks <- function(prior_means,
   }
 }
 
+
+multihost_checks <- function(infected_file_list, host_file_list, competency_table, pest_host_table) {
+  checks_passed <- TRUE
+  if (length(infected_file_list) != length(host_file_list)) {
+    checks_pass <- FALSE
+    failed_check <- multihost_file_length_error
+  }
+
+  if (!checks_passed & length(infected_file_list) != (ncol(competency_table) -1)) {
+    checks_passed <- FALSE
+    failed_check <- competency_table_column_length_error
+  }
+
+  if (!checks_passed & length(infected_file_list) != nrow(pest_host_table)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_row_length_error
+  }
+
+  if (checks_passed) {
+    outs <- list(checks_passed)
+    names(outs) <- c("checks_passed")
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- failed_check_list
+    return(outs)
+  }
+}
+
+
 multispecies_checks <- function(species,
                                 infected_files,
                                 parameter_means,
