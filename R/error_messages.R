@@ -172,3 +172,13 @@ weather_size_probabilitic_error <-
 weather_sd_layer_error <-
   "weather coefficient sd file number of layers not equal to number of layers in weather coefficient
   file"
+
+multihost_file_length_error <-
+  "infected_file_list and host_file_list are not of the same length, ensure both of these files are
+  of the length of the number of host species you want to simulate"
+
+competency_table_column_length_error <-
+  "competency_table doesn't have the same number of columns as number of files in host_file_list"
+
+pest_host_table_row_length_error <-
+  "pest_host_table doesn't have the same number of rows as number of files in host_file_list"
