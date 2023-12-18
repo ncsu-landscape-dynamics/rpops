@@ -39,6 +39,7 @@ pops_multirun <- function(infected_file_list,
                           parameter_means,
                           parameter_cov_matrix,
                           pest_host_table,
+                          competency_table,
                           temp = FALSE,
                           temperature_coefficient_file = "",
                           precip = FALSE,
@@ -191,6 +192,7 @@ pops_multirun <- function(infected_file_list,
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
   config$pest_host_table <- pest_host_table
+  config$competency_table <- competency_table
 
   config <- configuration(config)
 

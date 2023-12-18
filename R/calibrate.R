@@ -124,6 +124,7 @@ calibrate <- function(infected_years_file,
                       number_of_generations = 7,
                       generation_size = 1000,
                       pest_host_table,
+                      competency_table,
                       infected_file_list,
                       host_file_list,
                       total_populations_file,
@@ -292,6 +293,7 @@ calibrate <- function(infected_years_file,
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
   config$pest_host_table <- pest_host_table
+  config$competency_table <- competency_table
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++

@@ -14,6 +14,7 @@ calibrate(
   number_of_generations = 7,
   generation_size = 1000,
   pest_host_table,
+  competency_table,
   infected_file_list,
   host_file_list,
   total_populations_file,
@@ -155,6 +156,10 @@ accurate the model parameters selected will be.}
 and mortality time lag as columns with each row being the species. Host species must be in the
 same order in the host_file_list, infected_file_list, pest_host_table rows, and competency_table
 columns.}
+
+\item{competency_table}{A csv with the hosts as the first n columns (n being the number of hosts)
+and the last column being the competency value. Each row is a set of booleans for host presence
+and the competency value for that combination of hosts in a cell.}
 
 \item{infected_file_list}{paths to raster files with initial infections and standard deviation
 for each host can be based in 2 formats (a single file with number of hosts or a single file with

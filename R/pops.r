@@ -186,6 +186,10 @@
 #' and mortality time lag as columns with each row being the species. Host species must be in the
 #' same order in the host_file_list, infected_file_list, pest_host_table rows, and competency_table
 #' columns.
+#' @param competency_table A csv with the hosts as the first n columns (n being the number of hosts)
+#' and the last column being the competency value. Each row is a set of booleans for host presence
+#' and the competency value for that combination of hosts in a cell.
+#'
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
@@ -205,6 +209,7 @@ pops <- function(infected_file_list,
                  parameter_means,
                  parameter_cov_matrix,
                  pest_host_table,
+                 competency_table,
                  temp = FALSE,
                  temperature_coefficient_file = "",
                  precip = FALSE,
@@ -356,6 +361,7 @@ pops <- function(infected_file_list,
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
   config$pest_host_table <- pest_host_table
+  config$competency_table <- competency_table
 
   config <- configuration(config)
 

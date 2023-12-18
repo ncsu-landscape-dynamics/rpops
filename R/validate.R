@@ -52,6 +52,7 @@ validate <- function(infected_years_file,
                      parameter_means,
                      parameter_cov_matrix,
                      pest_host_table,
+                     competency_table,
                      infected_file_list,
                      host_file_list,
                      total_populations_file,
@@ -210,6 +211,7 @@ validate <- function(infected_years_file,
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
   config$pest_host_table <- pest_host_table
+  config$competency_table <- competency_table
 
   config <- configuration(config)
 
