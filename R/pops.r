@@ -8,13 +8,14 @@
 #' a single stochastic realization of the model and is predominantly used for
 #' automated tests of model features.
 #'
-#' @param infected_file Raster file with initial infections. Units for infections are based on data
+#' @param infected_file_list paths to raster files with initial infections and standard deviation
+#' for each host can be based in 2 formats (a single file with number of hosts or a single file with
+#' 2 layers number of hosts and standard deviation).. Units for infections are based on data
 #' availability and the way the units used for your host file is created (e.g. percent area, # of
 #' hosts per cell, etc.).
-#' @param host_file path to raster files with number of hosts and standard deviation on those
-#' estimates can be based in 3 formats (a single file with number of hosts, a single file with 2
-#' layers number of hosts and standard deviation, or two files 1 with number of hosts and the other
-#' with standard deviation of those estimates). The units for this can be of many formats the two
+#' @param host_file_list paths to raster files with number of hosts and standard deviation on those
+#' estimates can be based in 2 formats (a single file with number of hosts or a single file with 2
+#' layers number of hosts and standard deviation). The units for this can be of many formats the two
 #' most common that we use are either percent area (0 to 100) or # of hosts in the cell. Usually
 #' depends on data available and estimation methods.
 #' @param total_populations_file path to raster file with number of total populations of all hosts
@@ -105,8 +106,8 @@
 #' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
 #' network_min_distance, and network_max_distance) Should be 8x8 matrix.
 #' @param start_exposed Do your initial conditions start as exposed or infected (only used if
-#' model_type is "SEI"). Default False. If this is TRUE need to have both an infected_file (this
-#' can be a raster of all 0's) and exposed_file
+#' model_type is "SEI"). Default False. If this is TRUE need to have both infected_files (this
+#' can be a raster of all 0's) and exposed_files
 #' @param generate_stochasticity Boolean to indicate whether to use stochasticity in reproductive
 #' functions default is TRUE
 #' @param establishment_stochasticity Boolean to indicate whether to use stochasticity in
@@ -151,7 +152,7 @@
 #' along the edge. "jump" automatically moves to the nearest node when moving through the network.
 #' "teleport" moves from node to node most likely used for airport and seaport networks.
 #' @param use_initial_condition_uncertainty Boolean to indicate whether or not to propagate and
-#' partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+#' partition uncertainty from initial conditions. If TRUE the infected_files needs to have 2 layers
 #' one with the mean value and one with the standard deviation. If an SEI model is used the
 #' exposed_file needs to have 2 layers one with the mean value and one with the standard
 #' deviation
@@ -198,8 +199,8 @@
 #' @export
 #'
 
-pops <- function(infected_file,
-                 host_file,
+pops <- function(infected_file_list,
+                 host_file_list,
                  total_populations_file,
                  parameter_means,
                  parameter_cov_matrix,
@@ -275,8 +276,8 @@ pops <- function(infected_file,
 
   config <- c()
   config$random_seed <- random_seed
-  config$infected_file <- infected_file
-  config$host_file <- host_file
+  config$infected_file_list <- infected_file_list
+  config$host_file_list <- host_file_list
   config$total_populations_file <- total_populations_file
   config$parameter_means <- parameter_means
   config$parameter_cov_matrix <- parameter_cov_matrix

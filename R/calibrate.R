@@ -123,8 +123,8 @@ calibrate <- function(infected_years_file,
                       params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
                       number_of_generations = 7,
                       generation_size = 1000,
-                      infected_file,
-                      host_file,
+                      infected_file_list,
+                      host_file_list,
                       total_populations_file,
                       temp = FALSE,
                       temperature_coefficient_file = "",
@@ -213,8 +213,8 @@ calibrate <- function(infected_years_file,
   config$params_to_estimate <- params_to_estimate
   config$number_of_generations <- number_of_generations
   config$generation_size <- generation_size
-  config$infected_file <- infected_file
-  config$host_file <- host_file
+  config$infected_file_list <- infected_file_list
+  config$host_file_list <- host_file_list
   config$total_populations_file <- total_populations_file
   config$temp <- temp
   config$temperature_coefficient_file <- temperature_coefficient_file

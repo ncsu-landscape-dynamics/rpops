@@ -33,8 +33,8 @@
 #' @return list of infected and susceptible per year
 #' @export
 #'
-pops_multirun <- function(infected_file,
-                          host_file,
+pops_multirun <- function(infected_file_list,
+                          host_file_list,
                           total_populations_file,
                           parameter_means,
                           parameter_cov_matrix,
@@ -113,8 +113,8 @@ pops_multirun <- function(infected_file,
                           start_with_soil_populations = FALSE) {
   config <- c()
   config$random_seed <- random_seed
-  config$infected_file <- infected_file
-  config$host_file <- host_file
+  config$infected_file_list <- infected_file_list
+  config$host_file_list <- host_file_list
   config$total_populations_file <- total_populations_file
   config$parameter_means <- parameter_means
   config$parameter_cov_matrix <- parameter_cov_matrix
