@@ -11,6 +11,7 @@
 #' @param weather Boolean that is true if weather is used
 #' @param infected matrix of infected hosts
 #' @param susceptible matrix of susceptible hosts
+#' @param mortality_on Boolean to indicate if mortality is used
 #' @param mortality_tracker matrix of 0's to track mortality per year
 #' @param mortality matrix to track cumulative mortality
 #' @param resistant matrix to track resistant population over time
