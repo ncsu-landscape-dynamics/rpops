@@ -507,7 +507,7 @@ test_that("Multirun model outputs work with mask", {
   end_date <- "2019-12-31"
   lethal_temperature <- -35
   lethal_temperature_month <- 1
-  random_seed <- 42
+  random_seed <- NA
   treatments_file <- ""
   treatment_dates <- c("2019-11-01")
   treatment_method <- "ratio"
@@ -531,7 +531,7 @@ test_that("Multirun model outputs work with mask", {
   number_of_cores <- 2
   model_type <- "SI"
   latency_period <- 0
-  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(2, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   start_exposed <- FALSE
   generate_stochasticity <- TRUE
