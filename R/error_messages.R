@@ -182,3 +182,7 @@ competency_table_column_length_error <-
 
 pest_host_table_row_length_error <-
   "pest_host_table doesn't have the same number of rows as number of files in host_file_list"
+
+pest_host_table_wrong_columns <-
+  "pest_host_table must the 4 columns named and order: host, susceptibility, mortality_rate,
+  mortality_time_lag"

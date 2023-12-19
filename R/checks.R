@@ -312,7 +312,6 @@ bayesian_mnn_checks <- function(prior_means,
   }
 }
 
-
 multihost_checks <- function(infected_file_list, host_file_list, competency_table, pest_host_table) {
   checks_passed <- TRUE
   if (length(infected_file_list) != length(host_file_list)) {
@@ -330,9 +329,17 @@ multihost_checks <- function(infected_file_list, host_file_list, competency_tabl
     failed_check <- pest_host_table_row_length_error
   }
 
+  if (!checks_passed & identical(names(pest_host_table), pest_host_table_list)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_wrong_columns
+  } else {
+    host_names <- pest_host_table$host
+    pest_host_table <- pest_host_table[, 2:4]
+    pest_host_table_list <- split(pest_host_table, seq(nrow(pest_host_table)))
+
   if (checks_passed) {
-    outs <- list(checks_passed)
-    names(outs) <- c("checks_passed")
+    outs <- list(checks_passed, host_names, pest_host_table_list)
+    names(outs) <- c("checks_passed", "host_names", "pest_host_table_list")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
@@ -340,7 +347,6 @@ multihost_checks <- function(infected_file_list, host_file_list, competency_tabl
     return(outs)
   }
 }
-
 
 multispecies_checks <- function(species,
                                 infected_files,
