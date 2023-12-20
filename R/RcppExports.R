@@ -7,5 +7,5 @@ pops_model_cpp <- function(random_seed, multiple_random_seeds, random_seeds, let
 
 # Register entry points for exported C++ functions
 methods::setLoadAction(function(ns) {
-    .Call(`_PoPS_RcppExport_registerCCallable`)
+    .Call('_PoPS_RcppExport_registerCCallable', PACKAGE = 'PoPS')
 })

@@ -152,10 +152,11 @@ until 1,000 model runs are less than the threshold value.
 We recommend running at least 1,000 but the greater this number the more
 accurate the model parameters selected will be.}
 
-\item{pest_host_table}{The file path to a csv that has these columns in this order
+\item{pest_host_table}{The file path to a csv that has these columns in this order: host,
 susceptibility, mortality rate, and mortality time lag as columns with each row being the
 species. Host species must be in the same order in the host_file_list, infected_file_list,
-pest_host_table rows, and competency_table columns.}
+pest_host_table rows, and competency_table columns. The host column is only used for metadata
+and labeling output files.}
 
 \item{competency_table}{A csv with the hosts as the first n columns (n being the number of hosts)
 and the last column being the competency value. Each row is a set of Boolean for host presence
