@@ -180,6 +180,10 @@ multihost_file_length_error <-
 competency_table_column_length_error <-
   "competency_table doesn't have the same number of columns as number of files in host_file_list"
 
+competency_table_row_length_error <-
+  "competency_table needs to have at least 1 more row than the number of hosts being modeled which
+  is represented by the number of file in the host_file_list"
+
 pest_host_table_row_length_error <-
   "pest_host_table doesn't have the same number of rows as number of files in host_file_list"
 

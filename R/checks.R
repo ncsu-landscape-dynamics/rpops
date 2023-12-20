@@ -312,16 +312,24 @@ bayesian_mnn_checks <- function(prior_means,
   }
 }
 
-multihost_checks <- function(infected_file_list, host_file_list, competency_table, pest_host_table) {
+multihost_checks <-
+  function(infected_file_list, host_file_list, competency_table, pest_host_table) {
   checks_passed <- TRUE
   if (length(infected_file_list) != length(host_file_list)) {
     checks_pass <- FALSE
     failed_check <- multihost_file_length_error
   }
 
-  if (!checks_passed & length(infected_file_list) != (ncol(competency_table) -1)) {
+  if (!checks_passed & length(infected_file_list) != (ncol(competency_table) - 2)) {
     checks_passed <- FALSE
     failed_check <- competency_table_column_length_error
+  }
+
+  if (!checks_passed & (length(infected_file_list) + 1) <= nrow(competency_table)) {
+    checks_passed <- FALSE
+    failed_check <- competency_table_row_length_error
+  } else {
+    competency_table_list <- competency_table_list_creator(competency_table)
   }
 
   if (!checks_passed & length(infected_file_list) != nrow(pest_host_table)) {
@@ -336,10 +344,11 @@ multihost_checks <- function(infected_file_list, host_file_list, competency_tabl
     host_names <- pest_host_table$host
     pest_host_table <- pest_host_table[, 2:4]
     pest_host_table_list <- split(pest_host_table, seq(nrow(pest_host_table)))
+  }
 
   if (checks_passed) {
-    outs <- list(checks_passed, host_names, pest_host_table_list)
-    names(outs) <- c("checks_passed", "host_names", "pest_host_table_list")
+    outs <- list(checks_passed, host_names, pest_host_table_list, competency_table_list)
+    names(outs) <- c("checks_passed", "host_names", "pest_host_table_list", "competency_table_list")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
