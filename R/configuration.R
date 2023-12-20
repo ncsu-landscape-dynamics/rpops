@@ -75,10 +75,17 @@ configuration <- function(config) {
     return(config)
   }
 
+  config$pest_host_table <- read.csv(config$pest_host_table)
+  config$competency_table <- read.csv(config$competency_table)
+
   # check that multi-host dimensions are ensured
   multihost_check <-
     multihost_checks(infected_file_list, host_file_list, competency_table, pest_host_table)
-  if (!multihost_check$checks_passed) {
+  if (multihost_check$checks_passed) {
+    config$host_names <- multihost_check$host_names
+    config$pest_host_table_list <- multihost_check$pest_host_table_list
+    config$competency_table_list <- multihost_check$competency_table_list
+  } else {
     config$failure <- multihost_check$failed_check
   }
 
@@ -613,8 +620,38 @@ configuration <- function(config) {
     config$exposed_mean <- exposed_mean
     config$exposed_sd <- exposed_sd
 
+    exposed[[config$latency_period + 1]] <- exposed_mean
+    config$total_exposed <- exposed_mean
+    config$exposed <- exposed
 
-    host_pool <- list(infected, susceptible, exposed, total_exposed, resistant, mortality_tracker)
+    susceptible_mean <- host_mean - infected_mean - exposed_mean
+    susceptible_mean[susceptible_mean < 0] <- 0
+    config$susceptible_mean <- terra::as.matrix(susceptible_mean, wide = TRUE)
+
+    config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
+    config$mortality <- zero_matrix
+    config$resistant <- zero_matrix
+
+    mortality_tracker <- list(zero_matrix)
+    if (config$mortality_on) {
+      mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
+      for (mt in 2:(mortality_length)) {
+        mortality_tracker[[mt]] <- mortality_tracker
+      }
+    }
+    # add currently infected cells to last element of the mortality tracker so
+    # that mortality occurs at the appropriate interval
+    if (config$mortality_on) {
+      mortality_tracker[[length(mortality_tracker)]] <- infected_mean
+    }
+
+
+    config$mortality_tracker <- mortality_tracker
+
+
+    host_pool <-
+      list(infected, susceptible, exposed, total_exposed, resistant, total_hosts, mortality,
+           mortality_tracker)
     host_pools[i] <- host_pool
   }
 
@@ -693,20 +730,6 @@ configuration <- function(config) {
     config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
   }
 
-
-
-  exposed[[config$latency_period + 1]] <- exposed_mean
-  config$total_exposed <- exposed_mean
-  config$exposed <- exposed
-
-  susceptible_mean <- host_mean - infected_mean - exposed_mean
-  susceptible_mean[susceptible_mean < 0] <- 0
-  config$susceptible_mean <- terra::as.matrix(susceptible_mean, wide = TRUE)
-
-  config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
-  config$mortality <- zero_matrix
-  config$resistant <- zero_matrix
-
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
     if (config$function_name %in% aws_bucket_list) {
@@ -730,23 +753,6 @@ configuration <- function(config) {
     # set quarantine areas to all zeros. meaning no quarantine areas are considered
     config$quarantine_areas <- zero_matrix
   }
-
-  mortality_tracker <- zero_matrix
-  mortality_tracker2 <- list(mortality_tracker)
-  if (config$mortality_on) {
-    mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
-    for (mt in 2:(mortality_length)) {
-      mortality_tracker2[[mt]] <- mortality_tracker
-    }
-  }
-  # add currently infected cells to last element of the mortality tracker so
-  # that mortality occurs at the appropriate interval
-  if (config$mortality_on) {
-    mortality_tracker2[[length(mortality_tracker2)]] <- infected_mean
-  }
-
-
-  config$mortality_tracker <- mortality_tracker2
 
   if (config$function_name %in% parallel_function_list) {
     if (is.na(config$number_of_cores) ||
