@@ -282,6 +282,8 @@ validate <- function(infected_years_file,
         config$mortality_tracker <- mortality_tracker2
       }
 
+      config$competency_table_list <- competency_table_list_creator(competency_table)
+
       data <- pops_model(
         random_seed = config$random_seed[i],
         multiple_random_seeds = config$multiple_random_seeds,

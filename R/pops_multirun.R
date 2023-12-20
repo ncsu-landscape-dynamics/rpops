@@ -262,6 +262,7 @@ pops_multirun <- function(infected_file_list,
         mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
         config$mortality_tracker <- mortality_tracker2
       }
+      config$competency_table_list <- competency_table_list_creator(competency_table)
 
       data <- PoPS::pops_model(
         random_seed = config$random_seed[1],
