@@ -325,6 +325,13 @@ multihost_checks <-
     failed_check <- competency_table_column_length_error
   }
 
+  if (!checks_passed && all(competency_table$competency_mean <= 1) &&
+      all(competency_table$competency_mean >= 0) && all(competency_table$competency_sd <= 1) &&
+      all(competency_table$competency_sd >= 0)) {
+    checks_passed <- FALSE
+    failed_check <- competency_value_error
+  }
+
   if (!checks_passed & (length(infected_file_list) + 1) <= nrow(competency_table)) {
     checks_passed <- FALSE
     failed_check <- competency_table_row_length_error
@@ -335,6 +342,13 @@ multihost_checks <-
   if (!checks_passed & length(infected_file_list) != nrow(pest_host_table)) {
     checks_passed <- FALSE
     failed_check <- pest_host_table_row_length_error
+  }
+
+  if (!checks_passed & all(pest_host_table$susceptibility >= 0) &
+      all(pest_host_table$susceptibility <= 1) & all(pest_host_table$mortality_rate >= 0) &
+      all(pest_host_table$mortality_rate <= 1)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_value_error
   }
 
   if (!checks_passed & identical(names(pest_host_table), pest_host_table_list)) {

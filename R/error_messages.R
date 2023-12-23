@@ -184,9 +184,15 @@ competency_table_row_length_error <-
   "competency_table needs to have at least 1 more row than the number of hosts being modeled which
   is represented by the number of file in the host_file_list"
 
+competency_value_error <-
+  "competency_table competency_mean and competency_sd values must be between 0 and 1"
+
 pest_host_table_row_length_error <-
   "pest_host_table doesn't have the same number of rows as number of files in host_file_list"
 
 pest_host_table_wrong_columns <-
   "pest_host_table must the 4 columns named and order: host, susceptibility, mortality_rate,
   mortality_time_lag"
+
+pest_host_table_value_error <-
+  "pest_host_table susceptiblity and mortality_rate must be between 0 and 1"
