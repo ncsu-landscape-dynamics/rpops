@@ -80,7 +80,8 @@ configuration <- function(config) {
 
   # check that multi-host dimensions are ensured
   multihost_check <-
-    multihost_checks(infected_file_list, host_file_list, competency_table, pest_host_table)
+    multihost_checks(config$infected_file_list, config$host_file_list, config$competency_table,
+                     config$pest_host_table)
   if (multihost_check$checks_passed) {
     config$host_names <- multihost_check$host_names
     config$pest_host_table_list <- multihost_check$pest_host_table_list
