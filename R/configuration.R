@@ -163,11 +163,11 @@ configuration <- function(config) {
     return(config)
   }
 
-  zero_rast <- infected[[1]]
+  zero_rast <- total_populations[[1]]
   terra::values(zero_rast) <- 0
   zero_matrix <- terra::as.matrix(zero_rast, wide = TRUE)
 
-  one_matrix <- infected[[1]]
+  one_matrix <- total_populations[[1]]
   terra::values(one_matrix) <- 0
   one_matrix <- terra::as.matrix(one_matrix, wide = TRUE)
 
@@ -182,9 +182,9 @@ configuration <- function(config) {
       if (config$function_name %in% aws_bucket_list) {
         soils_check <-
           secondary_raster_checks(
-            config$soil_starting_pest_file, infected, config$use_s3, config$bucket)
+            config$soil_starting_pest_file, total_populations, config$use_s3, config$bucket)
       } else {
-        soils_check <- secondary_raster_checks(config$soil_starting_pest_file, infected)
+        soils_check <- secondary_raster_checks(config$soil_starting_pest_file, total_populations)
       }
       if (soils_check$checks_passed) {
         soil_pests <- soils_check$raster
@@ -206,9 +206,10 @@ configuration <- function(config) {
   if (config$use_survival_rates == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
       survival_rate_check <-
-        secondary_raster_checks(config$survival_rates_file, infected, config$use_s3, config$bucket)
+        secondary_raster_checks(config$survival_rates_file, total_populations, config$use_s3,
+                                config$bucket)
     } else {
-      survival_rate_check <- secondary_raster_checks(config$survival_rates_file, infected)
+      survival_rate_check <- secondary_raster_checks(config$survival_rates_file, total_populations)
     }
     if (survival_rate_check$checks_passed) {
       survival_rates_stack <- survival_rate_check$raster
@@ -235,9 +236,10 @@ configuration <- function(config) {
   if (config$use_lethal_temperature == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
       temperature_check <-
-        secondary_raster_checks(config$temperature_file, infected, config$use_s3, config$bucket)
+        secondary_raster_checks(config$temperature_file, total_populations, config$use_s3,
+                                config$bucket)
     } else {
-      temperature_check <- secondary_raster_checks(config$temperature_file, infected)
+      temperature_check <- secondary_raster_checks(config$temperature_file, total_populations)
     }
     if (temperature_check$checks_passed) {
       temperature_stack <- temperature_check$raster
@@ -266,19 +268,19 @@ configuration <- function(config) {
   if (config$temp == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
       temperature_coefficient_check <-
-        secondary_raster_checks(config$temperature_coefficient_file, infected,
+        secondary_raster_checks(config$temperature_coefficient_file, total_populations,
                                 config$use_s3, config$bucket)
       if (config$weather_type == "probabilistic") {
         temperature_coefficient_sd_check <-
-          secondary_raster_checks(config$temperature_coefficient_sd_file, infected,
+          secondary_raster_checks(config$temperature_coefficient_sd_file, total_populations,
                                   config$use_s3, config$bucket)
       }
     } else {
       temperature_coefficient_check <-
-        secondary_raster_checks(config$temperature_coefficient_file, infected)
+        secondary_raster_checks(config$temperature_coefficient_file, total_populations)
       if (config$weather_type == "probabilistic") {
         temperature_coefficient_sd_check <-
-          secondary_raster_checks(config$temperature_coefficient_sd_file, infected)
+          secondary_raster_checks(config$temperature_coefficient_sd_file, total_populations)
       }
     }
 
@@ -313,20 +315,20 @@ configuration <- function(config) {
     if (config$precip == TRUE) {
       if (config$function_name %in% aws_bucket_list) {
         precipitation_coefficient_check <-
-          secondary_raster_checks(config$precipitation_coefficient_file, infected,
+          secondary_raster_checks(config$precipitation_coefficient_file, total_populations,
                                   config$use_s3, config$bucket)
         if (config$weather_type == "probabilistic") {
           precipitation_coefficient_sd_check <-
-            secondary_raster_checks(config$precipitation_coefficient_sd_file, infected,
+            secondary_raster_checks(config$precipitation_coefficient_sd_file, total_populations,
                                     config$use_s3, config$bucket)
         }
 
       } else {
         precipitation_coefficient_check <-
-          secondary_raster_checks(config$precipitation_coefficient_file, infected)
+          secondary_raster_checks(config$precipitation_coefficient_file, total_populations)
         if (config$weather_type == "probabilistic") {
           precipitation_coefficient_sd_check <-
-            secondary_raster_checks(config$precipitation_coefficient_sd_file, infected)
+            secondary_raster_checks(config$precipitation_coefficient_sd_file, total_populations)
         }
       }
 
@@ -363,19 +365,19 @@ configuration <- function(config) {
   } else if (config$precip == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
       precipitation_coefficient_check <-
-        secondary_raster_checks(config$precipitation_coefficient_file, infected,
+        secondary_raster_checks(config$precipitation_coefficient_file, total_populations,
                                 config$use_s3, config$bucket)
       if (config$weather_type == "probabilistic") {
         precipitation_coefficient_sd_check <-
-          secondary_raster_checks(config$precipitation_coefficient_sd_file, infected,
+          secondary_raster_checks(config$precipitation_coefficient_sd_file, total_populations,
                                   config$use_s3, config$bucket)
       }
     } else {
       precipitation_coefficient_check <-
-        secondary_raster_checks(config$precipitation_coefficient_file, infected)
+        secondary_raster_checks(config$precipitation_coefficient_file, total_populations)
       if (config$weather_type == "probabilistic") {
         precipitation_coefficient_sd_check <-
-          secondary_raster_checks(config$precipitation_coefficient_sd_file, infected)
+          secondary_raster_checks(config$precipitation_coefficient_sd_file, total_populations)
       }
     }
 
@@ -457,9 +459,10 @@ configuration <- function(config) {
   if (config$management == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
       treatments_check <-
-        secondary_raster_checks(config$treatments_file, infected, config$use_s3, config$bucket)
+        secondary_raster_checks(config$treatments_file, total_populations, config$use_s3,
+                                config$bucket)
     } else {
-      treatments_check <- secondary_raster_checks(config$treatments_file, infected)
+      treatments_check <- secondary_raster_checks(config$treatments_file, total_populations)
     }
 
     if (treatments_check$checks_passed) {
@@ -492,7 +495,7 @@ configuration <- function(config) {
   # setup up movements to be used in the model converts from lat/long to i/j
   if (config$use_movements) {
     movements_check <-
-      movement_checks(config$movements_file, infected, config$start_date, config$end_date)
+      movement_checks(config$movements_file, total_populations, config$start_date, config$end_date)
     if (movements_check$checks_passed) {
       config$movements <- movements_check$movements
       config$movements_dates <- movements_check$movements_dates
@@ -510,11 +513,20 @@ configuration <- function(config) {
 
   # loop over infected and host files to create multi-host setup
   host_pools <- c()
-  for (i in 1:length(infected_file_list)) {
+  host_pool_infected_means <- c()
+  host_pool_infected_sds <- c()
+  host_pool_exposed_means <- c()
+  host_pool_exposed_sds <- c()
+  host_pool_host_means <- c()
+  host_pool_host_sds <- c()
+  suitable <- zero_rast
+  for (i in seq_along(config$infected_file_list)) {
+    host_pool <- c()
     # check that infection rasters have the same crs, resolution, and extent
     if (config$function_name %in% aws_bucket_list) {
       infected_check <-
-        secondary_raster_checks(config$infected_file_list[i], total_populations, config$use_s3, config$bucket)
+        secondary_raster_checks(config$infected_file_list[i], total_populations, config$use_s3,
+                                config$bucket)
     } else {
       infected_check <- secondary_raster_checks(config$infected_file_list[i], total_populations)
     }
@@ -541,14 +553,67 @@ configuration <- function(config) {
       infected_mean <- terra::as.matrix(infected[[1]], wide = TRUE)
       infected_sd <- zero_matrix
     }
+    host_pool$name <- config$host_names[i]
+    host_pool$infected <- infected_mean
+    host_pool_infected_means[i] <- infected_mean
+    host_pool_infected_sds[i] <- infected_sd
+    # prepare exposed
+    exposed <- list(zero_matrix)
+    if (config$model_type == "SEI" && config$latency_period > 1) {
+      for (ex in 2:(config$latency_period + 1)) {
+        exposed[[ex]] <- zero_matrix
+      }
+    }
 
-    config$infected_mean <- infected_mean
-    config$infected_sd <- infected_sd
+    if (config$model_type == "SEI" && config$start_exposed) {
+      if (config$function_name %in% aws_bucket_list) {
+        exposed_check <-
+          secondary_raster_checks(config$exposed_file, total_populations, config$use_s3,
+                                  config$bucket)
+      } else {
+        exposed_check <- secondary_raster_checks(config$exposed_file, total_populations)
+      }
+      if (exposed_check$checks_passed) {
+        exposed2 <- exposed_check$raster
+        if (config$use_initial_condition_uncertainty) {
+          if (terra::nlyr(exposed2) == 2) {
+            exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
+            exposed_sd <- terra::as.matrix(exposed2[[2]], wide = TRUE)
+          } else {
+            config$failure <- initial_cond_uncert_error
+            return(config)
+          }
+        } else {
+          exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
+          exposed_sd <- zero_matrix
+        }
+        total_exposed <- exposed_mean
+      } else {
+        config$failure <- exposed_check$failed_check
+        if (config$failure == file_exists_error) {
+          config$failure <- detailed_file_exists_error(config$exposed_file)
+        }
+        return(config)
+      }
+    } else {
+      total_exposed <- zero_matrix
+      exposed_mean <- zero_matrix
+      exposed_sd <- zero_matrix
+    }
+
+    host_pool_exposed_means[i] <- exposed_mean
+    host_pool_exposed_sds[i] <- exposed_sd
+
+    exposed[[config$latency_period + 1]] <- exposed_mean
+    host_pool$total_exposed <- total_exposed
+    host_pool$exposed <- exposed
+
     # check that host raster has the same crs, resolution, and extent
     if (config$function_name %in% aws_bucket_list) {
-      host_check <- secondary_raster_checks(config$host_file_list[i], infected, config$use_s3, config$bucket)
+      host_check <- secondary_raster_checks(config$host_file_list[i], total_populations,
+                                            config$use_s3, config$bucket)
     } else {
-      host_check <- secondary_raster_checks(config$host_file_list[i], infected)
+      host_check <- secondary_raster_checks(config$host_file_list[i], total_populations)
     }
     if (host_check$checks_passed) {
       host <- host_check$raster
@@ -573,65 +638,16 @@ configuration <- function(config) {
       host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
       host_sd <- zero_matrix
     }
-    config$host_mean <- host_mean
-    config$host_sd <- host_sd
+    host_pool_host_means[i] <- host_mean
+    host_pool_host_sds[i] <- host_sd
+    host_pool$total_host <- host_mean
 
-    exposed <- list(zero_matrix)
-    config$total_exposed <- zero_matrix
+    susceptible <- host_mean - infected_mean - exposed_mean
+    susceptible[susceptible < 0] <- 0
+    host_pool$susceptible <- terra::as.matrix(susceptible, wide = TRUE)
 
-    if (config$model_type == "SEI" && config$latency_period > 1) {
-      for (ex in 2:(config$latency_period + 1)) {
-        exposed[[ex]] <- zero_matrix
-      }
-    }
-
-    if (config$model_type == "SEI" && config$start_exposed) {
-      if (config$function_name %in% aws_bucket_list) {
-        exposed_check <-
-          secondary_raster_checks(config$exposed_file, infected, config$use_s3, config$bucket)
-      } else {
-        exposed_check <- secondary_raster_checks(config$exposed_file, infected)
-      }
-      if (exposed_check$checks_passed) {
-        exposed2 <- exposed_check$raster
-        if (config$use_initial_condition_uncertainty) {
-          if (terra::nlyr(exposed2) == 2) {
-            exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
-            exposed_sd <- terra::as.matrix(exposed2[[2]], wide = TRUE)
-          } else {
-            config$failure <- initial_cond_uncert_error
-            return(config)
-          }
-        } else {
-          exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
-          exposed_sd <- zero_matrix
-        }
-      } else {
-        config$failure <- exposed_check$failed_check
-        if (config$failure == file_exists_error) {
-          config$failure <- detailed_file_exists_error(config$exposed_file)
-        }
-        return(config)
-      }
-    } else {
-      exposed_mean <- zero_matrix
-      exposed_sd <- zero_matrix
-    }
-
-    config$exposed_mean <- exposed_mean
-    config$exposed_sd <- exposed_sd
-
-    exposed[[config$latency_period + 1]] <- exposed_mean
-    config$total_exposed <- exposed_mean
-    config$exposed <- exposed
-
-    susceptible_mean <- host_mean - infected_mean - exposed_mean
-    susceptible_mean[susceptible_mean < 0] <- 0
-    config$susceptible_mean <- terra::as.matrix(susceptible_mean, wide = TRUE)
-
-    config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
-    config$mortality <- zero_matrix
-    config$resistant <- zero_matrix
+    host_pool$mortality <- zero_matrix
+    host_pool$resistant <- zero_matrix
 
     mortality_tracker <- list(zero_matrix)
     if (config$mortality_on) {
@@ -646,30 +662,35 @@ configuration <- function(config) {
       mortality_tracker[[length(mortality_tracker)]] <- infected_mean
     }
 
+    host_pool$mortality_tracker <- mortality_tracker
 
-    config$mortality_tracker <- mortality_tracker
+    # create suitable cells from all host pools
+    suitable <- suitable + host[[1]] + infected[[1]]
+    if (config$use_host_uncertainty && terra::nlyr(host) > 1) {
+      suitable <- suitable + host[[2]]
+    }
+    if (config$use_initial_condition_uncertainty && terra::nlyr(infected) > 1) {
+      suitable <- suitable + infected[[2]]
+    }
+    if (config$model_type == "SEI" && config$start_exposed) {
+      suitable <- suitable + exposed2[[1]]
+      if (config$use_initial_condition_uncertainty && terra::nlyr(exposed2) > 1) {
+        suitable <- suitable + exposed2[[2]]
+      }
+    }
 
-
-    host_pool <-
-      list(infected, susceptible, exposed, total_exposed, resistant, total_hosts, mortality,
-           mortality_tracker)
     host_pools[i] <- host_pool
   }
 
+  config$host_pools <- host_pools
+  config$host_pool_infected_means <- host_pool_infected_means
+  config$host_pool_infected_sds <- host_pool_infected_sds
+  config$host_pool_exposed_means <- host_pool_exposed_means
+  config$host_pool_exposed_sds <- host_pool_exposed_sds
+  config$host_pool_host_means <- host_pool_host_means
+  config$host_pool_host_sds <- host_pool_host_sds
+
   # create spatial indices for computational speed up.
-  suitable <- host[[1]] + infected[[1]]
-  if (config$use_host_uncertainty && terra::nlyr(host) > 1) {
-    suitable <- suitable + host[[2]]
-  }
-  if (config$use_initial_condition_uncertainty && terra::nlyr(infected) > 1) {
-    suitable <- suitable + infected[[2]]
-  }
-  if (config$model_type == "SEI" && config$start_exposed) {
-    suitable <- suitable + exposed2[[1]]
-    if (config$use_initial_condition_uncertainty && terra::nlyr(exposed2) > 1) {
-      suitable <- suitable + exposed2[[2]]
-    }
-  }
   suitable_points <- terra::as.points(suitable)
   names(suitable_points) <- "data"
   suitable_points <- suitable_points[suitable_points$data > 0]
@@ -699,7 +720,7 @@ configuration <- function(config) {
   rows_cols$num_cols <- terra::ncol(infected)
   config$rows_cols <- rows_cols
 
-
+  config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
 
   if (!is.null(config$mask)) {
     if (config$function_name %in% aws_bucket_list) {
