@@ -274,7 +274,8 @@ combined_sd <- function(v1, v2, m1, m2, n1, n2) {
 competency_table_list_creator <- function(competency_table) {
   competency_table2 <- competency_table[, 1:(ncol(competency_table) - 1)]
   competencies <-
-    rnorm(n = nrow(competency_table), mean = competency_table$competency_mean, sd = competency_table$compentency_sd)
+    rnorm(n = nrow(competency_table), mean = competency_table$competency_mean,
+          sd = competency_table$compentency_sd)
   names(competency_table2)[ncol(competency_table2)] <- "competency"
   if (any(competencies > 1) || any(competencies < 0)) {
     competencies <-
@@ -283,6 +284,6 @@ competency_table_list_creator <- function(competency_table) {
   }
   competency_table2$competency <- competencies
   competency_table2 <- competency_table2
-  competency_table_list <- split(competency_table2, seq(nrow(competency_table2)))
+  competency_table_list <- split(competency_table2, seq_len(nrow(competency_table2)))
   return(competency_table_list)
 }

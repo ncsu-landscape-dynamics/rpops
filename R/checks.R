@@ -316,11 +316,11 @@ multihost_checks <-
   function(infected_file_list, host_file_list, competency_table, pest_host_table) {
   checks_passed <- TRUE
   if (length(infected_file_list) != length(host_file_list)) {
-    checks_pass <- FALSE
+    checks_passed <- FALSE
     failed_check <- multihost_file_length_error
   }
 
-  if (!checks_passed & length(infected_file_list) != (ncol(competency_table) - 2)) {
+  if (!checks_passed && length(infected_file_list) != (ncol(competency_table) - 2)) {
     checks_passed <- FALSE
     failed_check <- competency_table_column_length_error
   }
@@ -332,32 +332,32 @@ multihost_checks <-
     failed_check <- competency_value_error
   }
 
-  if (!checks_passed & (length(infected_file_list) + 1) <= nrow(competency_table)) {
+  if (!checks_passed && (length(infected_file_list) + 1) <= nrow(competency_table)) {
     checks_passed <- FALSE
     failed_check <- competency_table_row_length_error
   } else {
     competency_table_list <- competency_table_list_creator(competency_table)
   }
 
-  if (!checks_passed & length(infected_file_list) != nrow(pest_host_table)) {
+  if (!checks_passed && length(infected_file_list) != nrow(pest_host_table)) {
     checks_passed <- FALSE
     failed_check <- pest_host_table_row_length_error
   }
 
-  if (!checks_passed & all(pest_host_table$susceptibility >= 0) &
-      all(pest_host_table$susceptibility <= 1) & all(pest_host_table$mortality_rate >= 0) &
+  if (!checks_passed && all(pest_host_table$susceptibility >= 0) &&
+      all(pest_host_table$susceptibility <= 1) && all(pest_host_table$mortality_rate >= 0) &&
       all(pest_host_table$mortality_rate <= 1)) {
     checks_passed <- FALSE
     failed_check <- pest_host_table_value_error
   }
 
-  if (!checks_passed & identical(names(pest_host_table), pest_host_table_list)) {
+  if (!checks_passed && identical(names(pest_host_table), pest_host_table_list)) {
     checks_passed <- FALSE
     failed_check <- pest_host_table_wrong_columns
   } else {
     host_names <- pest_host_table$host
     pest_host_table <- pest_host_table[, 2:4]
-    pest_host_table_list <- split(pest_host_table, seq(nrow(pest_host_table)))
+    pest_host_table_list <- split(pest_host_table, seq_len(nrow(pest_host_table)))
   }
 
   if (checks_passed) {
