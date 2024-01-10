@@ -75,8 +75,8 @@ configuration <- function(config) {
     return(config)
   }
 
-  config$pest_host_table <- read.csv(config$pest_host_table)
-  config$competency_table <- read.csv(config$competency_table)
+  config$pest_host_table <- suppressWarnings(read.csv(config$pest_host_table))
+  config$competency_table <- suppressWarnings(read.csv(config$competency_table))
 
   # check that multi-host dimensions are ensured
   multihost_check <-
@@ -86,6 +86,7 @@ configuration <- function(config) {
     config$host_names <- multihost_check$host_names
     config$pest_host_table_list <- multihost_check$pest_host_table_list
     config$competency_table_list <- multihost_check$competency_table_list
+    config$mortality_on <- multihost_check$mortality_on
   } else {
     config$failure <- multihost_check$failed_check
   }
@@ -536,7 +537,7 @@ configuration <- function(config) {
     } else {
       config$failure <- infected_check$failed_check
       if (config$failure == file_exists_error) {
-        config$failure <- detailed_file_exists_error(config$infected_file)
+        config$failure <- detailed_file_exists_error(config$infected_file_list[i])
       }
       return(config)
     }
@@ -568,10 +569,10 @@ configuration <- function(config) {
     if (config$model_type == "SEI" && config$start_exposed) {
       if (config$function_name %in% aws_bucket_list) {
         exposed_check <-
-          secondary_raster_checks(config$exposed_file, total_populations, config$use_s3,
+          secondary_raster_checks(config$exposed_file_list[i], total_populations, config$use_s3,
                                   config$bucket)
       } else {
-        exposed_check <- secondary_raster_checks(config$exposed_file, total_populations)
+        exposed_check <- secondary_raster_checks(config$exposed_file_list[i], total_populations)
       }
       if (exposed_check$checks_passed) {
         exposed2 <- exposed_check$raster
@@ -591,7 +592,7 @@ configuration <- function(config) {
       } else {
         config$failure <- exposed_check$failed_check
         if (config$failure == file_exists_error) {
-          config$failure <- detailed_file_exists_error(config$exposed_file)
+          config$failure <- detailed_file_exists_error(config$exposed_file_list[i])
         }
         return(config)
       }
@@ -621,7 +622,7 @@ configuration <- function(config) {
     } else {
       config$failure <- host_check$failed_check
       if (config$failure == file_exists_error) {
-        config$failure <- detailed_file_exists_error(config$host_file)
+        config$failure <- detailed_file_exists_error(config$host_file_list[i])
       }
       return(config)
     }
