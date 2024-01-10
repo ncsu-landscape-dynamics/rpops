@@ -224,7 +224,7 @@ pops_model <-
                      lethal_temperature_month = lethal_temperature_month,
                      host_pools = host_pools,
                      total_populations = total_populations,
-                     competency_table = compotency_table,
+                     competency_table = competency_table,
                      pest_host_table = pest_host_table,
                      quarantine_areas = quarantine_areas,
                      quarantine_directions = quarantine_directions,
