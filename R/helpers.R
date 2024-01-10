@@ -332,4 +332,6 @@ host_pool_setup <- function(config) {
       mortality_tracker[[length(mortality_tracker)]] <- host_pool$infected
       host_pool$mortality_tracker <- mortality_tracker
     }
+    config$host_pools[i] <- host_pool
   }
+}
