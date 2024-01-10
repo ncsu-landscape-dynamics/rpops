@@ -130,7 +130,11 @@
 #' @param leaving_percentage Percentage of pests leaving an overpopulated cell
 #' @param leaving_scale_coefficient Coefficient to multiply scale parameter of the natural kernel
 #' (if applicable)
-#' @param exposed_file A file with the exposed for the current
+#' @param exposed_file_list paths to raster files with initial exposeds and standard deviation
+#' for each host can be based in 2 formats (a single file with number of hosts or a single file with
+#' 2 layers number of hosts and standard deviation).. Units for infections are based on data
+#' availability and the way the units used for your host file is created (e.g. percent area, # of
+#' hosts per cell, etc.).
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from
 #' comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). This
 #' can also be used to mask out areas that can't be managed in the auto_manage function.
@@ -261,7 +265,7 @@ pops <- function(infected_file_list,
                  overpopulation_percentage = 0,
                  leaving_percentage = 0,
                  leaving_scale_coefficient = 1,
-                 exposed_file = "",
+                 exposed_file_list = "",
                  mask = NULL,
                  network_filename = "",
                  network_movement = "walk",
@@ -342,7 +346,7 @@ pops <- function(infected_file_list,
   # calibration.
   config$function_name <- "pops"
   config$failure <- NULL
-  config$exposed_file <- exposed_file
+  config$exposed_file_list <- exposed_file_list
   config$write_outputs <- "None"
   config$output_folder_path <- ""
   config$mortality_frequency <- mortality_frequency

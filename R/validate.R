@@ -106,7 +106,7 @@ validate <- function(infected_years_file,
                      overpopulation_percentage = 0,
                      leaving_percentage = 0,
                      leaving_scale_coefficient = 1,
-                     exposed_file = "",
+                     exposed_file_list = "",
                      write_outputs = "None",
                      output_folder_path = "",
                      point_file = "",
@@ -189,7 +189,7 @@ validate <- function(infected_years_file,
   # calibration.
   config$function_name <- "validate"
   config$failure <- NULL
-  config$exposed_file <- exposed_file
+  config$exposed_file_list <- exposed_file_list
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
   config$mortality_frequency <- mortality_frequency

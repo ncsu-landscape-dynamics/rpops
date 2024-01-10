@@ -182,7 +182,7 @@ calibrate <- function(infected_years_file,
                       leaving_scale_coefficient = 1,
                       calibration_method = "ABC",
                       number_of_iterations = 100000,
-                      exposed_file = "",
+                      exposed_file_list = "",
                       verbose = TRUE,
                       write_outputs = "None",
                       output_folder_path = "",
@@ -268,7 +268,7 @@ calibrate <- function(infected_years_file,
   config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$calibration_method <- calibration_method
   config$number_of_iterations <- number_of_iterations
-  config$exposed_file <- exposed_file
+  config$exposed_file_list <- exposed_file_list
   # add function name for use in configuration function to skip
   # function specific specific configurations namely for validation and
   # calibration.

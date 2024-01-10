@@ -72,7 +72,7 @@ calibrate(
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
   number_of_iterations = 1e+05,
-  exposed_file = "",
+  exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "None",
   output_folder_path = "",
@@ -353,7 +353,11 @@ Approximation)}
 the calibration to converge (recommend a minimum of at least 100,000 but
 preferably 1 million).}
 
-\item{exposed_file}{A file with the exposed for the current}
+\item{exposed_file_list}{paths to raster files with initial exposeds and standard deviation
+for each host can be based in 2 formats (a single file with number of hosts or a single file with
+2 layers number of hosts and standard deviation).. Units for infections are based on data
+availability and the way the units used for your host file is created (e.g. percent area, # of
+hosts per cell, etc.).}
 
 \item{verbose}{Boolean with true printing current status of calibration,
 (e.g. the current generation, current particle, and the acceptance rate).

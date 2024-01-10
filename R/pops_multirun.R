@@ -92,7 +92,7 @@ pops_multirun <- function(infected_file_list,
                           overpopulation_percentage = 0,
                           leaving_percentage = 0,
                           leaving_scale_coefficient = 1,
-                          exposed_file = "",
+                          exposed_file_list = "",
                           mask = NULL,
                           write_outputs = "None",
                           output_folder_path = "",
@@ -172,7 +172,7 @@ pops_multirun <- function(infected_file_list,
   # calibration.
   config$function_name <- "multirun"
   config$failure <- NULL
-  config$exposed_file <- exposed_file
+  config$exposed_file_list <- exposed_file_list
   config$mask <- mask
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
