@@ -239,50 +239,8 @@ validate <- function(infected_years_file,
     ) %dopar% {
 
       config <- draw_parameters(config) # draws parameter set for the run
-
-      if (config$use_initial_condition_uncertainty) {
-        config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
-        while (any(config$infected < 0)) {
-          config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
-        }
-        exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
-        while (any(exposed2 < 0)) {
-          exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
-        }
-        exposed <- config$exposed
-        exposed[[config$latency_period + 1]] <- exposed2
-        config$exposed <- exposed
-      } else {
-        config$infected <- config$infected_mean
-        exposed2 <- config$exposed_mean
-        exposed <- config$exposed
-        exposed[[config$latency_period + 1]] <- exposed2
-        config$exposed <- exposed
-      }
-
-      if (config$use_host_uncertainty) {
-        config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
-        while (any(config$host > config$total_populations)) {
-          config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
-        }
-      } else {
-        config$host <- config$host_mean
-      }
-
-      susceptible <- config$host - config$infected - exposed2
-      susceptible[susceptible < 0] <- 0
-
-      config$susceptible <- susceptible
-      config$total_hosts <- config$host
-      config$total_exposed <- exposed2
-
-      if (config$mortality_on) {
-        mortality_tracker2 <- config$mortality_tracker
-        mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
-        config$mortality_tracker <- mortality_tracker2
-      }
-
-      config$competency_table_list <- competency_table_list_creator(competency_table)
+      config <- host_pool_setup(config)
+      config$competency_table_list <- competency_table_list_creator(config$competency_table)
 
       data <- pops_model(
         random_seed = config$random_seed[i],
