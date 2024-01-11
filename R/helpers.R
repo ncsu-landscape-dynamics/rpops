@@ -285,29 +285,33 @@ competency_table_list_creator <- function(competency_table) {
   competency_table2$competency <- competencies
   competency_table2 <- competency_table2
   competency_table_list <- split(competency_table2, seq_len(nrow(competency_table2)))
+  for (i in seq_along(competency_table_list)) {
+    competency_table_list[[i]] <- unname(competency_table_list[[i]])
+    competency_table_list[[i]] <- as.vector(t(competency_table_list[[i]]))
+  }
   return(competency_table_list)
 }
 
 # Update host pools when uncertainties are used
 host_pool_setup <- function(config) {
   for (i in seq_along(config$host_file_list)) {
-    host_pool <- config$host_pools[i]
+    host_pool <- config$host_pools[[i]]
     if (config$use_initial_condition_uncertainty) {
       infected <-
-        matrix_norm_distribution(config$host_pool_infected_means[i],
-                                 config$host_pool_infected_sds[i])
+        matrix_norm_distribution(config$host_pool_infected_means[[i]],
+                                 config$host_pool_infected_sds[[i]])
       while (any(infected < 0)) {
         infected <-
-          matrix_norm_distribution(config$host_pool_infected_means[i],
-                                   config$host_pool_infected_sds[i])
+          matrix_norm_distribution(config$host_pool_infected_means[[i]],
+                                   config$host_pool_infected_sds[[i]])
       }
-      exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[i],
-                                           config$host_pool_exposed_sds[i])
+      exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
+                                           config$host_pool_exposed_sds[[i]])
       while (any(exposed2 < 0)) {
-        exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[i],
-                                             config$host_pool_exposed_sds[i])
+        exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
+                                             config$host_pool_exposed_sds[[i]])
       }
-      exposed <- config$host_pools[i]$exposed
+      exposed <- host_pool[[i]]$exposed
       exposed[[config$latency_period + 1]] <- exposed2
       host_pool$infected <- infected
       host_pool$exposed <- exposed
@@ -315,11 +319,11 @@ host_pool_setup <- function(config) {
     }
 
     if (config$use_host_uncertainty) {
-      host <- matrix_norm_distribution(config$host_pool_host_means[i],
-                                       config$host_pool_host_sds[i])
+      host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
+                                       config$host_pool_host_sds[[i]])
       while (any(host > config$total_populations)) {
-        host <- matrix_norm_distribution(config$host_pool_host_means[i],
-                                         config$host_pool_host_sds[i])
+        host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
+                                         config$host_pool_host_sds[[i]])
       }
       host_pool$total_host <- host
     }
@@ -328,10 +332,11 @@ host_pool_setup <- function(config) {
     susceptible[susceptible < 0] <- 0
 
     if (config$mortality_on) {
-      mortality_tracker <- config$host_pool[i]$mortality_tracker
+      mortality_tracker <- host_pool$mortality_tracker
       mortality_tracker[[length(mortality_tracker)]] <- host_pool$infected
       host_pool$mortality_tracker <- mortality_tracker
     }
-    config$host_pools[i] <- host_pool
+    config$host_pools[[i]] <- host_pool
   }
+  return(config)
 }

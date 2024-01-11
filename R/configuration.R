@@ -513,16 +513,16 @@ configuration <- function(config) {
   }
 
   # loop over infected and host files to create multi-host setup
-  host_pools <- c()
-  host_pool_infected_means <- c()
-  host_pool_infected_sds <- c()
-  host_pool_exposed_means <- c()
-  host_pool_exposed_sds <- c()
-  host_pool_host_means <- c()
-  host_pool_host_sds <- c()
+  host_pools <- list()
+  host_pool_infected_means <- list()
+  host_pool_infected_sds <- list()
+  host_pool_exposed_means <- list()
+  host_pool_exposed_sds <- list()
+  host_pool_host_means <- list()
+  host_pool_host_sds <- list()
   suitable <- zero_rast
   for (i in seq_along(config$infected_file_list)) {
-    host_pool <- c()
+    host_pool <- list()
     # check that infection rasters have the same crs, resolution, and extent
     if (config$function_name %in% aws_bucket_list) {
       infected_check <-
@@ -556,8 +556,8 @@ configuration <- function(config) {
     }
     host_pool$name <- config$host_names[i]
     host_pool$infected <- infected_mean
-    host_pool_infected_means[i] <- infected_mean
-    host_pool_infected_sds[i] <- infected_sd
+    host_pool_infected_means[[i]] <- infected_mean
+    host_pool_infected_sds[[i]] <- infected_sd
     # prepare exposed
     exposed <- list(zero_matrix)
     if (config$model_type == "SEI" && config$latency_period > 1) {
@@ -602,8 +602,8 @@ configuration <- function(config) {
       exposed_sd <- zero_matrix
     }
 
-    host_pool_exposed_means[i] <- exposed_mean
-    host_pool_exposed_sds[i] <- exposed_sd
+    host_pool_exposed_means[[i]] <- exposed_mean
+    host_pool_exposed_sds[[i]] <- exposed_sd
 
     exposed[[config$latency_period + 1]] <- exposed_mean
     host_pool$total_exposed <- total_exposed
@@ -639,9 +639,9 @@ configuration <- function(config) {
       host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
       host_sd <- zero_matrix
     }
-    host_pool_host_means[i] <- host_mean
-    host_pool_host_sds[i] <- host_sd
-    host_pool$total_host <- host_mean
+    host_pool_host_means[[i]] <- host_mean
+    host_pool_host_sds[[i]] <- host_sd
+    host_pool$total_hosts <- host_mean
 
     susceptible <- host_mean - infected_mean - exposed_mean
     susceptible[susceptible < 0] <- 0
@@ -652,9 +652,11 @@ configuration <- function(config) {
 
     mortality_tracker <- list(zero_matrix)
     if (config$mortality_on) {
-      mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
+      mortality_length <-
+        1 / config$pest_host_table$mortality_rate[i] +
+        config$pest_host_table$mortality_time_lag[i]
       for (mt in 2:(mortality_length)) {
-        mortality_tracker[[mt]] <- mortality_tracker
+        mortality_tracker[[mt]] <- zero_matrix
       }
     }
     # add currently infected cells to last element of the mortality tracker so
@@ -680,7 +682,7 @@ configuration <- function(config) {
       }
     }
 
-    host_pools[i] <- host_pool
+    host_pools[[i]] <- host_pool
   }
 
   config$host_pools <- host_pools

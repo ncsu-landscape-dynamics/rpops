@@ -358,6 +358,10 @@ multihost_checks <-
     host_names <- pest_host_table$host
     pest_host_table <- pest_host_table[, 2:4]
     pest_host_table_list <- split(pest_host_table, seq_len(nrow(pest_host_table)))
+    for (i in seq_along(pest_host_table_list)) {
+      pest_host_table_list[[i]] <- unname(pest_host_table_list[[i]])
+      pest_host_table_list[[i]] <- as.vector(t(pest_host_table_list[[i]]))
+    }
   }
 
   if (any(pest_host_table$mortality_rate > 0)) {
@@ -368,10 +372,11 @@ multihost_checks <-
 
   if (checks_passed) {
     outs <-
-      list(checks_passed, host_names, pest_host_table_list, competency_table_list, mortality_on)
+      list(checks_passed, host_names, pest_host_table_list, competency_table_list, mortality_on,
+           pest_host_table)
     names(outs) <-
       c("checks_passed", "host_names", "pest_host_table_list", "competency_table_list",
-        "mortality_on")
+        "mortality_on", "pest_host_table2")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
