@@ -410,27 +410,22 @@ List pops_model_cpp(
             int num_infected = 0;
             IntegerMatrix all_infected(config.rows, config.cols);
             for (unsigned i = 0; i < host_pools.size(); i++) {
-              IntegerMatrix infected = host_pools[i]["infected"];
-              IntegerMatrix susceptible = host_pools[i]["susceptible"];
-              IntegerMatrix resistant = host_pools[i]["resistant"];
-              IntegerMatrix total_exposed = host_pools[i]["total_exposed"];
-              output_host_pool_vector[i].infected.push_back(Rcpp::clone(infected));
-              output_host_pool_vector[i].susceptible.push_back(Rcpp::clone(susceptible));
-              output_host_pool_vector[i].resistant.push_back(Rcpp::clone(resistant));
-              output_host_pool_vector[i].total_exposed.push_back(Rcpp::clone(total_exposed));
+              output_host_pool_vector[i].infected.push_back(Rcpp::clone(input_host_pool.infected[i]));
+              output_host_pool_vector[i].susceptible.push_back(Rcpp::clone(input_host_pool.susceptible[i]));
+              output_host_pool_vector[i].resistant.push_back(Rcpp::clone(input_host_pool.resistant[i]));
+              output_host_pool_vector[i].total_exposed.push_back(Rcpp::clone(input_host_pool.total_exposed[i]));
               std::vector<IntegerMatrix> exposed_v;
-              std::vector<IntegerMatrix> tmp_exposed = host_pools[i]["exposed"];
               if (config.model_type == "SEI") {
-                for (unsigned e = 0; e < tmp_exposed.size(); e++) {
-                  exposed_v.push_back(Rcpp::clone(tmp_exposed[e]));
+                for (unsigned e = 0; e < input_host_pool.exposed[i].size(); e++) {
+                  exposed_v.push_back(Rcpp::clone(input_host_pool.exposed[i][e]));
                 }
               }
               else {
-                exposed_v = tmp_exposed;
+                exposed_v = input_host_pool.exposed[i];
               }
               output_host_pool_vector[i].exposed.push_back(exposed_v);
-              num_infected += sum_of_infected(infected, spatial_indices);
-              all_infected += infected;
+              num_infected += sum_of_infected(input_host_pool.infected[i], spatial_indices);
+              all_infected += input_host_pool.infected[i];
             }
             total_populations_vector.push_back(Rcpp::clone(total_populations));
             dispersers_vector.push_back(Rcpp::clone(total_dispersers));
