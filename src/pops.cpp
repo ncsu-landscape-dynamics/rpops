@@ -275,7 +275,6 @@ List pops_model_cpp(
     InputHostPool input_host_pool;
     host_pool_vector.reserve(host_pools.size());
     host_pool_vector_plain.reserve(host_pools.size());
-    input_host_pool.reserve(host_pools.size());
     for (unsigned i = 0; i < host_pools.size(); i++) {
       input_host_pool.infected.emplace_back(host_pools[i]["infected"]);
       input_host_pool.susceptible.emplace_back(host_pools[i]["susceptible"]);
