@@ -126,7 +126,8 @@ validate <- function(infected_years_file,
                      file_random_seeds = NULL,
                      use_soils = FALSE,
                      soil_starting_pest_file = "",
-                     start_with_soil_populations = FALSE) {
+                     start_with_soil_populations = FALSE,
+                     county_level_infection_data = FALSE) {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -214,6 +215,7 @@ validate <- function(infected_years_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$county_level_infection_data <- county_level_infection_data
 
   config <- configuration(config)
 

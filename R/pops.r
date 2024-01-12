@@ -185,6 +185,9 @@
 #' the pest all values in the raster are between 0 and 1.
 #' @param start_with_soil_populations Boolean to indicate whether to use a starting soil pest or
 #' pathogen population if TRUE then soil_starting_pest_file is required.
+#' @param county_level_infection_data Boolean to indicate if infection data is at the county level.
+#' If TRUE then the infected_file should be a polygon raster with county level infection/infestation
+#' counts.
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
@@ -271,7 +274,8 @@ pops <- function(infected_file,
                  file_random_seeds = NULL,
                  use_soils = FALSE,
                  soil_starting_pest_file = "",
-                 start_with_soil_populations = FALSE) {
+                 start_with_soil_populations = FALSE,
+                 county_level_infection_data = FALSE) {
 
   config <- c()
   config$random_seed <- random_seed
@@ -359,6 +363,7 @@ pops <- function(infected_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$county_level_infection_data <- county_level_infection_data
 
   config <- configuration(config)
 
