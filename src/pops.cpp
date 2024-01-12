@@ -267,6 +267,7 @@ List pops_model_cpp(
       network->load(network_stream);
     }
     config.read_competency_table(competency_table);
+    config.read_pest_host_table(pest_host_table);
 
     PoPSModel model(config);
 
