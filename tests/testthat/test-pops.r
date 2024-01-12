@@ -841,7 +841,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
   end_date <- "2010-12-31"
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
-  pest_host_table <- system.file("extdata", "pest_host_table_singlehost.csv", package = "PoPS")
+  pest_host_table <- system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
   competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
   expect_equal(pops(infected_file_list = infected_file_list,
@@ -850,7 +850,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix,
                     pest_host_table = pest_host_table,
-                    competency_table = competency_table)$infected[[1]],
+                    competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(pops(infected_file_list = infected_file_list,
                     host_file_list = host_file_list,
@@ -863,7 +863,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
                     parameter_means = parameter_means,
                     parameter_cov_matrix = parameter_cov_matrix,
                     pest_host_table = pest_host_table,
-                    competency_table = competency_table)$infected[[1]],
+                    competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(pops(infected_file_list = infected_file_list,
                     host_file_list = host_file_list,
@@ -873,7 +873,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
                     pest_host_table = pest_host_table,
                     competency_table = competency_table,
                     temp = TRUE,
-                    temperature_coefficient_file = coefficient_file)$infected[[1]],
+                    temperature_coefficient_file = coefficient_file)$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(pops(infected_file_list = infected_file_list,
                     host_file_list = host_file_list,
@@ -883,7 +883,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
                     pest_host_table = pest_host_table,
                     competency_table = competency_table,
                     precip = TRUE,
-                    precipitation_coefficient_file = coefficient_file)$infected[[1]],
+                    precipitation_coefficient_file = coefficient_file)$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(pops(infected_file_list = infected_file_list,
                     host_file_list = host_file_list,
@@ -895,7 +895,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
                     temp = TRUE,
                     temperature_coefficient_file = coefficient_file,
                     precip = TRUE,
-                    precipitation_coefficient_file = coefficient_file)$infected[[1]],
+                    precipitation_coefficient_file = coefficient_file)$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(pops(infected_file_list = infected_file_list,
                     host_file_list = host_file_list,
@@ -912,7 +912,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
                     temp = TRUE,
                     temperature_coefficient_file = coefficient_file,
                     precip = TRUE,
-                    precipitation_coefficient_file = coefficient_file)$infected[[1]],
+                    precipitation_coefficient_file = coefficient_file)$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
 
   expect_equal(
@@ -927,7 +927,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          temperature_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
-         time_step = "week")$infected[[1]],
+         time_step = "week")$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(
     pops(infected_file_list = infected_file_list,
@@ -941,7 +941,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          precipitation_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
-         time_step = "week")$infected[[1]],
+         time_step = "week")$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(
     pops(infected_file_list = infected_file_list,
@@ -959,7 +959,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          precipitation_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
-         time_step = "week")$infected[[1]],
+         time_step = "week")$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(
     pops(infected_file_list = infected_file_list,
@@ -983,7 +983,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          precipitation_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_weeks.tif", package = "PoPS"),
-         time_step = "week")$infected[[1]],
+         time_step = "week")$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
 
   expect_equal(
@@ -998,7 +998,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          time_step = "day",
          temperature_coefficient_file =
            system.file("extdata", "simple2x2",
-                       "temperature_coefficient_days.tif", package = "PoPS"))$infected[[1]],
+                       "temperature_coefficient_days.tif", package = "PoPS"))$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(
     pops(infected_file_list = infected_file_list,
@@ -1012,7 +1012,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          precipitation_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_days.tif", package = "PoPS"),
-         time_step = "day")$infected[[1]],
+         time_step = "day")$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(
     pops(infected_file_list = infected_file_list,
@@ -1030,7 +1030,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          precipitation_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_days.tif", package = "PoPS"),
-         time_step = "day")$infected[[1]],
+         time_step = "day")$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(
     pops(infected_file_list = infected_file_list,
@@ -1053,7 +1053,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
          precipitation_coefficient_file =
            system.file("extdata", "simple2x2",
                        "temperature_coefficient_days.tif", package = "PoPS"),
-         time_step = "day")$infected[[1]],
+         time_step = "day")$host_pools[[1]]$infected[[1]],
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
 })
 
@@ -1070,6 +1070,8 @@ test_that(
     end_date <- "2010-12-31"
     parameter_means <- c(1, 21, 1, 500, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    pest_host_table <- system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
     expect_equal(pops(infected_file_list = infected_file_list,
                       host_file_list = host_file_list,
@@ -1079,7 +1081,7 @@ test_that(
                       parameter_means = parameter_means,
                       parameter_cov_matrix = parameter_cov_matrix,
                       pest_host_table = pest_host_table,
-                      competency_table = competency_table)$infected[[1]],
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  matrix(0, ncol = 2, nrow = 2))
     expect_equal(pops(infected_file_list = infected_file_list,
                       host_file_list = host_file_list,
@@ -1089,7 +1091,9 @@ test_that(
                       precip = TRUE,
                       precipitation_coefficient_file = coefficient_file,
                       parameter_means = parameter_means,
-                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                      parameter_cov_matrix = parameter_cov_matrix,
+                      pest_host_table = pest_host_table,
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  matrix(0, ncol = 2, nrow = 2))
     expect_equal(pops(infected_file_list = infected_file_list,
                       host_file_list = host_file_list,
@@ -1099,7 +1103,9 @@ test_that(
                       temp = TRUE,
                       temperature_coefficient_file = coefficient_file,
                       parameter_means = parameter_means,
-                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                      parameter_cov_matrix = parameter_cov_matrix,
+                      pest_host_table = pest_host_table,
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  matrix(0, ncol = 2, nrow = 2))
     expect_equal(pops(infected_file_list = infected_file_list,
                       host_file_list = host_file_list,
@@ -1111,7 +1117,9 @@ test_that(
                       precip = TRUE,
                       precipitation_coefficient_file = coefficient_file,
                       parameter_means = parameter_means,
-                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                      parameter_cov_matrix = parameter_cov_matrix,
+                      pest_host_table = pest_host_table,
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  matrix(0, ncol = 2, nrow = 2))
 
   })
@@ -1128,6 +1136,8 @@ test_that(
     end_date <- "2010-12-31"
     parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    pest_host_table <- system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
     reduced_inf <- matrix(0, ncol = 2, nrow = 2)
     reduced_inf[1, 1] <- 3
@@ -1138,7 +1148,9 @@ test_that(
                       use_survival_rates = TRUE,
                       survival_rates_file = survival_rates_file,
                       parameter_means = parameter_means,
-                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                      parameter_cov_matrix = parameter_cov_matrix,
+                      pest_host_table = pest_host_table,
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  reduced_inf)
     expect_equal(pops(infected_file_list = infected_file_list,
                       host_file_list = host_file_list,
@@ -1148,7 +1160,9 @@ test_that(
                       precip = TRUE,
                       precipitation_coefficient_file = coefficient_file,
                       parameter_means = parameter_means,
-                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                      parameter_cov_matrix = parameter_cov_matrix,
+                      pest_host_table = pest_host_table,
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  reduced_inf)
     expect_equal(pops(infected_file_list = infected_file_list,
                       host_file_list = host_file_list,
@@ -1158,7 +1172,9 @@ test_that(
                       temp = TRUE,
                       temperature_coefficient_file = coefficient_file,
                       parameter_means = parameter_means,
-                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                      parameter_cov_matrix = parameter_cov_matrix,
+                      pest_host_table = pest_host_table,
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  reduced_inf)
     expect_equal(pops(infected_file_list = infected_file_list,
                       host_file_list = host_file_list,
@@ -1170,7 +1186,9 @@ test_that(
                       precip = TRUE,
                       precipitation_coefficient_file = coefficient_file,
                       parameter_means = parameter_means,
-                      parameter_cov_matrix = parameter_cov_matrix)$infected[[1]],
+                      parameter_cov_matrix = parameter_cov_matrix,
+                      pest_host_table = pest_host_table,
+                      competency_table = competency_table)$host_pools[[1]]$infected[[1]],
                  reduced_inf)
 
   })
@@ -1192,6 +1210,8 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
                                            package = "PoPS")
             parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
             parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+            pest_host_table <- system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
             data <-
               pops(infected_file_list = infected_file_list,
@@ -1202,11 +1222,13 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
                    treatments_file = treatments_file,
                    parameter_means = parameter_means,
                    parameter_cov_matrix = parameter_cov_matrix,
+                   pest_host_table = pest_host_table,
+                   competency_table = competency_table,
                    start_date = start_date,
                    end_date = end_date)
 
-            expect_equal(data$infected[[1]], matrix(0, ncol = 2, nrow = 2))
-            expect_equal(data$susceptible[[1]], matrix(0, ncol = 2, nrow = 2))
+            expect_equal(data$host_pools[[1]]$infected[[1]], matrix(0, ncol = 2, nrow = 2))
+            expect_equal(data$host_pools[[1]]$susceptible[[1]], matrix(0, ncol = 2, nrow = 2))
 
             data <-
               pops(infected_file_list = infected_file_list,
@@ -1218,10 +1240,12 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
                    treatments_file = treatments_file,
                    parameter_means = parameter_means,
                    parameter_cov_matrix = parameter_cov_matrix,
+                   pest_host_table = pest_host_table,
+                   competency_table = competency_table,
                    start_date = start_date,
                    end_date = end_date)
 
-            expect_equal(data$infected[[1]], matrix(0, ncol = 2, nrow = 2))
+            expect_equal(data$host_pools[[1]]$infected[[1]], matrix(0, ncol = 2, nrow = 2))
             expect_equal(data$susceptible[[1]], matrix(0, ncol = 2, nrow = 2))
 
             treatments_file <-
@@ -1237,10 +1261,12 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
                    treatments_file = treatments_file,
                    parameter_means = parameter_means,
                    parameter_cov_matrix = parameter_cov_matrix,
+                   pest_host_table = pest_host_table,
+                   competency_table = competency_table,
                    start_date = start_date,
                    end_date = end_date)
 
-            expect_equal(data$infected[[1]], matrix(c(2, 0, 0, 0), ncol = 2, nrow = 2))
+            expect_equal(data$host_pools[[1]]$infected[[1]], matrix(c(2, 0, 0, 0), ncol = 2, nrow = 2))
             expect_equal(data$susceptible[[1]], matrix(c(5, 3, 7, 7), ncol = 2, nrow = 2))
 
             data <-
@@ -1253,10 +1279,12 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
                    treatments_file = treatments_file,
                    parameter_means = parameter_means,
                    parameter_cov_matrix = parameter_cov_matrix,
+                   pest_host_table = pest_host_table,
+                   competency_table = competency_table,
                    start_date = start_date,
                    end_date = end_date)
 
-            expect_equal(data$infected[[1]], matrix(c(0, 0, 0, 0), ncol = 2, nrow = 2))
+            expect_equal(data$host_pools[[1]]$infected[[1]], matrix(c(0, 0, 0, 0), ncol = 2, nrow = 2))
             expect_equal(data$susceptible[[1]], matrix(c(5, 3, 7, 7), ncol = 2, nrow = 2))
 
           })
@@ -1278,7 +1306,7 @@ test_that("Infected results are greater than initial infected", {
                         total_populations_file = total_populations_file,
                         parameter_means = parameter_means,
                         parameter_cov_matrix = parameter_cov_matrix
-  )$infected[[1]] >=
+  )$host_pools[[1]]$infected[[1]] >=
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_equal(all(
     pops(infected_file_list = infected_file_list,
@@ -1286,7 +1314,7 @@ test_that("Infected results are greater than initial infected", {
                                  "total_plants_host_greater_than_infected.tif", package = "PoPS"),
          total_populations_file = total_populations_file,
          parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix)$infected[[1]] >=
+         parameter_cov_matrix = parameter_cov_matrix)$host_pools[[1]]$infected[[1]] >=
       terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
 })
@@ -1313,7 +1341,7 @@ test_that("All kernel types lead to spread", {
                time_step = time_step,
                natural_kernel_type = "exponential")
 
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1324,7 +1352,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "cauchy")
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1335,7 +1363,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "uniform")
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1346,7 +1374,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "hyperbolic secant")
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1357,7 +1385,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "weibull")
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1368,7 +1396,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "logistic")
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1379,7 +1407,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "gamma")
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1393,7 +1421,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                natural_kernel_type = "power law")
-  infecteds <- data$infected[[1]]
+  infecteds <- data$host_pools[[1]]$infected[[1]]
   expect_equal(all(infecteds >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_gte(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
@@ -1409,7 +1437,7 @@ test_that("All kernel types lead to spread", {
   #              parameter_means = parameter_means,
   #              parameter_cov_matrix = parameter_cov_matrix,
   #              natural_kernel_type = "exponential-power")
-  # infecteds <- data$infected[[1]]
+  # infecteds <- data$host_pools[[1]]$infected[[1]]
   # expect_equal(all(infecteds >=
   #                    terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
   #              TRUE)
@@ -1422,7 +1450,7 @@ test_that("All kernel types lead to spread", {
   #              parameter_means = parameter_means,
   #              parameter_cov_matrix = parameter_cov_matrix,
   #              natural_kernel_type = "log normal")
-  # infecteds <- data$infected[[1]]
+  # infecteds <- data$host_pools[[1]]$infected[[1]]
   # expect_equal(all(infecteds >=
   #                    terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
   #              TRUE)
@@ -1436,7 +1464,7 @@ test_that("All kernel types lead to spread", {
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "exponential")
 
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   data <- pops(infected_file_list = infected_file_list,
@@ -1445,7 +1473,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "cauchy")
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   data <- pops(infected_file_list = infected_file_list,
@@ -1454,7 +1482,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "uniform")
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   data <- pops(infected_file_list = infected_file_list,
@@ -1463,7 +1491,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "hyperbolic secant")
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   data <- pops(infected_file_list = infected_file_list,
@@ -1472,7 +1500,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "logistic")
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   data <- pops(infected_file_list = infected_file_list,
@@ -1481,7 +1509,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "weibull")
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   data <- pops(infected_file_list = infected_file_list,
@@ -1490,7 +1518,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "power law")
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   data <- pops(infected_file_list = infected_file_list,
@@ -1499,7 +1527,7 @@ test_that("All kernel types lead to spread", {
                parameter_means = parameter_means,
                parameter_cov_matrix = parameter_cov_matrix,
                anthropogenic_kernel_type = "gamma")
-  expect_equal(all(data$infected[[1]] >=
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
 
   #
@@ -1509,7 +1537,7 @@ test_that("All kernel types lead to spread", {
   #                parameter_means = parameter_means,
   #                parameter_cov_matrix = parameter_cov_matrix,
   #                anthropogenic_kernel_type = "exponential-power")
-  #   expect_equal(all(data$infected[[1]] >=
+  #   expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
   #                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
   #                TRUE)
 
@@ -1522,7 +1550,7 @@ test_that("All kernel types lead to spread", {
   #              parameter_means = parameter_means,
   #              parameter_cov_matrix = parameter_cov_matrix,
   #              anthropogenic_kernel_type = "log normal")
-  # expect_equal(all(data$infected[[1]] >=
+  # expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
   #                    terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
   #              TRUE)
 
@@ -1660,9 +1688,9 @@ test_that("SEI model works as intended", {
   expect_equal(all(data$susceptible[[2]] <= data2$susceptible[[1]]), TRUE)
   expect_equal(all(data$susceptible[[3]] <= data2$susceptible[[1]]), TRUE)
 
-  expect_equal(all(data$infected[[1]] >= data2$infected[[1]]), TRUE)
-  expect_equal(all(data$infected[[2]] >= data2$infected[[1]]), TRUE)
-  expect_equal(all(data$infected[[3]] >= data2$infected[[1]]), TRUE)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
+  expect_equal(all(data$infected[[2]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
+  expect_equal(all(data$infected[[3]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
 
   start_exposed <- TRUE
   exposed_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
@@ -1688,9 +1716,9 @@ test_that("SEI model works as intended", {
   expect_equal(all(data3$susceptible[[2]] <= data2$susceptible[[1]]), TRUE)
   expect_equal(all(data3$susceptible[[3]] <= data2$susceptible[[1]]), TRUE)
 
-  expect_equal(all(data3$infected[[1]] >= data2$infected[[1]]), TRUE)
-  expect_equal(all(data3$infected[[2]] >= data2$infected[[1]]), TRUE)
-  expect_equal(all(data3$infected[[3]] >= data2$infected[[1]]), TRUE)
+  expect_equal(all(data3$host_pools[[1]]$infected[[1]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
+  expect_equal(all(data3$infected[[2]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
+  expect_equal(all(data3$infected[[3]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
 
 })
 
@@ -1801,27 +1829,27 @@ test_that("Infected results with weather are less than those without weather", {
          temperature_coefficient_sd_file = coefficient_sd_file,
          precipitation_coefficient_sd_file = coefficient_sd_file)
 
-  expect_gte(sum(data$infected[[1]]), sum(data_temp$infected[[1]]))
+  expect_gte(sum(data$host_pools[[1]]$infected[[1]]), sum(data_temp$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data$infected[[2]]), sum(data_temp$infected[[2]]))
   expect_gte(sum(data$infected[[3]]), sum(data_temp$infected[[3]]))
 
-  expect_gte(sum(data$infected[[1]]), sum(data_precip$infected[[1]]))
+  expect_gte(sum(data$host_pools[[1]]$infected[[1]]), sum(data_precip$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data$infected[[2]]), sum(data_precip$infected[[2]]))
   expect_gte(sum(data$infected[[3]]), sum(data_precip$infected[[3]]))
 
-  expect_gte(sum(data$infected[[1]]), sum(data_weather$infected[[1]]))
+  expect_gte(sum(data$host_pools[[1]]$infected[[1]]), sum(data_weather$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data$infected[[2]]), sum(data_weather$infected[[2]]))
   expect_gte(sum(data$infected[[3]]), sum(data_weather$infected[[3]]))
 
   expect_gte(sum(data$infected[[2]]), sum(data_temp_wsd$infected[[2]]))
   expect_gte(sum(data$infected[[3]]), sum(data_temp_wsd$infected[[3]]))
-  expect_gte(sum(data$infected[[1]]), sum(data_temp_wsd$infected[[1]]))
+  expect_gte(sum(data$host_pools[[1]]$infected[[1]]), sum(data_temp_wsd$host_pools[[1]]$infected[[1]]))
 
-  expect_gte(sum(data$infected[[1]]), sum(data_precip_wsd$infected[[1]]))
+  expect_gte(sum(data$host_pools[[1]]$infected[[1]]), sum(data_precip_wsd$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data$infected[[2]]), sum(data_precip_wsd$infected[[2]]))
   expect_gte(sum(data$infected[[3]]), sum(data_precip_wsd$infected[[3]]))
 
-  expect_gte(sum(data$infected[[1]]), sum(data_weather_wsd$infected[[1]]))
+  expect_gte(sum(data$host_pools[[1]]$infected[[1]]), sum(data_weather_wsd$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data$infected[[2]]), sum(data_weather_wsd$infected[[2]]))
   expect_gte(sum(data$infected[[3]]), sum(data_weather_wsd$infected[[3]]))
 })
@@ -1860,7 +1888,7 @@ test_that(
            start_date = start_date,
            end_date = end_date)
 
-    expect_equal(all(data_week$infected[[1]] >= data_month$infected[[1]]), TRUE)
+    expect_equal(all(data_week$host_pools[[1]]$infected[[1]] >= data_month$host_pools[[1]]$infected[[1]]), TRUE)
     expect_equal(all(data_week$infected[[2]] >= data_month$infected[[2]]), TRUE)
 
   })
@@ -1910,9 +1938,9 @@ test_that("Infected results are greater with same parameters for daily spread vs
                    start_date = start_date,
                    end_date = end_date)
 
-            expect_equal(all(data_day$infected[[1]] >= data_month$infected[[1]]), TRUE)
-            expect_equal(all(data_day$infected[[1]] >= data_week$infected[[1]]), TRUE)
-            expect_equal(all(data_week$infected[[1]] >= data_month$infected[[1]]), TRUE)
+            expect_equal(all(data_day$host_pools[[1]]$infected[[1]] >= data_month$host_pools[[1]]$infected[[1]]), TRUE)
+            expect_equal(all(data_day$host_pools[[1]]$infected[[1]] >= data_week$host_pools[[1]]$infected[[1]]), TRUE)
+            expect_equal(all(data_week$host_pools[[1]]$infected[[1]] >= data_month$host_pools[[1]]$infected[[1]]), TRUE)
           })
 
 test_that(
@@ -1948,7 +1976,7 @@ test_that(
            start_date = start_date,
            end_date = end_date)
 
-    expect_equal(all(data$infected[[1]] >= data_treat$infected[[1]]), TRUE)
+    expect_equal(all(data$host_pools[[1]]$infected[[1]] >= data_treat$host_pools[[1]]$infected[[1]]), TRUE)
     expect_equal(all(data$infected[[2]] >= data_treat$infected[[2]]), TRUE)
   })
 
@@ -2015,21 +2043,21 @@ test_that("Infected results are greater with higher reproductive rate", {
          start_date = start_date,
          end_date = end_date)
 
-  expect_gte(sum(data_1$infected[[1]]), sum(data_075$infected[[1]]))
-  expect_gte(sum(data_1$infected[[1]]), sum(data_050$infected[[1]]))
-  expect_gte(sum(data_1$infected[[1]]), sum(data_025$infected[[1]]))
-  expect_gte(sum(data_1$infected[[1]]), sum(data_010$infected[[1]]))
+  expect_gte(sum(data_1$host_pools[[1]]$infected[[1]]), sum(data_075$host_pools[[1]]$infected[[1]]))
+  expect_gte(sum(data_1$host_pools[[1]]$infected[[1]]), sum(data_050$host_pools[[1]]$infected[[1]]))
+  expect_gte(sum(data_1$host_pools[[1]]$infected[[1]]), sum(data_025$host_pools[[1]]$infected[[1]]))
+  expect_gte(sum(data_1$host_pools[[1]]$infected[[1]]), sum(data_010$host_pools[[1]]$infected[[1]]))
 
-  expect_gte(sum(data_075$infected[[1]]), sum(data_050$infected[[1]]))
-  expect_gte(sum(data_075$infected[[1]]), sum(data_025$infected[[1]]))
-  expect_gte(sum(data_075$infected[[1]]), sum(data_010$infected[[1]]))
+  expect_gte(sum(data_075$host_pools[[1]]$infected[[1]]), sum(data_050$host_pools[[1]]$infected[[1]]))
+  expect_gte(sum(data_075$host_pools[[1]]$infected[[1]]), sum(data_025$host_pools[[1]]$infected[[1]]))
+  expect_gte(sum(data_075$host_pools[[1]]$infected[[1]]), sum(data_010$host_pools[[1]]$infected[[1]]))
 
-  expect_gte(sum(data_050$infected[[1]]), sum(data_025$infected[[1]]))
+  expect_gte(sum(data_050$host_pools[[1]]$infected[[1]]), sum(data_025$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data_050$infected[[2]]), sum(data_025$infected[[2]]))
-  expect_gte(sum(data_050$infected[[1]]), sum(data_010$infected[[1]]))
+  expect_gte(sum(data_050$host_pools[[1]]$infected[[1]]), sum(data_010$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data_050$infected[[2]]), sum(data_010$infected[[2]]))
 
-  expect_gte(sum(data_025$infected[[1]]), sum(data_010$infected[[1]]))
+  expect_gte(sum(data_025$host_pools[[1]]$infected[[1]]), sum(data_010$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data_025$infected[[2]]), sum(data_010$infected[[2]]))
 
 })
@@ -2059,7 +2087,7 @@ test_that("Treatments apply no matter what time step", {
            parameter_cov_matrix = parameter_cov_matrix,
            start_date = start_date,
            end_date = end_date)
-    expect_equal(data$infected[[1]], matrix(0, ncol = 2, nrow = 2))
+    expect_equal(data$host_pools[[1]]$infected[[1]], matrix(0, ncol = 2, nrow = 2))
     expect_equal(data$susceptible[[1]], matrix(0, ncol = 2, nrow = 2))
   }
 })
@@ -2094,7 +2122,7 @@ test_that("Pesticide treatments apply no matter what time step", {
            end_date = end_date,
            pesticide_duration = pesticide_duration,
            pesticide_efficacy = pesticide_efficacy)
-    expect_equal(data$infected[[1]], matrix(0, ncol = 2, nrow = 2))
+    expect_equal(data$host_pools[[1]]$infected[[1]], matrix(0, ncol = 2, nrow = 2))
     expect_equal(data$susceptible[[1]],
                  terra::as.matrix(terra::rast(host_file_list), wide = TRUE))
   }
@@ -2116,7 +2144,7 @@ test_that("Pesticide treatments apply no matter what time step", {
            end_date = end_date,
            pesticide_duration = pesticide_duration,
            pesticide_efficacy = pesticide_efficacy)
-    expect_equal(data$infected[[1]], matrix(c(3, 0, 0, 0), ncol = 2, nrow = 2))
+    expect_equal(data$host_pools[[1]]$infected[[1]], matrix(c(3, 0, 0, 0), ncol = 2, nrow = 2))
     expect_equal(data$susceptible[[1]], matrix(c(12, 6, 14, 15), ncol = 2, nrow = 2))
   }
 
@@ -2766,7 +2794,7 @@ test_that("Movements works as expected", {
                random_seed = 42)
 
   expect_equal(length(data$infected), 12)
-  expect_equal(data$infected[[1]],
+  expect_equal(data$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$infected[[2]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
@@ -2807,7 +2835,7 @@ test_that("Movements works as expected", {
                random_seed = 45)
 
   expect_equal(length(data$infected), 12)
-  expect_equal(data$infected[[1]],
+  expect_equal(data$host_pools[[1]]$infected[[1]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$infected[[2]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
@@ -2858,10 +2886,10 @@ test_that(
            leaving_scale_coefficient = 0.5,
            natural_dir = "SE")
     test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-    expect_lte(data$infected[[1]][[1]], test_mat[[1]])
-    expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-    expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-    expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+    expect_lte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+    expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+    expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+    expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
   })
 
 test_that("Deterministic dispersal works as expected", {
@@ -2885,10 +2913,10 @@ test_that("Deterministic dispersal works as expected", {
          movement_stochasticity = FALSE,
          dispersal_stochasticity  = TRUE)
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
 test_that("Network dispersal works as expected", {
@@ -2914,10 +2942,10 @@ test_that("Network dispersal works as expected", {
          network_filename = network_filename)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
 test_that("uncertainty propogation works as expected", {
@@ -2946,10 +2974,10 @@ test_that("uncertainty propogation works as expected", {
          use_host_uncertainty = use_host_uncertainty)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 
   infected_file_list <- system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
   host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -2976,10 +3004,10 @@ test_that("uncertainty propogation works as expected", {
          use_host_uncertainty = use_host_uncertainty)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 
   infected_file_list <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
@@ -3007,10 +3035,10 @@ test_that("uncertainty propogation works as expected", {
          use_host_uncertainty = use_host_uncertainty)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
 test_that("multiple_random seeds works and returns expected results", {
@@ -3040,10 +3068,10 @@ test_that("multiple_random seeds works and returns expected results", {
          file_random_seeds = file_random_seeds)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 
   file_random_seeds <- system.file("extdata", "simple2x2", "randoms.csv", package = "PoPS")
 
@@ -3060,10 +3088,10 @@ test_that("multiple_random seeds works and returns expected results", {
          file_random_seeds = file_random_seeds)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
 
@@ -3097,10 +3125,10 @@ test_that("Using soils returns expected results", {
          dispersers_to_soils_percentage = dispersers_to_soils_percentage)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
   expect_equal(length(data$soil_reservoirs[[1]]), 20)
   expect_equal(length(data$soil_reservoirs[[2]]), 20)
 
@@ -3120,10 +3148,10 @@ test_that("Using soils returns expected results", {
          start_with_soil_populations = TRUE)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
   expect_equal(length(data$soil_reservoirs[[1]]), 20)
   expect_equal(length(data$soil_reservoirs[[2]]), 20)
 })
