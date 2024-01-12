@@ -32,6 +32,17 @@ using std::to_string;
 using namespace Rcpp;
 using namespace pops;
 
+struct InputHostPool {
+  std::vector<IntegerMatrix> infected;
+  std::vector<IntegerMatrix> susceptible;
+  std::vector<IntegerMatrix> total_exposed;
+  std::vector<IntegerMatrix> resistant;
+  std::vector<std::vector<IntegerMatrix>> exposed;
+  std::vector<IntegerMatrix> mortality;
+  std::vector<std::vector<IntegerMatrix>> mortality_tracker;
+  std::vector<IntegerMatrix> total_hosts;
+};
+
 struct OutputHostPool {
   std::vector<IntegerMatrix> infected;
   std::vector<IntegerMatrix> susceptible;
@@ -261,28 +272,32 @@ List pops_model_cpp(
 
     std::vector<std::unique_ptr<PoPSModel::StandardSingleHostPool>> host_pool_vector;
     std::vector<PoPSModel::StandardSingleHostPool*> host_pool_vector_plain;
+    InputHostPool input_host_pool;
     host_pool_vector.reserve(host_pools.size());
     host_pool_vector_plain.reserve(host_pools.size());
+    input_host_pool.reserve(host_pools.size());
     for (unsigned i = 0; i < host_pools.size(); i++) {
-      IntegerMatrix infected = host_pools[i]["infected"];
-      IntegerMatrix susceptible = host_pools[i]["susceptible"];
+      input_host_pool.infected.emplace_back(host_pools[i]["infected"]);
+      input_host_pool.susceptible.emplace_back(host_pools[i]["susceptible"]);
       std::vector<IntegerMatrix> exposed = host_pools[i]["exposed"];
-      IntegerMatrix total_exposed = host_pools[i]["total_exposed"];
-      IntegerMatrix resistant = host_pools[i]["resistant"];
-      IntegerMatrix total_hosts = host_pools[i]["total_hosts"];
-      IntegerMatrix mortality = host_pools[i]["mortality"];
+      input_host_pool.exposed.push_back(exposed);
+      input_host_pool.total_exposed.emplace_back(host_pools[i]["total_exposed"]);
+      input_host_pool.resistant.emplace_back(host_pools[i]["resistant"]);
+      input_host_pool.total_hosts.emplace_back(host_pools[i]["total_hosts"]);
+      input_host_pool.mortality.emplace_back(host_pools[i]["mortality"]);
       std::vector<IntegerMatrix> mortality_tracker = host_pools[i]["mortality_tracker"];
+      input_host_pool.mortality_tracker.push_back(mortality_tracker);
       host_pool_vector.emplace_back(new PoPSModel::StandardSingleHostPool(
           mt,
-          susceptible,
-          exposed,
+          input_host_pool.susceptible[i],
+          input_host_pool.exposed[i],
           config.latency_period_steps,
-          infected,
-          total_exposed,
-          resistant,
-          mortality_tracker,
-          mortality,
-          total_hosts,
+          input_host_pool.infected[i],
+          input_host_pool.total_exposed[i],
+          input_host_pool.resistant[i],
+          input_host_pool.mortality_tracker[i],
+          input_host_pool.mortality[i],
+          input_host_pool.total_hosts[i],
           model.environment(),
           config.generate_stochasticity,
           config.reproductive_rate,
