@@ -311,7 +311,7 @@ host_pool_setup <- function(config) {
         exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
                                              config$host_pool_exposed_sds[[i]])
       }
-      exposed <- host_pool[[i]]$exposed
+      exposed <- host_pool$exposed
       exposed[[config$latency_period + 1]] <- exposed2
       host_pool$infected <- infected
       host_pool$exposed <- exposed
@@ -330,6 +330,7 @@ host_pool_setup <- function(config) {
 
     susceptible <- host_pool$total_host - host_pool$infected - host_pool$total_exposed
     susceptible[susceptible < 0] <- 0
+    host_pool$susceptible <- susceptible
 
     if (config$mortality_on) {
       mortality_tracker <- host_pool$mortality_tracker
