@@ -223,7 +223,6 @@ validate <- function(infected_years_file,
       dir.exists(config$output_folder_path)) {
     write.csv(config$random_seeds, paste0(config$output_folder_path, "validation_random_seeds.csv"),
               row.names = FALSE)
-
   }
 
   i <- NULL
@@ -325,15 +324,20 @@ validate <- function(infected_years_file,
 
       all_disagreement <-
         foreach(
-          q = seq_len(length(data$infected)), .combine = rbind,
+          q = seq_len(length(data$host_pools[[1]]$infected)), .combine = rbind,
           .packages = c("terra", "PoPS")
         ) %do% {
           # need to assign reference, comparison, and mask in inner loop since
-          # terra objects are pointers and pointers using %dopar%
+          # terra objects are pointers
           comparison <- terra::rast(config$infected_file)[[1]]
           reference <- comparison
           mask <- comparison
-          terra::values(comparison) <- data$infected[[q]]
+          terra::values(comparison) <- 0
+          infections <- comparison
+          for (p in seq_len(length(data$host_pools))) {
+            terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
+            comparison <- comparison + infections
+          }
           terra::values(reference) <- config$infection_years2[[q]]
           terra::values(mask) <- config$mask_matrix
           ad <-
