@@ -401,7 +401,7 @@ List pops_model_cpp(
 
         if (config.use_mortality && config.mortality_schedule()[current_index]) {
             for (unsigned i = 0; i < host_pools.size(); i++) {
-              IntegerMatrix mortality = host_pools[i]["mortality"];
+              IntegerMatrix mortality = input_host_pool.mortality[i];
               output_host_pool_vector[i].mortality.push_back(Rcpp::clone(mortality));
             }
         }
