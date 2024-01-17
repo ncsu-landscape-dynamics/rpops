@@ -1,49 +1,59 @@
 context("test-calibrate")
 
 test_that("Model stops if files don't exist or aren't the correct extension", {
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   infected_years_file <-
     system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   prior_means <- c(0, 21, 1, 500, 0, 0)
   prior_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   number_of_observations <- 1
   prior_number_of_observations <- 0
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
   expect_error(calibrate(infected_years_file = infected_years_file,
                          number_of_observations = number_of_observations,
                          prior_number_of_observations = prior_number_of_observations,
                          prior_means = prior_means,
                          prior_cov_matrix = prior_cov_matrix,
-                         infected_file = "",
-                         host_file =  host_file,
-                         total_populations_file =  host_file),
+                         pest_host_table = pest_host_table,
+                         competency_table = competency_table,
+                         infected_file_list = "",
+                         host_file_list =  host_file_list,
+                         total_populations_file =  host_file_list),
                file_exists_error)
 })
 
 test_that("Model stops if success metric is incorrect", {
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   infected_years_file <-
     system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   prior_means <- c(0, 21, 1, 500, 0, 0)
   prior_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   number_of_observations <- 1
   prior_number_of_observations <- 0
   success_metric <- "yeah"
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
   expect_error(calibrate(infected_years_file = infected_years_file,
                          number_of_observations = number_of_observations,
                          prior_number_of_observations = prior_number_of_observations,
                          prior_means = prior_means,
                          prior_cov_matrix = prior_cov_matrix,
-                         infected_file = infected_file,
-                         host_file =  host_file,
-                         total_populations_file =  host_file,
+                         pest_host_table = pest_host_table,
+                         competency_table = competency_table,
+                         infected_file_list = infected_file_list,
+                         host_file_list =  host_file_list,
+                         total_populations_file =  host_file_list,
                          success_metric = success_metric),
                 success_metric_error)
 })
@@ -61,9 +71,13 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -82,9 +96,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -123,7 +134,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "summary_outputs"
             output_folder_path <- tempdir()
@@ -142,7 +153,10 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             dispersers_to_soils_percentage <- 0
             quarantine_directions <- ""
             multiple_random_seeds <- FALSE
-            random_seeds <- NULL
+            file_random_seeds <- NULL
+            use_soils <- FALSE
+            soil_starting_pest_file <- ""
+            start_with_soil_populations <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -152,8 +166,10 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -174,9 +190,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -212,7 +225,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -227,7 +240,10 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               dispersers_to_soils_percentage,
                               quarantine_directions,
                               multiple_random_seeds,
-                              random_seeds)
+                              file_random_seeds,
+                              use_soils,
+                              soil_starting_pest_file,
+                              start_with_soil_populations)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -262,9 +278,13 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -283,9 +303,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -326,7 +343,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -347,8 +364,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -369,9 +388,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -407,7 +423,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -448,9 +464,13 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -469,9 +489,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -512,7 +529,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -533,8 +550,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -555,9 +574,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -593,7 +609,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -634,9 +650,13 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -655,9 +675,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -698,7 +715,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -719,8 +736,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -741,9 +760,6 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -779,7 +795,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -821,9 +837,13 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -842,9 +862,6 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -885,7 +902,7 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -908,8 +925,10 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -930,9 +949,6 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -968,7 +984,7 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -1012,9 +1028,13 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -1033,9 +1053,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -1074,7 +1091,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -1094,8 +1111,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -1116,9 +1135,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -1154,7 +1170,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -1197,9 +1213,13 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -1218,9 +1238,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -1259,7 +1276,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -1279,8 +1296,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -1301,9 +1320,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -1339,7 +1355,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -1382,9 +1398,13 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -1403,9 +1423,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -1444,7 +1461,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -1464,8 +1481,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -1486,9 +1505,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -1524,7 +1540,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -1567,9 +1583,13 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
               system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
               system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -1588,9 +1608,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -1629,7 +1646,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -1649,8 +1666,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -1671,9 +1690,6 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -1709,7 +1725,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,
@@ -1752,9 +1768,13 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
-            infected_file <-
+            pest_host_table <-
+              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+            competency_table <-
+              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+            infected_file_list <-
             system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-            host_file <-
+            host_file_list <-
             system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -1773,9 +1793,6 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             temperature_file <- ""
             lethal_temperature <- -30
             lethal_temperature_month <- 1
-            mortality_on <- FALSE
-            mortality_rate <- 0
-            mortality_time_lag <- 0
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
@@ -1814,7 +1831,7 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
-            exposed_file <- ""
+            exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
@@ -1836,8 +1853,10 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
                               params_to_estimate,
                               number_of_generations,
                               generation_size,
-                              infected_file,
-                              host_file,
+                              pest_host_table = pest_host_table,
+                              competency_table = competency_table,
+                              infected_file_list,
+                              host_file_list,
                               total_populations_file,
                               temp,
                               temperature_coefficient_file,
@@ -1858,9 +1877,6 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
                               temperature_file,
                               lethal_temperature,
                               lethal_temperature_month,
-                              mortality_on,
-                              mortality_rate,
-                              mortality_time_lag,
                               mortality_frequency,
                               mortality_frequency_n,
                               management,
@@ -1896,7 +1912,7 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
                               leaving_scale_coefficient,
                               calibration_method,
                               number_of_iterations,
-                              exposed_file,
+                              exposed_file_list,
                               verbose,
                               write_outputs,
                               output_folder_path,

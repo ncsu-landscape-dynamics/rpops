@@ -324,7 +324,7 @@ calibrate <- function(infected_years_file,
       config$random_seed <- sample(1:999999999999, 1, replace = FALSE)
       random_seeds <- create_random_seeds(1)
       config <- host_pool_setup(config)
-      config$competency_table_list <- competency_table_list_creator(competency_table)
+      config$competency_table_list <- competency_table_list_creator(config$competency_table)
 
       data <- pops_model(
         random_seed = config$random_seed,
@@ -542,14 +542,20 @@ calibrate <- function(infected_years_file,
         # the simulation
         all_disagreement <-
           foreach::foreach(
-            q = seq_len(length(data$infected)),
+            q = seq_len(length(data$host_pools[[1]]$infected)),
             .combine = rbind,
             .packages = c("terra", "PoPS"),
             .final = colSums
           ) %do% {
-            comparison <- terra::rast(config$infected_file)[[1]]
-            reference <- terra::rast(config$infected_file)[[1]]
-            terra::values(comparison) <- data$infected[[q]]
+            comparison <- terra::rast(config$infected_file_list[[1]])[[1]]
+            reference <- comparison
+            mask <- comparison
+            terra::values(comparison) <- 0
+            infections <- comparison
+            for (p in seq_len(length(data$host_pools))) {
+              terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
+              comparison <- comparison + infections
+            }
             terra::values(reference) <- config$infection_years2[[q]]
             mask <- terra::rast(config$infected_file)[[1]]
             terra::values(mask) <- config$mask_matrix
@@ -561,7 +567,7 @@ calibrate <- function(infected_years_file,
           }
 
         all_disagreement <- as.data.frame(t(all_disagreement))
-        all_disagreement <- all_disagreement / length(data$infected)
+        all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
         config$quantity <- all_disagreement$quantity_disagreement
         config$allocation <- all_disagreement$allocation_disagreement
         config$configuration_dis <- all_disagreement$configuration_disagreement
@@ -880,14 +886,20 @@ calibrate <- function(infected_years_file,
 
     all_disagreement <-
       foreach::foreach(
-        q = seq_len(length(data$infected)),
+        q = seq_len(length(data$host_pools[[1]]$infected)),
         .combine = rbind,
         .packages = c("terra", "PoPS"),
         .final = colSums
       ) %do% {
-        comparison <- terra::rast(config$infected_file)[[1]]
-        reference <- terra::rast(config$infected_file)[[1]]
-        terra::values(comparison) <- data$infected[[q]]
+        comparison <- terra::rast(config$infected_file_list[[1]])[[1]]
+        reference <- comparison
+        mask <- comparison
+        terra::values(comparison) <- 0
+        infections <- comparison
+        for (p in seq_len(length(data$host_pools))) {
+          terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
+          comparison <- comparison + infections
+        }
         terra::values(reference) <- config$infection_years2[[q]]
         mask <- terra::rast(config$infected_file)[[1]]
         terra::values(mask) <- config$mask_matrix
@@ -899,7 +911,7 @@ calibrate <- function(infected_years_file,
       }
 
     all_disagreement <- as.data.frame(t(all_disagreement))
-    all_disagreement <- all_disagreement / length(data$infected)
+    all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
     config$accuracy <- all_disagreement$accuracy
     config$precision <- all_disagreement$precision
     config$recall <- all_disagreement$recall
@@ -1054,26 +1066,32 @@ calibrate <- function(infected_years_file,
       # set up comparison
       all_disagreement <-
         foreach::foreach(
-          q = seq_len(length(data$infected)),
+          q = seq_len(length(data$host_pools[[1]]$infected)),
           .combine = rbind,
           .packages = c("terra", "PoPS"),
           .final = colSums
         ) %do% {
-          comparison <- terra::rast(config$infected_file)[[1]]
+          comparison <- terra::rast(config$infected_file_list[[1]])[[1]]
           reference <- comparison
           mask <- comparison
-          terra::values(comparison) <- data$infected[[q]]
+          terra::values(comparison) <- 0
+          infections <- comparison
+          for (p in seq_len(length(data$host_pools))) {
+            terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
+            comparison <- comparison + infections
+          }
           terra::values(reference) <- config$infection_years2[[q]]
+          mask <- terra::rast(config$infected_file)[[1]]
           terra::values(mask) <- config$mask_matrix
           quantity_allocation_disagreement(reference,
                                            comparison,
-                                           use_configuration = FALSE,
+                                           use_configuration = config$use_configuration,
                                            mask = mask,
                                            use_distance = config$use_distance)
         }
 
       all_disagreement <- as.data.frame(t(all_disagreement))
-      all_disagreement <- all_disagreement / length(data$infected)
+      all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
       proposed <-
         data.frame(all_disagreement[, c("quantity_disagreement", "allocation_disagreement",
                                         "configuration_disagreement", "accuracy", "precision",
