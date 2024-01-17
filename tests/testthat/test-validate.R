@@ -42,6 +42,9 @@ test_that(
       system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    pest_host_table <-
+      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
     infected_file_list <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
     host_file_list <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")

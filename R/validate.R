@@ -329,7 +329,7 @@ validate <- function(infected_years_file,
         ) %do% {
           # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers
-          comparison <- terra::rast(config$infected_file)[[1]]
+          comparison <- terra::rast(config$infected_file_list[[1]])[[1]]
           reference <- comparison
           mask <- comparison
           terra::values(comparison) <- 0
