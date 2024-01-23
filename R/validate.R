@@ -330,9 +330,9 @@ validate <- function(infected_years_file,
           # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers
           comparison <- terra::rast(config$infected_file_list[[1]])[[1]]
+          terra::values(comparison) <- 0
           reference <- comparison
           mask <- comparison
-          terra::values(comparison) <- 0
           infections <- comparison
           for (p in seq_len(length(data$host_pools))) {
             terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
