@@ -221,10 +221,10 @@ pops_multirun <- function(infected_file_list,
 
       config <- draw_parameters(config) # draws parameter set for the run
       config <- host_pool_setup(config)
-      config$competency_table_list <- competency_table_list_creator(competency_table)
+      config$competency_table_list <- competency_table_list_creator(config$competency_table)
 
       data <- PoPS::pops_model(
-        random_seed = config$random_seed[1],
+        random_seed = config$random_seed[i],
         multiple_random_seeds = config$multiple_random_seeds,
         random_seeds = as.matrix(config$random_seeds[i, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
@@ -238,7 +238,6 @@ pops_multirun <- function(infected_file_list,
         competency_table = config$competency_table_list,
         pest_host_table = config$pest_host_table_list,
         mortality_on = config$mortality_on,
-        mortality = config$mortality,
         quarantine_areas = config$quarantine_areas,
         quarantine_directions = config$quarantine_directions,
         treatment_maps = config$treatment_maps,
@@ -304,74 +303,106 @@ pops_multirun <- function(infected_file_list,
         dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
         use_soils = config$use_soils)
 
-      run <- c()
-      run$single_run <- data$infected
-      run$comp_years <- data$infected
-      run$number_infected <- data$number_infected
-      run$susceptible_runs <- data$susceptible
-      run$infected_area <- data$area_infected
-      run$spread_rate <- data$rates
-      run$quarantine_escape <- data$quarantine_escape
-      run$quarantine_escape_distance <- data$quarantine_escape_distance
-      run$quarantine_escape_direction <- data$quarantine_escape_directions
-      run$exposed_runs <- data$exposed
+      outputs <- c()
+      outputs$number_infected <- data$number_infected
+      outputs$infected_area <- data$area_infected
+      outputs$spread_rate <- data$rates
+      outputs$quarantine_escape <- data$quarantine_escape
+      outputs$quarantine_escape_distance <- data$quarantine_escape_distance
+      outputs$quarantine_escape_direction <- data$quarantine_escape_directions
+      output_host_pools <- c()
 
-      if (config$write_outputs == "all_simulations") {
-        infected_out <- terra::rast(config$infected_file)[[1]]
-        susectible_out <- infected_out
-        exposed_out <- infected_out
-        for (q in seq_len(length(data$infected))) {
-          terra::values(infected_out[[q]]) <- data$infected[[q]]
-          terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
-          for (p in seq_len(length(data$exposed[[q]])))
-          terra::values(exposed_out[[q]]) <- data$exposed[[q]][[p]]
+      zero_rast <- terra::rast(config$total_populations_file)[[1]]
+      values(zero_rast) <- 0
+
+      total_infecteds_list <- c()
+      total_infecteds <- as.matrix(zero_rast, wide = TRUE)
+
+      for (p in seq_len(length(data$host_pools))) {
+        output_host_pool <- data$host_pools[[p]]
+        output_host_pool$name <- config$host_names[p]
+        output_host_pools[[p]] <- output_host_pool
+
+        config$pops_runs_folder_path <- paste(config$output_folder_path, "pops_runs/", sep = "")
+        suppressWarnings(dir.create(config$pops_runs_folder_path))
+        config$host_pool_folder_path <-
+          paste(config$pops_runs_folder_path , config$host_names[p], sep = "")
+        suppressWarnings(dir.create(config$host_pool_folder_path))
+
+        infected_out <- zero_rast
+        susectible_out <- zero_rast
+        exposed_outs <- c()
+
+        for (q in seq_len(length(data$host_pools[[p]]$infected))) {
+          total_infecteds_list[[q]] <- total_infecteds
+          exposed_out <- zero_rast
+          if (q > 1) {
+            add(infected_out) <- zero_rast
+            add(susectible_out) <- zero_rast
+          }
+          total_infecteds_list[[q]] <-
+            total_infecteds_list[[q]] + data$host_pools[[p]]$infected[[q]]
+          terra::values(infected_out[[q]]) <- data$host_pools[[p]]$infected[[q]]
+          terra::values(susectible_out[[q]]) <- data$host_pools[[p]]$susceptible[[q]]
+          for (k in seq_len(length(data$host_pools[[p]]$exposed[[q]]))) {
+            if (k > 1) {
+              add(exposed_out) <- zero_rast
+            }
+            terra::values(exposed_out[[k]]) <- data$host_pools[[p]]$exposed[[q]][[k]]
+          }
+          if (config$write_outputs == "all_simulations") {
+            file_name <- paste(config$host_pool_folder_path, "/exposed_", i, "time_step_", q, ".tif", sep = "")
+            terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
+          }
+          exposed_outs[[q]] <- exposed_out
         }
-
-        dir.create(paste(config$output_folder_path, "pops_runs/", sep = ""))
-        file_name <- paste(config$output_folder_path, "pops_runs/infected_", i, ".tif", sep = "")
-        terra::writeRaster(infected_out, file_name, overwrite = TRUE)
-        file_name <-
-        paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
-        terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
-        file_name <- paste(config$output_folder_path, "pops_runs/exposed_", i, ".tif", sep = "")
-        terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
+        if (config$write_outputs == "all_simulations") {
+          file_name <- paste(config$host_pool_folder_path,"/infected_", i, ".tif", sep = "")
+          terra::writeRaster(infected_out, file_name, overwrite = TRUE)
+          file_name <-
+            paste(config$host_pool_folder_path, "/susectible_", i, ".tif", sep = "")
+          terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
+        }
+        # file_name <- paste(config$host_pool_folder_path, "/exposed_", i, ".tif", sep = "")
+        # terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
       }
 
-      run
+      outputs$total_infecteds <- total_infecteds_list
+      outputs$output_host_pools <- output_host_pools
+
+      outputs
     }
 
   stopCluster(cl)
-  single_runs <- infected_stack[seq(1, length(infected_stack), 10)]
-  probability_runs <- infected_stack[seq(2, length(infected_stack), 10)]
-  number_infected_runs <- infected_stack[seq(3, length(infected_stack), 10)]
-  susceptible_runs <- infected_stack[seq(4, length(infected_stack), 10)]
-  area_infected_runs <- infected_stack[seq(5, length(infected_stack), 10)]
-  spread_rate_runs <- infected_stack[seq(6, length(infected_stack), 10)]
-  quarantine_escape_runs <- infected_stack[seq(7, length(infected_stack), 10)]
-  quarantine_escape_distance_runs <- infected_stack[seq(8, length(infected_stack), 10)]
-  quarantine_escape_directions_runs <- infected_stack[seq(9, length(infected_stack), 10)]
-  exposed_runs <- infected_stack[seq(10, length(infected_stack), 10)]
+  number_infected_runs <- infected_stack[seq(1, length(infected_stack), 8)]
+  area_infected_runs <- infected_stack[seq(2, length(infected_stack), 8)]
+  spread_rate_runs <- infected_stack[seq(3, length(infected_stack), 8)]
+  quarantine_escape_runs <- infected_stack[seq(4, length(infected_stack), 8)]
+  quarantine_escape_distance_runs <- infected_stack[seq(5, length(infected_stack), 8)]
+  quarantine_escape_directions_runs <- infected_stack[seq(6, length(infected_stack), 8)]
+  total_infecteds_runs <- infected_stack[seq(7, length(infected_stack), 8)]
+  output_host_pools_runs <- infected_stack[seq(8, length(infected_stack), 8)]
 
-  prediction <- probability_runs[[1]]
+  prediction <- total_infecteds_runs[[1]]
   for (w in seq_len(length(prediction))) {
     prediction[[w]] <- 0
   }
   escape_probability <-
-    data.frame(t(rep(0, length(probability_runs[[1]]))))
-  infected_area <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  infected_number <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  west_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  east_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  south_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  north_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  max_values <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escapes <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escape_distances <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escape_directions <- data.frame(t(rep(0, length(probability_runs[[1]]))))
+    data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  infected_area <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  infected_number <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  west_rates <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  east_rates <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  south_rates <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  north_rates <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  max_values <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  quarantine_escapes <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  quarantine_escape_distances <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
+  quarantine_escape_directions <- data.frame(t(rep(0, length(total_infecteds_runs[[1]]))))
 
-  for (p in seq_len(length(probability_runs))) {
+  for (p in seq_len(length(total_infecteds_runs))) {
     for (w in seq_len(length(prediction))) {
-      prob <- probability_runs[[p]][[w]]
+      prob <- total_infecteds_runs[[p]][[w]]
       max_values[p, w] <- max(prob)
       prob[prob <= 1] <- 0
       prob[prob > 1] <- 1
@@ -393,7 +424,7 @@ pops_multirun <- function(infected_file_list,
     }
 
     if (config$use_quarantine && length(quarantine_escape_runs[[p]]) ==
-        length(probability_runs[[p]])) {
+        length(total_infecteds_runs[[p]])) {
       escape_probability <- escape_probability + quarantine_escape_runs[[p]]
       quarantine_escapes[p, ] <- quarantine_escape_runs[[p]]
       quarantine_escape_distances[p, ] <- quarantine_escape_distance_runs[[p]]
@@ -403,7 +434,7 @@ pops_multirun <- function(infected_file_list,
 
   probability <- prediction
   for (w in seq_len(length(prediction))) {
-    probability[[w]] <- (prediction[[w]] / (length(probability_runs))) * 100
+    probability[[w]] <- (prediction[[w]] / (length(total_infecteds_runs))) * 100
   }
 
   infected_areas <-
@@ -458,7 +489,7 @@ pops_multirun <- function(infected_file_list,
 
   ## add quarantine here
   if (use_quarantine) {
-    escape_probability <- escape_probability / length(probability_runs) * 100
+    escape_probability <- escape_probability / length(total_infecteds_runs) * 100
     if (
       length(quarantine_escape_distances[quarantine_escape_directions == "N"]) >
         0) {
@@ -473,7 +504,7 @@ pops_multirun <- function(infected_file_list,
           }
         ), digits = 0)
     } else {
-      north_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
+      north_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
     }
 
     if (
@@ -490,7 +521,7 @@ pops_multirun <- function(infected_file_list,
           }
         ), digits = 0)
     } else {
-      south_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
+      south_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
     }
 
     if (
@@ -507,7 +538,7 @@ pops_multirun <- function(infected_file_list,
           }
         ), digits = 0)
     } else {
-      east_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
+      east_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
     }
 
     if (
@@ -524,14 +555,14 @@ pops_multirun <- function(infected_file_list,
           }
         ), digits = 0)
     } else {
-      west_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
+      west_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
     }
   } else {
-    escape_probability <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    north_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    south_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    east_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    west_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
+    escape_probability <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
+    north_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
+    south_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
+    east_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
+    west_distance_to_quarantine <- data.frame(t(rep(NA, length(total_infecteds_runs[[1]]))))
   }
 
   which_median <- function(x) which.min(abs(x - median(x)))
@@ -540,19 +571,17 @@ pops_multirun <- function(infected_file_list,
   min_run_index <- which.min(infected_number[[ncol(infected_number)]])
   max_run_index <- which.max(infected_number[[ncol(infected_number)]])
 
-  single_run <- single_runs[[median_run_index]]
-  susceptible_run <- susceptible_runs[[median_run_index]]
-  exposed_run <- exposed_runs[[median_run_index]]
+  median_run <- total_infecteds_runs[[median_run_index]]
 
-  min_run <- single_runs[[min_run_index]]
-  max_run <- single_runs[[max_run_index]]
+  min_run <- total_infecteds_runs[[min_run_index]]
+  max_run <- total_infecteds_runs[[max_run_index]]
 
-  for (q in seq_len(length(single_runs[[1]]))) {
-    for (j in seq_len(length(single_runs))) {
+  for (q in seq_len(length(total_infecteds_runs[[1]]))) {
+    for (j in seq_len(length(total_infecteds_runs))) {
       if (j == 1) {
-        raster_stacks <- list(single_runs[[j]][[q]])
+        raster_stacks <- list(total_infecteds_runs[[j]][[q]])
       } else {
-        raster_stacks[[j]] <- single_runs[[j]][[q]]
+        raster_stacks[[j]] <- total_infecteds_runs[[j]][[q]]
       }
     }
 
@@ -572,7 +601,6 @@ pops_multirun <- function(infected_file_list,
     simulation_min <- simulation_mean
     simulation_probability <- simulation_mean
     simulation_median <- simulation_mean
-    simulation_susceptible <- simulation_mean
     terra::values(simulation_mean) <- sim_mean
     names(simulation_mean) <- "mean"
 
@@ -585,14 +613,11 @@ pops_multirun <- function(infected_file_list,
     terra::values(simulation_min) <- min_run[[q]]
     names(simulation_min) <- "min"
 
-    terra::values(simulation_median) <- single_run[[q]]
+    terra::values(simulation_median) <- median_run[[q]]
     names(simulation_median) <- "median"
 
     terra::values(simulation_probability) <- probability[[q]]
     names(simulation_probability) <- "probability"
-
-    terra::values(simulation_susceptible) <- susceptible_run[[q]]
-    names(simulation_susceptible) <- "susceptible"
 
     if (q == 1) {
       simulation_mean_stack <- simulation_mean
@@ -632,9 +657,7 @@ pops_multirun <- function(infected_file_list,
       simulation_sd_stack,
       simulation_min_stack,
       simulation_max_stack,
-      single_run,
-      susceptible_run,
-      exposed_run,
+      median_run,
       number_infecteds,
       infected_areas,
       west_rate,
@@ -655,9 +678,7 @@ pops_multirun <- function(infected_file_list,
       "simulation_sd",
       "simulation_min",
       "simulation_max",
-      "single_run",
-      "susceptible_run",
-      "exposed_run",
+      "median_run",
       "number_infecteds",
       "infected_areas",
       "west_rate",
