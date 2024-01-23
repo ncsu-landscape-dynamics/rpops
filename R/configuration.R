@@ -166,7 +166,9 @@ configuration <- function(config) {
 
   zero_rast <- total_populations[[1]]
   terra::values(zero_rast) <- 0
+  config$zero_rast <- zero_rast
   zero_matrix <- terra::as.matrix(zero_rast, wide = TRUE)
+  config$zero_matrix <- zero_matrix
 
   one_matrix <- total_populations[[1]]
   terra::values(one_matrix) <- 0
@@ -521,6 +523,10 @@ configuration <- function(config) {
   host_pool_host_means <- list()
   host_pool_host_sds <- list()
   suitable <- zero_rast
+
+  total_infecteds <- config$zero_matrix
+  total_exposeds <- config$zero_matrix
+  total_hosts <- config$zero_matrix
   for (i in seq_along(config$infected_file_list)) {
     host_pool <- list()
     # check that infection rasters have the same crs, resolution, and extent
@@ -558,6 +564,7 @@ configuration <- function(config) {
     host_pool$infected <- infected_mean
     host_pool_infected_means[[i]] <- infected_mean
     host_pool_infected_sds[[i]] <- infected_sd
+    total_infecteds <- total_infecteds + infected_mean
     # prepare exposed
     exposed <- list(zero_matrix)
     if (config$model_type == "SEI" && config$latency_period > 1) {
@@ -608,6 +615,7 @@ configuration <- function(config) {
     exposed[[config$latency_period + 1]] <- exposed_mean
     host_pool$total_exposed <- total_exposed
     host_pool$exposed <- exposed
+    total_exposeds <- total_exposeds + exposed_mean
 
     # check that host raster has the same crs, resolution, and extent
     if (config$function_name %in% aws_bucket_list) {
@@ -642,6 +650,7 @@ configuration <- function(config) {
     host_pool_host_means[[i]] <- host_mean
     host_pool_host_sds[[i]] <- host_sd
     host_pool$total_hosts <- host_mean
+    total_hosts <- total_hosts + host_mean
 
     susceptible <- host_mean - infected_mean - exposed_mean
     susceptible[susceptible < 0] <- 0
@@ -685,6 +694,17 @@ configuration <- function(config) {
     host_pools[[i]] <- host_pool
   }
 
+  config$total_hosts <- total_hosts
+  config$total_exposed <- total_exposeds
+  config$total_infecteds <- total_infecteds
+  config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
+
+  while(any(config$total_hosts > config$total_populations) ||
+        any(config$total_exposed > config$total_populations) ||
+        any(config$total_infecteds> config$total_populations)) {
+    config <- host_pool_setup(config)
+  }
+
   config$host_pools <- host_pools
   config$host_pool_infected_means <- host_pool_infected_means
   config$host_pool_infected_sds <- host_pool_infected_sds
@@ -722,8 +742,6 @@ configuration <- function(config) {
   rows_cols$num_rows <- terra::nrow(infected)
   rows_cols$num_cols <- terra::ncol(infected)
   config$rows_cols <- rows_cols
-
-  config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
 
   if (!is.null(config$mask)) {
     if (config$function_name %in% aws_bucket_list) {

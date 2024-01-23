@@ -239,6 +239,11 @@ validate <- function(infected_years_file,
 
       config <- draw_parameters(config) # draws parameter set for the run
       config <- host_pool_setup(config)
+      while(any(config$total_hosts > config$total_populations) ||
+            any(config$total_exposed > config$total_populations) ||
+            any(config$total_infecteds> config$total_populations)) {
+        config <- host_pool_setup(config)
+      }
       config$competency_table_list <- competency_table_list_creator(config$competency_table)
 
       data <- pops_model(

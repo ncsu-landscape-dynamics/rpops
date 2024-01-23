@@ -294,6 +294,9 @@ competency_table_list_creator <- function(competency_table) {
 
 # Update host pools when uncertainties are used
 host_pool_setup <- function(config) {
+  total_infecteds <- config$zero_matrix
+  total_exposeds <- config$zero_matrix
+  total_hosts <- config$zero_matrix
   for (i in seq_along(config$host_file_list)) {
     host_pool <- config$host_pools[[i]]
     if (config$use_initial_condition_uncertainty) {
@@ -316,6 +319,9 @@ host_pool_setup <- function(config) {
       host_pool$infected <- infected
       host_pool$exposed <- exposed
       host_pool$total_exposed <- exposed2
+
+      total_infecteds <- total_infecteds + infected
+      total_exposeds <- total_exposeds + exposed2
     }
 
     if (config$use_host_uncertainty) {
@@ -326,6 +332,7 @@ host_pool_setup <- function(config) {
                                          config$host_pool_host_sds[[i]])
       }
       host_pool$total_host <- host
+      total_hosts <- total_hosts + host
     }
 
     susceptible <- host_pool$total_host - host_pool$infected - host_pool$total_exposed
@@ -339,5 +346,9 @@ host_pool_setup <- function(config) {
     }
     config$host_pools[[i]] <- host_pool
   }
+  config$total_hosts <- total_hosts
+  config$total_exposed <- total_exposeds
+  config$total_infecteds <- total_infecteds
+
   return(config)
 }
