@@ -1,36 +1,40 @@
 context("test-pops-multirun")
 
-
 test_that("Model stops if files don't exist or aren't the correct extension", {
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
-  expect_error(pops_multirun(infected_file = "",
-                    host_file =  host_file,
-                    total_populations_file =  host_file,
+  expect_error(pops_multirun(infected_file_list = "",
+                    host_file_list =  host_file_list,
+                    total_populations_file =  host_file_list,
                     parameter_means = parameter_means,
-                    parameter_cov_matrix = parameter_cov_matrix),
+                    parameter_cov_matrix = parameter_cov_matrix,
+                    pest_host_table = pest_host_table,
+                    competency_table = competency_table),
                file_exists_error)
 
-  expect_error(pops_multirun(infected_file = infected_file,
-                             host_file =  host_file,
-                             total_populations_file =  host_file,
+  expect_error(pops_multirun(infected_file_list = infected_file_list,
+                             host_file_list =  host_file_list,
+                             total_populations_file =  host_file_list,
                              parameter_means = parameter_means,
                              parameter_cov_matrix = parameter_cov_matrix,
+                             pest_host_table = pest_host_table,
+                             competency_table = competency_table,
                              mask = ""),
                file_exists_error)
 })
 
 test_that("Multirun model outputs work", {
   skip_on_os("windows")
-  infected_file <-
-    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   temperature_file <- ""
@@ -51,9 +55,6 @@ test_that("Multirun model outputs work", {
   treatment_dates <- c("2019-11-01")
   treatment_method <- "ratio"
   management <- FALSE
-  mortality_on <- FALSE
-  mortality_rate <- 0
-  mortality_time_lag <- 0
   mortality_frequency <- "Year"
   mortality_frequency_n <- 1
   natural_kernel_type <- "cauchy"
@@ -72,6 +73,9 @@ test_that("Multirun model outputs work", {
   latency_period <- 0
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
   start_exposed <- FALSE
   generate_stochasticity <- TRUE
   establishment_stochasticity <- TRUE
@@ -87,7 +91,7 @@ test_that("Multirun model outputs work", {
   overpopulation_percentage <- 0
   leaving_percentage <- 0
   leaving_scale_coefficient <- 1
-  exposed_file <- ""
+  exposed_file_list <- ""
   mask <- NULL
   write_outputs <- "None"
   output_folder_path <- tempdir()
@@ -110,11 +114,13 @@ test_that("Multirun model outputs work", {
   soil_starting_pest_file <- ""
   start_with_soil_populations <- FALSE
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -134,9 +140,6 @@ test_that("Multirun model outputs work", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -170,7 +173,7 @@ test_that("Multirun model outputs work", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
@@ -179,11 +182,11 @@ test_that("Multirun model outputs work", {
                         use_initial_condition_uncertainty,
                         use_host_uncertainty)
 
-  expect_equal(length(data), 19)
-  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
-               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
-  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
-               matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
+  expect_equal(length(data), 17)
+  expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
+  #              matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
   expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
@@ -203,11 +206,13 @@ test_that("Multirun model outputs work", {
   write_outputs <- "None"
   output_folder_path <- ""
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -227,9 +232,6 @@ test_that("Multirun model outputs work", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -263,7 +265,7 @@ test_that("Multirun model outputs work", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
@@ -282,11 +284,11 @@ test_that("Multirun model outputs work", {
                         soil_starting_pest_file = "",
                         start_with_soil_populations = FALSE)
 
-  expect_equal(length(data), 19)
-  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
-               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
-  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
-               matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
+  expect_equal(length(data), 17)
+  expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
+  #              matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
   expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
@@ -307,11 +309,13 @@ test_that("Multirun model outputs work", {
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   use_quarantine <- TRUE
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -331,9 +335,6 @@ test_that("Multirun model outputs work", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -367,19 +368,18 @@ test_that("Multirun model outputs work", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
                         network_filename,
                         network_movement)
 
-
-  expect_equal(length(data), 19)
-  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
-               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
-  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
-               matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
+  expect_equal(length(data), 17)
+  expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
+  #              matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
   expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
@@ -397,11 +397,13 @@ test_that("Multirun model outputs work", {
 
   output_frequency <- "month"
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -421,9 +423,6 @@ test_that("Multirun model outputs work", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -457,18 +456,18 @@ test_that("Multirun model outputs work", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
                         network_filename,
                         network_movement)
 
-  expect_equal(length(data), 19)
-  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
-               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
-  expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
-               matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
+  expect_equal(length(data), 17)
+  expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
+  #              matrix(c(10, 6, 14, 15), nrow = 2, ncol = 2))
   expect_equal(terra::as.matrix(data$probability[[1]], wide = TRUE),
                matrix(c(100, 0, 0, 0), nrow = 2, ncol = 2))
   expect_equal(data$number_infecteds[[1]], 5)
@@ -483,14 +482,13 @@ test_that("Multirun model outputs work", {
   expect_equal(data$south_rate[[2]], 0)
   expect_equal(data$north_rate[[1]], 0)
   expect_equal(data$north_rate[[2]], 0)
-
 })
 
 test_that("Multirun model outputs work with mask", {
   skip_on_os("windows")
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -512,9 +510,6 @@ test_that("Multirun model outputs work with mask", {
   treatment_dates <- c("2019-11-01")
   treatment_method <- "ratio"
   management <- FALSE
-  mortality_on <- FALSE
-  mortality_rate <- 0
-  mortality_time_lag <- 0
   mortality_frequency <- "Year"
   mortality_frequency_n <- 1
   natural_kernel_type <- "cauchy"
@@ -533,6 +528,9 @@ test_that("Multirun model outputs work with mask", {
   latency_period <- 0
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
   start_exposed <- FALSE
   generate_stochasticity <- TRUE
   establishment_stochasticity <- TRUE
@@ -554,17 +552,18 @@ test_that("Multirun model outputs work with mask", {
   overpopulation_percentage <- 0
   leaving_percentage <- 0
   leaving_scale_coefficient <- 1
-  exposed_file <- ""
+  exposed_file_list <- ""
   write_outputs <- "None"
   output_folder_path <- tempdir()
   network_filename <- ""
 
-
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -584,9 +583,6 @@ test_that("Multirun model outputs work with mask", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -620,16 +616,16 @@ test_that("Multirun model outputs work with mask", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
                         network_filename,
                         network_movement)
 
-  expect_equal(length(data), 19)
-  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
-               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(length(data), 17)
+  expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$number_infecteds[[1]], 1)
   expect_equal(data$number_infecteds[[2]], 0)
   expect_equal(data$infected_areas[[1]], 10000)
@@ -645,16 +641,18 @@ test_that("Multirun model outputs work with mask", {
 
   use_initial_condition_uncertainty <- TRUE
   use_host_uncertainty <- TRUE
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -674,9 +672,6 @@ test_that("Multirun model outputs work with mask", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -710,7 +705,7 @@ test_that("Multirun model outputs work with mask", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
@@ -719,7 +714,7 @@ test_that("Multirun model outputs work with mask", {
                         use_initial_condition_uncertainty,
                         use_host_uncertainty)
 
-  expect_equal(length(data), 19)
+  expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -731,16 +726,18 @@ test_that("Multirun model outputs work with mask", {
 
   use_initial_condition_uncertainty <- TRUE
   use_host_uncertainty <- FALSE
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -760,9 +757,6 @@ test_that("Multirun model outputs work with mask", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -796,7 +790,7 @@ test_that("Multirun model outputs work with mask", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
@@ -805,7 +799,7 @@ test_that("Multirun model outputs work with mask", {
                         use_initial_condition_uncertainty,
                         use_host_uncertainty)
 
-  expect_equal(length(data), 19)
+  expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -818,16 +812,18 @@ test_that("Multirun model outputs work with mask", {
 
   use_initial_condition_uncertainty <- FALSE
   use_host_uncertainty <- TRUE
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -847,9 +843,6 @@ test_that("Multirun model outputs work with mask", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -883,7 +876,7 @@ test_that("Multirun model outputs work with mask", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
@@ -892,7 +885,7 @@ test_that("Multirun model outputs work with mask", {
                         use_initial_condition_uncertainty,
                         use_host_uncertainty)
 
-  expect_equal(length(data), 19)
+  expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -905,16 +898,18 @@ test_that("Multirun model outputs work with mask", {
 
   use_initial_condition_uncertainty <- FALSE
   use_host_uncertainty <- FALSE
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -934,9 +929,6 @@ test_that("Multirun model outputs work with mask", {
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -970,7 +962,7 @@ test_that("Multirun model outputs work with mask", {
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
@@ -979,7 +971,7 @@ test_that("Multirun model outputs work with mask", {
                         use_initial_condition_uncertainty,
                         use_host_uncertainty)
 
-  expect_equal(length(data), 19)
+  expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -992,9 +984,9 @@ test_that("Multirun model outputs work with mask", {
 
 test_that("Multirun model outputs work with writing all simulations and random seeds", {
   skip_on_os("windows")
-  infected_file <-
+  infected_file_list <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file <-
+  host_file_list <-
     system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -1016,9 +1008,6 @@ test_that("Multirun model outputs work with writing all simulations and random s
   treatment_dates <- c("2019-11-01")
   treatment_method <- "ratio"
   management <- FALSE
-  mortality_on <- FALSE
-  mortality_rate <- 0
-  mortality_time_lag <- 0
   mortality_frequency <- "Year"
   mortality_frequency_n <- 1
   natural_kernel_type <- "cauchy"
@@ -1033,10 +1022,13 @@ test_that("Multirun model outputs work with writing all simulations and random s
   use_movements <- FALSE
   number_of_iterations <- 2
   number_of_cores <- 2
-  model_type <- "SI"
-  latency_period <- 0
+  model_type <- "SEI"
+  latency_period <- 2
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
   start_exposed <- FALSE
   generate_stochasticity <- TRUE
   establishment_stochasticity <- TRUE
@@ -1059,7 +1051,7 @@ test_that("Multirun model outputs work with writing all simulations and random s
   overpopulation_percentage <- 0
   leaving_percentage <- 0
   leaving_scale_coefficient <- 1
-  exposed_file <- ""
+  exposed_file_list <- ""
   write_outputs <- "all_simulations"
   output_folder_path <- tempdir()
   network_filename <- ""
@@ -1076,11 +1068,13 @@ test_that("Multirun model outputs work with writing all simulations and random s
   soil_starting_pest_file <- ""
   start_with_soil_populations <- FALSE
 
-  data <- pops_multirun(infected_file,
-                        host_file,
+  data <- pops_multirun(infected_file_list,
+                        host_file_list,
                         total_populations_file,
                         parameter_means,
                         parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table,
                         temp,
                         temperature_coefficient_file,
                         precip,
@@ -1100,9 +1094,6 @@ test_that("Multirun model outputs work with writing all simulations and random s
                         temperature_file,
                         lethal_temperature,
                         lethal_temperature_month,
-                        mortality_on,
-                        mortality_rate,
-                        mortality_time_lag,
                         mortality_frequency,
                         mortality_frequency_n,
                         management,
@@ -1136,7 +1127,7 @@ test_that("Multirun model outputs work with writing all simulations and random s
                         overpopulation_percentage,
                         leaving_percentage,
                         leaving_scale_coefficient,
-                        exposed_file,
+                        exposed_file_list,
                         mask,
                         write_outputs,
                         output_folder_path,
@@ -1155,9 +1146,9 @@ test_that("Multirun model outputs work with writing all simulations and random s
                         soil_starting_pest_file,
                         start_with_soil_populations)
 
-  expect_equal(length(data), 19)
-  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
-               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(length(data), 17)
+  expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$number_infecteds[[1]], 1)
   expect_equal(data$number_infecteds[[2]], 0)
   expect_equal(data$infected_areas[[1]], 10000)
