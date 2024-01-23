@@ -326,7 +326,7 @@ pops_multirun <- function(infected_file_list,
         config$pops_runs_folder_path <- paste(config$output_folder_path, "pops_runs/", sep = "")
         suppressWarnings(dir.create(config$pops_runs_folder_path))
         config$host_pool_folder_path <-
-          paste(config$pops_runs_folder_path , config$host_names[p], sep = "")
+          paste(config$pops_runs_folder_path, config$host_names[p], sep = "")
         suppressWarnings(dir.create(config$host_pool_folder_path))
 
         infected_out <- zero_rast
@@ -351,13 +351,14 @@ pops_multirun <- function(infected_file_list,
             terra::values(exposed_out[[k]]) <- data$host_pools[[p]]$exposed[[q]][[k]]
           }
           if (config$write_outputs == "all_simulations") {
-            file_name <- paste(config$host_pool_folder_path, "/exposed_", i, "time_step_", q, ".tif", sep = "")
+            file_name <-
+              paste(config$host_pool_folder_path, "/exposed_", i, "time_step_", q, ".tif", sep = "")
             terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
           }
           exposed_outs[[q]] <- exposed_out
         }
         if (config$write_outputs == "all_simulations") {
-          file_name <- paste(config$host_pool_folder_path,"/infected_", i, ".tif", sep = "")
+          file_name <- paste(config$host_pool_folder_path, "/infected_", i, ".tif", sep = "")
           terra::writeRaster(infected_out, file_name, overwrite = TRUE)
           file_name <-
             paste(config$host_pool_folder_path, "/susectible_", i, ".tif", sep = "")
