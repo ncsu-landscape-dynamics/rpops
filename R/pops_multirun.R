@@ -313,7 +313,7 @@ pops_multirun <- function(infected_file_list,
       output_host_pools <- c()
 
       zero_rast <- terra::rast(config$total_populations_file)[[1]]
-      values(zero_rast) <- 0
+      terra::values(zero_rast) <- 0
 
       total_infecteds_list <- c()
       total_infecteds <- as.matrix(zero_rast, wide = TRUE)
@@ -337,8 +337,8 @@ pops_multirun <- function(infected_file_list,
           total_infecteds_list[[q]] <- total_infecteds
           exposed_out <- zero_rast
           if (q > 1) {
-            add(infected_out) <- zero_rast
-            add(susectible_out) <- zero_rast
+            terra::add(infected_out) <- zero_rast
+            terra::add(susectible_out) <- zero_rast
           }
           total_infecteds_list[[q]] <-
             total_infecteds_list[[q]] + data$host_pools[[p]]$infected[[q]]
@@ -346,7 +346,7 @@ pops_multirun <- function(infected_file_list,
           terra::values(susectible_out[[q]]) <- data$host_pools[[p]]$susceptible[[q]]
           for (k in seq_len(length(data$host_pools[[p]]$exposed[[q]]))) {
             if (k > 1) {
-              add(exposed_out) <- zero_rast
+              terra::add(exposed_out) <- zero_rast
             }
             terra::values(exposed_out[[k]]) <- data$host_pools[[p]]$exposed[[q]][[k]]
           }
@@ -488,7 +488,6 @@ pops_multirun <- function(infected_file_list,
   south_rate[is.na(south_rate)] <- 0
   north_rate[is.na(north_rate)] <- 0
 
-  ## add quarantine here
   if (use_quarantine) {
     escape_probability <- escape_probability / length(total_infecteds_runs) * 100
     if (
