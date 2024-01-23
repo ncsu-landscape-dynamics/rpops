@@ -557,7 +557,6 @@ calibrate <- function(infected_years_file,
               comparison <- comparison + infections
             }
             terra::values(reference) <- config$infection_years2[[q]]
-            mask <- terra::rast(config$infected_file)[[1]]
             terra::values(mask) <- config$mask_matrix
             quantity_allocation_disagreement(reference,
                                              comparison,
@@ -901,7 +900,6 @@ calibrate <- function(infected_years_file,
           comparison <- comparison + infections
         }
         terra::values(reference) <- config$infection_years2[[q]]
-        mask <- terra::rast(config$infected_file)[[1]]
         terra::values(mask) <- config$mask_matrix
         quantity_allocation_disagreement(reference,
                                          comparison,
@@ -1081,7 +1079,6 @@ calibrate <- function(infected_years_file,
             comparison <- comparison + infections
           }
           terra::values(reference) <- config$infection_years2[[q]]
-          mask <- terra::rast(config$infected_file)[[1]]
           terra::values(mask) <- config$mask_matrix
           quantity_allocation_disagreement(reference,
                                            comparison,
