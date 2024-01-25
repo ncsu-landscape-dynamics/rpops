@@ -196,3 +196,15 @@ pest_host_table_wrong_columns <-
 
 pest_host_table_value_error <-
   "pest_host_table susceptiblity and mortality_rate must be between 0 and 1"
+
+multihosts_gt_totpop_error <-
+  "All hosts sum to more than the total populations in some cells. Check rasters to ensure that
+  combined summed host layers are not greater than total populations raster."
+
+multiinfected_gt_totpop_error <-
+  "All infecteds sum to more than the total populations in some cells. Check rasters to ensure that
+  combined summed infected layers are not greater than total populations raster."
+
+multiexposed_gt_totpop_error <-
+  "All exposeds sum to more than the total populations in some cells. Check rasters to ensure that
+  combined summed exposed layers are not greater than total populations raster."
