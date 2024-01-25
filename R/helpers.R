@@ -277,7 +277,7 @@ competency_table_list_creator <- function(competency_table) {
     rnorm(n = nrow(competency_table), mean = competency_table$competency_mean,
           sd = competency_table$compentency_sd)
   names(competency_table2)[ncol(competency_table2)] <- "competency"
-  if (any(competencies > 1) || any(competencies < 0)) {
+  while (any(competencies > 1) || any(competencies < 0)) {
     competencies <-
       rnorm(n = nrow(competency_table),
             mean = competency_table$competency_mean, sd = competency_table$compentency_sd)
