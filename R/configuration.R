@@ -47,11 +47,13 @@ configuration <- function(config) {
 
   if (config$write_outputs %notin% output_list) {
     config$failure <- write_outputs_error
+    return(config)
   }
 
   if (config$write_outputs %in% output_write_list) {
     if (!base::dir.exists(config$output_folder_path)) {
       config$failure <- output_path_error
+      return(config)
     }
   }
 
@@ -89,6 +91,7 @@ configuration <- function(config) {
     config$mortality_on <- multihost_check$mortality_on
   } else {
     config$failure <- multihost_check$failed_check
+    return(config)
   }
 
   seasons <- seq(1, 12, 1)
@@ -100,6 +103,7 @@ configuration <- function(config) {
     config$season_month_start_end <- season_month_start_end
   } else {
     config$failure <- season_month_error
+    return(config)
   }
 
   # ensures latent period is correct for type of model selected
@@ -661,16 +665,18 @@ configuration <- function(config) {
 
     mortality_tracker <- list(zero_matrix)
     if (config$mortality_on) {
-      mortality_length <-
-        1 / config$pest_host_table$mortality_rate[i] +
-        config$pest_host_table$mortality_time_lag[i]
+      if (config$pest_host_table$mortality_rate[i] <= 0) {
+        mortality_length <- 1
+      } else {
+        mortality_length <-
+          1 / config$pest_host_table$mortality_rate[i] +
+          config$pest_host_table$mortality_time_lag[i]
+      }
       for (mt in 2:(mortality_length)) {
         mortality_tracker[[mt]] <- zero_matrix
       }
-    }
-    # add currently infected cells to last element of the mortality tracker so
-    # that mortality occurs at the appropriate interval
-    if (config$mortality_on) {
+      # add currently infected cells to last element of the mortality tracker so
+      # that mortality occurs at the appropriate interval
       mortality_tracker[[length(mortality_tracker)]] <- infected_mean
     }
 
@@ -699,10 +705,19 @@ configuration <- function(config) {
   config$total_infecteds <- total_infecteds
   config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
 
-  while(any(config$total_hosts > config$total_populations) ||
-        any(config$total_exposed > config$total_populations) ||
-        any(config$total_infecteds> config$total_populations)) {
-    config <- host_pool_setup(config)
+  if (any(config$total_hosts > config$total_populations)) {
+    config$failure <- multihosts_gt_totpop_error
+    return(config)
+  }
+
+  if (any(config$total_exposed > config$total_populations)) {
+    config$failure <- multiinfected_gt_totpop_error
+    return(config)
+  }
+
+  if (any(config$total_infecteds> config$total_populations)) {
+    config$failure <- multiexposed_gt_totpop_error
+    return(config)
   }
 
   config$host_pools <- host_pools
