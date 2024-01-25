@@ -2,7 +2,7 @@ context("test-pops")
 
 test_that("Model stops if files don't exist or aren't the correct extension", {
   infected_file_list <- c("")
-  host_file_list <- c(system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS"))
+  host_file_list <- c(system.file("extdata", "simple2x2", "host.tif", package = "PoPS"))
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -55,7 +55,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
                     competency_table = competency_table),
                raster_type_error, fixed = TRUE)
 
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <- ""
   expect_error(pops(infected_file_list =  infected_file_list,
                     host_file_list =  host_file_list,
@@ -220,7 +220,9 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
 
 test_that("Model stops if treatments don't have correct dimenisions", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
+  total_populations_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2010-12-31"
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
@@ -245,7 +247,7 @@ test_that("Model stops if treatments don't have correct dimenisions", {
 
 test_that("Model stops if time and date parameters are of the wrong type and/or dimension", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -308,7 +310,7 @@ test_that("Model stops if time and date parameters are of the wrong type and/or 
 
 test_that("Model stops if kernel is of the wrong type and/or dimension", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -346,7 +348,7 @@ test_that("Model stops if kernel is of the wrong type and/or dimension", {
 
 test_that("Input raster resolutions, extents, and crs all match", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -832,7 +834,7 @@ test_that("Input raster resolutions, extents, and crs all match", {
 
 test_that("Infected results return initial infected if reproductive rate is set to 0", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -1066,7 +1068,7 @@ test_that("Infected results return initial infected if reproductive rate is set 
 test_that(
   "Infected results returns all 0's if minimum temp drops below lethal temperature", {
     infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
     coefficient_file <-
@@ -1135,7 +1137,7 @@ test_that(
 test_that(
   "Infected results returns less infection after survival rates than before", {
     infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
     coefficient_file <-
@@ -1209,7 +1211,7 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
             infected_file_list <-
               system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
             host_file_list <-
-              system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+              system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
             coefficient_file <-
@@ -1284,7 +1286,7 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
             expect_equal(data$host_pools[[1]]$infected[[1]],
                          matrix(c(2, 0, 0, 0), ncol = 2, nrow = 2))
             expect_equal(data$host_pools[[1]]$susceptible[[1]],
-                         matrix(c(5, 3, 7, 7), ncol = 2, nrow = 2))
+                         matrix(c(6, 7, 3, 7), ncol = 2, nrow = 2))
 
             data <-
               pops(infected_file_list = infected_file_list,
@@ -1304,13 +1306,12 @@ test_that("Infected and Susceptible results return all 0's if treatments file is
             expect_equal(data$host_pools[[1]]$infected[[1]],
                          matrix(c(0, 0, 0, 0), ncol = 2, nrow = 2))
             expect_equal(data$host_pools[[1]]$susceptible[[1]],
-                         matrix(c(5, 3, 7, 7), ncol = 2, nrow = 2))
-
+                         matrix(c(6, 7, 3, 7), ncol = 2, nrow = 2))
           })
 
 test_that("Infected results are greater than initial infected", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -1337,7 +1338,7 @@ test_that("Infected results are greater than initial infected", {
   expect_equal(all(
     pops(infected_file_list = infected_file_list,
          host_file_list = system.file("extdata", "simple2x2",
-                                 "total_plants_host_greater_than_infected.tif", package = "PoPS"),
+                                      "total_plants_host_greater_than_infected.tif", package = "PoPS"),
          total_populations_file = total_populations_file,
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
@@ -1349,7 +1350,7 @@ test_that("Infected results are greater than initial infected", {
 
 test_that("All kernel types lead to spread", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -1359,7 +1360,7 @@ test_that("All kernel types lead to spread", {
   start_date <- "2008-01-01"
   end_date <- "2008-12-31"
   time_step <- "month"
-  parameter_means <- c(0.4, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(3.0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
@@ -1630,7 +1631,7 @@ test_that("All kernel types lead to spread", {
 
 test_that("Susceptibles are never negative", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -1665,7 +1666,7 @@ test_that("Susceptibles are never negative", {
   data <-
     pops(infected_file_list = infected_file_list,
          host_file_list = system.file("extdata", "simple2x2",
-                                 "total_plants_host_greater_than_infected.tif", package = "PoPS"),
+                                      "total_plants_host_greater_than_infected.tif", package = "PoPS"),
          total_populations_file = total_populations_file,
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
@@ -1683,7 +1684,7 @@ test_that("Susceptibles are never negative", {
 
 test_that("SEI model works as intended", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -1823,7 +1824,7 @@ test_that("SEI model works as intended", {
 
 test_that("Infected results with weather are less than those without weather", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -1832,7 +1833,7 @@ test_that("Infected results with weather are less than those without weather", {
     system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2010-12-31"
-  parameter_means <- c(0.4, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(2.0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   coefficient_sd_file <- system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
   pest_host_table <-
@@ -1847,7 +1848,7 @@ test_that("Infected results with weather are less than those without weather", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
-         random_seed = 44,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date)
 
@@ -1861,7 +1862,7 @@ test_that("Infected results with weather are less than those without weather", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
-         random_seed = 44,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date)
 
@@ -1875,7 +1876,7 @@ test_that("Infected results with weather are less than those without weather", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
-         random_seed = 44,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date)
 
@@ -1891,7 +1892,7 @@ test_that("Infected results with weather are less than those without weather", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
-         random_seed = 44,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date)
 
@@ -1905,7 +1906,7 @@ test_that("Infected results with weather are less than those without weather", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
-         random_seed = 44,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date,
          weather_type = "probabilistic",
@@ -1921,7 +1922,7 @@ test_that("Infected results with weather are less than those without weather", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
-         random_seed = 44,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date,
          weather_type = "probabilistic",
@@ -1939,7 +1940,7 @@ test_that("Infected results with weather are less than those without weather", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
-         random_seed = 44,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date,
          weather_type = "probabilistic",
@@ -1989,7 +1990,7 @@ test_that("Infected results with weather are less than those without weather", {
 test_that(
   "Infected results are greater with same parameters for weekly spread vs. monthly", {
     infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
     coefficient_file <-
@@ -2041,7 +2042,7 @@ test_that("Infected results are greater with same parameters for daily spread vs
             infected_file_list <-
               system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
             host_file_list <-
-              system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+              system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
             coefficient_file <-
@@ -2104,7 +2105,7 @@ test_that("Infected results are greater with same parameters for daily spread vs
 test_that(
   "Infected results are greater without treatment than with treatment", {
     infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
     treatments_file <- system.file("extdata", "simple2x2", "treatments_1_1.tif", package = "PoPS")
@@ -2125,7 +2126,7 @@ test_that(
            parameter_cov_matrix = parameter_cov_matrix,
            pest_host_table = pest_host_table,
            competency_table = competency_table,
-           random_seed = 44,
+           random_seed = 42,
            start_date = start_date,
            end_date = end_date)
     data_treat <-
@@ -2139,7 +2140,7 @@ test_that(
            parameter_cov_matrix = parameter_cov_matrix,
            pest_host_table = pest_host_table,
            competency_table = competency_table,
-           random_seed = 44,
+           random_seed = 42,
            start_date = start_date,
            end_date = end_date)
 
@@ -2151,7 +2152,7 @@ test_that(
 
 test_that("Infected results are greater with higher reproductive rate", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
@@ -2256,7 +2257,7 @@ test_that("Infected results are greater with higher reproductive rate", {
 
 test_that("Treatments apply no matter what time step", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -2293,7 +2294,7 @@ test_that("Treatments apply no matter what time step", {
 
 test_that("Pesticide treatments apply no matter what time step", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   coefficient_file <-
@@ -2354,9 +2355,8 @@ test_that("Pesticide treatments apply no matter what time step", {
            pesticide_efficacy = pesticide_efficacy)
     expect_equal(data$host_pools[[1]]$infected[[1]], matrix(c(3, 0, 0, 0), ncol = 2, nrow = 2))
     expect_equal(data$host_pools[[1]]$susceptible[[1]],
-                 matrix(c(12, 6, 14, 15), ncol = 2, nrow = 2))
+                 matrix(c(14, 14, 6, 15), ncol = 2, nrow = 2))
   }
-
 })
 
 test_that("Changing the output frequency returns the correct number of outputs and output
@@ -2364,7 +2364,7 @@ test_that("Changing the output frequency returns the correct number of outputs a
             infected_file_list <-
               system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
             host_file_list <-
-              system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+              system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
             total_populations_file <-
               system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
             start_date <- "2009-01-01"
@@ -2554,7 +2554,7 @@ test_that("Changing the output frequency returns the correct number of outputs a
 test_that(
   "Outputs occur with non-full year date range for all time step output frequency combinations", {
     infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
     start_date <- "2009-05-01"
@@ -2563,7 +2563,7 @@ test_that(
     parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
     pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
     competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
     data <- pops(output_frequency = "year",
@@ -3169,7 +3169,7 @@ test_that(
   "Overpopulation dispersal works as expected with directionality to prevent dispersers from
   leaving the simulated area", {
     infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
     start_date <- "2008-01-01"
@@ -3204,7 +3204,7 @@ test_that(
 
 test_that("Deterministic dispersal works as expected", {
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
@@ -3441,7 +3441,7 @@ test_that("multiple_random seeds works and returns expected results", {
 test_that("Using soils returns expected results", {
   infected_file_list <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
   total_populations_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
@@ -3470,6 +3470,74 @@ test_that("Using soils returns expected results", {
          temperature_coefficient_file = coefficient_file,
          use_soils = use_soils,
          dispersers_to_soils_percentage = dispersers_to_soils_percentage)
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
+  expect_equal(length(data$soil_reservoirs[[1]]), 20)
+  expect_equal(length(data$soil_reservoirs[[2]]), 20)
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         temp = TRUE,
+         temperature_coefficient_file = coefficient_file,
+         use_soils = use_soils,
+         dispersers_to_soils_percentage = dispersers_to_soils_percentage,
+         soil_starting_pest_file = infected_file_list,
+         start_with_soil_populations = TRUE)
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
+  expect_equal(length(data$soil_reservoirs[[1]]), 20)
+  expect_equal(length(data$soil_reservoirs[[2]]), 20)
+})
+
+test_that("Using multiple hosts works as expected", {
+  infected_file_list <-
+    c(system.file("extdata", "simple2x2", "infected_oak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_tanoak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_baylaurel.tif", package = "PoPS"))
+  host_file_list <-
+    c(system.file("extdata", "simple2x2", "host_oak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_tanoak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_baylaurel.tif", package = "PoPS"))
+  total_populations_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2009-12-31"
+  parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  coefficient_file <-
+    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+  pest_host_table <-
+    system.file("extdata", "pest_host_table.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_multihost.csv", package = "PoPS")
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         temp = TRUE,
+         temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
