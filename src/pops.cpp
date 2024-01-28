@@ -287,6 +287,8 @@ List pops_model_cpp(
       input_host_pool.mortality.emplace_back(host_pools[i]["mortality"]);
       std::vector<IntegerMatrix> mortality_tracker = host_pools[i]["mortality_tracker"];
       input_host_pool.mortality_tracker.push_back(mortality_tracker);
+    }
+    for (unsigned i = 0; i < host_pools.size(); i++) {
       host_pool_vector.emplace_back(new PoPSModel::StandardSingleHostPool(
           mt,
           input_host_pool.susceptible[i],
