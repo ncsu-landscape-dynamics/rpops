@@ -1,5 +1,5 @@
-﻿oak,tanoak,bay laurel,competency_mean,compentency_sd
+﻿oak,tanoak,bay_laurel,competency_mean,compentency_sd
 0,0,0,0,0
 1,0,0,0,0
-0,1,0,1,0.1
-0,0,1,0.7,0.1
+0,1,0,0.7,0.1
+0,0,1,0.8,0.05
