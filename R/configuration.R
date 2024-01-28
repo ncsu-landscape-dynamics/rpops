@@ -715,7 +715,7 @@ configuration <- function(config) {
     return(config)
   }
 
-  if (any(config$total_infecteds> config$total_populations)) {
+  if (any(config$total_infecteds > config$total_populations)) {
     config$failure <- multiexposed_gt_totpop_error
     return(config)
   }

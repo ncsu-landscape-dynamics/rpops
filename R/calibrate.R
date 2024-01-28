@@ -324,9 +324,9 @@ calibrate <- function(infected_years_file,
       config$random_seed <- sample(1:999999999999, 1, replace = FALSE)
       random_seeds <- create_random_seeds(1)
       config <- host_pool_setup(config)
-      while(any(config$total_hosts > config$total_populations) ||
+      while (any(config$total_hosts > config$total_populations) ||
             any(config$total_exposed > config$total_populations) ||
-            any(config$total_infecteds> config$total_populations)) {
+            any(config$total_infecteds > config$total_populations)) {
         config <- host_pool_setup(config)
       }
       config$competency_table_list <- competency_table_list_creator(config$competency_table)

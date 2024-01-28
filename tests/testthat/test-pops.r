@@ -1337,8 +1337,9 @@ test_that("Infected results are greater than initial infected", {
     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
   expect_equal(all(
     pops(infected_file_list = infected_file_list,
-         host_file_list = system.file("extdata", "simple2x2",
-                                      "total_plants_host_greater_than_infected.tif", package = "PoPS"),
+         host_file_list =
+           system.file("extdata", "simple2x2",
+                       "total_plants_host_greater_than_infected.tif", package = "PoPS"),
          total_populations_file = total_populations_file,
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
@@ -1665,8 +1666,9 @@ test_that("Susceptibles are never negative", {
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   data <-
     pops(infected_file_list = infected_file_list,
-         host_file_list = system.file("extdata", "simple2x2",
-                                      "total_plants_host_greater_than_infected.tif", package = "PoPS"),
+         host_file_list =
+           system.file("extdata", "simple2x2",
+                       "total_plants_host_greater_than_infected.tif", package = "PoPS"),
          total_populations_file = total_populations_file,
          parameter_means = parameter_means,
          parameter_cov_matrix = parameter_cov_matrix,
