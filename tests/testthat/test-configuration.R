@@ -481,13 +481,13 @@ test_that("configuration returns proper errors", {
   expect_equal(config2$failure, output_path_error)
 
   config$network_movement <- "hello"
+  config$write_outputs <- "None"
   config$output_folder_path <- ""
   config2 <- configuration(config)
   expect_equal(config2$failure, network_movement_error)
 
   config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 25, 150)
   config$function_name <- "pops"
-  config$write_outputs <- "None"
   config$network_movement <- "walk"
   config$anthropogenic_kernel_type <- "network"
   config2 <- configuration(config)
