@@ -518,7 +518,7 @@ test_that("Multirun model outputs work with mask", {
   anthropogenic_dir <- "NONE"
   pesticide_duration <- c(0)
   pesticide_efficacy <- 1.0
-  random_seed <- 42
+  random_seed <- NULL
   output_frequency <- "year"
   movements_file <- ""
   use_movements <- FALSE
@@ -556,6 +556,24 @@ test_that("Multirun model outputs work with mask", {
   write_outputs <- "None"
   output_folder_path <- tempdir()
   network_filename <- ""
+  quarantine_directions <- ""
+  multiple_random_seeds <- TRUE
+  file_random_seeds <- NULL
+  use_soils <- FALSE
+  soil_starting_pest_file <- ""
+  start_with_soil_populations <- FALSE
+  use_initial_condition_uncertainty <- FALSE
+  use_host_uncertainty <- FALSE
+  weather_type <- "deterministic"
+  temperature_coefficient_sd_file <- ""
+  precipitation_coefficient_sd_file <- ""
+  dispersers_to_soils_percentage <- 0
+  quarantine_directions <- ""
+  multiple_random_seeds <- FALSE
+  file_random_seeds <- NULL
+  use_soils <- FALSE
+  soil_starting_pest_file <- ""
+  start_with_soil_populations <- FALSE
 
   data <- pops_multirun(infected_file_list,
                         host_file_list,
@@ -621,7 +639,19 @@ test_that("Multirun model outputs work with mask", {
                         write_outputs,
                         output_folder_path,
                         network_filename,
-                        network_movement)
+                        network_movement,
+                        use_initial_condition_uncertainty = FALSE,
+                        use_host_uncertainty = FALSE,
+                        weather_type = "deterministic",
+                        temperature_coefficient_sd_file = "",
+                        precipitation_coefficient_sd_file = "",
+                        dispersers_to_soils_percentage = 0,
+                        quarantine_directions = "",
+                        multiple_random_seeds = FALSE,
+                        file_random_seeds = NULL,
+                        use_soils = FALSE,
+                        soil_starting_pest_file = "",
+                        start_with_soil_populations = FALSE)
 
   expect_equal(length(data), 17)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
@@ -712,7 +742,17 @@ test_that("Multirun model outputs work with mask", {
                         network_filename,
                         network_movement,
                         use_initial_condition_uncertainty,
-                        use_host_uncertainty)
+                        use_host_uncertainty,
+                        weather_type = "deterministic",
+                        temperature_coefficient_sd_file = "",
+                        precipitation_coefficient_sd_file = "",
+                        dispersers_to_soils_percentage = 0,
+                        quarantine_directions = "",
+                        multiple_random_seeds = FALSE,
+                        file_random_seeds = NULL,
+                        use_soils = FALSE,
+                        soil_starting_pest_file = "",
+                        start_with_soil_populations = FALSE)
 
   expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
@@ -797,7 +837,17 @@ test_that("Multirun model outputs work with mask", {
                         network_filename,
                         network_movement,
                         use_initial_condition_uncertainty,
-                        use_host_uncertainty)
+                        use_host_uncertainty,
+                        weather_type = "deterministic",
+                        temperature_coefficient_sd_file = "",
+                        precipitation_coefficient_sd_file = "",
+                        dispersers_to_soils_percentage = 0,
+                        quarantine_directions = "",
+                        multiple_random_seeds = FALSE,
+                        file_random_seeds = NULL,
+                        use_soils = FALSE,
+                        soil_starting_pest_file = "",
+                        start_with_soil_populations = FALSE)
 
   expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
@@ -883,7 +933,17 @@ test_that("Multirun model outputs work with mask", {
                         network_filename,
                         network_movement,
                         use_initial_condition_uncertainty,
-                        use_host_uncertainty)
+                        use_host_uncertainty,
+                        weather_type = "deterministic",
+                        temperature_coefficient_sd_file = "",
+                        precipitation_coefficient_sd_file = "",
+                        dispersers_to_soils_percentage = 0,
+                        quarantine_directions = "",
+                        multiple_random_seeds = FALSE,
+                        file_random_seeds = NULL,
+                        use_soils = FALSE,
+                        soil_starting_pest_file = "",
+                        start_with_soil_populations = FALSE)
 
   expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
@@ -969,7 +1029,17 @@ test_that("Multirun model outputs work with mask", {
                         network_filename,
                         network_movement,
                         use_initial_condition_uncertainty,
-                        use_host_uncertainty)
+                        use_host_uncertainty,
+                        weather_type = "deterministic",
+                        temperature_coefficient_sd_file = "",
+                        precipitation_coefficient_sd_file = "",
+                        dispersers_to_soils_percentage = 0,
+                        quarantine_directions = "",
+                        multiple_random_seeds = FALSE,
+                        file_random_seeds = NULL,
+                        use_soils = FALSE,
+                        soil_starting_pest_file = "",
+                        start_with_soil_populations = FALSE)
 
   expect_equal(length(data), 17)
   expect_equal(data$west_rate[[1]], 0)
@@ -1016,7 +1086,7 @@ test_that("Multirun model outputs work with writing all simulations and random s
   anthropogenic_dir <- "NONE"
   pesticide_duration <- c(0)
   pesticide_efficacy <- 1.0
-  random_seed <- 42
+  random_seed <- NULL
   output_frequency <- "year"
   movements_file <- ""
   use_movements <- FALSE
