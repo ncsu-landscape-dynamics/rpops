@@ -1835,7 +1835,7 @@ test_that("Infected results with weather are less than those without weather", {
     system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2010-12-31"
-  parameter_means <- c(2.0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(3.0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   coefficient_sd_file <- system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
   pest_host_table <-
@@ -2159,7 +2159,7 @@ test_that("Infected results are greater with higher reproductive rate", {
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2010-12-31"
-  parameter_means <- c(1.0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(4.0, 15, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
@@ -2177,7 +2177,7 @@ test_that("Infected results are greater with higher reproductive rate", {
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
-  parameter_means <- c(0.75, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(3.0, 15, 1, 500, 0, 0, 0, 0)
   data_075 <-
     pops(infected_file_list = infected_file_list,
          host_file_list = host_file_list,
@@ -2190,7 +2190,7 @@ test_that("Infected results are greater with higher reproductive rate", {
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
-  parameter_means <- c(0.5, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(2.0, 15, 1, 500, 0, 0, 0, 0)
   data_050 <-
     pops(infected_file_list = infected_file_list,
          host_file_list = host_file_list,
@@ -2203,7 +2203,7 @@ test_that("Infected results are greater with higher reproductive rate", {
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
-  parameter_means <- c(0.25, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(1.0, 15, 1, 500, 0, 0, 0, 0)
   data_025 <-
     pops(infected_file_list = infected_file_list,
          host_file_list = host_file_list,
@@ -2216,7 +2216,7 @@ test_that("Infected results are greater with higher reproductive rate", {
          random_seed = 42,
          start_date = start_date,
          end_date = end_date)
-  parameter_means <- c(0.1, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(0.5, 15, 1, 500, 0, 0, 0, 0)
   data_010 <-
     pops(infected_file_list = infected_file_list,
          host_file_list = host_file_list,
@@ -3520,6 +3520,50 @@ test_that("Using multiple hosts works as expected", {
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2009-12-31"
+  parameter_means <- c(0, 21, 1, 500, 0, 0, 100, 1000)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  coefficient_file <-
+    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+  pest_host_table <-
+    system.file("extdata", "pest_host_table.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_multihost.csv", package = "PoPS")
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         temp = TRUE,
+         temperature_coefficient_file = coefficient_file)
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
+
+  infected_file_list <-
+    c(system.file("extdata", "simple2x2", "infected_oak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_tanoak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_baylaurel.tif", package = "PoPS"))
+  host_file_list <-
+    c(system.file("extdata", "simple2x2", "host_oak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_tanoak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_baylaurel.tif", package = "PoPS"))
+  total_populations_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2009-12-31"
   parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   coefficient_file <-
@@ -3541,13 +3585,35 @@ test_that("Using multiple hosts works as expected", {
          temp = TRUE,
          temperature_coefficient_file = coefficient_file)
 
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  expect_equal(length(data$soil_reservoirs[[1]]), 20)
-  expect_equal(length(data$soil_reservoirs[[2]]), 20)
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
+
+
+  infected_file_list <-
+    c(system.file("extdata", "simple2x2", "infected_oak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_tanoak.tif", package = "PoPS"))
+  host_file_list <-
+    c(system.file("extdata", "simple2x2", "host_oak.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_tanoak.tif", package = "PoPS"))
+  total_populations_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2009-12-31"
+  parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  coefficient_file <-
+    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_2host.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_2host.csv", package = "PoPS")
 
   data <-
     pops(infected_file_list = infected_file_list,
@@ -3560,17 +3626,106 @@ test_that("Using multiple hosts works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
-         temperature_coefficient_file = coefficient_file,
-         use_soils = use_soils,
-         dispersers_to_soils_percentage = dispersers_to_soils_percentage,
-         soil_starting_pest_file = infected_file_list,
-         start_with_soil_populations = TRUE)
+         temperature_coefficient_file = coefficient_file)
 
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  expect_equal(length(data$soil_reservoirs[[1]]), 20)
-  expect_equal(length(data$soil_reservoirs[[2]]), 20)
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
+})
+
+
+test_that("Using multiple hosts with uncertainty works as expected", {
+  infected_file_list <-
+    c(system.file("extdata", "simple2x2", "infected_oak_wsd.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_tanoak_wsd.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_baylaurel_wsd.tif", package = "PoPS"))
+  host_file_list <-
+    c(system.file("extdata", "simple2x2", "host_oak_wsd.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_tanoak_wsd.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_baylaurel_wsd.tif", package = "PoPS"))
+  total_populations_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2009-12-31"
+  parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  coefficient_file <-
+    system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
+  pest_host_table <-
+    system.file("extdata", "pest_host_table.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_multihost.csv", package = "PoPS")
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         temp = TRUE,
+         temperature_coefficient_file = coefficient_file)
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
+
+
+  infected_file_list <-
+    c(system.file("extdata", "simple2x2", "infected_oak_wsd.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "infected_tanoak_wsd.tif", package = "PoPS"))
+  host_file_list <-
+    c(system.file("extdata", "simple2x2", "host_oak_wsd.tif", package = "PoPS"),
+      system.file("extdata", "simple2x2", "host_tanoak_wsd.tif", package = "PoPS"))
+  total_populations_file <-
+    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2009-12-31"
+  parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  coefficient_file <-
+    system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_2host.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_2host.csv", package = "PoPS")
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         temp = TRUE,
+         temperature_coefficient_file = coefficient_file)
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
 })
