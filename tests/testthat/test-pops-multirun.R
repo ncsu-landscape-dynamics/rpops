@@ -182,7 +182,7 @@ test_that("Multirun model outputs work", {
                         use_initial_condition_uncertainty,
                         use_host_uncertainty)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -284,7 +284,7 @@ test_that("Multirun model outputs work", {
                         soil_starting_pest_file = "",
                         start_with_soil_populations = FALSE)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -375,7 +375,7 @@ test_that("Multirun model outputs work", {
                         network_filename,
                         network_movement)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -463,7 +463,7 @@ test_that("Multirun model outputs work", {
                         network_filename,
                         network_movement)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   # expect_equal(terra::as.matrix(data$susceptible_run[[1]], wide = TRUE),
@@ -653,7 +653,7 @@ test_that("Multirun model outputs work with mask", {
                         soil_starting_pest_file = "",
                         start_with_soil_populations = FALSE)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$number_infecteds[[1]], 1)
@@ -754,7 +754,7 @@ test_that("Multirun model outputs work with mask", {
                         soil_starting_pest_file = "",
                         start_with_soil_populations = FALSE)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -849,7 +849,7 @@ test_that("Multirun model outputs work with mask", {
                         soil_starting_pest_file = "",
                         start_with_soil_populations = FALSE)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -945,7 +945,7 @@ test_that("Multirun model outputs work with mask", {
                         soil_starting_pest_file = "",
                         start_with_soil_populations = FALSE)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -1041,7 +1041,7 @@ test_that("Multirun model outputs work with mask", {
                         soil_starting_pest_file = "",
                         start_with_soil_populations = FALSE)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(data$west_rate[[1]], 0)
   expect_equal(data$west_rate[[2]], 0)
   expect_equal(data$east_rate[[1]], 0)
@@ -1216,7 +1216,7 @@ test_that("Multirun model outputs work with writing all simulations and random s
                         soil_starting_pest_file,
                         start_with_soil_populations)
 
-  expect_equal(length(data), 17)
+  expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$number_infecteds[[1]], 1)

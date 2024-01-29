@@ -674,7 +674,8 @@ pops_multirun <- function(infected_file_list,
       north_distance_to_quarantine,
       south_distance_to_quarantine,
       east_distance_to_quarantine,
-      west_distance_to_quarantine
+      west_distance_to_quarantine,
+      output_host_pools_runs
     )
 
   names(outputs) <-
@@ -695,7 +696,8 @@ pops_multirun <- function(infected_file_list,
       "north_distance_to_quarantine",
       "south_distance_to_quarantine",
       "east_distance_to_quarantine",
-      "west_distance_to_quarantine"
+      "west_distance_to_quarantine",
+      "output_host_pools_runs"
     )
 
   if (config$write_outputs %in% config$output_write_list) {
