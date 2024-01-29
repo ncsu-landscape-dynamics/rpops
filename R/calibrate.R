@@ -321,7 +321,7 @@ calibrate <- function(infected_years_file,
              network_min_distance,
              network_max_distance) {
 
-      config$random_seed <- sample(1:999999999999, 1, replace = FALSE)
+      config$random_seed <- as.integer(sample.int(1e9, 1, replace = FALSE))
       set.seed(config$random_seed[[1]])
       random_seeds <- create_random_seeds(1)
       config <- host_pool_setup(config)
