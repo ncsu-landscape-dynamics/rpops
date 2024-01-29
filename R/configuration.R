@@ -25,8 +25,10 @@ configuration <- function(config) {
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
   if (is.null(config$random_seed)) {
-    config$random_seed <- sample(1:999999999999, config$number_of_iterations, replace = FALSE)
+    config$random_seed <- as.integer(sample.int(1e9, config$number_of_iterations, replace = FALSE))
   }
+
+  set.seed(config$random_seed[[1]])
 
   if (config$multiple_random_seeds) {
     if (!is.null(config$file_random_seeds)) {

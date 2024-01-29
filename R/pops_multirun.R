@@ -219,6 +219,7 @@ pops_multirun <- function(infected_file_list,
       .packages = c("PoPS", "terra")
     ) %dopar% {
 
+      set.seed(config$random_seed[[i]])
       config <- draw_parameters(config) # draws parameter set for the run
       config <- host_pool_setup(config)
       while (any(config$total_hosts > config$total_populations) ||
