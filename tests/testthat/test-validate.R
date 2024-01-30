@@ -1,30 +1,37 @@
 context("test-validate")
 
 test_that("Model stops if files don't exist or aren't the correct extension", {
-  infected_file <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   infected_years_file <-
     system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
-  host_file <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 
   expect_error(validate(infected_years_file = infected_years_file,
-                        infected_file = "",
-                        host_file =  host_file,
-                        total_populations_file =  host_file,
+                        infected_file_list = "",
+                        host_file_list =  host_file_list,
+                        total_populations_file =  host_file_list,
                         parameter_means = parameter_means,
-                        parameter_cov_matrix = parameter_cov_matrix),
+                        parameter_cov_matrix = parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table),
                PoPS:::file_exists_error, fixed = TRUE)
 
   expect_error(validate(infected_years_file = infected_years_file,
-                        infected_file = infected_file,
-                        host_file =  host_file,
-                        total_populations_file =  host_file,
+                        infected_file_list = infected_file_list,
+                        host_file_list =  host_file_list,
+                        total_populations_file =  host_file_list,
                         start_date = "2008-01-01",
                         end_date = "2009-12-31",
                         output_frequency = "year",
                         parameter_means = parameter_means,
-                        parameter_cov_matrix = parameter_cov_matrix),
+                        parameter_cov_matrix = parameter_cov_matrix,
+                        pest_host_table = pest_host_table,
+                        competency_table = competency_table),
                PoPS:::infection_years_length_error(1, 2), fixed = TRUE)
 })
 
@@ -35,9 +42,12 @@ test_that(
       system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
-    infected_file <-
+    pest_host_table <-
+      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+    infected_file_list <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-    host_file <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
+    host_file_list <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
     temp <- FALSE
@@ -55,9 +65,6 @@ test_that(
     temperature_file <- ""
     lethal_temperature <- -30
     lethal_temperature_month <- 1
-    mortality_on <- FALSE
-    mortality_rate <- 0
-    mortality_time_lag <- 0
     mortality_frequency <- "Year"
     mortality_frequency_n <- 1
     management <- FALSE
@@ -95,7 +102,7 @@ test_that(
     overpopulation_percentage <- 0
     leaving_percentage <- 0
     leaving_scale_coefficient <- 1
-    exposed_file <- ""
+    exposed_file_list <- ""
     write_outputs <- "all_simulations"
     output_folder_path <- tempdir()
     point_file <- ""
@@ -126,8 +133,10 @@ test_that(
       number_of_cores,
       parameter_means,
       parameter_cov_matrix,
-      infected_file,
-      host_file,
+      pest_host_table = pest_host_table,
+      competency_table = competency_table,
+      infected_file_list,
+      host_file_list,
       total_populations_file,
       temp,
       temperature_coefficient_file,
@@ -148,9 +157,6 @@ test_that(
       temperature_file,
       lethal_temperature,
       lethal_temperature_month,
-      mortality_on,
-      mortality_rate,
-      mortality_time_lag,
       mortality_frequency,
       mortality_frequency_n,
       management,
@@ -182,7 +188,7 @@ test_that(
       overpopulation_percentage,
       leaving_percentage,
       leaving_scale_coefficient,
-      exposed_file,
+      exposed_file_list,
       write_outputs,
       output_folder_path,
       point_file,
@@ -233,10 +239,13 @@ test_that(
     number_of_observations <- 68
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(ncol = 8, nrow = 8, 0)
+    pest_host_table <-
+      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
     checks <- c(500, 60000, 900, 1000)
-    infected_file <-
+    infected_file_list <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-    host_file <-
+    host_file_list <-
       system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -255,9 +264,6 @@ test_that(
     temperature_file <- ""
     lethal_temperature <- -30
     lethal_temperature_month <- 1
-    mortality_on <- FALSE
-    mortality_rate <- 0
-    mortality_time_lag <- 0
     mortality_frequency <- "Year"
     mortality_frequency_n <- 1
     management <- FALSE
@@ -295,7 +301,7 @@ test_that(
     overpopulation_percentage <- 0
     leaving_percentage <- 0
     leaving_scale_coefficient <- 1
-    exposed_file <- ""
+    exposed_file_list <- ""
     write_outputs <- "None"
     output_folder_path <- ""
     point_file <- system.file("extdata", "simple20x20", "points.gpkg", package = "PoPS")
@@ -326,8 +332,10 @@ test_that(
       number_of_cores,
       parameter_means,
       parameter_cov_matrix,
-      infected_file,
-      host_file,
+      pest_host_table = pest_host_table,
+      competency_table = competency_table,
+      infected_file_list,
+      host_file_list,
       total_populations_file,
       temp,
       temperature_coefficient_file,
@@ -348,9 +356,6 @@ test_that(
       temperature_file,
       lethal_temperature,
       lethal_temperature_month,
-      mortality_on,
-      mortality_rate,
-      mortality_time_lag,
       mortality_frequency,
       mortality_frequency_n,
       management,
@@ -382,7 +387,7 @@ test_that(
       overpopulation_percentage,
       leaving_percentage,
       leaving_scale_coefficient,
-      exposed_file,
+      exposed_file_list,
       write_outputs,
       output_folder_path,
       point_file,
@@ -426,18 +431,20 @@ test_that(
 )
 
 test_that(
-  "Validation has correctly formatted returns and runs with a
-  single output comparison with mask", {
+  "Validation has correctly formatted returns and runs with a single output comparison with mask", {
     skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    pest_host_table <-
+      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
     checks <- c(500, 60000, 900, 1000)
-    infected_file <-
+    infected_file_list <-
       system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-    host_file <-
+    host_file_list <-
       system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -456,9 +463,6 @@ test_that(
     temperature_file <- ""
     lethal_temperature <- -30
     lethal_temperature_month <- 1
-    mortality_on <- FALSE
-    mortality_rate <- 0
-    mortality_time_lag <- 0
     mortality_frequency <- "Year"
     mortality_frequency_n <- 1
     management <- FALSE
@@ -496,7 +500,7 @@ test_that(
     overpopulation_percentage <- 0
     leaving_percentage <- 0
     leaving_scale_coefficient <- 1
-    exposed_file <- ""
+    exposed_file_list <- ""
     write_outputs <- "None"
     output_folder_path <- ""
     point_file <- ""
@@ -527,8 +531,10 @@ test_that(
       number_of_cores,
       parameter_means,
       parameter_cov_matrix,
-      infected_file,
-      host_file,
+      pest_host_table = pest_host_table,
+      competency_table = competency_table,
+      infected_file_list,
+      host_file_list,
       total_populations_file,
       temp,
       temperature_coefficient_file,
@@ -549,9 +555,6 @@ test_that(
       temperature_file,
       lethal_temperature,
       lethal_temperature_month,
-      mortality_on,
-      mortality_rate,
-      mortality_time_lag,
       mortality_frequency,
       mortality_frequency_n,
       management,
@@ -583,7 +586,7 @@ test_that(
       overpopulation_percentage,
       leaving_percentage,
       leaving_scale_coefficient,
-      exposed_file,
+      exposed_file_list,
       write_outputs,
       output_folder_path,
       point_file,
@@ -635,10 +638,13 @@ test_that(
     number_of_observations <- 68
     parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+    pest_host_table <-
+      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
     checks <- c(500, 60000, 900, 1000)
-    infected_file <-
+    infected_file_list <-
       system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-    host_file <-
+    host_file_list <-
       system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
     total_populations_file <-
       system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -657,9 +663,6 @@ test_that(
     temperature_file <- ""
     lethal_temperature <- -30
     lethal_temperature_month <- 1
-    mortality_on <- FALSE
-    mortality_rate <- 0
-    mortality_time_lag <- 0
     mortality_frequency <- "Year"
     mortality_frequency_n <- 1
     management <- FALSE
@@ -697,7 +700,7 @@ test_that(
     overpopulation_percentage <- 0
     leaving_percentage <- 0
     leaving_scale_coefficient <- 1
-    exposed_file <- ""
+    exposed_file_list <- ""
     write_outputs <- "None"
     output_folder_path <- ""
     point_file <- ""
@@ -728,8 +731,10 @@ test_that(
       number_of_cores,
       parameter_means,
       parameter_cov_matrix,
-      infected_file,
-      host_file,
+      pest_host_table = pest_host_table,
+      competency_table = competency_table,
+      infected_file_list,
+      host_file_list,
       total_populations_file,
       temp,
       temperature_coefficient_file,
@@ -750,9 +755,6 @@ test_that(
       temperature_file,
       lethal_temperature,
       lethal_temperature_month,
-      mortality_on,
-      mortality_rate,
-      mortality_time_lag,
       mortality_frequency,
       mortality_frequency_n,
       management,
@@ -784,7 +786,7 @@ test_that(
       overpopulation_percentage,
       leaving_percentage,
       leaving_scale_coefficient,
-      exposed_file,
+      exposed_file_list,
       write_outputs,
       output_folder_path,
       point_file,

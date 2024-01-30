@@ -11,14 +11,18 @@ config$params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
 config$number_of_generations <- 4
 config$generation_size <- 10
 config$checks <- c(1200, 100000, 900, 1000)
-config$infected_file <-
+config$infected_file_list <-
   system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-config$host_file <-
+config$host_file_list <-
   system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
 config$total_populations_file <-
   system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
 config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 0, 0)
 config$parameter_cov_matrix <- matrix(ncol = 8, nrow = 8, 0)
+config$pest_host_table <-
+  system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+config$competency_table <-
+  system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
 config$temp <- FALSE
 config$temperature_coefficient_file <- ""
 config$temperature_coefficient_sd_file <- ""
@@ -36,9 +40,8 @@ config$use_lethal_temperature <- FALSE
 config$temperature_file <- ""
 config$lethal_temperature <- -30
 config$lethal_temperature_month <- 1
-config$mortality_on <- FALSE
-config$mortality_rate <- 0
-config$mortality_time_lag <- 0
+config$mortality_frequency <- "Year"
+config$mortality_frequency_n <- 1
 config$management <- FALSE
 config$treatment_dates <- c("2003-01-24")
 config$treatments_file <- ""
@@ -76,7 +79,7 @@ config$number_of_cores <- 1
 config$calibration_method <- "ABC"
 config$failure <- NULL
 config$function_name <- "pops"
-config$exposed_file <-
+config$exposed_file_list <-
   system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
 config$write_outputs <- "None"
 config$output_folder_path <- ""
@@ -478,13 +481,13 @@ test_that("configuration returns proper errors", {
   expect_equal(config2$failure, output_path_error)
 
   config$network_movement <- "hello"
+  config$write_outputs <- "None"
   config$output_folder_path <- ""
   config2 <- configuration(config)
   expect_equal(config2$failure, network_movement_error)
 
   config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 25, 150)
   config$function_name <- "pops"
-  config$write_outputs <- "None"
   config$network_movement <- "walk"
   config$anthropogenic_kernel_type <- "network"
   config2 <- configuration(config)
