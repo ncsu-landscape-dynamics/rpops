@@ -83,21 +83,16 @@ future.</p>
 <span>  <span class="va">use_survival_rates</span>,</span>
 <span>  <span class="va">survival_rate_month</span>,</span>
 <span>  <span class="va">survival_rate_day</span>,</span>
-<span>  <span class="va">infected</span>,</span>
-<span>  <span class="va">total_exposed</span>,</span>
-<span>  <span class="va">exposed</span>,</span>
-<span>  <span class="va">susceptible</span>,</span>
+<span>  <span class="va">host_pools</span>,</span>
 <span>  <span class="va">total_populations</span>,</span>
-<span>  <span class="va">total_hosts</span>,</span>
+<span>  <span class="va">competency_table</span>,</span>
+<span>  <span class="va">pest_host_table</span>,</span>
 <span>  <span class="va">mortality_on</span>,</span>
-<span>  <span class="va">mortality_tracker</span>,</span>
-<span>  <span class="va">mortality</span>,</span>
 <span>  <span class="va">quarantine_areas</span>,</span>
 <span>  <span class="va">quarantine_directions</span>,</span>
 <span>  <span class="va">treatment_maps</span>,</span>
 <span>  <span class="va">treatment_dates</span>,</span>
 <span>  <span class="va">pesticide_duration</span>,</span>
-<span>  <span class="va">resistant</span>,</span>
 <span>  <span class="va">use_movements</span>,</span>
 <span>  <span class="va">movements</span>,</span>
 <span>  <span class="va">movements_dates</span>,</span>
@@ -113,8 +108,6 @@ future.</p>
 <span>  <span class="va">spatial_indices</span>,</span>
 <span>  <span class="va">season_month_start_end</span>,</span>
 <span>  <span class="va">soil_reservoirs</span>,</span>
-<span>  mortality_rate <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  mortality_time_lag <span class="op">=</span> <span class="fl">2</span>,</span>
 <span>  start_date <span class="op">=</span> <span class="st">"2018-01-01"</span>,</span>
 <span>  end_date <span class="op">=</span> <span class="st">"2018-12-31"</span>,</span>
 <span>  treatment_method <span class="op">=</span> <span class="st">"ratio"</span>,</span>
@@ -209,42 +202,32 @@ month before for this parameter as it is when the survival rates raster will be 
 <dd><p>What day should the survival rates be applied</p></dd>
 
 
-<dt>infected</dt>
-<dd><p>matrix of infected hosts</p></dd>
-
-
-<dt>total_exposed</dt>
-<dd><p>sum of all exposed cohorts in exposed class for use with
-"SEI" model type</p></dd>
-
-
-<dt>exposed</dt>
-<dd><p>vector of matrices of the exposed class for use with "SEI"
-model type</p></dd>
-
-
-<dt>susceptible</dt>
-<dd><p>matrix of susceptible hosts</p></dd>
+<dt>host_pools</dt>
+<dd><p>list of host_pool lists with each host_pool list containing matrices of
+infected, susceptible, exposed, total_hosts, total_exposed, resistant, mortality, and
+mortality_tracker for that host.</p></dd>
 
 
 <dt>total_populations</dt>
 <dd><p>matrix of total populations</p></dd>
 
 
-<dt>total_hosts</dt>
-<dd><p>matrix of all hosts</p></dd>
+<dt>competency_table</dt>
+<dd><p>A csv with the hosts as the first n columns (n being the number of hosts)
+and the last column being the competency value. Each row is a set of Boolean for host presence
+and the competency value (between 0 and 1) for that combination of hosts in a cell.</p></dd>
+
+
+<dt>pest_host_table</dt>
+<dd><p>The file path to a csv that has these columns in this order: host,
+susceptibility, mortality rate, and mortality time lag as columns with each row being the
+species. Host species must be in the same order in the host_file_list, infected_file_list,
+pest_host_table rows, and competency_table columns. The host column is only used for metadata
+and labeling output files.</p></dd>
 
 
 <dt>mortality_on</dt>
-<dd><p>Boolean to turn host mortality on and off (TRUE or FALSE)</p></dd>
-
-
-<dt>mortality_tracker</dt>
-<dd><p>matrix of 0's to track mortality per year</p></dd>
-
-
-<dt>mortality</dt>
-<dd><p>matrix to track cumulative mortality</p></dd>
+<dd><p>Boolean to indicate if mortality is used</p></dd>
 
 
 <dt>quarantine_areas</dt>
@@ -271,10 +254,6 @@ occurred in a given year</p></dd>
 <dd><p>How long does the pesticide (herbicide, vaccine, etc..) last before the
 host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a
 pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)</p></dd>
-
-
-<dt>resistant</dt>
-<dd><p>matrix to track resistant population over time</p></dd>
 
 
 <dt>use_movements</dt>
@@ -340,15 +319,6 @@ host under optimal weather conditions</p></dd>
 
 <dt>soil_reservoirs</dt>
 <dd><p>list of matrices with soil pests created from soil_pest_file.</p></dd>
-
-
-<dt>mortality_rate</dt>
-<dd><p>Rate at which mortality occurs value between 0 and 1</p></dd>
-
-
-<dt>mortality_time_lag</dt>
-<dd><p>Time lag from infection until mortality can occur in time steps
-integer &gt;= 1</p></dd>
 
 
 <dt>start_date</dt>

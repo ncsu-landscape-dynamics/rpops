@@ -80,11 +80,13 @@ forecast spread of the pest/pathogen into the future.</p>
 
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">pops_multirun</span><span class="op">(</span></span>
-<span>  <span class="va">infected_file</span>,</span>
-<span>  <span class="va">host_file</span>,</span>
+<span>  <span class="va">infected_file_list</span>,</span>
+<span>  <span class="va">host_file_list</span>,</span>
 <span>  <span class="va">total_populations_file</span>,</span>
 <span>  <span class="va">parameter_means</span>,</span>
 <span>  <span class="va">parameter_cov_matrix</span>,</span>
+<span>  <span class="va">pest_host_table</span>,</span>
+<span>  <span class="va">competency_table</span>,</span>
 <span>  temp <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  temperature_coefficient_file <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  precip <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -104,9 +106,6 @@ forecast spread of the pest/pathogen into the future.</p>
 <span>  temperature_file <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  lethal_temperature <span class="op">=</span> <span class="op">-</span><span class="fl">12.87</span>,</span>
 <span>  lethal_temperature_month <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  mortality_on <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  mortality_rate <span class="op">=</span> <span class="fl">0</span>,</span>
-<span>  mortality_time_lag <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  mortality_frequency <span class="op">=</span> <span class="st">"year"</span>,</span>
 <span>  mortality_frequency_n <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  management <span class="op">=</span> <span class="cn">FALSE</span>,</span>
@@ -140,7 +139,7 @@ forecast spread of the pest/pathogen into the future.</p>
 <span>  overpopulation_percentage <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  leaving_percentage <span class="op">=</span> <span class="fl">0</span>,</span>
 <span>  leaving_scale_coefficient <span class="op">=</span> <span class="fl">1</span>,</span>
-<span>  exposed_file <span class="op">=</span> <span class="st">""</span>,</span>
+<span>  exposed_file_list <span class="op">=</span> <span class="st">""</span>,</span>
 <span>  mask <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  write_outputs <span class="op">=</span> <span class="st">"None"</span>,</span>
 <span>  output_folder_path <span class="op">=</span> <span class="st">""</span>,</span>
@@ -163,17 +162,18 @@ forecast spread of the pest/pathogen into the future.</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>infected_file</dt>
-<dd><p>Raster file with initial infections. Units for infections are based on data
+    <dl><dt>infected_file_list</dt>
+<dd><p>paths to raster files with initial infections and standard deviation
+for each host can be based in 2 formats (a single file with number of hosts or a single file with
+2 layers number of hosts and standard deviation).. Units for infections are based on data
 availability and the way the units used for your host file is created (e.g. percent area, # of
 hosts per cell, etc.).</p></dd>
 
 
-<dt>host_file</dt>
-<dd><p>path to raster files with number of hosts and standard deviation on those
-estimates can be based in 3 formats (a single file with number of hosts, a single file with 2
-layers number of hosts and standard deviation, or two files 1 with number of hosts and the other
-with standard deviation of those estimates). The units for this can be of many formats the two
+<dt>host_file_list</dt>
+<dd><p>paths to raster files with number of hosts and standard deviation on those
+estimates can be based in 2 formats (a single file with number of hosts or a single file with 2
+layers number of hosts and standard deviation). The units for this can be of many formats the two
 most common that we use are either percent area (0 to 100) or # of hosts in the cell. Usually
 depends on data available and estimation methods.</p></dd>
 
@@ -197,6 +197,20 @@ kappa, anthropogenic kappa, network_min_distance, and network_max_distance). 1x8
 estimation ordered from (reproductive_rate, natural_dispersal_distance,
 percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
 network_min_distance, and network_max_distance) Should be 8x8 matrix.</p></dd>
+
+
+<dt>pest_host_table</dt>
+<dd><p>The file path to a csv that has these columns in this order: host,
+susceptibility, mortality rate, and mortality time lag as columns with each row being the
+species. Host species must be in the same order in the host_file_list, infected_file_list,
+pest_host_table rows, and competency_table columns. The host column is only used for metadata
+and labeling output files.</p></dd>
+
+
+<dt>competency_table</dt>
+<dd><p>A csv with the hosts as the first n columns (n being the number of hosts)
+and the last column being the competency value. Each row is a set of Boolean for host presence
+and the competency value (between 0 and 1) for that combination of hosts in a cell.</p></dd>
 
 
 <dt>temp</dt>
@@ -294,19 +308,6 @@ mortality occurs for your pest or pathogen (-50 to 60)</p></dd>
 <dt>lethal_temperature_month</dt>
 <dd><p>The month in which lethal temperature related mortality occurs
 for your pest or pathogen integer value between 1 and 12</p></dd>
-
-
-<dt>mortality_on</dt>
-<dd><p>Boolean to turn host mortality on and off (TRUE or FALSE)</p></dd>
-
-
-<dt>mortality_rate</dt>
-<dd><p>Rate at which mortality occurs value between 0 and 1</p></dd>
-
-
-<dt>mortality_time_lag</dt>
-<dd><p>Time lag from infection until mortality can occur in time steps
-integer &gt;= 1</p></dd>
 
 
 <dt>mortality_frequency</dt>
@@ -410,8 +411,8 @@ of animals, and date.</p></dd>
 
 <dt>start_exposed</dt>
 <dd><p>Do your initial conditions start as exposed or infected (only used if
-model_type is "SEI"). Default False. If this is TRUE need to have both an infected_file (this
-can be a raster of all 0's) and exposed_file</p></dd>
+model_type is "SEI"). Default False. If this is TRUE need to have both infected_files (this
+can be a raster of all 0's) and exposed_files</p></dd>
 
 
 <dt>generate_stochasticity</dt>
@@ -477,8 +478,12 @@ overpopulated</p></dd>
 (if applicable)</p></dd>
 
 
-<dt>exposed_file</dt>
-<dd><p>A file with the exposed for the current</p></dd>
+<dt>exposed_file_list</dt>
+<dd><p>paths to raster files with initial exposeds and standard deviation
+for each host can be based in 2 formats (a single file with number of hosts or a single file with
+2 layers number of hosts and standard deviation).. Units for infections are based on data
+availability and the way the units used for your host file is created (e.g. percent area, # of
+hosts per cell, etc.).</p></dd>
 
 
 <dt>mask</dt>
@@ -511,7 +516,7 @@ along the edge. "jump" automatically moves to the nearest node when moving throu
 
 <dt>use_initial_condition_uncertainty</dt>
 <dd><p>Boolean to indicate whether or not to propagate and
-partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+partition uncertainty from initial conditions. If TRUE the infected_files needs to have 2 layers
 one with the mean value and one with the standard deviation. If an SEI model is used the
 exposed_file needs to have 2 layers one with the mean value and one with the standard
 deviation</p></dd>
