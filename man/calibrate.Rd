@@ -13,8 +13,10 @@ calibrate(
   params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
   number_of_generations = 7,
   generation_size = 1000,
-  infected_file,
-  host_file,
+  pest_host_table,
+  competency_table,
+  infected_file_list,
+  host_file_list,
   total_populations_file,
   temp = FALSE,
   temperature_coefficient_file = "",
@@ -35,9 +37,6 @@ calibrate(
   temperature_file = "",
   lethal_temperature = -12.87,
   lethal_temperature_month = 1,
-  mortality_on = FALSE,
-  mortality_rate = 0,
-  mortality_time_lag = 0,
   mortality_frequency = "year",
   mortality_frequency_n = 1,
   management = FALSE,
@@ -73,7 +72,7 @@ calibrate(
   leaving_scale_coefficient = 1,
   calibration_method = "ABC",
   number_of_iterations = 1e+05,
-  exposed_file = "",
+  exposed_file_list = "",
   verbose = TRUE,
   write_outputs = "None",
   output_folder_path = "",
@@ -153,14 +152,25 @@ until 1,000 model runs are less than the threshold value.
 We recommend running at least 1,000 but the greater this number the more
 accurate the model parameters selected will be.}
 
-\item{infected_file}{Raster file with initial infections. Units for infections are based on data
+\item{pest_host_table}{The file path to a csv that has these columns in this order: host,
+susceptibility, mortality rate, and mortality time lag as columns with each row being the
+species. Host species must be in the same order in the host_file_list, infected_file_list,
+pest_host_table rows, and competency_table columns. The host column is only used for metadata
+and labeling output files.}
+
+\item{competency_table}{A csv with the hosts as the first n columns (n being the number of hosts)
+and the last column being the competency value. Each row is a set of Boolean for host presence
+and the competency value (between 0 and 1) for that combination of hosts in a cell.}
+
+\item{infected_file_list}{paths to raster files with initial infections and standard deviation
+for each host can be based in 2 formats (a single file with number of hosts or a single file with
+2 layers number of hosts and standard deviation).. Units for infections are based on data
 availability and the way the units used for your host file is created (e.g. percent area, # of
 hosts per cell, etc.).}
 
-\item{host_file}{path to raster files with number of hosts and standard deviation on those
-estimates can be based in 3 formats (a single file with number of hosts, a single file with 2
-layers number of hosts and standard deviation, or two files 1 with number of hosts and the other
-with standard deviation of those estimates). The units for this can be of many formats the two
+\item{host_file_list}{paths to raster files with number of hosts and standard deviation on those
+estimates can be based in 2 formats (a single file with number of hosts or a single file with 2
+layers number of hosts and standard deviation). The units for this can be of many formats the two
 most common that we use are either percent area (0 to 100) or # of hosts in the cell. Usually
 depends on data available and estimation methods.}
 
@@ -229,13 +239,6 @@ mortality occurs for your pest or pathogen (-50 to 60)}
 \item{lethal_temperature_month}{The month in which lethal temperature related mortality occurs
 for your pest or pathogen integer value between 1 and 12}
 
-\item{mortality_on}{Boolean to turn host mortality on and off (TRUE or FALSE)}
-
-\item{mortality_rate}{Rate at which mortality occurs value between 0 and 1}
-
-\item{mortality_time_lag}{Time lag from infection until mortality can occur in time steps
-integer >= 1}
-
 \item{mortality_frequency}{Sets the frequency of mortality calculations occur either ('year',
 'month', week', 'day', 'time step', or 'every_n_steps')}
 
@@ -302,8 +305,8 @@ of animals, and date.}
 \item{use_movements}{This is a boolean to turn on use of the movement module.}
 
 \item{start_exposed}{Do your initial conditions start as exposed or infected (only used if
-model_type is "SEI"). Default False. If this is TRUE need to have both an infected_file (this
-can be a raster of all 0's) and exposed_file}
+model_type is "SEI"). Default False. If this is TRUE need to have both infected_files (this
+can be a raster of all 0's) and exposed_files}
 
 \item{generate_stochasticity}{Boolean to indicate whether to use stochasticity in reproductive
 functions default is TRUE}
@@ -350,7 +353,11 @@ Approximation)}
 the calibration to converge (recommend a minimum of at least 100,000 but
 preferably 1 million).}
 
-\item{exposed_file}{A file with the exposed for the current}
+\item{exposed_file_list}{paths to raster files with initial exposeds and standard deviation
+for each host can be based in 2 formats (a single file with number of hosts or a single file with
+2 layers number of hosts and standard deviation).. Units for infections are based on data
+availability and the way the units used for your host file is created (e.g. percent area, # of
+hosts per cell, etc.).}
 
 \item{verbose}{Boolean with true printing current status of calibration,
 (e.g. the current generation, current particle, and the acceptance rate).
@@ -383,7 +390,7 @@ comparing simulations vs. observations. Must be one of "quantity", "allocation",
 "mcc, quantity, and configuration"). Default is "mcc"}
 
 \item{use_initial_condition_uncertainty}{Boolean to indicate whether or not to propagate and
-partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+partition uncertainty from initial conditions. If TRUE the infected_files needs to have 2 layers
 one with the mean value and one with the standard deviation. If an SEI model is used the
 exposed_file needs to have 2 layers one with the mean value and one with the standard
 deviation}

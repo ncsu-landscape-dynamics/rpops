@@ -8,13 +8,14 @@
 #' a single stochastic realization of the model and is predominantly used for
 #' automated tests of model features.
 #'
-#' @param infected_file Raster file with initial infections. Units for infections are based on data
+#' @param infected_file_list paths to raster files with initial infections and standard deviation
+#' for each host can be based in 2 formats (a single file with number of hosts or a single file with
+#' 2 layers number of hosts and standard deviation).. Units for infections are based on data
 #' availability and the way the units used for your host file is created (e.g. percent area, # of
 #' hosts per cell, etc.).
-#' @param host_file path to raster files with number of hosts and standard deviation on those
-#' estimates can be based in 3 formats (a single file with number of hosts, a single file with 2
-#' layers number of hosts and standard deviation, or two files 1 with number of hosts and the other
-#' with standard deviation of those estimates). The units for this can be of many formats the two
+#' @param host_file_list paths to raster files with number of hosts and standard deviation on those
+#' estimates can be based in 2 formats (a single file with number of hosts or a single file with 2
+#' layers number of hosts and standard deviation). The units for this can be of many formats the two
 #' most common that we use are either percent area (0 to 100) or # of hosts in the cell. Usually
 #' depends on data available and estimation methods.
 #' @param total_populations_file path to raster file with number of total populations of all hosts
@@ -50,10 +51,6 @@
 #' mortality occurs for your pest or pathogen (-50 to 60)
 #' @param lethal_temperature_month The month in which lethal temperature related mortality occurs
 #' for your pest or pathogen integer value between 1 and 12
-#' @param mortality_on  Boolean to turn host mortality on and off (TRUE or FALSE)
-#' @param mortality_rate Rate at which mortality occurs value between 0 and 1
-#' @param mortality_time_lag Time lag from infection until mortality can occur in time steps
-#' integer >= 1
 #' @param mortality_frequency Sets the frequency of mortality calculations occur either ('year',
 #' 'month', week', 'day', 'time step', or 'every_n_steps')
 #' @param mortality_frequency_n Sets number of units from mortality_frequency in which to run the
@@ -105,8 +102,8 @@
 #' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
 #' network_min_distance, and network_max_distance) Should be 8x8 matrix.
 #' @param start_exposed Do your initial conditions start as exposed or infected (only used if
-#' model_type is "SEI"). Default False. If this is TRUE need to have both an infected_file (this
-#' can be a raster of all 0's) and exposed_file
+#' model_type is "SEI"). Default False. If this is TRUE need to have both infected_files (this
+#' can be a raster of all 0's) and exposed_files
 #' @param generate_stochasticity Boolean to indicate whether to use stochasticity in reproductive
 #' functions default is TRUE
 #' @param establishment_stochasticity Boolean to indicate whether to use stochasticity in
@@ -133,7 +130,11 @@
 #' @param leaving_percentage Percentage of pests leaving an overpopulated cell
 #' @param leaving_scale_coefficient Coefficient to multiply scale parameter of the natural kernel
 #' (if applicable)
-#' @param exposed_file A file with the exposed for the current
+#' @param exposed_file_list paths to raster files with initial exposeds and standard deviation
+#' for each host can be based in 2 formats (a single file with number of hosts or a single file with
+#' 2 layers number of hosts and standard deviation).. Units for infections are based on data
+#' availability and the way the units used for your host file is created (e.g. percent area, # of
+#' hosts per cell, etc.).
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from
 #' comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). This
 #' can also be used to mask out areas that can't be managed in the auto_manage function.
@@ -151,7 +152,7 @@
 #' along the edge. "jump" automatically moves to the nearest node when moving through the network.
 #' "teleport" moves from node to node most likely used for airport and seaport networks.
 #' @param use_initial_condition_uncertainty Boolean to indicate whether or not to propagate and
-#' partition uncertainty from initial conditions. If TRUE the infected_file needs to have 2 layers
+#' partition uncertainty from initial conditions. If TRUE the infected_files needs to have 2 layers
 #' one with the mean value and one with the standard deviation. If an SEI model is used the
 #' exposed_file needs to have 2 layers one with the mean value and one with the standard
 #' deviation
@@ -185,6 +186,15 @@
 #' the pest all values in the raster are between 0 and 1.
 #' @param start_with_soil_populations Boolean to indicate whether to use a starting soil pest or
 #' pathogen population if TRUE then soil_starting_pest_file is required.
+#' @param pest_host_table The file path to a csv that has these columns in this order: host,
+#' susceptibility, mortality rate, and mortality time lag as columns with each row being the
+#' species. Host species must be in the same order in the host_file_list, infected_file_list,
+#' pest_host_table rows, and competency_table columns. The host column is only used for metadata
+#' and labeling output files.
+#' @param competency_table A csv with the hosts as the first n columns (n being the number of hosts)
+#' and the last column being the competency value. Each row is a set of Boolean for host presence
+#' and the competency value (between 0 and 1) for that combination of hosts in a cell.
+#'
 #'
 #' @useDynLib PoPS, .registration = TRUE
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
@@ -198,11 +208,13 @@
 #' @export
 #'
 
-pops <- function(infected_file,
-                 host_file,
+pops <- function(infected_file_list,
+                 host_file_list,
                  total_populations_file,
                  parameter_means,
                  parameter_cov_matrix,
+                 pest_host_table,
+                 competency_table,
                  temp = FALSE,
                  temperature_coefficient_file = "",
                  precip = FALSE,
@@ -222,9 +234,6 @@ pops <- function(infected_file,
                  temperature_file = "",
                  lethal_temperature = -12.87,
                  lethal_temperature_month = 1,
-                 mortality_on = FALSE,
-                 mortality_rate = 0,
-                 mortality_time_lag = 0,
                  mortality_frequency = "year",
                  mortality_frequency_n = 1,
                  management = FALSE,
@@ -256,7 +265,7 @@ pops <- function(infected_file,
                  overpopulation_percentage = 0,
                  leaving_percentage = 0,
                  leaving_scale_coefficient = 1,
-                 exposed_file = "",
+                 exposed_file_list = "",
                  mask = NULL,
                  network_filename = "",
                  network_movement = "walk",
@@ -275,8 +284,8 @@ pops <- function(infected_file,
 
   config <- c()
   config$random_seed <- random_seed
-  config$infected_file <- infected_file
-  config$host_file <- host_file
+  config$infected_file_list <- infected_file_list
+  config$host_file_list <- host_file_list
   config$total_populations_file <- total_populations_file
   config$parameter_means <- parameter_means
   config$parameter_cov_matrix <- parameter_cov_matrix
@@ -299,9 +308,6 @@ pops <- function(infected_file,
   config$survival_rate_month <- survival_rate_month
   config$survival_rate_day <- survival_rate_day
   config$survival_rates_file <- survival_rates_file
-  config$mortality_on <- mortality_on
-  config$mortality_rate <- mortality_rate
-  config$mortality_time_lag <- mortality_time_lag
   config$management <- management
   config$treatment_dates <- treatment_dates
   config$treatments_file <- treatments_file
@@ -340,7 +346,7 @@ pops <- function(infected_file,
   # calibration.
   config$function_name <- "pops"
   config$failure <- NULL
-  config$exposed_file <- exposed_file
+  config$exposed_file_list <- exposed_file_list
   config$write_outputs <- "None"
   config$output_folder_path <- ""
   config$mortality_frequency <- mortality_frequency
@@ -359,6 +365,8 @@ pops <- function(infected_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$pest_host_table <- pest_host_table
+  config$competency_table <- competency_table
 
   config <- configuration(config)
 
@@ -367,48 +375,13 @@ pops <- function(infected_file,
   }
 
   config <- draw_parameters(config) # draws parameter set for the run
-
-  if (config$use_initial_condition_uncertainty) {
-    config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
-    while (any(config$infected < 0)) {
-      config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
-    }
-    exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
-    while (any(exposed2 < 0)) {
-      exposed2 <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
-    }
-    exposed <- config$exposed
-    exposed[[config$latency_period + 1]] <- exposed2
-    config$exposed <- exposed
-  } else {
-    config$infected <- config$infected_mean
-    exposed2 <- config$exposed_mean
-    exposed <- config$exposed
-    exposed[[config$latency_period + 1]] <- exposed2
-    config$exposed <- exposed
+  config <- host_pool_setup(config)
+  while (any(config$total_hosts > config$total_populations) ||
+         any(config$total_exposed > config$total_populations) ||
+         any(config$total_infecteds > config$total_populations)) {
+    config <- host_pool_setup(config)
   }
-
-  if (config$use_host_uncertainty) {
-    config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
-    while (any(config$host > config$total_populations)) {
-      config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
-    }
-  } else {
-    config$host <- config$host_mean
-  }
-
-  susceptible <- config$host - config$infected - exposed2
-  susceptible[susceptible < 0] <- 0
-
-  config$susceptible <- susceptible
-  config$total_hosts <- config$host
-  config$total_exposed <- exposed2
-
-  if (config$mortality_on) {
-    mortality_tracker2 <- config$mortality_tracker
-    mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
-    config$mortality_tracker <- mortality_tracker2
-  }
+  config$competency_table_list <- competency_table_list_creator(config$competency_table)
 
   data <- pops_model(random_seed = config$random_seed[1],
                      multiple_random_seeds = config$multiple_random_seeds,
@@ -419,21 +392,16 @@ pops <- function(infected_file,
                      use_survival_rates = config$use_survival_rates,
                      survival_rate_month = config$survival_rate_month,
                      survival_rate_day = config$survival_rate_day,
-                     infected = config$infected,
-                     total_exposed = config$total_exposed,
-                     exposed = config$exposed,
-                     susceptible = config$susceptible,
+                     host_pools = config$host_pools,
                      total_populations = config$total_populations,
-                     total_hosts = config$total_hosts,
+                     competency_table = config$competency_table_list,
+                     pest_host_table = config$pest_host_table_list,
                      mortality_on = config$mortality_on,
-                     mortality_tracker = config$mortality_tracker,
-                     mortality = config$mortality,
                      quarantine_areas = config$quarantine_areas,
                      quarantine_directions = config$quarantine_directions,
                      treatment_maps = config$treatment_maps,
                      treatment_dates = config$treatment_dates,
                      pesticide_duration = config$pesticide_duration,
-                     resistant = config$resistant,
                      use_movements = config$use_movements,
                      movements = config$movements,
                      movements_dates = config$movements_dates,
@@ -449,8 +417,6 @@ pops <- function(infected_file,
                      spatial_indices = config$spatial_indices,
                      season_month_start_end = config$season_month_start_end,
                      soil_reservoirs = config$soil_reservoirs,
-                     mortality_rate = config$mortality_rate,
-                     mortality_time_lag = config$mortality_time_lag,
                      start_date = config$start_date,
                      end_date = config$end_date,
                      treatment_method = config$treatment_method,

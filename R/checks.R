@@ -312,6 +312,79 @@ bayesian_mnn_checks <- function(prior_means,
   }
 }
 
+multihost_checks <-
+  function(infected_file_list, host_file_list, competency_table, pest_host_table) {
+  checks_passed <- TRUE
+  if (length(infected_file_list) != length(host_file_list)) {
+    checks_passed <- FALSE
+    failed_check <- multihost_file_length_error
+  }
+
+  if (!checks_passed && length(infected_file_list) != (ncol(competency_table) - 2)) {
+    checks_passed <- FALSE
+    failed_check <- competency_table_column_length_error
+  }
+
+  if (!checks_passed && all(competency_table$competency_mean <= 1) &&
+      all(competency_table$competency_mean >= 0) && all(competency_table$competency_sd <= 1) &&
+      all(competency_table$competency_sd >= 0)) {
+    checks_passed <- FALSE
+    failed_check <- competency_value_error
+  }
+
+  if (!checks_passed && (length(infected_file_list) + 1) <= nrow(competency_table)) {
+    checks_passed <- FALSE
+    failed_check <- competency_table_row_length_error
+  } else {
+    competency_table_list <- competency_table_list_creator(competency_table)
+  }
+
+  if (!checks_passed && length(infected_file_list) != nrow(pest_host_table)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_row_length_error
+  }
+
+  if (!checks_passed && all(pest_host_table$susceptibility >= 0) &&
+      all(pest_host_table$susceptibility <= 1) && all(pest_host_table$mortality_rate >= 0) &&
+      all(pest_host_table$mortality_rate <= 1)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_value_error
+  }
+
+  if (!checks_passed && identical(names(pest_host_table), pest_host_table_list)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_wrong_columns
+  } else {
+    host_names <- pest_host_table$host
+    pest_host_table <- pest_host_table[, 2:4]
+    pest_host_table_list <- split(pest_host_table, seq_len(nrow(pest_host_table)))
+    for (i in seq_along(pest_host_table_list)) {
+      pest_host_table_list[[i]] <- unname(pest_host_table_list[[i]])
+      pest_host_table_list[[i]] <- as.vector(t(pest_host_table_list[[i]]))
+    }
+  }
+
+  if (any(pest_host_table$mortality_rate > 0)) {
+    mortality_on <- TRUE
+  } else {
+    mortality_on <- FALSE
+  }
+
+  if (checks_passed) {
+    outs <-
+      list(checks_passed, host_names, pest_host_table_list, competency_table_list, mortality_on,
+           pest_host_table)
+    names(outs) <-
+      c("checks_passed", "host_names", "pest_host_table_list", "competency_table_list",
+        "mortality_on", "pest_host_table2")
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- failed_check_list
+    return(outs)
+  }
+}
+
 multispecies_checks <- function(species,
                                 infected_files,
                                 parameter_means,
