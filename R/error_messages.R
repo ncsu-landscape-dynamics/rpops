@@ -208,3 +208,7 @@ multiinfected_gt_totpop_error <-
 multiexposed_gt_totpop_error <-
   "All exposeds sum to more than the total populations in some cells. Check rasters to ensure that
   combined summed exposed layers are not greater than total populations raster."
+
+crs_infected_county_error <-
+  "Coordinate reference system (crs) of input infected vector does not match. Ensure that all of
+  your input rasters and vectors have the same crs"
