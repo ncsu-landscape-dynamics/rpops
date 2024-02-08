@@ -299,30 +299,6 @@ host_pool_setup <- function(config) {
   total_hosts <- config$zero_matrix
   for (i in seq_along(config$host_file_list)) {
     host_pool <- config$host_pools[[i]]
-    if (config$use_initial_condition_uncertainty) {
-      infected <-
-        matrix_norm_distribution(config$host_pool_infected_means[[i]],
-                                 config$host_pool_infected_sds[[i]])
-      while (any(infected < 0)) {
-        infected <-
-          matrix_norm_distribution(config$host_pool_infected_means[[i]],
-                                   config$host_pool_infected_sds[[i]])
-      }
-      exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
-                                           config$host_pool_exposed_sds[[i]])
-      while (any(exposed2 < 0)) {
-        exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
-                                             config$host_pool_exposed_sds[[i]])
-      }
-      exposed <- host_pool$exposed
-      exposed[[config$latency_period + 1]] <- exposed2
-      host_pool$infected <- infected
-      host_pool$exposed <- exposed
-      host_pool$total_exposed <- exposed2
-
-      total_infecteds <- total_infecteds + infected
-      total_exposeds <- total_exposeds + exposed2
-    }
 
     if (config$use_host_uncertainty) {
       host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
@@ -333,6 +309,54 @@ host_pool_setup <- function(config) {
       }
       host_pool$total_host <- host
       total_hosts <- total_hosts + host
+    } else {
+      host <- host_pool$total_hosts
+    }
+
+    if (config$use_initial_condition_uncertainty) {
+      if (config$county_level_infection_data) {
+        host_rast <- terra::rast(config$host_file_list[i])[[1]]
+        terra::values(host_rast) <- host
+        county_infections <- terra::vect(config$infected_file_list[i])
+        infected <- infected_rast_from_county(county_infections, host_rast[[1]], config)
+        infected <- terra::as.matrix(infected[[1]], wide = TRUE)
+        host_pool$infected <- infected
+        if (config$model_type == "SEI" && config$start_exposed) {
+          county_exposeds <- terra::vect(config$exposed_file_list[i])
+          exposed2 <- infected_rast_from_county(county_exposeds, host_rast[[1]], config)
+          exposed2 <- terra::as.matrix(exposed2[[1]], wide = TRUE)
+          exposed <- host_pool$exposed
+          exposed[[config$latency_period + 1]] <- exposed2
+          host_pool$exposed <- exposed
+          host_pool$total_exposed <- exposed2
+        } else {
+          exposed2 <- host_pool$total_exposed
+        }
+
+      } else {
+        infected <-
+          matrix_norm_distribution(config$host_pool_infected_means[[i]],
+                                   config$host_pool_infected_sds[[i]])
+        while (any(infected < 0)) {
+          infected <-
+            matrix_norm_distribution(config$host_pool_infected_means[[i]],
+                                     config$host_pool_infected_sds[[i]])
+        }
+        exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
+                                             config$host_pool_exposed_sds[[i]])
+        while (any(exposed2 < 0)) {
+          exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
+                                               config$host_pool_exposed_sds[[i]])
+        }
+        exposed <- host_pool$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        host_pool$infected <- infected
+        host_pool$exposed <- exposed
+        host_pool$total_exposed <- exposed2
+      }
+
+      total_infecteds <- total_infecteds + infected
+      total_exposeds <- total_exposeds + exposed2
     }
 
     susceptible <- host_pool$total_host - host_pool$infected - host_pool$total_exposed

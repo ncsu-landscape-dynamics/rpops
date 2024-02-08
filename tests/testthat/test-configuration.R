@@ -98,6 +98,7 @@ config$random_seeds <- NULL
 config$weather_type <- "deterministic"
 config$use_soils <- FALSE
 config$soil_starting_pest_file <- ""
+config$county_level_infection_data <- FALSE
 
 test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)

@@ -195,7 +195,7 @@ pops_multirun <- function(infected_file_list,
   config$county_level_infection_data <- county_level_infection_data
   config$pest_host_table <- pest_host_table
   config$competency_table <- competency_table
-s
+
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
