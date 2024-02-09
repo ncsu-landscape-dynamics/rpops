@@ -3539,6 +3539,7 @@ test_that("Using multiple hosts works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
+         random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
@@ -3583,6 +3584,7 @@ test_that("Using multiple hosts works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
+         random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
@@ -3626,6 +3628,7 @@ test_that("Using multiple hosts works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
+         random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
@@ -3670,6 +3673,7 @@ test_that("Using multiple hosts with uncertainty works as expected", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
@@ -3716,6 +3720,7 @@ test_that("Using multiple hosts with uncertainty works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
+         random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
