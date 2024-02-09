@@ -900,24 +900,34 @@ configuration <- function(config) {
   if (config$function_name %in% val_cal_list) {
     config$use_anthropogenic_kernel <- TRUE
     # Load observed data on occurrence
-    infection_years <- terra::rast(config$infected_years_file)
-    infection_years[] <- as.integer(infection_years[])
-    config$num_layers_infected_years <- terra::nlyr(infection_years)
-
-    if (config$num_layers_infected_years < config$number_of_outputs) {
-      config$failure <-
-        infection_years_length_error(config$num_layers_infected_years, config$number_of_time_steps)
-      return(config)
-    }
-
-    infection_years2 <- list(terra::as.matrix(infection_years[[1]], wide = TRUE))
-    if (terra::nlyr(infection_years) > 1) {
-      for (i in 2:terra::nlyr(infection_years)) {
-        infection_years2[[i]] <- terra::as.matrix(infection_years[[i]], wide = TRUE)
+    if (config$county_level_infection_data) {
+      infection_years <- terra::vect(config$infected_years_file)
+      config$num_layers_infected_years <- length(names(infection_years))
+      if (config$num_layers_infected_years < config$number_of_outputs) {
+        config$failure <-
+          infection_years_length_error(config$num_layers_infected_years, config$number_of_time_steps)
+        return(config)
       }
+    } else {
+      infection_years <- terra::rast(config$infected_years_file)
+      infection_years[] <- as.integer(infection_years[])
+      config$num_layers_infected_years <- terra::nlyr(infection_years)
+
+      if (config$num_layers_infected_years < config$number_of_outputs) {
+        config$failure <-
+          infection_years_length_error(config$num_layers_infected_years, config$number_of_time_steps)
+        return(config)
+      }
+
+      infection_years2 <- list(terra::as.matrix(infection_years[[1]], wide = TRUE))
+      if (terra::nlyr(infection_years) > 1) {
+        for (i in 2:terra::nlyr(infection_years)) {
+          infection_years2[[i]] <- terra::as.matrix(infection_years[[i]], wide = TRUE)
+        }
+      }
+      config$infection_years <- infection_years
+      config$infection_years2 <- infection_years2
     }
-    config$infection_years <- infection_years
-    config$infection_years2 <- infection_years2
   }
 
   if (config$function_name %in% c("calibrate") &&
