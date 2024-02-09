@@ -905,7 +905,8 @@ configuration <- function(config) {
       config$num_layers_infected_years <- length(names(infection_years))
       if (config$num_layers_infected_years < config$number_of_outputs) {
         config$failure <-
-          infection_years_length_error(config$num_layers_infected_years, config$number_of_time_steps)
+          infection_years_length_error(config$num_layers_infected_years,
+                                       config$number_of_time_steps)
         return(config)
       }
     } else {
@@ -915,7 +916,8 @@ configuration <- function(config) {
 
       if (config$num_layers_infected_years < config$number_of_outputs) {
         config$failure <-
-          infection_years_length_error(config$num_layers_infected_years, config$number_of_time_steps)
+          infection_years_length_error(config$num_layers_infected_years,
+                                       config$number_of_time_steps)
         return(config)
       }
 
