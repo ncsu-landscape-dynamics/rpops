@@ -3741,7 +3741,7 @@ test_that("county level infection works as expected", {
   parameter_means <- c(0, 21, 1, 500, 0, 0, 100, 1000)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   anthropogenic_kernel_type <- "cauchy"
-  use_initial_condition_uncertainty <-FALSE
+  use_initial_condition_uncertainty <- FALSE
   use_host_uncertainty <- FALSE
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
