@@ -405,3 +405,69 @@ infected_rast_from_county <- function(county_infections, host, config) {
   }
   return(infected_rast)
 }
+
+
+calculated_stats_county_level <- function(compare_vect) {
+  compare_vect$true_positives <-
+    ifelse(compare_vect$reference > 0 & compare_vect$comparison > 0, 1, 0)
+  compare_vect$true_negatives <-
+    ifelse(compare_vect$reference == 0 & compare_vect$comparison == 0, 1, 0)
+  compare_vect$false_negatives <-
+    ifelse(compare_vect$reference > 0 & compare_vect$comparison == 0, 1, 0)
+  compare_vect$false_positives <-
+    ifelse(compare_vect$reference == 0 & compare_vect$comparison > 0, 1, 0)
+  compare_vect$unknown_negatives <-
+    ifelse(is.na(compare_vect$reference) & compare_vect$comparison == 0, 1, 0)
+  compare_vect$unknown_positives <-
+    ifelse(is.na(compare_vect$reference) & compare_vect$comparison > 0, 1, 0)
+  compare_vect$infected_difference <- compare_vect$reference - compare_vect$comparison
+
+  compare_df <- as.data.frame(compare_vect)
+  output <- as.data.frame(compare_vect[1, ])
+  output[1, ] <- colSums(compare_df)
+
+  output$total_obs <-
+    output$true_negative + output$true_positive + output$false_negative + output$false_positive
+  output$accuracy <- (output$true_negative + output$true_positive) / output$total_obs
+  output$precision <- output$true_positive / (output$true_positive + output$false_positive)
+  output$recall <- output$true_positive / (output$true_positive + output$false_negative)
+  output$specificity <- output$true_negative / (output$true_negative + output$false_positive)
+
+  output$tp_fp <- as.double((output$true_positive + output$false_positive))
+  output$tp_fn <- as.double((output$true_positive + output$false_negative))
+  output$tn_fp <- as.double((output$true_negative + output$false_positive))
+  output$tn_fn <- as.double((output$true_negative + output$false_negative))
+
+  if (is.nan(output$tp_fp) || output$tp_fp == 0) {output$tp_fp <- 1}
+  if (is.nan(output$tp_fn) || output$tp_fn == 0) {output$tp_fn <- 1}
+  if (is.nan(output$tn_fp) || output$tn_fp == 0) {output$tn_fp <- 1}
+  if (is.nan(output$tn_fn) || output$tn_fn == 0) {output$tn_fn <- 1}
+
+  output$mcc <-
+    ((output$true_positive * output$true_negative) -
+       (output$false_positive * output$false_negative)) /
+    sqrt(output$tp_fp * output$tp_fn * output$tn_fp * output$tn_fn)
+
+  if (is.nan(output$accuracy)) {output$accuracy <- 0}
+  if (is.nan(output$precision)) {output$precision <- 0}
+  if (is.nan(output$recall)) {output$recall <- 0}
+  if (is.nan(output$specificity)) {output$specificity <- 0}
+
+  output$rmse <- Metrics::rmse(compare_df$reference, compare_df$comparison)
+
+  if (output$false_negative == 0 && output$false_positive == 0) {
+    output$odds_ratio <- (output$true_positive * output$true_negative) / 1
+  } else if (output$false_negative == 0) {
+    output$odds_ratio <- (output$true_positive * output$true_negative) / output$false_positive
+  } else if (output$false_positive == 0) {
+    output$odds_ratio <- (output$true_positive * output$true_negative) / output$false_negative
+  } else {
+    output$odds_ratio <- (output$true_positive * output$true_negative) /
+      (output$false_negative * output$false_positive)
+  }
+
+
+  output$residual_error <- sum(abs(compare_df$reference -  compare_df$comparison))
+
+  return(output)
+}
