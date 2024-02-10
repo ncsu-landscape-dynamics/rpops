@@ -187,10 +187,12 @@
 #' @param start_with_soil_populations Boolean to indicate whether to use a starting soil pest or
 #' pathogen population if TRUE then soil_starting_pest_file is required.
 #' @param pest_host_table The file path to a csv that has these columns in this order: host,
-#' susceptibility, mortality rate, and mortality time lag as columns with each row being the
-#' species. Host species must be in the same order in the host_file_list, infected_file_list,
-#' pest_host_table rows, and competency_table columns. The host column is only used for metadata
-#' and labeling output files.
+#' susceptibility_mean, susceptibility_sd, mortality_rate, mortality_rate_mean,
+#' and mortality_time_lag as columns with each row being the species. Host species
+#' must be in the same order in the host_file_list, infected_file_list,
+#' pest_host_table rows, and competency_table columns. The host column is character
+#' string of the species name, and  is only used for metadata  and labeling output files.
+#' Susceptibility and mortality_rate values must be between 0 and 1.
 #' @param competency_table A csv with the hosts as the first n columns (n being the number of hosts)
 #' and the last column being the competency value. Each row is a set of Boolean for host presence
 #' and the competency value (between 0 and 1) for that combination of hosts in a cell.
@@ -382,6 +384,7 @@ pops <- function(infected_file_list,
     config <- host_pool_setup(config)
   }
   config$competency_table_list <- competency_table_list_creator(config$competency_table)
+  config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
 
   data <- pops_model(random_seed = config$random_seed[1],
                      multiple_random_seeds = config$multiple_random_seeds,

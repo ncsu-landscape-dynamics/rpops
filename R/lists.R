@@ -121,4 +121,6 @@ failed_check_list <- c("checks_passed", "failed_check")
 output_frequency_list <-
   c("week", "month", "day", "year", "time_step", "every_n_steps", "final_step")
 csv_list <- c("csv", "txt")
-pest_host_table_list <- c("host", "susceptibility", "mortality_rate", "mortality_time_lag")
+pest_host_table_colnames <- c("host", "susceptibility_mean", "susceptibility_sd",
+                          "mortality_rate_mean", "morality_rate_sd", "mortality_time_lag")
+competency_table_colnames <- c("competency_mean", "competency_sd")

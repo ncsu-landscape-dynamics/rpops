@@ -331,6 +331,7 @@ calibrate <- function(infected_years_file,
         config <- host_pool_setup(config)
       }
       config$competency_table_list <- competency_table_list_creator(config$competency_table)
+      config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
 
       data <- pops_model(
         random_seed = config$random_seed,
