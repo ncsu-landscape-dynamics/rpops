@@ -337,55 +337,65 @@ validate <- function(infected_years_file,
         ) %do% {
           # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers
-          comparison <- terra::rast(config$infected_file_list[[1]])[[1]]
-          terra::values(comparison) <- 0
-          reference <- comparison
-          mask <- comparison
-          infections <- comparison
-          for (p in seq_len(length(data$host_pools))) {
-            terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
-            comparison <- comparison + infections
-          }
-          terra::values(reference) <- config$infection_years2[[q]]
-          terra::values(mask) <- config$mask_matrix
-          ad <-
-            quantity_allocation_disagreement(reference,
-                                             comparison,
-                                             use_configuration = config$use_configuration,
-                                             mask = mask,
-                                             use_distance = config$use_distance)
-          if (file.exists(config$point_file)) {
-            obs_data <- terra::vect(config$point_file)
-            obs_data <- terra::project(obs_data, comparison)
-            s <- extract(comparison, obs_data)
-            names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
-            s <- s[2]
-            obs_data <- cbind(obs_data, s)
-            ## calculate true positive, true negatives, false positives, false
-            ## negatives, and other statistics and add them to the data frame
-            ## for export
-            ad$points_true_positive <-
-              nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 > 0, ])
-            ad$points_false_negative <-
-              nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 == 0, ])
-            ad$points_false_positive <-
-              nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 > 0, ])
-            ad$points_true_negative <-
-              nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
-            ad$points_total_obs <-
-              ad$points_true_negative + ad$points_true_positive +
-              ad$points_false_negative + ad$points_false_positive
-            ad$points_accuracy <-
-              (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
-            ad$points_precision <-
-              ad$points_true_positive / (ad$points_true_positive + ad$points_false_positive)
-            ad$points_recall <-
-              ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
-            ad$points_specificiity <-
-              ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
-          }
-          ad$ouput <- q
-          ad
+
+            comparison <- terra::rast(config$host_file_list[[1]])[[1]]
+            terra::values(comparison) <- 0
+            reference <- comparison
+            mask <- comparison
+            infections <- comparison
+            for (p in seq_len(length(data$host_pools))) {
+              terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
+              comparison <- comparison + infections
+            }
+            terra::values(mask) <- config$mask_matrix
+            if (config$county_level_infection_data) {
+              reference <- terra::vect(config$infected_years_file[[1]])
+              compare_vect <- reference[, c(1, (q + 1))]
+              names(compare_vect) <- c("FIPS", "reference")
+              compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
+              ad <- calculated_stats_county_level(compare_vect)
+
+            } else {
+              terra::values(reference) <- config$infection_years2[[q]]
+              ad <-
+                quantity_allocation_disagreement(reference,
+                                                 comparison,
+                                                 use_configuration = config$use_configuration,
+                                                 mask = mask,
+                                                 use_distance = config$use_distance)
+              if (file.exists(config$point_file)) {
+                obs_data <- terra::vect(config$point_file)
+                obs_data <- terra::project(obs_data, comparison)
+                s <- extract(comparison, obs_data)
+                names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
+                s <- s[2]
+                obs_data <- cbind(obs_data, s)
+                ## calculate true positive, true negatives, false positives, false
+                ## negatives, and other statistics and add them to the data frame
+                ## for export
+                ad$points_true_positive <-
+                  nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 > 0, ])
+                ad$points_false_negative <-
+                  nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 == 0, ])
+                ad$points_false_positive <-
+                  nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 > 0, ])
+                ad$points_true_negative <-
+                  nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
+                ad$points_total_obs <-
+                  ad$points_true_negative + ad$points_true_positive +
+                  ad$points_false_negative + ad$points_false_positive
+                ad$points_accuracy <-
+                  (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
+                ad$points_precision <-
+                  ad$points_true_positive / (ad$points_true_positive + ad$points_false_positive)
+                ad$points_recall <-
+                  ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
+                ad$points_specificiity <-
+                  ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
+              }
+            }
+            ad$output <- q
+            ad
         }
 
       data.frame(all_disagreement)
@@ -394,8 +404,8 @@ validate <- function(infected_years_file,
   parallel::stopCluster(cl)
 
   output_list <- list()
-  for (j in 1:max(qa$ouput)) {
-    output_step <- qa[qa$ouput == j, ]
+  for (j in 1:max(qa$output)) {
+    output_step <- qa[qa$output == j, ]
     assign(paste("output_step_", j, sep = ""), output_step)
     output_list[[paste0("output_step_", j)]] <- output_step
     if (config$write_outputs %in% config$output_write_list) {
