@@ -157,6 +157,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             use_soils <- FALSE
             soil_starting_pest_file <- ""
             start_with_soil_populations <- FALSE
+            county_level_infection_data <- FALSE
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -243,7 +244,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               file_random_seeds,
                               use_soils,
                               soil_starting_pest_file,
-                              start_with_soil_populations)
+                              start_with_soil_populations,
+                              county_level_infection_data = county_level_infection_data)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -1043,11 +1045,11 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
             precipitation_coefficient_file <- ""
             model_type <- "SI"
             latency_period <- 0
-            time_step <- "month"
+            time_step <- "week"
             season_month_start <- 1
             season_month_end <- 12
             start_date <- "2003-01-01"
-            end_date <- "2003-02-11"
+            end_date <- "2003-01-14"
             use_lethal_temperature <- FALSE
             temperature_file <- ""
             lethal_temperature <- -30
@@ -1055,7 +1057,7 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
             mortality_frequency <- "Year"
             mortality_frequency_n <- 1
             management <- FALSE
-            treatment_dates <- c("2003-01-24")
+            treatment_dates <- c("2003-01-07")
             treatments_file <- ""
             treatment_method <- "ratio"
             natural_kernel_type <- "exponential"
@@ -1067,7 +1069,7 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
             mask <- NULL
-            output_frequency <- "year"
+            output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
             use_movements <- FALSE
@@ -1096,7 +1098,7 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
-            success_metric <- "quantity, allocation, and configuration"
+            success_metric <- "accuracy"
             network_filename <-
               system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
             use_survival_rates <- FALSE

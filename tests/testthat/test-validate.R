@@ -126,6 +126,7 @@ test_that(
     use_soils <- FALSE
     soil_starting_pest_file <- ""
     start_with_soil_populations <- FALSE
+    county_level_infection_data <- FALSE
 
     outputs <- validate(
       infected_years_file,
@@ -1011,7 +1012,7 @@ test_that(
     expect_type(outputs, "list")
     expect_length(outputs, 2)
     data <- outputs[[1]]
-    expect_length(data, 24)
+    expect_length(data, 28)
     expect_vector(data$false_negatives, size = number_of_iterations)
     expect_vector(data$false_positives, size = number_of_iterations)
     expect_vector(data$true_positives, size = number_of_iterations)

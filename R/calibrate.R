@@ -296,6 +296,7 @@ calibrate <- function(infected_years_file,
   config$county_level_infection_data <- county_level_infection_data
   config$pest_host_table <- pest_host_table
   config$competency_table <- competency_table
+  config$point_file <- ""
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -548,46 +549,8 @@ calibrate <- function(infected_years_file,
 
         # calculate comparison metrics for simulation data for each time step in
         # the simulation
-        all_disagreement <-
-          foreach::foreach(
-            q = seq_len(length(data$host_pools[[1]]$infected)),
-            .combine = rbind,
-            .packages = c("terra", "PoPS"),
-            .final = colSums
-          ) %do% {
-            comparison <- terra::rast(config$host_file_list[[1]])[[1]]
-            reference <- comparison
-            mask <- comparison
-            terra::values(comparison) <- 0
-            infections <- comparison
-            for (p in seq_len(length(data$host_pools))) {
-              terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
-              comparison <- comparison + infections
-            }
-            terra::values(mask) <- config$mask_matrix
-
-            if (config$county_level_infection_data) {
-              reference <- terra::vect(config$infected_years_file[[1]])
-              compare_vect <- reference[, c(1, (q + 1))]
-              names(compare_vect) <- c("FIPS", "reference")
-              compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
-              ad <- calculated_stats_county_level(compare_vect)
-              ad$quantity_disagreement <- 0
-              ad$allocation_disagreement <- 0
-              ad$allocation_disagreement <- 0
-              ad$configuration_disagreement <- 0
-              ad$distance_difference <- 0
-
-            } else {
-              terra::values(reference) <- config$infection_years2[[q]]
-              ad <- quantity_allocation_disagreement(reference,
-                                               comparison,
-                                               use_configuration = config$use_configuration,
-                                               mask = mask,
-                                               use_distance = config$use_distance)
-            }
-            ad
-          }
+        all_disagreement <- calculate_all_stats(config, data)
+        all_disagreement <- colSums(all_disagreement)
 
         all_disagreement <- as.data.frame(t(all_disagreement))
         all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
@@ -907,46 +870,8 @@ calibrate <- function(infected_years_file,
         proposed_network_max_distance
       )
 
-    all_disagreement <-
-      foreach::foreach(
-        q = seq_len(length(data$host_pools[[1]]$infected)),
-        .combine = rbind,
-        .packages = c("terra", "PoPS"),
-        .final = colSums
-      ) %do% {
-        comparison <- terra::rast(config$host_file_list[[1]])[[1]]
-        reference <- comparison
-        mask <- comparison
-        terra::values(comparison) <- 0
-        infections <- comparison
-        for (p in seq_len(length(data$host_pools))) {
-          terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
-          comparison <- comparison + infections
-        }
-        terra::values(mask) <- config$mask_matrix
-
-        if (config$county_level_infection_data) {
-          reference <- terra::vect(config$infected_file[[1]])
-          compare_vect <- reference[, c(1, (q + 1))]
-          names(compare_vect) <- c("FIPS", "reference")
-          compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
-          ad <- calculated_stats_county_level(compare_vect)
-          ad$quantity_disagreement <- 0
-          ad$allocation_disagreement <- 0
-          ad$allocation_disagreement <- 0
-          ad$configuration_disagreement <- 0
-          ad$distance_difference <- 0
-
-        } else {
-          terra::values(reference) <- config$infection_years2[[q]]
-          ad <- quantity_allocation_disagreement(reference,
-                                                 comparison,
-                                                 use_configuration = config$use_configuration,
-                                                 mask = mask,
-                                                 use_distance = config$use_distance)
-        }
-        ad
-      }
+    all_disagreement <- calculate_all_stats(config, data)
+    all_disagreement <- colSums(all_disagreement)
 
     all_disagreement <- as.data.frame(t(all_disagreement))
     all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
@@ -1102,46 +1027,8 @@ calibrate <- function(infected_years_file,
         )
 
       # set up comparison
-      all_disagreement <-
-        foreach::foreach(
-          q = seq_len(length(data$host_pools[[1]]$infected)),
-          .combine = rbind,
-          .packages = c("terra", "PoPS"),
-          .final = colSums
-        ) %do% {
-          comparison <- terra::rast(config$host_file_list[[1]])[[1]]
-          reference <- comparison
-          mask <- comparison
-          terra::values(comparison) <- 0
-          infections <- comparison
-          for (p in seq_len(length(data$host_pools))) {
-            terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
-            comparison <- comparison + infections
-          }
-          terra::values(mask) <- config$mask_matrix
-
-          if (config$county_level_infection_data) {
-            reference <- terra::vect(config$infected_file[[1]])
-            compare_vect <- reference[, c(1, (q + 1))]
-            names(compare_vect) <- c("FIPS", "reference")
-            compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
-            ad <- calculated_stats_county_level(compare_vect)
-            ad$quantity_disagreement <- 0
-            ad$allocation_disagreement <- 0
-            ad$allocation_disagreement <- 0
-            ad$configuration_disagreement <- 0
-            ad$distance_difference <- 0
-
-          } else {
-            terra::values(reference) <- config$infection_years2[[q]]
-            ad <- quantity_allocation_disagreement(reference,
-                                                   comparison,
-                                                   use_configuration = config$use_configuration,
-                                                   mask = mask,
-                                                   use_distance = config$use_distance)
-          }
-          ad
-        }
+      all_disagreement <- calculate_all_stats(config, data)
+      all_disagreement <- colSums(all_disagreement)
 
       all_disagreement <- as.data.frame(t(all_disagreement))
       all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
