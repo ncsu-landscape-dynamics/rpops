@@ -85,7 +85,8 @@ validate(
   file_random_seeds = NULL,
   use_soils = FALSE,
   soil_starting_pest_file = "",
-  start_with_soil_populations = FALSE
+  start_with_soil_populations = FALSE,
+  county_level_infection_data = FALSE
 )
 }
 \arguments{
@@ -365,6 +366,10 @@ pathogen.}
 
 \item{start_with_soil_populations}{Boolean to indicate whether to use a starting soil pest or
 pathogen population if TRUE then soil_starting_pest_file is required.}
+
+\item{county_level_infection_data}{Boolean to indicate if infection data is at the county level.
+If TRUE then the infected_file should be a polygon raster with county level infection/infestation
+counts.}
 }
 \value{
 a data frame of statistical measures of model performance.
