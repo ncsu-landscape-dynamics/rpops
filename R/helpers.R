@@ -271,25 +271,61 @@ combined_sd <- function(v1, v2, m1, m2, n1, n2) {
     (((n1 * n2) * (m1 - m2)^2) / ((n1 + n2) * (n1 + n2 - 1)))
 }
 
+# Reformat competency_table into list (per host composition) with competency values
+# randomly sampled from a normal distribution using mean and sd in competency table
+
 competency_table_list_creator <- function(competency_table) {
   competency_table2 <- competency_table[, 1:(ncol(competency_table) - 1)]
   competencies <-
     rnorm(n = nrow(competency_table), mean = competency_table$competency_mean,
-          sd = competency_table$compentency_sd)
+          sd = competency_table$competency_sd)
   names(competency_table2)[ncol(competency_table2)] <- "competency"
   while (any(competencies > 1) || any(competencies < 0)) {
     competencies <-
       rnorm(n = nrow(competency_table),
-            mean = competency_table$competency_mean, sd = competency_table$compentency_sd)
+            mean = competency_table$competency_mean, sd = competency_table$competency_sd)
   }
   competency_table2$competency <- competencies
-  competency_table2 <- competency_table2
   competency_table_list <- split(competency_table2, seq_len(nrow(competency_table2)))
   for (i in seq_along(competency_table_list)) {
     competency_table_list[[i]] <- unname(competency_table_list[[i]])
     competency_table_list[[i]] <- as.vector(t(competency_table_list[[i]]))
   }
   return(competency_table_list)
+}
+
+# Reformat pest_host_table into list (per host species) with susceptibility and
+# mortality rates randomly sampled from a normal distribution using the means and sds i
+# in the pest_host_table
+
+pest_host_table_list_creator <- function(pest_host_table) {
+  pest_host_table2 <- pest_host_table[, !grepl("_sd", colnames(pest_host_table))]
+  susceptibilities <-
+    rnorm(n = nrow(pest_host_table), mean = pest_host_table$susceptibility_mean,
+          sd = pest_host_table$susceptibility_sd)
+  names(pest_host_table2)[1] <- "susceptibility"
+  while (any(susceptibilities > 1) || any(susceptibilities < 0)) {
+    susceptibilities <- rnorm(n = nrow(pest_host_table),
+                              mean = pest_host_table$susceptibility_mean,
+                              sd = pest_host_table$susceptibility_sd)
+  }
+  pest_host_table2$susceptibility <- susceptibilities
+  mortality_rates <-
+    rnorm(n = nrow(pest_host_table), mean = pest_host_table$mortality_rate_mean,
+          sd = pest_host_table$mortality_rate_sd)
+  names(pest_host_table2)[2] <- "mortality_rate"
+  while (any(mortality_rates > 1) || any(mortality_rates < 0)) {
+    mortality_rates <-
+      rnorm(n = nrow(pest_host_table), mean = pest_host_table$mortality_rate_mean,
+            sd = pest_host_table$mortality_rate_sd)
+  }
+  pest_host_table2$mortality_rate <- mortality_rates
+  pest_host_table_list <- split(pest_host_table2, seq_len(nrow(pest_host_table2)))
+  for (i in seq_along(pest_host_table_list)) {
+    pest_host_table_list[[i]] <- unname(pest_host_table_list[[i]])
+    pest_host_table_list[[i]] <- as.vector(t(pest_host_table_list[[i]]))
+  }
+  return(pest_host_table_list)
 }
 
 # Update host pools when uncertainties are used

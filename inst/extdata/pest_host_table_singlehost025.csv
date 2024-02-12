@@ -1,2 +1,2 @@
-﻿host,susceptibility,mortality_rate,mortality_time_lag
-oak,0.7,0.25,1
+﻿host,susceptibility_mean,susceptibility_sd,mortality_rate_mean,mortality_rate_sd,mortality_time_lag
+oak,0.7,0.1,0.25,0.02,1
