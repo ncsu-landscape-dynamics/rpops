@@ -68,6 +68,10 @@
 <ul><li><p>Final step as an option for output frequency in all functions (@petrasovaa, #163).</p></li>
 <li><p>Added ability to use mean and sd for temp and precip coefficient. Uses 3 new parameters: weather_type, temperature_coefficient_sd_file, and precipitation_coefficient_sd_file. This is added to help understand uncertainty in model predictions due to weather drivers (@ChrisJones687, #168).</p></li>
 <li><p>Added the ability to use different seeds for all processes within pops-core. Adds 2 new parameters: multiple_random_seeds (boolean for using this functionality) and random_seeds (set to NULL to allow internal model selection of kernels or pass a CSV with the number of rows being the number of model runs and columns being the kernels in order (@ChrisJones687, #168).</p></li>
+<li><p>Added ability for model to simulate pathogen/pest survival in soil and then emergence/rain splash in an area (@ChrisJones687, #178).</p></li>
+<li><p>Model can now write out forecast ensemble members (@ChrisJones687, #179)</p></li>
+<li><p>Added ability for model to use multi-host pops-core API. The model now takes 2 new parameter tables for hosts. It also takes a list of rasters for each host allowing testing of hypothesis related to different host combinations being more conducive to spread on the landscape (@petrasovaa, @ChrisJones687, @wenzeslaus, #186 and #188).</p></li>
+<li><p>Added the ability to calibrate, validate, and simulate from county level infection data (@ChrisJones687, #196).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
@@ -80,7 +84,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="removed">Removed<a class="anchor" aria-label="anchor" href="#removed"></a></h3>
-<ul><li>Removed dependencies: packages rgdal, raster, sp</li>
+<ul><li>Removed dependencies: packages rgdal, raster, sp (@petrasovaa, #187)</li>
 </ul></div>
 </div>
 <div class="section level2">

@@ -154,7 +154,8 @@ then the model can be validated for the final 2 years.</p>
 <span>  file_random_seeds <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  use_soils <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  soil_starting_pest_file <span class="op">=</span> <span class="st">""</span>,</span>
-<span>  start_with_soil_populations <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span>  start_with_soil_populations <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  county_level_infection_data <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -595,6 +596,12 @@ pathogen.</p></dd>
 <dt>start_with_soil_populations</dt>
 <dd><p>Boolean to indicate whether to use a starting soil pest or
 pathogen population if TRUE then soil_starting_pest_file is required.</p></dd>
+
+
+<dt>county_level_infection_data</dt>
+<dd><p>Boolean to indicate if infection data is at the county level.
+If TRUE then the infected_file should be a polygon raster with county level infection/infestation
+counts.</p></dd>
 
 </dl></div>
     <div id="value">
