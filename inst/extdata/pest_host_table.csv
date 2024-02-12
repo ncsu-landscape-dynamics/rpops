@@ -1,4 +1,4 @@
-﻿host,susceptibility,mortality_rate,mortality_time_lag
-oak,0.7,0.1,1
-tanoak,1,0.5,1
-bay laurel,0.5,0,0
+﻿host,susceptibility_mean,susceptibility_sd,mortality_rate_mean,mortality_rate_sd,mortality_time_lag
+oak,0.7,0.1,0.1,0.02,1
+tanoak,1,0.05,0.5,0.1,1
+bay laurel,0.5,0.06,0,0,0

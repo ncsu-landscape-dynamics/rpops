@@ -1361,7 +1361,7 @@ test_that("All kernel types lead to spread", {
   start_date <- "2008-01-01"
   end_date <- "2008-12-31"
   time_step <- "month"
-  parameter_means <- c(3.0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_means <- c(4.0, 21, 1, 500, 0, 0, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
@@ -3539,6 +3539,7 @@ test_that("Using multiple hosts works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
+         random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
@@ -3547,10 +3548,14 @@ test_that("Using multiple hosts works as expected", {
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
-  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]] + data$host_pools[[2]]$infected[[1]][[1]],
+             test_mat[[1]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[2]] + data$host_pools[[2]]$infected[[1]][[2]],
+             test_mat[[2]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[3]] + data$host_pools[[2]]$infected[[1]][[3]],
+             test_mat[[3]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[4]] + data$host_pools[[2]]$infected[[1]][[4]],
+             test_mat[[4]])
 
   infected_file_list <-
     c(system.file("extdata", "simple2x2", "infected_oak.tif", package = "PoPS"),
@@ -3583,6 +3588,7 @@ test_that("Using multiple hosts works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
+         random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
@@ -3626,6 +3632,7 @@ test_that("Using multiple hosts works as expected", {
          start_date = start_date,
          end_date = end_date,
          temp = TRUE,
+         random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
@@ -3654,10 +3661,8 @@ test_that("Using multiple hosts with uncertainty works as expected", {
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2009-12-31"
-  parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
+  parameter_means <- c(0, 21, 1, 500, 0, 0, 100, 1000)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
   pest_host_table <-
     system.file("extdata", "pest_host_table.csv", package = "PoPS")
   competency_table <- system.file("extdata", "competency_table_multihost.csv", package = "PoPS")
@@ -3670,10 +3675,10 @@ test_that("Using multiple hosts with uncertainty works as expected", {
          parameter_cov_matrix = parameter_cov_matrix,
          pest_host_table = pest_host_table,
          competency_table = competency_table,
+         random_seed = 42,
          start_date = start_date,
          end_date = end_date,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file)
+         use_host_uncertainty = TRUE)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
@@ -3681,10 +3686,14 @@ test_that("Using multiple hosts with uncertainty works as expected", {
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
-  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]] + data$host_pools[[2]]$infected[[1]][[1]],
+             test_mat[[1]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[2]] + data$host_pools[[2]]$infected[[1]][[2]],
+             test_mat[[2]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[3]] + data$host_pools[[2]]$infected[[1]][[3]],
+             test_mat[[3]])
+  expect_gte(data$host_pools[[2]]$infected[[1]][[4]] + data$host_pools[[2]]$infected[[1]][[4]],
+             test_mat[[4]])
 
 
   infected_file_list <-
@@ -3699,8 +3708,6 @@ test_that("Using multiple hosts with uncertainty works as expected", {
   end_date <- "2009-12-31"
   parameter_means <- c(5, 21, 1, 500, 0, 0, 100, 1000)
   parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
   pest_host_table <-
     system.file("extdata", "pest_host_table_2host.csv", package = "PoPS")
   competency_table <- system.file("extdata", "competency_table_2host.csv", package = "PoPS")
@@ -3715,8 +3722,8 @@ test_that("Using multiple hosts with uncertainty works as expected", {
          competency_table = competency_table,
          start_date = start_date,
          end_date = end_date,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file)
+         random_seed = 42,
+         use_host_uncertainty = TRUE)
 
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])

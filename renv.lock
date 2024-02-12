@@ -94,7 +94,7 @@
     },
     "XML": {
       "Package": "XML",
-      "Version": "3.99-0.14",
+      "Version": "3.99-0.16.1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [

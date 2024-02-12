@@ -667,11 +667,11 @@ configuration <- function(config) {
 
     mortality_tracker <- list(zero_matrix)
     if (config$mortality_on) {
-      if (config$pest_host_table$mortality_rate[i] <= 0) {
+      if (config$pest_host_table$mortality_rate_mean[i] <= 0) {
         mortality_length <- 1
       } else {
         mortality_length <-
-          1 / config$pest_host_table$mortality_rate[i] +
+          1 / config$pest_host_table$mortality_rate_mean[i] +
           config$pest_host_table$mortality_time_lag[i]
       }
       for (mt in 2:(mortality_length)) {
