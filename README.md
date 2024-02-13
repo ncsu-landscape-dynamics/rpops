@@ -1,7 +1,7 @@
 # PoPS (Pest or Pathogen Spread) R Package <img src="man/PoPS_GIF_transparent.gif" align="right" width="15%" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check)
+[![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/R-CMD-check.yaml)
 [![lint](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/lint.yaml/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/lint.yaml)
 [![codecov](https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/main/graph/badge.svg)](https://codecov.io/gh/ncsu-landscape-dynamics/rpops)
 [![DOI](https://zenodo.org/badge/143435350.svg)](https://zenodo.org/badge/latestdoi/143435350)
