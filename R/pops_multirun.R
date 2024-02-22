@@ -319,6 +319,7 @@ pops_multirun <- function(infected_file_list,
       outputs$quarantine_escape <- data$quarantine_escape
       outputs$quarantine_escape_distance <- data$quarantine_escape_distance
       outputs$quarantine_escape_direction <- data$quarantine_escape_directions
+      outputs$propogules <- data$propogules
       output_host_pools <- c()
 
       zero_rast <- terra::rast(config$total_populations_file)[[1]]
@@ -384,14 +385,15 @@ pops_multirun <- function(infected_file_list,
     }
 
   stopCluster(cl)
-  number_infected_runs <- infected_stack[seq(1, length(infected_stack), 8)]
-  area_infected_runs <- infected_stack[seq(2, length(infected_stack), 8)]
-  spread_rate_runs <- infected_stack[seq(3, length(infected_stack), 8)]
-  quarantine_escape_runs <- infected_stack[seq(4, length(infected_stack), 8)]
-  quarantine_escape_distance_runs <- infected_stack[seq(5, length(infected_stack), 8)]
-  quarantine_escape_directions_runs <- infected_stack[seq(6, length(infected_stack), 8)]
-  total_infecteds_runs <- infected_stack[seq(7, length(infected_stack), 8)]
-  output_host_pools_runs <- infected_stack[seq(8, length(infected_stack), 8)]
+  number_infected_runs <- infected_stack[seq(1, length(infected_stack), 9)]
+  area_infected_runs <- infected_stack[seq(2, length(infected_stack), 9)]
+  spread_rate_runs <- infected_stack[seq(3, length(infected_stack), 9)]
+  quarantine_escape_runs <- infected_stack[seq(4, length(infected_stack), 9)]
+  quarantine_escape_distance_runs <- infected_stack[seq(5, length(infected_stack), 9)]
+  quarantine_escape_directions_runs <- infected_stack[seq(6, length(infected_stack), 9)]
+  disperers_runs <- infected_stack[seq(7, length(infected_stack), 9)]
+  total_infecteds_runs <- infected_stack[seq(7, length(infected_stack), 9)]
+  output_host_pools_runs <- infected_stack[seq(8, length(infected_stack), 9)]
 
   prediction <- total_infecteds_runs[[1]]
   for (w in seq_len(length(prediction))) {
