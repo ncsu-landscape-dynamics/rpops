@@ -424,20 +424,22 @@ infected_rast_from_county <- function(county_infections, host, config) {
 
   for (id in unique(fips_host_cells$FIPS)) {
     sampler <- fips_host_cells[fips_host_cells$FIPS == id & fips_host_cells$host > 0, ]
-    if (config$use_initial_condition_uncertainty) {
-      inf_num <-
-        round(rnorm(1, county_infections[county_infections$FIPS == id]$infected_mean,
-                    county_infections[county_infections$FIPS == id]$infected_sd))
-      while (inf_num < 0) {
+    if (nrow(sampler) > 0) {
+      if (config$use_initial_condition_uncertainty) {
         inf_num <-
           round(rnorm(1, county_infections[county_infections$FIPS == id]$infected_mean,
                       county_infections[county_infections$FIPS == id]$infected_sd))
+        while (inf_num < 0) {
+          inf_num <-
+            round(rnorm(1, county_infections[county_infections$FIPS == id]$infected_mean,
+                        county_infections[county_infections$FIPS == id]$infected_sd))
+        }
+      } else {
+        inf_num <- county_infections[county_infections$FIPS == id]$infected_mean
       }
-    } else {
-      inf_num <- county_infections[county_infections$FIPS == id]$infected_mean
+      cells <- sample(sampler$cell, inf_num)
+      infected_rast[cells] <- 1
     }
-    cells <- sample(sampler$cell, inf_num)
-    infected_rast[cells] <- 1
   }
   return(infected_rast)
 }

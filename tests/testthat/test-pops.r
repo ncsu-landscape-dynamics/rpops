@@ -3891,4 +3891,29 @@ test_that("county level infection works as expected", {
   test_infected <- terra::vect(infected_file_list[[1]])
   expect_equal(data$number_infected, sum(test_infected$infected_mean))
   expect_equal(sum(data$host_pools[[1]]$total_exposed[[1]]), sum(test_infected$infected_mean))
+
+  host_file_list <- system.file("extdata", "simple20x20", "host_fullzeropoly.tif", package = "PoPS")
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         anthropogenic_kernel_type = anthropogenic_kernel_type,
+         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
+         use_host_uncertainty = use_host_uncertainty,
+         county_level_infection_data = county_level_infection_data,
+         model_type = "SEI",
+         exposed_file_list = exposed_file_list,
+         latency_period = 5,
+         start_exposed = start_exposed)
+
+  test_infected <- terra::vect(infected_file_list[[1]])
+  expect_equal(data$number_infected, sum(test_infected$infected_mean))
+  expect_equal(sum(data$host_pools[[1]]$total_exposed[[1]]), sum(test_infected$infected_mean))
 })
