@@ -435,6 +435,7 @@ configuration <- function(config) {
     }
 
     if (config$weather_type == "probabilistic") {
+      config$number_of_time_steps <- round(config$number_of_time_steps / config$number_of_years)
       if (config$number_of_time_steps > config$weather_size) {
         config$failure <- weather_size_probabilitic_error
         return(config)
