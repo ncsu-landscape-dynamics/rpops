@@ -218,7 +218,11 @@ time_checks <- function(end_date, start_date, time_step, output_frequency, outpu
     duration <- lubridate::interval(start_date, end_date)
 
     if (time_step == "week") {
-      number_of_time_steps <- ceiling(lubridate::time_length(duration, "week"))
+      if (lubridate::leap_year(end_date)) {
+        number_of_time_steps <- floor(lubridate::time_length(duration, "week"))
+      } else {
+        number_of_time_steps <- ceiling(lubridate::time_length(duration, "week"))
+      }
     } else if (time_step == "month") {
       number_of_time_steps <- ceiling(lubridate::time_length(duration, "month"))
     } else if (time_step == "day") {
