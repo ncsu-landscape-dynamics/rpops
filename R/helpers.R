@@ -347,6 +347,7 @@ host_pool_setup <- function(config) {
       total_hosts <- total_hosts + host
     } else {
       host <- host_pool$total_hosts
+      total_hosts <- host_pool$total_hosts
     }
 
     if (config$use_initial_condition_uncertainty) {
