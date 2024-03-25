@@ -339,7 +339,7 @@ host_pool_setup <- function(config) {
     if (config$use_host_uncertainty) {
       host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
                                        config$host_pool_host_sds[[i]])
-      while (any(host > config$total_populations)) {
+      while (any(host > config$total_populations, na.rm = TRUE)) {
         host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
                                          config$host_pool_host_sds[[i]])
       }
