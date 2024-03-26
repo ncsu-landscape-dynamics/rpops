@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Ubuntu system dependencies
-        if: runner.os == "Linux"
+        if: runner.os == 'Linux'
         run: sudo apt install -y libproj-dev
 
       - uses: r-lib/actions/setup-r@v2
