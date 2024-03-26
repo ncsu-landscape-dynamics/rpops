@@ -42,7 +42,9 @@ jobs:
 
       - name: Install Ubuntu system dependencies
         if: runner.os == 'Linux'
-        run: sudo apt install -y libproj-dev
+        run: sudo apt install \
+          libproj-dev \
+          libgdal-dev
 
       - uses: r-lib/actions/setup-renv@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
