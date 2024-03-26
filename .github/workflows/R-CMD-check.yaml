@@ -41,8 +41,8 @@ jobs:
         run: brew install gdal proj fribidi
 
       - name: Install Ubuntu system dependencies
-        if: runner.os == "Linux"
-        run: sudo apt install libproj-dev
+        if: runner.os == 'Linux'
+        run: sudo apt install -y libproj-dev
 
       - uses: r-lib/actions/setup-renv@v2
       - uses: r-lib/actions/setup-r-dependencies@v2
