@@ -734,17 +734,17 @@ configuration <- function(config) {
   config$total_infecteds <- total_infecteds
   config$total_populations <- terra::as.matrix(total_populations, wide = TRUE)
 
-  if (any(config$total_hosts > config$total_populations)) {
+  if (any(config$total_hosts > config$total_populations, na.rm = TRUE)) {
     config$failure <- multihosts_gt_totpop_error
     return(config)
   }
 
-  if (any(config$total_exposed > config$total_populations)) {
+  if (any(config$total_exposed > config$total_populations, na.rm = TRUE)) {
     config$failure <- multiinfected_gt_totpop_error
     return(config)
   }
 
-  if (any(config$total_infecteds > config$total_populations)) {
+  if (any(config$total_infecteds > config$total_populations, na.rm = TRUE)) {
     config$failure <- multiexposed_gt_totpop_error
     return(config)
   }
