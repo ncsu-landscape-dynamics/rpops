@@ -27,19 +27,87 @@ namespace pops {
 /**
  * Class storing and computing step spread rate for one simulation.
  */
-template<typename Raster>
-class SpreadRate
+template<typename Hosts, typename RasterIndex>
+class SpreadRateAction
 {
+public:
+    SpreadRateAction(
+        const Hosts& hosts,
+        RasterIndex rows,
+        RasterIndex cols,
+        double ew_res,
+        double ns_res,
+        unsigned num_steps)
+        : width_(rows),
+          height_(cols),
+          west_east_resolution_(ew_res),
+          north_south_resolution_(ns_res),
+          num_steps_(num_steps),
+          boundaries_(num_steps + 1, std::make_tuple(0, 0, 0, 0)),
+          rates_(
+              num_steps,
+              std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan("")))
+    {
+        boundaries_.at(0) = infection_boundary(hosts);
+    }
+
+    /**
+     * Returns rate for certain year of simulation
+     */
+    const BBoxFloat& step_rate(unsigned step) const
+    {
+        return rates_[step];
+    }
+
+    /**
+     * Computes spread rate in n, s, e, w directions
+     * for certain simulation year based on provided
+     * infection raster and bbox of infection in previous year.
+     * Unit is distance (map units) per year.
+     * If spread rate is zero and the bbox is touching the edge,
+     * that means spread is out of bounds and rate is set to NaN.
+     */
+    void action(const Hosts& hosts, unsigned step)
+    {
+        BBoxInt bbox = infection_boundary(hosts);
+        boundaries_.at(step + 1) = bbox;
+        if (!is_boundary_valid(bbox)) {
+            rates_.at(step) =
+                std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan(""));
+            return;
+        }
+        int n1, n2, s1, s2, e1, e2, w1, w2;
+        std::tie(n1, s1, e1, w1) = boundaries_.at(step);
+        std::tie(n2, s2, e2, w2) = bbox;
+        double n_rate = ((n1 - n2) * north_south_resolution_);
+        double s_rate = ((s2 - s1) * north_south_resolution_);
+        double e_rate = ((e2 - e1) * west_east_resolution_);
+        double w_rate = ((w1 - w2) * west_east_resolution_);
+
+        bool bn, bs, be, bw;
+        std::tie(bn, bs, be, bw) = is_out_of_bounds(bbox);
+        if (n_rate == 0 && bn)
+            n_rate = std::nan("");
+        if (s_rate == 0 && bs)
+            s_rate = std::nan("");
+        if (e_rate == 0 && be)
+            e_rate = std::nan("");
+        if (w_rate == 0 && bw)
+            w_rate = std::nan("");
+
+        rates_.at(step) = std::make_tuple(n_rate, s_rate, e_rate, w_rate);
+    }
+
 private:
-    int width;
-    int height;
+    int width_;
+    int height_;
     // the west-east resolution of the pixel
-    double west_east_resolution;
+    double west_east_resolution_;
     // the north-south resolution of the pixel
-    double north_south_resolution;
-    unsigned num_steps;
-    std::vector<BBoxInt> boundaries;
-    std::vector<BBoxFloat> rates;
+    double north_south_resolution_;
+    unsigned num_steps_;
+    std::vector<BBoxInt> boundaries_;
+    std::vector<BBoxFloat> rates_;
 
     /**
      * Return tuple of booleans indicating
@@ -53,32 +121,32 @@ private:
         std::tie(n, s, e, w) = bbox;
         if (n == 0)
             bn = true;
-        if (s == (height - 1))
+        if (s == (height_ - 1))
             bs = true;
         if (w == 0)
             bw = true;
-        if (e == (width - 1))
+        if (e == (width_ - 1))
             be = true;
 
         return std::make_tuple(bn, bs, be, bw);
     }
+
     /**
      * Finds bbox of infections and returns
      * north, south, east, west coordinates (as number of rows/cols),
      * If there is no infection, sets -1 to all directions.
      */
-    BBoxInt infection_boundary(
-        const Raster& raster, const std::vector<std::vector<int>>& suitable_cells)
+    BBoxInt infection_boundary(const Hosts& hosts)
     {
-        int n = height - 1;
+        int n = height_ - 1;
         int s = 0;
         int e = 0;
-        int w = width - 1;
+        int w = width_ - 1;
         bool found = false;
-        for (auto indices : suitable_cells) {
+        for (auto indices : hosts.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            auto value = raster(i, j);
+            auto value = hosts.infected_at(i, j);
             if (value > 0) {
                 found = true;
                 if (i < n)
@@ -109,78 +177,6 @@ private:
             return false;
         return true;
     }
-
-public:
-    SpreadRate(
-        const Raster& raster,
-        double ew_res,
-        double ns_res,
-        unsigned num_steps,
-        const std::vector<std::vector<int>>& suitable_cells)
-        : width(raster.cols()),
-          height(raster.rows()),
-          west_east_resolution(ew_res),
-          north_south_resolution(ns_res),
-          num_steps(num_steps),
-          boundaries(num_steps + 1, std::make_tuple(0, 0, 0, 0)),
-          rates(
-              num_steps,
-              std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan("")))
-    {
-        boundaries.at(0) = infection_boundary(raster, suitable_cells);
-    }
-
-    SpreadRate() = delete;
-
-    /**
-     * Returns rate for certain year of simulation
-     */
-    const BBoxFloat& step_rate(unsigned step) const
-    {
-        return rates[step];
-    }
-
-    /**
-     * Computes spread rate in n, s, e, w directions
-     * for certain simulation year based on provided
-     * infection raster and bbox of infection in previous year.
-     * Unit is distance (map units) per year.
-     * If spread rate is zero and the bbox is touching the edge,
-     * that means spread is out of bounds and rate is set to NaN.
-     */
-    void compute_step_spread_rate(
-        const Raster& raster,
-        unsigned step,
-        const std::vector<std::vector<int>>& suitable_cells)
-    {
-        BBoxInt bbox = infection_boundary(raster, suitable_cells);
-        boundaries.at(step + 1) = bbox;
-        if (!is_boundary_valid(bbox)) {
-            rates.at(step) =
-                std::make_tuple(std::nan(""), std::nan(""), std::nan(""), std::nan(""));
-            return;
-        }
-        int n1, n2, s1, s2, e1, e2, w1, w2;
-        std::tie(n1, s1, e1, w1) = boundaries.at(step);
-        std::tie(n2, s2, e2, w2) = bbox;
-        double n_rate = ((n1 - n2) * north_south_resolution);
-        double s_rate = ((s2 - s1) * north_south_resolution);
-        double e_rate = ((e2 - e1) * west_east_resolution);
-        double w_rate = ((w1 - w2) * west_east_resolution);
-
-        bool bn, bs, be, bw;
-        std::tie(bn, bs, be, bw) = is_out_of_bounds(bbox);
-        if (n_rate == 0 && bn)
-            n_rate = std::nan("");
-        if (s_rate == 0 && bs)
-            s_rate = std::nan("");
-        if (e_rate == 0 && be)
-            e_rate = std::nan("");
-        if (w_rate == 0 && bw)
-            w_rate = std::nan("");
-
-        rates.at(step) = std::make_tuple(n_rate, s_rate, e_rate, w_rate);
-    }
 };
 
 /**
@@ -188,9 +184,9 @@ public:
  * from vector of spread rates.
  * Checks if any rate is nan to not include it in the average.
  */
-template<typename Raster>
-BBoxFloat
-average_spread_rate(const std::vector<SpreadRate<Raster>>& rates, unsigned step)
+template<typename Hosts, typename RasterIndex>
+BBoxFloat average_spread_rate(
+    const std::vector<SpreadRateAction<Hosts, RasterIndex>>& rates, unsigned step)
 {
     // loop through stochastic runs
     double n, s, e, w;

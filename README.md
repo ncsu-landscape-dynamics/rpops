@@ -2,15 +2,14 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/ncsu-landscape-dynamics/rpops/workflows/R-CMD-check/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3AR-CMD-check)
-[![lint](https://github.com/ncsu-landscape-dynamics/rpops/workflows/lint/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions?query=workflow%3Alint)
-[![Build Status](https://travis-ci.org/ncsu-landscape-dynamics/rpops.svg?branch=master)](https://travis-ci.org/ncsu-landscape-dynamics/rpops)
+[![lint](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/lint.yaml/badge.svg)](https://github.com/ncsu-landscape-dynamics/rpops/actions/workflows/lint.yaml)
 [![codecov](https://codecov.io/gh/ncsu-landscape-dynamics/rpops/branch/main/graph/badge.svg)](https://codecov.io/gh/ncsu-landscape-dynamics/rpops)
 [![DOI](https://zenodo.org/badge/143435350.svg)](https://zenodo.org/badge/latestdoi/143435350)
   <!-- badges: end -->
 
 ## Overview
 
-This is the R package for simulating spread of pests and pathogens. The package is an R package with multiple functions built around the PoPS (Pest or Pathogen Spread) model implemented in the C++ library maintained in the [PoPS Core Repository](https://github.com/ncsu-landscape-dynamics/pops-core). 
+This is an R package for simulating the spread of pests and pathogens. The package is an R package with multiple functions built around the PoPS (Pest or Pathogen Spread) model implemented in the C++ library maintained in the [PoPS Core Repository](https://github.com/ncsu-landscape-dynamics/pops-core). 
 
 PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit [popsmodel.org](https://popsmodel.org/). The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use [r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
 
@@ -101,7 +100,6 @@ Please see the [pops-core](https://github.com/ncsu-landscape-dynamics/pops-core#
 _(alphabetical order)_
 
 * Chris Jones
-* Margaret Lawrimore
 * Vaclav Petras
 * Anna Petrasova
 
@@ -111,6 +109,7 @@ _(alphabetical order)_
 
 * Zexi Chen
 * Devon Gaydos
+* Margaret Lawrimore
 * Nick Kruskamp
 * Francesco Tonini
 

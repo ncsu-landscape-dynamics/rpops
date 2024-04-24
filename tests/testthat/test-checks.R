@@ -19,7 +19,7 @@ test_that("Initial raster checks report correct errors and return a raster", {
   expect_equal(infected$raster[], terra::rast(infected_file)[])
 })
 
-test_that("Initial raster checks report correct errors and return a raster", {
+test_that("Secondary raster checks report correct errors and return a raster", {
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   infected <- terra::rast(infected_file)
@@ -284,10 +284,21 @@ test_that("Bayesian MNN checks work properly", {
   expect_equal(mnn_check$failed_check, prior_means_error)
 })
 
+test_that("Movements checks return errors when present and correct outputs", {
+  rast <- terra::rast(system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS"))
+  start_date <- "2009-01-01"
+  end_date <- "2009-12-31"
+  movements_file <- system.file("extdata", "simple20x20", "movements.csv", package = "PoPS")
+  x <- movements_file
 
-test_that("Multispecies checks return erros if any of the inputs aren't the
-          same length", {
+  check_moves <- movement_checks(movements_file, rast, start_date, end_date)
+  expect_equal(length(check_moves$movements), 2)
+  expect_equal(length(check_moves$movements_dates), 2)
+  expect_equal(nrow(check_moves$movements_r), 2)
+  expect_equal(ncol(check_moves$movements_r), 6)
+})
 
+test_that("Multispecies checks return erros if any of the inputs aren't the same length", {
   infected_files <- c("", "")
   host_file <- c("", "")
   total_populations_file <- c("", "")
@@ -1595,5 +1606,22 @@ test_that("Multispecies checks return erros if any of the inputs aren't the
                         use_spreadrates)
   expect_equal(multispecies_check$checks_passed, FALSE)
   expect_equal(multispecies_check$failed_check, PoPS:::species_length_error)
+})
 
+test_that("Multiple random seed draws and checks work", {
+  randoms_file <- "NULL.fs"
+  randoms <- random_seeds_file_checks(randoms_file)
+  expect_equal(randoms$checks_passed, FALSE)
+  expect_equal(randoms$failed_check, PoPS:::file_exists_error)
+
+  randoms_file <-
+    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
+  randoms <- random_seeds_file_checks(randoms_file)
+  expect_equal(randoms$checks_passed, FALSE)
+  expect_equal(randoms$failed_check, PoPS:::file_type_error)
+
+  randoms_file <-
+    system.file("extdata", "simple2x2", "randoms.csv", package = "PoPS")
+  randoms <- random_seeds_file_checks(randoms_file)
+  expect_equal(randoms$checks_passed, TRUE)
 })

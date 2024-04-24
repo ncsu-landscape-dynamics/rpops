@@ -11,23 +11,24 @@
 #' forecast spread of the pest/pathogen into the future.
 #'
 #' @inheritParams pops
-#' @param number_of_iterations how many iterations do you want to run to allow
-#' the calibration to converge at least 10
-#' @param number_of_cores enter how many cores you want to use (default = NA).
-#' If not set uses the # of CPU cores - 1. must be an integer >= 1
-#' @param write_outputs Either c("summary_outputs", or
-#' "None"). If not "None" output folder path must be provided.
+#' @param number_of_iterations how many iterations do you want to run to allow the calibration to
+#' converge at least 10
+#' @param number_of_cores enter how many cores you want to use (default = NA). If not set uses the
+#' # of CPU cores - 1. must be an integer >= 1
+#' @param write_outputs Either c("summary_outputs", "all_simulations", or "None"). If not
+#' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
 #'
-#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm median sd
 #' @importFrom doParallel registerDoParallel
 #' @importFrom foreach  registerDoSEQ %dopar% %do%
 #' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
-#' @importFrom utils write.csv
+#' @importFrom utils write.csv read.table read.csv
+#' @importFrom methods is
 #'
 #' @return list of infected and susceptible per year
 #' @export
@@ -99,7 +100,17 @@ pops_multirun <- function(infected_file,
                           network_filename = "",
                           network_movement = "walk",
                           use_initial_condition_uncertainty = FALSE,
-                          use_host_uncertainty = FALSE) {
+                          use_host_uncertainty = FALSE,
+                          weather_type = "deterministic",
+                          temperature_coefficient_sd_file = "",
+                          precipitation_coefficient_sd_file = "",
+                          dispersers_to_soils_percentage = 0,
+                          quarantine_directions = "",
+                          multiple_random_seeds = FALSE,
+                          file_random_seeds = NULL,
+                          use_soils = FALSE,
+                          soil_starting_pest_file = "",
+                          start_with_soil_populations = FALSE) {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -151,6 +162,7 @@ pops_multirun <- function(infected_file,
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
+  config$quarantine_directions <- quarantine_directions
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
   config$use_overpopulation_movements <- use_overpopulation_movements
@@ -174,6 +186,15 @@ pops_multirun <- function(infected_file,
   config$network_movement <- network_movement
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$temperature_coefficient_sd_file <- temperature_coefficient_sd_file
+  config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
+  config$multiple_random_seeds <- multiple_random_seeds
+  config$file_random_seeds <- file_random_seeds
+  config$use_soils <- use_soils
+  config$soil_starting_pest_file <- soil_starting_pest_file
+  config$start_with_soil_populations <- start_with_soil_populations
 
   config <- configuration(config)
 
@@ -181,9 +202,15 @@ pops_multirun <- function(infected_file,
     stop(config$failure)
   }
 
-  config$crs <- terra::crs(config$host)
-  # i <- NULL
+  if (config$multiple_random_seeds && is.null(config$file_random_seeds) &&
+      dir.exists(config$output_folder_path)) {
+    write.csv(config$random_seeds, paste0(config$output_folder_path, "forecast_random_seeds.csv"),
+              row.names = FALSE)
+  }
 
+  config$crs <- terra::crs(config$host)
+
+  i <- NULL
   cl <- parallel::makeCluster(config$core_count)
   doParallel::registerDoParallel(cl)
 
@@ -194,12 +221,17 @@ pops_multirun <- function(infected_file,
       .packages = c("PoPS", "terra")
     ) %dopar% {
 
-      config$random_seed <- round(stats::runif(1, 1, 1000000))
       config <- draw_parameters(config) # draws parameter set for the run
 
       if (config$use_initial_condition_uncertainty) {
         config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        while (any(config$infected < 0)) {
+          config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        }
         exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+        while (any(exposed2 < 0)) {
+          exposed2 <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        }
         exposed <- config$exposed
         exposed[[config$latency_period + 1]] <- exposed2
         config$exposed <- exposed
@@ -213,6 +245,9 @@ pops_multirun <- function(infected_file,
 
       if (config$use_host_uncertainty) {
         config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+        while (any(config$host > config$total_populations)) {
+          config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+        }
       } else {
         config$host <- config$host_mean
       }
@@ -231,7 +266,9 @@ pops_multirun <- function(infected_file,
       }
 
       data <- PoPS::pops_model(
-        random_seed = config$random_seed,
+        random_seed = config$random_seed[1],
+        multiple_random_seeds = config$multiple_random_seeds,
+        random_seeds = as.matrix(config$random_seeds[i, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
@@ -248,6 +285,7 @@ pops_multirun <- function(infected_file,
         mortality_tracker = config$mortality_tracker,
         mortality = config$mortality,
         quarantine_areas = config$quarantine_areas,
+        quarantine_directions = config$quarantine_directions,
         treatment_maps = config$treatment_maps,
         treatment_dates = config$treatment_dates,
         pesticide_duration = config$pesticide_duration,
@@ -259,12 +297,14 @@ pops_multirun <- function(infected_file,
         temperature = config$temperature,
         survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
+        weather_coefficient_sd = config$weather_coefficient_sd,
         res = config$res,
         rows_cols = config$rows_cols,
         time_step = config$time_step,
         reproductive_rate = config$reproductive_rate,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
+        soil_reservoirs = config$soil_reservoirs,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
@@ -306,8 +346,11 @@ pops_multirun <- function(infected_file,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
         network_filename = config$network_filename,
-        network_movement = config$network_movement
-      )
+        network_movement = config$network_movement,
+        weather_size = config$weather_size,
+        weather_type = config$weather_type,
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
+        use_soils = config$use_soils)
 
       run <- c()
       run$single_run <- data$infected
@@ -321,26 +364,26 @@ pops_multirun <- function(infected_file,
       run$quarantine_escape_direction <- data$quarantine_escape_directions
       run$exposed_runs <- data$exposed
 
-      # if (config$write_outputs == "all_simulations") {
-      #   infected_out <- terra::rast(config$infected_file)
-      #   susectible_out <- terra::rast(config$infected_file)
-      #   exposed_out <- terra::rast(config$infected_file)
-      #   for (q in seq_len(length(data$infected))) {
-      #     values(infected_out[[q]]) <- values(terra::rast(data$infected[[q]], crs = crs(infected_out), extent = ext(infected_out)))
-      #     terra::values(infected_out[[q]]) <- data$infected[[q]]
-      #     terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
-      #     for (p in seq_len(length(data$exposed[[q]])))
-      #     terra::values(exposed_out[[q]]) <- data$exposed[[q]][[p]]
-      #   }
-      #
-      #   dir.create(paste(config$output_folder_path, "pops_runs/", sep = ""))
-      #   file_name <- paste(config$output_folder_path, "pops_runs/infected_", i, ".tif", sep = "")
-      #   terra::writeRaster(infected_out, file_name, overwrite = TRUE)
-      #   file_name <- paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
-      #   terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
-      #   file_name <- paste(config$output_folder_path, "pops_runs/exposed_", i, ".tif", sep = "")
-      #   terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
-      # }
+      if (config$write_outputs == "all_simulations") {
+        infected_out <- terra::rast(config$infected_file)[[1]]
+        susectible_out <- infected_out
+        exposed_out <- infected_out
+        for (q in seq_len(length(data$infected))) {
+          terra::values(infected_out[[q]]) <- data$infected[[q]]
+          terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
+          for (p in seq_len(length(data$exposed[[q]])))
+          terra::values(exposed_out[[q]]) <- data$exposed[[q]][[p]]
+        }
+
+        dir.create(paste(config$output_folder_path, "pops_runs/", sep = ""))
+        file_name <- paste(config$output_folder_path, "pops_runs/infected_", i, ".tif", sep = "")
+        terra::writeRaster(infected_out, file_name, overwrite = TRUE)
+        file_name <-
+        paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
+        terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
+        file_name <- paste(config$output_folder_path, "pops_runs/exposed_", i, ".tif", sep = "")
+        terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
+      }
 
       run
     }
@@ -397,7 +440,7 @@ pops_multirun <- function(infected_file,
       north_rates[p, ] <- 0
     }
 
-    if (config$use_quarantine & length(quarantine_escape_runs[[p]]) ==
+    if (config$use_quarantine && length(quarantine_escape_runs[[p]]) ==
         length(probability_runs[[p]])) {
       escape_probability <- escape_probability + quarantine_escape_runs[[p]]
       quarantine_escapes[p, ] <- quarantine_escape_runs[[p]]
@@ -539,7 +582,7 @@ pops_multirun <- function(infected_file,
     west_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
   }
 
-  which_median <- function(x) raster::which.min(abs(x - median(x)))
+  which_median <- function(x) which.min(abs(x - median(x)))
 
   median_run_index <- which_median(infected_number[[ncol(infected_number)]])
   min_run_index <- which.min(infected_number[[ncol(infected_number)]])

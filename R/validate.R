@@ -21,7 +21,7 @@
 #' (posterior means)
 #' @param parameter_cov_matrix the parameter covariance matrix from the ABC
 #' calibration function (posterior covariance matrix)
-#' @param write_outputs Either c("summary_outputs", or "None"). If not
+#' @param write_outputs Either c("summary_outputs", "all_simulations", or "None"). If not
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
@@ -31,7 +31,7 @@
 #' @param use_configuration Boolean if you want to use configuration
 #' disagreement for comparing model runs. Default is FALSE.
 #'
-#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
+#' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm
 #' @importFrom doParallel registerDoParallel
@@ -40,7 +40,8 @@
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
 #' @importFrom Metrics rmse
-#' @importFrom utils write.csv
+#' @importFrom utils write.csv read.table read.csv
+#' @importFrom methods is
 #'
 #' @return a data frame of statistical measures of model performance.
 #' @export
@@ -115,7 +116,17 @@ validate <- function(infected_years_file,
                      use_distance = FALSE,
                      use_configuration = FALSE,
                      use_initial_condition_uncertainty = FALSE,
-                     use_host_uncertainty = FALSE) {
+                     use_host_uncertainty = FALSE,
+                     weather_type = "deterministic",
+                     temperature_coefficient_sd_file = "",
+                     precipitation_coefficient_sd_file = "",
+                     dispersers_to_soils_percentage = 0,
+                     quarantine_directions = "",
+                     multiple_random_seeds = FALSE,
+                     file_random_seeds = NULL,
+                     use_soils = FALSE,
+                     soil_starting_pest_file = "",
+                     start_with_soil_populations = FALSE) {
   config <- c()
   config$infected_years_file <- infected_years_file
   config$infected_file <- infected_file
@@ -168,6 +179,7 @@ validate <- function(infected_years_file,
   config$establishment_probability <- establishment_probability
   config$dispersal_percentage <- dispersal_percentage
   config$quarantine_areas_file <- quarantine_areas_file
+  config$quarantine_directions <- quarantine_directions
   config$use_quarantine <- use_quarantine
   config$use_spreadrates <- use_spreadrates
   config$use_overpopulation_movements <- use_overpopulation_movements
@@ -193,11 +205,27 @@ validate <- function(infected_years_file,
   config$use_distance <- use_distance
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
+  config$weather_type <- weather_type
+  config$temperature_coefficient_sd_file <- temperature_coefficient_sd_file
+  config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
+  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
+  config$multiple_random_seeds <- multiple_random_seeds
+  config$file_random_seeds <- file_random_seeds
+  config$use_soils <- use_soils
+  config$soil_starting_pest_file <- soil_starting_pest_file
+  config$start_with_soil_populations <- start_with_soil_populations
 
   config <- configuration(config)
 
   if (!is.null(config$failure)) {
     stop(config$failure)
+  }
+
+  if (config$multiple_random_seeds && is.null(config$file_random_seeds) &&
+      dir.exists(config$output_folder_path)) {
+    write.csv(config$random_seeds, paste0(config$output_folder_path, "validation_random_seeds.csv"),
+              row.names = FALSE)
+
   }
 
   i <- NULL
@@ -212,12 +240,17 @@ validate <- function(infected_years_file,
       .packages = c("terra", "PoPS", "foreach")
     ) %dopar% {
 
-      config$random_seed <- round(stats::runif(1, 1, 1000000))
       config <- draw_parameters(config) # draws parameter set for the run
 
       if (config$use_initial_condition_uncertainty) {
         config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        while (any(config$infected < 0)) {
+          config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        }
         exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+        while (any(exposed2 < 0)) {
+          exposed2 <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
+        }
         exposed <- config$exposed
         exposed[[config$latency_period + 1]] <- exposed2
         config$exposed <- exposed
@@ -231,6 +264,9 @@ validate <- function(infected_years_file,
 
       if (config$use_host_uncertainty) {
         config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+        while (any(config$host > config$total_populations)) {
+          config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+        }
       } else {
         config$host <- config$host_mean
       }
@@ -249,7 +285,9 @@ validate <- function(infected_years_file,
       }
 
       data <- pops_model(
-        random_seed = config$random_seed,
+        random_seed = config$random_seed[i],
+        multiple_random_seeds = config$multiple_random_seeds,
+        random_seeds = as.matrix(config$random_seeds[i, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
@@ -266,6 +304,7 @@ validate <- function(infected_years_file,
         mortality_tracker = config$mortality_tracker,
         mortality = config$mortality,
         quarantine_areas = config$quarantine_areas,
+        quarantine_directions = config$quarantine_directions,
         treatment_maps = config$treatment_maps,
         treatment_dates = config$treatment_dates,
         pesticide_duration = config$pesticide_duration,
@@ -277,12 +316,14 @@ validate <- function(infected_years_file,
         temperature = config$temperature,
         survival_rates = config$survival_rates,
         weather_coefficient = config$weather_coefficient,
+        weather_coefficient_sd = config$weather_coefficient_sd,
         res = config$res,
         rows_cols = config$rows_cols,
         time_step = config$time_step,
         reproductive_rate = config$reproductive_rate,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
+        soil_reservoirs = config$soil_reservoirs,
         mortality_rate = config$mortality_rate,
         mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
@@ -324,8 +365,11 @@ validate <- function(infected_years_file,
         network_min_distance = config$network_min_distance,
         network_max_distance = config$network_max_distance,
         network_filename = config$network_filename,
-        network_movement = config$network_movement
-      )
+        network_movement = config$network_movement,
+        weather_size = config$weather_size,
+        weather_type = config$weather_type,
+        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
+        use_soils = config$use_soils)
 
 
       all_disagreement <-
@@ -336,10 +380,10 @@ validate <- function(infected_years_file,
           # need to assign reference, comparison, and mask in inner loop since
           # terra objects are pointers and pointers using %dopar%
           comparison <- terra::rast(config$infected_file)[[1]]
-          reference <- terra::rast(config$infected_file)[[1]]
+          reference <- comparison
+          mask <- comparison
           terra::values(comparison) <- data$infected[[q]]
           terra::values(reference) <- config$infection_years2[[q]]
-          mask <- terra::rast(config$infected_file)[[1]]
           terra::values(mask) <- config$mask_matrix
           ad <-
             quantity_allocation_disagreement(reference,

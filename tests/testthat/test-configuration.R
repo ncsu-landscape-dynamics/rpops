@@ -7,7 +7,7 @@ config$number_of_observations <- 68
 config$prior_number_of_observations <- 0
 config$prior_means <- c(1, 1, 0.99, 1000, 0, 0, 0, 0)
 config$prior_cov_matrix <- matrix(ncol = 8, nrow = 8, 0.1)
-config$params_to_estimate <- c(T, T, T, T, F, F)
+config$params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
 config$number_of_generations <- 4
 config$generation_size <- 10
 config$checks <- c(1200, 100000, 900, 1000)
@@ -21,8 +21,10 @@ config$parameter_means <- c(0, 1, 0.99, 1000, 0, 0, 0, 0)
 config$parameter_cov_matrix <- matrix(ncol = 8, nrow = 8, 0)
 config$temp <- FALSE
 config$temperature_coefficient_file <- ""
+config$temperature_coefficient_sd_file <- ""
 config$precip <- FALSE
 config$precipitation_coefficient_file <- ""
+config$precipitation_coefficient_sd_file <- ""
 config$model_type <- "SEI"
 config$latency_period <- 14
 config$time_step <- "day"
@@ -88,6 +90,11 @@ config$survival_rate_day <- 0
 config$survival_rates_file <- ""
 config$use_initial_condition_uncertainty <- FALSE
 config$use_host_uncertainty <- FALSE
+config$multiple_random_seeds <- FALSE
+config$random_seeds <- NULL
+config$weather_type <- "deterministic"
+config$use_soils <- FALSE
+config$soil_starting_pest_file <- ""
 
 test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)
@@ -416,6 +423,10 @@ test_that("Configuration returns proper values when no errors present", {
   config2 <- configuration(config)
   expect_equal(config2$failure, NULL)
 
+  config$use_multiple_random_seeds <- TRUE
+  config2 <- configuration(config)
+  expect_equal(config2$failure, NULL)
+
   config$infected_files <-
     c(system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS"))
   config$parameter_means <- list(c(0.2, 20, 0.99, 6000, 0, 0, 0, 0))
@@ -496,4 +507,9 @@ test_that("configuration returns proper errors", {
   config$use_host_uncertainty <- TRUE
   config2 <- configuration(config)
   expect_equal(config2$failure, host_uncert_error)
+
+  config$use_host_uncertainty <- FALSE
+  config$weather_type <- "s"
+  config2 <- configuration(config)
+  expect_equal(config2$failure, weather_type_error)
 })

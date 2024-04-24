@@ -860,7 +860,6 @@ protected:
      * @brief Read segments from a stream.
      *
      * @param stream Input stream with segments
-     * @param node_ids Container with node IDs to use
      */
     template<typename InputStream>
     void load_segments(InputStream& stream)
@@ -884,11 +883,11 @@ protected:
                     "Node ID must be greater than zero: " + node_1_text + " "
                     + node_2_text));
             }
-            // if (node_1_id == node_2_id) {
-            //     throw std::runtime_error(
-            //         std::string("Edge cannot begin and end with the same node: ")
-            //         + node_1_text + " " + node_2_text);
-            // }
+            if (node_1_id == node_2_id) {
+                throw std::runtime_error(
+                    std::string("Edge cannot begin and end with the same node: ")
+                    + node_1_text + " " + node_2_text);
+            }
             Segment segment;
 
             if (has_probability) {

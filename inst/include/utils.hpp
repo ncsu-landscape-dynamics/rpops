@@ -16,6 +16,9 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+#ifdef UNUSED
+#undef UNUSED
+#endif
 /*!
  * Macro to mark unused variables (including parameters) and silence the warning
  * while documenting that it is intentionally unused.
@@ -29,15 +32,24 @@
  * ```
  *
  * To be replaced by `[[maybe_unused]]` once we migrate to C++17 or higher.
+ *
+ * We remove any existing UNUSED definition from elsewhere, to ensure we have one
+ * which is compatible with our code.
  */
 #define UNUSED(expr) (void)(expr)
 
+// We assume that if the constants are defined elsewhere, they can be used instead.
+#ifndef M_PI
 #define M_PI 3.14159265358979323846
+#endif
+#ifndef PI
 #define PI M_PI
+#endif
 
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <map>
 
 /**
  * Return true if _container_ contains _value_.
@@ -45,7 +57,16 @@
 template<typename Container, typename Value>
 bool container_contains(const Container& container, const Value& value)
 {
-    return container.find(value) != container.end();
+    return std::find(container.begin(), container.end(), value) != container.end();
+}
+
+/**
+ * Return true if _container_ contains _key_.
+ */
+template<typename Key, typename Value>
+bool container_contains(const std::map<Key, Value>& container, const Key& key)
+{
+    return container.count(key) > 0;
 }
 
 /**
@@ -82,6 +103,56 @@ pick_random_item(const Container& container, Generator& generator)
     auto index = distribution(generator);
     // For small containers, this is expected to be fast for both sets and vectors.
     return *std::next(container.begin(), index);
+}
+
+/** Rotate elements in a container to the left by one
+ *
+ * Rotates (moves) elements in a container to the left (anticlockwise)
+ * by one. The second element is moved to the front and the first
+ * element is moved to the back.
+ */
+template<typename Container>
+void rotate_left_by_one(Container& container)
+{
+    std::rotate(container.begin(), container.begin() + 1, container.end());
+}
+
+/** Draws n elements from a vector. Expects n to be equal or less than v.size().
+ */
+template<typename Generator>
+std::vector<int> draw_n_from_v(std::vector<int> v, unsigned n, Generator& generator)
+{
+    if (n > v.size())
+        n = v.size();
+
+    std::shuffle(v.begin(), v.end(), generator);
+    v.erase(v.begin() + n, v.end());
+    return v;
+}
+
+/** Draws n elements from a cohort of rasters. Expects n to be equal or less than
+ *  sum of cohorts at cell (i, j).
+ */
+template<typename Generator, typename IntegerRaster, typename RasterIndex = int>
+std::vector<int> draw_n_from_cohorts(
+    std::vector<IntegerRaster>& cohorts,
+    int n,
+    RasterIndex row,
+    RasterIndex col,
+    Generator& generator)
+{
+    std::vector<int> categories;
+    unsigned index = 0;
+    for (auto& raster : cohorts) {
+        categories.insert(categories.end(), raster(row, col), index);
+        index += 1;
+    }
+    std::vector<int> draw = draw_n_from_v(categories, n, generator);
+    std::vector<int> cohort_counts;
+    for (index = 0; index < cohorts.size(); index++) {
+        cohort_counts.push_back(std::count(draw.begin(), draw.end(), index));
+    }
+    return cohort_counts;
 }
 
 /**
@@ -291,7 +362,7 @@ std::string quarantine_enum_to_string(Direction type)
 }
 
 /**
- * Create a list of suitable cells in from a host raster.
+ * Create a list of suitable cells from a host raster.
  *
  * Suitable cell is defined as cell with value higher than zero, i.e., there is at least
  * one host.
@@ -319,4 +390,28 @@ std::vector<std::vector<RasterIndex>> find_suitable_cells(const RasterType& rast
     return cells;
 }
 
+/**
+ * Create a list of suitable cells from a list of host rasters.
+ *
+ * @see find_suitable_cells(const RasterType&)
+ */
+template<typename RasterIndex, typename RasterType>
+std::vector<std::vector<RasterIndex>>
+find_suitable_cells(const std::vector<const RasterType*>& rasters)
+{
+    std::vector<std::vector<RasterIndex>> cells;
+    // The assumption is that the raster is sparse (otherwise we would not be doing
+    // this), so we have no number for the reserve method.
+    for (RasterIndex row = 0; row < rasters[0]->rows(); ++row) {
+        for (RasterIndex col = 0; col < rasters[0]->cols(); ++col) {
+            for (const auto& raster : rasters) {
+                if (raster->operator()(row, col) > 0) {
+                    cells.push_back({row, col});
+                    break;
+                }
+            }
+        }
+    }
+    return cells;
+}
 #endif  // POPS_UTILS_HPP

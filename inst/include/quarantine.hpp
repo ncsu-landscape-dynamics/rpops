@@ -37,12 +37,46 @@ std::ostream& operator<<(std::ostream& os, const Direction& obj)
 typedef std::tuple<double, Direction> DistDir;
 typedef std::tuple<bool, DistDir> EscapeDistDir;
 typedef std::vector<EscapeDistDir> EscapeDistDirs;
+typedef std::map<Direction, bool> Directions;
+
+/*! Get a map with direction and bool parsed from string with letters N S E W
+ *  separated by delimeter. Empty string means all directions are true.
+ *
+ * Throws an std::invalid_argument exception if the value was not
+ * found or is not supported (which is the same thing).
+ */
+Directions directions_from_string(const std::string& text, char delimiter = ',')
+{
+    Directions directions;
+    for (auto& direction : {Direction::N, Direction::E, Direction::S, Direction::W})
+        directions[direction] = text.empty() ? true : false;
+
+    if (text.empty())
+        return directions;
+    std::string direction;
+    std::istringstream directionStream(text);
+    while (std::getline(directionStream, direction, delimiter)) {
+        std::map<std::string, Direction> mapping{
+            {"N", Direction::N},
+            {"E", Direction::E},
+            {"S", Direction::S},
+            {"W", Direction::W}};
+        try {
+            directions[mapping.at(direction)] = true;
+        }
+        catch (const std::out_of_range&) {
+            throw std::invalid_argument(
+                "directions_from_string: Invalid value '" + direction + "' provided");
+        }
+    }
+    return directions;
+}
 
 /**
  * Class storing and computing quarantine escape metrics for one simulation.
  */
 template<typename IntegerRaster, typename RasterIndex = int>
-class QuarantineEscape
+class QuarantineEscapeAction
 {
 private:
     RasterIndex width_;
@@ -53,6 +87,7 @@ private:
     double north_south_resolution_;
     unsigned num_steps;
     std::vector<BBoxInt> boundaries;
+    Directions directions_;
     // mapping between quarantine areas is from map and index
     std::map<int, int> boundary_id_idx_map;
     std::vector<EscapeDistDir> escape_dist_dirs;
@@ -62,38 +97,36 @@ private:
      * Different quarantine areas are represented by different integers.
      * 0 in the raster means no quarantine area.
      */
-    void quarantine_boundary(
-        const IntegerRaster& quarantine_areas,
-        const std::vector<std::vector<int>>& suitable_cells)
+    void quarantine_boundary(const IntegerRaster& quarantine_areas)
     {
         int n, s, e, w;
         int idx = 0;
-        for (auto indices : suitable_cells) {
-            int i = indices[0];
-            int j = indices[1];
-            auto value = quarantine_areas(i, j);
-            if (value > 0) {
-                auto search = boundary_id_idx_map.find(value);
-                int bidx;
-                if (search == boundary_id_idx_map.end()) {
-                    boundary_id_idx_map.insert(std::make_pair(value, idx));
-                    boundaries.push_back(
-                        std::make_tuple(height_ - 1, 0, 0, width_ - 1));
-                    bidx = idx;
-                    ++idx;
+        for (int i = 0; i < height_; i++) {
+            for (int j = 0; j < width_; j++) {
+                auto value = quarantine_areas(i, j);
+                if (value > 0) {
+                    auto search = boundary_id_idx_map.find(value);
+                    int bidx;
+                    if (search == boundary_id_idx_map.end()) {
+                        boundary_id_idx_map.insert(std::make_pair(value, idx));
+                        boundaries.push_back(
+                            std::make_tuple(height_ - 1, 0, 0, width_ - 1));
+                        bidx = idx;
+                        ++idx;
+                    }
+                    else
+                        bidx = search->second;
+                    std::tie(n, s, e, w) = boundaries.at(bidx);
+                    if (i < n)
+                        n = i;
+                    if (i > s)
+                        s = i;
+                    if (j > e)
+                        e = j;
+                    if (j < w)
+                        w = j;
+                    boundaries.at(bidx) = std::make_tuple(n, s, e, w);
                 }
-                else
-                    bidx = search->second;
-                std::tie(n, s, e, w) = boundaries.at(bidx);
-                if (i < n)
-                    n = i;
-                if (i > s)
-                    s = i;
-                if (j > e)
-                    e = j;
-                if (j < w)
-                    w = j;
-                boundaries.at(bidx) = std::make_tuple(n, s, e, w);
             }
         }
     }
@@ -112,19 +145,21 @@ private:
         int mindist = std::numeric_limits<int>::max();
         std::tie(n, s, e, w) = boundary;
         DistDir closest;
-        if ((i - n) * north_south_resolution_ < mindist) {
+        if (directions_.at(Direction::N)
+            && (i - n) * north_south_resolution_ < mindist) {
             mindist = (i - n) * north_south_resolution_;
             closest = std::make_tuple(mindist, Direction::N);
         }
-        if ((s - i) * north_south_resolution_ < mindist) {
+        if (directions_.at(Direction::S)
+            && (s - i) * north_south_resolution_ < mindist) {
             mindist = (s - i) * north_south_resolution_;
             closest = std::make_tuple(mindist, Direction::S);
         }
-        if ((e - j) * west_east_resolution_ < mindist) {
+        if (directions_.at(Direction::E) && (e - j) * west_east_resolution_ < mindist) {
             mindist = (e - j) * west_east_resolution_;
             closest = std::make_tuple(mindist, Direction::E);
         }
-        if ((j - w) * west_east_resolution_ < mindist) {
+        if (directions_.at(Direction::W) && (j - w) * west_east_resolution_ < mindist) {
             mindist = (j - w) * west_east_resolution_;
             closest = std::make_tuple(mindist, Direction::W);
         }
@@ -132,46 +167,45 @@ private:
     }
 
 public:
-    QuarantineEscape(
+    QuarantineEscapeAction(
         const IntegerRaster& quarantine_areas,
         double ew_res,
         double ns_res,
         unsigned num_steps,
-        const std::vector<std::vector<int>>& suitable_cells)
+        std::string directions = "")
         : width_(quarantine_areas.cols()),
           height_(quarantine_areas.rows()),
           west_east_resolution_(ew_res),
           north_south_resolution_(ns_res),
           num_steps(num_steps),
+          directions_(directions_from_string(directions)),
           escape_dist_dirs(
               num_steps,
               std::make_tuple(
                   false,
                   std::make_tuple(std::numeric_limits<double>::max(), Direction::None)))
     {
-        quarantine_boundary(quarantine_areas, suitable_cells);
+        quarantine_boundary(quarantine_areas);
     }
 
-    QuarantineEscape() = delete;
+    QuarantineEscapeAction() = delete;
 
     /**
      * Computes whether infection in certain step escaped from quarantine areas
      * and if not, computes and saves minimum distance and direction to quarantine areas
      * for the specified step. Aggregates over all quarantine areas.
      */
-    void infection_escape_quarantine(
-        const IntegerRaster& infected,
-        const IntegerRaster& quarantine_areas,
-        unsigned step,
-        const std::vector<std::vector<int>>& suitable_cells)
+    template<typename Hosts>
+    void
+    action(const Hosts& hosts, const IntegerRaster& quarantine_areas, unsigned step)
     {
 
         DistDir min_dist_dir =
             std::make_tuple(std::numeric_limits<double>::max(), Direction::None);
-        for (auto indices : suitable_cells) {
+        for (auto indices : hosts.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            if (!infected(i, j))
+            if (!hosts.infected_at(i, j))
                 continue;
             int area = quarantine_areas(i, j);
             if (area == 0) {
@@ -234,7 +268,8 @@ public:
  */
 template<typename IntegerRaster>
 double quarantine_escape_probability(
-    const std::vector<QuarantineEscape<IntegerRaster>> escape_infos, unsigned step)
+    const std::vector<QuarantineEscapeAction<IntegerRaster>> escape_infos,
+    unsigned step)
 {
     bool escape;
     DistDir distdir;
@@ -254,7 +289,8 @@ double quarantine_escape_probability(
  */
 template<typename IntegerRaster>
 std::vector<DistDir> distance_direction_to_quarantine(
-    const std::vector<QuarantineEscape<IntegerRaster>> escape_infos, unsigned step)
+    const std::vector<QuarantineEscapeAction<IntegerRaster>> escape_infos,
+    unsigned step)
 {
     bool escape;
     DistDir distdir;
@@ -276,7 +312,8 @@ std::vector<DistDir> distance_direction_to_quarantine(
  */
 template<typename IntegerRaster>
 std::string write_quarantine_escape(
-    const std::vector<QuarantineEscape<IntegerRaster>> escape_infos, unsigned num_steps)
+    const std::vector<QuarantineEscapeAction<IntegerRaster>> escape_infos,
+    unsigned num_steps)
 {
     std::stringstream ss;
     ss << std::setprecision(1) << std::fixed;

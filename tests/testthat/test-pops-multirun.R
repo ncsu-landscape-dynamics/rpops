@@ -99,6 +99,16 @@ test_that("Multirun model outputs work", {
   network_movement <- "walk"
   use_initial_condition_uncertainty <- FALSE
   use_host_uncertainty <- FALSE
+  weather_type <- "deterministic"
+  temperature_coefficient_sd_file <- ""
+  precipitation_coefficient_sd_file <- ""
+  dispersers_to_soils_percentage <- 0
+  quarantine_directions <- ""
+  multiple_random_seeds <- FALSE
+  file_random_seeds <- NULL
+  use_soils <- FALSE
+  soil_starting_pest_file <- ""
+  start_with_soil_populations <- FALSE
 
   data <- pops_multirun(infected_file,
                         host_file,
@@ -258,7 +268,19 @@ test_that("Multirun model outputs work", {
                         write_outputs,
                         output_folder_path,
                         network_filename,
-                        network_movement)
+                        network_movement,
+                        use_initial_condition_uncertainty = FALSE,
+                        use_host_uncertainty = FALSE,
+                        weather_type = "deterministic",
+                        temperature_coefficient_sd_file = "",
+                        precipitation_coefficient_sd_file = "",
+                        dispersers_to_soils_percentage = 0,
+                        quarantine_directions = "",
+                        multiple_random_seeds = FALSE,
+                        file_random_seeds = NULL,
+                        use_soils = FALSE,
+                        soil_starting_pest_file = "",
+                        start_with_soil_populations = FALSE)
 
   expect_equal(length(data), 19)
   expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
@@ -485,7 +507,7 @@ test_that("Multirun model outputs work with mask", {
   end_date <- "2019-12-31"
   lethal_temperature <- -35
   lethal_temperature_month <- 1
-  random_seed <- 42
+  random_seed <- NA
   treatments_file <- ""
   treatment_dates <- c("2019-11-01")
   treatment_method <- "ratio"
@@ -536,6 +558,7 @@ test_that("Multirun model outputs work with mask", {
   write_outputs <- "None"
   output_folder_path <- tempdir()
   network_filename <- ""
+
 
   data <- pops_multirun(infected_file,
                         host_file,
@@ -705,7 +728,6 @@ test_that("Multirun model outputs work with mask", {
   expect_equal(data$south_rate[[2]], 0)
   expect_equal(data$north_rate[[1]], 0)
   expect_equal(data$north_rate[[2]], 0)
-
 
   use_initial_condition_uncertainty <- TRUE
   use_host_uncertainty <- FALSE
@@ -968,3 +990,184 @@ test_that("Multirun model outputs work with mask", {
   expect_equal(data$north_rate[[2]], 0)
 })
 
+test_that("Multirun model outputs work with writing all simulations and random seeds", {
+  skip_on_os("windows")
+  infected_file <-
+    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
+  host_file <-
+    system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
+  total_populations_file <-
+    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  temperature_file <- ""
+  temperature_coefficient_file <- ""
+  precipitation_coefficient_file <- ""
+  use_lethal_temperature <- FALSE
+  temp <- FALSE
+  precip <- FALSE
+  season_month_start <- 5
+  season_month_end <- 11
+  time_step <- "month"
+  start_date <- "2019-01-01"
+  end_date <- "2019-12-31"
+  lethal_temperature <- -35
+  lethal_temperature_month <- 1
+  random_seed <- 42
+  treatments_file <- ""
+  treatment_dates <- c("2019-11-01")
+  treatment_method <- "ratio"
+  management <- FALSE
+  mortality_on <- FALSE
+  mortality_rate <- 0
+  mortality_time_lag <- 0
+  mortality_frequency <- "Year"
+  mortality_frequency_n <- 1
+  natural_kernel_type <- "cauchy"
+  anthropogenic_kernel_type <- "cauchy"
+  natural_dir <- "NONE"
+  anthropogenic_dir <- "NONE"
+  pesticide_duration <- c(0)
+  pesticide_efficacy <- 1.0
+  random_seed <- 42
+  output_frequency <- "year"
+  movements_file <- ""
+  use_movements <- FALSE
+  number_of_iterations <- 2
+  number_of_cores <- 2
+  model_type <- "SI"
+  latency_period <- 0
+  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  start_exposed <- FALSE
+  generate_stochasticity <- TRUE
+  establishment_stochasticity <- TRUE
+  movement_stochasticity <- TRUE
+  dispersal_stochasticity <- TRUE
+  establishment_probability <- 0.5
+  dispersal_percentage <- 0.99
+  quarantine_areas_file <- ""
+  use_quarantine <- FALSE
+  output_frequency_n <- 1
+  use_spreadrates <- TRUE
+  mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
+  use_survival_rates <- FALSE
+  survival_rate_month <- 3
+  survival_rate_day <- 15
+  survival_rates_file <- ""
+  network_movement <- "walk"
+  network_movement <- "walk"
+  use_overpopulation_movements <- FALSE
+  overpopulation_percentage <- 0
+  leaving_percentage <- 0
+  leaving_scale_coefficient <- 1
+  exposed_file <- ""
+  write_outputs <- "all_simulations"
+  output_folder_path <- tempdir()
+  network_filename <- ""
+  use_initial_condition_uncertainty <- FALSE
+  use_host_uncertainty <- FALSE
+  weather_type <- "deterministic"
+  temperature_coefficient_sd_file <- ""
+  precipitation_coefficient_sd_file <- ""
+  dispersers_to_soils_percentage <- 0
+  quarantine_directions <- ""
+  multiple_random_seeds <- TRUE
+  file_random_seeds <- NULL
+  use_soils <- FALSE
+  soil_starting_pest_file <- ""
+  start_with_soil_populations <- FALSE
+
+  data <- pops_multirun(infected_file,
+                        host_file,
+                        total_populations_file,
+                        parameter_means,
+                        parameter_cov_matrix,
+                        temp,
+                        temperature_coefficient_file,
+                        precip,
+                        precipitation_coefficient_file,
+                        model_type,
+                        latency_period,
+                        time_step,
+                        season_month_start,
+                        season_month_end,
+                        start_date,
+                        end_date,
+                        use_survival_rates,
+                        survival_rate_month,
+                        survival_rate_day,
+                        survival_rates_file,
+                        use_lethal_temperature,
+                        temperature_file,
+                        lethal_temperature,
+                        lethal_temperature_month,
+                        mortality_on,
+                        mortality_rate,
+                        mortality_time_lag,
+                        mortality_frequency,
+                        mortality_frequency_n,
+                        management,
+                        treatment_dates,
+                        treatments_file,
+                        treatment_method,
+                        natural_kernel_type,
+                        anthropogenic_kernel_type,
+                        natural_dir,
+                        anthropogenic_dir,
+                        number_of_iterations,
+                        number_of_cores,
+                        pesticide_duration,
+                        pesticide_efficacy,
+                        random_seed,
+                        output_frequency,
+                        output_frequency_n,
+                        movements_file,
+                        use_movements,
+                        start_exposed,
+                        generate_stochasticity,
+                        establishment_stochasticity,
+                        movement_stochasticity,
+                        dispersal_stochasticity,
+                        establishment_probability,
+                        dispersal_percentage,
+                        quarantine_areas_file,
+                        use_quarantine,
+                        use_spreadrates,
+                        use_overpopulation_movements,
+                        overpopulation_percentage,
+                        leaving_percentage,
+                        leaving_scale_coefficient,
+                        exposed_file,
+                        mask,
+                        write_outputs,
+                        output_folder_path,
+                        network_filename,
+                        network_movement,
+                        use_initial_condition_uncertainty,
+                        use_host_uncertainty,
+                        weather_type,
+                        temperature_coefficient_sd_file,
+                        precipitation_coefficient_sd_file,
+                        dispersers_to_soils_percentage,
+                        quarantine_directions,
+                        multiple_random_seeds,
+                        file_random_seeds,
+                        use_soils,
+                        soil_starting_pest_file,
+                        start_with_soil_populations)
+
+  expect_equal(length(data), 19)
+  expect_equal(terra::as.matrix(data$single_run[[1]], wide = TRUE),
+               terra::as.matrix(terra::rast(infected_file), wide = TRUE))
+  expect_equal(data$number_infecteds[[1]], 1)
+  expect_equal(data$number_infecteds[[2]], 0)
+  expect_equal(data$infected_areas[[1]], 10000)
+  expect_equal(data$infected_areas[[2]], 0)
+  expect_equal(data$west_rate[[1]], 0)
+  expect_equal(data$west_rate[[2]], 0)
+  expect_equal(data$east_rate[[1]], 0)
+  expect_equal(data$east_rate[[2]], 0)
+  expect_equal(data$south_rate[[1]], 0)
+  expect_equal(data$south_rate[[2]], 0)
+  expect_equal(data$north_rate[[1]], 0)
+  expect_equal(data$north_rate[[2]], 0)
+})

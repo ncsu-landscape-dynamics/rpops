@@ -1,217 +1,5 @@
 # These functions are designed to reduce code complexity and the need to copy
 # and past code across main functions
-
-# add error variables that can be returned from functions and used in tests
-file_exists_error <- "does not exist."
-
-detailed_file_exists_error <- function(file_name) {
-  error_message <-
-    paste( deparse(substitute(file_name)), "does not exist. Current path is", file_name, sep = " ")
-  return(error_message)
-}
-frequency_error <-
-  "Output frequency must be either 'week', 'month', 'day', 'year', 'time_step', or 'every_n_steps'"
-raster_type_error <-
-  "file is not one of '.grd', '.tif', '.img', or '.vrt'"
-extent_error <-
-  "Extents of input rasters do not match. Ensure that all of your input rasters have the same
-extent"
-resolution_error <-
-  "Resolution of input rasters do not match. Ensure that all of your input rasters have the same
-resolution"
-crs_error <-
-  "Coordinate reference system (crs) of input rasters do not match. Ensure that all of your input
-rasters have the same crs"
-treatment_length_error <-
-  "Length of list for treatment dates and treatments_file must be equal"
-pesticide_length_error <-
-  "Length of list for treatment dates and pesticide_duration must be equal"
-treatment_method_error <-
-  "treatment method is not one of the valid treatment options"
-time_step_error <-
-  "Time step must be one of 'week', 'month' or 'day'"
-output_frequency_error <-
-  "Output frequency is more frequent than time_step. The minimum output_frequency you can use is
-  the time_step of your simulation. You can set the output_frequency to 'time_step' to default to
-  the most frequent output possible"
-date_format_error <-
-  "End time and/or start time not of type numeric and/or in format YYYY-MM-DD"
-output_type_error <-
-  "Output frequency must be either 'week', 'month', 'day', 'year', 'time_step', or 'every_n_steps'"
-prior_means_error <-
-  "There are not enough prior_means to communte the posterior means for all paramaters"
-prior_cov_matrix_error <-
-  "The prior covariance matrix is not the correct dimension to match the calibrated covariance
-  matrix in order to compute the posterior covariance matrix"
-# multi-species errors based on matching lengths of parameters
-species_length_error <-
-  "Length of list for species and infected_files must be equal"
-parameter_length_error <-
-  "Length of list for parameter_means and infected_files must be equal"
-cov_matrix_length_error <-
-  "Length of list for parameter_cov_matrix and infected_files must be equal"
-model_type_length_error <-
-  "Length of list for model_type and infected_files must be equal"
-natural_kernel_length_error <-
-  "Length of list for infected_files and natural_kernel_type must be equal"
-anthropogenic_kernel_length_error <-
-  "Length of list for infected_files and anthropogenic_kernel_type must be equal"
-natural_dir_length_error <-
-  "Length of list for infected_files and natural_dir must be equal"
-anthropogenic_dir_length_error <-
-  "Length of list for infected_files and anthropogenic_dir must be equal"
-host_file_length_error <-
-  "Length of list for infected_files and host_file must be equal"
-total_population_length_error <-
-  "Length of list for infected_files and total_populations_file must be equal"
-temp_length_error <-
-  "Length of list for infected_files and temp must be equal"
-temperature_coefficient_length_error <-
-  "Length of list for infected_files and temperature_coefficient_file must be equal"
-precip_length_error <-
-  "Length of list for infected_files and precip must be equal"
-precipitation_coefficient_length_error <-
-  "Length of list for infected_files and precipitation_coefficient_file must be equal"
-latency_period_length_error <-
-  "Length of list for infected_files and latency_period must be equal"
-time_step_length_error <-
-  "Length of list for infected_files and time_step must be equal"
-season_month_start_length_error <-
-  "Length of list for infected_files and season_month_start must be equal"
-season_month_end_length_error <-
-  "Length of list for infected_files and season_month_end must be equal"
-use_lethal_length_error <-
-  "Length of list for infected_files and use_lethal_temperature must be equal"
-temperature_file_length_error <-
-  "Length of list for infected_files and temperature_file must be equal"
-lethal_temperature_length_error <-
-  "Length of list for infected_files and lethal_temperature must be equal"
-lethal_temperature_month_length_error <-
-  "Length of list for infected_files and lethal_temperature_month must be equal"
-mortality_on_length_error <-
-  "Length of list for infected_files and mortality_on must be equal"
-mortality_rate_length_error <-
-  "Length of list for infected_files and mortality_rate must be equal"
-mortality_time_lag_length_error <-
-  "Length of list for infected_files and mortality_time_lag must be equal"
-movements_file_length_error <-
-  "Length of list for infected_files and movements_file must be equal"
-use_movements_length_error <-
-  "Length of list for infected_files and use_movements must be equal"
-start_exposed_length_error <-
-  "Length of list for infected_files and start_exposed must be equal"
-quarantine_areas_length_error <-
-  "Length of list for infected_files and quarantine_areas_file must be equal"
-use_quarantine_length_error <-
-  "Length of list for infected_files and use_quarantine must be equal"
-use_spreadrates_length_error <-
-  "Length of list for infected_files and use_spreadrates must be equal"
-file_type_error <-
-  "file is not one of '.csv' or '.txt'"
-natural_kernel_error <-
-  "Natural kernel type not one of 'cauchy', 'exponential', 'uniform', 'deterministic neighbor',
-  'power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic'"
-anthropogenic_kernel_error <-
-  "Anthropogenic kernel type not one of 'cauchy', 'exponential', 'uniform', 'deterministic
-  neighbor', 'power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network'"
-covariance_mat_error <-
-  "parameter covariance matrix is not 8 x 8"
-paramter_means_error <-
-  "parameter means is not a vector of length 8"
-write_outputs_error <-
-  "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')"
-output_path_error <-
-  "output path doesn't exist"
-model_type_error <-
-  "Model type is not a valid type options are 'SI' or 'SEI'"
-season_month_error <-
-  "Season month start or end not between 1 and 12"
-latency_period_error <-
-  "Model type is set to SEI but the latency period is less than 1"
-treatment_option_error <-
-  "treatment method is not one of the valid treatment options"
-network_min_distance_small_error <-
-  "network min distance is less than half the cell resolution"
-network_min_distance_large_error <-
-  "network min distance is greater than the network max distance"
-network_max_distance_large_error <-
-  "network max distance is greater than the resoultion times the minimum NS or EW extent"
-network_movement_error <- "network movement is not of type 'walk', 'jump', or 'teleport'"
-
-infection_years_length_error <- function(num_layers_infected_years, number_of_time_steps) {
-  error_message <-
-    paste("The infection years file must have enough layers to match the number of outputs from the
-    model. The number of layers of your infected year file is", num_layers_infected_years,
-    "and the number of outputs is", number_of_time_steps, sep = " ")
-  return(error_message)
-}
-
-success_metric_error <- "success_metric is not one of the listed options."
-
-initial_cond_uncert_error <-
-  "use_initial_condition_uncertainty is TRUE but the number of layers in the infected file is not 2.
-  This should be a raster file with 2 layers the first being the mean value and the second the
-  stadard deviation"
-
-host_uncert_error <-
-  "use_host_uncertainty is TRUE but the number of layers in the host file is not 2. This should be
-  a raster file with 2 layers the first being the mean value and the second the stadard deviation."
-## calibration success metric option
-success_metric_options <- c("quantity", "allocation", "configuration", "quantity and allocation",
-                            "quantity and configuration", "allocation and configuration",
-                            "quantity, allocation, and configuration", "accuracy", "precision",
-                            "recall", "specificity", "accuracy and precision",
-                            "accuracy and specificity", "accuracy and recall",
-                            "precision and recall", "precision and specificity",
-                            "recall and specificity", "accuracy, precision, and recall",
-                            "accuracy, precision, and specificity",
-                            "accuracy, recall, and specificity",
-                            "precision, recall, and specificity",
-                            "accuracy, precision, recall, and specificity",
-                            "rmse", "distance", "mcc", "mcc and quantity", "mcc and distance",
-                            "rmse and distance", "mcc and configuration", "mcc and RMSE",
-                            "mcc, quantity, and configuration")
-
-quantity_list <- c("quantity", "quantity and allocation", "quantity and configuration",
-                   "quantity, allocation, and configuration", "mcc and quantity",
-                   "mcc, quantity, and configuration")
-
-allocation_list <- c("allocation", "quantity and allocation", "allocation and configuration",
-                     "quantity, allocation, and configuration")
-
-configuration_list <- c("configuration",  "quantity and configuration",
-                        "allocation and configuration", "quantity, allocation, and configuration",
-                        "mcc and configuration", "mcc, quantity, and configuration")
-
-accurracy_list <- c("accuracy", "accuracy and precision", "accuracy and specificity",
-                    "accuracy and recall", "accuracy, precision, and recall",
-                    "accuracy, precision, and specificity",
-                    "accuracy, recall, and specificity",
-                    "accuracy, precision, recall, and specificity")
-
-precision_list <- c("precision", "accuracy and precision", "precision and recall",
-                    "precision and specificity", "accuracy, precision, and recall",
-                    "accuracy, precision, and specificity",
-                    "precision, recall, and specificity",
-                    "accuracy, precision, recall, and specificity")
-
-recall_list <- c("recall", "accuracy and recall", "precision and recall", "recall and specificity",
-                 "accuracy, precision, and recall", "accuracy, recall, and specificity",
-                 "precision, recall, and specificity",
-                 "accuracy, precision, recall, and specificity")
-
-specificity_list <- c("specificity", "accuracy and specificity", "precision and specificity",
-                      "recall and specificity", "accuracy, precision, and specificity",
-                      "accuracy, recall, and specificity",  "precision, recall, and specificity",
-                      "accuracy, precision, recall, and specificity")
-
-rmse_list <- c("rmse", "rmse and distance", "mcc and RMSE")
-
-distance_list <- c("distance", "mcc and distance", "rmse and distance")
-
-mcc_list <- c("mcc", "mcc and quantity", "mcc and distance", "mcc and configuration",
-              "mcc and RMSE", "mcc, quantity, and configuration")
-
 "%notin%" <- Negate("%in%")
 
 set_success_metrics <- function(config) {
@@ -244,6 +32,7 @@ set_success_metrics <- function(config) {
 
   if (config$success_metric %in% precision_list) {
     config$use_precision <- TRUE
+
   }
 
   if (config$success_metric %in% recall_list) {
@@ -269,12 +58,196 @@ set_success_metrics <- function(config) {
   return(config)
 }
 
+create_cal_print <- function(config) {
+  config$acceptance_rate_info <- paste(
+    "generation:                ",
+    config$current_bin,
+    "\nparticle:                ",
+    config$current_particles,
+    "\nacceptance rate:         ",
+    format(config$acceptance_rate, digits = 5), sep = " ")
+
+  if (config$use_quantity) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nquantity:                ",
+                                         config$quantity,
+                                         "\nquantity threshold:      ",
+                                         config$allocation_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_allocation) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nallocation:              ",
+                                         config$allocation,
+                                         "\nallocation threshold:    ",
+                                         config$allocation_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_configuration) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nconfiguration:           ",
+                                         config$configuration_dis,
+                                         "\nconfiguration threshold: ",
+                                         config$configuration_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_accuracy) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\naccuracy:                ",
+                                         config$accuracy,
+                                         "\naccuracy threshold:      ",
+                                         config$accuracy_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_precision) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nprecision:               ",
+                                         config$precision,
+                                         "\nprecision threshold:     ",
+                                         config$precision_threshold,
+                                         sep = " ")
+
+  }
+
+  if (config$use_recall) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nrecall:                  ",
+                                         config$recall,
+                                         "\nrecall threshold:        ",
+                                         config$recall_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_specificity) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nspecificity:             ",
+                                         config$specificity,
+                                         "\nspecificity threshold:   ",
+                                         config$specificity_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_rmse) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nrmse:                    ",
+                                         config$rmse,
+                                         "\nrmse threshold:          ",
+                                         config$rmse_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_distance) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\ndistance difference:     ",
+                                         config$distance_difference,
+                                         "\ndistance threshold:      ",
+                                         config$distance_threshold,
+                                         sep = " ")
+  }
+
+  if (config$use_mcc) {
+    config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                         "\nMCC:                     ",
+                                         config$mcc,
+                                         "\nMCC threshold:           ",
+                                         config$mcc_threshold,
+                                         sep = " ")
+  }
+
+  config$acceptance_rate_info <- paste(config$acceptance_rate_info,
+                                       "\n\n",
+                                       sep = " ")
+  return(config)
+}
+
+draw_parameters <- function(config) {
+  parameters <-
+    MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
+  while (any(parameters[1] < 0 |
+             parameters[2] <= 0 |
+             parameters[3] > 1 |
+             parameters[3] <= 0 |
+             parameters[4] <= 0 |
+             parameters[5] < 0 |
+             parameters[6] < 0 |
+             parameters[7] < config$res$ew_res / 2 |
+             parameters[7] > parameters[8] |
+             parameters[8] >
+             min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
+
+    config$number_of_draws <-
+      nrow(parameters[parameters[1] < 0 |
+                        parameters[2] <= 0 |
+                        parameters[3] > 1 |
+                        parameters[3] <= 0 |
+                        parameters[4] <= 0 |
+                        parameters[5] < 0 |
+                        parameters[6] < 0 |
+                        parameters[7] < config$res$ew_res / 2 |
+                        parameters[7] > parameters[8] |
+                        parameters[8] >
+                        min(config$rows_cols$num_cols, config$rows_cols$num_rows) *
+                        config$res$ew_res
+      ])
+
+    if (is.null(config$number_of_draws)) {
+      config$number_of_draws <- 1
+    }
+
+    parameters[parameters[1] < 0 |
+                 parameters[2] <= 0 |
+                 parameters[3] > 1 |
+                 parameters[3] <= 0 |
+                 parameters[4] <= 0 |
+                 parameters[5] < 0 |
+                 parameters[6] < 0 |
+                 parameters[7] < config$res$ew_res / 2 |
+                 parameters[7] > parameters[8] |
+                 parameters[8] >
+                 (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)] <-
+      MASS::mvrnorm(
+        config$number_of_draws,
+        config$parameter_means,
+        config$parameter_cov_matrix
+      )
+  }
+  config$reproductive_rate <- parameters[1]
+  config$natural_distance_scale <- parameters[2]
+  config$percent_natural_dispersal <- parameters[3]
+  config$anthropogenic_distance_scale <- parameters[4]
+  config$natural_kappa <- parameters[5]
+  config$anthropogenic_kappa <- parameters[6]
+  config$network_min_distance <- parameters[7]
+  config$network_max_distance <- parameters[8]
+
+  return(config)
+}
+
+create_random_seeds <- function(n) {
+  random_seeds <-
+    data.frame(disperser_generation = sample(1:999999999, n, replace = FALSE),
+               natural_dispersal = sample(1:999999999, n, replace = FALSE),
+               anthropogenic_dispersal = sample(1:999999999999, n, replace = FALSE),
+               establishment = sample(1:999999999, n, replace = FALSE),
+               weather = sample(1:999999999, n, replace = FALSE),
+               movement = sample(1:999999999, n, replace = FALSE),
+               overpopulation = sample(1:999999999, n, replace = FALSE),
+               survival_rate = sample(1:999999999, n, replace = FALSE),
+               soil = sample(1:999999999, n, replace = FALSE))
+
+  return(random_seeds)
+}
+
 # creates a matrix from a matrix of mean values and a matrix of standard deviations. The two
 # matrices must be the same size.
 matrix_norm_distribution <- function(mean_matrix, sd_matrix) {
   new_matrix <-
     round(matrix(mapply(function(x, y) {rnorm(x, y, n = 1)}, x = mean_matrix, y = sd_matrix),
-                 nrow(mean_matrix), ncol(mean_matrix)))
+                 nrow(mean_matrix), ncol(mean_matrix)), digits = 0)
   new_matrix[is.na(new_matrix)] <- 0
   new_matrix[new_matrix < 0] <- 0
   return(new_matrix)
@@ -292,388 +265,8 @@ output_from_raster_mean_and_sd <- function(x) {
   return(x2)
 }
 
-# function for getting all infected locations based on rook or queens rule for
-# assessing clusters of infections.
-get_all_infected <- function(rast, direction = 4) {
-  # get infections as points
-  p <- terra::as.points(rast)
-  rast <- terra::classify(rast, matrix(c(0, NA), ncol = 2, byrow = TRUE), right = NA)
-  names(rast) <- "group"
-  names(p) <- "data"
-  p <- p[p$data > 0]
-  infections <- data.frame(terra::extract(rast, p, cells = TRUE))
-  infections <- infections[, 2:3]
-  names(infections) <- c("detections", "cells")
-  if (direction %in% c(4, 8)) {
-    infections$i <- terra::colFromCell(rast, infections$cells)
-    infections$j <- terra::rowFromCell(rast, infections$cells)
-    r <- terra::patches(rast, direction = direction, zeroAsNA = TRUE)
-    infections$group <- terra::extract(r, p)$patches
-  } else {
-    return("direction should be either of 4 or 8")
-  }
-
-  infections$group_size <- 0
-  groups <- data.frame(table(infections$group))
-  groups$Var1 <- as.numeric(groups$Var1)
-  for (m in seq_len(nrow(groups))) {
-    infections$group_size[infections$group == groups$Var1[m]] <- groups$Freq[m]
-  }
-  names(infections) <-
-    c("detections", "cell_number", "i", "j", "group", "group_size")
-  return(infections)
-}
-
-# returns the foci of infestation for a spatRaster Object
-get_foci <- function(rast) {
-  indexes <- get_all_infected(rast)
-  center <-
-    data.frame(i = round(mean(indexes$i), digits = 0), j = round(mean(indexes$j, digits = 0)))
-  return(center)
-}
-
-# returns the border of the infected area for a spatRaster
-get_infection_border <- function(rast) {
-  s <- get_all_infected(rast)
-  min_max_col <-
-    data.frame(row_number = seq(1, nrow(rast), 1),
-               min_j = rep(0, nrow(rast)),
-               max_j = rep(0, nrow(rast)))
-  min_max_row <-
-    data.frame(column_number = seq(1, ncol(rast), 1),
-               min_i = rep(0, ncol(rast)),
-               max_i = rep(0, ncol(rast)))
-  for (i in seq_len(nrow(rast))) {
-    if (length(s$j[s$i %in% i]) > 0) {
-      min_max_col$max_j[i] <- max(s$j[s$i %in% i])
-      min_max_col$min_j[i] <- min(s$j[s$i %in% i])
-    } else {
-      min_max_col$max_j[i] <- 0
-      min_max_col$min_j[i] <- 0
-    }
-  }
-
-  for (j in seq_len(ncol(rast))) {
-    if (length(s$i[s$j %in% j]) > 0) {
-      min_max_row$max_i[j] <- max(s$i[s$j %in% j])
-      min_max_row$min_i[j] <- min(s$i[s$j %in% j])
-    } else {
-      min_max_row$max_i[j] <- 0
-      min_max_row$min_i[j] <- 0
-    }
-  }
-
-  border1 <-
-    data.frame(rows = rep(min_max_col$row_number, 2),
-               cols = c(min_max_col$min_j, min_max_col$max_j))
-  border2 <-
-    data.frame(rows = c(min_max_row$min_i, min_max_row$max_i),
-               cols = rep(min_max_row$column_number))
-  border <- rbind(border1, border2)
-  borders <- data.frame(table(border[, 1:2]))
-  borders <- borders[borders$Freq > 0, ]
-  borders <- borders[borders$rows != 0, ]
-  borders <- borders[borders$cols != 0, ]
-  borders$rows <- as.numeric(as.character(borders$rows))
-  borders$cols <- as.numeric(as.character(borders$cols))
-
-  names(borders) <- c("i", "j", "freq")
-  return(borders)
-}
-
-# returns the distances of points from either the Foci, the Border, or a set of
-# points
-get_infection_distances <- function(rast, method = "Foci", points = c()) {
-  infections <- get_all_infected(rast)
-  if (method == "Foci") {
-    points <- get_foci(rast)
-  } else if (method == "Border") {
-    points <- get_infection_border(rast)
-  } else if (method == "Points") {
-    points <- points
-  } else {
-    return("method must be one of 'Foci', 'Border', or'Points'")
-  }
-  for (i in seq_len(nrow(infections))) {
-    minimum_distance <- Inf
-    for (l in seq_len(nrow(points))) {
-      new_distance <-
-        sqrt((abs(infections$i[i] - points$i[l]))^2 + (abs(infections$j[i] - points$j[l]))^2)
-      if (new_distance < minimum_distance) {
-        minimum_distance <- new_distance
-      }
-    }
-    infections$distance[i] <- minimum_distance
-  }
-
-  return(infections)
-}
-
-# returns a set of treatments for a group of species infestations based on
-# multiple rules
-treatment_auto <- function(rasts,
-                           rasts2,
-                           method = "Foci",
-                           priority = "group size",
-                           number_of_locations = 1,
-                           points = c(),
-                           treatment_efficacy = 1,
-                           buffer_cells = 1.5,
-                           direction_first = TRUE,
-                           treatment_priority = "equal",
-                           treatment_rank = c(0)) {
-  # get distances and groups and group size
-  if (method == "Points") {
-    points <- points
-  }
-
-  if (treatment_priority == "equal") {
-    rasts <-
-      terra::tapp(rasts,
-                  index = rep(1, terra::nlyr(rasts)),
-                  fun = sum)
-    rasts2 <-
-      terra::tapp(rasts2,
-                  index = rep(1, terra::nlyr(rasts2)),
-                  fun = sum)
-  } else if (treatment_priority == "ranked") {
-    for (r in seq_len(length(treatment_rank))) {
-      if (r == 1) {
-        raste <- rast(rasts[[match(r, treatment_rank)]])
-        terra::values(raste) <- terra::values(rasts[[match(r, treatment_rank)]])
-        raste2 <- rast(rasts2[[match(r, treatment_rank)]])
-        terra::values(raste2) <-
-          terra::values(rasts2[[match(r, treatment_rank)]])
-      } else if (r > 1) {
-        raste <- c(raste, rasts[[match(r, treatment_rank)]])
-        raste2 <- c(raste2, rasts2[[match(r, treatment_rank)]])
-      }
-    }
-    rasts <- raste
-    rasts2 <- raste2
-  }
-
-  total_infs <- c(0)
-  cells_treated <- 0
-  treatment <- rasts[[1]]
-  treatment[] <- 0
-  names(treatment) <- treatment
-  for (q in 1:terra::nlyr(rasts)) {
-    rast <- rasts[[q]]
-    rast2 <- rasts2[[q]]
-    total_infs[q] <- sum(rast[rast > 0] > 0)
-    if (q > 1) {
-      treatment <- treatment
-      cells_treated <- cells_treated
-    }
-
-    if (total_infs[q] > 0 && cells_treated[[1]] < number_of_locations) {
-
-      infections <- get_infection_distances(rast = rast, method = method, points = points)
-      infections$host <- 0
-      for (p in seq_len(nrow(infections))) {
-        infections$host[p] <- rast2[infections$i[p], infections$j[p]]
-      }
-
-      if (priority == "group size") {
-        if (direction_first) {
-          infections <-
-            infections[order(infections$distance,
-                             infections$group_size,
-                             decreasing = c(FALSE, TRUE)), ]
-        } else {
-          infections <-
-            infections[order(infections$group_size,
-                             infections$distance,
-                             decreasing = c(TRUE, FALSE)), ]
-        }
-        groups_unique <- unique(infections$group)
-        for (group in groups_unique) {
-          managed_group <- infections[infections$group == group, ]
-          for (m in seq_len(nrow(managed_group))) {
-            i <- managed_group$i[m]
-            j <- managed_group$j[m]
-            if (treatment[i, j] < 1 & (rast[i, j] | rast2[i, j])) {
-              value <- min(1, treatment[i, j]$treatment + 1)
-              if (value > treatment[i, j]) {
-                cells_treated <- cells_treated + value - treatment[i, j]
-              } else {
-                cells_treated <- cells_treated + value
-              }
-              treatment[i, j] <- value
-              if (cells_treated >= number_of_locations) {
-                break
-                }
-            }
-          }
-          for (m in seq_len(nrow(managed_group))) {
-            i <- managed_group$i[m]
-            j <- managed_group$j[m]
-            i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
-            j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
-            i_s <- i_s[i_s > 0]
-            j_s <- j_s[j_s > 0]
-            for (s in seq_len(length(i_s))) {
-              for (n in seq_len(length(j_s))) {
-                if (treatment[i_s[s], j_s[n]] < 1 &
-                    (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
-                  if (cells_treated >= number_of_locations) {
-                    break
-                  }
-                  if (abs(i - i_s[s]) > buffer_cells |
-                      abs(j - j_s[n]) > buffer_cells) {
-                    value <-
-                      min(1, treatment[i_s[s], j_s[n]]$treatment +
-                            (buffer_cells - floor(buffer_cells)))
-                    if (value > treatment[i_s[s], j_s[n]]) {
-                      cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
-                    } else {
-                      cells_treated <- cells_treated + value
-                    }
-                    treatment[i_s[s], j_s[n]] <- value
-                  } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
-                    if (treatment[i_s[s], j_s[n]] < 1) {
-                      if (cells_treated >= number_of_locations) {
-                        break
-                      }
-                      cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
-                      treatment[i_s[s], j_s[n]] <- 1
-                    }
-                  }
-                }
-                if (cells_treated >= number_of_locations) {
-                  break
-                  }
-              }
-              if (cells_treated >= number_of_locations) {
-                break
-                }
-            }
-            if (cells_treated >= number_of_locations) {
-              break
-              }
-          }
-          if (cells_treated >= number_of_locations) {
-            break
-            }
-        }
-      } else if (priority == "host") {
-        if (direction_first) {
-          infections <-
-            infections[order(infections$distance,
-                             infections$host,
-                             decreasing = c(FALSE, TRUE)), ]
-        } else {
-          infections <-
-            infections[order(infections$host,
-                             infections$distance,
-                             decreasing = c(TRUE, FALSE)), ]
-        }
-        for (t in seq_len(nrow(infections))) {
-          i <- infections$i[t]
-          j <- infections$j[t]
-          if (treatment[i, j] < 1) {
-            cells_treated <- cells_treated + (1 - treatment[i, j])
-            treatment[i, j] <- 1
-          }
-          i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
-          j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
-          i_s <- i_s[i_s > 0]
-          j_s <- j_s[j_s > 0]
-          for (s in seq_len(length(i_s))) {
-            for (n in seq_len(length(j_s))) {
-              if (cells_treated >= number_of_locations) {
-                break
-                }
-              if (treatment[i_s[s], j_s[n]] < 1 &
-                  (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
-                if (abs(i - i_s[s]) > buffer_cells |
-                    abs(j - j_s[n]) > buffer_cells) {
-                  value <-
-                    min(1, treatment[i_s[s], j_s[n]]$treatment +
-                          (buffer_cells - floor(buffer_cells)))
-                  if (value > treatment[i_s[s], j_s[n]]) {
-                    cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
-                  } else {
-                    cells_treated <- cells_treated + value
-                  }
-                  treatment[i_s[s], j_s[n]] <- value
-                } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
-                  if (treatment[i_s[s], j_s[n]] < 1) {
-                    cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
-                    treatment[i_s[s], j_s[n]] <- 1
-                  }
-                }
-              }
-            }
-          }
-          if (cells_treated >= number_of_locations) {
-            break
-          }
-        }
-      } else if (priority == "infected") {
-        if (direction_first) {
-          infections <-
-            infections[order(infections$distance,
-                             infections$detections,
-                             decreasing = c(FALSE, TRUE)), ]
-        } else {
-          infections <-
-            infections[order(infections$detections,
-                             infections$distance,
-                             decreasing = c(TRUE, FALSE)), ]
-        }
-        for (t in seq_len(nrow(infections))) {
-          i <- infections$i[t]
-          j <- infections$j[t]
-          if (treatment[i, j] < 1) {
-            cells_treated <- cells_treated + (1 - treatment[i, j])
-            treatment[i, j] <- 1
-          }
-          i_s <- seq(floor(i - buffer_cells), ceiling(i + buffer_cells), 1)
-          j_s <- seq(floor(j - buffer_cells), ceiling(j + buffer_cells), 1)
-          i_s <- i_s[i_s > 0]
-          j_s <- j_s[j_s > 0]
-          for (s in seq_len(length(i_s))) {
-            for (n in seq_len(length(j_s))) {
-              if (cells_treated >= number_of_locations) {
-                break
-              }
-              if (treatment[i_s[s], j_s[n]] < 1 &
-                  (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]])) {
-                if (abs(i - i_s[s]) > buffer_cells |
-                    abs(j - j_s[n]) > buffer_cells) {
-                  value <-
-                    min(1, treatment[i_s[s], j_s[n]]$treatment +
-                          (buffer_cells - floor(buffer_cells)))
-                  if (value > treatment[i_s[s], j_s[n]]) {
-                    cells_treated <- cells_treated + value - treatment[i_s[s], j_s[n]]
-                  } else {
-                    cells_treated <- cells_treated + value
-                  }
-                  treatment[i_s[s], j_s[n]] <- value
-                } else if (rast[i_s[s], j_s[n]] | rast2[i_s[s], j_s[n]]) {
-                  if (treatment[i_s[s], j_s[n]] < 1) {
-                    cells_treated <- cells_treated + (1 - treatment[i_s[s], j_s[n]])
-                    treatment[i_s[s], j_s[n]] <- 1
-                  }
-                }
-              }
-
-            }
-          }
-          if (cells_treated >= number_of_locations) {
-            break
-          }
-        }
-      } else {
-        return('priority needs to be one of "group size", "host", or "infected"')
-      }
-    }
-  }
-  treatment <- treatment[[1]]
-
-  treatment <- treatment * treatment_efficacy
-
-  return(treatment)
+# Combine two standard deviation spatRasters
+combined_sd <- function(v1, v2, m1, m2, n1, n2) {
+  (((n1 - 1) * v1 + (n2 - 1) * v2) / (n1 + n2 - 1)) +
+    (((n1 * n2) * (m1 - m2)^2) / ((n1 + n2) * (n1 + n2 - 1)))
 }

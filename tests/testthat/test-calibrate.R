@@ -4,9 +4,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   infected_years_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif",
-                package = "PoPS"
-    )
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
   host_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   prior_means <- c(0, 21, 1, 500, 0, 0)
@@ -29,9 +27,7 @@ test_that("Model stops if success metric is incorrect", {
   infected_file <-
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   infected_years_file <-
-    system.file("extdata", "simple20x20", "infected_years.tif",
-                package = "PoPS"
-    )
+    system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
   host_file <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   prior_means <- c(0, 21, 1, 500, 0, 0)
@@ -49,7 +45,7 @@ test_that("Model stops if success metric is incorrect", {
                          host_file =  host_file,
                          total_populations_file =  host_file,
                          success_metric = success_metric),
-               success_metric_error)
+                success_metric_error)
 })
 
 test_that("ABC calibration has correctly formatted returns with multiple output
@@ -62,7 +58,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -138,6 +134,15 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             survival_rate_day <- 15
             survival_rates_file <- ""
             network_movement <- "walk"
+            use_initial_condition_uncertainty <- FALSE
+            use_host_uncertainty <- FALSE
+            weather_type <- "deterministic"
+            temperature_coefficient_sd_file <- ""
+            precipitation_coefficient_sd_file <- ""
+            dispersers_to_soils_percentage <- 0
+            quarantine_directions <- ""
+            multiple_random_seeds <- FALSE
+            random_seeds <- NULL
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -213,7 +218,16 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               output_folder_path,
                               network_filename,
                               network_movement,
-                              success_metric)
+                              success_metric,
+                              use_initial_condition_uncertainty,
+                              use_host_uncertainty,
+                              weather_type,
+                              temperature_coefficient_sd_file,
+                              precipitation_coefficient_sd_file,
+                              dispersers_to_soils_percentage,
+                              quarantine_directions,
+                              multiple_random_seeds,
+                              random_seeds)
 
             expect_length(data$posterior_means, 8)
             expect_vector(data$posterior_means, ptype = double(), size = 8)
@@ -224,8 +238,8 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -245,7 +259,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -406,8 +420,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -418,14 +432,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_generations * generation_size)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
 
           })
-
-
 
 test_that("ABC calibration has correctly formatted returns and runs with a
           single output comparison with network", {
@@ -435,7 +445,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -596,8 +606,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -608,10 +618,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_generations * generation_size)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
 
           })
 
@@ -623,7 +631,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -784,8 +792,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -796,10 +804,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_generations * generation_size)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
 
           })
 
@@ -812,7 +818,7 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -977,8 +983,8 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -989,10 +995,8 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_generations * generation_size)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
 
           })
 
@@ -1005,7 +1009,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1163,8 +1167,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -1175,10 +1179,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_iterations)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
 
           })
 
@@ -1192,7 +1194,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1350,8 +1352,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -1362,10 +1364,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_iterations)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
           })
 
 
@@ -1379,7 +1379,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1537,8 +1537,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -1549,10 +1549,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_iterations)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
           })
 
 
@@ -1561,24 +1559,20 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             skip_on_ci()
             skip_on_covr()
             infected_years_file <-
-              system.file("extdata", "simple20x20", "infected_years.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
             number_of_observations <- 68
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
-              system.file("extdata", "simple20x20", "initial_infection.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
             host_file <-
-              system.file("extdata", "simple20x20", "host.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
             total_populations_file <-
-              system.file("extdata", "simple20x20", "all_plants.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
             temp <- FALSE
             temperature_coefficient_file <- ""
             precip <- FALSE
@@ -1611,8 +1605,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             anthropogenic_kappa <- 0
             pesticide_duration <- c(0)
             pesticide_efficacy <- 1.0
-            mask <- system.file("extdata", "simple20x20", "mask.tif",
-                                package = "PoPS")
+            mask <- system.file("extdata", "simple20x20", "mask.tif", package = "PoPS")
             output_frequency <- "week"
             output_frequency_n <- 1
             movements_file <- ""
@@ -1729,8 +1722,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -1741,10 +1734,8 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_iterations)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
           })
 
 
@@ -1753,13 +1744,12 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             skip_on_ci()
             skip_on_covr()
             infected_years_file <-
-              system.file("extdata", "simple20x20", "infected_years.tif",
-                          package = "PoPS")
+              system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
             number_of_observations <- 68
             prior_number_of_observations <- 0
             prior_means <- c(0, 0, 0, 0, 0, 0)
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
-            params_to_estimate <- c(T, T, T, T, F, F)
+            params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
             generation_size <- 2
             infected_file <-
@@ -1921,8 +1911,8 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
-            expect_gt(data$posterior_means[3], 0)
-            expect_lt(data$posterior_means[3], 1)
+            expect_gte(data$posterior_means[3], 0)
+            expect_lte(data$posterior_means[3], 1)
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
@@ -1933,8 +1923,6 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             expect_equal(nrow(data$posterior_cov_matrix), 8)
             expect_equal(ncol(data$posterior_cov_matrix), 8)
             expect_type(data$total_number_of_observations, "double")
-            expect_equal(data$total_number_of_observations,
-                         number_of_observations)
-            expect_equal(nrow(data$raw_calibration_data),
-                         number_of_iterations)
+            expect_equal(data$total_number_of_observations, number_of_observations)
+            expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
           })

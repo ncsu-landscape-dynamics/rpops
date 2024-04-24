@@ -17,16 +17,14 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     }
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in%
-    c("grd", "tif", "img", "vrt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% raster_list))) {
     checks_passed <- FALSE
     failed_check <- raster_type_error
   }
 
   if (checks_passed) {
     if (use_s3) {
-      aws.s3::save_object(object = x, bucket = bucket,
-                          file = x, check_region = FALSE)
+      aws.s3::save_object(object = x, bucket = bucket, file = x, check_region = FALSE)
       r <- terra::rast(x)
     } else {
       r <- terra::rast(x)
@@ -39,7 +37,7 @@ initial_raster_checks <- function(x, use_s3 = FALSE, bucket = "") {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -61,8 +59,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     }
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in%
-    c("grd", "tif", "img", "vrt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% raster_list))) {
     checks_passed <- FALSE
     failed_check <- raster_type_error
   }
@@ -108,7 +105,7 @@ secondary_raster_checks <- function(x, x2, use_s3 = FALSE, bucket = "") {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -156,7 +153,7 @@ treatment_checks <- function(treatment_stack,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -175,13 +172,12 @@ treatment_metric_checks <- function(treatment_method) {
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
 
-time_checks <- function(end_date, start_date, time_step,
-                        output_frequency, output_frequency_n) {
+time_checks <- function(end_date, start_date, time_step, output_frequency, output_frequency_n) {
   checks_passed <- TRUE
 
   if (checks_passed && !(time_step %in% list("week", "month", "day"))) {
@@ -199,9 +195,7 @@ time_checks <- function(end_date, start_date, time_step,
     failed_check <- date_format_error
   }
 
-  if (checks_passed && !(output_frequency %in% list(
-    "week", "month", "day", "year", "time_step", "every_n_steps", "final_step"
-  ))) {
+  if (checks_passed && !(output_frequency %in% output_frequency_list)) {
     checks_passed <- FALSE
     failed_check <- output_type_error
   }
@@ -270,14 +264,12 @@ time_checks <- function(end_date, start_date, time_step,
       checks_passed, number_of_time_steps, number_of_years,
       number_of_outputs, output_frequency
     )
-    names(outs) <- c(
-      "checks_passed", "number_of_time_steps",
-      "number_of_years", "number_of_outputs", "output_frequency"
-    )
+    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years",
+                     "number_of_outputs", "output_frequency")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -315,7 +307,7 @@ bayesian_mnn_checks <- function(prior_means,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -516,7 +508,7 @@ multispecies_checks <- function(species,
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
@@ -529,27 +521,19 @@ movement_checks <- function(x, rast, start_date, end_date) {
     failed_check <- file_exists_error
   }
 
-  if (checks_passed && !all((tools::file_ext(x) %in% c("csv", "txt")))) {
+  if (checks_passed && !all((tools::file_ext(x) %in% csv_list))) {
     checks_passed <- FALSE
     failed_check <- file_type_error
   }
 
   if (checks_passed) {
     moves <- read.csv(x, header = TRUE)
-    movement_from <- sp::SpatialPointsDataFrame(moves[, 1:2],
-      data = moves[, c(1:2, 5:6)],
-      proj4string = sp::CRS("+init=epsg:4326")
-    )
-    movement_to <- sp::SpatialPointsDataFrame(moves[, 3:4],
-      data = moves[, 3:6],
-      proj4string = sp::CRS("+init=epsg:4326")
-    )
-    movement_from <-
-      suppressWarnings(sp::spTransform(movement_from, CRSobj = terra::crs(rast)))
-    movement_to <-
-      suppressWarnings(sp::spTransform(movement_to, CRSobj = terra::crs(rast)))
-    move_from <- terra::vect(movement_from)
-    move_to <- terra::vect(movement_to)
+    movement_from <- moves[, c(1:2, 5:6)]
+    movement_to <- moves[, c(3:4, 5:6)]
+    movement_from <- vect(movement_from, geom = c("from_long", "from_lat"), crs = "+init=epsg:4326")
+    movement_to <- vect(movement_to, geom = c("to_long", "to_lat"), crs = "+init=epsg:4326")
+    move_from <- terra::project(movement_from, rast)
+    move_to <- terra::project(movement_to, rast)
     cell_from <- terra::extract(rast, move_from, cells = TRUE)
     cell_to <- terra::extract(rast, move_to, cells = TRUE)
     rowcol_from <- terra::rowColFromCell(rast, cell_from[, 3])
@@ -593,71 +577,42 @@ movement_checks <- function(x, rast, start_date, end_date) {
 
   if (checks_passed) {
     outs <- list(checks_passed, movement, movements_dates, movements_r)
-    names(outs) <-
-      c("checks_passed", "movements", "movements_dates", "movements_r")
+    names(outs) <- c("checks_passed", "movements", "movements_dates", "movements_r")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)
-    names(outs) <- c("checks_passed", "failed_check")
+    names(outs) <- failed_check_list
     return(outs)
   }
 }
 
-draw_parameters <- function(config) {
-  parameters <-
-    MASS::mvrnorm(1,
-                  config$parameter_means,
-                  config$parameter_cov_matrix)
-  while (any(parameters[1] < 0 |
-             parameters[2] <= 0 |
-             parameters[3] > 1 |
-             parameters[3] <= 0 |
-             parameters[4] <= 0 |
-             parameters[5] < 0 |
-             parameters[6] < 0 |
-             parameters[7] < config$res$ew_res / 2 |
-             parameters[7] > parameters[8] |
-             parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
-
-    config$number_of_draws <- nrow(parameters[parameters[1] < 0 |
-                                                parameters[2] <= 0 |
-                                                parameters[3] > 1 |
-                                                parameters[3] <= 0 |
-                                                parameters[4] <= 0 |
-                                                parameters[5] < 0 |
-                                                parameters[6] < 0 |
-                                                parameters[7] < config$res$ew_res / 2 |
-                                                parameters[7] > parameters[8] |
-                                                parameters[8] > min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res])
-
-    if (is.null(config$number_of_draws)) {
-      config$number_of_draws <- 1
-    }
-
-    parameters[parameters[1] < 0 |
-                 parameters[2] <= 0 |
-                 parameters[3] > 1 |
-                 parameters[3] <= 0 |
-                 parameters[4] <= 0 |
-                 parameters[5] < 0 |
-                 parameters[6] < 0 |
-                 parameters[7] < config$res$ew_res / 2 |
-                 parameters[7] > parameters[8] |
-                 parameters[8] > (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)] <-
-      MASS::mvrnorm(
-        config$number_of_draws,
-        config$parameter_means,
-        config$parameter_cov_matrix
-      )
+random_seeds_file_checks <- function(x, number_of_iterations = 1) {
+  checks_passed <- TRUE
+  if (!all(file.exists(x))) {
+    checks_passed <- FALSE
+    failed_check <- file_exists_error
   }
-  config$reproductive_rate <- parameters[1]
-  config$natural_distance_scale <- parameters[2]
-  config$percent_natural_dispersal <- parameters[3]
-  config$anthropogenic_distance_scale <- parameters[4]
-  config$natural_kappa <- parameters[5]
-  config$anthropogenic_kappa <- parameters[6]
-  config$network_min_distance <- parameters[7]
-  config$network_max_distance <- parameters[8]
 
-  return(config)
+  if (checks_passed && !all((tools::file_ext(x) %in% csv_list))) {
+    checks_passed <- FALSE
+    failed_check <- file_type_error
+  }
+
+  if (checks_passed) {
+    random_seeds <- read.table(x, sep = ",", header = TRUE)
+    if (base::ncol(random_seeds) != 9 || base::nrow(random_seeds) <= number_of_iterations) {
+      checks_passed <- FALSE
+      failed_check <- random_seeds_dimensions_error
+    }
+  }
+
+  if (checks_passed) {
+    outs <- list(checks_passed, random_seeds)
+    names(outs) <- c("checks_passed", "random_seeds")
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- failed_check_list
+    return(outs)
+  }
 }

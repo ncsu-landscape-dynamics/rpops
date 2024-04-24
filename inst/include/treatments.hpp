@@ -21,12 +21,16 @@
 #include "date.hpp"
 #include "scheduling.hpp"
 #include "utils.hpp"
+#include "host_pool.hpp"
 
 #include <map>
 #include <vector>
 #include <string>
 #include <functional>
 #include <stdexcept>
+
+// only temporarily for direct host pool creation
+#include <random>
 
 namespace pops {
 
@@ -75,7 +79,7 @@ inline TreatmentApplication treatment_app_enum_from_string(const std::string& te
  * general set of parameters only when
  * needed for additional classes.
  */
-template<typename IntegerRaster, typename FloatRaster>
+template<typename HostPool, typename FloatRaster>
 class AbstractTreatment
 {
 public:
@@ -83,20 +87,8 @@ public:
     virtual unsigned get_end() = 0;
     virtual bool should_start(unsigned step) = 0;
     virtual bool should_end(unsigned step) = 0;
-    virtual void apply_treatment(
-        IntegerRaster& infected,
-        std::vector<IntegerRaster>& exposed,
-        IntegerRaster& susceptible,
-        IntegerRaster& resistant,
-        IntegerRaster& total_hosts,
-        const std::vector<std::vector<int>>& spatial_indices) = 0;
-    virtual void end_treatment(
-        IntegerRaster& susceptible,
-        IntegerRaster& resistant,
-        const std::vector<std::vector<int>>& spatial_indices) = 0;
-    virtual void apply_treatment_mortality(
-        IntegerRaster& infected,
-        const std::vector<std::vector<int>>& spatial_indices) = 0;
+    virtual void apply_treatment(HostPool& host_pool) = 0;
+    virtual void end_treatment(HostPool& host_pool) = 0;
     virtual ~AbstractTreatment() {}
 };
 
@@ -104,8 +96,8 @@ public:
  * Base treatment class.
  * Holds functions common between all treatment classes.
  */
-template<typename IntegerRaster, typename FloatRaster>
-class BaseTreatment : public AbstractTreatment<IntegerRaster, FloatRaster>
+template<typename HostPool, typename FloatRaster>
+class BaseTreatment : public AbstractTreatment<HostPool, FloatRaster>
 {
 protected:
     unsigned start_step_;
@@ -131,20 +123,23 @@ public:
     {
         return end_step_;
     }
-    void apply_treatment_mortality(
-        IntegerRaster& infected,
-        const std::vector<std::vector<int>>& suitable_cells) override
+
+    // returning double allows identical results with the previous version
+    double get_treated(int i, int j, int count)
     {
-        for (auto indices : suitable_cells) {
-            int i = indices[0];
-            int j = indices[1];
-            if (application_ == TreatmentApplication::Ratio) {
-                infected(i, j) = infected(i, j) - (infected(i, j) * map_(i, j));
-            }
-            else if (application_ == TreatmentApplication::AllInfectedInCell) {
-                infected(i, j) = map_(i, j) ? 0 : infected(i, j);
-            }
+        return get_treated(i, j, count, this->application_);
+    }
+
+    double get_treated(int i, int j, int count, TreatmentApplication application)
+    {
+        if (application == TreatmentApplication::Ratio) {
+            return count * this->map_(i, j);
         }
+        else if (application == TreatmentApplication::AllInfectedInCell) {
+            return this->map_(i, j) ? count : 0;
+        }
+        throw std::runtime_error(
+            "BaseTreatment::get_treated: unknown TreatmentApplication");
     }
 };
 
@@ -153,15 +148,15 @@ public:
  * Removes percentage (given by treatment efficiency)
  * of infected and susceptible host (e.g. cut down trees).
  */
-template<typename IntegerRaster, typename FloatRaster>
-class SimpleTreatment : public BaseTreatment<IntegerRaster, FloatRaster>
+template<typename HostPool, typename FloatRaster>
+class SimpleTreatment : public BaseTreatment<HostPool, FloatRaster>
 {
 public:
     SimpleTreatment(
         const FloatRaster& map,
         unsigned start,
         TreatmentApplication treatment_application)
-        : BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
+        : BaseTreatment<HostPool, FloatRaster>(map, start, treatment_application)
     {}
     bool should_start(unsigned step) override
     {
@@ -173,54 +168,36 @@ public:
     {
         return false;
     }
-    void apply_treatment(
-        IntegerRaster& infected,
-        std::vector<IntegerRaster>& exposed,
-        IntegerRaster& susceptible,
-        IntegerRaster& resistant,
-        IntegerRaster& total_hosts,
-        const std::vector<std::vector<int>>& suitable_cells) override
+    void apply_treatment(HostPool& host_pool) override
     {
-        for (auto indices : suitable_cells) {
+        for (auto indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            int new_exposed_total = 0;
-            int new_infected = 0;
-            int new_susceptible = 0;
-            int new_exposed_individual = 0;
-            if (this->application_ == TreatmentApplication::Ratio) {
-                new_infected = infected(i, j) - (infected(i, j) * this->map_(i, j));
-                infected(i, j) = new_infected;
+            double remove_susceptible = this->get_treated(
+                i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio);
+            double remove_infected =
+                this->get_treated(i, j, host_pool.infected_at(i, j));
+            std::vector<double> remove_mortality;
+            for (int count : host_pool.mortality_by_group_at(i, j)) {
+                remove_mortality.push_back(this->get_treated(i, j, count));
             }
-            else if (this->application_ == TreatmentApplication::AllInfectedInCell) {
-                new_infected = this->map_(i, j) ? 0 : infected(i, j);
-                infected(i, j) = new_infected;
+
+            std::vector<double> remove_exposed;
+            for (int count : host_pool.exposed_by_group_at(i, j)) {
+                remove_exposed.push_back(this->get_treated(i, j, count));
             }
-            for (auto& raster : exposed) {
-                if (this->application_ == TreatmentApplication::Ratio) {
-                    new_exposed_individual =
-                        raster(i, j) - (raster(i, j) * this->map_(i, j));
-                    raster(i, j) = new_exposed_individual;
-                    new_exposed_total += new_exposed_individual;
-                }
-                else if (
-                    this->application_ == TreatmentApplication::AllInfectedInCell) {
-                    new_exposed_individual =
-                        raster(i, j) - (raster(i, j) * this->map_(i, j));
-                    raster(i, j) = new_exposed_individual;
-                    new_exposed_total += new_exposed_individual;
-                }
-            }
-            new_susceptible =
-                susceptible(i, j) - (susceptible(i, j) * this->map_(i, j));
-            susceptible(i, j) = new_susceptible;
-            total_hosts(i, j) =
-                new_infected + new_susceptible + new_exposed_total + resistant(i, j);
+            host_pool.completely_remove_hosts_at(
+                i,
+                j,
+                remove_susceptible,
+                remove_exposed,
+                remove_infected,
+                remove_mortality);
         }
     }
-    void end_treatment(
-        IntegerRaster&, IntegerRaster&, const std::vector<std::vector<int>>&) override
+    void end_treatment(HostPool& host_pool) override
     {
+        UNUSED(host_pool);
         return;
     }
 };
@@ -231,8 +208,8 @@ public:
  * of infected and susceptible to resistant pool
  * and after certain number of days back to susceptible.
  */
-template<typename IntegerRaster, typename FloatRaster>
-class PesticideTreatment : public BaseTreatment<IntegerRaster, FloatRaster>
+template<typename HostPool, typename FloatRaster>
+class PesticideTreatment : public BaseTreatment<HostPool, FloatRaster>
 {
 public:
     PesticideTreatment(
@@ -240,7 +217,7 @@ public:
         unsigned start,
         unsigned end,
         TreatmentApplication treatment_application)
-        : BaseTreatment<IntegerRaster, FloatRaster>(map, start, treatment_application)
+        : BaseTreatment<HostPool, FloatRaster>(map, start, treatment_application)
     {
         this->end_step_ = end;
     }
@@ -256,58 +233,41 @@ public:
             return true;
         return false;
     }
-
-    void apply_treatment(
-        IntegerRaster& infected,
-        std::vector<IntegerRaster>& exposed_vector,
-        IntegerRaster& susceptible,
-        IntegerRaster& resistant,
-        IntegerRaster& total_hosts,
-        const std::vector<std::vector<int>>& suitable_cells) override
+    void apply_treatment(HostPool& host_pool) override
     {
-        UNUSED(total_hosts);
-        for (auto indices : suitable_cells) {
+        for (auto indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            int infected_resistant = 0;
-            int exposed_resistant_sum = 0;
-            int susceptible_resistant = susceptible(i, j) * this->map_(i, j);
-            int current_resistant = resistant(i, j);
-            if (this->application_ == TreatmentApplication::Ratio) {
-                infected_resistant = infected(i, j) * this->map_(i, j);
+            // Given how the original code was written (everything was first converted
+            // to ints and subtractions happened only afterwards), this needs ints,
+            // not doubles to pass the r.pops.spread test (unlike the other code which
+            // did substractions before converting to ints).
+            int susceptible_resistant = this->get_treated(
+                i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio);
+            std::vector<int> resistant_exposed_list;
+            for (const auto& number : host_pool.exposed_by_group_at(i, j)) {
+                resistant_exposed_list.push_back(this->get_treated(i, j, number));
             }
-            else if (this->application_ == TreatmentApplication::AllInfectedInCell) {
-                infected_resistant = this->map_(i, j) ? infected(i, j) : 0;
+            std::vector<int> resistant_mortality_list;
+            for (const auto& number : host_pool.mortality_by_group_at(i, j)) {
+                resistant_mortality_list.push_back(this->get_treated(i, j, number));
             }
-            infected(i, j) -= infected_resistant;
-            for (auto& exposed : exposed_vector) {
-                int exposed_resistant = 0;
-                if (this->application_ == TreatmentApplication::Ratio) {
-                    exposed_resistant = exposed(i, j) * this->map_(i, j);
-                }
-                else if (
-                    this->application_ == TreatmentApplication::AllInfectedInCell) {
-                    exposed_resistant = this->map_(i, j) ? exposed(i, j) : 0;
-                }
-                exposed(i, j) -= exposed_resistant;
-                exposed_resistant_sum += exposed_resistant;
-            }
-            resistant(i, j) = infected_resistant + exposed_resistant_sum
-                              + susceptible_resistant + current_resistant;
-            susceptible(i, j) -= susceptible_resistant;
+            host_pool.make_resistant_at(
+                i,
+                j,
+                susceptible_resistant,
+                resistant_exposed_list,
+                this->get_treated(i, j, host_pool.infected_at(i, j)),
+                resistant_mortality_list);
         }
     }
-    void end_treatment(
-        IntegerRaster& susceptible,
-        IntegerRaster& resistant,
-        const std::vector<std::vector<int>>& suitable_cells) override
+    void end_treatment(HostPool& host_pool) override
     {
-        for (auto indices : suitable_cells) {
+        for (auto indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
             if (this->map_(i, j) > 0) {
-                susceptible(i, j) += resistant(i, j);
-                resistant(i, j) = 0;
+                host_pool.remove_resistance_at(i, j);
             }
         }
     }
@@ -325,11 +285,11 @@ public:
  * populations that overlap both spatially and temporally
  * are returned to the susceptible pool when the first treatment ends.
  */
-template<typename IntegerRaster, typename FloatRaster>
+template<typename HostPool, typename FloatRaster>
 class Treatments
 {
 private:
-    std::vector<AbstractTreatment<IntegerRaster, FloatRaster>*> treatments;
+    std::vector<AbstractTreatment<HostPool, FloatRaster>*> treatments;
     Scheduler scheduler_;
 
 public:
@@ -362,13 +322,13 @@ public:
     {
         unsigned start = scheduler_.schedule_action_date(start_date);
         if (num_days == 0)
-            treatments.push_back(new SimpleTreatment<IntegerRaster, FloatRaster>(
+            treatments.push_back(new SimpleTreatment<HostPool, FloatRaster>(
                 map, start, treatment_application));
         else {
             Date end_date(start_date);
             end_date.add_days(num_days);
             unsigned end = scheduler_.schedule_action_date(end_date);
-            treatments.push_back(new PesticideTreatment<IntegerRaster, FloatRaster>(
+            treatments.push_back(new PesticideTreatment<HostPool, FloatRaster>(
                 map, start, end, treatment_application));
         }
     }
@@ -379,63 +339,24 @@ public:
      * activated/deactivated.
      *
      * \param current simulation step
-     * \param infected raster of infected host
-     * \param exposed Exposed hosts per cohort
-     * \param susceptible raster of susceptible host
-     * \param resistant raster of resistant host
-     * \param total_hosts All host individuals in the area (I+E+S in the cell)
-     * \param suitable_cells List of indices of cells with hosts
+     * \param host_pool Host
      *
      * \return true if any management action was necessary
      */
-    bool manage(
-        unsigned current,
-        IntegerRaster& infected,
-        std::vector<IntegerRaster>& exposed,
-        IntegerRaster& susceptible,
-        IntegerRaster& resistant,
-        IntegerRaster& total_hosts,
-        const std::vector<std::vector<int>>& suitable_cells)
+    bool manage(unsigned current, HostPool& host_pool)
     {
         bool changed = false;
         for (unsigned i = 0; i < treatments.size(); i++) {
             if (treatments[i]->should_start(current)) {
-                treatments[i]->apply_treatment(
-                    infected,
-                    exposed,
-                    susceptible,
-                    resistant,
-                    total_hosts,
-                    suitable_cells);
+                treatments[i]->apply_treatment(host_pool);
                 changed = true;
             }
             else if (treatments[i]->should_end(current)) {
-                treatments[i]->end_treatment(susceptible, resistant, suitable_cells);
+                treatments[i]->end_treatment(host_pool);
                 changed = true;
             }
         }
         return changed;
-    }
-    /*!
-     * \brief Separately manage mortality infected cohorts
-     * \param current simulation step
-     * \param infected raster of infected host
-     * \param suitable_cells List of indices of cells with hosts
-     *
-     * \return true if any management action was necessary
-     */
-    bool manage_mortality(
-        unsigned current,
-        IntegerRaster& infected,
-        const std::vector<std::vector<int>>& suitable_cells)
-    {
-        bool applied = false;
-        for (unsigned i = 0; i < treatments.size(); i++)
-            if (treatments[i]->should_start(current)) {
-                treatments[i]->apply_treatment_mortality(infected, suitable_cells);
-                applied = true;
-            }
-        return applied;
     }
     /*!
      * \brief Used to remove treatments after certain step.

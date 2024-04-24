@@ -14,6 +14,28 @@ this repository.
 
 ## [Unreleased]
 
+### Added
+
+- Final step as an option for output frequency in all functions (@petrasovaa, #163).
+
+- Added ability to use mean and sd for temp and precip coefficient. Uses 3 new parameters: weather_type, temperature_coefficient_sd_file, and precipitation_coefficient_sd_file. This is added to help understand uncertainty in model predictions due to weather drivers (@ChrisJones687, #168).
+
+- Added the ability to use different seeds for all processes within pops-core. Adds 2 new parameters: multiple_random_seeds (boolean for using this functionality) and random_seeds (set to NULL to allow internal model selection of kernels or pass a CSV with the number of rows being the number of model runs and columns being the kernels in order (@ChrisJones687, #168).
+    
+### Changed
+
+- Quarantine directions can now be calculated only for directions of interest (@petrasovaa, #168).
+
+### Fixed
+
+- Fixed MCC calculations that returned NaN with very large datasets (@ChrisJones687, #161).
+
+- Fixed quarantine directions outputs in pops-multirun (@petrasovaa, #162).
+
+### Removed
+
+- Removed dependencies: packages rgdal, raster, sp
+
 ## [2.0.1] 2022-11-16
 
 ### Added

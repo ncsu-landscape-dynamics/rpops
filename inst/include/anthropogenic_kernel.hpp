@@ -35,8 +35,10 @@ namespace pops {
  * Same structure as the natural kernel, but the parameters are for anthropogenic
  * kernel when available.
  *
+ * @param config Configuration for the kernel
  * @param dispersers The disperser raster (reference, for deterministic kernel)
  * @param network Network (initialized or not)
+ *
  * @return Created kernel
  */
 template<typename Generator, typename IntegerRaster, typename RasterIndex>
