@@ -62,7 +62,7 @@ struct OutputHostPool {
 List pops_model_cpp(
     int random_seed,
     bool multiple_random_seeds,
-    std::vector<int> random_seeds,
+    std::vector<unsigned> random_seeds,
     double lethal_temperature,
     int lethal_temperature_month,
     std::vector<List> host_pools,
@@ -117,6 +117,10 @@ List pops_model_cpp(
 {
     Config config;
     config.random_seed = random_seed;
+    config.multiple_random_seeds = multiple_random_seeds;
+    if (multiple_random_seeds) {
+        config.read_seeds(random_seeds);
+    }
     config.rows = rows_cols["num_rows"];
     config.cols = rows_cols["num_cols"];
     config.ew_res = res["ew_res"];

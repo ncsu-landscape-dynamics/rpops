@@ -234,6 +234,7 @@ create_random_seeds <- function(n) {
                anthropogenic_dispersal = sample(1:999999999999, n, replace = FALSE),
                establishment = sample(1:999999999, n, replace = FALSE),
                weather = sample(1:999999999, n, replace = FALSE),
+               lethal_temperature = sample(1:999999999, n, replace = FALSE),
                movement = sample(1:999999999, n, replace = FALSE),
                overpopulation = sample(1:999999999, n, replace = FALSE),
                survival_rate = sample(1:999999999, n, replace = FALSE),

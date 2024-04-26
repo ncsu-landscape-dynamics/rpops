@@ -75,8 +75,8 @@
 #' of dispersers that fall to the soil and survive.
 #' @param soil_reservoirs list of matrices with soil pests created from soil_pest_file.
 #' @param random_seeds vector of random seeds in the order of "disperser_generation",
-#' "natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
-#' "overpopulation", "survival_rate", "soil"
+#' "natural_dispersal", "anthropogenic_dispersal", "establishment", "weather",
+#' "lethal_temperature", "movement", "overpopulation", "survival_rate", "soil"
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -218,8 +218,8 @@ pops_model <-
 
     data <-
       suppressWarnings(pops_model_cpp(random_seed = random_seed,
-                     multiple_random_seeds,
-                     random_seeds,
+                     multiple_random_seeds = multiple_random_seeds,
+                     random_seeds = random_seeds,
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
                      host_pools = host_pools,
