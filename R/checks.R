@@ -686,7 +686,7 @@ random_seeds_file_checks <- function(x, number_of_iterations = 1) {
 
   if (checks_passed) {
     random_seeds <- read.table(x, sep = ",", header = TRUE)
-    if (base::ncol(random_seeds) != 9 || base::nrow(random_seeds) <= number_of_iterations) {
+    if (base::ncol(random_seeds) != 10 || base::nrow(random_seeds) <= number_of_iterations) {
       checks_passed <- FALSE
       failed_check <- random_seeds_dimensions_error
     }
