@@ -2,10 +2,10 @@
 
 export(calibrate)
 export(configuration)
-export(optimize)
 export(pops)
 export(pops_model)
 export(pops_multirun)
+export(pops_optimize)
 export(quantity_allocation_disagreement)
 export(validate)
 importFrom(MASS,mvrnorm)
