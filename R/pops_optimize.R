@@ -71,7 +71,7 @@ buffer_treatments <-
       count_raster / terra::global(count_raster, "max")[[1]]
     treatment_cost_raster <- treatments_raster * cost_raster
     actual_cost <-
-      terra::global(treatment_cost_raster, "sum", na.rm = T)[[1]]
+      terra::global(treatment_cost_raster, "sum", na.rm = TRUE)[[1]]
     return(list(raster = treatments_raster, cost = actual_cost))
   }
 
@@ -92,7 +92,7 @@ run_pops <- function(config, treatment_raster = NULL) {
   } else {
     config$treatment_maps <- list(matrix(0, nrow = 1, ncol = 1))
   }
-  
+
   cl <- parallel::makeCluster(config$core_count)
   doParallel::registerDoParallel(cl)
   infected_stack <-
@@ -105,7 +105,7 @@ run_pops <- function(config, treatment_raster = NULL) {
       data <- PoPS::pops_model(
         random_seed = config$random_seed,
         multiple_random_seeds = config$multiple_random_seeds,
-        random_seeds = as.matrix(config$random_seeds[1,])[1,],
+        random_seeds = as.matrix(config$random_seeds[1, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,
         lethal_temperature_month = config$lethal_temperature_month,
@@ -196,7 +196,7 @@ run_pops <- function(config, treatment_raster = NULL) {
       run
     }
   stopCluster(cl)
-  
+
   area_infected_runs <-
     infected_stack[seq(1, length(infected_stack), 2)]
   infected_area <-
@@ -212,9 +212,9 @@ run_pops <- function(config, treatment_raster = NULL) {
       ))))
   }
   for (p in seq_len(length(area_infected_runs))) {
-    infected_area[p,] <- area_infected_runs[[p]]
+    infected_area[p, ] <- area_infected_runs[[p]]
     if (config$use_quarantine) {
-      quarantine_escape_distances[p,] <-
+      quarantine_escape_distances[p, ] <-
         quarantine_escape_distance_runs[[p]]
     }
   }
@@ -236,7 +236,7 @@ pops_init <- function(config) {
   config$function_name <- "multirun"
   config$management <- FALSE
   config <- PoPS::configuration(config)
-  
+
   if (!is.null(config$failure)) {
     stop(config$failure)
   }
@@ -268,9 +268,9 @@ best_guess <- function(points,
                        budget,
                        config) {
   sorted <-
-    points[order(points[[weight_column]][[1]], decreasing = TRUE),]
-  candidate <- sorted[cumsum(sorted$cost) <= budget,]
-  
+    points[order(points[[weight_column]][[1]], decreasing = TRUE), ]
+  candidate <- sorted[cumsum(sorted$cost) <= budget, ]
+
   treatment <- treatments(candidate,
                           treatments_raster,
                           cost_raster)
@@ -287,7 +287,7 @@ estimate_baseline <- function(config) {
   quarantine_distance <- baseline$quarantine_distance
   baseline <- run_pops(config)
   baseline$quarantine_distance <- quarantine_distance
-  return (baseline)
+  return(baseline)
 }
 
 estimate_initial_threshold <- function(points,
@@ -315,7 +315,7 @@ estimate_initial_threshold <- function(points,
 
 scoring <- function(simulated, baseline, weights = c(1, 1)) {
   scores <- c(NA, NA)
-  
+
   if (!is.null(simulated$infected_area)) {
     scores[1] <- simulated$infected_area / baseline$infected_area
   }
@@ -324,7 +324,7 @@ scoring <- function(simulated, baseline, weights = c(1, 1)) {
       (baseline$quarantine_distance - simulated$quarantine_distance) /
       baseline$quarantine_distance
   }
-  return (weighted.mean(scores, w = weights, na.rm = TRUE))
+  return(weighted.mean(scores, w = weights, na.rm = TRUE))
 }
 
 sample_candidate <- function(points, weight_column, budget) {
@@ -356,7 +356,7 @@ sample_candidate <- function(points, weight_column, budget) {
       }
     }
   }
-  return(points[points$cat %in% candidate_cats,])
+  return(points[points$cat %in% candidate_cats, ])
 }
 
 
@@ -451,7 +451,7 @@ filter_particles <-
            iteration,
            percentile) {
     # filter unsuccessful ones
-    filtered <- points[points[[weight_column]] > 0,]
+    filtered <- points[points[[weight_column]] > 0, ]
     weights_percentile <- quantile(filtered[[weight_column]][[1]],
                                    percentile / 100,
                                    names = FALSE)
@@ -576,14 +576,14 @@ pops_optimize <- function(infestation_potential_file,
                           start_with_soil_populations = FALSE) {
   # parameters for pops
   config <- as.list(environment())
-  
+
   # extract infected points and associated cost and potential
   infected_raster <- terra::rast(infected_file)
   infected_points <- terra::as.points(infected_raster)
   names(infected_points) <- "infected"
   infected_points <- infected_points[infected_points$infected > 0]
   # cat
-  infected_points$cat <- 1:nrow(infected_points)
+  infected_points$cat <- seq_len(nrow(infected_points))
   # cost
   cost_raster <- terra::rast(cost_file)
   names(cost_raster) <- "cost"
@@ -594,7 +594,7 @@ pops_optimize <- function(infestation_potential_file,
   names(potential_raster) <- "potential"
   infected_points <-
     terra::extract(potential_raster, infected_points, bind = TRUE)
-  
+
   if (!is.null(buffer_size_file)) {
     buffer_size_raster <- terra::rast(buffer_size_file)
     names(buffer_size_raster) <- "buffer_size"
@@ -609,7 +609,7 @@ pops_optimize <- function(infestation_potential_file,
     infected_points <-
       terra::extract(bboxrast, infected_points, bind = TRUE)
   }
-  
+
   # prior weights
   iteration <- 1
   weight_column <- paste0("weight_", iteration)
@@ -619,14 +619,13 @@ pops_optimize <- function(infestation_potential_file,
     infected_points$quarantine_distance,
     score_weights
   )
-  
+
   # prepare treatment raster
-  temporary_directory <- tempdir()
   treatments_raster <- terra::rast(terra::ext(infected_raster),
                                    resolution = terra::res(infected_raster))
   terra::crs(treatments_raster) <- terra::crs(infected_raster)
   config <- pops_init(config)
-  
+
   # baseline
   baseline <- estimate_baseline(config)
   message("Baseline area:", baseline$infected_area)
@@ -634,7 +633,7 @@ pops_optimize <- function(infestation_potential_file,
     message("Initial distance to quarantine boundary:",
             baseline$quarantine_distance)
   }
-  
+
   # best guess
   best_guess <- best_guess(infected_points,
                            weight_column,
@@ -649,10 +648,10 @@ pops_optimize <- function(infestation_potential_file,
       best_guess$result$quarantine_distance
     )
   }
-  
+
   # initial threshold
   thresholds <- c()
-  
+
   initial_threshold <- estimate_initial_threshold(
     infected_points,
     weight_column,
@@ -665,9 +664,8 @@ pops_optimize <- function(infestation_potential_file,
   )
   thresholds[1] <- initial_threshold$threshold
   threshold_step <- initial_threshold$threshold_step
-  
+
   filtered_points <- infected_points
-  tmp_points <- infected_points
   acceptance_rates <- c()
   while (TRUE) {
     message("Iteration ", iteration,
@@ -691,17 +689,16 @@ pops_optimize <- function(infestation_potential_file,
     thresholds <- append(thresholds, results$threshold)
     threshold_step <- results$threshold_step
     new_weight_column <- paste0("weight_", iteration + 1)
-    new_weights <- results$weights
-    filtered_points[[new_weight_column]] <- results$weights[match(filtered_points$cat,
-                                                                  as.integer(names(results$weights)))]
+    tmp_match <- match(filtered_points$cat, as.integer(names(results$weights)))
+    filtered_points[[new_weight_column]] <- results$weights[tmp_match]
     # filtering
     tmp <- filter_particles(filtered_points,
                             new_weight_column,
                             iteration,
                             filter_percentile)
     before <-
-      filtered_points[filtered_points[[new_weight_column]] > 0,]
-    after <- tmp[tmp[[new_weight_column]] > 0,]
+      filtered_points[filtered_points[[new_weight_column]] > 0, ]
+    after <- tmp[tmp[[new_weight_column]] > 0, ]
     if (sum(after$cost) >= budget) {
       message("Filtered ",
               length(before) - length(after),
@@ -714,7 +711,7 @@ pops_optimize <- function(infestation_potential_file,
     }
     iteration <- iteration + 1
   }
-  
+
   output <- list(
     best_guess = best_guess,
     best = results$best,
@@ -722,7 +719,7 @@ pops_optimize <- function(infestation_potential_file,
     acceptance_rates = acceptance_rates,
     thresholds = thresholds
   )
-  
+
   cat("Baseline area:", baseline$infected_area, "\n")
   cat("Best guess infected area:",
       best_guess$result$infected_area,
@@ -730,7 +727,7 @@ pops_optimize <- function(infestation_potential_file,
   cat("Optimized infected area:",
       results$best$simulation$infected_area,
       "\n")
-  
+
   if (score_weights[2] > 0) {
     cat("Initial distance to quarantine boundary:",
         baseline$quarantine_distance,
