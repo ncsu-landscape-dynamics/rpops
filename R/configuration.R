@@ -429,9 +429,18 @@ configuration <- function(config) {
       }
     }
 
-    weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]], wide = TRUE))
-    for (i in 2:terra::nlyr(weather_coefficient_stack)) {
-      weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
+    weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]],
+                                                 wide = TRUE))
+    for (i in 1:terra::nlyr(weather_coefficient_stack)) {
+      current_month <- i %% 12
+      current_month <- ifelse(current_month == 0, 12, current_month)
+      
+      if (current_month >= season_month_start && current_month <= season_month_end) {
+        weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], 
+                                                     wide = TRUE)
+      } else {
+        weather_coefficient[[i]] <- matrix(0, nrow = 1, ncol = 1)
+      }
     }
 
     if (config$weather_type == "probabilistic") {
@@ -445,12 +454,18 @@ configuration <- function(config) {
         config$failure <- weather_sd_layer_error
         return(config)
       }
-
       weather_coefficient_sd <-
-        list(terra::as.matrix(weather_coefficient_sd_stack[[1]], wide = TRUE))
-      for (i in 2:terra::nlyr(weather_coefficient_sd_stack)) {
-        weather_coefficient_sd[[i]] <-
-          terra::as.matrix(weather_coefficient_sd_stack[[i]], wide = TRUE)
+        list(terra::as.matrix(weather_coefficient_sd_stack[[1]],
+                              wide = TRUE))
+      for (i in 1:terra::nlyr(weather_coefficient_sd_stack)) {
+        current_month <- i %% 12
+        current_month <- ifelse(current_month == 0, 12, current_month)
+        if (current_month >= season_month_start && current_month <= season_month_end) {
+          weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]],
+                                                          wide = TRUE)
+        } else {
+          weather_coefficient_sd[[i]] <- matrix(0, nrow = 1, ncol = 1)
+        }
       }
     } else {
       weather_coefficient_sd <- list(zero_matrix)
