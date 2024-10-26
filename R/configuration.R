@@ -148,13 +148,8 @@ configuration <- function(config) {
     return(config)
   }
 
-  zero_rast <- infected[[1]]
-  terra::values(zero_rast) <- 0
-  zero_matrix <- terra::as.matrix(zero_rast, wide = TRUE)
-
-  one_matrix <- infected[[1]]
-  terra::values(one_matrix) <- 0
-  one_matrix <- terra::as.matrix(one_matrix, wide = TRUE)
+  zero_matrix <- matrix(0, nrow = nrow(infected[[1]]), ncol = ncol(infected[[1]]))
+  one_matrix <- matrix(1, nrow = nrow(infected[[1]]), ncol = ncol(infected[[1]]))
 
   # check that host raster has the same crs, resolution, and extent
   if (config$function_name %in% aws_bucket_list) {
@@ -469,6 +464,7 @@ configuration <- function(config) {
     weather_coefficient_sd <- list(zero_matrix)
     config$weather_type <- "none"
   }
+  rm(one_matrix)
 
   config$weather_coefficient <- weather_coefficient
   config$weather_coefficient_sd <- weather_coefficient_sd
@@ -713,6 +709,7 @@ configuration <- function(config) {
   }
 
   mortality_tracker <- zero_matrix
+  rm(zero_matrix)
   mortality_tracker2 <- list(mortality_tracker)
   if (config$mortality_on) {
     mortality_length <- 1 / config$mortality_rate + config$mortality_time_lag
