@@ -598,25 +598,16 @@ configuration <- function(config) {
       suitable <- suitable + exposed2[[2]]
     }
   }
-  suitable_points <- terra::as.points(suitable)
-  names(suitable_points) <- "data"
-  suitable_points <- suitable_points[suitable_points$data > 0]
-  suitable_cells <- terra::extract(suitable, suitable_points, cells = TRUE)$cell
-  suitable_row <- terra::rowFromCell(suitable, suitable_cells)
-  suitable_row <- suitable_row - 1
-  suitable_row <- as.integer(suitable_row)
-  suitable_col <- terra::colFromCell(suitable, suitable_cells)
-  suitable_col <- suitable_col - 1
-  suitable_col <- as.integer(suitable_col)
-  spatial_indices2 <- data.frame(row = suitable_row, col = suitable_col)
-  spatial_indices2 <- unname(spatial_indices2)
-  spatial_indices2 <- as.matrix(spatial_indices2)
-  spatial_indices <- list()
-  for (i in seq_len(terra::nrow(spatial_indices2))) {
-    spatial_indices[[i]] <- spatial_indices2[i, 1:2]
-  }
-  spatial_indices <- unname(spatial_indices)
-  config$spatial_indices <- spatial_indices
+  
+  suitable <- terra::classify(suitable, matrix(c(-Inf, 0, NA), ncol = 3, byrow = TRUE),
+                              right = FALSE)
+  suitable_cells <- which(!is.na(values(suitable)))
+  suitable_row <- as.integer(terra::rowFromCell(suitable, suitable_cells) - 1L)
+  suitable_col <- as.integer(terra::colFromCell(suitable, suitable_cells) - 1L)
+  config$spatial_indices <- lapply(seq_along(suitable_row),
+                                   function(i) c(suitable_row[i],
+                                                 suitable_col[i]))
+  names(config$spatial_indices) <- NULL
 
   res <- c()
   res$ew_res <- terra::xres(infected)
