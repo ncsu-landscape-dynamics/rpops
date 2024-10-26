@@ -431,11 +431,20 @@ configuration <- function(config) {
         return(config)
       }
     }
-
-    weather_coefficient <- list(terra::as.matrix(weather_coefficient_stack[[1]], wide = TRUE))
-    for (i in 2:terra::nlyr(weather_coefficient_stack)) {
-      weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
-    }
+    
+    weather_coefficient <- vector("list", config$weather_size)
+    for(i in seq_along(weather_coefficient)) {
+      current_month <- i %% 12
+      current_month <- ifelse(current_month == 0, 12, current_month)
+      
+      if(current_month >= config$season_month_start && current_month
+          <= config$season_month_end) {
+        weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]],
+                                                     wide = TRUE)
+        } else {
+          weather_coefficient[[i]] <- matrix(0, 2, 2)
+        }
+      }
 
     if (config$weather_type == "probabilistic") {
       if (config$number_of_time_steps > config$weather_size) {
@@ -447,23 +456,30 @@ configuration <- function(config) {
         config$failure <- weather_sd_layer_error
         return(config)
       }
-
-      weather_coefficient_sd <-
-        list(terra::as.matrix(weather_coefficient_sd_stack[[1]], wide = TRUE))
-      for (i in 2:terra::nlyr(weather_coefficient_sd_stack)) {
-        weather_coefficient_sd[[i]] <-
-          terra::as.matrix(weather_coefficient_sd_stack[[i]], wide = TRUE)
-      }
+      
+      weather_coefficient_sd <- vector("list", config$weather_size)
+      for(i in seq_along(weather_coefficient_sd)) {
+        current_month <- i %% 12
+        current_month <- ifelse(current_month == 0, 12, current_month)
+        
+        if(current_month >= config$season_month_start && current_month
+           <= config$season_month_end) {
+          weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]],
+                                                       wide = TRUE)
+          } else {
+            weather_coefficient_sd[[i]] <- matrix(0, 2, 2)
+          }
+        }
+      } else {
+        weather_coefficient_sd <- list(zero_matrix)
+        }
     } else {
+      config$weather_size <- 1
+      config$weather_type <- "None"
+      weather_coefficient <- list(one_matrix)
       weather_coefficient_sd <- list(zero_matrix)
-    }
-  } else {
-    config$weather_size <- 1
-    config$weather_type <- "None"
-    weather_coefficient <- list(one_matrix)
-    weather_coefficient_sd <- list(zero_matrix)
-    config$weather_type <- "none"
-  }
+      config$weather_type <- "none"
+      }
   rm(one_matrix)
 
   config$weather_coefficient <- weather_coefficient
