@@ -213,9 +213,9 @@ configuration <- function(config) {
     }
     config$soil_reservoirs <- soil_reservoirs
   } else {
-    config$soil_reservoirs <- list(zero_matrix)
+    config$soil_reservoirs <- list(matrix(0, 2, 2))
   }
-
+  
   # check that survival_rates raster has the same crs, resolution, and extent
   if (config$use_survival_rates == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
@@ -234,17 +234,16 @@ configuration <- function(config) {
       return(config)
     }
 
-    survival_rates <- list(terra::as.matrix(survival_rates_stack[[1]], wide = TRUE))
+    config$survival_rates <- list(terra::as.matrix(survival_rates_stack[[1]], wide = TRUE))
     if (terra::nlyr(survival_rates_stack) > 1) {
       for (i in 2:config$number_of_years) {
-        survival_rates[[i]] <- terra::as.matrix(survival_rates_stack[[i]], wide = TRUE)
+        config$survival_rates[[i]] <- terra::as.matrix(survival_rates_stack[[i]], wide = TRUE)
       }
     }
   } else {
-    survival_rates <- list(one_matrix)
+    config$survival_rates <- list(matrix(1, 2, 2))
   }
 
-  config$survival_rates <- survival_rates
   # check that temperature raster has the same crs, resolution, and extent
   if (config$use_lethal_temperature == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
@@ -263,18 +262,16 @@ configuration <- function(config) {
       return(config)
     }
 
-    temperature <- list(terra::as.matrix(temperature_stack[[1]], wide = TRUE))
+    config$temperature <- list(terra::as.matrix(temperature_stack[[1]], wide = TRUE))
     if (terra::nlyr(temperature_stack) > 1) {
       for (i in 2:config$number_of_years) {
-        temperature[[i]] <- terra::as.matrix(temperature_stack[[i]], wide = TRUE)
+        config$temperature[[i]] <- terra::as.matrix(temperature_stack[[i]], wide = TRUE)
       }
     }
   } else {
-    temperature <- list(one_matrix)
+    config$temperature <- list(matrix(1, 2, 2))
   }
-
-  config$temperature <- temperature
-
+  
   # check that temp and precip rasters have the same crs, resolution, and extent
   config$weather <- FALSE
   if (config$temp == TRUE) {
@@ -432,17 +429,17 @@ configuration <- function(config) {
       }
     }
     
-    weather_coefficient <- vector("list", config$weather_size)
-    for(i in seq_along(weather_coefficient)) {
+    config$weather_coefficient <- vector("list", config$weather_size)
+    for(i in seq_along(config$weather_coefficient)) {
       current_month <- i %% 12
       current_month <- ifelse(current_month == 0, 12, current_month)
       
       if(current_month >= config$season_month_start && current_month
           <= config$season_month_end) {
-        weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]],
+        config$weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]],
                                                      wide = TRUE)
         } else {
-          weather_coefficient[[i]] <- matrix(0, 2, 2)
+          config$weather_coefficient[[i]] <- matrix(0, 2, 2)
         }
       }
 
@@ -457,33 +454,31 @@ configuration <- function(config) {
         return(config)
       }
       
-      weather_coefficient_sd <- vector("list", config$weather_size)
-      for(i in seq_along(weather_coefficient_sd)) {
+      config$weather_coefficient_sd <- vector("list", config$weather_size)
+      for(i in seq_along(config$weather_coefficient_sd)) {
         current_month <- i %% 12
         current_month <- ifelse(current_month == 0, 12, current_month)
         
         if(current_month >= config$season_month_start && current_month
            <= config$season_month_end) {
-          weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]],
+          config$weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]],
                                                        wide = TRUE)
           } else {
-            weather_coefficient_sd[[i]] <- matrix(0, 2, 2)
+            config$weather_coefficient_sd[[i]] <- matrix(0, 2, 2)
           }
         }
       } else {
-        weather_coefficient_sd <- list(zero_matrix)
+        config$weather_coefficient_sd <- list(zero_matrix)
         }
     } else {
       config$weather_size <- 1
       config$weather_type <- "None"
-      weather_coefficient <- list(one_matrix)
-      weather_coefficient_sd <- list(zero_matrix)
+      config$weather_coefficient <- list(one_matrix)
+      config$weather_coefficient_sd <- list(zero_matrix)
       config$weather_type <- "none"
-      }
+    }
+  
   rm(one_matrix)
-
-  config$weather_coefficient <- weather_coefficient
-  config$weather_coefficient_sd <- weather_coefficient_sd
 
   if (config$management == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
@@ -559,15 +554,15 @@ configuration <- function(config) {
       exposed2 <- exposed_check$raster
       if (config$use_initial_condition_uncertainty) {
         if (terra::nlyr(exposed2) == 2) {
-          exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
-          exposed_sd <- terra::as.matrix(exposed2[[2]], wide = TRUE)
+          config$exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
+          config$exposed_sd <- terra::as.matrix(exposed2[[2]], wide = TRUE)
         } else {
           config$failure <- initial_cond_uncert_error
           return(config)
         }
       } else {
-        exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
-        exposed_sd <- zero_matrix
+        config$exposed_mean <- terra::as.matrix(exposed2[[1]], wide = TRUE)
+        config$exposed_sd <- matrix(0, 2, 2)
       }
     } else {
       config$failure <- exposed_check$failed_check
@@ -577,12 +572,9 @@ configuration <- function(config) {
       return(config)
     }
   } else {
-    exposed_mean <- zero_matrix
-    exposed_sd <- zero_matrix
+    config$exposed_mean <- zero_matrix
+    config$exposed_sd <- matrix(0, 2, 2)
   }
-
-  config$exposed_mean <- exposed_mean
-  config$exposed_sd <- exposed_sd
 
   # create spatial indices for computational speed up.
   suitable <- host[[1]] + infected[[1]]
@@ -608,6 +600,7 @@ configuration <- function(config) {
                                    function(i) c(suitable_row[i],
                                                  suitable_col[i]))
   names(config$spatial_indices) <- NULL
+  rm(suitable, suitable_cells, suitable_row, suitable_col)
 
   res <- c()
   res$ew_res <- terra::xres(infected)
@@ -620,18 +613,16 @@ configuration <- function(config) {
 
   if (config$use_host_uncertainty) {
     if (terra::nlyr(host) == 2) {
-      host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
-      host_sd <- terra::as.matrix(host[[2]], wide = TRUE)
+      config$host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
+      config$host_sd <- terra::as.matrix(host[[2]], wide = TRUE)
     } else {
       config$failure <- host_uncert_error
       return(config)
     }
   } else {
-    host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
-    host_sd <- zero_matrix
+    config$host_mean <- terra::as.matrix(host[[1]], wide = TRUE)
+    config$host_sd <- matrix(0, 2, 2)
   }
-  config$host_mean <- host_mean
-  config$host_sd <- host_sd
 
   if (!is.null(config$mask)) {
     if (config$function_name %in% aws_bucket_list) {
@@ -665,25 +656,22 @@ configuration <- function(config) {
 
   if (config$use_initial_condition_uncertainty) {
     if (terra::nlyr(infected) == 2) {
-      infected_mean <- terra::as.matrix(infected[[1]], wide = TRUE)
-      infected_sd <- terra::as.matrix(infected[[2]], wide = TRUE)
+      config$infected_mean <- terra::as.matrix(infected[[1]], wide = TRUE)
+      config$infected_sd <- terra::as.matrix(infected[[2]], wide = TRUE)
     } else {
       config$failure <- initial_cond_uncert_error
       return(config)
     }
   } else {
-    infected_mean <- terra::as.matrix(infected[[1]], wide = TRUE)
-    infected_sd <- zero_matrix
+    config$infected_mean <- terra::as.matrix(infected[[1]], wide = TRUE)
+    config$infected_sd <- matrix(0, 2, 2)
   }
 
-  config$infected_mean <- infected_mean
-  config$infected_sd <- infected_sd
-
-  exposed[[config$latency_period + 1]] <- exposed_mean
-  config$total_exposed <- exposed_mean
+  exposed[[config$latency_period + 1]] <- config$exposed_mean
+  config$total_exposed <- config$exposed_mean
   config$exposed <- exposed
 
-  susceptible_mean <- host_mean - infected_mean - exposed_mean
+  susceptible_mean <- config$host_mean - config$infected_mean - config$exposed_mean
   susceptible_mean[susceptible_mean < 0] <- 0
   config$susceptible_mean <- terra::as.matrix(susceptible_mean, wide = TRUE)
 
@@ -712,7 +700,7 @@ configuration <- function(config) {
     }
   } else {
     # set quarantine areas to all zeros. meaning no quarantine areas are considered
-    config$quarantine_areas <- zero_matrix
+    config$quarantine_areas <- matrix(0, 2, 2)
   }
 
   mortality_tracker <- zero_matrix
@@ -727,7 +715,7 @@ configuration <- function(config) {
   # add currently infected cells to last element of the mortality tracker so
   # that mortality occurs at the appropriate interval
   if (config$mortality_on) {
-    mortality_tracker2[[length(mortality_tracker2)]] <- infected_mean
+    mortality_tracker2[[length(mortality_tracker2)]] <- config$infected_mean
   }
 
 
@@ -793,9 +781,9 @@ configuration <- function(config) {
   if (config$function_name %in% val_cal_list) {
     config$use_anthropogenic_kernel <- TRUE
     # Load observed data on occurrence
-    infection_years <- terra::rast(config$infected_years_file)
-    infection_years[] <- as.integer(infection_years[])
-    config$num_layers_infected_years <- terra::nlyr(infection_years)
+    config$infection_years <- terra::rast(config$infected_years_file)
+    config$infection_years[] <- as.integer(config$infection_years[])
+    config$num_layers_infected_years <- terra::nlyr(config$infection_years)
 
     if (config$num_layers_infected_years < config$number_of_outputs) {
       config$failure <-
@@ -803,14 +791,12 @@ configuration <- function(config) {
       return(config)
     }
 
-    infection_years2 <- list(terra::as.matrix(infection_years[[1]], wide = TRUE))
-    if (terra::nlyr(infection_years) > 1) {
-      for (i in 2:terra::nlyr(infection_years)) {
-        infection_years2[[i]] <- terra::as.matrix(infection_years[[i]], wide = TRUE)
+    config$infection_years2 <- list(terra::as.matrix(config$infection_years[[1]], wide = TRUE))
+    if (terra::nlyr(config$infection_years) > 1) {
+      for (i in 2:terra::nlyr(config$infection_years)) {
+        config$infection_years2[[i]] <- terra::as.matrix(config$infection_years[[i]], wide = TRUE)
       }
     }
-    config$infection_years <- infection_years
-    config$infection_years2 <- infection_years2
   }
 
   if (config$function_name %in% c("calibrate") &&
