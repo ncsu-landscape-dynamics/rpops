@@ -320,3 +320,47 @@ format_output_date <- function(start_date, output_frequency, time_step, multipli
   
   return(formatted_date)
 }
+
+# Helper function to update parameters
+update_config_parameters <- function(config) {
+  config <- draw_parameters(config)  # Draws parameter set for the run
+  
+  # Update infected and exposed based on uncertainty settings
+  if (config$use_initial_condition_uncertainty) {
+    config$infected <- matrix_norm_distribution(config$infected_mean, config$infected_sd)
+    exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+    config$exposed[[config$latency_period + 1]] <- exposed2
+  } else {
+    config$infected <- config$infected_mean
+    exposed2 <- config$exposed_mean
+    config$exposed[[config$latency_period + 1]] <- exposed2
+  }
+  rm(exposed2)
+  
+  # Update host based on uncertainty settings
+  if (config$use_host_uncertainty) {
+    config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+  } else {
+    config$host <- config$host_mean
+  }
+  
+  # Update susceptible and total populations
+  config$susceptible <- config$host - config$infected - exposed2
+  config$susceptible[config$susceptible < 0] <- 0
+  
+  config$total_hosts <- config$host
+  config$total_exposed <- exposed2
+  
+  # Update mortality tracker if mortality is on
+  if (config$mortality_on) {
+    mortality_tracker2 <- config$mortality_tracker
+    mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
+    config$mortality_tracker <- mortality_tracker2
+  }
+  
+  config$host_mean <- NULL
+  config$host_sd <- NULL
+  config$host <- NULL
+  
+  return(config)
+}
