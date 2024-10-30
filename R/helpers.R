@@ -271,3 +271,52 @@ combined_sd <- function(v1, v2, m1, m2, n1, n2) {
   (((n1 - 1) * v1 + (n2 - 1) * v2) / (n1 + n2 - 1)) +
     (((n1 * n2) * (m1 - m2)^2) / ((n1 + n2) * (n1 + n2 - 1)))
 }
+
+# Create a unique identifier for the pops_run_lite output filenames
+generate_uid <- function(length = 10) {
+  uid <- paste0(
+    sample(c(letters[1:23], 1:9), length, replace = TRUE),
+    collapse = ""
+  )
+  return(uid)
+}
+
+# Add time step for the pops_run_lite output filenames
+format_output_date <- function(start_date, output_frequency, time_step, multiplier = 0) {
+  # Ensure the start date is in Date format and check for validity
+  if (is.na(as.Date(start_date, format = "%Y-%m-%d"))) {
+    stop("Invalid start_date provided. Please use a valid date in 'YYYY-MM-DD' format.")
+  }
+  start_date <- as.Date(start_date)
+  
+  # Function to increment the date based on a unit and multiplier
+  advance_date <- function(date, unit, multiplier) {
+    switch(unit,
+           "year" = date + lubridate::years(multiplier),
+           "month" = date %m+% lubridate::months(multiplier),
+           "week" = date + lubridate::weeks(multiplier),
+           "day" = date + lubridate::days(multiplier))
+  }
+  
+  # Determine the correct format and advance the date
+  formatted_date <- if (output_frequency %in% c("year", "month")) {
+    format(advance_date(start_date, output_frequency, multiplier), 
+           if (output_frequency == "year") "%Y" else "%Y-%m")
+  } else if (output_frequency == "week") {
+    paste(format(advance_date(start_date, "week", multiplier), "%Y-%m-%d"), "w")
+  } else if (output_frequency == "day") {
+    paste(format(advance_date(start_date, "day", multiplier), "%Y-%m-%d"), "d")
+  } else if (output_frequency == "time step" || output_frequency == "every_n_steps") {
+    unit <- switch(time_step, "year" = "year", "month" = "month", "week" = "week", "day" = "day")
+    advanced_date <- advance_date(start_date, unit, multiplier)
+    formatted_date <- switch(unit,
+                             "year" = format(advanced_date, "%Y"),
+                             "month" = format(advanced_date, "%Y-%m"),
+                             "week" = paste(format(advanced_date, "%Y-%m-%d"), "w"),
+                             "day" = paste(format(advanced_date, "%Y-%m-%d"), "d"))
+  } else {
+    stop("Invalid output_frequency or time_step value provided.")
+  }
+  
+  return(formatted_date)
+}
