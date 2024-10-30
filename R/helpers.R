@@ -321,8 +321,8 @@ format_output_date <- function(start_date, output_frequency, time_step, multipli
   return(formatted_date)
 }
 
-# Helper function to update parameters
-update_config_parameters <- function(config) {
+# Helper function to update the configuration based on uncertainty settings
+update_config <- function(config) {
   config <- draw_parameters(config)  # Draws parameter set for the run
   
   # Update infected and exposed based on uncertainty settings
@@ -335,8 +335,7 @@ update_config_parameters <- function(config) {
     exposed2 <- config$exposed_mean
     config$exposed[[config$latency_period + 1]] <- exposed2
   }
-  rm(exposed2)
-  
+
   # Update host based on uncertainty settings
   if (config$use_host_uncertainty) {
     config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
@@ -358,8 +357,6 @@ update_config_parameters <- function(config) {
     config$mortality_tracker <- mortality_tracker2
   }
   
-  config$host_mean <- NULL
-  config$host_sd <- NULL
   config$host <- NULL
   
   return(config)
