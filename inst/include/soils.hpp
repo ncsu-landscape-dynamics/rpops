@@ -90,7 +90,7 @@ public:
             }
         }
         else {
-            dispersers = lambda * count;
+            dispersers = static_cast<int>(std::floor(lambda * count));
         }
         auto draw = draw_n_from_cohorts(*rasters_, dispersers, row, col, generator);
         size_t index = 0;

@@ -198,8 +198,8 @@ public:
         }
         theta = von_mises(generator);
 
-        row -= round(distance * cos(theta) / north_south_resolution);
-        col += round(distance * sin(theta) / east_west_resolution);
+        row -= lround(distance * cos(theta) / north_south_resolution);
+        col += lround(distance * sin(theta) / east_west_resolution);
 
         return std::make_tuple(row, col);
     }

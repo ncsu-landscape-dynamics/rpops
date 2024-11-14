@@ -172,8 +172,10 @@ public:
             // The invalid state is checked later, in this case using the kernel type.
             return;
         }
-        number_of_columns = ceil(max_distance / east_west_resolution) * 2 + 1;
-        number_of_rows = ceil(max_distance / north_south_resolution) * 2 + 1;
+        number_of_columns =
+            static_cast<int>(ceil(max_distance / east_west_resolution)) * 2 + 1;
+        number_of_rows =
+            static_cast<int>(ceil(max_distance / north_south_resolution)) * 2 + 1;
         Raster<double> prob_size(number_of_rows, number_of_columns, 0);
         probability = prob_size;
         probability_copy = prob_size;
