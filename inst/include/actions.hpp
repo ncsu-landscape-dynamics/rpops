@@ -90,16 +90,14 @@ public:
                     // From all the generated dispersers, some go to the soil in the
                     // same cell and don't participate in the kernel-driven dispersal.
                     auto dispersers_to_soil =
-                        std::round(to_soil_percentage_ * dispersers_from_cell);
+                        std::lround(to_soil_percentage_ * dispersers_from_cell);
                     soil_pool_->dispersers_to(dispersers_to_soil, i, j, generator);
                     dispersers_from_cell -= dispersers_to_soil;
                 }
-                pests.set_dispersers_at(i, j, dispersers_from_cell);
-                pests.set_established_dispersers_at(i, j, dispersers_from_cell);
+                pests.set_dispersers_at(i, j, dispersers_from_cell, 0);
             }
             else {
-                pests.set_dispersers_at(i, j, 0);
-                pests.set_established_dispersers_at(i, j, 0);
+                pests.set_dispersers_at(i, j, 0, 0);
             }
         }
     }
@@ -123,17 +121,15 @@ public:
             if (pests.dispersers_at(i, j) > 0) {
                 for (int k = 0; k < pests.dispersers_at(i, j); k++) {
                     std::tie(row, col) = dispersal_kernel_(generator, i, j);
-                    // if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
                     if (host_pool.is_outside(row, col)) {
                         pests.add_outside_disperser_at(row, col);
-                        pests.remove_established_dispersers_at(i, j, 1);
                         continue;
                     }
                     // Put a disperser to the host pool.
                     auto dispersed =
                         host_pool.disperser_to(row, col, generator.establishment());
-                    if (!dispersed) {
-                        pests.remove_established_dispersers_at(i, j, 1);
+                    if (dispersed) {
+                        pests.add_established_dispersers_at(i, j, 1);
                     }
                 }
             }
@@ -370,7 +366,8 @@ public:
                 // for leaving_percentage == 0.5
                 // 2 infected -> 1 leaving
                 // 3 infected -> 1 leaving
-                int leaving = original_count * leaving_percentage_;
+                int leaving =
+                    static_cast<int>(std::floor(original_count * leaving_percentage_));
                 leaving = hosts.pests_from(i, j, leaving, generator.overpopulation());
                 if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
                     pests.add_outside_dispersers_at(row, col, leaving);
@@ -510,7 +507,7 @@ public:
     void action(Hosts& hosts)
     {
         for (auto indices : hosts.suitable_cells()) {
-            if (action_mortality_) {
+            if (static_cast<bool>(action_mortality_)) {
                 hosts.apply_mortality_at(
                     indices[0], indices[1], mortality_rate_, mortality_time_lag_);
             }

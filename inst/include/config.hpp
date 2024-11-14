@@ -569,12 +569,19 @@ public:
         for (const auto& row : values) {
             if (row.size() < 3) {
                 throw std::invalid_argument(
-                    "3 values are required for each pest-host table row");
+                    "3 values are required for each pest-host table row "
+                    "(but row size is "
+                    + std::to_string(row.size()) + ")");
             }
             PestHostTableDataRow resulting_row;
             resulting_row.susceptibility = row[0];
             resulting_row.mortality_rate = row[1];
             resulting_row.mortality_time_lag = row[2];
+            if (resulting_row.susceptibility < 0 || resulting_row.susceptibility > 1) {
+                throw std::invalid_argument(
+                    "Susceptibility needs to be >=0 and <=1, not "
+                    + std::to_string(resulting_row.susceptibility));
+            }
             pest_host_table_data_.push_back(std::move(resulting_row));
         }
     }

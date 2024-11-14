@@ -58,7 +58,7 @@ public:
     /** Get cost of the whole segment (edge). */
     double cost() const
     {
-        if (total_cost_)
+        if (static_cast<bool>(total_cost_))
             return total_cost_;
         // This is short for ((size - 2) + (2 * 1/2)) * cost per cell.
         return (this->size() - 1) * cost_per_cell_;
@@ -72,7 +72,7 @@ public:
     /** Get cost per cell for the segment (edge). */
     double cost_per_cell() const
     {
-        if (total_cost_)
+        if (static_cast<bool>(total_cost_))
             return total_cost_ / (this->size() - 1);
         return cost_per_cell_;
     }

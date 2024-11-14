@@ -35,10 +35,11 @@ namespace pops {
 
 /*! A class to control the spread simulation.
  *
- * \deprecated
- * The class is deprecated in favor of individual action classes and a higher-level
- * Model. The class corresponding to the original Simulation class before too much code
- * accumulated in Simulation is SpreadAction. The class is now used only in tests.
+ * @note
+ * The class is deprecated for external use in favor of individual action classes and a
+ * higher-level Model. The class corresponding to the original Simulation class before
+ * too much code accumulated in Simulation is SpreadAction. The class is now used only
+ * in tests.
  *
  * The Simulation class handles the mechanics of the model, but the
  * timing of the events or steps should be handled outside of this

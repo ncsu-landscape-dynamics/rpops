@@ -125,18 +125,18 @@ public:
     }
 
     // returning double allows identical results with the previous version
-    double get_treated(int i, int j, int count)
+    int get_treated(int i, int j, int count)
     {
         return get_treated(i, j, count, this->application_);
     }
 
-    double get_treated(int i, int j, int count, TreatmentApplication application)
+    int get_treated(int i, int j, int count, TreatmentApplication application)
     {
         if (application == TreatmentApplication::Ratio) {
-            return count * this->map_(i, j);
+            return std::lround(count * this->map_(i, j));
         }
         else if (application == TreatmentApplication::AllInfectedInCell) {
-            return this->map_(i, j) ? count : 0;
+            return static_cast<bool>(this->map_(i, j)) ? count : 0;
         }
         throw std::runtime_error(
             "BaseTreatment::get_treated: unknown TreatmentApplication");
@@ -173,16 +173,18 @@ public:
         for (auto indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            double remove_susceptible = this->get_treated(
+            int remove_susceptible = this->get_treated(
                 i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio);
-            double remove_infected =
-                this->get_treated(i, j, host_pool.infected_at(i, j));
-            std::vector<double> remove_mortality;
+            // Treated infected are computed as a sum of treated in mortality groups.
+            int remove_infected = 0;
+            std::vector<int> remove_mortality;
             for (int count : host_pool.mortality_by_group_at(i, j)) {
-                remove_mortality.push_back(this->get_treated(i, j, count));
+                int remove = this->get_treated(i, j, count);
+                remove_mortality.push_back(remove);
+                remove_infected += remove;
             }
 
-            std::vector<double> remove_exposed;
+            std::vector<int> remove_exposed;
             for (int count : host_pool.exposed_by_group_at(i, j)) {
                 remove_exposed.push_back(this->get_treated(i, j, count));
             }
@@ -238,26 +240,25 @@ public:
         for (auto indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            // Given how the original code was written (everything was first converted
-            // to ints and subtractions happened only afterwards), this needs ints,
-            // not doubles to pass the r.pops.spread test (unlike the other code which
-            // did substractions before converting to ints).
             int susceptible_resistant = this->get_treated(
                 i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio);
             std::vector<int> resistant_exposed_list;
             for (const auto& number : host_pool.exposed_by_group_at(i, j)) {
                 resistant_exposed_list.push_back(this->get_treated(i, j, number));
             }
+            int infected = 0;
             std::vector<int> resistant_mortality_list;
             for (const auto& number : host_pool.mortality_by_group_at(i, j)) {
-                resistant_mortality_list.push_back(this->get_treated(i, j, number));
+                int remove = this->get_treated(i, j, number);
+                resistant_mortality_list.push_back(remove);
+                infected += remove;
             }
             host_pool.make_resistant_at(
                 i,
                 j,
                 susceptible_resistant,
                 resistant_exposed_list,
-                this->get_treated(i, j, host_pool.infected_at(i, j)),
+                infected,
                 resistant_mortality_list);
         }
     }
