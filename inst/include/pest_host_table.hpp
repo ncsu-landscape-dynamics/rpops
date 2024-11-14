@@ -103,7 +103,7 @@ public:
      * @param host Pointer to the host to get the information for
      * @return Mortality time lag value
      */
-    double mortality_time_lag(const HostPool* host) const
+    int mortality_time_lag(const HostPool* host) const
     {
         auto host_index = environment_.host_index(host);
         return mortality_time_lags_.at(host_index);

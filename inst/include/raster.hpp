@@ -275,7 +275,11 @@ public:
     }
 
     template<typename OtherNumber>
-    Raster& operator+=(OtherNumber value)
+    typename std::enable_if<
+        !(std::is_floating_point<OtherNumber>::value
+          && std::is_integral<Number>::value),
+        Raster&>::type
+    operator+=(OtherNumber value)
     {
         std::for_each(
             data_, data_ + (cols_ * rows_), [&value](Number& a) { a += value; });
@@ -283,7 +287,11 @@ public:
     }
 
     template<typename OtherNumber>
-    Raster& operator-=(OtherNumber value)
+    typename std::enable_if<
+        !(std::is_floating_point<OtherNumber>::value
+          && std::is_integral<Number>::value),
+        Raster&>::type
+    operator-=(OtherNumber value)
     {
         std::for_each(
             data_, data_ + (cols_ * rows_), [&value](Number& a) { a -= value; });
@@ -291,7 +299,11 @@ public:
     }
 
     template<typename OtherNumber>
-    Raster& operator*=(OtherNumber value)
+    typename std::enable_if<
+        !(std::is_floating_point<OtherNumber>::value
+          && std::is_integral<Number>::value),
+        Raster&>::type
+    operator*=(OtherNumber value)
     {
         std::for_each(
             data_, data_ + (cols_ * rows_), [&value](Number& a) { a *= value; });
@@ -299,10 +311,62 @@ public:
     }
 
     template<typename OtherNumber>
-    Raster& operator/=(OtherNumber value)
+    typename std::enable_if<
+        !(std::is_floating_point<OtherNumber>::value
+          && std::is_integral<Number>::value),
+        Raster&>::type
+    operator/=(OtherNumber value)
     {
         std::for_each(
             data_, data_ + (cols_ * rows_), [&value](Number& a) { a /= value; });
+        return *this;
+    }
+
+    template<typename OtherNumber>
+    typename std::enable_if<
+        std::is_floating_point<OtherNumber>::value && std::is_integral<Number>::value,
+        Raster&>::type
+    operator+=(OtherNumber value)
+    {
+        std::for_each(data_, data_ + (cols_ * rows_), [&value](Number& a) {
+            a += static_cast<int>(std::floor(value));
+        });
+        return *this;
+    }
+
+    template<typename OtherNumber>
+    typename std::enable_if<
+        std::is_floating_point<OtherNumber>::value && std::is_integral<Number>::value,
+        Raster&>::type
+    operator-=(OtherNumber value)
+    {
+        std::for_each(data_, data_ + (cols_ * rows_), [&value](Number& a) {
+            a -= static_cast<int>(std::floor(value));
+        });
+        return *this;
+    }
+
+    template<typename OtherNumber>
+    typename std::enable_if<
+        std::is_floating_point<OtherNumber>::value && std::is_integral<Number>::value,
+        Raster&>::type
+    operator*=(OtherNumber value)
+    {
+        std::for_each(data_, data_ + (cols_ * rows_), [&value](Number& a) {
+            a *= static_cast<int>(std::floor(value));
+        });
+        return *this;
+    }
+
+    template<typename OtherNumber>
+    typename std::enable_if<
+        std::is_floating_point<OtherNumber>::value && std::is_integral<Number>::value,
+        Raster&>::type
+    operator/=(OtherNumber value)
+    {
+        std::for_each(data_, data_ + (cols_ * rows_), [&value](Number& a) {
+            a /= static_cast<int>(std::floor(value));
+        });
         return *this;
     }
 
@@ -496,12 +560,13 @@ public:
         return out;
     }
 
-    friend inline Raster pow(Raster image, double value)
+    friend inline Raster pow(const Raster& image, double value)
     {
         image.for_each([value](Number& a) { a = std::pow(a, value); });
         return image;
     }
-    friend inline Raster sqrt(Raster image)
+
+    friend inline Raster sqrt(const Raster& image)
     {
         image.for_each([](Number& a) { a = std::sqrt(a); });
         return image;
