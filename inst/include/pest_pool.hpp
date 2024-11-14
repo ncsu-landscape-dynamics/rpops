@@ -53,13 +53,17 @@ public:
     {}
     /**
      * @brief Set number of dispersers
+     *
      * @param row Row number
      * @param col Column number
-     * @param value The new value
+     * @param dispersers Number of dispersers
+     * @param established_dispersers Number of established dispersers
      */
-    void set_dispersers_at(RasterIndex row, RasterIndex col, int value)
+    void set_dispersers_at(
+        RasterIndex row, RasterIndex col, int dispersers, int established_dispersers)
     {
-        dispersers_(row, col) = value;
+        dispersers_(row, col) = dispersers;
+        established_dispersers_(row, col) = established_dispersers;
     }
     /**
      * @brief Return number of dispersers
@@ -82,32 +86,21 @@ public:
     {
         return dispersers_;
     }
+
     /**
-     * @brief Set number of established dispersers
+     * @brief Add established dispersers
      *
-     * Established are dispersers which left cell (row, col) and established themselves
-     * elsewhere, i.e., origin of the established dispersers is tracked.
+     * Established dispersers are dispersers which left cell (row, col) and
+     * established themselves elsewhere, i.e., origin of the established dispersers
+     * is tracked.
      *
      * @param row Row number
      * @param col Column number
-     * @param value The new value
+     * @param count How many dispersers to add
      */
-    void set_established_dispersers_at(RasterIndex row, RasterIndex col, int value)
+    void add_established_dispersers_at(RasterIndex row, RasterIndex col, int count)
     {
-        established_dispersers_(row, col) = value;
-    }
-    // TODO: The following function should not be necessary because pests can't
-    // un-establish. It exists just because it mirrors how the raster was handled in the
-    // original Simulation code.
-    /**
-     * @brief Remove established dispersers
-     * @param row Row number
-     * @param col Column number
-     * @param count How many dispers to remove
-     */
-    void remove_established_dispersers_at(RasterIndex row, RasterIndex col, int count)
-    {
-        established_dispersers_(row, col) -= count;
+        established_dispersers_(row, col) += count;
     }
     /**
      * @brief Add a disperser which left the study area

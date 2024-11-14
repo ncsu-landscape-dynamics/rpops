@@ -147,20 +147,20 @@ private:
         DistDir closest;
         if (directions_.at(Direction::N)
             && (i - n) * north_south_resolution_ < mindist) {
-            mindist = (i - n) * north_south_resolution_;
+            mindist = static_cast<int>(std::floor((i - n) * north_south_resolution_));
             closest = std::make_tuple(mindist, Direction::N);
         }
         if (directions_.at(Direction::S)
             && (s - i) * north_south_resolution_ < mindist) {
-            mindist = (s - i) * north_south_resolution_;
+            mindist = static_cast<int>(std::floor((s - i) * north_south_resolution_));
             closest = std::make_tuple(mindist, Direction::S);
         }
         if (directions_.at(Direction::E) && (e - j) * west_east_resolution_ < mindist) {
-            mindist = (e - j) * west_east_resolution_;
+            mindist = static_cast<int>(std::floor((e - j) * west_east_resolution_));
             closest = std::make_tuple(mindist, Direction::E);
         }
         if (directions_.at(Direction::W) && (j - w) * west_east_resolution_ < mindist) {
-            mindist = (j - w) * west_east_resolution_;
+            mindist = static_cast<int>(std::floor((j - w) * west_east_resolution_));
             closest = std::make_tuple(mindist, Direction::W);
         }
         return closest;
