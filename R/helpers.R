@@ -374,3 +374,19 @@ generate_unique_id <- function() {
   return(unique_id)
 }
 
+clean_data <- function(data, model_type = "SEI") {
+  # Remove unwanted elements
+  data$spatial_indices <- NULL
+  data$soil_reservoirs <- NULL
+  
+  # Remove 'exposed' if model_type is "SI"
+  if (model_type == "SI") {
+    data$exposed <- NULL
+  }
+  
+  # Return the cleaned data
+  return(data)
+}
+
+
+
