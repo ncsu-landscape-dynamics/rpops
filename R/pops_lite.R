@@ -318,5 +318,3 @@ pops_lite <- function(infected_file,
   stopCluster(cl)
   return(cat("PoPS runs exported"))
 }
-
-str(data)
