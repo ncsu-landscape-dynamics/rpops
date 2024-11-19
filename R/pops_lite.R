@@ -19,14 +19,6 @@
 #' "None" output folder path must be provided.
 #' @param output_folder_path this is the full path with either / or \\ (e.g.,
 #' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
-#' @param output_step_labels Specifies the time steps for naming output files in the simulation. 
-#' The length of output_step_labels must match the expected number of outputs, 
-#' determined by 'start_date', 'end_date', and 'output_frequency'. 
-#' For example:
-#' - If 'start_date' = '01-01-2021', 'end_date' = '12-31-2023', and 'output_frequency' = 'year', 
-#'   then output_step_labels = c("2021", "2022", "2023").
-#' - If 'start_date' = '01-01-2021', 'end_date' = '12-31-2021', and 'output_frequency' = 'year', 
-#'   then output_step_labels = c("2021").
 #'   
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
@@ -41,84 +33,84 @@
 #' @return list of infected and susceptible per year
 #' @export
 #'
-pops_multirun <- function(infected_file,
-                          host_file,
-                          total_populations_file,
-                          parameter_means,
-                          parameter_cov_matrix,
-                          temp = FALSE,
-                          temperature_coefficient_file = "",
-                          precip = FALSE,
-                          precipitation_coefficient_file = "",
-                          model_type = "SI",
-                          latency_period = 0,
-                          time_step = "month",
-                          season_month_start = 1,
-                          season_month_end = 12,
-                          start_date = "2008-01-01",
-                          end_date = "2008-12-31",
-                          use_survival_rates = FALSE,
-                          survival_rate_month = 3,
-                          survival_rate_day = 15,
-                          survival_rates_file = "",
-                          use_lethal_temperature = FALSE,
-                          temperature_file = "",
-                          lethal_temperature = -12.87,
-                          lethal_temperature_month = 1,
-                          mortality_on = FALSE,
-                          mortality_rate = 0,
-                          mortality_time_lag = 0,
-                          mortality_frequency = "year",
-                          mortality_frequency_n = 1,
-                          management = FALSE,
-                          treatment_dates = c(""),
-                          treatments_file = "",
-                          treatment_method = "ratio",
-                          natural_kernel_type = "cauchy",
-                          anthropogenic_kernel_type = "cauchy",
-                          natural_dir = "NONE",
-                          anthropogenic_dir = "NONE",
-                          number_of_iterations = 100,
-                          number_of_cores = NA,
-                          pesticide_duration = 0,
-                          pesticide_efficacy = 1.0,
-                          random_seed = NULL,
-                          output_frequency = "year",
-                          output_frequency_n = 1,
-                          movements_file = "",
-                          use_movements = FALSE,
-                          start_exposed = FALSE,
-                          generate_stochasticity = TRUE,
-                          establishment_stochasticity = TRUE,
-                          movement_stochasticity = TRUE,
-                          dispersal_stochasticity = TRUE,
-                          establishment_probability = 0.5,
-                          dispersal_percentage = 0.99,
-                          quarantine_areas_file = "",
-                          use_quarantine = FALSE,
-                          use_spreadrates = FALSE,
-                          use_overpopulation_movements = FALSE,
-                          overpopulation_percentage = 0,
-                          leaving_percentage = 0,
-                          leaving_scale_coefficient = 1,
-                          exposed_file = "",
-                          mask = NULL,
-                          write_outputs = "None",
-                          output_folder_path = "",
-                          network_filename = "",
-                          network_movement = "walk",
-                          use_initial_condition_uncertainty = FALSE,
-                          use_host_uncertainty = FALSE,
-                          weather_type = "deterministic",
-                          temperature_coefficient_sd_file = "",
-                          precipitation_coefficient_sd_file = "",
-                          dispersers_to_soils_percentage = 0,
-                          quarantine_directions = "",
-                          multiple_random_seeds = FALSE,
-                          file_random_seeds = NULL,
-                          use_soils = FALSE,
-                          soil_starting_pest_file = "",
-                          start_with_soil_populations = FALSE) {
+pops_lite <- function(infected_file,
+                      host_file,
+                      total_populations_file,
+                      parameter_means,
+                      parameter_cov_matrix,
+                      temp = FALSE,
+                      temperature_coefficient_file = "",
+                      precip = FALSE,
+                      precipitation_coefficient_file = "",
+                      model_type = "SI",
+                      latency_period = 0,
+                      time_step = "month",
+                      season_month_start = 1,
+                      season_month_end = 12,
+                      start_date = "2008-01-01",
+                      end_date = "2008-12-31",
+                      use_survival_rates = FALSE,
+                      survival_rate_month = 3,
+                      survival_rate_day = 15,
+                      survival_rates_file = "",
+                      use_lethal_temperature = FALSE,
+                      temperature_file = "",
+                      lethal_temperature = -12.87,
+                      lethal_temperature_month = 1,
+                      mortality_on = FALSE,
+                      mortality_rate = 0,
+                      mortality_time_lag = 0,
+                      mortality_frequency = "year",
+                      mortality_frequency_n = 1,
+                      management = FALSE,
+                      treatment_dates = c(""),
+                      treatments_file = "",
+                      treatment_method = "ratio",
+                      natural_kernel_type = "cauchy",
+                      anthropogenic_kernel_type = "cauchy",
+                      natural_dir = "NONE",
+                      anthropogenic_dir = "NONE",
+                      number_of_iterations = 100,
+                      number_of_cores = NA,
+                      pesticide_duration = 0,
+                      pesticide_efficacy = 1.0,
+                      random_seed = NULL,
+                      output_frequency = "year",
+                      output_frequency_n = 1,
+                      movements_file = "",
+                      use_movements = FALSE,
+                      start_exposed = FALSE,
+                      generate_stochasticity = TRUE,
+                      establishment_stochasticity = TRUE,
+                      movement_stochasticity = TRUE,
+                      dispersal_stochasticity = TRUE,
+                      establishment_probability = 0.5,
+                      dispersal_percentage = 0.99,
+                      quarantine_areas_file = "",
+                      use_quarantine = FALSE,
+                      use_spreadrates = FALSE,
+                      use_overpopulation_movements = FALSE,
+                      overpopulation_percentage = 0,
+                      leaving_percentage = 0,
+                      leaving_scale_coefficient = 1,
+                      exposed_file = "",
+                      mask = NULL,
+                      write_outputs = "None",
+                      output_folder_path = "",
+                      network_filename = "",
+                      network_movement = "walk",
+                      use_initial_condition_uncertainty = FALSE,
+                      use_host_uncertainty = FALSE,
+                      weather_type = "deterministic",
+                      temperature_coefficient_sd_file = "",
+                      precipitation_coefficient_sd_file = "",
+                      dispersers_to_soils_percentage = 0,
+                      quarantine_directions = "",
+                      multiple_random_seeds = FALSE,
+                      file_random_seeds = NULL,
+                      use_soils = FALSE,
+                      soil_starting_pest_file = "",
+                      start_with_soil_populations = FALSE) {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -203,9 +195,9 @@ pops_multirun <- function(infected_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
-
+  
   config <- configuration(config)
-
+  
   if (!is.null(config$failure)) {
     stop(config$failure)
   }
@@ -218,22 +210,19 @@ pops_multirun <- function(infected_file,
                                           "_forecast_random_seeds.csv"),
               row.names = FALSE)
   }
-
+  
   config$crs <- terra::crs(config$host)
-
+  
   i <- NULL
   cl <- parallel::makeCluster(config$core_count)
   doParallel::registerDoParallel(cl)
-
-  infected_stack <-
     foreach::foreach(
       i = seq_len(config$number_of_iterations),
-      .combine = c,
       .packages = c("PoPS", "terra")
     ) %dopar% {
       
       config <- update_config(config)
-
+      
       data <- PoPS::pops_model(
         random_seed = config$random_seed[1],
         multiple_random_seeds = config$multiple_random_seeds,
@@ -320,388 +309,14 @@ pops_multirun <- function(infected_file,
         weather_type = config$weather_type,
         dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
         use_soils = config$use_soils)
-
-      run <- c()
-      run$single_run <- data$infected
-      run$comp_years <- data$infected
-      run$number_infected <- data$number_infected
-      run$susceptible_runs <- data$susceptible
-      run$infected_area <- data$area_infected
-      run$spread_rate <- data$rates
-      run$quarantine_escape <- data$quarantine_escape
-      run$quarantine_escape_distance <- data$quarantine_escape_distance
-      run$quarantine_escape_direction <- data$quarantine_escape_directions
-      run$exposed_runs <- data$exposed
-
-      if (config$write_outputs == "all_simulations") {
-        infected_out <- terra::rast(config$infected_file)[[1]]
-        susectible_out <- infected_out
-        exposed_out <- infected_out
-        for (q in seq_len(length(data$infected))) {
-          terra::values(infected_out[[q]]) <- data$infected[[q]]
-          terra::values(susectible_out[[q]]) <- data$susceptible[[q]]
-          for (p in seq_len(length(data$exposed[[q]])))
-          terra::values(exposed_out[[q]]) <- data$exposed[[q]][[p]]
-        }
-
-        dir.create(paste(config$output_folder_path, "pops_runs/", sep = ""))
-        file_name <- paste(config$output_folder_path, "pops_runs/infected_", i, ".tif", sep = "")
-        terra::writeRaster(infected_out, file_name, overwrite = TRUE)
-        file_name <-
-        paste(config$output_folder_path, "pops_runs/susectible_", i, ".tif", sep = "")
-        terra::writeRaster(susectible_out, file_name, overwrite = TRUE)
-        file_name <- paste(config$output_folder_path, "pops_runs/exposed_", i, ".tif", sep = "")
-        terra::writeRaster(exposed_out, file_name, overwrite = TRUE)
-      }
-
-      run
+      
+      data <- clean_data(data, model_type = config$model_type)
+      saveRDS(data, file.path(config$output_folder_path, paste0(uid, "_", i, ".rds")))
+      rm(data)
+      gc()
     }
-
   stopCluster(cl)
-  single_runs <- infected_stack[seq(1, length(infected_stack), 10)]
-  probability_runs <- infected_stack[seq(2, length(infected_stack), 10)]
-  number_infected_runs <- infected_stack[seq(3, length(infected_stack), 10)]
-  susceptible_runs <- infected_stack[seq(4, length(infected_stack), 10)]
-  area_infected_runs <- infected_stack[seq(5, length(infected_stack), 10)]
-  spread_rate_runs <- infected_stack[seq(6, length(infected_stack), 10)]
-  quarantine_escape_runs <- infected_stack[seq(7, length(infected_stack), 10)]
-  quarantine_escape_distance_runs <- infected_stack[seq(8, length(infected_stack), 10)]
-  quarantine_escape_directions_runs <- infected_stack[seq(9, length(infected_stack), 10)]
-  exposed_runs <- infected_stack[seq(10, length(infected_stack), 10)]
-
-  prediction <- probability_runs[[1]]
-  for (w in seq_len(length(prediction))) {
-    prediction[[w]] <- 0
-  }
-  escape_probability <-
-    data.frame(t(rep(0, length(probability_runs[[1]]))))
-  infected_area <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  infected_number <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  west_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  east_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  south_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  north_rates <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  max_values <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escapes <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escape_distances <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-  quarantine_escape_directions <- data.frame(t(rep(0, length(probability_runs[[1]]))))
-
-  for (p in seq_len(length(probability_runs))) {
-    for (w in seq_len(length(prediction))) {
-      prob <- probability_runs[[p]][[w]]
-      max_values[p, w] <- max(prob)
-      prob[prob <= 1] <- 0
-      prob[prob > 1] <- 1
-      prediction[[w]] <- prediction[[w]] + prob
-    }
-    infected_number[p, ] <- number_infected_runs[[p]]
-    infected_area[p, ] <- area_infected_runs[[p]]
-    rates <- do.call(rbind, spread_rate_runs[[p]])
-    if (!is.null(rates)) {
-      west_rates[p, ] <- rates[, 4]
-      east_rates[p, ] <- rates[, 3]
-      south_rates[p, ] <- rates[, 2]
-      north_rates[p, ] <- rates[, 1]
-    } else {
-      west_rates[p, ] <- 0
-      east_rates[p, ] <- 0
-      south_rates[p, ] <- 0
-      north_rates[p, ] <- 0
-    }
-
-    if (config$use_quarantine && length(quarantine_escape_runs[[p]]) ==
-        length(probability_runs[[p]])) {
-      escape_probability <- escape_probability + quarantine_escape_runs[[p]]
-      quarantine_escapes[p, ] <- quarantine_escape_runs[[p]]
-      quarantine_escape_distances[p, ] <- quarantine_escape_distance_runs[[p]]
-      quarantine_escape_directions[p, ] <- quarantine_escape_directions_runs[[p]]
-    }
-  }
-
-  probability <- prediction
-  for (w in seq_len(length(prediction))) {
-    probability[[w]] <- (prediction[[w]] / (length(probability_runs))) * 100
-  }
-
-  infected_areas <-
-    round(sapply(infected_area, function(x) {
-      c(
-        "Mean" = mean(x, na.rm = TRUE),
-        "Stand dev" = sd(x)
-      )
-    }), digits = 0)
-  number_infecteds <-
-    round(sapply(infected_number, function(x) {
-      c(
-        "Mean" = mean(x, na.rm = TRUE),
-        "Stand dev" = sd(x)
-      )
-    }),
-    digits = 0
-    )
-  west_rate <-
-    round(sapply(west_rates, function(x) {
-      c(
-        "Mean" = mean(x, na.rm = TRUE),
-        "Stand dev" = sd(x)
-      )
-    }), digits = 0)
-  east_rate <-
-    round(sapply(east_rates, function(x) {
-      c(
-        "Mean" = mean(x, na.rm = TRUE),
-        "Stand dev" = sd(x)
-      )
-    }), digits = 0)
-  south_rate <-
-    round(sapply(south_rates, function(x) {
-      c(
-        "Mean" = mean(x, na.rm = TRUE),
-        "Stand dev" = sd(x)
-      )
-    }), digits = 0)
-  north_rate <-
-    round(sapply(north_rates, function(x) {
-      c(
-        "Mean" = mean(x, na.rm = TRUE),
-        "Stand dev" = sd(x)
-      )
-    }), digits = 0)
-
-  west_rate[is.na(west_rate)] <- 0
-  east_rate[is.na(east_rate)] <- 0
-  south_rate[is.na(south_rate)] <- 0
-  north_rate[is.na(north_rate)] <- 0
-
-  ## add quarantine here
-  if (use_quarantine) {
-    escape_probability <- escape_probability / length(probability_runs) * 100
-    if (
-      length(quarantine_escape_distances[quarantine_escape_directions == "N"]) >
-        0) {
-      north_distance_to_quarantine <-
-        round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == "N"],
-          function(x) {
-            c(
-              "Mean" = mean(x, na.rm = TRUE),
-              "Stand dev" = sd(x)
-            )
-          }
-        ), digits = 0)
-    } else {
-      north_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    }
-
-    if (
-      length(quarantine_escape_distances[quarantine_escape_directions == "S"]) >
-        0) {
-      south_distance_to_quarantine <-
-        round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == "S"],
-          function(x) {
-            c(
-              "Mean" = mean(x, na.rm = TRUE),
-              "Stand dev" = sd(x, na.rm = TRUE)
-            )
-          }
-        ), digits = 0)
-    } else {
-      south_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    }
-
-    if (
-      length(quarantine_escape_distances[quarantine_escape_directions == "E"]) >
-        0) {
-      east_distance_to_quarantine <-
-        round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == "E"],
-          function(x) {
-            c(
-              "Mean" = mean(x, na.rm = TRUE),
-              "Stand dev" = sd(x)
-            )
-          }
-        ), digits = 0)
-    } else {
-      east_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    }
-
-    if (
-      length(quarantine_escape_distances[quarantine_escape_directions == "W"]) >
-        0) {
-      west_distance_to_quarantine <-
-        round(sapply(
-          quarantine_escape_distances[quarantine_escape_directions == "W"],
-          function(x) {
-            c(
-              "Mean" = mean(x, na.rm = TRUE),
-              "Stand dev" = sd(x)
-            )
-          }
-        ), digits = 0)
-    } else {
-      west_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    }
-  } else {
-    escape_probability <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    north_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    south_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    east_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-    west_distance_to_quarantine <- data.frame(t(rep(NA, length(probability_runs[[1]]))))
-  }
-
-  which_median <- function(x) which.min(abs(x - median(x)))
-
-  median_run_index <- which_median(infected_number[[ncol(infected_number)]])
-  min_run_index <- which.min(infected_number[[ncol(infected_number)]])
-  max_run_index <- which.max(infected_number[[ncol(infected_number)]])
-
-  single_run <- single_runs[[median_run_index]]
-  susceptible_run <- susceptible_runs[[median_run_index]]
-  exposed_run <- exposed_runs[[median_run_index]]
-
-  min_run <- single_runs[[min_run_index]]
-  max_run <- single_runs[[max_run_index]]
-
-  for (q in seq_len(length(single_runs[[1]]))) {
-    for (j in seq_len(length(single_runs))) {
-      if (j == 1) {
-        raster_stacks <- list(single_runs[[j]][[q]])
-      } else {
-        raster_stacks[[j]] <- single_runs[[j]][[q]]
-      }
-    }
-
-    raster_stacks2 <- do.call(cbind, raster_stacks)
-    raster_stacks2 <- array(raster_stacks2, dim = c(dim(raster_stacks[[1]]), length(raster_stacks)))
-    sim_mean <- apply(raster_stacks2, c(1, 2), mean, na.rm = TRUE)
-    sim_sd <- apply(raster_stacks2, c(1, 2), sd, na.rm = TRUE)
-
-    simulation_mean <-
-      terra::rast(
-        nrow = config$rows_cols$num_rows, ncol = config$rows_cols$num_cols,
-        xmin = config$xmin, xmax = config$xmax,
-        ymin = config$ymin, ymax = config$ymax, crs = config$crs
-      )
-    simulation_sd <- simulation_mean
-    simulation_max <- simulation_mean
-    simulation_min <- simulation_mean
-    simulation_probability <- simulation_mean
-    simulation_median <- simulation_mean
-    simulation_susceptible <- simulation_mean
-    terra::values(simulation_mean) <- sim_mean
-    names(simulation_mean) <- "mean"
-
-    terra::values(simulation_sd) <- sim_sd
-    names(simulation_sd) <- "sd"
-
-    terra::values(simulation_max) <- max_run[[q]]
-    names(simulation_max) <- "max"
-
-    terra::values(simulation_min) <- min_run[[q]]
-    names(simulation_min) <- "min"
-
-    terra::values(simulation_median) <- single_run[[q]]
-    names(simulation_median) <- "median"
-
-    terra::values(simulation_probability) <- probability[[q]]
-    names(simulation_probability) <- "probability"
-
-    terra::values(simulation_susceptible) <- susceptible_run[[q]]
-    names(simulation_susceptible) <- "susceptible"
-
-    if (q == 1) {
-      simulation_mean_stack <- simulation_mean
-      simulation_sd_stack <- simulation_sd
-      simulation_min_stack <- simulation_min
-      simulation_max_stack <- simulation_max
-      simulation_median_stack <- simulation_median
-      simulation_probability_stack <- simulation_probability
-    } else {
-      simulation_mean_stack <- c(simulation_mean_stack, simulation_mean)
-      simulation_sd_stack <- c(simulation_sd_stack, simulation_sd)
-      simulation_min_stack <- c(simulation_min_stack, simulation_min)
-      simulation_max_stack <- c(simulation_max_stack, simulation_max)
-      simulation_median_stack <- c(simulation_median_stack, simulation_median)
-      simulation_probability_stack <-
-        c(simulation_probability_stack, simulation_probability)
-    }
-  }
-
-  if (!is.null(config$mask)) {
-    simulation_probability_stack <-
-      terra::mask(simulation_probability_stack, config$mask, maskvalues = NA, updatevalue = NA)
-    simulation_mean_stack <-
-      terra::mask(simulation_mean_stack, config$mask, maskvalues = NA, updatevalue = NA)
-    simulation_sd_stack <-
-      terra::mask(simulation_sd_stack, config$mask, maskvalues = NA, updatevalue = NA)
-    simulation_min_stack <-
-      terra::mask(simulation_min_stack, config$mask, maskvalues = NA, updatevalue = NA)
-    simulation_max_stack <-
-      terra::mask(simulation_max_stack, config$mask, maskvalues = NA, updatevalue = NA)
-  }
-
-  outputs <-
-    list(
-      simulation_probability_stack,
-      simulation_mean_stack,
-      simulation_sd_stack,
-      simulation_min_stack,
-      simulation_max_stack,
-      single_run,
-      susceptible_run,
-      exposed_run,
-      number_infecteds,
-      infected_areas,
-      west_rate,
-      east_rate,
-      south_rate,
-      north_rate,
-      escape_probability,
-      north_distance_to_quarantine,
-      south_distance_to_quarantine,
-      east_distance_to_quarantine,
-      west_distance_to_quarantine
-    )
-
-  names(outputs) <-
-    c(
-      "probability",
-      "simulation_mean",
-      "simulation_sd",
-      "simulation_min",
-      "simulation_max",
-      "single_run",
-      "susceptible_run",
-      "exposed_run",
-      "number_infecteds",
-      "infected_areas",
-      "west_rate",
-      "east_rate",
-      "south_rate",
-      "north_rate",
-      "escape_probability",
-      "north_distance_to_quarantine",
-      "south_distance_to_quarantine",
-      "east_distance_to_quarantine",
-      "west_distance_to_quarantine"
-    )
-
-  if (config$write_outputs %in% config$output_write_list) {
-    file_name <- paste(config$output_folder_path, "simulation_probability.tif", sep = "")
-    terra::writeRaster(simulation_probability_stack, file_name, overwrite = TRUE)
-    file_name <- paste(config$output_folder_path, "simulation_mean.tif", sep = "")
-    terra::writeRaster(simulation_mean_stack, file_name, overwrite = TRUE)
-    file_name <- paste(config$output_folder_path, "simulation_sd.tif", sep = "")
-    terra::writeRaster(simulation_sd_stack, file_name, overwrite = TRUE)
-    file_name <- paste(config$output_folder_path, "simulation_min.tif", sep = "")
-    terra::writeRaster(simulation_min_stack, file_name, overwrite = TRUE)
-    file_name <- paste(config$output_folder_path, "simulation_max.tif", sep = "")
-    terra::writeRaster(simulation_max_stack, file_name, overwrite = TRUE)
-    file_name <- paste(config$output_folder_path, "multirun_outputs.rdata", sep = "")
-    save(outputs, file = file_name)
-  }
-
-  return(outputs)
+  return(cat("PoPS runs exported"))
 }
+
+str(data)
