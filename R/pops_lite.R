@@ -209,10 +209,13 @@ pops_multirun <- function(infected_file,
   if (!is.null(config$failure)) {
     stop(config$failure)
   }
-
+  
+  uid <- generate_unique_id()
+  
   if (config$multiple_random_seeds && is.null(config$file_random_seeds) &&
       dir.exists(config$output_folder_path)) {
-    write.csv(config$random_seeds, paste0(config$output_folder_path, "forecast_random_seeds.csv"),
+    write.csv(config$random_seeds, paste0(config$output_folder_path, uid, 
+                                          "_forecast_random_seeds.csv"),
               row.names = FALSE)
   }
 
