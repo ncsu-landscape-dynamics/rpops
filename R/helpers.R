@@ -335,6 +335,7 @@ update_config <- function(config) {
     exposed2 <- config$exposed_mean
     config$exposed[[config$latency_period + 1]] <- exposed2
   }
+  gc()
 
   # Update host based on uncertainty settings
   if (config$use_host_uncertainty) {
@@ -342,6 +343,7 @@ update_config <- function(config) {
   } else {
     config$host <- config$host_mean
   }
+  gc()
   
   # Update susceptible and total populations
   config$susceptible <- config$host - config$infected - exposed2

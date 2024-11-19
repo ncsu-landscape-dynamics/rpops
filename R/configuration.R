@@ -835,6 +835,6 @@ configuration <- function(config) {
   bounding_box$west <- config$xmin
   bounding_box$east <- config$xmax
   config$bounding_box <- bounding_box
-
+  gc()
   return(config)
 }
