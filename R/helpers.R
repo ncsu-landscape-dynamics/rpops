@@ -388,5 +388,26 @@ clean_data <- function(data, model_type = "SEI") {
   return(data)
 }
 
-
+# Function to convert  and export infected matrices from pops_lite.R into rasters
+write_infected_rasters <- function(config, uid) {
+  for (i in seq_len(config$number_of_iterations)) {
+    # Read the template raster
+    r_template <- rast(config$infected_file)
+    # Assign values to the raster
+    values(r_template) <- readRDS(file.path(config$output_folder_path, paste0(uid, "_", i, ".rds")))$infected[[1]]
+    
+    # Write the raster to disk with compression
+    writeRaster(
+      r_template,
+      filename = file.path(config$output_folder_path, paste0(uid, "_", i, ".tif")),
+      overwrite = TRUE,
+      datatype = "INT2U",
+      gdal = c("COMPRESS=ZSTD")
+    )
+    gc()
+    
+    # Print a status message
+    cat("Processed iteration", i, "- output saved to:", config$output_folder_path, "\n")
+  }
+}
 
