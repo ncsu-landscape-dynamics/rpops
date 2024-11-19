@@ -361,3 +361,16 @@ update_config <- function(config) {
   
   return(config)
 }
+
+# Create unique ID to track forecast_random_seeds.csv and outputs from pops_lite.R
+# Function to generate a unique ID
+generate_unique_id <- function() {
+  # Generate interleaved sequence of random numbers and letters in one step
+  unique_id <- paste(c(rbind(
+    sample(1:9, 4, replace = TRUE), 
+    sample(letters, 4, replace = TRUE)
+  )), collapse = "")
+  
+  return(unique_id)
+}
+
