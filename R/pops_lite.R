@@ -110,7 +110,8 @@ pops_lite <- function(infected_file,
                       file_random_seeds = NULL,
                       use_soils = FALSE,
                       soil_starting_pest_file = "",
-                      start_with_soil_populations = FALSE) {
+                      start_with_soil_populations = FALSE,
+                      create_infected_rasters = TRUE) {
   config <- c()
   config$random_seed <- random_seed
   config$infected_file <- infected_file
@@ -195,6 +196,7 @@ pops_lite <- function(infected_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$create_infected_rasters <- create_infected_rasters
   
   config <- configuration(config)
   
@@ -316,5 +318,8 @@ pops_lite <- function(infected_file,
       gc()
     }
   stopCluster(cl)
+  if(config$create_infected_rasters) {
+    write_infected_rasters(config, uid)
+  }
   return(cat("PoPS runs exported"))
 }
