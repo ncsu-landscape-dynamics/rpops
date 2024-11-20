@@ -410,43 +410,14 @@ generate_unique_id <- function() {
   return(unique_id)
 }
 
-clean_data <- function(data,
-                       model_type = "SEI",
-                       mortality_on = FALSE,
-                       use_quarantine = FALSE) {
-  # Remove common elements
-  data[c("spatial_indices",
-         "soil_reservoirs",
-         "total_populations",
-         "total_exposed")] <- NULL
-  
-  # Adjust for specific conditions
-  if (model_type == "SI") {
-    data[c("exposed", "total_exposed")] <- NULL
-  }
-  if (!mortality_on) {
-    data$mortality <- NULL
-  }
-  if (!use_quarantine) {
-    data[c(
-      "quarantine_escape",
-      "quarantine_escape_directions",
-      "quarantine_escape_distance"
-    )] <- NULL
-  }
-  
-  gc() # Trigger garbage collection
-  return(data)
-}
-
-
 # Function to convert  and export infected matrices from pops_lite.R into rasters
 write_infected_rasters <- function(config, uid) {
   for (i in seq_len(config$number_of_iterations)) {
     # Read the template raster
     r_template <- rast(config$infected_file)
     # Assign values to the raster
-    values(r_template) <- readRDS(file.path(config$output_folder_path, paste0(uid, "_", i, ".rds")))$infected[[1]]
+    values(r_template) <- readRDS(file.path(config$output_folder_path,
+                                            paste0(uid, "_", i, ".rds")))$infected[[1]]
     
     # Write the raster to disk with compression
     writeRaster(
