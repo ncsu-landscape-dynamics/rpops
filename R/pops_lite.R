@@ -345,6 +345,8 @@ pops_lite <- function(infected_file,
     
     # Remove any null in data
     data <- data[!sapply(data, is.null)]
+    gc()
+    
     saveRDS(
       data,
       file = paste0(config$output_folder_path, uid, "_pops_output_", i, ".rds"),
