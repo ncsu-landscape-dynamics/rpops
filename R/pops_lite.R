@@ -1,21 +1,28 @@
 #' PoPS (Pest or Pathogen Spread) Lite Model Multiple Runs
-#' 
-#' A process-based model designed to forecast the spread of pests or pathogens 
-#' in forest or agricultural ecosystems. It incorporates the effects of weather 
-#' and environmental factors on reproduction and survival. The model runs 
-#' multiple stochastic simulations, propagating uncertainty in parameters, 
-#' initial conditions, and drivers, similar to `pops_multirun`. However, this 
-#' function exports raw outputs directly from `pops_model`. 
 #'
-#' Use this function if raw simulation data is needed or if extent and/or 
+#' A process-based model designed to forecast the spread of pests or pathogens
+#' in forest or agricultural ecosystems. It incorporates the effects of weather
+#' and environmental factors on reproduction and survival. The model runs
+#' multiple stochastic simulations, propagating uncertainty in parameters,
+#' initial conditions, and drivers, similar to `pops_multirun`. However, this
+#' function exports raw outputs directly from `pops_model`.
+#'
+#' Use this function if raw simulation data is needed or if extent and/or
 #' resolution constraints prevent using `pops_multirun`.
 
 #'
 #' @inheritParams pops
-#' 
-#' @param config_file Path to config file produced when calling `configuration`. 
+#'
+#' @param config_file Path to config file produced when calling `configuration`.
 #' The config file includes all data necessary used to set up c++ PoPS model
-#' 
+#' @param number_of_cores (Default = `NULL`) Specify the number of cores to use 
+#' for the computation. If a value is provided, it overrides `config$core_count`. 
+#' If set to `NULL`, the value from `config$core_count` will be used.
+#' @param number_of_iterations (Default = `NULL`) Specify the number of iterations 
+#' to run the PoPS model. If a value is provided, it overrides 
+#' `config$number_of_iterations`. If set to `NULL`, the value from 
+#' `config$number_of_iterations` will be used.
+#'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm median sd
@@ -29,7 +36,9 @@
 #' @return list of infected and susceptible per year
 #' @export
 
-pops_lite <- function(config_file = "") {
+pops_lite <- function(config_file = "",
+                      number_of_cores = NULL,
+                      number_of_iterations = NULL) {
   config <- readRDS(config_file)
   
   if (!is.null(config$failure)) {
@@ -59,9 +68,20 @@ pops_lite <- function(config_file = "") {
   
   config$crs <- terra::crs(terra::rast(config$host_file))
   
+  #If statement to dynamically set number of cores and iterations
+  
+  if (!is.null(number_of_cores)) {
+    config$core_count <- number_of_cores
+  }
+  
+  if (!is.null(number_of_iterations)) {
+    config$number_of_iterations <- number_of_iterations
+  }
+  
   i <- NULL
   cl <- parallel::makeCluster(config$core_count)
   doParallel::registerDoParallel(cl)
+  
   foreach::foreach(
     i = seq_len(config$number_of_iterations),
     .packages = c("PoPS", "terra")
@@ -179,7 +199,6 @@ pops_lite <- function(config_file = "") {
     
     # Remove any null in data
     data <- data[!sapply(data, is.null)]
-    gc()
     
     saveRDS(
       data,
@@ -187,6 +206,7 @@ pops_lite <- function(config_file = "") {
       compress = TRUE
     )
     rm(data)
+    gc()
   }
   stopCluster(cl)
   return(cat("Raw PoPS runs outputs saved to output_path"))
