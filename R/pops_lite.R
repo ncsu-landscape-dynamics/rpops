@@ -66,10 +66,7 @@ pops_lite <- function(config_file = "",
     )
   }
   
-  config$crs <- terra::crs(terra::rast(config$host_file))
-  
   #If statement to dynamically set number of cores and iterations
-  
   if (!is.null(number_of_cores)) {
     config$core_count <- number_of_cores
   }
