@@ -437,3 +437,38 @@ write_infected_rasters <- function(config, uid) {
         "\n")
   }
 }
+
+#' Function to dynamically update the working directory for all file paths in
+#' the configuration rds output
+
+update_config_paths <- function(config, root) {
+  # Normalize the root directory
+  root <- normalizePath(root, winslash = "/", mustWork = FALSE)
+  target_dir <- basename(root)  # Extract the target directory name
+  
+  # List of keys to update
+  keys_to_update <- c(
+    "infected_file", "host_file", "total_populations_file", 
+    "temperature_coefficient_file", "precipitation_coefficient_file", 
+    "temperature_file", "survival_rates_file", "treatments_file", 
+    "movements_file", "quarantine_areas_file", "exposed_file", 
+    "network_filename", "temperature_coefficient_sd_file", 
+    "precipitation_coefficient_sd_file", "soil_starting_pest_file",
+    "output_folder_path"
+  )
+  
+  # Precompute the replacement pattern
+  replace_pattern <- paste0(".*", target_dir)
+  
+  # Update paths in place
+  for (key in keys_to_update) {
+    if (!is.null(config[[key]]) && is.character(config[[key]])) {
+      old_path <- normalizePath(config[[key]], winslash = "/", mustWork = FALSE)
+      if (grepl(target_dir, old_path, fixed = TRUE)) {
+        config[[key]] <- sub(replace_pattern, root, old_path)
+      }
+    }
+  }
+  
+  return(config)
+}
