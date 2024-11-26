@@ -212,7 +212,7 @@ pops_lite <- function(config_file = "",
     
     saveRDS(
       data,
-      file = paste0(config$output_folder_path, uid, "_pops_output_", i, ".rds"),
+      file = file.path(config$output_folder_path, paste0(uid, "_pops_output_", i, ".rds")),
       compress = TRUE
     )
     rm(data)
