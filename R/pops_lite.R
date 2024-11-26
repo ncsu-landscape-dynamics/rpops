@@ -22,18 +22,15 @@
 #' to run the PoPS model. If a value is provided, it overrides 
 #' `config$number_of_iterations`. If set to `NULL`, the value from 
 #' `config$number_of_iterations` will be used.
-#' @param updated_dirs_path (Default = `NULL`) Specify an alternative root directory
-#' for input and output file/folder paths in the config_file. This makes it easy to 
-#' update the input file paths and output folder path in the original config_file 
-#' when running it from a new workstation with different root paths, without needing 
-#' to recreate the entire config_file. By default, `updated_dirs_path` is set to NULL, 
-#' meaning the original paths in the config_file are used if no alternative root 
-#' directory is specified. NOTE: The function assumes that the folder structure for 
-#' input_data and output matches the original config_file. It aligns the "top-level" 
-#' folder in both the original and alternative directories to update file/folder paths 
-#' accordingly in the config_file. If no matching folder exists, the file paths and 
-#' output folder remain unchanged.
-#'
+#' @param new_dirs_path (Default = `NULL`) Specify a new root directory to update 
+#' input and output file paths in the `config_file`. This helps adapt the file paths 
+#' when running the configuration on a different workstation with a different root path, 
+#' without needing to recreate the entire `config_file`.
+#' If `new_dirs_path` is `NULL` (default), the original paths in `config_file` are used. 
+#' When specified, `new_dirs_path` should point to the top-level folder containing 
+#' the input files and output folder. The folder structure under this top-level 
+#' directory must match the structure in the original `config_file` If no match is 
+#' found, the original input file paths and output folder remain unchanged.
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm median sd
@@ -50,7 +47,7 @@
 pops_lite <- function(config_file = "",
                       number_of_cores = NULL,
                       number_of_iterations = NULL, 
-                      update_dirs_path = NULL) {
+                      new_dirs_path = NULL) {
   config <- readRDS(config_file)
   
   if (!is.null(config$failure)) {
@@ -87,8 +84,8 @@ pops_lite <- function(config_file = "",
     config$number_of_iterations <- number_of_iterations
   }
   
-  if (!is.null(updated_dirs_path)) {
-    config <- update_config_paths(config, updated_dirs_path)
+  if (!is.null(new_dirs_path)) {
+    config <- update_config_paths(config, new_dirs_path)
   }
   
   i <- NULL
