@@ -454,7 +454,7 @@ update_config_paths <- function(config, root) {
     "movements_file", "quarantine_areas_file", "exposed_file", 
     "network_filename", "temperature_coefficient_sd_file", 
     "precipitation_coefficient_sd_file", "soil_starting_pest_file",
-    "output_folder_path"
+    "output_folder_path", "reference", "comparison", "ref", "comp"
   )
   
   # Precompute the replacement pattern
