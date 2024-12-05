@@ -280,5 +280,5 @@ quantity_allocation_disagreement_lite <-
     )
     results_fn <- file.path(config_qad_lite$output_folder_path, gsub("reclassed.tif", "results.csv", basename(config_qad_lite$comparison)))
     write.csv(output, results_fn, row.names = FALSE)
-    return(cat("Completed:", basename(results_fn), "\n"))
+    return(cat("Completed & exported results:", basename(results_fn), "\n"))
   }
