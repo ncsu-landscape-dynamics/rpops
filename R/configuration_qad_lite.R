@@ -24,15 +24,6 @@
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' rowColFromCell global vect
 
-
-reference <- "C:/Users/blaginh/Desktop/pops_runs/input_data/res_1000m/slf/slf_2014_2020.tif"
-comparison <- "C:/Users/blaginh/Desktop/pops_runs/results/6o1v3i7c_1000m_2020.tif"
-mask <- "C:/Users/blaginh/Desktop/pops_runs/input_data/res_1000m/base/mask_1000m.tif"
-use_configuration <- TRUE
-use_distance <- TRUE
-use_rmse <- TRUE
-output_folder_path <- "C:/Users/blaginh/Desktop/pops_runs/results/qad_outputs/"
-
 configuration_qad_lite <- function(reference,
                                    comparison,
                                    mask,
