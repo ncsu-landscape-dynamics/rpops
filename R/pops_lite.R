@@ -1,16 +1,28 @@
-#' PoPS (Pest or Pathogen Spread) Lite Model Multiple Runs
+#' PoPS Lite Model
+#' 
+#' A process-based model for forecasting the spread of forest/agricultural pests 
+#' or pathogens. This model accounts for weather and environmental effects on 
+#' reproduction and survival through multiple stochastic simulations. It 
+#' propagates uncertainty in parameters, initial conditions, and drivers, 
+#' similar to pops_multirun, but directly exports raw outputs from pops_model.
 #'
-#' A process-based model designed to forecast the spread of pests or pathogens
-#' in forest or agricultural ecosystems. It incorporates the effects of weather
-#' and environmental factors on reproduction and survival. The model runs
-#' multiple stochastic simulations, propagating uncertainty in parameters,
-#' initial conditions, and drivers, similar to `pops_multirun`. However, this
-#' function exports raw outputs directly from `pops_model`.
+#' When to Use PoPS Lite:
+#' - To export raw simulation data from the `pops_model` function
+#' - Extent or resolution constraints make `pops_multirun` impractical due to
+#' time or computational constraints.
 #'
-#' Use this function if raw simulation data is needed or if extent and/or
-#' resolution constraints prevent using `pops_multirun`.
+#' Dynamic Configuration:
+#' `number_of_cores`, `number_of_iterations`, and `random_seeds` in the 
+#' `config_file` can be updated dynamically. See parameter descriptions below
+#' on how to dynamically update these parameters.
+#'
+#' Multiple Random Seed handling:
+#' - If multiple_random_seeds = TRUE and file_random_seeds = NULL in the 
+#' `config_file`, a new set of random seeds will be sampled and exported as 
+#' [unique_id]_forecast_random_seeds.csv in the output folder.
+#' - The same [unique_id] is used for raw output files to link seeds with
+#' their respective runs.
 
-#'
 #' @inheritParams pops
 #'
 #' @param config_file Path to config file produced when calling `configuration`.
@@ -20,8 +32,11 @@
 #' If set to `NULL`, the value from `config$core_count` will be used.
 #' @param number_of_iterations (Default = `NULL`) Specify the number of iterations 
 #' to run the PoPS model. If a value is provided, it overrides 
-#' `config$number_of_iterations`. If set to `NULL`, the value from 
-#' `config$number_of_iterations` will be used.
+#' `config$number_of_iterations` in `config_file`.
+#' @param random_seed Sets the random seed for the simulation used for reproducibility.
+#' Value provided will replace the value in `config_file$random_seed`. If no value provided,
+#' a random value will replace the value in  `config_file$random_seed` for 
+#' each PoPS (lite) run iteration.
 #' @param new_dirs_path (Default = `NULL`) Specify a new root directory to update 
 #' input and output file paths in the `config_file`. This helps adapt the file paths 
 #' when running the configuration on a different workstation with a different root path, 
@@ -31,6 +46,7 @@
 #' the input files and output folder. The folder structure under this top-level 
 #' directory must match the structure in the original `config_file` If no match is 
 #' found, the original input file paths and output folder remain unchanged.
+#' 
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs vect
 #' @importFrom stats runif rnorm median sd
@@ -46,24 +62,55 @@
 
 pops_lite <- function(config_file = "",
                       number_of_cores = NULL,
-                      number_of_iterations = NULL, 
+                      number_of_iterations = NULL,
+                      random_seed = NULL,
                       new_dirs_path = NULL) {
+  
   config <- readRDS(config_file)
   
   if (!is.null(config$failure)) {
     stop(config$failure)
   }
   
-  uid <- generate_unique_id()
+  #update number of cores in the config file
+  if (!is.null(number_of_cores)) {
+    config$core_count <- number_of_cores
+  }
   
+  #update number of iterations in the config file
+  if (!is.null(number_of_iterations)) {
+    config$number_of_iterations <- number_of_iterations
+  }
+  
+  #update file path names in the config file
+  if (!is.null(new_dirs_path)) {
+    config <- update_config_paths(config, new_dirs_path)
+  }
+  
+  #update random_seed in the config file
+  if (is.null(config$random_seed)) {
+    config$random_seed <- sample(1:999999999999, config$number_of_iterations,
+                                 replace = FALSE)
+  }
+  
+  #update multiple_random_seeds if TRUE and file_random_seeds NULL in config file
+  if (config$multiple_random_seeds && is.null(config$file_random_seeds)) {
+    config$random_seeds <- create_random_seeds(config$number_of_iterations)
+  } else {
+    config$random_seeds <- create_random_seeds(1)
+  }
+  
+  #create output folder if it doesn't already exist
   if (!dir.exists(config$output_folder_path)) {
     suppressWarnings(dir.create(config$output_folder_path, recursive = TRUE))
   }
   
-  
+  # if multiple_random_seeds = TRUE and file_random_seeds = NULL
+  # create unique ID to keep track of random seeds used per pops_lite simulation
   if (config$multiple_random_seeds &&
       is.null(config$file_random_seeds) &&
       dir.exists(config$output_folder_path)) {
+    uid <- generate_uid()
     write.csv(
       config$random_seeds,
       paste0(
@@ -73,19 +120,6 @@ pops_lite <- function(config_file = "",
       ),
       row.names = FALSE
     )
-  }
-  
-  #If statement to dynamically set number of cores and iterations
-  if (!is.null(number_of_cores)) {
-    config$core_count <- number_of_cores
-  }
-  
-  if (!is.null(number_of_iterations)) {
-    config$number_of_iterations <- number_of_iterations
-  }
-  
-  if (!is.null(new_dirs_path)) {
-    config <- update_config_paths(config, new_dirs_path)
   }
   
   i <- NULL
@@ -210,9 +244,15 @@ pops_lite <- function(config_file = "",
     # Remove any null in data
     data <- data[!sapply(data, is.null)]
     
+    if (exists("uid")) {
+      fn <- file.path(config$output_folder_path, paste0(uid, "_pops_output_", i, ".rds"))
+    } else {
+      fn <- file.path(config$output_folder_path, paste0("pops_output_", i, ".rds"))
+    }
+    
     saveRDS(
       data,
-      file = file.path(config$output_folder_path, paste0(uid, "_pops_output_", i, ".rds")),
+      file = fn,
       compress = TRUE
     )
     rm(data)
