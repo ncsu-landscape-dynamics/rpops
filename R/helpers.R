@@ -293,8 +293,11 @@ combined_sd <- function(v1, v2, m1, m2, n1, n2) {
 }
 
 # Create a unique identifier for the pops_run_lite output filenames
-generate_uid <- function(length = 10) {
-  uid <- paste0(sample(c(letters[1:23], 1:9), length, replace = TRUE), collapse = "")
+generate_uid <- function() {
+  letters_part <- sample(letters[1:26], 6, replace = TRUE)
+  numbers_part <- sample(0:9, 6, replace = TRUE)
+  
+  uid <- paste0(c(rbind(letters_part, numbers_part)), collapse = "")
   return(uid)
 }
 
