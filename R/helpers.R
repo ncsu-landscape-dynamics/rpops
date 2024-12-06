@@ -256,7 +256,8 @@ create_random_seeds <- function(n) {
       movement = sample(1:999999999, n, replace = FALSE),
       overpopulation = sample(1:999999999, n, replace = FALSE),
       survival_rate = sample(1:999999999, n, replace = FALSE),
-      soil = sample(1:999999999, n, replace = FALSE)
+      soil = sample(1:999999999, n, replace = FALSE),
+      iteration = seq(1,n, by = 1)
     )
   
   return(random_seeds)
