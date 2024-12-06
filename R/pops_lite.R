@@ -259,5 +259,5 @@ pops_lite <- function(config_file = "",
     gc()
   }
   stopCluster(cl)
-  return(cat("Raw PoPS runs outputs saved to output_path"))
+  return(cat("Raw PoPS runs outputs saved to output_path: "))
 }
