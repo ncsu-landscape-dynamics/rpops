@@ -150,7 +150,7 @@ configuration_qad_lite <- function(reference,
   # Process reference (masked + reclassified)
   if (file.exists(config_qad_lite$reference)) {
     reference <- terra::rast(config_qad_lite$reference)
-    config_qad_lite$ref_values <- readRDS(config_qad_lite$ref_values)
+    config_qad_lite$ref_values <- readRDS(ref_values_fn)
     config_qad_lite$positives_in_reference <- readRDS(positives_in_reference_fn)
   } else {
     reference <- terra::classify(ref, matrix(
