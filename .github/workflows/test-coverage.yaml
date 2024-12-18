@@ -25,10 +25,10 @@ jobs:
 
       - uses: r-lib/actions/setup-renv@v2
 
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::covr
-          needs: coverage
+      # - uses: r-lib/actions/setup-r-dependencies@v2
+      #   with:
+      #     extra-packages: any::covr
+      #     needs: coverage
 
       - name: Test coverage
         run: |
