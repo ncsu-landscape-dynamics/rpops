@@ -365,9 +365,8 @@ public:
                     dispersal_kernel_(generator.overpopulation(), i, j);
                 // for leaving_percentage == 0.5
                 // 2 infected -> 1 leaving
-                // 3 infected -> 1 leaving
-                int leaving =
-                    static_cast<int>(std::floor(original_count * leaving_percentage_));
+                // 3 infected -> 2 leaving (assuming always rounding up for .5)
+                int leaving = std::lround(original_count * leaving_percentage_);
                 leaving = hosts.pests_from(i, j, leaving, generator.overpopulation());
                 if (row < 0 || row >= rows_ || col < 0 || col >= cols_) {
                     pests.add_outside_dispersers_at(row, col, leaving);
