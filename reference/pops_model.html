@@ -8,7 +8,7 @@ future."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mat
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -33,7 +33,7 @@ future."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mat
 <li class="dropdown">
   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
     Articles
-     
+
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu"><li>
@@ -46,20 +46,20 @@ future."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mat
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/ncsu-landscape-dynamics/rpops/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>PoPS (Pest or Pathogen Spread) model</h1>
-    <small class="dont-index">Source: <a href="https://github.com/ncsu-landscape-dynamics/rpops/blob/HEAD/R/pops_model.R" class="external-link"><code>R/pops_model.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/ncsu-landscape-dynamics/rpops/blob/main/R/pops_model.R" class="external-link"><code>R/pops_model.R</code></a></small>
     <div class="hidden name"><code>pops_model.Rd</code></div>
     </div>
 
@@ -157,68 +157,70 @@ future.</p>
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>random_seed</dt>
+
+
+<dl><dt id="arg-random-seed">random_seed<a class="anchor" aria-label="anchor" href="#arg-random-seed"></a></dt>
 <dd><p>Sets the random seed for the simulation used for reproducibility</p></dd>
 
 
-<dt>multiple_random_seeds</dt>
+<dt id="arg-multiple-random-seeds">multiple_random_seeds<a class="anchor" aria-label="anchor" href="#arg-multiple-random-seeds"></a></dt>
 <dd><p>Boolean to indicate if the model should use multiple random seeds
 (allows for performing uncertainty partitioning) or a single random seed (backwards
 compatibility option). Default is FALSE.</p></dd>
 
 
-<dt>random_seeds</dt>
+<dt id="arg-random-seeds">random_seeds<a class="anchor" aria-label="anchor" href="#arg-random-seeds"></a></dt>
 <dd><p>vector of random seeds in the order of "disperser_generation",
 "natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
 "overpopulation", "survival_rate", "soil"</p></dd>
 
 
-<dt>use_lethal_temperature</dt>
+<dt id="arg-use-lethal-temperature">use_lethal_temperature<a class="anchor" aria-label="anchor" href="#arg-use-lethal-temperature"></a></dt>
 <dd><p>A boolean to answer the question: does your pest or pathogen have
 a temperature at which it cannot survive? (TRUE or FALSE)</p></dd>
 
 
-<dt>lethal_temperature</dt>
+<dt id="arg-lethal-temperature">lethal_temperature<a class="anchor" aria-label="anchor" href="#arg-lethal-temperature"></a></dt>
 <dd><p>The temperature in degrees C at which lethal temperature related
 mortality occurs for your pest or pathogen (-50 to 60)</p></dd>
 
 
-<dt>lethal_temperature_month</dt>
+<dt id="arg-lethal-temperature-month">lethal_temperature_month<a class="anchor" aria-label="anchor" href="#arg-lethal-temperature-month"></a></dt>
 <dd><p>The month in which lethal temperature related mortality occurs
 for your pest or pathogen integer value between 1 and 12</p></dd>
 
 
-<dt>use_survival_rates</dt>
+<dt id="arg-use-survival-rates">use_survival_rates<a class="anchor" aria-label="anchor" href="#arg-use-survival-rates"></a></dt>
 <dd><p>Boolean to indicate if the model will use survival rates to limit the
 survival or emergence of overwintering generations.</p></dd>
 
 
-<dt>survival_rate_month</dt>
+<dt id="arg-survival-rate-month">survival_rate_month<a class="anchor" aria-label="anchor" href="#arg-survival-rate-month"></a></dt>
 <dd><p>What month do over wintering generations emerge. We suggest using the
 month before for this parameter as it is when the survival rates raster will be applied.</p></dd>
 
 
-<dt>survival_rate_day</dt>
+<dt id="arg-survival-rate-day">survival_rate_day<a class="anchor" aria-label="anchor" href="#arg-survival-rate-day"></a></dt>
 <dd><p>What day should the survival rates be applied</p></dd>
 
 
-<dt>host_pools</dt>
+<dt id="arg-host-pools">host_pools<a class="anchor" aria-label="anchor" href="#arg-host-pools"></a></dt>
 <dd><p>list of host_pool lists with each host_pool list containing matrices of
 infected, susceptible, exposed, total_hosts, total_exposed, resistant, mortality, and
 mortality_tracker for that host.</p></dd>
 
 
-<dt>total_populations</dt>
+<dt id="arg-total-populations">total_populations<a class="anchor" aria-label="anchor" href="#arg-total-populations"></a></dt>
 <dd><p>matrix of total populations</p></dd>
 
 
-<dt>competency_table</dt>
+<dt id="arg-competency-table">competency_table<a class="anchor" aria-label="anchor" href="#arg-competency-table"></a></dt>
 <dd><p>A csv with the hosts as the first n columns (n being the number of hosts)
 and the last column being the competency value. Each row is a set of Boolean for host presence
 and the competency value (between 0 and 1) for that combination of hosts in a cell.</p></dd>
 
 
-<dt>pest_host_table</dt>
+<dt id="arg-pest-host-table">pest_host_table<a class="anchor" aria-label="anchor" href="#arg-pest-host-table"></a></dt>
 <dd><p>The file path to a csv that has these columns in this order: host,
 susceptibility, mortality rate, and mortality time lag as columns with each row being the
 species. Host species must be in the same order in the host_file_list, infected_file_list,
@@ -226,333 +228,331 @@ pest_host_table rows, and competency_table columns. The host column is only used
 and labeling output files.</p></dd>
 
 
-<dt>mortality_on</dt>
+<dt id="arg-mortality-on">mortality_on<a class="anchor" aria-label="anchor" href="#arg-mortality-on"></a></dt>
 <dd><p>Boolean to indicate if mortality is used</p></dd>
 
 
-<dt>quarantine_areas</dt>
+<dt id="arg-quarantine-areas">quarantine_areas<a class="anchor" aria-label="anchor" href="#arg-quarantine-areas"></a></dt>
 <dd><p>areas that are set as quarantined for computing
 escape from quarantine statistics.</p></dd>
 
 
-<dt>quarantine_directions</dt>
+<dt id="arg-quarantine-directions">quarantine_directions<a class="anchor" aria-label="anchor" href="#arg-quarantine-directions"></a></dt>
 <dd><p>String with comma separated directions to include in the quarantine
 direction analysis, e.g., 'N,E'. By default all directions (N, S, E, W) are considered</p></dd>
 
 
-<dt>treatment_maps</dt>
+<dt id="arg-treatment-maps">treatment_maps<a class="anchor" aria-label="anchor" href="#arg-treatment-maps"></a></dt>
 <dd><p>list of matrices where treatment or management has
 occurred in a given year</p></dd>
 
 
-<dt>treatment_dates</dt>
+<dt id="arg-treatment-dates">treatment_dates<a class="anchor" aria-label="anchor" href="#arg-treatment-dates"></a></dt>
 <dd><p>Dates in which to apply treatment list with format ('YYYY_MM_DD')
 (needs to be the same length as treatment_file and pesticide_duration)</p></dd>
 
 
-<dt>pesticide_duration</dt>
+<dt id="arg-pesticide-duration">pesticide_duration<a class="anchor" aria-label="anchor" href="#arg-pesticide-duration"></a></dt>
 <dd><p>How long does the pesticide (herbicide, vaccine, etc..) last before the
 host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a
 pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)</p></dd>
 
 
-<dt>use_movements</dt>
+<dt id="arg-use-movements">use_movements<a class="anchor" aria-label="anchor" href="#arg-use-movements"></a></dt>
 <dd><p>this is a boolean to turn on use of the movement module.</p></dd>
 
 
-<dt>movements</dt>
+<dt id="arg-movements">movements<a class="anchor" aria-label="anchor" href="#arg-movements"></a></dt>
 <dd><p>a matrix with columns lon_from, lat_from, lon_to, lat_to,
 number of animals, and date.</p></dd>
 
 
-<dt>movements_dates</dt>
+<dt id="arg-movements-dates">movements_dates<a class="anchor" aria-label="anchor" href="#arg-movements-dates"></a></dt>
 <dd><p>this is a list of dates passed as strings in the
 format 'YYYY-MM-DD'</p></dd>
 
 
-<dt>weather</dt>
+<dt id="arg-weather">weather<a class="anchor" aria-label="anchor" href="#arg-weather"></a></dt>
 <dd><p>Boolean that is true if weather is used</p></dd>
 
 
-<dt>temperature</dt>
+<dt id="arg-temperature">temperature<a class="anchor" aria-label="anchor" href="#arg-temperature"></a></dt>
 <dd><p>vector of matrices of temperature values used to check
 against lethal temperature</p></dd>
 
 
-<dt>survival_rates</dt>
+<dt id="arg-survival-rates">survival_rates<a class="anchor" aria-label="anchor" href="#arg-survival-rates"></a></dt>
 <dd><p>vector of matrices of survival rates used to determine percentage of
 overwinter population that emerges</p></dd>
 
 
-<dt>weather_coefficient</dt>
+<dt id="arg-weather-coefficient">weather_coefficient<a class="anchor" aria-label="anchor" href="#arg-weather-coefficient"></a></dt>
 <dd><p>vector of matrices of weather coefficients</p></dd>
 
 
-<dt>weather_coefficient_sd</dt>
+<dt id="arg-weather-coefficient-sd">weather_coefficient_sd<a class="anchor" aria-label="anchor" href="#arg-weather-coefficient-sd"></a></dt>
 <dd><p>vector of matrices of weather coefficient standard deviations.</p></dd>
 
 
-<dt>res</dt>
+<dt id="arg-res">res<a class="anchor" aria-label="anchor" href="#arg-res"></a></dt>
 <dd><p>vector of east/west resolution and north/south resolution</p></dd>
 
 
-<dt>rows_cols</dt>
+<dt id="arg-rows-cols">rows_cols<a class="anchor" aria-label="anchor" href="#arg-rows-cols"></a></dt>
 <dd><p>vector of number of rows and columns in the raster files</p></dd>
 
 
-<dt>time_step</dt>
+<dt id="arg-time-step">time_step<a class="anchor" aria-label="anchor" href="#arg-time-step"></a></dt>
 <dd><p>How often should spread occur options: ('day', 'week', 'month').</p></dd>
 
 
-<dt>reproductive_rate</dt>
+<dt id="arg-reproductive-rate">reproductive_rate<a class="anchor" aria-label="anchor" href="#arg-reproductive-rate"></a></dt>
 <dd><p>number of spores or pest units produced by a single
 host under optimal weather conditions</p></dd>
 
 
-<dt>spatial_indices</dt>
+<dt id="arg-spatial-indices">spatial_indices<a class="anchor" aria-label="anchor" href="#arg-spatial-indices"></a></dt>
 <dd><p>list of all spatial locations with suitable hosts</p></dd>
 
 
-<dt>season_month_start_end</dt>
+<dt id="arg-season-month-start-end">season_month_start_end<a class="anchor" aria-label="anchor" href="#arg-season-month-start-end"></a></dt>
 <dd><p>vector of months when spread starts and stops</p></dd>
 
 
-<dt>soil_reservoirs</dt>
+<dt id="arg-soil-reservoirs">soil_reservoirs<a class="anchor" aria-label="anchor" href="#arg-soil-reservoirs"></a></dt>
 <dd><p>list of matrices with soil pests created from soil_pest_file.</p></dd>
 
 
-<dt>start_date</dt>
+<dt id="arg-start-date">start_date<a class="anchor" aria-label="anchor" href="#arg-start-date"></a></dt>
 <dd><p>Date to start the simulation with format ('YYYY_MM_DD')</p></dd>
 
 
-<dt>end_date</dt>
+<dt id="arg-end-date">end_date<a class="anchor" aria-label="anchor" href="#arg-end-date"></a></dt>
 <dd><p>Date to end the simulation with format ('YYYY_MM_DD')</p></dd>
 
 
-<dt>treatment_method</dt>
+<dt id="arg-treatment-method">treatment_method<a class="anchor" aria-label="anchor" href="#arg-treatment-method"></a></dt>
 <dd><p>What method to use when applying treatment one of ("ratio" or "all
 infected"). ratio removes a portion of all infected and susceptibles, all infected removes all
 infected a portion of susceptibles.</p></dd>
 
 
-<dt>natural_kernel_type</dt>
+<dt id="arg-natural-kernel-type">natural_kernel_type<a class="anchor" aria-label="anchor" href="#arg-natural-kernel-type"></a></dt>
 <dd><p>What type of dispersal kernel should be used for natural dispersal.
 Current dispersal kernel options are ('Cauchy', 'exponential', 'uniform',
 'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic')</p></dd>
 
 
-<dt>anthropogenic_kernel_type</dt>
+<dt id="arg-anthropogenic-kernel-type">anthropogenic_kernel_type<a class="anchor" aria-label="anchor" href="#arg-anthropogenic-kernel-type"></a></dt>
 <dd><p>What type of dispersal kernel should be used for anthropogenic
 dispersal. Current dispersal kernel options are ('cauchy', 'exponential', 'uniform',
 'deterministic neighbor','power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic',
 'network')</p></dd>
 
 
-<dt>use_anthropogenic_kernel</dt>
+<dt id="arg-use-anthropogenic-kernel">use_anthropogenic_kernel<a class="anchor" aria-label="anchor" href="#arg-use-anthropogenic-kernel"></a></dt>
 <dd><p>A boolean that turns on the use of the
 anthropogenic or long distance dispersal portion of the 2 scale dispersal
 kernel function</p></dd>
 
 
-<dt>percent_natural_dispersal</dt>
+<dt id="arg-percent-natural-dispersal">percent_natural_dispersal<a class="anchor" aria-label="anchor" href="#arg-percent-natural-dispersal"></a></dt>
 <dd><p>what percentage of dispersal is natural
 range versus anthropogenic range value between 0 and 1</p></dd>
 
 
-<dt>natural_distance_scale</dt>
+<dt id="arg-natural-distance-scale">natural_distance_scale<a class="anchor" aria-label="anchor" href="#arg-natural-distance-scale"></a></dt>
 <dd><p>distance scale parameter for natural range
 dispersal kernel numeric value &gt; 0</p></dd>
 
 
-<dt>anthropogenic_distance_scale</dt>
+<dt id="arg-anthropogenic-distance-scale">anthropogenic_distance_scale<a class="anchor" aria-label="anchor" href="#arg-anthropogenic-distance-scale"></a></dt>
 <dd><p>distance scale parameter for
 anthropogenic range dispersal kernel numeric value &gt; 0</p></dd>
 
 
-<dt>natural_dir</dt>
+<dt id="arg-natural-dir">natural_dir<a class="anchor" aria-label="anchor" href="#arg-natural-dir"></a></dt>
 <dd><p>Sets the predominate direction of natural dispersal usually due to wind values
 ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')</p></dd>
 
 
-<dt>natural_kappa</dt>
+<dt id="arg-natural-kappa">natural_kappa<a class="anchor" aria-label="anchor" href="#arg-natural-kappa"></a></dt>
 <dd><p>sets the strength of the natural direction in the
 von-mises distribution numeric value between 0.01 and 12</p></dd>
 
 
-<dt>anthropogenic_dir</dt>
+<dt id="arg-anthropogenic-dir">anthropogenic_dir<a class="anchor" aria-label="anchor" href="#arg-anthropogenic-dir"></a></dt>
 <dd><p>Sets the predominate direction of anthropogenic dispersal usually due
 to human movement typically over long distances (e.g. nursery trade, movement of firewood, etc..)
 ('N', 'NW', 'W', 'SW', 'S', 'SE', 'E', 'NE', 'NONE')</p></dd>
 
 
-<dt>anthropogenic_kappa</dt>
+<dt id="arg-anthropogenic-kappa">anthropogenic_kappa<a class="anchor" aria-label="anchor" href="#arg-anthropogenic-kappa"></a></dt>
 <dd><p>sets the strength of the anthropogenic direction
 in the von-mises distribution numeric value between 0.01 and 12</p></dd>
 
 
-<dt>output_frequency</dt>
+<dt id="arg-output-frequency">output_frequency<a class="anchor" aria-label="anchor" href="#arg-output-frequency"></a></dt>
 <dd><p>Sets when outputs occur either ('year', 'month', week', 'day',
 'time step', or 'every_n_steps')</p></dd>
 
 
-<dt>output_frequency_n</dt>
+<dt id="arg-output-frequency-n">output_frequency_n<a class="anchor" aria-label="anchor" href="#arg-output-frequency-n"></a></dt>
 <dd><p>Sets number of units from output_frequency in which to export model
 results if mortality_frequency is 'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
 
 
-<dt>quarantine_frequency</dt>
+<dt id="arg-quarantine-frequency">quarantine_frequency<a class="anchor" aria-label="anchor" href="#arg-quarantine-frequency"></a></dt>
 <dd><p>sets how often the quarantine statistics are
 calculated either ('year', 'month', 'week', 'day' or 'time step')
 (default is year)</p></dd>
 
 
-<dt>quarantine_frequency_n</dt>
+<dt id="arg-quarantine-frequency-n">quarantine_frequency_n<a class="anchor" aria-label="anchor" href="#arg-quarantine-frequency-n"></a></dt>
 <dd><p>sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export quarantine statistics.</p></dd>
 
 
-<dt>use_quarantine</dt>
+<dt id="arg-use-quarantine">use_quarantine<a class="anchor" aria-label="anchor" href="#arg-use-quarantine"></a></dt>
 <dd><p>Boolean to indicate whether or not there is a quarantine area if TRUE must
 pass in a raster file indicating the quarantine areas (default = FALSE)</p></dd>
 
 
-<dt>spreadrate_frequency</dt>
+<dt id="arg-spreadrate-frequency">spreadrate_frequency<a class="anchor" aria-label="anchor" href="#arg-spreadrate-frequency"></a></dt>
 <dd><p>sets how often the spread rate statistics are
 calculated either ('year', 'month', 'week', 'day' or 'time step')
 (default is year)</p></dd>
 
 
-<dt>spreadrate_frequency_n</dt>
+<dt id="arg-spreadrate-frequency-n">spreadrate_frequency_n<a class="anchor" aria-label="anchor" href="#arg-spreadrate-frequency-n"></a></dt>
 <dd><p>sets number units ('year', 'month', 'week',
 'day' or 'time step') in which to calculate and export spread rate
 statistics.</p></dd>
 
 
-<dt>mortality_frequency</dt>
+<dt id="arg-mortality-frequency">mortality_frequency<a class="anchor" aria-label="anchor" href="#arg-mortality-frequency"></a></dt>
 <dd><p>Sets the frequency of mortality calculations occur either ('year',
 'month', week', 'day', 'time step', or 'every_n_steps')</p></dd>
 
 
-<dt>mortality_frequency_n</dt>
+<dt id="arg-mortality-frequency-n">mortality_frequency_n<a class="anchor" aria-label="anchor" href="#arg-mortality-frequency-n"></a></dt>
 <dd><p>Sets number of units from mortality_frequency in which to run the
 mortality calculation if mortality_frequency is 'every_n_steps'. Must be an integer &gt;= 1.</p></dd>
 
 
-<dt>use_spreadrates</dt>
+<dt id="arg-use-spreadrates">use_spreadrates<a class="anchor" aria-label="anchor" href="#arg-use-spreadrates"></a></dt>
 <dd><p>Boolean to indicate whether or not to calculate spread rates</p></dd>
 
 
-<dt>model_type_</dt>
+<dt id="arg-model-type-">model_type_<a class="anchor" aria-label="anchor" href="#arg-model-type-"></a></dt>
 <dd><p>What type of model most represents your system. Options
 are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 (Susceptible - Infected/Infested). Default value is "SI".</p></dd>
 
 
-<dt>latency_period</dt>
+<dt id="arg-latency-period">latency_period<a class="anchor" aria-label="anchor" href="#arg-latency-period"></a></dt>
 <dd><p>How many times steps does it take to for exposed populations become
 infected/infested. This is an integer value and must be greater than 0 if model type is SEI.</p></dd>
 
 
-<dt>generate_stochasticity</dt>
+<dt id="arg-generate-stochasticity">generate_stochasticity<a class="anchor" aria-label="anchor" href="#arg-generate-stochasticity"></a></dt>
 <dd><p>Boolean to indicate whether to use stochasticity in reproductive
 functions default is TRUE</p></dd>
 
 
-<dt>establishment_stochasticity</dt>
+<dt id="arg-establishment-stochasticity">establishment_stochasticity<a class="anchor" aria-label="anchor" href="#arg-establishment-stochasticity"></a></dt>
 <dd><p>Boolean to indicate whether to use stochasticity in
 establishment functions default is TRUE</p></dd>
 
 
-<dt>movement_stochasticity</dt>
+<dt id="arg-movement-stochasticity">movement_stochasticity<a class="anchor" aria-label="anchor" href="#arg-movement-stochasticity"></a></dt>
 <dd><p>Boolean to indicate whether to use stochasticity in movement
 functions default is TRUE</p></dd>
 
 
-<dt>dispersal_stochasticity</dt>
+<dt id="arg-dispersal-stochasticity">dispersal_stochasticity<a class="anchor" aria-label="anchor" href="#arg-dispersal-stochasticity"></a></dt>
 <dd><p>Boolean to indicate whether to use a stochasticity in the
 dispersal kernel default is TRUE</p></dd>
 
 
-<dt>establishment_probability</dt>
+<dt id="arg-establishment-probability">establishment_probability<a class="anchor" aria-label="anchor" href="#arg-establishment-probability"></a></dt>
 <dd><p>Threshold to determine establishment if
 establishment_stochasticity is FALSE (range 0 to 1, default = 0.5)</p></dd>
 
 
-<dt>dispersal_percentage</dt>
+<dt id="arg-dispersal-percentage">dispersal_percentage<a class="anchor" aria-label="anchor" href="#arg-dispersal-percentage"></a></dt>
 <dd><p>Percentage of dispersal used to calculate the bounding box for
 deterministic dispersal</p></dd>
 
 
-<dt>use_overpopulation_movements</dt>
+<dt id="arg-use-overpopulation-movements">use_overpopulation_movements<a class="anchor" aria-label="anchor" href="#arg-use-overpopulation-movements"></a></dt>
 <dd><p>Boolean to indicate whether to use the overpopulation pest
 movement module (driven by the natural kernel with its scale parameter modified by a coefficient)</p></dd>
 
 
-<dt>overpopulation_percentage</dt>
+<dt id="arg-overpopulation-percentage">overpopulation_percentage<a class="anchor" aria-label="anchor" href="#arg-overpopulation-percentage"></a></dt>
 <dd><p>Percentage of occupied hosts when the cell is considered to be
 overpopulated</p></dd>
 
 
-<dt>leaving_percentage</dt>
+<dt id="arg-leaving-percentage">leaving_percentage<a class="anchor" aria-label="anchor" href="#arg-leaving-percentage"></a></dt>
 <dd><p>Percentage of pests leaving an overpopulated cell</p></dd>
 
 
-<dt>leaving_scale_coefficient</dt>
+<dt id="arg-leaving-scale-coefficient">leaving_scale_coefficient<a class="anchor" aria-label="anchor" href="#arg-leaving-scale-coefficient"></a></dt>
 <dd><p>Coefficient to multiply scale parameter of the natural kernel
 (if applicable)</p></dd>
 
 
-<dt>bbox</dt>
+<dt id="arg-bbox">bbox<a class="anchor" aria-label="anchor" href="#arg-bbox"></a></dt>
 <dd><p>bounding box for network kernel</p></dd>
 
 
-<dt>network_min_distance</dt>
+<dt id="arg-network-min-distance">network_min_distance<a class="anchor" aria-label="anchor" href="#arg-network-min-distance"></a></dt>
 <dd><p>minimum time a propagule rides on the network. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
 
 
-<dt>network_max_distance</dt>
+<dt id="arg-network-max-distance">network_max_distance<a class="anchor" aria-label="anchor" href="#arg-network-max-distance"></a></dt>
 <dd><p>maximum time a propagule rides on the network. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
 
 
-<dt>network_filename</dt>
+<dt id="arg-network-filename">network_filename<a class="anchor" aria-label="anchor" href="#arg-network-filename"></a></dt>
 <dd><p>The entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.</p></dd>
 
 
-<dt>network_movement</dt>
+<dt id="arg-network-movement">network_movement<a class="anchor" aria-label="anchor" href="#arg-network-movement"></a></dt>
 <dd><p>What movement type do you want to use in the network kernel either
 "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
 "teleport" moves from node to node most likely used for airport and seaport networks.</p></dd>
 
 
-<dt>weather_size</dt>
+<dt id="arg-weather-size">weather_size<a class="anchor" aria-label="anchor" href="#arg-weather-size"></a></dt>
 <dd><p>the number of matrices in a list or layers in a raster object</p></dd>
 
 
-<dt>weather_type</dt>
+<dt id="arg-weather-type">weather_type<a class="anchor" aria-label="anchor" href="#arg-weather-type"></a></dt>
 <dd><p>string indicating how the weather data is passed in  either
 as a mean and standard deviation to represent uncertainty ("probabilistic") or as a time
 series ("deterministic")</p></dd>
 
 
-<dt>dispersers_to_soils_percentage</dt>
+<dt id="arg-dispersers-to-soils-percentage">dispersers_to_soils_percentage<a class="anchor" aria-label="anchor" href="#arg-dispersers-to-soils-percentage"></a></dt>
 <dd><p>range from 0 to 1 representing the percentage
 of dispersers that fall to the soil and survive.</p></dd>
 
 
-<dt>use_soils</dt>
+<dt id="arg-use-soils">use_soils<a class="anchor" aria-label="anchor" href="#arg-use-soils"></a></dt>
 <dd><p>Boolean to indicate if pests establish in the soil and spread out from there.
 Typically used for soil borne pathogens.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>list of vector matrices of infected and susceptible hosts per
+    <p>list of vector matrices of infected and susceptible hosts per
 simulated year and associated statistics (e.g. spread rate)</p>
     </div>
 
@@ -568,15 +568,15 @@ simulated year and associated statistics (e.g. spread rate)</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 
