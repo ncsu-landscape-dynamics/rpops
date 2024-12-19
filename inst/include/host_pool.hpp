@@ -26,6 +26,7 @@
 #include "environment_interface.hpp"
 #include "competency_table.hpp"
 #include "pest_host_table.hpp"
+#include "utils.hpp"
 
 namespace pops {
 
@@ -306,7 +307,8 @@ public:
             }
         }
         else {
-            dispersers_from_cell = lambda * infected_at(row, col);
+            dispersers_from_cell =
+                static_cast<int>(std::floor(lambda * infected_at(row, col)));
         }
         return dispersers_from_cell;
     }
@@ -326,7 +328,17 @@ public:
         if (pest_host_table_) {
             suitability *= pest_host_table_->susceptibility(this);
         }
-        return environment_.influence_suitability_at(row, col, suitability);
+        suitability = environment_.influence_suitability_at(row, col, suitability);
+        if (suitability < 0 || suitability > 1) {
+            throw std::invalid_argument(
+                "Suitability should be >=0 and <=1, not " + std::to_string(suitability)
+                + " (susceptible: " + std::to_string(susceptible_(row, col))
+                + ", total population: "
+                + std::to_string(environment_.total_population_at(row, col))
+                + ", susceptibility: "
+                + std::to_string(pest_host_table_->susceptibility(this)) + ")");
+        }
+        return suitability;
     }
 
     /**
@@ -477,16 +489,9 @@ public:
         // Since suitable cells originally comes from the total hosts, check first total
         // hosts and proceed only if there was no host.
         if (total_hosts_(row_to, col_to) == 0) {
-            for (auto indices : suitable_cells_) {
-                int i = indices[0];
-                int j = indices[1];
-                // TODO: This looks like a bug. Flag is needed for found and push back
-                // should happen only after the loop.
-                if ((i == row_to) && (j == col_to)) {
-                    std::vector<int> added_index = {row_to, col_to};
-                    suitable_cells_.push_back(added_index);
-                    break;
-                }
+            std::vector<int> new_index = {row_to, col_to};
+            if (!container_contains(suitable_cells_, new_index)) {
+                suitable_cells_.push_back(new_index);
             }
         }
 
@@ -528,10 +533,10 @@ public:
     void completely_remove_hosts_at(
         RasterIndex row,
         RasterIndex col,
-        double susceptible,
-        std::vector<double> exposed,
-        double infected,
-        const std::vector<double>& mortality)
+        int susceptible,
+        std::vector<int> exposed,
+        int infected,
+        const std::vector<int>& mortality)
     {
         if (susceptible > 0)
             susceptible_(row, col) = susceptible_(row, col) - susceptible;
@@ -795,6 +800,9 @@ public:
      * individuals is multiplied by the mortality rate to calculate the number of hosts
      * that die that time step.
      *
+     * If mortality rate is zero (<=0), no mortality is applied and mortality tracker
+     * vector stays as is, i.e., no hosts die.
+     *
      * To be used together with step_forward_mortality().
      *
      * @param row Row index of the cell
@@ -805,6 +813,8 @@ public:
     void apply_mortality_at(
         RasterIndex row, RasterIndex col, double mortality_rate, int mortality_time_lag)
     {
+        if (mortality_rate <= 0)
+            return;
         int max_index = mortality_tracker_vector_.size() - mortality_time_lag - 1;
         for (int index = 0; index <= max_index; index++) {
             int mortality_in_index = 0;
@@ -815,8 +825,8 @@ public:
                     mortality_in_index = mortality_tracker_vector_[index](row, col);
                 }
                 else {
-                    mortality_in_index =
-                        mortality_rate * mortality_tracker_vector_[index](row, col);
+                    mortality_in_index = static_cast<int>(std::floor(
+                        mortality_rate * mortality_tracker_vector_[index](row, col)));
                 }
                 mortality_tracker_vector_[index](row, col) -= mortality_in_index;
                 died_(row, col) += mortality_in_index;
