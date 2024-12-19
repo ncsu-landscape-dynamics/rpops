@@ -307,8 +307,7 @@ public:
             }
         }
         else {
-            dispersers_from_cell =
-                static_cast<int>(std::floor(lambda * infected_at(row, col)));
+            dispersers_from_cell = std::lround(lambda * infected_at(row, col));
         }
         return dispersers_from_cell;
     }
