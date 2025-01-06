@@ -183,6 +183,7 @@ public:
                 remove_mortality.push_back(remove);
                 remove_infected += remove;
             }
+            // Will need to use infected directly if not mortality.
 
             std::vector<int> remove_exposed;
             for (int count : host_pool.exposed_by_group_at(i, j)) {
