@@ -154,14 +154,17 @@ We recommend running at least 1,000 but the greater this number the more
 accurate the model parameters selected will be.}
 
 \item{pest_host_table}{The file path to a csv that has these columns in this order: host,
-susceptibility, mortality rate, and mortality time lag as columns with each row being the
-species. Host species must be in the same order in the host_file_list, infected_file_list,
-pest_host_table rows, and competency_table columns. The host column is only used for metadata
-and labeling output files.}
+susceptibility_mean, susceptibility_sd, mortality_rate, mortality_rate_mean,
+and mortality_time_lag as columns with each row being the species. Host species
+must be in the same order in the host_file_list, infected_file_list,
+pest_host_table rows, and competency_table columns. The host column is character
+string of the species name, and  is only used for metadata  and labeling output files.
+Susceptibility and mortality_rate values must be between 0 and 1.}
 
 \item{competency_table}{A csv with the hosts as the first n columns (n being the number of hosts)
 and the last column being the competency value. Each row is a set of Boolean for host presence
-and the competency value (between 0 and 1) for that combination of hosts in a cell.}
+and the competency value (between 0 and 1) for that combination of hosts in a cell.
+#'}
 
 \item{infected_file_list}{paths to raster files with initial infections and standard deviation
 for each host can be based in 2 formats (a single file with number of hosts or a single file with

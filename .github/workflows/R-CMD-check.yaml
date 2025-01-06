@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main]
 
-name: R-CMD-check
+name: R-CMD-check.yaml
 
 jobs:
   R-CMD-check:
@@ -38,13 +38,22 @@ jobs:
 
       - name: Install macOS system dependencies
         if: runner.os == 'macOS'
-        run: brew install gdal proj fribidi
+        run: brew install gdal proj
+        
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt install \
+            libudunits2-dev \
+            libgdal-dev \
+            libgeos-dev \
+            libproj-dev \
 
       - uses: r-lib/actions/setup-renv@v2
-      - uses: r-lib/actions/setup-r-dependencies@v2
-        with:
-          extra-packages: any::rcmdcheck
-          needs: check
+      # - uses: r-lib/actions/setup-r-dependencies@v2
+      #   with:
+      #     extra-packages: any::rcmdcheck
+      #     needs: check
 
       - uses: r-lib/actions/check-r-package@v2
         with:
