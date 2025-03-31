@@ -18,6 +18,12 @@
 #'
 #' @param config_qad_lite_file the raster with ground truth data. For all metrics expect
 #' RMSE these values are reclassified with values > 1 becoming 1, values < 1
+#' @param use_configuration Boolean if you want to use configuration
+#' disagreement for comparing model runs. NOTE: overrides boolean provided in 
+#' the quantity, allocation, and disagreement config file.
+#' @param use_distance Boolean if you want to compare distance between
+#' simulations and observations. NOTE: overrides boolean provided in 
+#' the quantity, allocation, and disagreement config file.
 #' @param new_dirs_path (Default = `NULL`) Specify a new root directory to update
 #' input and output file paths in the `config_qad_lite_file`. This helps adapt the file paths
 #' when running the configuration on a different workstation with a different root path,
@@ -40,9 +46,18 @@
 #' @export
 
 quantity_allocation_disagreement_lite <-
-  function(config_qad_lite_file, new_dirs_path = NULL) {
+  function(config_qad_lite_file, new_dirs_path = NULL, use_configuration = NULL, 
+           use_distance = NULL) {
     
     config_qad_lite <- readRDS(config_qad_lite_file)
+    
+    if (!is.null(use_configuration)) {
+    config_qad_lite$use_configuration <- use_configuration
+    }
+    
+    if (!is.null(use_distance)) {
+      config_qad_lite$use_distance <- use_distance
+    }
     
     if (!is.null(new_dirs_path)) {
       config_qad_lite <- update_config_paths(config_qad_lite, new_dirs_path)
