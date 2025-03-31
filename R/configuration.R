@@ -109,6 +109,7 @@ configuration <- function(config) {
     config$number_of_time_steps <- time_check$number_of_time_steps
     config$number_of_years <- time_check$number_of_years
     config$number_of_outputs <- time_check$number_of_outputs
+    config$number_annual_time_steps <- time_check$number_annual_time_steps
     config$output_frequency <- time_check$output_frequency
     config$quarantine_frequency <- config$output_frequency
     config$quarantine_frequency_n <- config$output_frequency_n
@@ -215,7 +216,7 @@ configuration <- function(config) {
   } else {
     config$soil_reservoirs <- list(matrix(0, 2, 2))
   }
-  
+
   # check that survival_rates raster has the same crs, resolution, and extent
   if (config$use_survival_rates == TRUE) {
     if (config$function_name %in% aws_bucket_list) {
@@ -271,7 +272,7 @@ configuration <- function(config) {
   } else {
     config$temperature <- list(matrix(1, 2, 2))
   }
-  
+
   # check that temp and precip rasters have the same crs, resolution, and extent
   config$weather <- FALSE
   if (config$temp == TRUE) {
@@ -428,12 +429,12 @@ configuration <- function(config) {
         return(config)
       }
     }
-    
+
     config$weather_coefficient <- vector("list", config$weather_size)
     for(i in seq_along(config$weather_coefficient)) {
       current_month <- i %% 12
       current_month <- ifelse(current_month == 0, 12, current_month)
-      
+
       if(current_month >= config$season_month_start && current_month
           <= config$season_month_end) {
         config$weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]],
@@ -444,8 +445,8 @@ configuration <- function(config) {
       }
 
     if (config$weather_type == "probabilistic") {
-      if (config$number_of_time_steps > config$weather_size) {
-        config$failure <- weather_size_probabilitic_error
+      if (config$number_annual_time_steps > config$weather_size) {
+        config$failure <- weather_size_probabilitic_error ## elis problem
         return(config)
       }
 
@@ -453,12 +454,12 @@ configuration <- function(config) {
         config$failure <- weather_sd_layer_error
         return(config)
       }
-      
+
       config$weather_coefficient_sd <- vector("list", config$weather_size)
       for(i in seq_along(config$weather_coefficient_sd)) {
         current_month <- i %% 12
         current_month <- ifelse(current_month == 0, 12, current_month)
-        
+
         if(current_month >= config$season_month_start && current_month
            <= config$season_month_end) {
           config$weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]],
@@ -477,7 +478,7 @@ configuration <- function(config) {
       config$weather_coefficient_sd <- list(zero_matrix)
       config$weather_type <- "none"
     }
-  
+
   rm(one_matrix)
 
   if (config$management == TRUE) {
@@ -590,7 +591,7 @@ configuration <- function(config) {
       suitable <- suitable + exposed2[[2]]
     }
   }
-  
+
   suitable <- terra::classify(suitable, matrix(c(-Inf, 0, NA), ncol = 3, byrow = TRUE),
                               right = FALSE)
   suitable_cells <- which(!is.na(values(suitable)))

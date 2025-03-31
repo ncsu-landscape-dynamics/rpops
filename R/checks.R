@@ -232,7 +232,7 @@ time_checks <- function(end_date, start_date, time_step, output_frequency, outpu
     }
 
     if (output_frequency == "week") {
-      number_of_outputs <- ceiling(lubridate::time_length(duration, "week"))
+      number_of_outputs <- floor(lubridate::time_length(duration, "week"))
     } else if (output_frequency == "month") {
       number_of_outputs <- ceiling(lubridate::time_length(duration, "month"))
     } else if (output_frequency == "day") {
@@ -259,12 +259,20 @@ time_checks <- function(end_date, start_date, time_step, output_frequency, outpu
     }
   }
 
+  if (time_step == "day" ) {
+    number_annual_time_steps <- 365
+  } else if (time_step == "week") {
+    number_annual_time_steps <- 52
+  } else if (time_step == "month") {
+    number_annual_time_steps <- 12
+  }
+
   if (checks_passed) {
     outs <- list(
-      checks_passed, number_of_time_steps, number_of_years,
+      checks_passed, number_of_time_steps, number_of_years, number_annual_time_steps,
       number_of_outputs, output_frequency
     )
-    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years",
+    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years", "number_annual_time_steps",
                      "number_of_outputs", "output_frequency")
     return(outs)
   } else {
