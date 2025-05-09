@@ -824,8 +824,8 @@ public:
                     mortality_in_index = mortality_tracker_vector_[index](row, col);
                 }
                 else {
-                    mortality_in_index = static_cast<int>(std::floor(
-                        mortality_rate * mortality_tracker_vector_[index](row, col)));
+                    mortality_in_index = std::lround(
+                        mortality_rate * mortality_tracker_vector_[index](row, col));
                 }
                 mortality_tracker_vector_[index](row, col) -= mortality_in_index;
                 died_(row, col) += mortality_in_index;
