@@ -2905,7 +2905,7 @@ test_that("Quarantine and spread rates work at all timings", {
   expect_equal(length(data$rates), 364)
 })
 
-test_that("Mortality works as expected with multiple ", {
+test_that("Mortality works as expected with multiple hosts", {
   infected_file_list <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
@@ -2935,8 +2935,10 @@ test_that("Mortality works as expected with multiple ", {
                mortality_frequency_n = 1)
 
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
-  expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
-  expect_equal(data$host_pools[[1]]$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[1]],
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$mortality[[2]],
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$host_pools[[1]]$mortality[[3]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
 
@@ -3542,7 +3544,8 @@ test_that("Using multiple hosts works as expected", {
          random_seed = 42,
          temperature_coefficient_file = coefficient_file)
 
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[[1]]), wide = TRUE)
+  test_mat[[1]] <- 4
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
@@ -3685,7 +3688,8 @@ test_that("Using multiple hosts with uncertainty works as expected", {
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2])[[1]], wide = TRUE)
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  test_mat[[3]] <- 0
   expect_gte(data$host_pools[[2]]$infected[[1]][[1]] + data$host_pools[[2]]$infected[[1]][[1]],
              test_mat[[1]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[2]] + data$host_pools[[2]]$infected[[1]][[2]],
