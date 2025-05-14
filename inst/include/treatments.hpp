@@ -170,7 +170,7 @@ public:
     }
     void apply_treatment(HostPool& host_pool) override
     {
-        for (auto indices : host_pool.suitable_cells()) {
+        for (const auto& indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
             int remove_susceptible = this->get_treated(
@@ -238,7 +238,7 @@ public:
     }
     void apply_treatment(HostPool& host_pool) override
     {
-        for (auto indices : host_pool.suitable_cells()) {
+        for (const auto& indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
             int susceptible_resistant = this->get_treated(
@@ -265,7 +265,7 @@ public:
     }
     void end_treatment(HostPool& host_pool) override
     {
-        for (auto indices : host_pool.suitable_cells()) {
+        for (const auto& indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
             if (this->map_(i, j) > 0) {
