@@ -123,8 +123,10 @@ calibrate <- function(infected_years_file,
                       params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
                       number_of_generations = 7,
                       generation_size = 1000,
-                      infected_file,
-                      host_file,
+                      pest_host_table,
+                      competency_table,
+                      infected_file_list,
+                      host_file_list,
                       total_populations_file,
                       temp = FALSE,
                       temperature_coefficient_file = "",
@@ -145,9 +147,6 @@ calibrate <- function(infected_years_file,
                       temperature_file = "",
                       lethal_temperature = -12.87,
                       lethal_temperature_month = 1,
-                      mortality_on = FALSE,
-                      mortality_rate = 0,
-                      mortality_time_lag = 0,
                       mortality_frequency = "year",
                       mortality_frequency_n = 1,
                       management = FALSE,
@@ -183,7 +182,7 @@ calibrate <- function(infected_years_file,
                       leaving_scale_coefficient = 1,
                       calibration_method = "ABC",
                       number_of_iterations = 100000,
-                      exposed_file = "",
+                      exposed_file_list = "",
                       verbose = TRUE,
                       write_outputs = "None",
                       output_folder_path = "",
@@ -201,7 +200,8 @@ calibrate <- function(infected_years_file,
                       file_random_seeds = NULL,
                       use_soils = FALSE,
                       soil_starting_pest_file = "",
-                      start_with_soil_populations = FALSE) {
+                      start_with_soil_populations = FALSE,
+                      county_level_infection_data = FALSE) {
 
   # add all data to config list
   config <- c()
@@ -213,8 +213,8 @@ calibrate <- function(infected_years_file,
   config$params_to_estimate <- params_to_estimate
   config$number_of_generations <- number_of_generations
   config$generation_size <- generation_size
-  config$infected_file <- infected_file
-  config$host_file <- host_file
+  config$infected_file_list <- infected_file_list
+  config$host_file_list <- host_file_list
   config$total_populations_file <- total_populations_file
   config$temp <- temp
   config$temperature_coefficient_file <- temperature_coefficient_file
@@ -235,9 +235,6 @@ calibrate <- function(infected_years_file,
   config$survival_rate_month <- survival_rate_month
   config$survival_rate_day <- survival_rate_day
   config$survival_rates_file <- survival_rates_file
-  config$mortality_on <- mortality_on
-  config$mortality_rate <- mortality_rate
-  config$mortality_time_lag <- mortality_time_lag
   config$management <- management
   config$treatment_dates <- treatment_dates
   config$treatments_file <- treatments_file
@@ -272,7 +269,7 @@ calibrate <- function(infected_years_file,
   config$leaving_scale_coefficient <- leaving_scale_coefficient
   config$calibration_method <- calibration_method
   config$number_of_iterations <- number_of_iterations
-  config$exposed_file <- exposed_file
+  config$exposed_file_list <- exposed_file_list
   # add function name for use in configuration function to skip
   # function specific specific configurations namely for validation and
   # calibration.
@@ -296,6 +293,10 @@ calibrate <- function(infected_years_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$county_level_infection_data <- county_level_infection_data
+  config$pest_host_table <- pest_host_table
+  config$competency_table <- competency_table
+  config$point_file <- ""
 
   # call configuration function to perform data checks and transform data into
   # format used in pops c++
@@ -323,40 +324,17 @@ calibrate <- function(infected_years_file,
              network_min_distance,
              network_max_distance) {
 
-      config$random_seed <- sample(1:999999999999, 1, replace = FALSE)
+      config$random_seed <- as.integer(sample.int(1e9, 1, replace = FALSE))
+      set.seed(config$random_seed[[1]])
       random_seeds <- create_random_seeds(1)
-      if (config$use_initial_condition_uncertainty) {
-        config$infected <-  matrix_norm_distribution(config$infected_mean, config$infected_sd)
-        exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
-        exposed <- config$exposed
-        exposed[[config$latency_period + 1]] <- exposed2
-        config$exposed <- exposed
-      } else {
-        config$infected <- config$infected_mean
-        exposed2 <- config$exposed_mean
-        exposed <- config$exposed
-        exposed[[config$latency_period + 1]] <- exposed2
-        config$exposed <- exposed
+      config <- host_pool_setup(config)
+      while (any(config$total_hosts > config$total_populations, na.rm = TRUE) ||
+            any(config$total_exposed > config$total_populations, na.rm = TRUE) ||
+            any(config$total_infecteds > config$total_populations, na.rm = TRUE)) {
+        config <- host_pool_setup(config)
       }
-
-      if (config$use_host_uncertainty) {
-        config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
-      } else {
-        config$host <- config$host_mean
-      }
-
-      susceptible <- config$host - config$infected - exposed2
-      susceptible[susceptible < 0] <- 0
-
-      config$susceptible <- susceptible
-      config$total_hosts <- config$host
-      config$total_exposed <- exposed2
-
-      if (config$mortality_on) {
-        mortality_tracker2 <- config$mortality_tracker
-        mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
-        config$mortality_tracker <- mortality_tracker2
-      }
+      config$competency_table_list <- competency_table_list_creator(config$competency_table)
+      config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
 
       data <- pops_model(
         random_seed = config$random_seed,
@@ -368,21 +346,16 @@ calibrate <- function(infected_years_file,
         use_survival_rates = config$use_survival_rates,
         survival_rate_month = config$survival_rate_month,
         survival_rate_day = config$survival_rate_day,
-        infected = config$infected,
-        total_exposed = config$total_exposed,
-        exposed = config$exposed,
-        susceptible = config$susceptible,
+        host_pools = config$host_pools,
         total_populations = config$total_populations,
-        total_hosts = config$total_hosts,
+        competency_table = config$competency_table_list,
+        pest_host_table = config$pest_host_table_list,
         mortality_on = config$mortality_on,
-        mortality_tracker = config$mortality_tracker,
-        mortality = config$mortality,
         quarantine_areas = config$quarantine_areas,
         quarantine_directions = config$quarantine_directions,
         treatment_maps = config$treatment_maps,
         treatment_dates = config$treatment_dates,
         pesticide_duration = config$pesticide_duration,
-        resistant = config$resistant,
         use_movements = config$use_movements,
         movements = config$movements,
         movements_dates = config$movements_dates,
@@ -398,8 +371,6 @@ calibrate <- function(infected_years_file,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
         soil_reservoirs = config$soil_reservoirs,
-        mortality_rate = config$mortality_rate,
-        mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
@@ -579,28 +550,11 @@ calibrate <- function(infected_years_file,
 
         # calculate comparison metrics for simulation data for each time step in
         # the simulation
-        all_disagreement <-
-          foreach::foreach(
-            q = seq_len(length(data$infected)),
-            .combine = rbind,
-            .packages = c("terra", "PoPS"),
-            .final = colSums
-          ) %do% {
-            comparison <- terra::rast(config$infected_file)[[1]]
-            reference <- terra::rast(config$infected_file)[[1]]
-            terra::values(comparison) <- data$infected[[q]]
-            terra::values(reference) <- config$infection_years2[[q]]
-            mask <- terra::rast(config$infected_file)[[1]]
-            terra::values(mask) <- config$mask_matrix
-            quantity_allocation_disagreement(reference,
-                                             comparison,
-                                             use_configuration = config$use_configuration,
-                                             mask = mask,
-                                             use_distance = config$use_distance)
-          }
+        all_disagreement <- calculate_all_stats(config, data)
+        all_disagreement <- colSums(all_disagreement)
 
         all_disagreement <- as.data.frame(t(all_disagreement))
-        all_disagreement <- all_disagreement / length(data$infected)
+        all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
         config$quantity <- all_disagreement$quantity_disagreement
         config$allocation <- all_disagreement$allocation_disagreement
         config$configuration_dis <- all_disagreement$configuration_disagreement
@@ -917,28 +871,11 @@ calibrate <- function(infected_years_file,
         proposed_network_max_distance
       )
 
-    all_disagreement <-
-      foreach::foreach(
-        q = seq_len(length(data$infected)),
-        .combine = rbind,
-        .packages = c("terra", "PoPS"),
-        .final = colSums
-      ) %do% {
-        comparison <- terra::rast(config$infected_file)[[1]]
-        reference <- terra::rast(config$infected_file)[[1]]
-        terra::values(comparison) <- data$infected[[q]]
-        terra::values(reference) <- config$infection_years2[[q]]
-        mask <- terra::rast(config$infected_file)[[1]]
-        terra::values(mask) <- config$mask_matrix
-        quantity_allocation_disagreement(reference,
-                                         comparison,
-                                         use_configuration = config$use_configuration,
-                                         mask = mask,
-                                         use_distance = config$use_distance)
-      }
+    all_disagreement <- calculate_all_stats(config, data)
+    all_disagreement <- colSums(all_disagreement)
 
     all_disagreement <- as.data.frame(t(all_disagreement))
-    all_disagreement <- all_disagreement / length(data$infected)
+    all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
     config$accuracy <- all_disagreement$accuracy
     config$precision <- all_disagreement$precision
     config$recall <- all_disagreement$recall
@@ -1091,28 +1028,11 @@ calibrate <- function(infected_years_file,
         )
 
       # set up comparison
-      all_disagreement <-
-        foreach::foreach(
-          q = seq_len(length(data$infected)),
-          .combine = rbind,
-          .packages = c("terra", "PoPS"),
-          .final = colSums
-        ) %do% {
-          comparison <- terra::rast(config$infected_file)[[1]]
-          reference <- comparison
-          mask <- comparison
-          terra::values(comparison) <- data$infected[[q]]
-          terra::values(reference) <- config$infection_years2[[q]]
-          terra::values(mask) <- config$mask_matrix
-          quantity_allocation_disagreement(reference,
-                                           comparison,
-                                           use_configuration = FALSE,
-                                           mask = mask,
-                                           use_distance = config$use_distance)
-        }
+      all_disagreement <- calculate_all_stats(config, data)
+      all_disagreement <- colSums(all_disagreement)
 
       all_disagreement <- as.data.frame(t(all_disagreement))
-      all_disagreement <- all_disagreement / length(data$infected)
+      all_disagreement <- all_disagreement / length(data$host_pools[[1]]$infected)
       proposed <-
         data.frame(all_disagreement[, c("quantity_disagreement", "allocation_disagreement",
                                         "configuration_disagreement", "accuracy", "precision",

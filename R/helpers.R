@@ -259,7 +259,7 @@ create_random_seeds <- function(n) {
       soil = sample(1:999999999, n, replace = FALSE),
       iteration = seq(1,n, by = 1)
     )
-  
+
   return(random_seeds)
 }
 
@@ -430,6 +430,7 @@ write_infected_rasters <- function(config, uid) {
   }
 }
 
+
 #' Function to dynamically update the working directory for all file paths in
 #' the configuration rds output
 
@@ -464,3 +465,323 @@ update_config_paths <- function(config, root) {
   
   return(config)
 }
+
+# Reformat competency_table into list (per host composition) with competency values
+# randomly sampled from a normal distribution using mean and sd in competency table
+
+competency_table_list_creator <- function(competency_table) {
+  competency_table2 <- competency_table[, 1:(ncol(competency_table) - 1)]
+  competencies <-
+    rnorm(n = nrow(competency_table), mean = competency_table$competency_mean,
+          sd = competency_table$competency_sd)
+  names(competency_table2)[ncol(competency_table2)] <- "competency"
+  while (any(competencies > 1) || any(competencies < 0)) {
+    competencies <-
+      rnorm(n = nrow(competency_table),
+            mean = competency_table$competency_mean, sd = competency_table$competency_sd)
+  }
+  competency_table2$competency <- competencies
+  competency_table_list <- split(competency_table2, seq_len(nrow(competency_table2)))
+  for (i in seq_along(competency_table_list)) {
+    competency_table_list[[i]] <- unname(competency_table_list[[i]])
+    competency_table_list[[i]] <- as.vector(t(competency_table_list[[i]]))
+  }
+  return(competency_table_list)
+}
+
+# Reformat pest_host_table into list (per host species) with susceptibility and
+# mortality rates randomly sampled from a normal distribution using the means and sds i
+# in the pest_host_table
+
+pest_host_table_list_creator <- function(pest_host_table) {
+  pest_host_table2 <- pest_host_table[, !grepl("_sd", colnames(pest_host_table))]
+  susceptibilities <-
+    rnorm(n = nrow(pest_host_table), mean = pest_host_table$susceptibility_mean,
+          sd = pest_host_table$susceptibility_sd)
+  names(pest_host_table2)[1] <- "susceptibility"
+  while (any(susceptibilities > 1) || any(susceptibilities < 0)) {
+    susceptibilities <- rnorm(n = nrow(pest_host_table),
+                              mean = pest_host_table$susceptibility_mean,
+                              sd = pest_host_table$susceptibility_sd)
+  }
+  pest_host_table2$susceptibility <- susceptibilities
+  mortality_rates <-
+    rnorm(n = nrow(pest_host_table), mean = pest_host_table$mortality_rate_mean,
+          sd = pest_host_table$mortality_rate_sd)
+  names(pest_host_table2)[2] <- "mortality_rate"
+  while (any(mortality_rates > 1) || any(mortality_rates < 0)) {
+    mortality_rates <-
+      rnorm(n = nrow(pest_host_table), mean = pest_host_table$mortality_rate_mean,
+            sd = pest_host_table$mortality_rate_sd)
+  }
+  pest_host_table2$mortality_rate <- mortality_rates
+  pest_host_table_list <- split(pest_host_table2, seq_len(nrow(pest_host_table2)))
+  for (i in seq_along(pest_host_table_list)) {
+    pest_host_table_list[[i]] <- unname(pest_host_table_list[[i]])
+    pest_host_table_list[[i]] <- as.vector(t(pest_host_table_list[[i]]))
+  }
+  return(pest_host_table_list)
+}
+
+# Update host pools when uncertainties are used
+host_pool_setup <- function(config) {
+  total_infecteds <- config$zero_matrix
+  total_exposeds <- config$zero_matrix
+  total_hosts <- config$zero_matrix
+  for (i in seq_along(config$host_file_list)) {
+    host_pool <- config$host_pools[[i]]
+
+    if (config$use_host_uncertainty) {
+      host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
+                                       config$host_pool_host_sds[[i]])
+      while (any(host > config$total_populations, na.rm = TRUE)) {
+        host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
+                                         config$host_pool_host_sds[[i]])
+      }
+      host_pool$total_host <- host
+      total_hosts <- total_hosts + host
+    } else {
+      host <- host_pool$total_hosts
+      total_hosts <- total_hosts + host_pool$total_hosts
+    }
+
+    if (config$use_initial_condition_uncertainty) {
+      if (config$county_level_infection_data) {
+        host_rast <- terra::rast(config$host_file_list[i])[[1]]
+        terra::values(host_rast) <- host
+        county_infections <- terra::vect(config$infected_file_list[i])
+        infected <- infected_rast_from_county(county_infections, host_rast[[1]], config)
+        infected <- terra::as.matrix(infected[[1]], wide = TRUE)
+        host_pool$infected <- infected
+        if (config$model_type == "SEI" && config$start_exposed) {
+          county_exposeds <- terra::vect(config$exposed_file_list[i])
+          exposed2 <- infected_rast_from_county(county_exposeds, host_rast[[1]], config)
+          exposed2 <- terra::as.matrix(exposed2[[1]], wide = TRUE)
+          exposed <- host_pool$exposed
+          exposed[[config$latency_period + 1]] <- exposed2
+          host_pool$exposed <- exposed
+          host_pool$total_exposed <- exposed2
+        } else {
+          exposed2 <- host_pool$total_exposed
+        }
+
+      } else {
+        infected <-
+          matrix_norm_distribution(config$host_pool_infected_means[[i]],
+                                   config$host_pool_infected_sds[[i]])
+        while (any(infected < 0)) {
+          infected <-
+            matrix_norm_distribution(config$host_pool_infected_means[[i]],
+                                     config$host_pool_infected_sds[[i]])
+        }
+        exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
+                                             config$host_pool_exposed_sds[[i]])
+        while (any(exposed2 < 0)) {
+          exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
+                                               config$host_pool_exposed_sds[[i]])
+        }
+        exposed <- host_pool$exposed
+        exposed[[config$latency_period + 1]] <- exposed2
+        host_pool$infected <- infected
+        host_pool$exposed <- exposed
+        host_pool$total_exposed <- exposed2
+      }
+
+      total_infecteds <- total_infecteds + infected
+      total_exposeds <- total_exposeds + exposed2
+    }
+
+    susceptible <- host_pool$total_host - host_pool$infected - host_pool$total_exposed
+    susceptible[susceptible < 0] <- 0
+    host_pool$susceptible <- susceptible
+
+    if (config$mortality_on) {
+      mortality_tracker <- host_pool$mortality_tracker
+      mortality_tracker[[length(mortality_tracker)]] <- host_pool$infected
+      host_pool$mortality_tracker <- mortality_tracker
+    }
+    config$host_pools[[i]] <- host_pool
+  }
+  config$total_hosts <- total_hosts
+  config$total_exposed <- total_exposeds
+  config$total_infecteds <- total_infecteds
+
+  return(config)
+}
+
+infected_rast_from_county <- function(county_infections, host, config) {
+  infected_rast <- host
+  names(host) <- c("host")
+  terra::values(infected_rast) <- 0
+  county_infections_rast <- terra::rasterize(county_infections, host, field = "FIPS")
+  county_infections_rast
+  fips_host_cells <- terra::extract(host, county_infections, cells = TRUE)
+  fips_host_cells$FIPS <- terra::extract(county_infections_rast, county_infections)$FIPS
+
+  for (id in unique(fips_host_cells$FIPS)) {
+    sampler <- fips_host_cells[fips_host_cells$FIPS == id & fips_host_cells$host > 0, ]
+    if (nrow(sampler) > 0) {
+      if (config$use_initial_condition_uncertainty) {
+        inf_num <-
+          round(rnorm(1, county_infections[county_infections$FIPS == id]$infected_mean,
+                      county_infections[county_infections$FIPS == id]$infected_sd))
+        while (inf_num < 0) {
+          inf_num <-
+            round(rnorm(1, county_infections[county_infections$FIPS == id]$infected_mean,
+                        county_infections[county_infections$FIPS == id]$infected_sd))
+        }
+      } else {
+        inf_num <- county_infections[county_infections$FIPS == id]$infected_mean
+      }
+      cells <- sample(sampler$cell, inf_num)
+      infected_rast[cells] <- 1
+    }
+  }
+  return(infected_rast)
+}
+
+
+calculated_stats_county_level <- function(compare_vect) {
+  compare_vect$true_positives <-
+    ifelse(compare_vect$reference > 0 & compare_vect$comparison > 0, 1, 0)
+  compare_vect$true_negatives <-
+    ifelse(compare_vect$reference == 0 & compare_vect$comparison == 0, 1, 0)
+  compare_vect$false_negatives <-
+    ifelse(compare_vect$reference > 0 & compare_vect$comparison == 0, 1, 0)
+  compare_vect$false_positives <-
+    ifelse(compare_vect$reference == 0 & compare_vect$comparison > 0, 1, 0)
+  compare_vect$unknown_negatives <-
+    ifelse(is.na(compare_vect$reference) & compare_vect$comparison == 0, 1, 0)
+  compare_vect$unknown_positives <-
+    ifelse(is.na(compare_vect$reference) & compare_vect$comparison > 0, 1, 0)
+  compare_vect$infected_difference <- compare_vect$reference - compare_vect$comparison
+
+  compare_df <- as.data.frame(compare_vect)
+  output <- as.data.frame(compare_vect[1, ])
+  output[1, ] <- colSums(compare_df)
+
+  output$total_obs <-
+    output$true_negative + output$true_positive + output$false_negative + output$false_positive
+  output$accuracy <- (output$true_negative + output$true_positive) / output$total_obs
+  output$precision <- output$true_positive / (output$true_positive + output$false_positive)
+  output$recall <- output$true_positive / (output$true_positive + output$false_negative)
+  output$specificity <- output$true_negative / (output$true_negative + output$false_positive)
+
+  output$tp_fp <- as.double((output$true_positive + output$false_positive))
+  output$tp_fn <- as.double((output$true_positive + output$false_negative))
+  output$tn_fp <- as.double((output$true_negative + output$false_positive))
+  output$tn_fn <- as.double((output$true_negative + output$false_negative))
+
+  if (is.nan(output$tp_fp) || output$tp_fp == 0) {output$tp_fp <- 1}
+  if (is.nan(output$tp_fn) || output$tp_fn == 0) {output$tp_fn <- 1}
+  if (is.nan(output$tn_fp) || output$tn_fp == 0) {output$tn_fp <- 1}
+  if (is.nan(output$tn_fn) || output$tn_fn == 0) {output$tn_fn <- 1}
+
+  output$mcc <-
+    ((output$true_positive * output$true_negative) -
+       (output$false_positive * output$false_negative)) /
+    sqrt(output$tp_fp * output$tp_fn * output$tn_fp * output$tn_fn)
+
+  if (is.nan(output$accuracy)) {output$accuracy <- 0}
+  if (is.nan(output$precision)) {output$precision <- 0}
+  if (is.nan(output$recall)) {output$recall <- 0}
+  if (is.nan(output$specificity)) {output$specificity <- 0}
+
+  output$rmse <- Metrics::rmse(compare_df$reference, compare_df$comparison)
+
+  if (output$false_negative == 0 && output$false_positive == 0) {
+    output$odds_ratio <- (output$true_positive * output$true_negative) / 1
+  } else if (output$false_negative == 0) {
+    output$odds_ratio <- (output$true_positive * output$true_negative) / output$false_positive
+  } else if (output$false_positive == 0) {
+    output$odds_ratio <- (output$true_positive * output$true_negative) / output$false_negative
+  } else {
+    output$odds_ratio <- (output$true_positive * output$true_negative) /
+      (output$false_negative * output$false_positive)
+  }
+
+
+  output$residual_error <- sum(abs(compare_df$reference -  compare_df$comparison))
+
+  return(output)
+}
+
+
+calculate_all_stats <- function(config, data) {
+  all_disagreement <-
+    foreach::foreach(
+      q = seq_len(length(data$host_pools[[1]]$infected)), .combine = rbind,
+      .packages = c("terra", "PoPS")
+    ) %do% {
+      # need to assign reference, comparison, and mask in inner loop since
+      # terra objects are pointers
+
+      comparison <- terra::rast(config$host_file_list[[1]])[[1]]
+      terra::values(comparison) <- 0
+      reference <- comparison
+      mask <- comparison
+      infections <- comparison
+      for (p in seq_len(length(data$host_pools))) {
+        terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
+        comparison <- comparison + infections
+      }
+      terra::values(mask) <- config$mask_matrix
+      if (config$county_level_infection_data) {
+        reference <- terra::vect(config$infected_years_file[[1]])
+        compare_vect <- reference[, c(1, (q + 1))]
+        names(compare_vect) <- c("FIPS", "reference")
+        compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
+        ad <- calculated_stats_county_level(compare_vect)
+        ad <- calculated_stats_county_level(compare_vect)
+        ad$quantity_disagreement <- 0
+        ad$allocation_disagreement <- 0
+        ad$allocation_disagreement <- 0
+        ad$configuration_disagreement <- 0
+        ad$distance_difference <- 0
+
+      } else {
+        terra::values(reference) <- config$infection_years2[[q]]
+        ad <-
+          quantity_allocation_disagreement(reference,
+                                           comparison,
+                                           use_configuration = config$use_configuration,
+                                           mask = mask,
+                                           use_distance = config$use_distance)
+        if (file.exists(config$point_file)) {
+          obs_data <- terra::vect(config$point_file)
+          obs_data <- terra::project(obs_data, comparison)
+          s <- extract(comparison, obs_data)
+          names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
+          s <- s[2]
+          obs_data <- cbind(obs_data, s)
+          ## calculate true positive, true negatives, false positives, false
+          ## negatives, and other statistics and add them to the data frame
+          ## for export
+          ad$points_true_positive <-
+            nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 > 0, ])
+          ad$points_false_negative <-
+            nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 == 0, ])
+          ad$points_false_positive <-
+            nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 > 0, ])
+          ad$points_true_negative <-
+            nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
+          ad$points_total_obs <-
+            ad$points_true_negative + ad$points_true_positive +
+            ad$points_false_negative + ad$points_false_positive
+          ad$points_accuracy <-
+            (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
+          ad$points_precision <-
+            ad$points_true_positive / (ad$points_true_positive + ad$points_false_positive)
+          ad$points_recall <-
+            ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
+          ad$points_specificiity <-
+            ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
+        }
+      }
+      ad$output <- q
+      ad
+    }
+  all_disagreement <- data.frame(all_disagreement)
+  return(all_disagreement)
+}
+

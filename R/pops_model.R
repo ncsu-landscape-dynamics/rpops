@@ -9,13 +9,11 @@
 #'
 #' @inheritParams pops
 #' @param weather Boolean that is true if weather is used
-#' @param infected matrix of infected hosts
-#' @param susceptible matrix of susceptible hosts
-#' @param mortality_tracker matrix of 0's to track mortality per year
-#' @param mortality matrix to track cumulative mortality
-#' @param resistant matrix to track resistant population over time
+#' @param mortality_on Boolean to indicate if mortality is used
+#' @param host_pools list of host_pool lists with each host_pool list containing matrices of
+#' infected, susceptible, exposed, total_hosts, total_exposed, resistant, mortality, and
+#' mortality_tracker for that host.
 #' @param total_populations  matrix of total populations
-#' @param total_hosts matrix of all hosts
 #' @param treatment_maps list of matrices where treatment or management has
 #' occurred in a given year
 #' @param temperature vector of matrices of temperature values used to check
@@ -33,10 +31,6 @@
 #' @param use_movements this is a boolean to turn on use of the movement module.
 #' @param movements_dates this is a list of dates passed as strings in the
 #' format 'YYYY-MM-DD'
-#' @param exposed vector of matrices of the exposed class for use with "SEI"
-#' model type
-#' @param total_exposed sum of all exposed cohorts in exposed class for use with
-#' "SEI" model type
 #' @param model_type_ What type of model most represents your system. Options
 #' are "SEI" (Susceptible - Exposed - Infected/Infested) or "SI"
 #' (Susceptible - Infected/Infested). Default value is "SI".
@@ -81,8 +75,8 @@
 #' of dispersers that fall to the soil and survive.
 #' @param soil_reservoirs list of matrices with soil pests created from soil_pest_file.
 #' @param random_seeds vector of random seeds in the order of "disperser_generation",
-#' "natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
-#' "overpopulation", "survival_rate", "soil"
+#' "natural_dispersal", "anthropogenic_dispersal", "establishment", "weather",
+#' "lethal_temperature", "movement", "overpopulation", "survival_rate", "soil"
 #'
 #' @return list of vector matrices of infected and susceptible hosts per
 #' simulated year and associated statistics (e.g. spread rate)
@@ -99,21 +93,16 @@ pops_model <-
            use_survival_rates,
            survival_rate_month,
            survival_rate_day,
-           infected,
-           total_exposed,
-           exposed,
-           susceptible,
+           host_pools,
            total_populations,
-           total_hosts,
+           competency_table,
+           pest_host_table,
            mortality_on,
-           mortality_tracker,
-           mortality,
            quarantine_areas,
            quarantine_directions,
            treatment_maps,
            treatment_dates,
            pesticide_duration,
-           resistant,
            use_movements,
            movements,
            movements_dates,
@@ -129,8 +118,6 @@ pops_model <-
            spatial_indices,
            season_month_start_end,
            soil_reservoirs,
-           mortality_rate = 0.0,
-           mortality_time_lag = 2,
            start_date = "2018-01-01",
            end_date = "2018-12-31",
            treatment_method = "ratio",
@@ -231,24 +218,19 @@ pops_model <-
 
     data <-
       suppressWarnings(pops_model_cpp(random_seed = random_seed,
-                     multiple_random_seeds,
-                     random_seeds,
+                     multiple_random_seeds = multiple_random_seeds,
+                     random_seeds = random_seeds,
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
-                     infected = infected,
-                     total_exposed = total_exposed,
-                     exposed = exposed,
-                     susceptible = susceptible,
+                     host_pools = host_pools,
                      total_populations = total_populations,
-                     total_hosts = total_hosts,
-                     mortality_tracker = mortality_tracker,
-                     mortality = mortality,
+                     competency_table = competency_table,
+                     pest_host_table = pest_host_table,
                      quarantine_areas = quarantine_areas,
                      quarantine_directions = quarantine_directions,
                      treatment_maps = treatment_maps,
                      treatment_dates = treatment_dates,
                      pesticide_duration = pesticide_duration,
-                     resistant = resistant,
                      movements = movements,
                      movements_dates = movements_dates,
                      temperature = temperature,
@@ -264,8 +246,6 @@ pops_model <-
                      season_month_start_end = season_month_start_end,
                      frequency_config = frequency_config,
                      bool_config = bool_config,
-                     mortality_rate = mortality_rate,
-                     mortality_time_lag = mortality_time_lag,
                      start_date = start_date,
                      end_date = end_date,
                      treatment_method = treatment_method,
@@ -281,10 +261,10 @@ pops_model <-
                      frequencies_n_config = frequencies_n_config,
                      model_type_ = model_type_,
                      latency_period = latency_period,
+                     establishment_probability = establishment_probability,
                      dispersal_percentage = dispersal_percentage,
                      survival_rate_month = survival_rate_month,
                      survival_rate_day = survival_rate_day,
-                     establishment_probability = establishment_probability,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
                      network_data_config = network_data_config,

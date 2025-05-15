@@ -172,3 +172,50 @@ weather_size_probabilitic_error <-
 weather_sd_layer_error <-
   "weather coefficient sd file number of layers not equal to number of layers in weather coefficient
   file"
+
+multihost_file_length_error <-
+  "infected_file_list and host_file_list are not of the same length, ensure both of these files are
+  of the length of the number of host species you want to simulate"
+
+competency_table_column_length_error <-
+  "competency_table doesn't have the same number of columns as number of files in host_file_list"
+
+competency_table_row_length_error <-
+  "competency_table needs to have at least 1 more row than the number of hosts being modeled which
+  is represented by the number of file in the host_file_list"
+
+competency_table_wrong_columns <-
+  "Check column order and headings. The competency table requires a column for each
+  host species, followed by a competency_mean column and competency_sd column"
+
+competency_value_error <-
+  "competency_table competency_mean and competency_sd values must be between 0 and 1"
+
+pest_host_table_wrong_columns <-
+  "pest_host_table must the 6 columns named and order: host, susceptibility_mean,
+  susceptibility_sd, mortality_rate_mean, mortality_rate_sd, mortality_time_lag"
+
+pest_host_susceptbility_value_error <-
+  "pest_host_table susceptiblity_mean and susceptibility_sd values must be between 0 and 1"
+
+pest_host_mortality_rate_value_error <-
+  "pest_host_table mortality_rate_mean and mortality_rate_sd values must be between 0 and 1"
+
+pest_host_table_row_length_error <-
+  "pest_host_table doesn't have the same number of rows as number of files in host_file_list"
+
+multihosts_gt_totpop_error <-
+  "All hosts sum to more than the total populations in some cells. Check rasters to ensure that
+  combined summed host layers are not greater than total populations raster."
+
+multiinfected_gt_totpop_error <-
+  "All infecteds sum to more than the total populations in some cells. Check rasters to ensure that
+  combined summed infected layers are not greater than total populations raster."
+
+multiexposed_gt_totpop_error <-
+  "All exposeds sum to more than the total populations in some cells. Check rasters to ensure that
+  combined summed exposed layers are not greater than total populations raster."
+
+crs_infected_county_error <-
+  "Coordinate reference system (crs) of input infected vector does not match. Ensure that all of
+  your input rasters and vectors have the same crs"

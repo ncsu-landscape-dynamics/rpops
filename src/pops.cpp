@@ -32,6 +32,27 @@ using std::to_string;
 using namespace Rcpp;
 using namespace pops;
 
+struct InputHostPool {
+  std::vector<IntegerMatrix> infected;
+  std::vector<IntegerMatrix> susceptible;
+  std::vector<IntegerMatrix> total_exposed;
+  std::vector<IntegerMatrix> resistant;
+  std::vector<std::vector<IntegerMatrix>> exposed;
+  std::vector<IntegerMatrix> mortality;
+  std::vector<std::vector<IntegerMatrix>> mortality_tracker;
+  std::vector<IntegerMatrix> total_hosts;
+};
+
+struct OutputHostPool {
+  std::vector<IntegerMatrix> infected;
+  std::vector<IntegerMatrix> susceptible;
+  std::vector<IntegerMatrix> total_exposed;
+  std::vector<IntegerMatrix> resistant;
+  std::vector<std::vector<IntegerMatrix>> exposed;
+  std::vector<IntegerMatrix> mortality;
+  std::vector<std::vector<IntegerMatrix>> mortality_tracker;
+};
+
 // Enable C++11 via this plugin (Rcpp 0.10.3 or later)
 // [[Rcpp::plugins(cpp11)]]
 
@@ -41,23 +62,18 @@ using namespace pops;
 List pops_model_cpp(
     int random_seed,
     bool multiple_random_seeds,
-    std::vector<int> random_seeds,
+    std::vector<unsigned> random_seeds,
     double lethal_temperature,
     int lethal_temperature_month,
-    IntegerMatrix infected,
-    IntegerMatrix total_exposed,
-    std::vector<IntegerMatrix> exposed,
-    IntegerMatrix susceptible,
+    std::vector<List> host_pools,
     IntegerMatrix total_populations,
-    IntegerMatrix total_hosts,
-    std::vector<IntegerMatrix> mortality_tracker,
-    IntegerMatrix mortality,
+    std::vector<std::vector<double>> competency_table,
+    std::vector<std::vector<double>> pest_host_table,
     IntegerMatrix quarantine_areas,
     std::string quarantine_directions,
     std::vector<NumericMatrix> treatment_maps,
     std::vector<std::string> treatment_dates,
     std::vector<int> pesticide_duration,
-    IntegerMatrix resistant,
     std::vector<std::vector<int>> movements,
     std::vector<std::string> movements_dates,
     std::vector<NumericMatrix> temperature,
@@ -73,8 +89,6 @@ List pops_model_cpp(
     List season_month_start_end,
     List frequency_config,
     List bool_config,
-    double mortality_rate = 0.0,
-    int mortality_time_lag = 2,
     std::string start_date = "2018-01-01",
     std::string end_date = "2018-12-31",
     std::string treatment_method = "ratio",
@@ -103,6 +117,10 @@ List pops_model_cpp(
 {
     Config config;
     config.random_seed = random_seed;
+    config.multiple_random_seeds = multiple_random_seeds;
+    if (multiple_random_seeds) {
+        config.read_seeds(random_seeds);
+    }
     config.rows = rows_cols["num_rows"];
     config.cols = rows_cols["num_cols"];
     config.ew_res = res["ew_res"];
@@ -147,8 +165,6 @@ List pops_model_cpp(
     std::string mortality_frequency = frequency_config["mortality_frequency"];
     // use_treatment set later
     config.use_mortality = bool_config["mortality_on"];
-    config.mortality_rate = mortality_rate;
-    config.mortality_time_lag = mortality_time_lag;
     if (output_frequency == "time_step") {
         output_frequency = time_step;
     }
@@ -196,37 +212,118 @@ List pops_model_cpp(
 
     std::vector<std::array<double, 4>> spread_rates_vector;
     std::tuple<double, double, double, double> spread_rates;
+    IntegerMatrix dispersers(config.rows, config.cols);
     IntegerMatrix total_dispersers(config.rows, config.cols);
     IntegerMatrix established_dispersers(config.rows, config.cols);
 
-    int num_infected;
     std::vector<int> number_infected;
     double area_infect;
     std::vector<double> area_infected;
 
-    std::vector<IntegerMatrix> infected_vector;
-    std::vector<IntegerMatrix> susceptible_vector;
-    std::vector<IntegerMatrix> mortality_vector;
-    std::vector<IntegerMatrix> resistant_vector;
+    std::vector<OutputHostPool> output_host_pool_vector(host_pools.size());
     std::vector<IntegerMatrix> total_populations_vector;
-    std::vector<IntegerMatrix> total_exposed_vector;
     std::vector<IntegerMatrix> dispersers_vector;
-    std::vector<IntegerMatrix> exposed_v;
-    std::vector<std::vector<IntegerMatrix>> exposed_vector;
     std::vector<std::vector<IntegerMatrix>> soil_reservoirs_vector;
     std::vector<IntegerMatrix> soil_v;
 
     config.create_schedules();
 
-    Treatments<IntegerMatrix, NumericMatrix> treatments(config.scheduler());
+    ModelType mt = model_type_from_string(config.model_type);
+    using PoPSModel = Model<IntegerMatrix, NumericMatrix, int>;
+
+    Treatments<PoPSModel::StandardSingleHostPool, NumericMatrix> treatments(config.scheduler());
     for (unsigned t = 0; t < treatment_maps.size(); t++) {
-        treatments.add_treatment(
-            treatment_maps[t],
-            pops::Date(treatment_dates[t]),
-            pesticide_duration[t],
-            treatment_application);
-        config.use_treatments = true;
+      treatments.add_treatment(
+        treatment_maps[t],
+        pops::Date(treatment_dates[t]),
+        pesticide_duration[t],
+        treatment_application);
+      config.use_treatments = true;
     }
+
+    unsigned move_scheduled;
+    if (config.use_movements) {
+      for (unsigned move = 0; move < movements_dates.size(); ++move) {
+        pops::Date movement_date(movements_dates[move]);
+        move_scheduled =
+          unsigned(config.scheduler().schedule_action_date(movement_date));
+        config.movement_schedule.push_back(move_scheduled);
+      }
+    }
+
+    std::unique_ptr<Network<int>> network{nullptr};
+    if (network_config.isNotNull() && network_data_config.isNotNull()) {
+      // The best place for bbox handling would be with rows, cols, and
+      // resolution, but since it is required only for network, it is here.
+      config.bbox.north = bbox["north"];
+      config.bbox.south = bbox["south"];
+      config.bbox.east = bbox["east"];
+      config.bbox.west = bbox["west"];
+      List net_config(network_config);
+      config.network_min_distance = net_config["network_min_distance"];
+      config.network_max_distance = net_config["network_max_distance"];
+      std::string network_movement = net_config["network_movement"];
+      config.network_movement = network_movement;
+      network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
+      List net_data_config(network_data_config);
+      std::ifstream network_stream{
+        Rcpp::as<std::string>(net_data_config["network_filename"])};
+      network->load(network_stream);
+    }
+    config.read_competency_table(competency_table);
+    config.read_pest_host_table(pest_host_table);
+
+    PoPSModel model(config);
+
+    std::vector<std::unique_ptr<PoPSModel::StandardSingleHostPool>> host_pool_vector;
+    std::vector<PoPSModel::StandardSingleHostPool*> host_pool_vector_plain;
+    InputHostPool input_host_pool;
+    host_pool_vector.reserve(host_pools.size());
+    host_pool_vector_plain.reserve(host_pools.size());
+    for (unsigned i = 0; i < host_pools.size(); i++) {
+      input_host_pool.infected.emplace_back(host_pools[i]["infected"]);
+      input_host_pool.susceptible.emplace_back(host_pools[i]["susceptible"]);
+      std::vector<IntegerMatrix> exposed = host_pools[i]["exposed"];
+      input_host_pool.exposed.push_back(exposed);
+      input_host_pool.total_exposed.emplace_back(host_pools[i]["total_exposed"]);
+      input_host_pool.resistant.emplace_back(host_pools[i]["resistant"]);
+      input_host_pool.total_hosts.emplace_back(host_pools[i]["total_hosts"]);
+      input_host_pool.mortality.emplace_back(host_pools[i]["mortality"]);
+      std::vector<IntegerMatrix> mortality_tracker = host_pools[i]["mortality_tracker"];
+      input_host_pool.mortality_tracker.push_back(mortality_tracker);
+    }
+    for (unsigned i = 0; i < host_pools.size(); i++) {
+      host_pool_vector.emplace_back(new PoPSModel::StandardSingleHostPool(
+          mt,
+          input_host_pool.susceptible[i],
+          input_host_pool.exposed[i],
+          config.latency_period_steps,
+          input_host_pool.infected[i],
+          input_host_pool.total_exposed[i],
+          input_host_pool.resistant[i],
+          input_host_pool.mortality_tracker[i],
+          input_host_pool.mortality[i],
+          input_host_pool.total_hosts[i],
+          model.environment(),
+          config.generate_stochasticity,
+          config.reproductive_rate,
+          config.establishment_stochasticity,
+          config.establishment_probability,
+          config.rows,
+          config.cols,
+          spatial_indices));
+
+      host_pool_vector_plain.push_back(host_pool_vector[i].get());
+    }
+    PoPSModel::StandardMultiHostPool multi_host_pool(host_pool_vector_plain, config);
+    PestHostTable<PoPSModel::StandardSingleHostPool> pest_host(config, model.environment());
+    multi_host_pool.set_pest_host_table(pest_host);
+    CompetencyTable<PoPSModel::StandardSingleHostPool> competency(config, model.environment());
+    multi_host_pool.set_competency_table(competency);
+    PoPSModel::StandardPestPool pest_pool(
+        dispersers,
+        established_dispersers,
+        outside_dispersers);
 
     if (config.use_lethal_temperature) {
         if (config.num_lethal() > temperature.size()) {
@@ -241,17 +338,13 @@ List pops_model_cpp(
     else {
         spread_rate_outputs = 0;
     }
-    SpreadRate<IntegerMatrix> spreadrate(
-        infected, config.ew_res, config.ns_res, spread_rate_outputs, spatial_indices);
-    unsigned move_scheduled;
-    if (config.use_movements) {
-        for (unsigned move = 0; move < movements_dates.size(); ++move) {
-            pops::Date movement_date(movements_dates[move]);
-            move_scheduled =
-                unsigned(config.scheduler().schedule_action_date(movement_date));
-            config.movement_schedule.push_back(move_scheduled);
-        }
-    }
+    SpreadRateAction<PoPSModel::StandardMultiHostPool, int> spreadrate(
+        multi_host_pool,
+        config.rows,
+        config.cols,
+        config.ew_res,
+        config.ns_res,
+        spread_rate_outputs);
 
     unsigned quarantine_outputs;
     if (config.use_quarantine) {
@@ -261,7 +354,7 @@ List pops_model_cpp(
         quarantine_outputs = 0;
     }
 
-    QuarantineEscape<IntegerMatrix> quarantine(
+    QuarantineEscapeAction<IntegerMatrix> quarantine(
         quarantine_areas,
         config.ew_res,
         config.ns_res,
@@ -274,41 +367,14 @@ List pops_model_cpp(
     Direction escape_direction;
     std::vector<std::string> escape_directions;
 
-    std::unique_ptr<Network<int>> network{nullptr};
-    if (network_config.isNotNull() && network_data_config.isNotNull()) {
-        // The best place for bbox handling would be with rows, cols, and
-        // resolution, but since it is required only for network, it is here.
-        config.bbox.north = bbox["north"];
-        config.bbox.south = bbox["south"];
-        config.bbox.east = bbox["east"];
-        config.bbox.west = bbox["west"];
-        List net_config(network_config);
-        config.network_min_distance = net_config["network_min_distance"];
-        config.network_max_distance = net_config["network_max_distance"];
-        std::string network_movement = net_config["network_movement"];
-        config.network_movement = network_movement;
-        network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
-        List net_data_config(network_data_config);
-        std::ifstream network_stream{
-            Rcpp::as<std::string>(net_data_config["network_filename"])};
-        network->load(network_stream);
-    }
-
-    ModelType mt = model_type_from_string(config.model_type);
     WeatherType weather_typed = weather_type_from_string(config.weather_type);
 
-    Simulation<IntegerMatrix, NumericMatrix> simulation(
-        config.rows, config.cols, mt, config.latency_period_steps);
-
-    Model<IntegerMatrix, NumericMatrix, int> model(config);
     if (use_soils) {
       model.activate_soils(soil_reservoirs);
     }
 
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
-
-      IntegerMatrix dispersers(config.rows, config.cols);
 
       auto weather_step = config.simulation_step_to_weather_step(current_index);
       if (weather_typed == WeatherType::Probabilistic) {
@@ -322,27 +388,17 @@ List pops_model_cpp(
 
         model.run_step(
             current_index,
-            infected,
-            susceptible,
+            multi_host_pool,
+            pest_pool,
             total_populations,
-            total_hosts,
-            dispersers,
-            established_dispersers,
-            total_exposed,
-            exposed,
-            mortality_tracker,
-            mortality,
+            treatments,
             temperature,
             survival_rates,
-            treatments,
-            resistant,
-            outside_dispersers,
             spreadrate,
             quarantine,
             quarantine_areas,
             movements,
-            network ? *network : Network<int>::null_network(),
-            spatial_indices);
+            network ? *network : Network<int>::null_network());
 
         // keeps track of cumulative dispersers or propagules from a site.
         if (config.spread_schedule()[current_index]) {
@@ -350,27 +406,35 @@ List pops_model_cpp(
         }
 
         if (config.use_mortality && config.mortality_schedule()[current_index]) {
-            mortality_vector.push_back(Rcpp::clone(mortality));
+            for (unsigned i = 0; i < host_pools.size(); i++) {
+              IntegerMatrix mortality = input_host_pool.mortality[i];
+              output_host_pool_vector[i].mortality.push_back(Rcpp::clone(mortality));
+            }
         }
 
         if (config.output_schedule()[current_index]) {
-            infected_vector.push_back(Rcpp::clone(infected));
-            susceptible_vector.push_back(Rcpp::clone(susceptible));
-            resistant_vector.push_back(Rcpp::clone(resistant));
-            total_populations_vector.push_back(Rcpp::clone(total_populations));
-            total_exposed_vector.push_back(Rcpp::clone(total_exposed));
-            dispersers_vector.push_back(Rcpp::clone(total_dispersers));
-
-            if (config.model_type == "SEI") {
-                exposed_v.clear();
-
-                for (unsigned e = 0; e < exposed.size(); e++) {
-                    exposed_v.push_back(Rcpp::clone(exposed[e]));
+            int num_infected = 0;
+            IntegerMatrix all_infected(config.rows, config.cols);
+            for (unsigned i = 0; i < host_pools.size(); i++) {
+              output_host_pool_vector[i].infected.push_back(Rcpp::clone(input_host_pool.infected[i]));
+              output_host_pool_vector[i].susceptible.push_back(Rcpp::clone(input_host_pool.susceptible[i]));
+              output_host_pool_vector[i].resistant.push_back(Rcpp::clone(input_host_pool.resistant[i]));
+              output_host_pool_vector[i].total_exposed.push_back(Rcpp::clone(input_host_pool.total_exposed[i]));
+              std::vector<IntegerMatrix> exposed_v;
+              if (config.model_type == "SEI") {
+                for (unsigned e = 0; e < input_host_pool.exposed[i].size(); e++) {
+                  exposed_v.push_back(Rcpp::clone(input_host_pool.exposed[i][e]));
                 }
+              }
+              else {
+                exposed_v = input_host_pool.exposed[i];
+              }
+              output_host_pool_vector[i].exposed.push_back(exposed_v);
+              num_infected += sum_of_infected(input_host_pool.infected[i], spatial_indices);
+              all_infected += input_host_pool.infected[i];
             }
-            else {
-                exposed_v = exposed;
-            }
+            total_populations_vector.push_back(Rcpp::clone(total_populations));
+            dispersers_vector.push_back(Rcpp::clone(total_dispersers));
 
             if (use_soils) {
               soil_v.clear();
@@ -382,13 +446,11 @@ List pops_model_cpp(
               soil_v = soil_reservoirs;
             }
 
-            exposed_vector.push_back(exposed_v);
             soil_reservoirs_vector.push_back(soil_v);
 
-            num_infected = sum_of_infected(infected, spatial_indices);
             number_infected.push_back(num_infected);
             area_infect = area_of_infected(
-                infected, config.ew_res, config.ns_res, spatial_indices);
+                all_infected, config.ew_res, config.ns_res, spatial_indices);
             area_infected.push_back(area_infect);
             total_dispersers(config.rows, config.cols);
         }
@@ -414,18 +476,23 @@ List pops_model_cpp(
             escape_directions.push_back(quarantine_enum_to_string(escape_direction));
         }
     }
+    std::vector<List> output_host_pool_v;
+    for (unsigned i = 0; i < output_host_pool_vector.size(); i++) {
+      List host = List::create(Named("infected") = output_host_pool_vector[i].infected,
+                               Named("susceptible") = output_host_pool_vector[i].susceptible,
+                               Named("total_exposed") = output_host_pool_vector[i].total_exposed,
+                               Named("mortality") = output_host_pool_vector[i].mortality,
+                               Named("exposed") = output_host_pool_vector[i].exposed,
+                               Named("resistant") = output_host_pool_vector[i].resistant);
+      output_host_pool_v.push_back(host);
+    }
 
     return List::create(
-        _["infected"] = infected_vector,
-        _["exposed"] = exposed_vector,
-        _["susceptible"] = susceptible_vector,
-        _["resistant"] = resistant_vector,
-        _["mortality"] = mortality_vector,
+        _["host_pools"] = output_host_pool_v,
         _["rates"] = spread_rates_vector,
         _["number_infected"] = number_infected,
         _["area_infected"] = area_infected,
         _["total_populations"] = total_populations_vector,
-        _["total_exposed"] = total_exposed_vector,
         _["propogules"] = dispersers_vector,
         _["quarantine_escape"] = quarantine_escapes,
         _["quarantine_escape_distance"] = escape_dists,

@@ -1,0 +1,3 @@
+﻿host,susceptibility_mean,susceptibility_sd,mortality_rate_mean,mortality_rate_sd,mortality_time_lag
+oak,0.7,0.1,0.1,0.02,1
+tanoak,1,0.05,0.5,0.1,1

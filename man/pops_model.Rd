@@ -14,21 +14,16 @@ pops_model(
   use_survival_rates,
   survival_rate_month,
   survival_rate_day,
-  infected,
-  total_exposed,
-  exposed,
-  susceptible,
+  host_pools,
   total_populations,
-  total_hosts,
+  competency_table,
+  pest_host_table,
   mortality_on,
-  mortality_tracker,
-  mortality,
   quarantine_areas,
   quarantine_directions,
   treatment_maps,
   treatment_dates,
   pesticide_duration,
-  resistant,
   use_movements,
   movements,
   movements_dates,
@@ -44,8 +39,6 @@ pops_model(
   spatial_indices,
   season_month_start_end,
   soil_reservoirs,
-  mortality_rate = 0,
-  mortality_time_lag = 2,
   start_date = "2018-01-01",
   end_date = "2018-12-31",
   treatment_method = "ratio",
@@ -100,8 +93,8 @@ pops_model(
 compatibility option). Default is FALSE.}
 
 \item{random_seeds}{vector of random seeds in the order of "disperser_generation",
-"natural_dispersal", "anthropogenic_dispersal", "establishment", "weather", "movement",
-"overpopulation", "survival_rate", "soil"}
+"natural_dispersal", "anthropogenic_dispersal", "establishment", "weather",
+"lethal_temperature", "movement", "overpopulation", "survival_rate", "soil"}
 
 \item{use_lethal_temperature}{A boolean to answer the question: does your pest or pathogen have
 a temperature at which it cannot survive? (TRUE or FALSE)}
@@ -120,25 +113,26 @@ month before for this parameter as it is when the survival rates raster will be 
 
 \item{survival_rate_day}{What day should the survival rates be applied}
 
-\item{infected}{matrix of infected hosts}
-
-\item{total_exposed}{sum of all exposed cohorts in exposed class for use with
-"SEI" model type}
-
-\item{exposed}{vector of matrices of the exposed class for use with "SEI"
-model type}
-
-\item{susceptible}{matrix of susceptible hosts}
+\item{host_pools}{list of host_pool lists with each host_pool list containing matrices of
+infected, susceptible, exposed, total_hosts, total_exposed, resistant, mortality, and
+mortality_tracker for that host.}
 
 \item{total_populations}{matrix of total populations}
 
-\item{total_hosts}{matrix of all hosts}
+\item{competency_table}{A csv with the hosts as the first n columns (n being the number of hosts)
+and the last column being the competency value. Each row is a set of Boolean for host presence
+and the competency value (between 0 and 1) for that combination of hosts in a cell.
+#'}
 
-\item{mortality_on}{Boolean to turn host mortality on and off (TRUE or FALSE)}
+\item{pest_host_table}{The file path to a csv that has these columns in this order: host,
+susceptibility_mean, susceptibility_sd, mortality_rate, mortality_rate_mean,
+and mortality_time_lag as columns with each row being the species. Host species
+must be in the same order in the host_file_list, infected_file_list,
+pest_host_table rows, and competency_table columns. The host column is character
+string of the species name, and  is only used for metadata  and labeling output files.
+Susceptibility and mortality_rate values must be between 0 and 1.}
 
-\item{mortality_tracker}{matrix of 0's to track mortality per year}
-
-\item{mortality}{matrix to track cumulative mortality}
+\item{mortality_on}{Boolean to indicate if mortality is used}
 
 \item{quarantine_areas}{areas that are set as quarantined for computing
 escape from quarantine statistics.}
@@ -155,8 +149,6 @@ occurred in a given year}
 \item{pesticide_duration}{How long does the pesticide (herbicide, vaccine, etc..) last before the
 host is susceptible again. If value is 0 treatment is a culling (i.e. host removal) not a
 pesticide treatment. (needs to be the same length as treatment_dates and treatment_file)}
-
-\item{resistant}{matrix to track resistant population over time}
 
 \item{use_movements}{this is a boolean to turn on use of the movement module.}
 
@@ -192,11 +184,6 @@ host under optimal weather conditions}
 \item{season_month_start_end}{vector of months when spread starts and stops}
 
 \item{soil_reservoirs}{list of matrices with soil pests created from soil_pest_file.}
-
-\item{mortality_rate}{Rate at which mortality occurs value between 0 and 1}
-
-\item{mortality_time_lag}{Time lag from infection until mortality can occur in time steps
-integer >= 1}
 
 \item{start_date}{Date to start the simulation with format ('YYYY_MM_DD')}
 

@@ -320,6 +320,92 @@ bayesian_mnn_checks <- function(prior_means,
   }
 }
 
+multihost_checks <-
+  function(infected_file_list, host_file_list, competency_table, pest_host_table) {
+  checks_passed <- TRUE
+  if (length(infected_file_list) != length(host_file_list)) {
+    checks_passed <- FALSE
+    failed_check <- multihost_file_length_error
+  }
+
+  if (!checks_passed && length(infected_file_list) != (ncol(competency_table) - 2)) {
+    checks_passed <- FALSE
+    failed_check <- competency_table_column_length_error
+  }
+
+  if (!checks_passed && all(competency_table$competency_mean <= 1) &&
+      all(competency_table$competency_mean >= 0) && all(competency_table$competency_sd <= 1) &&
+      all(competency_table$competency_sd >= 0)) {
+    checks_passed <- FALSE
+    failed_check <- competency_value_error
+  }
+
+  if (!checks_passed && identical(names(competency_table)
+                                  [(length(names(competency_table)) - 1):
+                                      length(names(competency_table))],
+                                  competency_table_colnames)) {
+    checks_passed <- FALSE
+    failed_check <- competency_table_wrong_columns
+  }
+
+  if (!checks_passed && (length(infected_file_list) + 1) <= nrow(competency_table)) {
+    checks_passed <- FALSE
+    failed_check <- competency_table_row_length_error
+  } else {
+    competency_table_list <- competency_table_list_creator(competency_table)
+  }
+
+  if (!checks_passed && identical(names(pest_host_table), pest_host_table_colnames)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_wrong_columns
+  }
+
+  if (!checks_passed && all(pest_host_table$susceptibility_mean <= 1) &&
+      all(pest_host_table$susceptibility_mean >= 0) &&
+      all(pest_host_table$susceptibility_sd <= 1) &&
+      all(pest_host_table$susceptibility_sd >= 0)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_susceptbility_value_error
+  }
+
+  if (!checks_passed && all(pest_host_table$mortality_rate_mean <= 1) &&
+      all(pest_host_table$mortality_rate_mean >= 0) &&
+      all(pest_host_table$mortality_rate_sd <= 1) &&
+      all(pest_host_table$mortality_rate_sd >= 0)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_mortality_rate_value_error
+  }
+
+  if (!checks_passed && length(infected_file_list) != nrow(pest_host_table)) {
+    checks_passed <- FALSE
+    failed_check <- pest_host_table_row_length_error
+  } else {
+    host_names <- pest_host_table$host
+    pest_host_table <- pest_host_table[, -1]
+    pest_host_table_list <- pest_host_table_list_creator(pest_host_table)
+  }
+
+  if (any(pest_host_table$mortality_rate_mean > 0)) {
+    mortality_on <- TRUE
+  } else {
+    mortality_on <- FALSE
+  }
+
+  if (checks_passed) {
+    outs <-
+      list(checks_passed, host_names, pest_host_table_list, competency_table_list, mortality_on,
+           pest_host_table)
+    names(outs) <-
+      c("checks_passed", "host_names", "pest_host_table_list", "competency_table_list",
+        "mortality_on", "pest_host_table2")
+    return(outs)
+  } else {
+    outs <- list(checks_passed, failed_check)
+    names(outs) <- failed_check_list
+    return(outs)
+  }
+}
+
 multispecies_checks <- function(species,
                                 infected_files,
                                 parameter_means,
@@ -608,7 +694,7 @@ random_seeds_file_checks <- function(x, number_of_iterations = 1) {
 
   if (checks_passed) {
     random_seeds <- read.table(x, sep = ",", header = TRUE)
-    if (base::ncol(random_seeds) != 9 || base::nrow(random_seeds) <= number_of_iterations) {
+    if (base::ncol(random_seeds) != 10 || base::nrow(random_seeds) <= number_of_iterations) {
       checks_passed <- FALSE
       failed_check <- random_seeds_dimensions_error
     }

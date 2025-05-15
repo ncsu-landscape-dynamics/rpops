@@ -51,8 +51,10 @@ validate <- function(infected_years_file,
                      number_of_cores = NA,
                      parameter_means,
                      parameter_cov_matrix,
-                     infected_file,
-                     host_file,
+                     pest_host_table,
+                     competency_table,
+                     infected_file_list,
+                     host_file_list,
                      total_populations_file,
                      temp = FALSE,
                      temperature_coefficient_file = "",
@@ -73,9 +75,6 @@ validate <- function(infected_years_file,
                      temperature_file = "",
                      lethal_temperature = -12.87,
                      lethal_temperature_month = 1,
-                     mortality_on = FALSE,
-                     mortality_rate = 0,
-                     mortality_time_lag = 0,
                      mortality_frequency = "year",
                      mortality_frequency_n = 1,
                      management = FALSE,
@@ -107,7 +106,7 @@ validate <- function(infected_years_file,
                      overpopulation_percentage = 0,
                      leaving_percentage = 0,
                      leaving_scale_coefficient = 1,
-                     exposed_file = "",
+                     exposed_file_list = "",
                      write_outputs = "None",
                      output_folder_path = "",
                      point_file = "",
@@ -126,11 +125,12 @@ validate <- function(infected_years_file,
                      file_random_seeds = NULL,
                      use_soils = FALSE,
                      soil_starting_pest_file = "",
-                     start_with_soil_populations = FALSE) {
+                     start_with_soil_populations = FALSE,
+                     county_level_infection_data = FALSE) {
   config <- c()
   config$infected_years_file <- infected_years_file
-  config$infected_file <- infected_file
-  config$host_file <- host_file
+  config$infected_file_list <- infected_file_list
+  config$host_file_list <- host_file_list
   config$total_populations_file <- total_populations_file
   config$parameter_means <- parameter_means
   config$parameter_cov_matrix <- parameter_cov_matrix
@@ -153,9 +153,6 @@ validate <- function(infected_years_file,
   config$survival_rate_month <- survival_rate_month
   config$survival_rate_day <- survival_rate_day
   config$survival_rates_file <- survival_rates_file
-  config$mortality_on <- mortality_on
-  config$mortality_rate <- mortality_rate
-  config$mortality_time_lag <- mortality_time_lag
   config$management <- management
   config$treatment_dates <- treatment_dates
   config$treatments_file <- treatments_file
@@ -193,7 +190,7 @@ validate <- function(infected_years_file,
   # calibration.
   config$function_name <- "validate"
   config$failure <- NULL
-  config$exposed_file <- exposed_file
+  config$exposed_file_list <- exposed_file_list
   config$write_outputs <- write_outputs
   config$output_folder_path <- output_folder_path
   config$mortality_frequency <- mortality_frequency
@@ -214,6 +211,9 @@ validate <- function(infected_years_file,
   config$use_soils <- use_soils
   config$soil_starting_pest_file <- soil_starting_pest_file
   config$start_with_soil_populations <- start_with_soil_populations
+  config$county_level_infection_data <- county_level_infection_data
+  config$pest_host_table <- pest_host_table
+  config$competency_table <- competency_table
 
   config <- configuration(config)
 
@@ -225,7 +225,6 @@ validate <- function(infected_years_file,
       dir.exists(config$output_folder_path)) {
     write.csv(config$random_seeds, paste0(config$output_folder_path, "validation_random_seeds.csv"),
               row.names = FALSE)
-
   }
 
   i <- NULL
@@ -239,8 +238,17 @@ validate <- function(infected_years_file,
       .combine = rbind,
       .packages = c("terra", "PoPS", "foreach")
     ) %dopar% {
-      
-      config <- update_config(config)
+      set.seed(config$random_seed[[i]])
+      config <- draw_parameters(config) # draws parameter set for the run
+      config <- host_pool_setup(config)
+      while (any(config$total_hosts > config$total_populations, na.rm = TRUE) ||
+            any(config$total_exposed > config$total_populations, na.rm = TRUE) ||
+            any(config$total_infecteds > config$total_populations, na.rm = TRUE)) {
+        config <- host_pool_setup(config)
+      }
+      config$competency_table_list <- competency_table_list_creator(config$competency_table)
+      config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
+
       data <- pops_model(
         random_seed = config$random_seed[i],
         multiple_random_seeds = config$multiple_random_seeds,
@@ -251,21 +259,16 @@ validate <- function(infected_years_file,
         use_survival_rates = config$use_survival_rates,
         survival_rate_month = config$survival_rate_month,
         survival_rate_day = config$survival_rate_day,
-        infected = config$infected,
-        total_exposed = config$total_exposed,
-        exposed = config$exposed,
-        susceptible = config$susceptible,
+        host_pools = config$host_pools,
         total_populations = config$total_populations,
-        total_hosts = config$total_hosts,
+        competency_table = config$competency_table_list,
+        pest_host_table = config$pest_host_table_list,
         mortality_on = config$mortality_on,
-        mortality_tracker = config$mortality_tracker,
-        mortality = config$mortality,
         quarantine_areas = config$quarantine_areas,
         quarantine_directions = config$quarantine_directions,
         treatment_maps = config$treatment_maps,
         treatment_dates = config$treatment_dates,
         pesticide_duration = config$pesticide_duration,
-        resistant = config$resistant,
         use_movements = config$use_movements,
         movements = config$movements,
         movements_dates = config$movements_dates,
@@ -281,8 +284,6 @@ validate <- function(infected_years_file,
         spatial_indices = config$spatial_indices,
         season_month_start_end = config$season_month_start_end,
         soil_reservoirs = config$soil_reservoirs,
-        mortality_rate = config$mortality_rate,
-        mortality_time_lag = config$mortality_time_lag,
         start_date = config$start_date,
         end_date = config$end_date,
         treatment_method = config$treatment_method,
@@ -328,68 +329,15 @@ validate <- function(infected_years_file,
         dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
         use_soils = config$use_soils)
 
-
-      all_disagreement <-
-        foreach(
-          q = seq_len(length(data$infected)), .combine = rbind,
-          .packages = c("terra", "PoPS")
-        ) %do% {
-          # need to assign reference, comparison, and mask in inner loop since
-          # terra objects are pointers and pointers using %dopar%
-          comparison <- terra::rast(config$infected_file)[[1]]
-          reference <- comparison
-          mask <- comparison
-          terra::values(comparison) <- data$infected[[q]]
-          terra::values(reference) <- config$infection_years2[[q]]
-          terra::values(mask) <- config$mask_matrix
-          ad <-
-            quantity_allocation_disagreement(reference,
-                                             comparison,
-                                             use_configuration = config$use_configuration,
-                                             mask = mask,
-                                             use_distance = config$use_distance)
-          if (file.exists(config$point_file)) {
-            obs_data <- terra::vect(config$point_file)
-            obs_data <- terra::project(obs_data, comparison)
-            s <- extract(comparison, obs_data)
-            names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
-            s <- s[2]
-            obs_data <- cbind(obs_data, s)
-            ## calculate true positive, true negatives, false positives, false
-            ## negatives, and other statistics and add them to the data frame
-            ## for export
-            ad$points_true_positive <-
-              nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 > 0, ])
-            ad$points_false_negative <-
-              nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 == 0, ])
-            ad$points_false_positive <-
-              nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 > 0, ])
-            ad$points_true_negative <-
-              nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
-            ad$points_total_obs <-
-              ad$points_true_negative + ad$points_true_positive +
-              ad$points_false_negative + ad$points_false_positive
-            ad$points_accuracy <-
-              (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
-            ad$points_precision <-
-              ad$points_true_positive / (ad$points_true_positive + ad$points_false_positive)
-            ad$points_recall <-
-              ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
-            ad$points_specificiity <-
-              ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
-          }
-          ad$ouput <- q
-          ad
-        }
-
-      data.frame(all_disagreement)
+      all_disagreement <- calculate_all_stats(config, data)
+      all_disagreement
     }
 
   parallel::stopCluster(cl)
 
   output_list <- list()
-  for (j in 1:max(qa$ouput)) {
-    output_step <- qa[qa$ouput == j, ]
+  for (j in 1:max(qa$output)) {
+    output_step <- qa[qa$output == j, ]
     assign(paste("output_step_", j, sep = ""), output_step)
     output_list[[paste0("output_step_", j)]] <- output_step
     if (config$write_outputs %in% config$output_write_list) {
