@@ -259,7 +259,7 @@ time_checks <- function(end_date, start_date, time_step, output_frequency, outpu
     }
   }
 
-  if (time_step == "day" ) {
+  if (time_step == "day") {
     number_annual_time_steps <- 365
   } else if (time_step == "week") {
     number_annual_time_steps <- 52
@@ -272,8 +272,9 @@ time_checks <- function(end_date, start_date, time_step, output_frequency, outpu
       checks_passed, number_of_time_steps, number_of_years, number_annual_time_steps,
       number_of_outputs, output_frequency
     )
-    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years", "number_annual_time_steps",
-                     "number_of_outputs", "output_frequency")
+    names(outs) <-
+      c("checks_passed", "number_of_time_steps", "number_of_years", "number_annual_time_steps",
+        "number_of_outputs", "output_frequency")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)

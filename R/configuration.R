@@ -428,11 +428,11 @@ configuration <- function(config) {
     }
 
     config$weather_coefficient <- vector("list", config$weather_size)
-    for(i in seq_along(config$weather_coefficient)) {
+    for (i in seq_along(config$weather_coefficient)) {
       current_month <- i %% 12
       current_month <- ifelse(current_month == 0, 12, current_month)
 
-      if(current_month >= config$season_month_start && current_month
+      if (current_month >= config$season_month_start && current_month
           <= config$season_month_end) {
         config$weather_coefficient[[i]] <- terra::as.matrix(weather_coefficient_stack[[i]],
                                                      wide = TRUE)
@@ -453,11 +453,11 @@ configuration <- function(config) {
       }
 
       config$weather_coefficient_sd <- vector("list", config$weather_size)
-      for(i in seq_along(config$weather_coefficient_sd)) {
+      for (i in seq_along(config$weather_coefficient_sd)) {
         current_month <- i %% 12
         current_month <- ifelse(current_month == 0, 12, current_month)
 
-        if(current_month >= config$season_month_start && current_month
+        if (current_month >= config$season_month_start && current_month
            <= config$season_month_end) {
           config$weather_coefficient_sd[[i]] <- terra::as.matrix(weather_coefficient_sd_stack[[i]],
                                                        wide = TRUE)
@@ -827,7 +827,7 @@ configuration <- function(config) {
     config$mask <- mask
     config$mask_matrix <- terra::as.matrix(mask, wide = TRUE)
   }
-                                   
+
   # check that quarantine raster has the same crs, resolution, and extent
   if (config$use_quarantine) {
     if (config$function_name %in% aws_bucket_list) {
@@ -941,7 +941,6 @@ configuration <- function(config) {
         }
       }
       config$infection_years <- infection_years
-      config$infection_years2 <- infection_years2
     }
   }
 

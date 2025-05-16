@@ -1,5 +1,5 @@
 # These functions are designed to reduce code complexity and the need to copy
-# and past code across main functions
+# and paste code across main functions
 "%notin%" <- Negate("%in%")
 
 set_success_metrics <- function(config) {
@@ -13,48 +13,48 @@ set_success_metrics <- function(config) {
   config$use_rmse <- FALSE
   config$use_distance <- FALSE
   config$use_mcc <- FALSE
-  
+
   if (config$success_metric %in% quantity_list) {
     config$use_quantity <- TRUE
   }
-  
+
   if (config$success_metric %in% allocation_list) {
     config$use_allocation <- TRUE
   }
-  
+
   if (config$success_metric %in% configuration_list) {
     config$use_configuration <- TRUE
   }
-  
+
   if (config$success_metric %in% accurracy_list) {
     config$use_accuracy <- TRUE
   }
-  
+
   if (config$success_metric %in% precision_list) {
     config$use_precision <- TRUE
-    
+
   }
-  
+
   if (config$success_metric %in% recall_list) {
     config$use_recall <- TRUE
   }
-  
+
   if (config$success_metric %in% specificity_list) {
     config$use_specificity <- TRUE
   }
-  
+
   if (config$success_metric %in% rmse_list) {
     config$use_rmse <- TRUE
   }
-  
+
   if (config$success_metric %in% distance_list) {
     config$use_distance <- TRUE
   }
-  
+
   if (config$success_metric %in% mcc_list) {
     config$use_mcc <- TRUE
   }
-  
+
   return(config)
 }
 
@@ -68,7 +68,7 @@ create_cal_print <- function(config) {
     format(config$acceptance_rate, digits = 5),
     sep = " "
   )
-  
+
   if (config$use_quantity) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -79,7 +79,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_allocation) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -90,7 +90,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_configuration) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -101,7 +101,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_accuracy) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -112,7 +112,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_precision) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -122,9 +122,9 @@ create_cal_print <- function(config) {
       config$precision_threshold,
       sep = " "
     )
-    
+
   }
-  
+
   if (config$use_recall) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -135,7 +135,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_specificity) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -146,7 +146,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_rmse) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -157,7 +157,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_distance) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -168,7 +168,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   if (config$use_mcc) {
     config$acceptance_rate_info <- paste(
       config$acceptance_rate_info,
@@ -179,7 +179,7 @@ create_cal_print <- function(config) {
       sep = " "
     )
   }
-  
+
   config$acceptance_rate_info <- paste(config$acceptance_rate_info, "\n\n", sep = " ")
   return(config)
 }
@@ -213,11 +213,11 @@ draw_parameters <- function(config) {
                         parameters[8] >
                         min(config$rows_cols$num_cols, config$rows_cols$num_rows) *
                         config$res$ew_res])
-    
+
     if (is.null(config$number_of_draws)) {
       config$number_of_draws <- 1
     }
-    
+
     parameters[parameters[1] < 0 |
                  parameters[2] <= 0 |
                  parameters[3] > 1 |
@@ -241,7 +241,7 @@ draw_parameters <- function(config) {
   config$anthropogenic_kappa <- parameters[6]
   config$network_min_distance <- parameters[7]
   config$network_max_distance <- parameters[8]
-  
+
   return(config)
 }
 
@@ -257,7 +257,7 @@ create_random_seeds <- function(n) {
       overpopulation = sample(1:999999999, n, replace = FALSE),
       survival_rate = sample(1:999999999, n, replace = FALSE),
       soil = sample(1:999999999, n, replace = FALSE),
-      iteration = seq(1,n, by = 1)
+      iteration = seq(1, n, by = 1)
     )
 
   return(random_seeds)
@@ -297,7 +297,7 @@ combined_sd <- function(v1, v2, m1, m2, n1, n2) {
 generate_uid <- function() {
   letters_part <- sample(letters[1:26], 6, replace = TRUE)
   numbers_part <- sample(0:9, 6, replace = TRUE)
-  
+
   uid <- paste0(c(rbind(letters_part, numbers_part)), collapse = "")
   return(uid)
 }
@@ -312,18 +312,18 @@ format_output_date <- function(start_date,
     stop("Invalid start_date provided. Please use a valid date in 'YYYY-MM-DD' format.")
   }
   start_date <- as.Date(start_date)
-  
+
   # Function to increment the date based on a unit and multiplier
   advance_date <- function(date, unit, multiplier) {
     switch(
       unit,
       "year" = date + lubridate::years(multiplier),
-      "month" = date %m+% lubridate::months(multiplier),
+      "month" = date + months(multiplier),
       "week" = date + lubridate::weeks(multiplier),
       "day" = date + lubridate::days(multiplier)
     )
   }
-  
+
   # Determine the correct format and advance the date
   formatted_date <- if (output_frequency %in% c("year", "month")) {
     format(advance_date(start_date, output_frequency, multiplier),
@@ -355,14 +355,14 @@ format_output_date <- function(start_date,
   } else {
     stop("Invalid output_frequency or time_step value provided.")
   }
-  
+
   return(formatted_date)
 }
 
 # Helper function to update the configuration based on uncertainty settings
 update_config <- function(config) {
   config <- draw_parameters(config)  # Draws parameter set for the run
-  
+
   # Update infected and exposed based on uncertainty settings
   if (config$use_initial_condition_uncertainty) {
     config$infected <- matrix_norm_distribution(config$infected_mean, config$infected_sd)
@@ -374,7 +374,7 @@ update_config <- function(config) {
     config$exposed[[config$latency_period + 1]] <- exposed2
   }
   gc()
-  
+
   # Update host based on uncertainty settings
   if (config$use_host_uncertainty) {
     config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
@@ -382,23 +382,23 @@ update_config <- function(config) {
     config$host <- config$host_mean
   }
   gc()
-  
+
   # Update susceptible and total populations
   config$susceptible <- config$host - config$infected - exposed2
   config$susceptible[config$susceptible < 0] <- 0
-  
+
   config$total_hosts <- config$host
   config$total_exposed <- exposed2
-  
+
   # Update mortality tracker if mortality is on
   if (config$mortality_on) {
     mortality_tracker2 <- config$mortality_tracker
     mortality_tracker2[[length(mortality_tracker2)]] <- config$infected
     config$mortality_tracker <- mortality_tracker2
   }
-  
+
   config$host <- NULL
-  
+
   return(config)
 }
 
@@ -408,11 +408,11 @@ write_infected_rasters <- function(config, uid) {
     # Read the template raster
     r_template <- rast(config$infected_file)
     # Assign values to the raster
-    values(r_template) <- readRDS(file.path(config$output_folder_path,
-                                            paste0(uid, "_", i, ".rds")))$infected[[1]]
-    
+    terra::values(r_template) <- readRDS(file.path(config$output_folder_path,
+                                                   paste0(uid, "_", i, ".rds")))$infected[[1]]
+
     # Write the raster to disk with compression
-    writeRaster(
+    terra::writeRaster(
       r_template,
       filename = file.path(config$output_folder_path, paste0(uid, "_", i, ".tif")),
       overwrite = TRUE,
@@ -420,7 +420,7 @@ write_infected_rasters <- function(config, uid) {
       gdal = c("COMPRESS=ZSTD")
     )
     gc()
-    
+
     # Print a status message
     cat("Processed iteration",
         i,
@@ -438,21 +438,21 @@ update_config_paths <- function(config, root) {
   # Normalize the root directory
   root <- normalizePath(root, winslash = "/", mustWork = FALSE)
   target_dir <- basename(root)  # Extract the target directory name
-  
+
   # List of keys to update
   keys_to_update <- c(
-    "infected_file", "host_file", "total_populations_file", 
-    "temperature_coefficient_file", "precipitation_coefficient_file", 
-    "temperature_file", "survival_rates_file", "treatments_file", 
-    "movements_file", "quarantine_areas_file", "exposed_file", 
-    "network_filename", "temperature_coefficient_sd_file", 
+    "infected_file", "host_file", "total_populations_file",
+    "temperature_coefficient_file", "precipitation_coefficient_file",
+    "temperature_file", "survival_rates_file", "treatments_file",
+    "movements_file", "quarantine_areas_file", "exposed_file",
+    "network_filename", "temperature_coefficient_sd_file",
     "precipitation_coefficient_sd_file", "soil_starting_pest_file",
     "output_folder_path", "reference", "comparison", "ref", "comp"
   )
-  
+
   # Precompute the replacement pattern
   replace_pattern <- paste0(".*", target_dir)
-  
+
   # Update paths in place
   for (key in keys_to_update) {
     if (!is.null(config[[key]]) && is.character(config[[key]])) {
@@ -462,7 +462,7 @@ update_config_paths <- function(config, root) {
       }
     }
   }
-  
+
   return(config)
 }
 
@@ -784,4 +784,3 @@ calculate_all_stats <- function(config, data) {
   all_disagreement <- data.frame(all_disagreement)
   return(all_disagreement)
 }
-
