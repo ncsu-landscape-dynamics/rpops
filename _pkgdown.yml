@@ -27,9 +27,12 @@ reference:
     contents:
     - pops
     - pops_multirun
+    - pops_lite
   - title: "Internal data handlers"
     desc: "Functions for error checks and data handling for pops setup"
     contents:
     - configuration
     - pops_model
     - quantity_allocation_disagreement
+    - configuration_qad_lite
+    - quantity_allocation_disagreement_lite
