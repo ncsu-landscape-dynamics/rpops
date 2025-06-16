@@ -265,9 +265,9 @@ create_random_seeds <- function(n) {
 
 # creates a matrix from a matrix of mean values and a matrix of standard deviations. The two
 # matrices must be the same size.
-matrix_norm_distribution <- function(mean_matrix, sd_matrix) {
-  new_matrix <- matrix(round(rnorm(
-    length(mean_matrix), mean = mean_matrix[], sd = sd_matrix[]
+matrix_norm_distribution <- function(mean_matrix, sd_matrix, total_population_matrix) {
+  new_matrix <- matrix(round(truncnorm::rtruncnorm(
+    length(mean_matrix), a = 0, b = total_population_matrix, mean = mean_matrix[], sd = sd_matrix[]
   )),
   nrow = nrow(mean_matrix),
   ncol = ncol(mean_matrix))
