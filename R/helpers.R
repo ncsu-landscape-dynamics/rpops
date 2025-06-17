@@ -267,7 +267,7 @@ create_random_seeds <- function(n) {
 # matrices must be the same size.
 matrix_norm_distribution <- function(mean_matrix, sd_matrix, total_population_matrix) {
   new_matrix <- matrix(round(truncnorm::rtruncnorm(
-    length(mean_matrix), a = 0, b = total_population_matrix, mean = mean_matrix[], sd = sd_matrix[]
+    length(mean_matrix), a = 0, b = total_population_matrix[], mean = mean_matrix[], sd = sd_matrix[]
   )),
   nrow = nrow(mean_matrix),
   ncol = ncol(mean_matrix))
@@ -365,8 +365,10 @@ update_config <- function(config) {
 
   # Update infected and exposed based on uncertainty settings
   if (config$use_initial_condition_uncertainty) {
-    config$infected <- matrix_norm_distribution(config$infected_mean, config$infected_sd)
-    exposed2 <- matrix_norm_distribution(config$exposed_mean, config$exposed_sd)
+    config$infected <-
+      matrix_norm_distribution(config$infected_mean, config$infected_sd, config$total_populations)
+    exposed2 <-
+      matrix_norm_distribution(config$exposed_mean, config$exposed_sd, config$total_populations)
     config$exposed[[config$latency_period + 1]] <- exposed2
   } else {
     config$infected <- config$infected_mean
@@ -377,7 +379,8 @@ update_config <- function(config) {
 
   # Update host based on uncertainty settings
   if (config$use_host_uncertainty) {
-    config$host <- matrix_norm_distribution(config$host_mean, config$host_sd)
+    config$host <-
+      matrix_norm_distribution(config$host_mean, config$host_sd, config$total_populations)
   } else {
     config$host <- config$host_mean
   }
@@ -533,10 +536,12 @@ host_pool_setup <- function(config) {
 
     if (config$use_host_uncertainty) {
       host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
-                                       config$host_pool_host_sds[[i]])
+                                       config$host_pool_host_sds[[i]],
+                                       config$total_populations)
       while (any(host > config$total_populations, na.rm = TRUE)) {
         host <- matrix_norm_distribution(config$host_pool_host_means[[i]],
-                                         config$host_pool_host_sds[[i]])
+                                         config$host_pool_host_sds[[i]],
+                                         config$total_populations)
       }
       host_pool$total_host <- host
       total_hosts <- total_hosts + host
@@ -568,17 +573,21 @@ host_pool_setup <- function(config) {
       } else {
         infected <-
           matrix_norm_distribution(config$host_pool_infected_means[[i]],
-                                   config$host_pool_infected_sds[[i]])
+                                   config$host_pool_infected_sds[[i]],
+                                   config$total_populations)
         while (any(infected < 0)) {
           infected <-
             matrix_norm_distribution(config$host_pool_infected_means[[i]],
-                                     config$host_pool_infected_sds[[i]])
+                                     config$host_pool_infected_sds[[i]],
+                                     config$total_populations)
         }
         exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
-                                             config$host_pool_exposed_sds[[i]])
+                                             config$host_pool_exposed_sds[[i]],
+                                             config$total_populations)
         while (any(exposed2 < 0)) {
           exposed2 <- matrix_norm_distribution(config$host_pool_exposed_means[[i]],
-                                               config$host_pool_exposed_sds[[i]])
+                                               config$host_pool_exposed_sds[[i]],
+                                               config$total_populations)
         }
         exposed <- host_pool$exposed
         exposed[[config$latency_period + 1]] <- exposed2
