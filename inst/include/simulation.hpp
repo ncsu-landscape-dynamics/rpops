@@ -192,6 +192,7 @@ public:
         IntegerRaster empty;
         StandardHostPool hosts(
             model_type_,
+            bool(mortality_tracker_vector.size()),
             susceptible,
             exposed,
             0,
@@ -245,6 +246,7 @@ public:
         IntegerRaster empty;
         StandardHostPool hosts(
             model_type_,
+            bool(mortality_tracker_vector.size()),
             susceptible,
             exposed,
             0,
@@ -298,6 +300,7 @@ public:
         std::vector<IntegerRaster> empty_vector;
         StandardHostPool hosts{
             model_type_,
+            bool(mortality_tracker_vector.size()),
             empty,
             empty_vector,
             0,
@@ -366,6 +369,7 @@ public:
         IntegerRaster empty;
         StandardHostPool hosts{
             model_type_,
+            bool(mortality_tracker_vector.size()),
             susceptible,
             exposed,
             0,
@@ -413,6 +417,7 @@ public:
         std::vector<IntegerRaster> empty_vector;
         StandardHostPool host_pool{
             model_type_,
+            false,
             empty,
             empty_vector,
             0,
@@ -519,6 +524,7 @@ public:
         IntegerRaster empty;
         StandardHostPool host_pool{
             model_type_,
+            bool(mortality_tracker.size()),
             susceptible,
             exposed,
             0,
@@ -678,6 +684,7 @@ public:
         std::vector<IntegerRaster> empty_vector;
         StandardHostPool hosts{
             model_type_,
+            false,
             susceptible,
             empty_vector,
             0,
@@ -775,6 +782,7 @@ public:
         IntegerRaster empty;
         StandardHostPool host_pool{
             model_type_,
+            bool(mortality_tracker.size()),
             susceptible,
             exposed,
             latency_period_,

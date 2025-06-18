@@ -143,7 +143,7 @@ private:
         int e = 0;
         int w = width_ - 1;
         bool found = false;
-        for (auto indices : hosts.suitable_cells()) {
+        for (const auto& indices : hosts.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
             auto value = hosts.infected_at(i, j);

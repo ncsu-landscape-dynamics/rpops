@@ -26,6 +26,7 @@
 
 #include "scheduling.hpp"
 #include "utils.hpp"
+#include "model_type.hpp"
 
 #include <cmath>
 #include <vector>
@@ -217,6 +218,12 @@ public:
     double leaving_percentage{0};
     double leaving_scale_coefficient{1};
     double dispersers_to_soils_percentage{0};  ///< Ratio of dispersers going into soil
+
+    /** Get model type as ModelType enum value */
+    ModelType model_type_as_enum() const
+    {
+        return model_type_from_string(model_type);
+    }
 
     void create_schedules()
     {

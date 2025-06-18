@@ -27,7 +27,7 @@ unsigned sum_of_infected(
     const IntegerRaster& infected, const std::vector<std::vector<int>>& suitable_cells)
 {
     unsigned sum = 0;
-    for (auto indices : suitable_cells) {
+    for (const auto& indices : suitable_cells) {
         int i = indices[0];
         int j = indices[1];
         sum += infected(i, j);
@@ -46,7 +46,7 @@ double area_of_infected(
     const std::vector<std::vector<int>>& suitable_cells)
 {
     unsigned cells = 0;
-    for (auto indices : suitable_cells) {
+    for (const auto& indices : suitable_cells) {
         int i = indices[0];
         int j = indices[1];
         if (infected(i, j) > 0)

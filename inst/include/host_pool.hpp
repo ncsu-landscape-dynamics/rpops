@@ -85,10 +85,15 @@ public:
      * host infection over time. Expectation is that mortality tracker is of
      * length (1/mortality_rate + mortality_time_lag).
      *
+     * If *use_mortality* is set to false, the *mortality_tracker_vector* is not
+     * used or otherwise accessed, and any attempts to retrieve mortality information
+     * will provide empty results (but will not fail).
+     *
      * Host is added to the environment by the constructor. Afterwards, the environment
      * is not modified.
      *
      * @param model_type Type of the model (SI or SEI)
+     * @param use_mortality true if morality should be used
      * @param susceptible Raster of susceptible hosts
      * @param exposed Raster of exposed or infected hosts
      * @param latency_period Length of the latency period in steps
@@ -109,6 +114,7 @@ public:
      */
     HostPool(
         ModelType model_type,
+        bool use_mortality,
         IntegerRaster& susceptible,
         std::vector<IntegerRaster>& exposed,
         unsigned latency_period,
@@ -137,12 +143,49 @@ public:
           total_hosts_(total_hosts),
           environment_(environment),
           model_type_(model_type),
+          use_mortality_(use_mortality),
           dispersers_stochasticity_(dispersers_stochasticity),
           reproductive_rate_(reproductive_rate),
           establishment_stochasticity_(establishment_stochasticity),
           deterministic_establishment_probability_(establishment_probability),
           rows_(rows),
           cols_(cols),
+          suitable_cells_(suitable_cells)
+    {
+        environment.add_host(this);
+    }
+
+    /** Constructor overload which takes Config instead of the individual values. */
+    HostPool(
+        const Config& config,
+        IntegerRaster& susceptible,
+        std::vector<IntegerRaster>& exposed,
+        IntegerRaster& infected,
+        IntegerRaster& total_exposed,
+        IntegerRaster& resistant,
+        std::vector<IntegerRaster>& mortality_tracker_vector,
+        IntegerRaster& died,
+        IntegerRaster& total_hosts,
+        Environment& environment,
+        std::vector<std::vector<int>>& suitable_cells)
+        : susceptible_(susceptible),
+          infected_(infected),
+          exposed_(exposed),
+          latency_period_(config.latency_period_steps),
+          total_exposed_(total_exposed),
+          resistant_(resistant),
+          mortality_tracker_vector_(mortality_tracker_vector),
+          died_(died),
+          total_hosts_(total_hosts),
+          environment_(environment),
+          model_type_(config.model_type_as_enum()),
+          use_mortality_(config.use_mortality),
+          dispersers_stochasticity_(config.generate_stochasticity),
+          reproductive_rate_(config.reproductive_rate),
+          establishment_stochasticity_(config.establishment_stochasticity),
+          deterministic_establishment_probability_(config.establishment_probability),
+          rows_(config.rows),
+          cols_(config.cols),
           suitable_cells_(suitable_cells)
     {
         environment.add_host(this);
@@ -266,7 +309,8 @@ public:
         susceptible_(row, col) -= 1;
         if (model_type_ == ModelType::SusceptibleInfected) {
             infected_(row, col) += 1;
-            mortality_tracker_vector_.back()(row, col) += 1;
+            if (use_mortality_)
+                mortality_tracker_vector_.back()(row, col) += 1;
         }
         else if (model_type_ == ModelType::SusceptibleExposedInfected) {
             exposed_.back()(row, col) += 1;
@@ -472,7 +516,7 @@ public:
                 index += 1;
             }
         }
-        if (infected_moved > 0) {
+        if (use_mortality_ && infected_moved > 0) {
             std::vector<int> mortality_draw = draw_n_from_cohorts(
                 mortality_tracker_vector_,
                 infected_moved,
@@ -517,7 +561,6 @@ public:
      * @brief Completely remove any hosts
      *
      * Removes hosts completely (as opposed to moving them to another pool).
-     * If mortality is not active, the *mortality* parameter is ignored.
      *
      * @param row Row index of the cell
      * @param col Column index of the cell
@@ -525,6 +568,9 @@ public:
      * @param exposed Number of exposed hosts to remove by cohort.
      * @param infected Number of infected hosts to remove.
      * @param mortality Number of infected hosts in each mortality cohort.
+     *
+     * @note Counts are doubles, so that handling of floating point values is managed
+     * here in the same way as in the original treatment code.
      *
      * @note This does not remove resistant just like the original implementation in
      * treatments.
@@ -556,52 +602,49 @@ public:
         // Possibly reuse in the I->S removal.
         if (infected <= 0)
             return;
-        if (!mortality_tracker_vector_.size()) {
-            infected_(row, col) -= infected;
-            reset_total_host(row, col);
-            return;
-        }
-        if (mortality_tracker_vector_.size() != mortality.size()) {
-            throw std::invalid_argument(
-                "mortality is not the same size as the internal mortality tracker ("
-                + std::to_string(mortality_tracker_vector_.size())
-                + " != " + std::to_string(mortality.size()) + ") for cell ("
-                + std::to_string(row) + ", " + std::to_string(col) + ")");
-        }
-
-        int mortality_total = 0;
-        for (size_t i = 0; i < mortality_tracker_vector_.size(); ++i) {
-            if (mortality_tracker_vector_[i](row, col) < mortality[i]) {
+        if (use_mortality_) {
+            if (mortality_tracker_vector_.size() != mortality.size()) {
                 throw std::invalid_argument(
-                    "Mortality value [" + std::to_string(i) + "] is too high ("
-                    + std::to_string(mortality[i]) + " > "
-                    + std::to_string(mortality_tracker_vector_[i](row, col))
-                    + ") for cell (" + std::to_string(row) + ", " + std::to_string(col)
-                    + ")");
+                    "mortality is not the same size as the internal mortality tracker ("
+                    + std::to_string(mortality_tracker_vector_.size())
+                    + " != " + std::to_string(mortality.size()) + ") for cell ("
+                    + std::to_string(row) + ", " + std::to_string(col) + ")");
             }
-            mortality_tracker_vector_[i](row, col) =
-                mortality_tracker_vector_[i](row, col) - mortality[i];
-            mortality_total += mortality[i];
-        }
-        // These two values will only match if we actually compute one from another
-        // and once we don't need to keep the exact same double to int results for
-        // tests. First condition always fails the tests. The second one may potentially
-        // fail.
-        if (infected != mortality_total) {
-            throw std::invalid_argument(
-                "Total of removed mortality values differs from removed infected "
-                "count ("
-                + std::to_string(mortality_total) + " != " + std::to_string(infected)
-                + ") for cell (" + std::to_string(row) + ", " + std::to_string(col)
-                + ")");
-        }
-        if (infected_(row, col) < mortality_total) {
-            throw std::invalid_argument(
-                "Total of removed mortality values is higher than current number "
-                "of infected hosts ("
-                + std::to_string(mortality_total) + " > " + std::to_string(infected)
-                + ") for cell (" + std::to_string(row) + ", " + std::to_string(col)
-                + ")");
+
+            double mortality_total = 0;
+            for (size_t i = 0; i < mortality.size(); ++i) {
+                if (mortality_tracker_vector_[i](row, col) < mortality[i]) {
+                    throw std::invalid_argument(
+                        "Mortality value [" + std::to_string(i) + "] is too high ("
+                        + std::to_string(mortality[i]) + " > "
+                        + std::to_string(mortality_tracker_vector_[i](row, col))
+                        + ") for cell (" + std::to_string(row) + ", "
+                        + std::to_string(col) + ")");
+                }
+                mortality_tracker_vector_[i](row, col) =
+                    mortality_tracker_vector_[i](row, col) - mortality[i];
+                mortality_total += mortality[i];
+            }
+            // These two values will only match if we actually compute one from another
+            // and once we don't need to keep the exact same double to int results for
+            // tests. First condition always fails the tests. The second one may
+            // potentially fail.
+            if (false && infected != mortality_total) {
+                throw std::invalid_argument(
+                    "Total of removed mortality values differs from removed infected "
+                    "count ("
+                    + std::to_string(mortality_total)
+                    + " != " + std::to_string(infected) + " for cell ("
+                    + std::to_string(row) + ", " + std::to_string(col) + ")");
+            }
+            if (false && infected_(row, col) < mortality_total) {
+                throw std::invalid_argument(
+                    "Total of removed mortality values is higher than current number "
+                    "of infected hosts for cell ("
+                    + std::to_string(row) + ", " + std::to_string(col)
+                    + ") is too high (" + std::to_string(mortality_total) + " > "
+                    + std::to_string(infected) + ")");
+            }
         }
         infected_(row, col) -= infected;
         reset_total_host(row, col);
@@ -626,13 +669,15 @@ public:
         // remove percentage of infestation/infection in the infected class
         infected_(row, col) -= count;
         // remove the removed infected from mortality cohorts
-        if (count > 0) {
-            std::vector<int> mortality_draw = draw_n_from_cohorts(
-                mortality_tracker_vector_, count, row, col, generator);
-            int index = 0;
-            for (auto& raster : mortality_tracker_vector_) {
-                raster(row, col) -= mortality_draw[index];
-                index += 1;
+        if (use_mortality_) {
+            if (count > 0) {
+                std::vector<int> mortality_draw = draw_n_from_cohorts(
+                    mortality_tracker_vector_, count, row, col, generator);
+                int index = 0;
+                for (auto& raster : mortality_tracker_vector_) {
+                    raster(row, col) -= mortality_draw[index];
+                    index += 1;
+                }
             }
         }
         // move infested/infected host back to susceptible pool
@@ -705,8 +750,6 @@ public:
     /**
      * @brief Make hosts resistant in a given cell
      *
-     * If mortality is not active, the *mortality* parameter is ignored.
-     *
      * @param row Row index of the cell
      * @param col Column index of the cell
      * @param susceptible Number of susceptible hosts to make resistant
@@ -753,38 +796,35 @@ public:
             total_resistant += exposed[i];
         }
         infected_(row, col) -= infected;
+        if (use_mortality_) {
+            if (mortality_tracker_vector_.size() != mortality.size()) {
+                throw std::invalid_argument(
+                    "mortality is not the same size as the internal mortality tracker ("
+                    + std::to_string(mortality_tracker_vector_.size())
+                    + " != " + std::to_string(mortality.size()) + ") for cell ("
+                    + std::to_string(row) + ", " + std::to_string(col) + ")");
+            }
+            int mortality_total = 0;
+            // no simple zip in C++, falling back to indices
+            for (size_t i = 0; i < mortality.size(); ++i) {
+                mortality_tracker_vector_[i](row, col) -= mortality[i];
+                mortality_total += mortality[i];
+            }
+            // These two values will only match if we actually compute one from another
+            // and once we don't need to keep the exact same double to int results for
+            // tests. First condition always fails the tests. The second one may
+            // potentially fail.
+            if (false && infected != mortality_total) {
+                throw std::invalid_argument(
+                    "Total of mortality values differs from formerly infected, now resistant "
+                    "count ("
+                    + std::to_string(mortality_total)
+                    + " != " + std::to_string(infected) + " for cell ("
+                    + std::to_string(row) + ", " + std::to_string(col) + "))");
+            }
+        }
         total_resistant += infected;
         resistant_(row, col) += total_resistant;
-        if (!mortality_tracker_vector_.size()) {
-            reset_total_host(row, col);
-            return;
-        }
-        if (mortality_tracker_vector_.size() != mortality.size()) {
-            throw std::invalid_argument(
-                "mortality is not the same size as the internal mortality tracker ("
-                + std::to_string(mortality_tracker_vector_.size())
-                + " != " + std::to_string(mortality.size()) + ") for cell ("
-                + std::to_string(row) + ", " + std::to_string(col) + ")");
-        }
-        int mortality_total = 0;
-        // no simple zip in C++, falling back to indices
-        for (size_t i = 0; i < mortality_tracker_vector_.size(); ++i) {
-            mortality_tracker_vector_[i](row, col) -= mortality[i];
-            mortality_total += mortality[i];
-        }
-        // These two values will only match if we actually compute one from another
-        // and once we don't need to keep the exact same double to int results for
-        // tests. First condition always fails the tests. The second one may potentially
-        // fail.
-        if (false && infected != mortality_total) {
-            throw std::invalid_argument(
-                "Total of mortality values differs from formerly infected, now resistant "
-                "count ("
-                + std::to_string(mortality_total) + " != " + std::to_string(infected)
-                + " for cell (" + std::to_string(row) + ", " + std::to_string(col)
-                + "))");
-        }
-        reset_total_host(row, col);
     }
 
     /**
@@ -824,7 +864,7 @@ public:
     void apply_mortality_at(
         RasterIndex row, RasterIndex col, double mortality_rate, int mortality_time_lag)
     {
-        if (mortality_rate <= 0)
+        if (mortality_rate <= 0 || !use_mortality_)
             return;
         int max_index = mortality_tracker_vector_.size() - mortality_time_lag - 1;
         for (int index = 0; index <= max_index; index++) {
@@ -900,6 +940,8 @@ public:
      */
     void step_forward_mortality()
     {
+        if (!use_mortality_)
+            return;
         rotate_left_by_one(mortality_tracker_vector_);
     }
 
@@ -987,9 +1029,6 @@ public:
     /**
      * @brief Get infected hosts in each mortality cohort at a given cell
      *
-     * If mortality is not active, it returns number of all infected individuals
-     * in the first and only item of the vector.
-     *
      * @param row Row index of the cell
      * @param col Column index of the cell
      *
@@ -998,15 +1037,11 @@ public:
     std::vector<int> mortality_by_group_at(RasterIndex row, RasterIndex col) const
     {
         std::vector<int> all;
-
-        if (!mortality_tracker_vector_.size()) {
-            all.push_back(infected_at(row, col));
-            return all;
+        if (use_mortality_) {
+            all.reserve(mortality_tracker_vector_.size());
+            for (const auto& raster : mortality_tracker_vector_)
+                all.push_back(raster(row, col));
         }
-
-        all.reserve(mortality_tracker_vector_.size());
-        for (const auto& raster : mortality_tracker_vector_)
-            all.push_back(raster(row, col));
         return all;
     }
 
@@ -1096,7 +1131,8 @@ public:
                 auto& oldest = exposed_.front();
                 // Move hosts to infected raster
                 infected_ += oldest;
-                mortality_tracker_vector_.back() += oldest;
+                if (use_mortality_)
+                    mortality_tracker_vector_.back() += oldest;
                 total_exposed_ += (oldest * (-1));
                 // Reset the raster
                 // (hosts moved from the raster)
@@ -1179,6 +1215,7 @@ private:
     const Environment& environment_;
 
     ModelType model_type_;
+    bool use_mortality_{false};
 
     bool dispersers_stochasticity_{false};
     double reproductive_rate_{0};

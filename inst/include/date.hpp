@@ -52,17 +52,17 @@ public:
     inline void add_days(unsigned n);
     inline void subtract_day();
     inline void subtract_days(unsigned n);
-    inline Date get_year_end();
-    inline Date get_next_year_end();
-    inline Date get_last_day_of_week();
-    inline Date get_last_day_of_month();
-    inline bool is_last_week_of_year();
-    inline bool is_last_month_of_year();
-    inline bool is_last_day_of_year();
-    inline bool is_last_day_of_month();
-    inline bool is_last_week_of_month();
-    inline bool is_leap_year();
-    inline std::string to_string();
+    inline Date get_year_end() const;
+    inline Date get_next_year_end() const;
+    inline Date get_last_day_of_week() const;
+    inline Date get_last_day_of_month() const;
+    inline bool is_last_week_of_year() const;
+    inline bool is_last_month_of_year() const;
+    inline bool is_last_day_of_year() const;
+    inline bool is_last_day_of_month() const;
+    inline bool is_last_week_of_month() const;
+    inline bool is_leap_year() const;
+    inline std::string to_string() const;
     int month() const
     {
         return month_;
@@ -75,7 +75,7 @@ public:
     {
         return day_;
     }
-    inline int weeks_from_date(Date start);
+    inline int weeks_from_date(Date start) const;
     inline friend std::ostream& operator<<(std::ostream& os, const Date& d);
     inline friend bool operator>(const Date& d1, const Date& d2);
     inline friend bool operator>=(const Date& d1, const Date& d2);
@@ -113,7 +113,7 @@ std::ostream& operator<<(std::ostream& os, const Date& d)
     return os;
 }
 
-Date Date::get_year_end()
+Date Date::get_year_end() const
 {
     return Date(year_, 12, 31);
 }
@@ -123,7 +123,7 @@ Date Date::get_year_end()
  * Advances date by week and subtracts 1 day to work
  * correctly at the end of the year.
  */
-Date Date::get_last_day_of_week()
+Date Date::get_last_day_of_week() const
 {
     Date d = Date(*this);
     d.increased_by_week();
@@ -142,35 +142,35 @@ Date Date::get_last_day_of_week()
 /*!
  * Compute the last day of a month.
  */
-Date Date::get_last_day_of_month()
+Date Date::get_last_day_of_month() const
 {
     if (this->is_leap_year())
         return Date(year_, month_, day_in_month[1][month_]);
     return Date(year_, month_, day_in_month[0][month_]);
 }
 
-bool Date::is_last_week_of_year()
+bool Date::is_last_week_of_year() const
 {
     if (month_ == 12 && (day_ + 9) > 31)
         return true;
     return false;
 }
 
-bool Date::is_last_month_of_year()
+bool Date::is_last_month_of_year() const
 {
     if (month_ == 12)
         return true;
     return false;
 }
 
-bool Date::is_last_day_of_year()
+bool Date::is_last_day_of_year() const
 {
     if (month_ == 12 && day_ == 31)
         return true;
     return false;
 }
 
-bool Date::is_last_week_of_month()
+bool Date::is_last_week_of_month() const
 {
     if (this->is_leap_year()) {
         if ((day_ + 7) >= day_in_month[1][month_])
@@ -184,7 +184,7 @@ bool Date::is_last_week_of_month()
     }
 }
 
-bool Date::is_last_day_of_month()
+bool Date::is_last_day_of_month() const
 {
     if (this->is_leap_year()) {
         if (day_ == day_in_month[1][month_])
@@ -198,7 +198,7 @@ bool Date::is_last_day_of_month()
     }
 }
 
-Date Date::get_next_year_end()
+Date Date::get_next_year_end() const
 {
     if (month_ == 1)
         return Date(year_, 12, 31);
@@ -206,7 +206,7 @@ Date Date::get_next_year_end()
         return Date(year_ + 1, 12, 31);
 }
 
-bool Date::is_leap_year()
+bool Date::is_leap_year() const
 {
     if (year_ % 4 == 0 && (year_ % 100 != 0 || year_ % 400 == 0))
         return true;
@@ -434,7 +434,7 @@ void Date::subtract_days(unsigned n)
  * \param start date to start from
  * \return Number of weeks
  */
-int Date::weeks_from_date(Date start)
+int Date::weeks_from_date(Date start) const
 {
     int week = 0;
     while (start <= *this) {
@@ -451,7 +451,7 @@ int Date::weeks_from_date(Date start)
  *
  * \return current date as a string
  */
-std::string Date::to_string()
+std::string Date::to_string() const
 {
     std::string date = std::to_string(year_) + "-";
     if (month_ < 10) {

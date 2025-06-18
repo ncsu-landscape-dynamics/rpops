@@ -125,15 +125,15 @@ public:
     }
 
     // returning double allows identical results with the previous version
-    int get_treated(int i, int j, int count)
+    double get_treated(int i, int j, int count)
     {
         return get_treated(i, j, count, this->application_);
     }
 
-    int get_treated(int i, int j, int count, TreatmentApplication application)
+    double get_treated(int i, int j, int count, TreatmentApplication application)
     {
         if (application == TreatmentApplication::Ratio) {
-            return std::lround(count * this->map_(i, j));
+            return count * this->map_(i, j);
         }
         else if (application == TreatmentApplication::AllInfectedInCell) {
             return static_cast<bool>(this->map_(i, j)) ? count : 0;
@@ -173,21 +173,20 @@ public:
         for (const auto& indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            int remove_susceptible = this->get_treated(
-                i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio);
-            // Treated infected are computed as a sum of treated in mortality groups.
-            int remove_infected = 0;
+            int remove_susceptible = static_cast<int>(std::ceil(this->get_treated(
+                i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio)));
+            int remove_infected = static_cast<int>(
+                std::ceil(this->get_treated(i, j, host_pool.infected_at(i, j))));
             std::vector<int> remove_mortality;
             for (int count : host_pool.mortality_by_group_at(i, j)) {
-                int remove = this->get_treated(i, j, count);
-                remove_mortality.push_back(remove);
-                remove_infected += remove;
+                remove_mortality.push_back(
+                    static_cast<int>(std::ceil(this->get_treated(i, j, count))));
             }
-            // Will need to use infected directly if not mortality.
 
             std::vector<int> remove_exposed;
             for (int count : host_pool.exposed_by_group_at(i, j)) {
-                remove_exposed.push_back(this->get_treated(i, j, count));
+                remove_exposed.push_back(
+                    static_cast<int>(std::ceil(this->get_treated(i, j, count))));
             }
             host_pool.completely_remove_hosts_at(
                 i,
@@ -241,19 +240,26 @@ public:
         for (const auto& indices : host_pool.suitable_cells()) {
             int i = indices[0];
             int j = indices[1];
-            int susceptible_resistant = this->get_treated(
-                i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio);
+            // Given how the original code was written (everything was first converted
+            // to ints and subtractions happened only afterwards), this needs ints,
+            // not doubles to pass the r.pops.spread test (unlike the other code which
+            // did substractions before converting to ints), so the conversion to ints
+            // happened only later. Now get_treated returns double and floor or ceil is
+            // applied to the result to get the same results as before.
+            int susceptible_resistant = static_cast<int>(std::floor(this->get_treated(
+                i, j, host_pool.susceptible_at(i, j), TreatmentApplication::Ratio)));
             std::vector<int> resistant_exposed_list;
             for (const auto& number : host_pool.exposed_by_group_at(i, j)) {
-                resistant_exposed_list.push_back(this->get_treated(i, j, number));
+                resistant_exposed_list.push_back(
+                    static_cast<int>(std::floor(this->get_treated(i, j, number))));
             }
-            int infected = 0;
             std::vector<int> resistant_mortality_list;
             for (const auto& number : host_pool.mortality_by_group_at(i, j)) {
-                int remove = this->get_treated(i, j, number);
-                resistant_mortality_list.push_back(remove);
-                infected += remove;
+                resistant_mortality_list.push_back(
+                    static_cast<int>(std::floor(this->get_treated(i, j, number))));
             }
+            int infected = static_cast<int>(
+                std::floor(this->get_treated(i, j, host_pool.infected_at(i, j))));
             host_pool.make_resistant_at(
                 i,
                 j,

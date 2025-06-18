@@ -484,7 +484,7 @@ public:
     result_type operator()()
     {
         if (mutli_) {
-            std::runtime_error(
+            throw std::runtime_error(
                 "RandomNumberGeneratorProvider used as a single generator "
                 "but it is set to provide multiple isolated generators");
         }
@@ -495,7 +495,7 @@ public:
     void discard(unsigned long long n)
     {
         if (mutli_) {
-            std::runtime_error(
+            throw std::runtime_error(
                 "RandomNumberGeneratorProvider used as a single generator "
                 "but it is set to provide multiple isolated generators");
         }
