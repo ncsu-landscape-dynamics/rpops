@@ -67,7 +67,7 @@ public:
      */
     void set_pest_host_table(const PestHostTable<HostPool>& table)
     {
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             host_pool->set_pest_host_table(table);
         }
     }
@@ -81,7 +81,7 @@ public:
      */
     void set_competency_table(const CompetencyTable<HostPool>& table)
     {
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             host_pool->set_competency_table(table);
         }
     }
@@ -192,7 +192,7 @@ public:
     int total_hosts_at(RasterIndex row, RasterIndex col) const
     {
         int sum = 0;
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             sum += host_pool->total_hosts_at(row, col);
         }
         return sum;
@@ -209,7 +209,7 @@ public:
     int infected_at(RasterIndex row, RasterIndex col) const
     {
         int infected = 0;
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             infected += host_pool->infected_at(row, col);
         }
         return infected;
@@ -221,7 +221,7 @@ public:
     int dispersers_from(RasterIndex row, RasterIndex col, Generator& generator) const
     {
         int sum{0};
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             sum += host_pool->dispersers_from(row, col, generator);
         }
         return sum;
@@ -248,7 +248,7 @@ public:
     {
         std::vector<int> infected;
         int index = 0;
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             infected.insert(infected.end(), host_pool->infected_at(row, col), index);
             index++;
         }
@@ -291,7 +291,7 @@ public:
     {
         std::vector<int> susceptible;
         int index = 0;
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             susceptible.insert(
                 susceptible.end(), host_pool->susceptible_at(row, col), index);
             index++;
@@ -339,7 +339,7 @@ public:
     {
         std::vector<double> suitabilities;
         double total_suitability_score = 0;
-        for (auto& host_pool : host_pools_) {
+        for (const auto& host_pool : host_pools_) {
             // The suitability accounts for weather and, importantly, number of
             // susceptible hosts, so host pool without available hosts in a given cell
             // is less likely to be selected over a host pool with available hosts
@@ -449,7 +449,7 @@ private:
         Generator& generator)
     {
         if (!hosts.size()) {
-            std::invalid_argument("List of hosts is empty in multi host pool");
+            throw std::invalid_argument("List of hosts is empty in multi host pool");
         }
         if (hosts.size() == 1) {
             return hosts[0];

@@ -227,10 +227,9 @@ public:
         std::vector<std::vector<int>>& suitable_cells)
     {
         StandardSingleHostPool host_pool(
-            model_type_from_string(config_.model_type),
+            config_,
             susceptible,
             exposed,
-            config_.latency_period_steps,
             infected,
             total_exposed,
             resistant,
@@ -238,12 +237,6 @@ public:
             died,
             total_hosts,
             environment_,
-            config_.generate_stochasticity,
-            config_.reproductive_rate,
-            config_.establishment_stochasticity,
-            config_.establishment_probability,
-            config_.rows,
-            config_.cols,
             suitable_cells);
         std::vector<StandardSingleHostPool*> host_pools = {&host_pool};
         StandardMultiHostPool multi_host_pool(host_pools, config_);

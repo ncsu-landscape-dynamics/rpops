@@ -141,7 +141,7 @@ public:
     int total_at(RasterIndex row, RasterIndex col) const
     {
         int total = 0;
-        for (auto& raster : *rasters_) {
+        for (const auto& raster : *rasters_) {
             total += raster(row, col);
         }
         return total;

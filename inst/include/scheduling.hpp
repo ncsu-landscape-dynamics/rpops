@@ -40,11 +40,11 @@ class Step
 public:
     Step(Date start_date, Date end_date) : start_date_(start_date), end_date_(end_date)
     {}
-    inline Date start_date() const
+    inline const Date& start_date() const
     {
         return start_date_;
     }
-    inline Date end_date() const
+    inline const Date& end_date() const
     {
         return end_date_;
     }
@@ -179,7 +179,7 @@ public:
     {
         std::vector<bool> schedule;
         schedule.reserve(num_steps);
-        for (Step step : steps) {
+        for (const Step& step : steps) {
             if (season.month_in_season(step.start_date().month())
                 || season.month_in_season(step.end_date().month()))
                 schedule.push_back(true);
@@ -204,7 +204,7 @@ public:
     {
         std::vector<bool> schedule;
         schedule.reserve(num_steps);
-        for (Step step : steps) {
+        for (const Step& step : steps) {
             Date st = step.start_date();
             Date end = step.end_date();
             Date test(st.year(), month, day);
@@ -225,7 +225,7 @@ public:
     {
         std::vector<bool> schedule;
         schedule.reserve(num_steps);
-        for (Step step : steps) {
+        for (const Step& step : steps) {
             if (step.end_date().is_last_day_of_year())
                 schedule.push_back(true);
             else
@@ -279,7 +279,7 @@ public:
     {
         std::vector<bool> schedule;
         schedule.reserve(num_steps);
-        for (Step step : steps) {
+        for (const Step& step : steps) {
             Date st = step.start_date();
             Date end = step.end_date();
             if (st.month() != end.month() || end.is_last_day_of_month())
@@ -338,7 +338,7 @@ public:
      * @brief Prints schedule for debugging purposes.
      * @param schedule vector of bools to print along the steps
      */
-    void debug_schedule(std::vector<bool>& schedule) const
+    void debug_schedule(const std::vector<bool>& schedule) const
     {
         for (unsigned i = 0; i < num_steps; i++)
             std::cout << steps[i] << ": " << (schedule.at(i) ? "true" : "false")

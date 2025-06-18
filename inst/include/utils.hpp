@@ -135,7 +135,7 @@ std::vector<int> draw_n_from_v(std::vector<int> v, unsigned n, Generator& genera
  */
 template<typename Generator, typename IntegerRaster, typename RasterIndex = int>
 std::vector<int> draw_n_from_cohorts(
-    std::vector<IntegerRaster>& cohorts,
+    const std::vector<IntegerRaster>& cohorts,
     int n,
     RasterIndex row,
     RasterIndex col,
@@ -143,7 +143,7 @@ std::vector<int> draw_n_from_cohorts(
 {
     std::vector<int> categories;
     unsigned index = 0;
-    for (auto& raster : cohorts) {
+    for (const auto& raster : cohorts) {
         categories.insert(categories.end(), raster(row, col), index);
         index += 1;
     }
