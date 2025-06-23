@@ -48,7 +48,8 @@ typedef std::map<Direction, bool> Directions;
 Directions directions_from_string(const std::string& text, char delimiter = ',')
 {
     Directions directions;
-    for (auto& direction : {Direction::N, Direction::E, Direction::S, Direction::W})
+    for (const auto& direction :
+         {Direction::N, Direction::E, Direction::S, Direction::W})
         directions[direction] = text.empty() ? true : false;
 
     if (text.empty())

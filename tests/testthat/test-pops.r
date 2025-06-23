@@ -3683,7 +3683,7 @@ test_that("Using multiple hosts with uncertainty works as expected", {
          end_date = end_date,
          use_host_uncertainty = TRUE)
 
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1])[[1]], wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])

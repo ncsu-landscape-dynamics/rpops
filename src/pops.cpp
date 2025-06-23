@@ -228,7 +228,6 @@ List pops_model_cpp(
 
     config.create_schedules();
 
-    ModelType mt = model_type_from_string(config.model_type);
     using PoPSModel = Model<IntegerMatrix, NumericMatrix, int>;
 
     Treatments<PoPSModel::StandardSingleHostPool, NumericMatrix> treatments(config.scheduler());
@@ -294,10 +293,9 @@ List pops_model_cpp(
     }
     for (unsigned i = 0; i < host_pools.size(); i++) {
       host_pool_vector.emplace_back(new PoPSModel::StandardSingleHostPool(
-          mt,
+          config,
           input_host_pool.susceptible[i],
           input_host_pool.exposed[i],
-          config.latency_period_steps,
           input_host_pool.infected[i],
           input_host_pool.total_exposed[i],
           input_host_pool.resistant[i],
@@ -305,12 +303,6 @@ List pops_model_cpp(
           input_host_pool.mortality[i],
           input_host_pool.total_hosts[i],
           model.environment(),
-          config.generate_stochasticity,
-          config.reproductive_rate,
-          config.establishment_stochasticity,
-          config.establishment_probability,
-          config.rows,
-          config.cols,
           spatial_indices));
 
       host_pool_vector_plain.push_back(host_pool_vector[i].get());
