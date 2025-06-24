@@ -914,8 +914,8 @@ configuration <- function(config) {
     # Load observed data on occurrence
 
     if (config$county_level_infection_data) {
-      infection_years <- terra::vect(config$infected_years_file)
-      config$num_layers_infected_years <- length(names(infection_years))
+      config$infection_years <- terra::vect(config$infected_years_file)
+      config$num_layers_infected_years <- length(names(config$infection_years))
       if (config$num_layers_infected_years < config$number_of_outputs) {
         config$failure <-
           infection_years_length_error(config$num_layers_infected_years,
@@ -924,8 +924,8 @@ configuration <- function(config) {
       }
     } else {
       config$infection_years <- terra::rast(config$infected_years_file)
-      config$infection_years[] <- as.integer(infection_years[])
-      config$num_layers_infected_years <- terra::nlyr(infection_years)
+      config$infection_years[] <- as.integer(config$infection_years[])
+      config$num_layers_infected_years <- terra::nlyr(config$infection_years)
 
       if (config$num_layers_infected_years < config$number_of_outputs) {
         config$failure <-
@@ -934,13 +934,12 @@ configuration <- function(config) {
         return(config)
       }
 
-      config$infection_years2 <- list(terra::as.matrix(infection_years[[1]], wide = TRUE))
+      config$infection_years2 <- list(terra::as.matrix(config$infection_years[[1]], wide = TRUE))
       if (terra::nlyr(config$infection_years) > 1) {
         for (i in 2:terra::nlyr(config$infection_years)) {
-          config$infection_years2[[i]] <- terra::as.matrix(infection_years[[i]], wide = TRUE)
+          config$infection_years2[[i]] <- terra::as.matrix(config$infection_years[[i]], wide = TRUE)
         }
       }
-      config$infection_years <- infection_years
     }
   }
 

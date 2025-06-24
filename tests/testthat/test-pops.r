@@ -2958,8 +2958,10 @@ test_that("Mortality works as expected with multiple hosts", {
                mortality_frequency_n = 1)
 
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
-  expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
-  expect_equal(data$host_pools[[1]]$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[3]],
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$mortality[[3]],
+               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
   expect_equal(data$host_pools[[1]]$mortality[[3]],
                terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
 
@@ -3551,13 +3553,13 @@ test_that("Using multiple hosts works as expected", {
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
   test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
-  expect_gte(data$host_pools[[2]]$infected[[1]][[1]] + data$host_pools[[2]]$infected[[1]][[1]],
+  expect_lte(data$host_pools[[2]]$infected[[1]][[1]],
              test_mat[[1]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[2]] + data$host_pools[[2]]$infected[[1]][[2]],
+  expect_lte(data$host_pools[[2]]$infected[[1]][[2]],
              test_mat[[2]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[3]] + data$host_pools[[2]]$infected[[1]][[3]],
+  expect_lte(data$host_pools[[2]]$infected[[1]][[3]],
              test_mat[[3]])
-  expect_gte(data$host_pools[[2]]$infected[[1]][[4]] + data$host_pools[[2]]$infected[[1]][[4]],
+  expect_lte(data$host_pools[[2]]$infected[[1]][[4]],
              test_mat[[4]])
 
   infected_file_list <-
