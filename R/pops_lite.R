@@ -23,8 +23,6 @@
 #' - The same [unique_id] is used for raw output files to link seeds with
 #' their respective runs.
 
-#' @inheritParams pops
-#'
 #' @param config_file Path to config file produced when calling `configuration`.
 #' The config file includes all data necessary used to set up c++ PoPS model
 #' @param number_of_cores (Default = `NULL`) Specify the number of cores to use

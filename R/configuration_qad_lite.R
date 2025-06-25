@@ -17,12 +17,12 @@
 #' the config_qad_rds, masked and reclassified rasters will be exported to the
 #' same directories as the input reference and comparison folders.
 #'
-#' @export config_qad_lite list of all data necessary used to set up the PoPS
-#' `quantity_allocation_disagreement_lite` function
-#'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' rowColFromCell global vect
+#'
+#' @export
+#'
 
 configuration_qad_lite <- function(reference,
                                    comparison,

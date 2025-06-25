@@ -447,8 +447,7 @@ If TRUE then the infected_file should be a polygon raster with county level infe
 counts.}
 }
 \value{
-a dataframe of the variables saved and their success metrics for
-each run
+a dataframe of the variables saved and their success metrics for each run
 }
 \description{
 Either Approximate Bayesian Computation or Markov Chain Monte Carlo
