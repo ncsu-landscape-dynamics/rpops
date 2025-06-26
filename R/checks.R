@@ -117,7 +117,7 @@ treatment_checks <- function(treatment_stack,
                              pesticide_efficacy) {
   checks_passed <- TRUE
 
-  if (checks_passed && length(treatments_file) != length(treatment_dates)) {
+  if (checks_passed && terra::nlyr(treatment_stack) != length(treatment_dates)) {
     checks_passed <- FALSE
     failed_check <- treatment_length_error
   }
@@ -139,9 +139,9 @@ treatment_checks <- function(treatment_stack,
       for (i in 2:terra::nlyr(treatment_stack)) {
         if (pesticide_duration[i] > 0) {
           treatment_maps[[i]] <-
-            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy, wide = TRUE))
+            terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy, wide = TRUE)
         } else {
-          treatment_maps[[i]] <- list(terra::as.matrix(treatment_stack[[i]], wide = TRUE))
+          treatment_maps[[i]] <- terra::as.matrix(treatment_stack[[i]], wide = TRUE)
         }
       }
     }
