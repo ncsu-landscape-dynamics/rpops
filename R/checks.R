@@ -117,7 +117,7 @@ treatment_checks <- function(treatment_stack,
                              pesticide_efficacy) {
   checks_passed <- TRUE
 
-  if (checks_passed && length(treatments_file) != length(treatment_dates)) {
+  if (checks_passed && terra::nlyr(treatment_stack) != length(treatment_dates)) {
     checks_passed <- FALSE
     failed_check <- treatment_length_error
   }
@@ -139,9 +139,9 @@ treatment_checks <- function(treatment_stack,
       for (i in 2:terra::nlyr(treatment_stack)) {
         if (pesticide_duration[i] > 0) {
           treatment_maps[[i]] <-
-            list(terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy, wide = TRUE))
+            terra::as.matrix(treatment_stack[[i]] * pesticide_efficacy, wide = TRUE)
         } else {
-          treatment_maps[[i]] <- list(terra::as.matrix(treatment_stack[[i]], wide = TRUE))
+          treatment_maps[[i]] <- terra::as.matrix(treatment_stack[[i]], wide = TRUE)
         }
       }
     }
@@ -232,7 +232,7 @@ time_checks <- function(end_date, start_date, time_step, output_frequency, outpu
     }
 
     if (output_frequency == "week") {
-      number_of_outputs <- ceiling(lubridate::time_length(duration, "week"))
+      number_of_outputs <- floor(lubridate::time_length(duration, "week"))
     } else if (output_frequency == "month") {
       number_of_outputs <- ceiling(lubridate::time_length(duration, "month"))
     } else if (output_frequency == "day") {
@@ -259,13 +259,22 @@ time_checks <- function(end_date, start_date, time_step, output_frequency, outpu
     }
   }
 
+  if (time_step == "day") {
+    number_annual_time_steps <- 365
+  } else if (time_step == "week") {
+    number_annual_time_steps <- 52
+  } else if (time_step == "month") {
+    number_annual_time_steps <- 12
+  }
+
   if (checks_passed) {
     outs <- list(
-      checks_passed, number_of_time_steps, number_of_years,
+      checks_passed, number_of_time_steps, number_of_years, number_annual_time_steps,
       number_of_outputs, output_frequency
     )
-    names(outs) <- c("checks_passed", "number_of_time_steps", "number_of_years",
-                     "number_of_outputs", "output_frequency")
+    names(outs) <-
+      c("checks_passed", "number_of_time_steps", "number_of_years", "number_annual_time_steps",
+        "number_of_outputs", "output_frequency")
     return(outs)
   } else {
     outs <- list(checks_passed, failed_check)

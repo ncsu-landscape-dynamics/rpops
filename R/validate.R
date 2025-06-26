@@ -238,7 +238,6 @@ validate <- function(infected_years_file,
       .combine = rbind,
       .packages = c("terra", "PoPS", "foreach")
     ) %dopar% {
-
       set.seed(config$random_seed[[i]])
       config <- draw_parameters(config) # draws parameter set for the run
       config <- host_pool_setup(config)

@@ -110,8 +110,7 @@
 #' @importFrom utils write.csv read.table read.csv
 #' @importFrom methods is
 #'
-#' @return a dataframe of the variables saved and their success metrics for
-#' each run
+#' @return a dataframe of the variables saved and their success metrics for each run
 #'
 #' @export
 
