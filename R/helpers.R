@@ -409,7 +409,7 @@ update_config <- function(config) {
   return(config)
 }
 
-# Function to convert  and export infected matrices from pops_lite.R into rasters
+# Function to convert and export infected matrices from pops_lite.R into rasters
 write_infected_rasters <- function(config, uid) {
   for (i in seq_len(config$number_of_iterations)) {
     # Read the template raster
@@ -438,8 +438,8 @@ write_infected_rasters <- function(config, uid) {
 }
 
 
-#' Function to dynamically update the working directory for all file paths in
-#' the configuration rds output
+# Function to dynamically update the working directory for all file paths in
+# the configuration rds output
 
 update_config_paths <- function(config, root) {
   # Normalize the root directory

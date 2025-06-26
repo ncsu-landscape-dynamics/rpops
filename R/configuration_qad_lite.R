@@ -12,6 +12,8 @@
 #' comparison. Default is FALSE.
 #' @param use_distance Boolean to compare distances between simulations and
 #' observations. Default is FALSE.
+#' @param use_rmse Boolean to use RMSE (root mean square error) for comparison. Used only if
+#' population data is accurate enough.
 #' @param output_folder_path this is the full path with either / or \
 #' (e.g., "C:/user_name/desktop/pops_sod_2020_2023/outputs/"). If not provided,
 #' the config_qad_rds, masked and reclassified rasters will be exported to the
