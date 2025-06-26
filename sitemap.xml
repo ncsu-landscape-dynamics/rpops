@@ -10,11 +10,14 @@
 <url><loc>/index.html</loc></url>
 <url><loc>/reference/calibrate.html</loc></url>
 <url><loc>/reference/configuration.html</loc></url>
+<url><loc>/reference/configuration_qad_lite.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/pops.html</loc></url>
+<url><loc>/reference/pops_lite.html</loc></url>
 <url><loc>/reference/pops_model.html</loc></url>
 <url><loc>/reference/pops_multirun.html</loc></url>
 <url><loc>/reference/quantity_allocation_disagreement.html</loc></url>
+<url><loc>/reference/quantity_allocation_disagreement_lite.html</loc></url>
 <url><loc>/reference/validate.html</loc></url>
 </urlset>
 
