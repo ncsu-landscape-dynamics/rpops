@@ -20,7 +20,7 @@ this repository.
 
 - Added ability to use mean and sd for temp and precip coefficient. Uses 3 new parameters: weather_type, temperature_coefficient_sd_file, and precipitation_coefficient_sd_file. This is added to help understand uncertainty in model predictions due to weather drivers (@ChrisJones687, #168).
 
-- Added the ability to use different seeds for all processes within pops-core. Adds 2 new parameters: multiple_random_seeds (boolean for using this functionality) and random_seeds (set to NULL to allow internal model selection of kernels or pass a CSV with the number of rows being the number of model runs and columns being the kernels in order (@ChrisJones687, #168).
+- Added the ability to use different seeds for all processes within pops-core. Adds 2 new parameters: multiple_random_seeds (boolean for using this functionality) and random_seeds (set to NULL to allow internal model selection of kernels or pass a CSV with the number of rows being the number of model runs and columns being the kernels in order (@ChrisJones687, #168 and @petrasovaa).
 
 - Added ability for model to simulate pathogen/pest survival in soil and then emergence/rain splash in an area (@ChrisJones687, #178).
 
@@ -28,17 +28,25 @@ this repository.
 
 - Added ability for model to use multi-host pops-core API. The model now takes 2 new parameter tables for hosts. It also takes a list of rasters for each host allowing testing of hypothesis related to different host combinations being more conducive to spread on the landscape (@petrasovaa, @ChrisJones687, @wenzeslaus, #186 and #188).
 
-- Added the ability to calibrate, validate, and simulate from county level infection data (@ChrisJones687, #196).
+- Added the ability to calibrate, validate, and simulate from county level infection data (@ChrisJones687, #196 and #198).
+
+- Added in PoPS lite features which make the model faster and less memory intensive (@cyborginhas and @ChrisJones687, #207).
     
 ### Changed
 
 - Quarantine directions can now be calculated only for directions of interest (@petrasovaa, #168).
+
+- In PoPS Core we are more explicit with types and round to the nearest int for model aspects that require it (@wenzeslaus, #203, #204, #205, #206, and #210 and @ChrisJones687, #208 and #209).
 
 ### Fixed
 
 - Fixed MCC calculations that returned NaN with very large datasets (@ChrisJones687, #161).
 
 - Fixed quarantine directions outputs in pops-multirun (@petrasovaa, #162).
+
+- Fixed probablistic weather not having the right number of time steps to check against (@ChrisJones687, #200)
+
+- Fixed error with checking for any when NAs are present in areas that are water (@ChrisJones687, #201)
 
 ### Removed
 
