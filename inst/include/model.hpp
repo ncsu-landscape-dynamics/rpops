@@ -47,9 +47,10 @@ template<
     typename IntegerRaster,
     typename FloatRaster,
     typename RasterIndex,
+    typename NetworkType = Network<RasterIndex>,
     typename Generator = std::default_random_engine,
     typename KernelFactory = DispersalKernel<Generator>(
-        const Config&, const IntegerRaster&, const Network<RasterIndex>&)>
+        const Config&, const IntegerRaster&, const NetworkType&)>
 class Model
 {
 protected:
@@ -92,9 +93,9 @@ protected:
      * @param network Network (initialized or not)
      * @return Created kernel
      */
-    SwitchDispersalKernel<IntegerRaster, RasterIndex>
+    SwitchDispersalKernel<IntegerRaster, NetworkType>
     create_overpopulation_movement_kernel(
-        const IntegerRaster& dispersers, const Network<RasterIndex>& network)
+        const IntegerRaster& dispersers, const NetworkType& network)
     {
         RadialDispersalKernel<IntegerRaster> radial_kernel(
             config_.ew_res,
@@ -112,9 +113,8 @@ protected:
             config_.ns_res,
             config_.natural_scale * config_.leaving_scale_coefficient,
             config_.shape);
-        NetworkDispersalKernel<RasterIndex> network_kernel(
-            network, config_.network_min_distance, config_.network_max_distance);
-        SwitchDispersalKernel<IntegerRaster, RasterIndex> selectable_kernel(
+        NetworkDispersalKernel<StandardNetwork> network_kernel(network);
+        SwitchDispersalKernel<IntegerRaster, StandardNetwork> selectable_kernel(
             natural_kernel,
             radial_kernel,
             deterministic_kernel,
@@ -141,11 +141,13 @@ public:
         RandomNumberGeneratorProvider<Generator>>;
     /** Type for pest pool */
     using StandardPestPool = PestPool<IntegerRaster, FloatRaster, RasterIndex>;
+    /** Type for network */
+    using StandardNetwork = NetworkType;
 
     Model(
         const Config& config,
         KernelFactory& kernel_factory =
-            create_dynamic_kernel<Generator, IntegerRaster, RasterIndex>)
+            create_dynamic_kernel<Generator, IntegerRaster, NetworkType>)
         : config_(config),
           generator_provider_(config),
           natural_kernel(kernel_type_from_string(config.natural_kernel_type)),
@@ -223,7 +225,7 @@ public:
         QuarantineEscapeAction<IntegerRaster>& quarantine,  // out
         const IntegerRaster& quarantine_areas,
         const std::vector<std::vector<int>> movements,
-        const Network<RasterIndex>& network,
+        const NetworkType& network,
         std::vector<std::vector<int>>& suitable_cells)
     {
         StandardSingleHostPool host_pool(
@@ -296,7 +298,7 @@ public:
         QuarantineEscapeAction<IntegerRaster>& quarantine,
         const IntegerRaster& quarantine_areas,
         const std::vector<std::vector<int>> movements,
-        const Network<RasterIndex>& network)
+        const NetworkType& network)
     {
         // Soil step is the same as simulation step.
         if (soil_pool_)
