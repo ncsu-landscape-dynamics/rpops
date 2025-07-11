@@ -49,6 +49,7 @@
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <random>
 #include <map>
 
 /**
@@ -100,6 +101,22 @@ pick_random_item(const Container& container, Generator& generator)
 {
     // Replace .size() call by std::size in C++17.
     std::uniform_int_distribution<size_t> distribution(0, container.size() - 1);
+    auto index = distribution(generator);
+    // For small containers, this is expected to be fast for both sets and vectors.
+    return *std::next(container.begin(), index);
+}
+
+/**
+ * Select a random item from a container using weights.
+ *
+ * May be slow if it takes a long time to increase the iterator (e.g., for std::set) and
+ * the container is large.
+ */
+template<typename Container, typename WeightsContainer, typename Generator>
+typename Container::value_type pick_weighted_random_item(
+    const Container& container, const WeightsContainer& weights, Generator& generator)
+{
+    std::discrete_distribution<size_t> distribution{weights.begin(), weights.end()};
     auto index = distribution(generator);
     // For small containers, this is expected to be fast for both sets and vectors.
     return *std::next(container.begin(), index);

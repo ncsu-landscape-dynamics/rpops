@@ -38,7 +38,8 @@ namespace pops {
  *
  * @return Created kernel
  */
-template<typename Generator, typename IntegerRaster, typename RasterIndex>
+template<typename Generator, typename IntegerRaster, typename NetworkType>
+// NetworkType is unused
 std::unique_ptr<KernelInterface<Generator>>
 create_natural_kernel(const Config& config, const IntegerRaster& dispersers)
 {

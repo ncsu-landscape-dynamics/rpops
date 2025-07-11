@@ -1,7 +1,7 @@
 /*
  * PoPS model - network dispersal kernel
  *
- * Copyright (C) 2020-2021 by the authors.
+ * Copyright (C) 2020-2025 by the authors.
  *
  * Authors: Vaclav Petras (wenzeslaus gmail com)
  *
@@ -17,7 +17,7 @@
 #define POPS_NETWORK_KERNEL_HPP
 
 #include "kernel_types.hpp"
-#include "network.hpp"
+#include "multi_network.hpp"
 
 namespace pops {
 
@@ -28,7 +28,7 @@ namespace pops {
  * needs to be called first to see if the kernel can be used with the given row and
  * column.
  */
-template<typename RasterIndex>
+template<typename NetworkType>
 class NetworkDispersalKernel
 {
 public:
@@ -38,36 +38,9 @@ public:
      * The kernel assumes that the *network* is already initialized. It does not modify
      * the network.
      *
-     * The *min_distance* and *max_distance* parameters are used as a range for uniform
-     * real distribution which determines the travel distance (cost) through the network
-     * for one trip if the network movement is walking (and not teleporting).
-     *
-     * @param network Existing network
-     * @param min_distance Minimum travel distance (cost)
-     * @param max_distance Maximum travel distance (cost)
-     * @param jump End always on a node (snaps result to the closest node)
-     */
-    NetworkDispersalKernel(
-        const Network<RasterIndex>& network,
-        double min_distance,
-        double max_distance,
-        bool jump = false)
-        : network_(network),
-          distance_distribution_(min_distance, max_distance),
-          jump_(jump)
-    {}
-
-    /**
-     * @brief Create kernel which teleports from one node to another.
-     *
-     * The kernel assumes that the *network* is already initialized. It does not modify
-     * the network.
-     *
      * @param network Existing network
      */
-    NetworkDispersalKernel(const Network<RasterIndex>& network)
-        : network_(network), teleport_{true}
-    {}
+    NetworkDispersalKernel(const NetworkType& network) : network_(network) {}
 
     /*! \copybrief RadialDispersalKernel::operator()()
      *
@@ -77,17 +50,13 @@ public:
     template<typename Generator>
     std::tuple<int, int> operator()(Generator& generator, int row, int col)
     {
-        if (teleport_) {
-            return network_.teleport(row, col, generator);
-        }
-        double distance = distance_distribution_(generator);
-        std::tie(row, col) = network_.walk(row, col, distance, generator);
-
-        return std::make_tuple(row, col);
+        return network_.move(row, col, generator);
     }
 
     /**
      * @brief Test if cell is eligible to be used with the kernel.
+     *
+     * Tests if node is present at a cell in the underlying network.
      *
      * @param row Row to be used with the kernel
      * @param col Column to be used with the kernel
@@ -107,13 +76,7 @@ public:
 
 protected:
     /** Reference to the network */
-    const Network<RasterIndex>& network_;
-    /** Travel distance (cost) distribution */
-    std::uniform_real_distribution<double> distance_distribution_;
-    /** Step through network instead of traveling between nodes */
-    bool teleport_{false};
-    /** Snap to nodes when traveling between nodes */
-    bool jump_{false};
+    const NetworkType& network_;
 };
 
 }  // namespace pops
