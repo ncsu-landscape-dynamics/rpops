@@ -864,39 +864,14 @@ configuration <- function(config) {
 
   if (config$function_name %in% parameter_draw_list) {
 
-    if (nrow(config$parameter_cov_matrix) != 8 ||
-      ncol(config$parameter_cov_matrix) != 8) {
+    if (nrow(config$parameter_cov_matrix) != 6 ||
+      ncol(config$parameter_cov_matrix) != 6) {
       config$failure <- covariance_mat_error
       return(config)
     }
 
-    if (length(config$parameter_means) != 8) {
+    if (length(config$parameter_means) != 6) {
       config$failure <- paramter_means_error
-      return(config)
-    }
-
-    if (config$anthropogenic_kernel_type != "network") {
-      config$parameter_means[7] <- config$res$ew_res / 2
-    }
-
-    if (config$anthropogenic_kernel_type != "network") {
-      config$parameter_means[8] <-
-        min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
-    }
-
-    if (config$parameter_means[7] < config$res$ew_res / 2) {
-      config$failure <- network_min_distance_small_error
-      return(config)
-    }
-
-    if (config$parameter_means[7] > config$parameter_means[8]) {
-      config$failure <- network_min_distance_large_error
-      return(config)
-    }
-
-    if (config$parameter_means[8] >
-        (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
-      config$failure <- network_max_distance_large_error
       return(config)
     }
 
