@@ -128,7 +128,17 @@ pops_lite <- function(config_file = "",
     i = seq_len(config$number_of_iterations),
     .packages = c("PoPS", "terra")
   ) %dopar% {
-    config <- update_config(config)
+
+    set.seed(config$random_seed[[i]])
+    config <- draw_parameters(config) # draws parameter set for the run
+    config <- host_pool_setup(config)
+    while (any(config$total_hosts > config$total_populations, na.rm = TRUE) ||
+           any(config$total_exposed > config$total_populations, na.rm = TRUE) ||
+           any(config$total_infecteds > config$total_populations, na.rm = TRUE)) {
+      config <- host_pool_setup(config)
+    }
+    config$competency_table_list <- competency_table_list_creator(config$competency_table)
+    config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
 
     data <- PoPS::pops_model(
       random_seed = config$random_seed[1],
