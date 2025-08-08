@@ -229,7 +229,7 @@ List pops_model_cpp(
 
     config.create_schedules();
 
-    using PoPSModel = Model<IntegerMatrix, NumericMatrix, int>;
+    using PoPSModel = Model<IntegerMatrix, NumericMatrix, int, MultiNetwork<int>>;
 
     Treatments<PoPSModel::StandardSingleHostPool, NumericMatrix> treatments(config.scheduler());
     for (unsigned t = 0; t < treatment_maps.size(); t++) {
@@ -404,7 +404,7 @@ List pops_model_cpp(
             quarantine,
             quarantine_areas,
             movements,
-            network ? *network : MultiNetwork<int>::null_network());
+            network ? *network : PoPSModel::StandardNetwork::null_network());
 
         // keeps track of cumulative dispersers or propagules from a site.
         if (config.spread_schedule()[current_index]) {
