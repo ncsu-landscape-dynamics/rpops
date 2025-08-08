@@ -96,11 +96,11 @@
 #' value is "SI".
 #' @param parameter_means A vector of the means of the model parameters (reproductive_rate,
 #' natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural
-#' kappa, anthropogenic kappa, network_min_distance, and network_max_distance). 1x8 vector.
+#' kappa, anthropogenic kappa). 1x6 vector.
 #' @param parameter_cov_matrix A covariance matrix from the previous years posterior parameter
 #' estimation ordered from (reproductive_rate, natural_dispersal_distance,
-#' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
-#' network_min_distance, and network_max_distance) Should be 8x8 matrix.
+#' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa).
+#' Should be 6x6 matrix.
 #' @param start_exposed Do your initial conditions start as exposed or infected (only used if
 #' model_type is "SEI"). Default False. If this is TRUE need to have both infected_files (this
 #' can be a raster of all 0's) and exposed_files
@@ -138,8 +138,22 @@
 #' @param mask Raster file used to provide a mask to remove 0's that are not true negatives from
 #' comparisons (e.g. mask out lakes and oceans from statics if modeling terrestrial species). This
 #' can also be used to mask out areas that can't be managed in the auto_manage function.
-#' @param network_filename The entire file path for the network file. Used if
+#' @param network_filenames The entire file path for the network file. Used if
 #' anthropogenic_kernel_type = 'network'.
+#' @param network_movement_types What movement types do you want to use in the network kernel either
+#' "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
+#' along the edge. "jump" automatically moves to the nearest node when moving through the network.
+#' "teleport" moves from node to node most likely used for airport and seaport networks. This is a
+#' list that is as long as the number of networks used and must be the same length as
+#' network_max_distances, network_files, and network_min_distances.
+#' @param network_min_distances minimum time a propagule rides on the network. Used if
+#' anthropogenic_kernel_type = 'network'. This is a list that is as long as the number of networks
+#' used and must be the same length as network_max_distances, network_filenames, and
+#' network_movement_types.
+#' @param network_max_distances maximum time a propagule rides on the network. Used if
+#' anthropogenic_kernel_type = 'network'. This is a list that is as long as the number of networks
+#' used and must be the same length as network_min_distances, network_filenames, and
+#' network_movement_types.
 #' @param use_survival_rates Boolean to indicate if the model will use survival rates to limit the
 #' survival or emergence of overwintering generations.
 #' @param survival_rate_month What month do over wintering generations emerge. We suggest using the
@@ -147,10 +161,6 @@
 #' @param survival_rate_day What day should the survival rates be applied
 #' @param survival_rates_file Raster file with survival rates from 0 to 1 representing the
 #' percentage of emergence for a cell.
-#' @param network_movement What movement type do you want to use in the network kernel either
-#' "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
-#' along the edge. "jump" automatically moves to the nearest node when moving through the network.
-#' "teleport" moves from node to node most likely used for airport and seaport networks.
 #' @param use_initial_condition_uncertainty Boolean to indicate whether or not to propagate and
 #' partition uncertainty from initial conditions. If TRUE the infected_files needs to have 2 layers
 #' one with the mean value and one with the standard deviation. If an SEI model is used the
@@ -271,8 +281,10 @@ pops <- function(infected_file_list,
                  leaving_scale_coefficient = 1,
                  exposed_file_list = "",
                  mask = NULL,
-                 network_filename = "",
-                 network_movement = "walk",
+                 network_filenames = c(""),
+                 network_movement_types = c("walk"),
+                 network_min_distances = c(0),
+                 network_max_distances = c(0),
                  use_initial_condition_uncertainty = FALSE,
                  use_host_uncertainty = FALSE,
                  weather_type = "deterministic",
@@ -357,8 +369,10 @@ pops <- function(infected_file_list,
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
 
-  config$network_filename <- network_filename
-  config$network_movement <- network_movement
+  config$network_filenames <- network_filenames
+  config$network_movement_types <- network_movement_types
+  config$network_min_distances <- network_min_distances
+  config$network_max_distances <- network_max_distances
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type

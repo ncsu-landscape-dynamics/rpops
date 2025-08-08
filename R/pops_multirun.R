@@ -96,8 +96,10 @@ pops_multirun <- function(infected_file_list,
                           mask = NULL,
                           write_outputs = "None",
                           output_folder_path = "",
-                          network_filename = "",
-                          network_movement = "walk",
+                          network_filenames = c(""),
+                          network_movement_types = c("walk"),
+                          network_min_distances = c(0),
+                          network_max_distances = c(0),
                           use_initial_condition_uncertainty = FALSE,
                           use_host_uncertainty = FALSE,
                           weather_type = "deterministic",
@@ -179,8 +181,10 @@ pops_multirun <- function(infected_file_list,
   config$output_folder_path <- output_folder_path
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
-  config$network_filename <- network_filename
-  config$network_movement <- network_movement
+  config$network_filenames <- network_filenames
+  config$network_movement_types <- network_movement_types
+  config$network_min_distances <- network_min_distances
+  config$network_max_distances <- network_max_distances
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
