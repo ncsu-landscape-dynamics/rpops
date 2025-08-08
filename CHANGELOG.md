@@ -46,7 +46,7 @@ this repository.
 
 - Fixed quarantine directions outputs in pops-multirun (@petrasovaa, #162).
 
-- Fixed probablistic weather not having the right number of time steps to check against (@ChrisJones687, #200)
+- Fixed probabilistic weather not having the right number of time steps to check against (@ChrisJones687, #200)
 
 - Fixed error with checking for any when NAs are present in areas that are water (@ChrisJones687, #201)
 
