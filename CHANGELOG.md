@@ -31,6 +31,8 @@ this repository.
 - Added the ability to calibrate, validate, and simulate from county level infection data (@ChrisJones687, #196 and #198).
 
 - Added in PoPS lite features which make the model faster and less memory intensive (@cyborginhas and @ChrisJones687, #207).
+
+- Added in ability to use multiple networks as part of the anthropogenic kernel (@ChrisJones687, #226).
     
 ### Changed
 
