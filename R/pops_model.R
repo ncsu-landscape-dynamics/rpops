@@ -176,7 +176,7 @@ pops_model <-
     # Network configuration
     network_config <- NULL
     network_data_config <- NULL
-    if (!(is.na(network_filename) || is.null(network_filename) || network_filename == "")) {
+    if (!(is.na(network_filenames) || is.null(network_filenames) || network_filenames == "")) {
       network_config <- c()
       network_config$network_min_distances <- network_min_distances
       network_config$network_max_distances <- network_max_distances
