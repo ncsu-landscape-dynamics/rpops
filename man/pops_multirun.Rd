@@ -68,8 +68,10 @@ pops_multirun(
   mask = NULL,
   write_outputs = "None",
   output_folder_path = "",
-  network_filename = "",
-  network_movement = "walk",
+  network_filenames = c(""),
+  network_movement_types = c("walk"),
+  network_min_distances = c(0),
+  network_max_distances = c(0),
   use_initial_condition_uncertainty = FALSE,
   use_host_uncertainty = FALSE,
   weather_type = "deterministic",
@@ -106,12 +108,12 @@ cell then this should be a raster with values that are the max of the host raste
 
 \item{parameter_means}{A vector of the means of the model parameters (reproductive_rate,
 natural_dispersal_distance, percent_natural_dispersal, anthropogenic_dispersal_distance, natural
-kappa, anthropogenic kappa, network_min_distance, and network_max_distance). 1x8 vector.}
+kappa, anthropogenic kappa). 1x6 vector.}
 
 \item{parameter_cov_matrix}{A covariance matrix from the previous years posterior parameter
 estimation ordered from (reproductive_rate, natural_dispersal_distance,
-percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa,
-network_min_distance, and network_max_distance) Should be 8x8 matrix.}
+percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa, anthropogenic kappa).
+Should be 6x6 matrix.}
 
 \item{pest_host_table}{The file path to a csv that has these columns in this order: host,
 susceptibility_mean, susceptibility_sd, mortality_rate, mortality_rate_mean,
@@ -303,13 +305,25 @@ can also be used to mask out areas that can't be managed in the auto_manage func
 \item{output_folder_path}{this is the full path with either / or \\ (e.g.,
 "C:/user_name/desktop/pops_sod_2020_2023/outputs/")}
 
-\item{network_filename}{The entire file path for the network file. Used if
+\item{network_filenames}{The entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
 
-\item{network_movement}{What movement type do you want to use in the network kernel either
+\item{network_movement_types}{What movement types do you want to use in the network kernel either
 "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
-"teleport" moves from node to node most likely used for airport and seaport networks.}
+"teleport" moves from node to node most likely used for airport and seaport networks. This is a
+list that is as long as the number of networks used and must be the same length as
+network_max_distances, network_files, and network_min_distances.}
+
+\item{network_min_distances}{minimum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'. This is a list that is as long as the number of networks
+used and must be the same length as network_max_distances, network_filenames, and
+network_movement_types.}
+
+\item{network_max_distances}{maximum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'. This is a list that is as long as the number of networks
+used and must be the same length as network_min_distances, network_filenames, and
+network_movement_types.}
 
 \item{use_initial_condition_uncertainty}{Boolean to indicate whether or not to propagate and
 partition uncertainty from initial conditions. If TRUE the infected_files needs to have 2 layers

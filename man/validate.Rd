@@ -70,8 +70,10 @@ validate(
   write_outputs = "None",
   output_folder_path = "",
   point_file = "",
-  network_filename = "",
-  network_movement = "walk",
+  network_filenames = c(""),
+  network_movement_types = c("walk"),
+  network_min_distances = c(0),
+  network_max_distances = c(0),
   use_distance = FALSE,
   use_configuration = FALSE,
   use_initial_condition_uncertainty = FALSE,
@@ -307,13 +309,25 @@ hosts per cell, etc.).}
 
 \item{point_file}{file for point comparison if not provided skips calculations}
 
-\item{network_filename}{The entire file path for the network file. Used if
+\item{network_filenames}{The entire file path for the network file. Used if
 anthropogenic_kernel_type = 'network'.}
 
-\item{network_movement}{What movement type do you want to use in the network kernel either
+\item{network_movement_types}{What movement types do you want to use in the network kernel either
 "walk", "jump", or "teleport". "walk" allows dispersing units to leave the network at any cell
 along the edge. "jump" automatically moves to the nearest node when moving through the network.
-"teleport" moves from node to node most likely used for airport and seaport networks.}
+"teleport" moves from node to node most likely used for airport and seaport networks. This is a
+list that is as long as the number of networks used and must be the same length as
+network_max_distances, network_files, and network_min_distances.}
+
+\item{network_min_distances}{minimum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'. This is a list that is as long as the number of networks
+used and must be the same length as network_max_distances, network_filenames, and
+network_movement_types.}
+
+\item{network_max_distances}{maximum time a propagule rides on the network. Used if
+anthropogenic_kernel_type = 'network'. This is a list that is as long as the number of networks
+used and must be the same length as network_min_distances, network_filenames, and
+network_movement_types.}
 
 \item{use_distance}{Boolean if you want to compare distance between
 simulations and observations. Default is FALSE.}
