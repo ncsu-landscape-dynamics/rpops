@@ -230,8 +230,11 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty,
@@ -350,13 +353,13 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             write_outputs <- "None"
             output_folder_path <- ""
             success_metric <- "rmse and distance"
-            network_filename <-
+            network_filenames <-
               system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
             survival_rates_file <- ""
-            network_movement <- "walk"
+            network_movement_types <- "walk"
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -429,8 +432,11 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
             expect_length(data$posterior_means, 8)
@@ -536,13 +542,13 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             write_outputs <- "None"
             output_folder_path <- ""
             success_metric <- "accuracy, precision, recall, and specificity"
-            network_filename <-
-              system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
+            network_filenames <-
+              c(system.file("extdata", "simple20x20", "segments.csv", package = "PoPS"))
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
             survival_rates_file <- ""
-            network_movement <- "walk"
+            network_movement_types <- c("walk")
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -615,8 +621,11 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = network_filenames,
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(100),
+                              network_max_distances = c(1000),
+                              network_weights = c(1),
                               success_metric)
 
             expect_length(data$posterior_means, 8)
@@ -801,8 +810,11 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
             expect_length(data$posterior_means, 8)
@@ -990,8 +1002,11 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty)
@@ -1195,8 +1210,11 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty,
@@ -1382,8 +1400,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
             expect_length(data$posterior_means, 8)
@@ -1566,8 +1587,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
             expect_length(data$posterior_means, 8)
@@ -1750,8 +1774,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
             expect_length(data$posterior_means, 8)
@@ -1934,8 +1961,11 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
             expect_length(data$posterior_means, 8)
@@ -2120,8 +2150,11 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty)
@@ -2320,8 +2353,11 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty,
