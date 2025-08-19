@@ -154,6 +154,10 @@
 #' anthropogenic_kernel_type = 'network'. This is a list that is as long as the number of networks
 #' used and must be the same length as network_min_distances, network_filenames, and
 #' network_movement_types.
+#' @param network_weights the weight for each network, doesn't need to be probabilities that add to
+#' one but can be number of events in the data and the model will calculate the probabilities.
+#' This is a list that is as long as the number of networks used and must be the same length as
+#' network_min_distances, network_filenames, and network_movement_types.
 #' @param use_survival_rates Boolean to indicate if the model will use survival rates to limit the
 #' survival or emergence of overwintering generations.
 #' @param survival_rate_month What month do over wintering generations emerge. We suggest using the
@@ -285,6 +289,7 @@ pops <- function(infected_file_list,
                  network_movement_types = c("walk"),
                  network_min_distances = c(0),
                  network_max_distances = c(0),
+                 network_weights = c(1),
                  use_initial_condition_uncertainty = FALSE,
                  use_host_uncertainty = FALSE,
                  weather_type = "deterministic",
@@ -373,6 +378,7 @@ pops <- function(infected_file_list,
   config$network_movement_types <- network_movement_types
   config$network_min_distances <- network_min_distances
   config$network_max_distances <- network_max_distances
+  config$network_weights <- network_weights
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
@@ -474,10 +480,11 @@ pops <- function(infected_file_list,
                      leaving_percentage = config$leaving_percentage,
                      leaving_scale_coefficient = config$leaving_scale_coefficient,
                      bbox = config$bounding_box,
-                     network_min_distances = network_min_distances,
-                     network_max_distances = network_max_distances,
+                     network_min_distances = config$network_min_distances,
+                     network_max_distances = config$network_max_distances,
                      network_filenames = config$network_filenames,
                      network_movement_types = config$network_movement_types,
+                     network_weights = config$network_weights,
                      weather_size = config$weather_size,
                      weather_type = config$weather_type,
                      dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,

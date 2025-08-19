@@ -154,6 +154,7 @@ pops_model <-
            network_max_distances = c(0),
            network_filenames = c(""),
            network_movement_types = c("walk"),
+           network_weights = c(1),
            weather_size = 0,
            weather_type = "deterministic",
            dispersers_to_soils_percentage = 0,
@@ -181,6 +182,7 @@ pops_model <-
       network_config$network_min_distances <- network_min_distances
       network_config$network_max_distances <- network_max_distances
       network_config$network_movement_types <- network_movement_types
+      network_config$network_weights <- network_weights
 
       network_data_config <- c()
       network_data_config$network_filenames <- network_filenames

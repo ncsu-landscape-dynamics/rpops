@@ -100,6 +100,7 @@ pops_multirun <- function(infected_file_list,
                           network_movement_types = c("walk"),
                           network_min_distances = c(0),
                           network_max_distances = c(0),
+                          network_weights = c(1),
                           use_initial_condition_uncertainty = FALSE,
                           use_host_uncertainty = FALSE,
                           weather_type = "deterministic",
@@ -185,6 +186,7 @@ pops_multirun <- function(infected_file_list,
   config$network_movement_types <- network_movement_types
   config$network_min_distances <- network_min_distances
   config$network_max_distances <- network_max_distances
+  config$network_weights <- network_weights
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
@@ -307,10 +309,11 @@ pops_multirun <- function(infected_file_list,
         leaving_percentage = config$leaving_percentage,
         leaving_scale_coefficient = config$leaving_scale_coefficient,
         bbox = config$bounding_box,
-        network_min_distances = network_min_distances,
-        network_max_distances = network_max_distances,
+        network_min_distances = config$network_min_distances,
+        network_max_distances = config$network_max_distances,
         network_filenames = config$network_filenames,
         network_movement_types = config$network_movement_types,
+        network_weights = config$network_weights,
         weather_size = config$weather_size,
         weather_type = config$weather_type,
         dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
