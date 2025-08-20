@@ -3250,7 +3250,7 @@ test_that("Network dispersal works as expected", {
     system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
   start_date <- "2008-01-01"
   end_date <- "2008-03-31"
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
+  parameter_means <- c(2, 21, 0.1, 500, 0, 0)
   parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   network_filenames <-  c(system.file("extdata", "simple20x20", "segments.csv", package = "PoPS"))
   anthropogenic_kernel_type <- c("network")
@@ -3282,6 +3282,76 @@ test_that("Network dispersal works as expected", {
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
+
+test_that("Network dispersal works with multiple networks", {
+  infected_file_list <-
+    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
+  host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  total_populations_file <-
+    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
+  start_date <- "2008-01-01"
+  end_date <- "2008-03-31"
+  parameter_means <- c(2, 21, 0.01, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
+  network_filenames <-  c(system.file("extdata", "simple20x20", "segments1.csv", package = "PoPS"),
+                          system.file("extdata", "simple20x20", "segments2.csv", package = "PoPS"))
+  anthropogenic_kernel_type <- c("network")
+  network_min_distances <- c(100, 100)
+  network_max_distances <- c(1000, 1000)
+  pest_host_table <-
+    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
+  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         anthropogenic_kernel_type = anthropogenic_kernel_type,
+         network_filenames = network_filenames,
+         network_movement_types = c("walk", "walk"),
+         network_weights = c(1000,1),
+         network_min_distances = network_min_distances,
+         network_max_distance = network_max_distances)
+  plot(rast(data$host_pools[[1]]$infected[[1]]))
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
+
+
+  data <-
+    pops(infected_file_list = infected_file_list,
+         host_file_list = host_file_list,
+         total_populations_file = total_populations_file,
+         parameter_means = parameter_means,
+         parameter_cov_matrix = parameter_cov_matrix,
+         pest_host_table = pest_host_table,
+         competency_table = competency_table,
+         start_date = start_date,
+         end_date = end_date,
+         anthropogenic_kernel_type = anthropogenic_kernel_type,
+         network_filenames = network_filenames,
+         network_movement_types = c("walk", "walk"),
+         network_weights = c(1, 1000),
+         network_min_distances = network_min_distances,
+         network_max_distance = network_max_distances)
+  plot(rast(data$host_pools[[1]]$infected[[1]]))
+
+  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
+})
+
 
 test_that("uncertainty propogation works as expected", {
   infected_file_list <- system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
