@@ -142,10 +142,35 @@ configuration <- function(config) {
     return(config)
   }
 
-  # check that network movement is one of the correct options
-  if (config$network_movement %notin% network_movement_options) {
-    config$failure <- network_movement_error
-    return(config)
+
+  # check that network parameters are of the same length and correct type
+  if (config$anthropogenic_kernel_type == "network") {
+    if (length(config$network_min_distances) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+    if (length(config$network_max_distances) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+    if (length(config$network_movement_types) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+    if (length(config$network_weights) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+    # check that network movement is one of the correct options
+    if (length(config$network_movement_types) > 1) {
+      for (i in 1:length(config$network_movement_types)) {
+        if (config$network_movement_types[i] %notin% network_movement_options) {
+          config$failure <- network_movement_error
+          return(config)
+        }
+      }
+    } else {
+      if (config$network_movement_types %notin% network_movement_options) {
+        config$failure <- network_movement_error
+        return(config)
+      }
+    }
   }
 
   # check that weather_type is correct
