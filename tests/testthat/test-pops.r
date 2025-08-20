@@ -3318,8 +3318,6 @@ test_that("Network dispersal works with multiple networks", {
          network_weights = c(1000,1),
          network_min_distances = network_min_distances,
          network_max_distance = network_max_distances)
-  plot(rast(data$host_pools[[1]]$infected[[1]]))
-
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
@@ -3343,8 +3341,6 @@ test_that("Network dispersal works with multiple networks", {
          network_weights = c(1, 1000),
          network_min_distances = network_min_distances,
          network_max_distance = network_max_distances)
-  plot(rast(data$host_pools[[1]]$infected[[1]]))
-
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
