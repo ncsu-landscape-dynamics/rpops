@@ -473,7 +473,7 @@ test_that("Multirun model outputs work", {
                         network_movement_types = c("walk"),
                         network_min_distances = c(0),
                         network_max_distances = c(0),
-                        network_weights = c(1),)
+                        network_weights = c(1))
 
   expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),

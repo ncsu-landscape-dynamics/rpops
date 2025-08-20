@@ -3315,7 +3315,7 @@ test_that("Network dispersal works with multiple networks", {
          anthropogenic_kernel_type = anthropogenic_kernel_type,
          network_filenames = network_filenames,
          network_movement_types = c("walk", "walk"),
-         network_weights = c(1000,1),
+         network_weights = c(1000, 1),
          network_min_distances = network_min_distances,
          network_max_distance = network_max_distances)
   test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)

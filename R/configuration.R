@@ -159,7 +159,7 @@ configuration <- function(config) {
     }
     # check that network movement is one of the correct options
     if (length(config$network_movement_types) > 1) {
-      for (i in 1:length(config$network_movement_types)) {
+      for (i in seq_len(length(config$network_movement_types))) {
         if (config$network_movement_types[i] %notin% network_movement_options) {
           config$failure <- network_movement_error
           return(config)
