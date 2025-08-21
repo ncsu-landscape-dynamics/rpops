@@ -325,9 +325,7 @@ calibrate <- function(infected_years_file,
              anthropogenic_distance_scale,
              percent_natural_dispersal,
              natural_kappa,
-             anthropogenic_kappa,
-             network_min_distance,
-             network_max_distance) {
+             anthropogenic_kappa) {
 
       config$random_seed <- as.integer(sample.int(1e9, 1, replace = FALSE))
       set.seed(config$random_seed[[1]])
@@ -428,8 +426,8 @@ calibrate <- function(infected_years_file,
   # Computation or Markov Chain Monte Carlo.
   if (config$calibration_method == "ABC") {
     # set up data structures for storing results
-    parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
-    parameters_test <- matrix(ncol = 18, nrow = 200)
+    parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
+    parameters_test <- matrix(ncol = 16, nrow = 200)
     config$acceptance_rate <- 1
     config$acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
 
@@ -484,7 +482,7 @@ calibrate <- function(infected_years_file,
             }
           }
           if (params_to_estimate[3]) {
-            proposed_percent_natural_dispersal <- round(runif(1, 0.93, 1), digits = 3)
+            proposed_percent_natural_dispersal <- round(runif(1, 0.87, 1), digits = 3)
           } else {
             proposed_percent_natural_dispersal <- 1.0
           }
@@ -498,20 +496,6 @@ calibrate <- function(infected_years_file,
           } else {
             proposed_anthropogenic_kappa <- anthropogenic_kappa
           }
-          if (anthropogenic_kernel_type == "network") {
-            proposed_network_min_distance <-
-              round(runif(1, config$res$ew_res / 2, config$res$ew_res * 10), digits = 0)
-          } else {
-            proposed_network_min_distance <- config$res$ew_res / 2
-          }
-          if (anthropogenic_kernel_type == "network") {
-            proposed_network_max_distance <-
-              round(runif(1, config$res$ew_res * 10, config$res$ew_res *
-                            min(config$rows_cols$num_cols, config$rows_cols$num_rows)), digits = 0)
-          } else {
-            proposed_network_max_distance <-
-              min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
-          }
         } else {
           # draw from the multivariate normal distribution and ensure that
           # parameters are within their allowed range
@@ -520,14 +504,10 @@ calibrate <- function(infected_years_file,
           while (proposed_parameters[1] < 0.1 ||
                  proposed_parameters[2] < 0.1 ||
                  proposed_parameters[3] > 1.00 ||
-                 proposed_parameters[3] <= 0.92 ||
+                 proposed_parameters[3] <= 0.85 ||
                  proposed_parameters[4] < 0.1 ||
                  proposed_parameters[5] < 0 ||
-                 proposed_parameters[6] < 0 ||
-                 proposed_parameters[7] < config$res$ew_res / 2 ||
-                 proposed_parameters[7] > proposed_parameters[8] ||
-                 proposed_parameters[8] >
-                  min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res) {
+                 proposed_parameters[6] < 0) {
             proposed_parameters <-
               MASS::mvrnorm(1, config$parameter_means, config$parameter_cov_matrix)
           }
@@ -537,8 +517,6 @@ calibrate <- function(infected_years_file,
           proposed_anthropogenic_distance_scale <- proposed_parameters[4]
           proposed_natural_kappa <- proposed_parameters[5]
           proposed_anthropogenic_kappa <- proposed_parameters[6]
-          proposed_network_min_distance <- proposed_parameters[7]
-          proposed_network_max_distance <- proposed_parameters[8]
         }
 
         # run the model with the proposed parameter set
@@ -549,9 +527,7 @@ calibrate <- function(infected_years_file,
             proposed_anthropogenic_distance_scale,
             proposed_percent_natural_dispersal,
             proposed_natural_kappa,
-            proposed_anthropogenic_kappa,
-            proposed_network_min_distance,
-            proposed_network_max_distance
+            proposed_anthropogenic_kappa
           )
 
         # calculate comparison metrics for simulation data for each time step in
@@ -663,8 +639,6 @@ calibrate <- function(infected_years_file,
               proposed_anthropogenic_distance_scale,
               proposed_natural_kappa,
               proposed_anthropogenic_kappa,
-              proposed_network_min_distance,
-              proposed_network_max_distance,
               config$accuracy,
               config$precision,
               config$recall,
@@ -686,8 +660,6 @@ calibrate <- function(infected_years_file,
                 proposed_anthropogenic_distance_scale,
                 proposed_natural_kappa,
                 proposed_anthropogenic_kappa,
-                proposed_network_min_distance,
-                proposed_network_max_distance,
                 config$accuracy,
                 config$precision,
                 config$recall,
@@ -713,8 +685,6 @@ calibrate <- function(infected_years_file,
                 proposed_anthropogenic_distance_scale,
                 proposed_natural_kappa,
                 proposed_anthropogenic_kappa,
-                proposed_network_min_distance,
-                proposed_network_max_distance,
                 config$accuracy,
                 config$precision,
                 config$recall,
@@ -741,47 +711,47 @@ calibrate <- function(infected_years_file,
             ) {
           if (config$acceptance_rate < 0.05) {
             config$accuracy_threshold <-
-              mean(c(median(parameters_test[, 9], na.rm = TRUE), config$accuracy_threshold)) - 0.03
+              mean(c(median(parameters_test[, 7], na.rm = TRUE), config$accuracy_threshold)) - 0.03
             config$precision_threshold <-
-              mean(c(median(parameters_test[, 10], na.rm = TRUE), config$precision_threshold))
+              mean(c(median(parameters_test[, 8], na.rm = TRUE), config$precision_threshold))
               - 0.03
             config$recall_threshold <-
-              mean(c(median(parameters_test[, 11], na.rm = TRUE), config$recall_threshold)) - 0.03
+              mean(c(median(parameters_test[, 9], na.rm = TRUE), config$recall_threshold)) - 0.03
             config$specificity_threshold <-
-              mean(c(median(parameters_test[, 12], na.rm = TRUE), config$specificity_threshold))
+              mean(c(median(parameters_test[, 10], na.rm = TRUE), config$specificity_threshold))
               - 0.03
             config$rmse_threshold <-
-              mean(c(median(parameters_test[, 13], na.rm = TRUE), config$rmse_threshold)) + 2
+              mean(c(median(parameters_test[, 11], na.rm = TRUE), config$rmse_threshold)) + 2
             config$distance_threshold <-
-              mean(c(median(parameters_test[, 14], na.rm = TRUE), config$distance_threshold)) + 10
+              mean(c(median(parameters_test[, 12], na.rm = TRUE), config$distance_threshold)) + 10
             config$mcc_threshold <-
-              mean(c(median(parameters_test[, 15], na.rm = TRUE), config$mcc_threshold)) - 0.02
+              mean(c(median(parameters_test[, 13], na.rm = TRUE), config$mcc_threshold)) - 0.02
             config$quantity_threshold_threshold <-
-              mean(c(median(parameters_test[, 16], na.rm = TRUE), config$quantity)) - 0.02
+              mean(c(median(parameters_test[, 14], na.rm = TRUE), config$quantity)) - 0.02
             config$allocation_threshold <-
-              mean(c(median(parameters_test[, 17], na.rm = TRUE), config$allocation)) - 0.02
+              mean(c(median(parameters_test[, 15], na.rm = TRUE), config$allocation)) - 0.02
             config$configuration_threshold <-
-              mean(c(median(parameters_test[, 18], na.rm = TRUE), config$configuration_dis)) - 0.02
+              mean(c(median(parameters_test[, 16], na.rm = TRUE), config$configuration_dis)) - 0.02
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 18, nrow = 200)
+            parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
+            parameters_test <- matrix(ncol = 16, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
           } else if (config$acceptance_rate > 0.15) {
-            config$accuracy_threshold <- median(parameters_kept[, 9], na.rm = TRUE)
-            config$precision_threshold <- median(parameters_kept[, 10], na.rm = TRUE)
-            config$recall_threshold <- median(parameters_kept[, 11], na.rm = TRUE)
-            config$specificity_threshold <- median(parameters_kept[, 12], na.rm = TRUE)
-            config$rmse_threshold <- median(parameters_kept[, 13], na.rm = TRUE)
-            config$distance_threshold <- median(parameters_kept[, 14], na.rm = TRUE)
-            config$mcc_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
-            config$quantity_threshold <- median(parameters_kept[, 16], na.rm = TRUE)
-            config$allocation_threshold <- median(parameters_kept[, 17], na.rm = TRUE)
-            config$configuration_threshold <- median(parameters_kept[, 18], na.rm = TRUE)
+            config$accuracy_threshold <- median(parameters_kept[, 7], na.rm = TRUE)
+            config$precision_threshold <- median(parameters_kept[, 8], na.rm = TRUE)
+            config$recall_threshold <- median(parameters_kept[, 9], na.rm = TRUE)
+            config$specificity_threshold <- median(parameters_kept[, 10], na.rm = TRUE)
+            config$rmse_threshold <- median(parameters_kept[, 11], na.rm = TRUE)
+            config$distance_threshold <- median(parameters_kept[, 12], na.rm = TRUE)
+            config$mcc_threshold <- median(parameters_kept[, 13], na.rm = TRUE)
+            config$quantity_threshold <- median(parameters_kept[, 14], na.rm = TRUE)
+            config$allocation_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
+            config$configuration_threshold <- median(parameters_kept[, 16], na.rm = TRUE)
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 18, nrow = 200)
+            parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
+            parameters_test <- matrix(ncol = 16, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
@@ -795,8 +765,8 @@ calibrate <- function(infected_years_file,
 
       start_index <- config$current_bin * generation_size - generation_size + 1
       end_index <- config$current_bin * generation_size
-      config$parameter_means <- colMeans(parameters_kept[start_index:end_index, 1:8])
-      config$parameter_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:8])
+      config$parameter_means <- colMeans(parameters_kept[start_index:end_index, 1:6])
+      config$parameter_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:6])
 
       config$current_particles <- 1
       config$proposed_particles <- 1
@@ -810,21 +780,21 @@ calibrate <- function(infected_years_file,
       config$rmse_thresholds[config$current_bin] <- config$rmse_threshold
       config$distance_thresholds[config$current_bin] <- config$distance_threshold
       config$specificity_thresholds[config$current_bin] <- config$specificity_threshold
-      config$accuracy_threshold <- median(parameters_kept[start_index:end_index, 9])
-      config$precision_threshold <- median(parameters_kept[start_index:end_index, 10])
-      config$recall_threshold <- median(parameters_kept[start_index:end_index, 11])
-      config$specificity_threshold <- median(parameters_kept[start_index:end_index, 12])
-      config$rmse_threshold <- median(parameters_kept[start_index:end_index, 13])
-      config$distance_threshold <- median(parameters_kept[start_index:end_index, 14])
-      config$mcc_threshold <- median(parameters_kept[start_index:end_index, 15])
-      config$quantity_threshold <- median(parameters_kept[start_index:end_index, 16])
-      config$allocation_threshold <- median(parameters_kept[start_index:end_index, 17])
-      config$configuration_threshold <- median(parameters_kept[start_index:end_index, 18])
+      config$accuracy_threshold <- median(parameters_kept[start_index:end_index, 7])
+      config$precision_threshold <- median(parameters_kept[start_index:end_index, 8])
+      config$recall_threshold <- median(parameters_kept[start_index:end_index, 9])
+      config$specificity_threshold <- median(parameters_kept[start_index:end_index, 10])
+      config$rmse_threshold <- median(parameters_kept[start_index:end_index, 11])
+      config$distance_threshold <- median(parameters_kept[start_index:end_index, 12])
+      config$mcc_threshold <- median(parameters_kept[start_index:end_index, 13])
+      config$quantity_threshold <- median(parameters_kept[start_index:end_index, 14])
+      config$allocation_threshold <- median(parameters_kept[start_index:end_index, 15])
+      config$configuration_threshold <- median(parameters_kept[start_index:end_index, 16])
       config$current_bin <- config$current_bin + 1
     }
 
-    calibrated_means <- colMeans(parameters_kept[start_index:end_index, 1:8])
-    calibrated_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:8])
+    calibrated_means <- colMeans(parameters_kept[start_index:end_index, 1:6])
+    calibrated_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:6])
 
   } else if (config$calibration_method == "MCMC") {
     proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
@@ -850,20 +820,6 @@ calibrate <- function(infected_years_file,
     } else {
       proposed_anthropogenic_kappa <- anthropogenic_kappa
     }
-    if (anthropogenic_kernel_type == "network") {
-      proposed_network_min_distance <-
-        round(runif(1, config$res$ew_res / 2, config$res$ew_res * 10), digits = 0)
-    } else {
-      proposed_network_min_distance <- config$res$ew_res / 2
-    }
-    if (anthropogenic_kernel_type == "network") {
-      proposed_network_max_distance <-
-        round(runif(1, config$res$ew_res * 10, config$res$ew_res *
-                      min(config$rows_cols$num_cols, config$rows_cols$num_rows)), digits = 0)
-    } else {
-      proposed_network_max_distance <-
-        min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
-    }
 
     data <-
       param_func(
@@ -872,9 +828,7 @@ calibrate <- function(infected_years_file,
         proposed_anthropogenic_distance_scale,
         proposed_percent_natural_dispersal,
         proposed_natural_kappa,
-        proposed_anthropogenic_kappa,
-        proposed_network_min_distance,
-        proposed_network_max_distance
+        proposed_anthropogenic_kappa
       )
 
     all_disagreement <- calculate_all_stats(config, data)
@@ -902,9 +856,7 @@ calibrate <- function(infected_years_file,
                  anthropogenic_distance_scale = proposed_anthropogenic_distance_scale,
                  percent_natural_dispersal = proposed_percent_natural_dispersal,
                  natural_kappa = proposed_natural_kappa,
-                 anthropogenic_kappa = proposed_anthropogenic_kappa,
-                 network_min_distance = proposed_network_min_distance,
-                 network_max_distance = proposed_network_max_distance
+                 anthropogenic_kappa = proposed_anthropogenic_kappa
       )
 
     params <-
@@ -928,9 +880,7 @@ calibrate <- function(infected_years_file,
                  anthropogenic_distance_scale = rep(0, config$number_of_iterations),
                  percent_natural_dispersal = rep(0, config$number_of_iterations),
                  natural_kappa = rep(0, config$number_of_iterations),
-                 anthropogenic_kappa = rep(0, config$number_of_iterations),
-                 network_min_distance = rep(0, config$number_of_iterations),
-                 network_max_distance = rep(0, config$number_of_iterations))
+                 anthropogenic_kappa = rep(0, config$number_of_iterations))
 
     for (i in seq_len(config$number_of_iterations)) {
 
@@ -996,31 +946,6 @@ calibrate <- function(infected_years_file,
         proposed_anthropogenic_kappa <- anthropogenic_kappa
       }
 
-      if (anthropogenic_kernel_type == "network") {
-        proposed_network_min_distance <- 0
-        while (proposed_network_min_distance < config$res$ew_res / 2) {
-          proposed_network_min_distance <-
-            round(rnorm(1, mean = current$network_min_distance,
-                        sd = current$network_min_distance / 20), digits = 0)
-        }
-      } else {
-        proposed_network_min_distance <- config$res$ew_res / 2
-      }
-
-      if (anthropogenic_kernel_type == "network") {
-        proposed_network_max_distance <- 0
-        while (proposed_network_max_distance < proposed_network_min_distance ||
-               proposed_network_max_distance > (config$res$ew_res *
-               min(config$rows_cols$num_cols, config$rows_cols$num_rows))) {
-          proposed_network_max_distance <-
-            round(rnorm(1, mean = current$network_max_distance,
-                        sd = current$network_max_distance / 20), digits = 0)
-        }
-      } else {
-        proposed_network_max_distance <-
-          min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
-      }
-
       data <-
         param_func(
           proposed_reproductive_rate,
@@ -1028,9 +953,7 @@ calibrate <- function(infected_years_file,
           proposed_anthropogenic_distance_scale,
           proposed_percent_natural_dispersal,
           proposed_natural_kappa,
-          proposed_anthropogenic_kappa,
-          proposed_network_min_distance,
-          proposed_network_max_distance
+          proposed_anthropogenic_kappa
         )
 
       # set up comparison
@@ -1050,9 +973,7 @@ calibrate <- function(infected_years_file,
                    anthropogenic_distance_scale = proposed_anthropogenic_distance_scale,
                    percent_natural_dispersal = proposed_percent_natural_dispersal,
                    natural_kappa = proposed_natural_kappa,
-                   anthropogenic_kappa = proposed_anthropogenic_kappa,
-                   network_min_distance = proposed_network_min_distance,
-                   network_max_distance = proposed_network_max_distance
+                   anthropogenic_kappa = proposed_anthropogenic_kappa
         )
 
 
@@ -1219,9 +1140,7 @@ calibrate <- function(infected_years_file,
                         "percent_natural_dispersal",
                         "anthropogenic_distance_scale",
                         "natural_kappa",
-                        "anthropogenic_kappa",
-                        "network_min_distance",
-                        "network_max_distance")])
+                        "anthropogenic_kappa")])
 
     calibrated_cov_matrix <-
       cov(params[start_index:config$number_of_iterations,
@@ -1230,9 +1149,7 @@ calibrate <- function(infected_years_file,
                    "percent_natural_dispersal",
                    "anthropogenic_distance_scale",
                    "natural_kappa",
-                   "anthropogenic_kappa",
-                   "network_min_distance",
-                   "network_max_distance")])
+                   "anthropogenic_kappa")])
 
     parameters_kept <- params
 
