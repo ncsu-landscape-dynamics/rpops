@@ -3,6 +3,7 @@
 export(calibrate)
 export(configuration)
 export(configuration_qad_lite)
+export(create_summary_stats_and_stacks)
 export(pops)
 export(pops_lite)
 export(pops_model)
