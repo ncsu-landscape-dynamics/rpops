@@ -128,10 +128,20 @@ pops_lite <- function(config_file = "",
     i = seq_len(config$number_of_iterations),
     .packages = c("PoPS", "terra")
   ) %dopar% {
-    config <- update_config(config)
+
+    set.seed(config$random_seed[[i]])
+    config <- draw_parameters(config) # draws parameter set for the run
+    config <- host_pool_setup(config)
+    while (any(config$total_hosts > config$total_populations, na.rm = TRUE) ||
+           any(config$total_exposed > config$total_populations, na.rm = TRUE) ||
+           any(config$total_infecteds > config$total_populations, na.rm = TRUE)) {
+      config <- host_pool_setup(config)
+    }
+    config$competency_table_list <- competency_table_list_creator(config$competency_table)
+    config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
 
     data <- PoPS::pops_model(
-      random_seed = config$random_seed[1],
+      random_seed = config$random_seed[i],
       multiple_random_seeds = config$multiple_random_seeds,
       random_seeds = as.matrix(config$random_seeds[i, ])[1, ],
       use_lethal_temperature = config$use_lethal_temperature,
@@ -140,21 +150,16 @@ pops_lite <- function(config_file = "",
       use_survival_rates = config$use_survival_rates,
       survival_rate_month = config$survival_rate_month,
       survival_rate_day = config$survival_rate_day,
-      infected = config$infected,
-      total_exposed = config$total_exposed,
-      exposed = config$exposed,
-      susceptible = config$susceptible,
+      host_pools = config$host_pools,
       total_populations = config$total_populations,
-      total_hosts = config$total_hosts,
+      competency_table = config$competency_table_list,
+      pest_host_table = config$pest_host_table_list,
       mortality_on = config$mortality_on,
-      mortality_tracker = config$mortality_tracker,
-      mortality = config$mortality,
       quarantine_areas = config$quarantine_areas,
       quarantine_directions = config$quarantine_directions,
       treatment_maps = config$treatment_maps,
       treatment_dates = config$treatment_dates,
       pesticide_duration = config$pesticide_duration,
-      resistant = config$resistant,
       use_movements = config$use_movements,
       movements = config$movements,
       movements_dates = config$movements_dates,
@@ -170,8 +175,6 @@ pops_lite <- function(config_file = "",
       spatial_indices = config$spatial_indices,
       season_month_start_end = config$season_month_start_end,
       soil_reservoirs = config$soil_reservoirs,
-      mortality_rate = config$mortality_rate,
-      mortality_time_lag = config$mortality_time_lag,
       start_date = config$start_date,
       end_date = config$end_date,
       treatment_method = config$treatment_method,
@@ -216,8 +219,7 @@ pops_lite <- function(config_file = "",
       weather_size = config$weather_size,
       weather_type = config$weather_type,
       dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
-      use_soils = config$use_soils
-    )
+      use_soils = config$use_soils)
 
     data[c("spatial_indices",
            "soil_reservoirs",
