@@ -14,10 +14,10 @@ create_summary_stats_and_stacks <- function(config) {
   filelist <- list.files(file.path(config$output_folder_path), pattern = "pops_output*")
 
   inf_indices <- lapply(seq_len(config$number_of_outputs), function(i) {
-    seq(i, 2 * config$number_of_outputs *config$number_of_iterations, 2 * config$number_of_outputs)
+    seq(i, 2 * config$number_of_outputs * config$number_of_iterations, 2 * config$number_of_outputs)
   })
   area_indices <- lapply((3 + seq_len(config$number_of_outputs)), function(i) {
-    seq(i, 2 * config$number_of_outputs *config$number_of_iterations, 2 * config$number_of_outputs)
+    seq(i, 2 * config$number_of_outputs * config$number_of_iterations, 2 * config$number_of_outputs)
   })
   all_indices <-  c(inf_indices, area_indices)
 
@@ -30,7 +30,7 @@ create_summary_stats_and_stacks <- function(config) {
   all_names <-  c(inf_names, area_names)
 
   rasts <- lapply(1:config$number_of_outputs, function(j) {
-    y <- lapply(1:config$number_of_iterations, function(i){
+    y <- lapply(1:config$number_of_iterations, function(i) {
       file <- readRDS(file.path(config$output_folder_path, filelist[i]))
       values(raster_template) <- file$host_pools[[1]]$infected[[j]]
       raster_template
@@ -43,7 +43,8 @@ create_summary_stats_and_stacks <- function(config) {
     c(file$number_infected, file$area_infected)
   }))
 
-  all_stats <- data.frame(matrix(ncol = config$number_of_outputs * 2, nrow = config$number_of_iterations))
+  all_stats <-
+    data.frame(matrix(ncol = config$number_of_outputs * 2, nrow = config$number_of_iterations))
   for (i in seq_len(length(all_indices))) {
     all_stats[, i] <- x[all_indices[[i]]]
   }
@@ -56,7 +57,7 @@ create_summary_stats_and_stacks <- function(config) {
   min_run_index <- which.min(all_stats$number_infecteds_y1)
   max_run_index <- which.max(all_stats$number_infecteds_y1)
   for (i in seq_len(config$number_of_outputs)) {
-    if (i ==1) {
+    if (i == 1) {
       median_run <- rasts[[i]][[median_run_index]]
       min_run <- rasts[[i]][[min_run_index]]
       max_run <- rasts[[i]][[max_run_index]]
@@ -67,11 +68,16 @@ create_summary_stats_and_stacks <- function(config) {
     }
   }
 
-  writeRaster(median_run, file.path(config$output_folder_path, paste0("pops_median.tif")), overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(min_run, file.path(config$output_folder_path, paste0("pops_min.tif")), overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(max_run, file.path(config$output_folder_path, paste0("pops_max.tif")), overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(all_means, file.path(config$output_folder_path, paste0("pops_mean.tif")), overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(sd_s, file.path(config$output_folder_path, paste0("pops_sd.tif")), overwrite = TRUE, gdal = c("COMPRESS=NONE"))
+  writeRaster(median_run, file.path(config$output_folder_path, paste0("pops_median.tif")),
+              overwrite = TRUE, gdal = c("COMPRESS=NONE"))
+  writeRaster(min_run, file.path(config$output_folder_path, paste0("pops_min.tif")),
+              overwrite = TRUE, gdal = c("COMPRESS=NONE"))
+  writeRaster(max_run, file.path(config$output_folder_path, paste0("pops_max.tif")),
+              overwrite = TRUE, gdal = c("COMPRESS=NONE"))
+  writeRaster(all_means, file.path(config$output_folder_path, paste0("pops_mean.tif")),
+              overwrite = TRUE, gdal = c("COMPRESS=NONE"))
+  writeRaster(sd_s, file.path(config$output_folder_path, paste0("pops_sd.tif")),
+              overwrite = TRUE, gdal = c("COMPRESS=NONE"))
   write.csv(all_stats, (file.path(config$output_folder_path, paste0("all_stats.csv"))))
   summary_stats <-  data.frame(t(c(colMeans(all_stats), sapply(all_stats, sd))))
   write.csv(summary_stats, file.path(config$output_folder_path, paste0("all_stats.csv")))
