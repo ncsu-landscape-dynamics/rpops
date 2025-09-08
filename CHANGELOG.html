@@ -73,6 +73,7 @@
 <li><p>Added ability for model to use multi-host pops-core API. The model now takes 2 new parameter tables for hosts. It also takes a list of rasters for each host allowing testing of hypothesis related to different host combinations being more conducive to spread on the landscape (@petrasovaa, @ChrisJones687, @wenzeslaus, #186 and #188).</p></li>
 <li><p>Added the ability to calibrate, validate, and simulate from county level infection data (@ChrisJones687, #196 and #198).</p></li>
 <li><p>Added in PoPS lite features which make the model faster and less memory intensive (@cyborginhas and @ChrisJones687, #207).</p></li>
+<li><p>Added in ability to use multiple networks as part of the anthropogenic kernel (@ChrisJones687, #226).</p></li>
 </ul></div>
 <div class="section level3">
 <h3 id="changed">Changed<a class="anchor" aria-label="anchor" href="#changed"></a></h3>
@@ -83,7 +84,7 @@
 <h3 id="fixed">Fixed<a class="anchor" aria-label="anchor" href="#fixed"></a></h3>
 <ul><li><p>Fixed MCC calculations that returned NaN with very large datasets (@ChrisJones687, #161).</p></li>
 <li><p>Fixed quarantine directions outputs in pops-multirun (@petrasovaa, #162).</p></li>
-<li><p>Fixed probablistic weather not having the right number of time steps to check against (@ChrisJones687, #200)</p></li>
+<li><p>Fixed probabilistic weather not having the right number of time steps to check against (@ChrisJones687, #200)</p></li>
 <li><p>Fixed error with checking for any when NAs are present in areas that are water (@ChrisJones687, #201)</p></li>
 </ul></div>
 <div class="section level3">
