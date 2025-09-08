@@ -70,7 +70,7 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -139,12 +139,15 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             write_outputs <- "summary_outputs"
             output_folder_path <- tempdir()
             success_metric <- "mcc"
-            network_filename <- ""
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
             survival_rates_file <- ""
-            network_movement <- "walk"
+            network_filenames <- c("")
+            network_movement_types <- c("walk")
+            network_min_distances <- c(0)
+            network_max_distances <- c(0)
+            network_weights <- c(1)
             use_initial_condition_uncertainty <- FALSE
             use_host_uncertainty <- FALSE
             weather_type <- "deterministic"
@@ -230,8 +233,11 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty,
@@ -247,12 +253,12 @@ test_that("ABC calibration has correctly formatted returns with multiple output
                               start_with_soil_populations,
                               county_level_infection_data = county_level_infection_data)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -261,8 +267,6 @@ test_that("ABC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
@@ -279,7 +283,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -350,13 +354,13 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             write_outputs <- "None"
             output_folder_path <- ""
             success_metric <- "rmse and distance"
-            network_filename <-
-              system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
+            network_filenames <-
+              c(system.file("extdata", "simple20x20", "segments.csv", package = "PoPS"))
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
             survival_rates_file <- ""
-            network_movement <- "walk"
+            network_movement_types <- "walk"
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -429,12 +433,15 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = network_filenames,
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(50),
+                              network_max_distances = c(250),
+                              network_weights = c(1),
                               success_metric)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -443,12 +450,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
@@ -465,7 +470,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -536,13 +541,13 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             write_outputs <- "None"
             output_folder_path <- ""
             success_metric <- "accuracy, precision, recall, and specificity"
-            network_filename <-
-              system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
+            network_filenames <-
+              c(system.file("extdata", "simple20x20", "segments.csv", package = "PoPS"))
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
             survival_rates_file <- ""
-            network_movement <- "walk"
+            network_movement_types <- c("walk")
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -615,12 +620,15 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = network_filenames,
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(100),
+                              network_max_distances = c(1000),
+                              network_weights = c(1),
                               success_metric)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -629,12 +637,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
@@ -651,7 +657,7 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -722,8 +728,8 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             write_outputs <- "None"
             output_folder_path <- ""
             success_metric <- "quantity, allocation, and configuration"
-            network_filename <-
-              system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
+            network_filenames <-
+              c(system.file("extdata", "simple20x20", "segments.csv", package = "PoPS"))
             use_survival_rates <- FALSE
             survival_rate_month <- 3
             survival_rate_day <- 15
@@ -801,12 +807,15 @@ test_that("ABC calibration has correctly formatted returns and runs with a
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = network_filenames,
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(50),
+                              network_max_distances = c(150),
+                              network_weights = c(1),
                               success_metric)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -815,12 +824,10 @@ test_that("ABC calibration has correctly formatted returns and runs with a
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
@@ -838,7 +845,7 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -860,6 +867,10 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             season_month_end <- 12
             start_date <- "2003-01-01"
             end_date <- "2003-02-11"
+            use_survival_rates <- FALSE
+            survival_rate_month <- 3
+            survival_rate_day <- 15
+            survival_rates_file <- ""
             use_lethal_temperature <- FALSE
             temperature_file <- ""
             lethal_temperature <- -30
@@ -883,41 +894,48 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             output_frequency_n <- 1
             movements_file <- ""
             use_movements <- FALSE
-            percent_natural_dispersal <- 1.0
-            anthropogenic_distance_scale <- 0.1
-            number_of_iterations <- 10
-            number_of_cores <- 2
             start_exposed <- FALSE
             generate_stochasticity <- TRUE
             establishment_stochasticity <- TRUE
             movement_stochasticity <- TRUE
-            dispersal_stochasticity <- FALSE
+            dispersal_stochasticity <- TRUE
             establishment_probability <- 0.5
             dispersal_percentage <- 0.99
             quarantine_areas_file <- ""
             use_quarantine <- FALSE
             output_frequency_n <- 1
             use_spreadrates <- FALSE
-            calibration_method <- "ABC"
-            number_of_iterations <- 10
             use_overpopulation_movements <- FALSE
             overpopulation_percentage <- 0
             leaving_percentage <- 0
             leaving_scale_coefficient <- 1
+            calibration_method <- "ABC"
+            number_of_iterations <- 10
             exposed_file_list <- ""
             verbose <- TRUE
             write_outputs <- "None"
             output_folder_path <- ""
+            network_filenames <-
+              c(system.file("extdata", "simple20x20", "segments.csv", package = "PoPS"))
+            network_movement_types <- c("walk")
+            network_min_distances <- c(0)
+            network_max_distances <- c(0)
+            network_weights <- c(1)
             success_metric <- "quantity, allocation, and configuration"
-            network_filename <-
-              system.file("extdata", "simple20x20", "segments.csv", package = "PoPS")
-            use_survival_rates <- FALSE
-            survival_rate_month <- 3
-            survival_rate_day <- 15
-            survival_rates_file <- ""
-            network_movement <- "walk"
             use_initial_condition_uncertainty <- TRUE
             use_host_uncertainty <- TRUE
+            weather_type <- "deterministic"
+            temperature_coefficient_sd_file <- ""
+            precipitation_coefficient_sd_file <- ""
+            dispersers_to_soils_percentage <- 0
+            quarantine_directions <- ""
+            multiple_random_seeds <- FALSE
+            file_random_seeds <- NULL
+            use_soils <- FALSE
+            soil_starting_pest_file <- ""
+            start_with_soil_populations <- FALSE
+            county_level_infection_data <- FALSE
+
 
             data <- calibrate(infected_years_file,
                               number_of_observations,
@@ -990,14 +1008,28 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
-                              success_metric,
-                              use_initial_condition_uncertainty,
-                              use_host_uncertainty)
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
+                              success_metric = success_metric,
+                              use_initial_condition_uncertainty = use_initial_condition_uncertainty,
+                              use_host_uncertainty = use_host_uncertainty,
+                              weather_type = "deterministic",
+                              temperature_coefficient_sd_file = "",
+                              precipitation_coefficient_sd_file = "",
+                              dispersers_to_soils_percentage = 0,
+                              quarantine_directions = "",
+                              multiple_random_seeds = FALSE,
+                              file_random_seeds = NULL,
+                              use_soils = FALSE,
+                              soil_starting_pest_file = "",
+                              start_with_soil_populations = FALSE,
+                              county_level_infection_data = FALSE)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -1006,12 +1038,10 @@ test_that("ABC calibration has correctly formatted returns/runs with host and in
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
@@ -1028,7 +1058,7 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -1195,15 +1225,18 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty,
                               county_level_infection_data = county_level_infection_data)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -1212,12 +1245,10 @@ test_that("ABC calibration has correctly formatted returns/runs with county leve
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_generations * generation_size)
@@ -1235,7 +1266,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -1382,12 +1413,15 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -1396,12 +1430,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gt(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
@@ -1419,7 +1451,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -1566,12 +1598,15 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -1580,12 +1615,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gte(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
@@ -1603,7 +1636,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -1750,12 +1783,15 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -1764,12 +1800,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gte(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
@@ -1787,7 +1821,7 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -1934,12 +1968,15 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -1948,12 +1985,10 @@ test_that("MCMC calibration has correctly formatted returns with multiple output
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gte(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
@@ -1971,7 +2006,7 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -2120,14 +2155,17 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -2136,12 +2174,10 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gte(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_iterations)
@@ -2159,7 +2195,7 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             prior_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
             params_to_estimate <- c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE)
             number_of_generations <- 2
-            generation_size <- 2
+            generation_size <- 5
             pest_host_table <-
               system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
             competency_table <-
@@ -2320,15 +2356,18 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
                               verbose,
                               write_outputs,
                               output_folder_path,
-                              network_filename,
-                              network_movement,
+                              network_filenames = c(""),
+                              network_movement_types = c("walk"),
+                              network_min_distances = c(0),
+                              network_max_distances = c(0),
+                              network_weights = c(1),
                               success_metric,
                               use_initial_condition_uncertainty,
                               use_host_uncertainty,
                               county_level_infection_data = county_level_infection_data)
 
-            expect_length(data$posterior_means, 8)
-            expect_vector(data$posterior_means, ptype = double(), size = 8)
+            expect_length(data$posterior_means, 6)
+            expect_vector(data$posterior_means, ptype = double(), size = 6)
             expect_gt(data$posterior_means[1], 0)
             expect_gt(data$posterior_means[2], 0)
             expect_lte(data$posterior_means[2], 1000)
@@ -2337,12 +2376,10 @@ test_that("MCMC calibration has correctly formatted returns with host and initia
             expect_gt(data$posterior_means[4], 0)
             expect_gte(data$posterior_means[5], 0)
             expect_gte(data$posterior_means[6], 0)
-            expect_gt(data$posterior_means[7], 0)
-            expect_gte(data$posterior_means[8], 0)
             expect_is(data$posterior_cov_matrix, class = "matrix")
             expect_type(data$posterior_cov_matrix, "double")
-            expect_equal(nrow(data$posterior_cov_matrix), 8)
-            expect_equal(ncol(data$posterior_cov_matrix), 8)
+            expect_equal(nrow(data$posterior_cov_matrix), 6)
+            expect_equal(ncol(data$posterior_cov_matrix), 6)
             expect_type(data$total_number_of_observations, "double")
             expect_equal(data$total_number_of_observations, number_of_observations)
             expect_equal(nrow(data$raw_calibration_data), number_of_iterations)

@@ -113,9 +113,9 @@ anthropogenic_kernel_error <-
   "Anthropogenic kernel type not one of 'cauchy', 'exponential', 'uniform', 'deterministic
   neighbor', 'power law', 'hyperbolic secant', 'gamma', 'weibull', 'logistic', 'network'"
 covariance_mat_error <-
-  "parameter covariance matrix is not 8 x 8"
+  "parameter covariance matrix is not 6 x 6"
 paramter_means_error <-
-  "parameter means is not a vector of length 8"
+  "parameter means is not a vector of length 6"
 write_outputs_error <-
   "write_outputs is not one of c('all simulations', 'summary_outputs', 'None')"
 output_path_error <-
@@ -135,6 +135,9 @@ network_min_distance_large_error <-
 network_max_distance_large_error <-
   "network max distance is greater than the resoultion times the minimum NS or EW extent"
 network_movement_error <- "network movement is not of type 'walk', 'jump', or 'teleport'"
+network_length_error <-
+  "network_movement_types, network_min_distances, network_max_distances, network_filenames, and
+  network_weights are not all the same length (different number of items in the list)"
 
 infection_years_length_error <- function(num_layers_infected_years, number_of_time_steps) {
   error_message <-

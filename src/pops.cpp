@@ -12,6 +12,7 @@
 #include "treatments.hpp"
 #include "uniform_kernel.hpp"
 #include "quarantine.hpp"
+#include "multi_network.hpp"
 #include <Rcpp.h>
 #include <fstream>
 #include <iostream>
@@ -228,7 +229,7 @@ List pops_model_cpp(
 
     config.create_schedules();
 
-    using PoPSModel = Model<IntegerMatrix, NumericMatrix, int>;
+    using PoPSModel = Model<IntegerMatrix, NumericMatrix, int, MultiNetwork<int>>;
 
     Treatments<PoPSModel::StandardSingleHostPool, NumericMatrix> treatments(config.scheduler());
     for (unsigned t = 0; t < treatment_maps.size(); t++) {
@@ -250,7 +251,7 @@ List pops_model_cpp(
       }
     }
 
-    std::unique_ptr<Network<int>> network{nullptr};
+    std::unique_ptr<MultiNetwork<int>> network{nullptr};
     if (network_config.isNotNull() && network_data_config.isNotNull()) {
       // The best place for bbox handling would be with rows, cols, and
       // resolution, but since it is required only for network, it is here.
@@ -259,16 +260,29 @@ List pops_model_cpp(
       config.bbox.east = bbox["east"];
       config.bbox.west = bbox["west"];
       List net_config(network_config);
-      config.network_min_distance = net_config["network_min_distance"];
-      config.network_max_distance = net_config["network_max_distance"];
-      std::string network_movement = net_config["network_movement"];
-      config.network_movement = network_movement;
-      network.reset(new Network<int>(config.bbox, config.ew_res, config.ns_res));
+      List network_min_distances(net_config["network_min_distances"]);
+      List network_max_distances(net_config["network_max_distances"]);
+      List network_movement_types(net_config["network_movement_types"]);
+      List network_weights(net_config["network_weights"]);
+
+      for (unsigned i = 0; i < network_movement_types.size(); ++i) {
+        config.network_min_distances.push_back(network_min_distances.at(i));
+        config.network_max_distances.push_back(network_max_distances.at(i));
+        config.network_movement_types.push_back(network_movement_types.at(i));
+        config.network_weights.push_back(network_weights.at(i));
+      }
+
+      network.reset(new MultiNetwork<int>(config));
       List net_data_config(network_data_config);
-      std::ifstream network_stream{
-        Rcpp::as<std::string>(net_data_config["network_filename"])};
-      network->load(network_stream);
+      List network_filenames((net_data_config["network_filenames"]));
+      std::vector<std::string> network_files;
+      for (unsigned i = 0; i < network_filenames.size(); ++i) {
+        network_files.push_back(network_filenames.at(i));
+      }
+      network->load_from_files(network_files);
     }
+
+
     config.read_competency_table(competency_table);
     config.read_pest_host_table(pest_host_table);
 
@@ -390,7 +404,7 @@ List pops_model_cpp(
             quarantine,
             quarantine_areas,
             movements,
-            network ? *network : Network<int>::null_network());
+            network ? *network : PoPSModel::StandardNetwork::null_network());
 
         // keeps track of cumulative dispersers or propagules from a site.
         if (config.spread_schedule()[current_index]) {

@@ -41,11 +41,9 @@ namespace pops {
  *
  * @return Created kernel
  */
-template<typename Generator, typename IntegerRaster, typename RasterIndex>
+template<typename Generator, typename IntegerRaster, typename NetworkType>
 std::unique_ptr<KernelInterface<Generator>> create_anthro_kernel(
-    const Config& config,
-    const IntegerRaster& dispersers,
-    const Network<RasterIndex>& network)
+    const Config& config, const IntegerRaster& dispersers, const NetworkType& network)
 {
     auto anthro_kernel = kernel_type_from_string(config.anthro_kernel_type);
     if (anthro_kernel == DispersalKernelType::Uniform) {
@@ -60,12 +58,8 @@ std::unique_ptr<KernelInterface<Generator>> create_anthro_kernel(
     }
     else if (anthro_kernel == DispersalKernelType::Network) {
         using Kernel =
-            DynamicWrapperKernel<NetworkDispersalKernel<RasterIndex>, Generator>;
-        if (config.network_movement == "teleport")
-            return std::unique_ptr<Kernel>(new Kernel(network));
-        bool jump = config.network_movement == "jump" ? true : false;
-        return std::unique_ptr<Kernel>(new Kernel(
-            network, config.network_min_distance, config.network_max_distance, jump));
+            DynamicWrapperKernel<NetworkDispersalKernel<NetworkType>, Generator>;
+        return std::unique_ptr<Kernel>(new Kernel(network));
     }
     else if (!config.dispersal_stochasticity) {
         using Kernel = DynamicWrapperKernel<

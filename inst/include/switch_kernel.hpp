@@ -35,7 +35,7 @@ namespace pops {
  * its call in the function call operator, and extend the
  * supports_kernel() function.
  */
-template<typename IntegerRaster, typename RasterIndex>
+template<typename IntegerRaster, typename NetworkType>
 class SwitchDispersalKernel
 {
 protected:
@@ -44,7 +44,7 @@ protected:
     DeterministicDispersalKernel<IntegerRaster> deterministic_kernel_;
     UniformDispersalKernel uniform_kernel_;
     DeterministicNeighborDispersalKernel deterministic_neighbor_kernel_;
-    NetworkDispersalKernel<RasterIndex> network_kernel_;
+    NetworkDispersalKernel<NetworkType> network_kernel_;
     bool dispersal_stochasticity_;
 
 public:
@@ -53,7 +53,7 @@ public:
         const RadialDispersalKernel<IntegerRaster>& radial_kernel,
         const DeterministicDispersalKernel<IntegerRaster>& deterministic_kernel,
         const UniformDispersalKernel& uniform_kernel,
-        const NetworkDispersalKernel<RasterIndex>& network_kernel,
+        const NetworkDispersalKernel<NetworkType>& network_kernel,
         const DeterministicNeighborDispersalKernel& deterministic_neighbor_kernel =
             DeterministicNeighborDispersalKernel(Direction::None),
         const bool dispersal_stochasticity = true)

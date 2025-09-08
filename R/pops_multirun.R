@@ -96,8 +96,11 @@ pops_multirun <- function(infected_file_list,
                           mask = NULL,
                           write_outputs = "None",
                           output_folder_path = "",
-                          network_filename = "",
-                          network_movement = "walk",
+                          network_filenames = c(""),
+                          network_movement_types = c("walk"),
+                          network_min_distances = c(0),
+                          network_max_distances = c(0),
+                          network_weights = c(1),
                           use_initial_condition_uncertainty = FALSE,
                           use_host_uncertainty = FALSE,
                           weather_type = "deterministic",
@@ -179,8 +182,11 @@ pops_multirun <- function(infected_file_list,
   config$output_folder_path <- output_folder_path
   config$mortality_frequency <- mortality_frequency
   config$mortality_frequency_n <- mortality_frequency_n
-  config$network_filename <- network_filename
-  config$network_movement <- network_movement
+  config$network_filenames <- network_filenames
+  config$network_movement_types <- network_movement_types
+  config$network_min_distances <- network_min_distances
+  config$network_max_distances <- network_max_distances
+  config$network_weights <- network_weights
   config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
   config$use_host_uncertainty <- use_host_uncertainty
   config$weather_type <- weather_type
@@ -303,10 +309,11 @@ pops_multirun <- function(infected_file_list,
         leaving_percentage = config$leaving_percentage,
         leaving_scale_coefficient = config$leaving_scale_coefficient,
         bbox = config$bounding_box,
-        network_min_distance = config$network_min_distance,
-        network_max_distance = config$network_max_distance,
-        network_filename = config$network_filename,
-        network_movement = config$network_movement,
+        network_min_distances = config$network_min_distances,
+        network_max_distances = config$network_max_distances,
+        network_filenames = config$network_filenames,
+        network_movement_types = config$network_movement_types,
+        network_weights = config$network_weights,
         weather_size = config$weather_size,
         weather_type = config$weather_type,
         dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,

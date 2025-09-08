@@ -61,10 +61,6 @@
 #' statistics.
 #' @param spatial_indices list of all spatial locations with suitable hosts
 #' @param bbox bounding box for network kernel
-#' @param network_min_distance minimum time a propagule rides on the network. Used if
-#' anthropogenic_kernel_type = 'network'.
-#' @param network_max_distance maximum time a propagule rides on the network. Used if
-#' anthropogenic_kernel_type = 'network'.
 #' @param survival_rates vector of matrices of survival rates used to determine percentage of
 #' overwinter population that emerges
 #' @param weather_size the number of matrices in a list or layers in a raster object
@@ -154,10 +150,11 @@ pops_model <-
            leaving_percentage = 0.0,
            leaving_scale_coefficient = 1.0,
            bbox = NULL,
-           network_min_distance = 0,
-           network_max_distance = 0,
-           network_filename = "",
-           network_movement = "walk",
+           network_min_distances = c(0),
+           network_max_distances = c(0),
+           network_filenames = c(""),
+           network_movement_types = c("walk"),
+           network_weights = c(1),
            weather_size = 0,
            weather_type = "deterministic",
            dispersers_to_soils_percentage = 0,
@@ -180,14 +177,15 @@ pops_model <-
     # Network configuration
     network_config <- NULL
     network_data_config <- NULL
-    if (!(is.na(network_filename) || is.null(network_filename) || network_filename == "")) {
+    if (anthropogenic_kernel_type == "network") {
       network_config <- c()
-      network_config$network_min_distance <- network_min_distance
-      network_config$network_max_distance <- network_max_distance
-      network_config$network_movement <- network_movement
+      network_config$network_min_distances <- network_min_distances
+      network_config$network_max_distances <- network_max_distances
+      network_config$network_movement_types <- network_movement_types
+      network_config$network_weights <- network_weights
 
       network_data_config <- c()
-      network_data_config$network_filename <- network_filename
+      network_data_config$network_filenames <- network_filenames
     }
 
     # List of frequencies type string

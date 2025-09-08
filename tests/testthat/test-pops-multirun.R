@@ -5,8 +5,8 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
     system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file_list <-
     system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
   competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
@@ -32,7 +32,7 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
 })
 
 test_that("Multirun model outputs work", {
-  skip_on_os("windows")
+  # skip_on_os("windows")
   infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
   host_file_list <- system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
   total_populations_file <-
@@ -71,8 +71,8 @@ test_that("Multirun model outputs work", {
   number_of_cores <- 2
   model_type <- "SI"
   latency_period <- 0
-  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
   competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
@@ -177,8 +177,11 @@ test_that("Multirun model outputs work", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty,
                         use_host_uncertainty)
 
@@ -269,8 +272,11 @@ test_that("Multirun model outputs work", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty = FALSE,
                         use_host_uncertainty = FALSE,
                         weather_type = "deterministic",
@@ -372,8 +378,11 @@ test_that("Multirun model outputs work", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement)
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1))
 
   expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
@@ -460,8 +469,11 @@ test_that("Multirun model outputs work", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement)
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1))
 
   expect_equal(length(data), 18)
   expect_equal(terra::as.matrix(data$median_run[[1]], wide = TRUE),
@@ -485,7 +497,7 @@ test_that("Multirun model outputs work", {
 })
 
 test_that("Multirun model outputs work with mask", {
-  skip_on_os("windows")
+  # skip_on_os("windows")
   infected_file_list <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file_list <-
@@ -526,8 +538,8 @@ test_that("Multirun model outputs work with mask", {
   number_of_cores <- 2
   model_type <- "SI"
   latency_period <- 0
-  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
   competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
@@ -638,8 +650,11 @@ test_that("Multirun model outputs work with mask", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty = FALSE,
                         use_host_uncertainty = FALSE,
                         weather_type = "deterministic",
@@ -739,8 +754,11 @@ test_that("Multirun model outputs work with mask", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty,
                         use_host_uncertainty,
                         weather_type = "deterministic",
@@ -834,8 +852,11 @@ test_that("Multirun model outputs work with mask", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty,
                         use_host_uncertainty,
                         weather_type = "deterministic",
@@ -930,8 +951,11 @@ test_that("Multirun model outputs work with mask", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty,
                         use_host_uncertainty,
                         weather_type = "deterministic",
@@ -1026,8 +1050,11 @@ test_that("Multirun model outputs work with mask", {
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty,
                         use_host_uncertainty,
                         weather_type = "deterministic",
@@ -1039,7 +1066,8 @@ test_that("Multirun model outputs work with mask", {
                         file_random_seeds = NULL,
                         use_soils = FALSE,
                         soil_starting_pest_file = "",
-                        start_with_soil_populations = FALSE)
+                        start_with_soil_populations = FALSE,
+                        county_level_infection_data = FALSE)
 
   expect_equal(length(data), 18)
   expect_equal(data$west_rate[[1]], 0)
@@ -1053,7 +1081,7 @@ test_that("Multirun model outputs work with mask", {
 })
 
 test_that("Multirun model outputs work with writing all simulations and random seeds", {
-  skip_on_os("windows")
+  # skip_on_os("windows")
   infected_file_list <-
     system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
   host_file_list <-
@@ -1094,8 +1122,8 @@ test_that("Multirun model outputs work with writing all simulations and random s
   number_of_cores <- 2
   model_type <- "SEI"
   latency_period <- 2
-  parameter_means <- c(0, 21, 1, 500, 0, 0, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+  parameter_means <- c(0, 21, 1, 500, 0, 0)
+  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
   pest_host_table <-
     system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
   competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
@@ -1201,8 +1229,11 @@ test_that("Multirun model outputs work with writing all simulations and random s
                         mask,
                         write_outputs,
                         output_folder_path,
-                        network_filename,
-                        network_movement,
+                        network_filenames = c(""),
+                        network_movement_types = c("walk"),
+                        network_min_distances = c(0),
+                        network_max_distances = c(0),
+                        network_weights = c(1),
                         use_initial_condition_uncertainty,
                         use_host_uncertainty,
                         weather_type,

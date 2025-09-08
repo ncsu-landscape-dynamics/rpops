@@ -142,12 +142,6 @@ configuration <- function(config) {
     return(config)
   }
 
-  # check that network movement is one of the correct options
-  if (config$network_movement %notin% network_movement_options) {
-    config$failure <- network_movement_error
-    return(config)
-  }
-
   # check that weather_type is correct
   if (config$weather_type %notin% weather_type_list) {
     config$failure <- weather_type_error
@@ -798,6 +792,54 @@ configuration <- function(config) {
   rows_cols$num_cols <- terra::ncol(infected)
   config$rows_cols <- rows_cols
 
+  # check that network parameters are of the same length and correct type
+  if (config$anthropogenic_kernel_type == "network") {
+    if (length(config$network_min_distances) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+    if (length(config$network_max_distances) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+    if (length(config$network_movement_types) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+    if (length(config$network_weights) != length(config$network_filenames)) {
+      config$failure <- network_length_error
+    }
+
+
+    if (any(config$network_min_distances < config$res$ew_res / 2)) {
+      config$failure <- network_min_distance_small_error
+      return(config)
+    }
+
+    if (any(config$network_min_distances > config$network_max_distances)) {
+      config$failure <- network_min_distance_large_error
+      return(config)
+    }
+
+    if (any(config$network_max_distances >
+            (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res))) {
+      config$failure <- network_max_distance_large_error
+      return(config)
+    }
+
+    # check that network movement is one of the correct options
+    if (length(config$network_movement_types) > 1) {
+      for (i in seq_len(length(config$network_movement_types))) {
+        if (config$network_movement_types[i] %notin% network_movement_options) {
+          config$failure <- network_movement_error
+          return(config)
+        }
+      }
+    } else {
+      if (config$network_movement_types %notin% network_movement_options) {
+        config$failure <- network_movement_error
+        return(config)
+      }
+    }
+  }
+
   if (!is.null(config$mask)) {
     if (config$function_name %in% aws_bucket_list) {
       mask_check <- secondary_raster_checks(config$mask, infected, config$use_s3, config$bucket)
@@ -864,39 +906,14 @@ configuration <- function(config) {
 
   if (config$function_name %in% parameter_draw_list) {
 
-    if (nrow(config$parameter_cov_matrix) != 8 ||
-      ncol(config$parameter_cov_matrix) != 8) {
+    if (nrow(config$parameter_cov_matrix) != 6 ||
+      ncol(config$parameter_cov_matrix) != 6) {
       config$failure <- covariance_mat_error
       return(config)
     }
 
-    if (length(config$parameter_means) != 8) {
+    if (length(config$parameter_means) != 6) {
       config$failure <- paramter_means_error
-      return(config)
-    }
-
-    if (config$anthropogenic_kernel_type != "network") {
-      config$parameter_means[7] <- config$res$ew_res / 2
-    }
-
-    if (config$anthropogenic_kernel_type != "network") {
-      config$parameter_means[8] <-
-        min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res
-    }
-
-    if (config$parameter_means[7] < config$res$ew_res / 2) {
-      config$failure <- network_min_distance_small_error
-      return(config)
-    }
-
-    if (config$parameter_means[7] > config$parameter_means[8]) {
-      config$failure <- network_min_distance_large_error
-      return(config)
-    }
-
-    if (config$parameter_means[8] >
-        (min(config$rows_cols$num_cols, config$rows_cols$num_rows) * config$res$ew_res)) {
-      config$failure <- network_max_distance_large_error
       return(config)
     }
 
