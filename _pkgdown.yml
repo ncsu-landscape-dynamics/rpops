@@ -36,3 +36,4 @@ reference:
     - quantity_allocation_disagreement
     - configuration_qad_lite
     - quantity_allocation_disagreement_lite
+    - create_summary_stats_and_stacks
