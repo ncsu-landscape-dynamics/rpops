@@ -37,10 +37,10 @@ test_that("Model stops if files don't exist or aren't the correct extension", {
 
 test_that(
   "Validation has correctly formatted returns with multiple output comparisons", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_years.tif", package = "PoPS")
-    parameter_means <- c(1.8, 16.4, 0.973, 7803)
+    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
     parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
     pest_host_table <-
       system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
@@ -110,8 +110,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filename <- ""
-    network_movement <- "walk"
+    network_filenames = c("")
+    network_movement_types = c("walk")
+    network_min_distances = c(0)
+    network_max_distances = c(0)
+    network_weights = c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- FALSE
@@ -193,8 +196,11 @@ test_that(
       write_outputs,
       output_folder_path,
       point_file,
-      network_filename,
-      network_movement,
+      network_filenames,
+      network_movement_types,
+      network_min_distances,
+      network_max_distances,
+      network_weights,
       use_distance,
       use_configuration,
       use_initial_condition_uncertainty,
@@ -234,12 +240,12 @@ test_that(
 
 test_that(
   "Validation has correctly formatted returns and runs with a single output comparison", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
-    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0, 0, 0)
-    parameter_cov_matrix <- matrix(ncol = 8, nrow = 8, 0)
+    parameter_means <- c(1.8, 16.4, 0.973, 7803, 0, 0)
+    parameter_cov_matrix <- matrix(ncol = 6, nrow = 6, 0)
     pest_host_table <-
       system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
     competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
@@ -310,8 +316,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filename <- ""
-    network_movement <- "walk"
+    network_filenames = c("")
+    network_movement_types = c("walk")
+    network_min_distances = c(0)
+    network_max_distances = c(0)
+    network_weights = c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- FALSE
@@ -392,8 +401,11 @@ test_that(
       write_outputs,
       output_folder_path,
       point_file,
-      network_filename,
-      network_movement,
+      network_filenames,
+      network_movement_types,
+      network_min_distances,
+      network_max_distances,
+      network_weights,
       use_distance,
       use_configuration,
       use_initial_condition_uncertainty,
@@ -433,7 +445,7 @@ test_that(
 
 test_that(
   "Validation has correctly formatted returns and runs with a single output comparison with mask", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
@@ -509,8 +521,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filename <- ""
-    network_movement <- "walk"
+    network_filenames = c("")
+    network_movement_types = c("walk")
+    network_min_distances = c(0)
+    network_max_distances = c(0)
+    network_weights = c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- FALSE
@@ -591,8 +606,11 @@ test_that(
       write_outputs,
       output_folder_path,
       point_file,
-      network_filename,
-      network_movement,
+      network_filenames,
+      network_movement_types,
+      network_min_distances,
+      network_max_distances,
+      network_weights,
       use_distance,
       use_configuration,
       use_initial_condition_uncertainty,
@@ -630,10 +648,9 @@ test_that(
   }
 )
 
-
 test_that(
   "Validation has correctly formatted returns/runs with host and initial condition uncertainty", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "infected_single.tif", package = "PoPS")
     number_of_observations <- 68
@@ -709,8 +726,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filename <- ""
-    network_movement <- "walk"
+    network_filenames = c("")
+    network_movement_types = c("walk")
+    network_min_distances = c(0)
+    network_max_distances = c(0)
+    network_weights = c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- TRUE
@@ -791,8 +811,11 @@ test_that(
       write_outputs,
       output_folder_path,
       point_file,
-      network_filename,
-      network_movement,
+      network_filenames,
+      network_movement_types,
+      network_min_distances,
+      network_max_distances,
+      network_weights,
       use_distance,
       use_configuration,
       use_initial_condition_uncertainty,
@@ -832,7 +855,7 @@ test_that(
 
 test_that(
   "Validation has correctly formatted returns/runs with polygon level data", {
-    skip_on_os("windows")
+    # skip_on_os("windows")
     infected_years_file <-
       system.file("extdata", "simple20x20", "county_infected_years.gpkg", package = "PoPS")
     number_of_observations <- 68
@@ -908,8 +931,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filename <- ""
-    network_movement <- "walk"
+    network_filenames = c("")
+    network_movement_types = c("walk")
+    network_min_distances = c(0)
+    network_max_distances = c(0)
+    network_weights = c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- TRUE
@@ -991,8 +1017,11 @@ test_that(
       write_outputs,
       output_folder_path,
       point_file,
-      network_filename,
-      network_movement,
+      network_filenames,
+      network_movement_types,
+      network_min_distances,
+      network_max_distances,
+      network_weights,
       use_distance,
       use_configuration,
       use_initial_condition_uncertainty,
