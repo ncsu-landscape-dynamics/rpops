@@ -110,11 +110,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filenames = c("")
-    network_movement_types = c("walk")
-    network_min_distances = c(0)
-    network_max_distances = c(0)
-    network_weights = c(1)
+    network_filenames <- c("")
+    network_movement_types <- c("walk")
+    network_min_distances <- c(0)
+    network_max_distances <- c(0)
+    network_weights <- c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- FALSE
@@ -316,11 +316,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filenames = c("")
-    network_movement_types = c("walk")
-    network_min_distances = c(0)
-    network_max_distances = c(0)
-    network_weights = c(1)
+    network_filenames <- c("")
+    network_movement_types <- c("walk")
+    network_min_distances <- c(0)
+    network_max_distances <- c(0)
+    network_weights <- c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- FALSE
@@ -521,11 +521,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filenames = c("")
-    network_movement_types = c("walk")
-    network_min_distances = c(0)
-    network_max_distances = c(0)
-    network_weights = c(1)
+    network_filenames <- c("")
+    network_movement_types <- c("walk")
+    network_min_distances <- c(0)
+    network_max_distances <- c(0)
+    network_weights <- c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- FALSE
@@ -726,11 +726,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filenames = c("")
-    network_movement_types = c("walk")
-    network_min_distances = c(0)
-    network_max_distances = c(0)
-    network_weights = c(1)
+    network_filenames <- c("")
+    network_movement_types <- c("walk")
+    network_min_distances <- c(0)
+    network_max_distances <- c(0)
+    network_weights <- c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- TRUE
@@ -931,11 +931,11 @@ test_that(
     survival_rate_month <- 3
     survival_rate_day <- 15
     survival_rates_file <- ""
-    network_filenames = c("")
-    network_movement_types = c("walk")
-    network_min_distances = c(0)
-    network_max_distances = c(0)
-    network_weights = c(1)
+    network_filenames <- c("")
+    network_movement_types <- c("walk")
+    network_min_distances <- c(0)
+    network_max_distances <- c(0)
+    network_weights <- c(1)
     use_distance <- FALSE
     use_configuration <- FALSE
     use_initial_condition_uncertainty <- TRUE
