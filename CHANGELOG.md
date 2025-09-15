@@ -40,7 +40,7 @@ this repository.
 
 - In PoPS Core we are more explicit with types and round to the nearest int for model aspects that require it (@wenzeslaus, #203, #204, #205, #206, and #210 and @ChrisJones687, #208 and #209).
 
-- The workflow for PoPS has changed for version 3.0.0 and newer. We have moved to using a config file (.ymal or .csv). We then create a configuration variable in R and write out an .rds file that can be used in all other functions.
+- The workflow for PoPS has changed for version 3.0.0 and newer. We have moved to using a config file (.ymal or .csv). We then create a configuration variable in R and write out an .rds file that can be used in all other functions, see workflow documentation for more information (@ChrisJones687 #)
 
 ### Fixed
 
