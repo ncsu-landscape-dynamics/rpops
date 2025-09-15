@@ -40,6 +40,8 @@ this repository.
 
 - In PoPS Core we are more explicit with types and round to the nearest int for model aspects that require it (@wenzeslaus, #203, #204, #205, #206, and #210 and @ChrisJones687, #208 and #209).
 
+- The workflow for PoPS has changed for version 3.0.0 and newer. We have moved to using a config file (.ymal or .csv). We then create a configuration variable in R and write out an .rds file that can be used in all other functions.
+
 ### Fixed
 
 - Fixed MCC calculations that returned NaN with very large datasets (@ChrisJones687, #161).
@@ -64,7 +66,7 @@ this repository.
 - `validate`, `calibrate`, `pops_multirun`,  and `pops` now take use_survival_rates, survival_rate_month, 
   survival_rate_day, and survival_rates_file (@ChrisJones687, #147).
   
- - `validate`, `calibrate`, `pops_multirun`,  and `pops` now take network_movement as a parameter. This 
+- `validate`, `calibrate`, `pops_multirun`,  and `pops` now take network_movement as a parameter. This 
     parameter controls how dispersal occurs along the network (@ChrisJones687, #147).
     
 ### Changed
