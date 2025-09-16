@@ -1,0 +1,128 @@
+#file paths
+input_path: "/Users/cmjone25/projects/rpops/inst/extdata/"
+output_path: "/Users/cmjone25/projects/rpops/inst/extdata/simple20x20/outputs"
+
+# pest parameters
+infected_file_list: ["simple20x20/infected_single.tif"]
+parameter_means: [0, 0, 0, 0, 0, 0]
+parameter_cov_matrix: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+pest_host_table: "pest_host_table_singlehost.csv"
+competency_table: "competency_table_singlehost.csv"
+county_level_infection_data: false
+use_initial_condition_uncertainty: true
+start_exposed: false
+latency_period: 0
+exposed_file_list: [""]
+
+# host data
+host_file_list: "simple20x20/host.tif"
+total_populations_file: "simple20x20/all_plants.tif"
+use_host_uncertainty: true
+
+# simulation settings
+random_seed: null
+start_date: "2022-01-01"
+end_date: "2024-12-31"
+time_step: "week"
+model_type: "SI"
+season_month_start: 1
+season_month_end: 12
+number_of_iterations: 4000
+number_of_cores: 5
+function_name: "multirun"
+failure: null
+write_outputs: "all_simulations"
+output_frequency: "year"
+output_frequency_n: 1
+mask: null
+
+# weather
+use_lethal_temperature: false
+temperature_file: ""
+lethal_temperature: -15
+lethal_temperature_month: 1
+use_survival_rates: false
+survival_rate_month: 3
+survival_rate_day: 15
+survival_rates_file: ""
+temp: false
+temperature_coefficient_file: ""
+temperature_coefficient_sd_file: ""
+precip: false
+precipitation_coefficient_file: ""
+precipitation_coefficient_sd_file: ""
+weather_type: "deterministic"
+
+# mortality
+mortality_frequency: "year"
+mortality_frequency_n: 1
+
+# management
+management: false
+treatments_file: ""
+treatment_dates: ["2023-12-24"]
+treatment_method: "ratio"
+pesticide_duration: [0]
+pesticide_efficacy: 1.0
+use_quarantine: false
+quarantine_areas_file: ""
+quarantine_directions: ""
+
+# dispersal
+natural_kernel_type: "cauchy"
+natural_dir: "NONE"
+anthropogenic_kernel_type: "cauchy"
+anthropogenic_dir: "NONE"
+network_filenames: [""]
+network_movement_types: ["walk"]
+network_min_distances: [0]
+network_max_distances: [0]
+network_weights: [1]
+
+# host movement
+use_movements: false
+movements_file: ""
+
+# stochasticity
+multiple_random_seeds: true
+file_random_seeds: null
+generate_stochasticity: true
+establishment_stochasticity: true
+movement_stochasticity: true
+dispersal_stochasticity: true
+establishment_probability: 0.5
+dispersal_percentage: 0.99
+use_spreadrates: false
+use_overpopulation_movements: false
+overpopulation_percentage: 0.75
+leaving_percentage: 0.5
+leaving_scale_coefficient: 5
+
+# soil_pests
+use_soils: false
+soil_starting_pest_file: ""
+start_with_soil_populations: false
+dispersers_to_soils_percentage: 0
+
+# validation and calibration
+infected_years_file: ""
+
+# calibration only
+params_to_estimate: [true, true, true, true, false, false]
+prior_means: [0, 0, 0, 0, 0, 0]
+prior_cov_matrix: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
+prior_number_of_observations: 0
+number_of_observations: 0
+success_metric: "MCC"
+verbose: true
+natural_kappa: 0
+anthropogenic_kappa: 0
+calibration_method: "ABC"
+# ABC Parameters
+generation_size: 1000
+number_of_generations: 7
+
+# validation only
+point_file: ""
+use_configuration: false
+
