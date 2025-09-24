@@ -703,7 +703,6 @@ calculated_stats_county_level <- function(compare_vect) {
   return(output)
 }
 
-
 calculate_all_stats <- function(config, data) {
   all_disagreement <-
     foreach::foreach(
