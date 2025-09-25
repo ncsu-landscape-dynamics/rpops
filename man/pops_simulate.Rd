@@ -28,7 +28,7 @@ time or computational constraints.
 
 Multiple Random Seed handling:
 - If use_multiple_random_seeds = TRUE and multiple_random_seeds_file = NULL in the
-`config_file`, a new set of random seeds will be sampled and exported as
+`config_rds_file`, a new set of random seeds will be sampled and exported as
 [unique_id]_forecast_random_seeds.csv in the output folder.
 - The same [unique_id] is used for raw output files to link seeds with
 their respective runs.

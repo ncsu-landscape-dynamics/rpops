@@ -35,10 +35,10 @@ configuration <- function(config_file, testing = FALSE) {
   config$rclmat <- matrix(config$rcl, ncol = 3, byrow = TRUE)
 
   if (is.null(config$random_seed)) {
-    config$random_seed <- as.integer(sample.int(1e9, config$number_of_iterations, replace = FALSE))
+    config$random_seed_list <- as.integer(sample.int(1e9, config$number_of_iterations, replace = FALSE))
   }
 
-  set.seed(config$random_seed[[1]])
+  set.seed(config$random_seed_list[[1]])
 
   if (config$use_multiple_random_seeds) {
     if (!is.null(config$file_random_seeds)) {
@@ -49,13 +49,13 @@ configuration <- function(config_file, testing = FALSE) {
         print(config$failure)
         return(config)
       } else {
-        config$random_seeds <- random_seeds_file_check$random_seeds
+        config$random_seeds_list <- random_seeds_file_check$random_seeds
       }
     } else {
-      config$random_seeds <- create_random_seeds(config$number_of_iterations)
+      config$random_seeds_list <- create_random_seeds(config$number_of_iterations)
     }
   } else {
-    config$random_seeds <- create_random_seeds(1)
+    config$random_seeds_list <- create_random_seeds(1)
   }
 
   if (!base::dir.exists(config$output_path)) {

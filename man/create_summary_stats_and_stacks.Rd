@@ -4,7 +4,7 @@
 \alias{create_summary_stats_and_stacks}
 \title{Create summary stats and raster summaries}
 \usage{
-create_summary_stats_and_stacks(config_file)
+create_summary_stats_and_stacks(config_rds_file)
 }
 \arguments{
 \item{config_rds_file}{Path to config rds file produced when calling `configuration`.

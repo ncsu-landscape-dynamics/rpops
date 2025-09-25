@@ -11,8 +11,8 @@
 #' @export
 #'
 
-create_summary_stats_and_stacks <- function(config_file) {
-  config <- readRDS(config_file)
+create_summary_stats_and_stacks <- function(config_rds_file) {
+  config <- readRDS(config_rds_file)
   raster_template <- terra::rast(file.path(config$input_path, config$host_files)[[1]])[[1]]
   filelist <- list.files(file.path(config$output_path), pattern = "pops_output*")
 
