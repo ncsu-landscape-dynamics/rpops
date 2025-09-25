@@ -90,7 +90,7 @@ pops_simulate <- function(config_rds_file = "") {
     }
     config$competency_table_list <- competency_table_list_creator(config$competency_table)
     config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
-    config$random_seed <- config$random_seed_list[i]
+    config$random_seed <- config$random_seed_list[[i]]
     config$random_seeds <- as.matrix(config$random_seeds_list[i, ])[1, ]
 
     data <- PoPS::pops_model(config)
