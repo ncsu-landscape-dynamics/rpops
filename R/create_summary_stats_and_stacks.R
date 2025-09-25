@@ -3,15 +3,18 @@
 #' This function takes the outputs from PoPS lite and calculates the mean, max, min, and standard
 #' deviation of each cell and calculates the summary statistics for the study area.
 #'
-#' @param config the config used for running PoPS lite for the simulations.
+#' @param config_rds_file Path to config rds file produced when calling `configuration`.
+#' The config file includes all data necessary used to set up c++ PoPS model. This is the same
+#' file called when calling `simulate`.
 #' @return creates and writes raster stacks from all pops_lite runs in the outputs folder. Also
 #' reates and writes mean, standard deviation, median, min, and max runs, and summary statistics.
 #' @export
 #'
 
-create_summary_stats_and_stacks <- function(config) {
-  raster_template <- rast(config$host_file_list[[1]])[[1]]
-  filelist <- list.files(file.path(config$output_folder_path), pattern = "pops_output*")
+create_summary_stats_and_stacks <- function(config_file) {
+  config <- readRDS(config_file)
+  raster_template <- terra::rast(file.path(config$input_path, config$host_files)[[1]])[[1]]
+  filelist <- list.files(file.path(config$output_path), pattern = "pops_output*")
 
   inf_indices <- lapply(seq_len(config$number_of_outputs), function(i) {
     seq(i, 2 * config$number_of_outputs * config$number_of_iterations, 2 * config$number_of_outputs)
@@ -31,15 +34,17 @@ create_summary_stats_and_stacks <- function(config) {
 
   rasts <- lapply(1:config$number_of_outputs, function(j) {
     y <- lapply(1:config$number_of_iterations, function(i) {
-      file <- readRDS(file.path(config$output_folder_path, filelist[i]))
-      values(raster_template) <- file$host_pools[[1]]$infected[[j]]
+      file <- readRDS(file.path(config$output_path, filelist[i]))
+      terra::values(raster_template) <- file$host_pools[[1]]$infected[[j]]
       raster_template
     })
-    return(rast(y))
+    terra::writeRaster(terra::rast(y), file.path(config$output_path, paste0("pops_ensemble_ts_", j, ".tif")),
+                       overwrite = TRUE, gdal = c("COMPRESS=NONE"))
+    return(terra::rast(y))
   })
 
   x <- unlist(lapply(1:config$number_of_iterations, function(r) {
-    file <- readRDS(file.path(config$output_folder_path, filelist[r]))
+    file <- readRDS(file.path(config$output_path, filelist[r]))
     c(file$number_infected, file$area_infected)
   }))
 
@@ -50,8 +55,8 @@ create_summary_stats_and_stacks <- function(config) {
   }
   names(all_stats) <- all_names
 
-  all_means <- rast(lapply(rasts, terra::mean))
-  sd_s <- rast(lapply(rasts, terra::stdev))
+  all_means <- terra::rast(lapply(rasts, terra::mean))
+  sd_s <- terra::rast(lapply(rasts, terra::stdev))
   which_median <- function(x) which.min(abs(x - median(x)))
   median_run_index <- which_median(all_stats$number_infecteds_y1)
   min_run_index <- which.min(all_stats$number_infecteds_y1)
@@ -68,18 +73,18 @@ create_summary_stats_and_stacks <- function(config) {
     }
   }
 
-  writeRaster(median_run, file.path(config$output_folder_path, paste0("pops_median.tif")),
+  terra::writeRaster(median_run, file.path(config$output_path, paste0("pops_median.tif")),
               overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(min_run, file.path(config$output_folder_path, paste0("pops_min.tif")),
+  terra::writeRaster(min_run, file.path(config$output_path, paste0("pops_min.tif")),
               overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(max_run, file.path(config$output_folder_path, paste0("pops_max.tif")),
+  terra::writeRaster(max_run, file.path(config$output_path, paste0("pops_max.tif")),
               overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(all_means, file.path(config$output_folder_path, paste0("pops_mean.tif")),
+  terra::writeRaster(all_means, file.path(config$output_path, paste0("pops_mean.tif")),
               overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  writeRaster(sd_s, file.path(config$output_folder_path, paste0("pops_sd.tif")),
+  terra::writeRaster(sd_s, file.path(config$output_path, paste0("pops_sd.tif")),
               overwrite = TRUE, gdal = c("COMPRESS=NONE"))
-  write.csv(all_stats, (file.path(config$output_folder_path, paste0("all_stats.csv"))))
+  write.csv(all_stats, (file.path(config$output_path, paste0("all_stats.csv"))))
   summary_stats <-  data.frame(t(c(colMeans(all_stats), sapply(all_stats, sd))))
-  write.csv(summary_stats, file.path(config$output_folder_path, paste0("all_stats.csv")))
+  write.csv(summary_stats, file.path(config$output_path, paste0("all_stats.csv")))
   return(all_means)
 }
