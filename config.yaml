@@ -1,54 +1,51 @@
-#file paths
-input_path: "/Users/cmjone25/projects/rpops/inst/extdata/"
-output_path: "/Users/cmjone25/projects/rpops/inst/extdata/simple20x20/outputs"
+# File paths for input and output data
+input_path: "C:/Users/cjone/Projects/rpops/inst/extdata" # folder with inputs
+output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple20x20/outputs" # folder to write outputs to
 
 # pest parameters
-infected_file_list: ["simple20x20/infected_single.tif"]
-parameter_means: [0, 0, 0, 0, 0, 0]
-parameter_cov_matrix: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
-pest_host_table: "pest_host_table_singlehost.csv"
-competency_table: "competency_table_singlehost.csv"
-county_level_infection_data: false
-use_initial_condition_uncertainty: true
-start_exposed: false
-latency_period: 0
-exposed_file_list: [""]
+starting_infected_files: ["simple20x20/infected_wsd.tif"] # GeoTiff File with the locations of initial infections to start the simulation
+parameter_means_file: "parameter_means_default.csv" # CSV File with the parameter means from the calibration
+parameter_cov_matrix_file: "parameter_cov_matrix_default.csv" # CSV File with the parameter covariance matrix from the calibration
+pest_host_table: "pest_host_table_singlehost.csv" # CSV file with the pest host table
+competency_table: "competency_table_singlehost.csv" # CSV file with the compentency table
+county_level_infection_data: false # is your infection data county level only
+use_initial_condition_uncertainty: true # Are you providing a mean and standard deviation for your starting infection files. This allows for propogating uncertainty through the model.
+start_exposed: false # Should you start with your known infections as exposed. Useful for simulating inoculation experiments.
+latency_period: 0 # what is the lantent period of your pathogen?
+exposed_files: [""] # A list of GeoTiff files with location of exposed infections at start of simulation.
 
 # host data
-host_file_list: "simple20x20/host.tif"
+host_files: ["simple20x20/host_w_sd2.tif"]
 total_populations_file: "simple20x20/all_plants.tif"
 use_host_uncertainty: true
 
 # simulation settings
-random_seed: null
+random_seed: null # no need to set this primarily used for tests to ensure identical random draws.
 start_date: "2022-01-01"
 end_date: "2024-12-31"
 time_step: "week"
 model_type: "SI"
 season_month_start: 1
 season_month_end: 12
-number_of_iterations: 4000
-number_of_cores: 5
-function_name: "multirun"
-failure: null
-write_outputs: "all_simulations"
+number_of_iterations: 10
+number_of_cores: 2
 output_frequency: "year"
 output_frequency_n: 1
 mask: null
 
 # weather
 use_lethal_temperature: false
-temperature_file: ""
+lethal_temperature_file: ""
 lethal_temperature: -15
 lethal_temperature_month: 1
-use_survival_rates: false
-survival_rate_month: 3
-survival_rate_day: 15
-survival_rates_file: ""
-temp: false
+use_overwinter_survival: false
+overwinter_survival_rate_month: 3
+overwinter_survival_rate_day: 15
+overwinter_survival_rates_file: ""
+use_temperature: false
 temperature_coefficient_file: ""
 temperature_coefficient_sd_file: ""
-precip: false
+use_precipitation: false
 precipitation_coefficient_file: ""
 precipitation_coefficient_sd_file: ""
 weather_type: "deterministic"
@@ -57,12 +54,12 @@ weather_type: "deterministic"
 mortality_frequency: "year"
 mortality_frequency_n: 1
 
-# management
-management: false
+# treatments
+use_treatment: false
 treatments_file: ""
 treatment_dates: ["2023-12-24"]
 treatment_method: "ratio"
-pesticide_duration: [0]
+pesticide_durations: [0]
 pesticide_efficacy: 1.0
 use_quarantine: false
 quarantine_areas_file: ""
@@ -73,19 +70,20 @@ natural_kernel_type: "cauchy"
 natural_dir: "NONE"
 anthropogenic_kernel_type: "cauchy"
 anthropogenic_dir: "NONE"
-network_filenames: [""]
+# only used if anthropogenic_kernel_type == "network"
+network_files: [""]
 network_movement_types: ["walk"]
 network_min_distances: [0]
 network_max_distances: [0]
 network_weights: [1]
 
 # host movement
-use_movements: false
+use_movements: false # Boolean for moving hosts (used when animals move from farm to farm)
 movements_file: ""
 
 # stochasticity
-multiple_random_seeds: true
-file_random_seeds: null
+use_multiple_random_seeds: false
+multiple_random_seeds_file: null
 generate_stochasticity: true
 establishment_stochasticity: true
 movement_stochasticity: true
@@ -105,24 +103,29 @@ start_with_soil_populations: false
 dispersers_to_soils_percentage: 0
 
 # validation and calibration
-infected_years_file: ""
+infected_val_cal_file: "" # GeoTiff file with the infections in which to compare the validation/calibration results with.
 
-# calibration only
-params_to_estimate: [true, true, true, true, false, false]
+# calibration only parameters
+perform_calibration: false
+params_to_estimate: [true, true, true, true, false, false] # Position 1 = reproductive rate, 2 =
 prior_means: [0, 0, 0, 0, 0, 0]
 prior_cov_matrix: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]
-prior_number_of_observations: 0
-number_of_observations: 0
+prior_number_of_observations: 0 # observations that have been conducted at the start of the simulation
+number_of_observations: 0 # observations that were conducted during the simulation for validation/calibration (these are samples taken to confirm presence/absence and/or abundance)
 success_metric: "MCC"
 verbose: true
 natural_kappa: 0
 anthropogenic_kappa: 0
-calibration_method: "ABC"
+calibration_method: "ABC" # Which method of calibration to use ABC or MCMC. We recommend ABC as it tends to provide more robust and accurate parameter sets.
 # ABC Parameters
 generation_size: 1000
 number_of_generations: 7
 
 # validation only
-point_file: ""
-use_configuration: false
+perform_validation: false
+point_file: "" # only if you want to validate to specific point data ()
+use_configuration: false # Use if you want to calculate configuration disagreement. This takes longer to compute simulation statistics and success metrics).
 
+# Model API only never used unless you are pulling data from an S3 bucket in the cloud
+use_s3: false
+bucket: ""
