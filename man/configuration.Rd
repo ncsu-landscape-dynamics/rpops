@@ -4,11 +4,13 @@
 \alias{configuration}
 \title{PoPS (configuration}
 \usage{
-configuration(config_file)
+configuration(config_file, testing = FALSE)
 }
 \arguments{
 \item{config_file}{yaml or csv file with paths and data necessary for formatting data to
 be used in the c++ model}
+
+\item{testing}{only used during tests otherwise ignored}
 }
 \value{
 config list with all data ready for pops C++ or error message
