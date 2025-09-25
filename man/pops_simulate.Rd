@@ -4,10 +4,10 @@
 \alias{pops_simulate}
 \title{PoPS Simulate}
 \usage{
-pops_simulate(config_file = "")
+pops_simulate(config_rds_file = "")
 }
 \arguments{
-\item{config_file}{Path to config file produced when calling `configuration`.
+\item{config_rds_file}{Path to config file produced when calling `configuration`.
 The config file includes all data necessary used to set up c++ PoPS model}
 }
 \value{

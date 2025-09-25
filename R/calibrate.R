@@ -69,7 +69,7 @@ calibrate <- function(config) {
 
       data <- pops_model(
         random_seed = config$random_seed,
-        multiple_random_seeds = config$multiple_random_seeds,
+        use_multiple_random_seeds = config$use_multiple_random_seeds,
         random_seeds = as.matrix(random_seeds[1, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,

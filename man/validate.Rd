@@ -7,9 +7,6 @@ scales of the pops model.}
 \usage{
 validate(config)
 }
-\arguments{
-\item{config}{The config with the list of parameters returned from running configuration.}
-}
 \value{
 a data frame of statistical measures of model performance.
 }

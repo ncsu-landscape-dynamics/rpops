@@ -18,7 +18,7 @@
 #' - The same [unique_id] is used for raw output files to link seeds with
 #' their respective runs.
 
-#' @param config_file Path to config file produced when calling `configuration`.
+#' @param config_rds_file Path to config file produced when calling `configuration`.
 #' The config file includes all data necessary used to set up c++ PoPS model
 #'
 #' @importFrom terra app rast xres yres classify extract ext as.points ncol nrow project
@@ -34,7 +34,7 @@
 #' @return list of infected and susceptible per year
 #' @export
 
-pops_simulate <- function(config_file = "") {
+pops_simulate <- function(config_rds_file = "") {
 
   config <- readRDS(config_file)
 

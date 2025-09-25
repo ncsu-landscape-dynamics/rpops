@@ -32,7 +32,7 @@ validate <- function(config) {
     stop(config$failure)
   }
 
-  if (config$multiple_random_seeds && is.null(config$file_random_seeds) &&
+  if (config$use_multiple_random_seeds && is.null(config$file_random_seeds) &&
       dir.exists(config$output_folder_path)) {
     write.csv(config$random_seeds, paste0(config$output_folder_path, "validation_random_seeds.csv"),
               row.names = FALSE)
@@ -40,7 +40,7 @@ validate <- function(config) {
 
   i <- NULL
 
-  cl <- makeCluster(config$core_count)
+  cl <- makeCluster(config$number_of_cores)
   registerDoParallel(cl)
 
   qa <-
@@ -62,7 +62,7 @@ validate <- function(config) {
 
       data <- pops_model(
         random_seed = config$random_seed[i],
-        multiple_random_seeds = config$multiple_random_seeds,
+        use_multiple_random_seeds = config$use_multiple_random_seeds,
         random_seeds = as.matrix(config$random_seeds[i, ])[1, ],
         use_lethal_temperature = config$use_lethal_temperature,
         lethal_temperature = config$lethal_temperature,

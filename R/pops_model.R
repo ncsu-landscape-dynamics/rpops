@@ -81,14 +81,14 @@
 
 pops_model <-
   function(random_seed,
-           multiple_random_seeds,
+           use_multiple_random_seeds,
            random_seeds,
            use_lethal_temperature,
            lethal_temperature,
            lethal_temperature_month,
-           use_survival_rates,
-           survival_rate_month,
-           survival_rate_day,
+           use_overwinter_survival,
+           overwinter_survival_rate_month,
+           overwinter_survival_rate_day,
            host_pools,
            total_populations,
            competency_table,
@@ -98,7 +98,7 @@ pops_model <-
            quarantine_directions,
            treatment_maps,
            treatment_dates,
-           pesticide_duration,
+           pesticide_durations,
            use_movements,
            movements,
            movements_dates,
@@ -152,7 +152,7 @@ pops_model <-
            bbox = NULL,
            network_min_distances = c(0),
            network_max_distances = c(0),
-           network_filenames = c(""),
+           network_files = c(""),
            network_movement_types = c("walk"),
            network_weights = c(1),
            weather_size = 0,
@@ -185,7 +185,7 @@ pops_model <-
       network_config$network_weights <- network_weights
 
       network_data_config <- c()
-      network_data_config$network_filenames <- network_filenames
+      network_data_config$network_filenames <- network_files
     }
 
     # List of frequencies type string
@@ -210,13 +210,13 @@ pops_model <-
     bool_config$movement_stochasticity <- movement_stochasticity
     bool_config$dispersal_stochasticity <- dispersal_stochasticity
     bool_config$use_overpopulation_movements <- use_overpopulation_movements
-    bool_config$use_survival_rate <- use_survival_rates
+    bool_config$use_survival_rate <- use_overwinter_survival
     bool_config$use_soils <- use_soils
 
 
     data <-
       suppressWarnings(pops_model_cpp(random_seed = random_seed,
-                     multiple_random_seeds = multiple_random_seeds,
+                     multiple_random_seeds = use_multiple_random_seeds,
                      random_seeds = random_seeds,
                      lethal_temperature = lethal_temperature,
                      lethal_temperature_month = lethal_temperature_month,
@@ -228,7 +228,7 @@ pops_model <-
                      quarantine_directions = quarantine_directions,
                      treatment_maps = treatment_maps,
                      treatment_dates = treatment_dates,
-                     pesticide_duration = pesticide_duration,
+                     pesticide_duration = pesticide_durations,
                      movements = movements,
                      movements_dates = movements_dates,
                      temperature = temperature,
@@ -261,8 +261,8 @@ pops_model <-
                      latency_period = latency_period,
                      establishment_probability = establishment_probability,
                      dispersal_percentage = dispersal_percentage,
-                     survival_rate_month = survival_rate_month,
-                     survival_rate_day = survival_rate_day,
+                     survival_rate_month = overwinter_survival_rate_month,
+                     survival_rate_day = overwinter_survival_rate_day,
                      overpopulation_config = overpopulation_config,
                      network_config = network_config,
                      network_data_config = network_data_config,

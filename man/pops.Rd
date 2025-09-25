@@ -7,7 +7,8 @@
 pops(config)
 }
 \arguments{
-\item{config}{The config with the list of parameters returned from running configuration.}
+\item{config_rds_file}{Path to config file produced when calling `configuration`.
+The config file includes all data necessary used to set up c++ PoPS model}
 }
 \value{
 list of infected and susceptible per year

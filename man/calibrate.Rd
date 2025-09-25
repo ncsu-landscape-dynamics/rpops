@@ -6,9 +6,6 @@
 \usage{
 calibrate(config)
 }
-\arguments{
-\item{config}{The config with the list of parameters returned from running configuration.}
-}
 \value{
 a dataframe of the variables saved and their success metrics for each run
 }
