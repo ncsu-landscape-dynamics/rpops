@@ -38,7 +38,8 @@ create_summary_stats_and_stacks <- function(config_rds_file) {
       terra::values(raster_template) <- file$host_pools[[1]]$infected[[j]]
       raster_template
     })
-    terra::writeRaster(terra::rast(y), file.path(config$output_path, paste0("pops_ensemble_ts_", j, ".tif")),
+    terra::writeRaster(terra::rast(y),
+                       file.path(config$output_path, paste0("pops_ensemble_ts_", j, ".tif")),
                        overwrite = TRUE, gdal = c("COMPRESS=NONE"))
     return(terra::rast(y))
   })

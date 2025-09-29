@@ -499,7 +499,7 @@ test_that("Test set 15: Pesticide treatments apply no matter what time step", {
   # only go through the day in which pesticide duration end doesn't go beyond the end_date
   for (i in 1:245) {
     config$treatment_dates <- c(paste(dates[[i]]))
-    data <-pops(config)
+    data <- pops(config)
     expect_equal(data$host_pools[[1]]$infected[[1]], matrix(0, ncol = 2, nrow = 2))
     expect_equal(data$host_pools[[1]]$susceptible[[1]],
                  config$host_pools[[1]]$susceptible + config$host_pools[[1]]$infected)
@@ -509,7 +509,7 @@ test_that("Test set 15: Pesticide treatments apply no matter what time step", {
   config <- configuration(config_file = config_file, testing = TRUE)
   for (i in 1:245) {
     config$treatment_dates <- c(paste(dates[[i]]))
-    data <-pops(config)
+    data <- pops(config)
     expect_equal(data$host_pools[[1]]$infected[[1]], matrix(c(3, 0, 0, 0), ncol = 2, nrow = 2))
     expect_equal(data$host_pools[[1]]$susceptible[[1]],
                  matrix(c(14, 14, 6, 15), ncol = 2, nrow = 2))
