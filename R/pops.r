@@ -7,7 +7,7 @@
 #' forecast spread of the pest/pathogen into the future. This function performs
 #' a single stochastic realization of the model and is predominantly used for
 #' automated tests of model features.
-#' @param config_rds_file Path to config file produced when calling `configuration`.
+#' @param config Path to config file produced when calling `configuration`.
 #' The config file includes all data necessary used to set up c++ PoPS model
 #'
 #' @useDynLib PoPS, .registration = TRUE
@@ -24,6 +24,9 @@
 
 pops <- function(config) {
 
+  if (!is.null(config$failure)) {
+    stop(config$failure)
+  }
   set.seed(config$random_seed_list[[1]])
   config <- draw_parameters(config) # draws parameter set for the run
   config <- host_pool_setup(config)
