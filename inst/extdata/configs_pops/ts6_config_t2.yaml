@@ -4,7 +4,7 @@ output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs"
 
 # pest parameters
 starting_infected_files: ["extdata/simple2x2/infected.tif"]
-parameter_means_file: "extdata/parameter_means_rr1.csv" 
+parameter_means_file: "extdata/parameter_means_rr4.csv" 
 parameter_cov_matrix_file: "extdata/parameter_cov_matrix_default.csv" 
 pest_host_table: "extdata/pest_host_table_singlehost_nomort.csv" 
 competency_table: "extdata/competency_table_singlehost.csv" 
@@ -15,14 +15,14 @@ latency_period: 0
 exposed_files: [""]
 
 # host data
-host_files: ["extdata/simple2x2/total_plants_host_greater_than_infected.tif"]
+host_files: ["extdata/simple2x2/host.tif"]
 total_populations_file: "extdata/simple2x2/total_plants.tif"
 use_host_uncertainty: false
 
 # simulation settings
 random_seed: null
 start_date: "2008-01-01"
-end_date: "2010-12-31"
+end_date: "2008-12-31"
 time_step: "month"
 model_type: "SI"
 season_month_start: 1

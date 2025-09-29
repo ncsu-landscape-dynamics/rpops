@@ -4,25 +4,25 @@ output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs"
 
 # pest parameters
 starting_infected_files: ["extdata/simple2x2/infected.tif"]
-parameter_means_file: "extdata/parameter_means_rr1.csv" 
+parameter_means_file: "extdata/parameter_means_default.csv" 
 parameter_cov_matrix_file: "extdata/parameter_cov_matrix_default.csv" 
 pest_host_table: "extdata/pest_host_table_singlehost_nomort.csv" 
 competency_table: "extdata/competency_table_singlehost.csv" 
 county_level_infection_data: false 
 use_initial_condition_uncertainty: false 
 start_exposed: false
-latency_period: 0
+latency_period: 2
 exposed_files: [""]
 
 # host data
-host_files: ["extdata/simple2x2/total_plants_host_greater_than_infected.tif"]
+host_files: ["extdata/simple2x2/host.tif"]
 total_populations_file: "extdata/simple2x2/total_plants.tif"
 use_host_uncertainty: false
 
 # simulation settings
-random_seed: null
-start_date: "2008-01-01"
-end_date: "2010-12-31"
+random_seed: 42
+start_date: "2009-01-01"
+end_date: "2009-12-31"
 time_step: "month"
 model_type: "SI"
 season_month_start: 1
@@ -44,10 +44,10 @@ overwinter_survival_rate_day: 15
 overwinter_survival_rates_file: "extdata/simple2x2/survival_rates.tif"
 use_temperature: false
 temperature_coefficient_file: "extdata/simple2x2/temperature_coefficient.tif"
-temperature_coefficient_sd_file: ""
+temperature_coefficient_sd_file: "extdata/simple2x2/coefficient_sd.tif"
 use_precipitation: false
 precipitation_coefficient_file: "extdata/simple2x2/temperature_coefficient.tif"
-precipitation_coefficient_sd_file: ""
+precipitation_coefficient_sd_file: "extdata/simple2x2/coefficient_sd.tif"
 weather_type: "deterministic"
 
 # mortality
@@ -57,17 +57,17 @@ mortality_frequency_n: 1
 # treatments
 use_treatment: false
 treatments_file: "extdata/simple2x2/treatments.tif"
-treatment_dates: ["2008-12-01"]
+treatment_dates: ["2009-01-01"]
 treatment_method: "ratio"
-pesticide_durations: [0]
-pesticide_efficacy: 1.0
+pesticide_durations: [120]
+pesticide_efficacy: 0.5
 use_quarantine: false
 quarantine_areas_file: ""
 quarantine_directions: ""
 
 # dispersal
 natural_kernel_type: "cauchy"
-natural_dir: "NONE"
+natural_dir: "NE"
 anthropogenic_kernel_type: "cauchy"
 anthropogenic_dir: "NONE"
 # only used if anthropogenic_kernel_type == "network"
@@ -91,10 +91,10 @@ dispersal_stochasticity: true
 establishment_probability: 0.5
 dispersal_percentage: 0.99
 use_spreadrates: false
-use_overpopulation_movements: false
-overpopulation_percentage: 0.75
+use_overpopulation_movements: true
+overpopulation_percentage: 0.2
 leaving_percentage: 0.5
-leaving_scale_coefficient: 5
+leaving_scale_coefficient: 0.5
 
 # soil_pests
 use_soils: false

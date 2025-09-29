@@ -95,7 +95,7 @@ test_that(
   })
 
 test_that(
-"Test set 4: Infected and Susceptible results return all 0's if treatments file is all 1's
+  "Test set 4: Infected and Susceptible results return all 0's if treatments file is all 1's
 but leaves a proportion of susceptibles if treatment method is ratio", {
   config_file <- system.file("extdata", "configs_pops", "ts4_config_t1.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
@@ -126,404 +126,138 @@ test_that("Test set 5: Infected results are greater than initial infected", {
   config_file <- system.file("extdata", "configs_pops", "ts5_config_t1.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   expect_equal(all(pops(config)$host_pools[[1]]$infected[[1]] >=
-    terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+                     config$host_pools[[1]]$infected), TRUE)
 
   config_file <- system.file("extdata", "configs_pops", "ts5_config_t2.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   expect_equal(all(pops(config)$host_pools[[1]]$infected[[1]] >=
-      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+                     config$host_pools[[1]]$infected), TRUE)
 })
 
-test_that("All kernel types lead to spread", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  temperature_file <-
-    system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-12-31"
-  time_step <- "month"
-  parameter_means <- c(4.0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               time_step = time_step,
-               natural_kernel_type = "exponential")
-
+## this one is random
+test_that("Test set 6: All kernel types lead to spread", {
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               natural_kernel_type = "cauchy")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               natural_kernel_type = "uniform")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               natural_kernel_type = "hyperbolic secant")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t4.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               natural_kernel_type = "weibull")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t5.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               natural_kernel_type = "logistic")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t6.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               natural_kernel_type = "gamma")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t7.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gt(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  parameter_means <- c(0.4, 2, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               natural_kernel_type = "power law")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t8.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   infecteds <- data$host_pools[[1]]$infected[[1]]
-  expect_equal(all(infecteds >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  expect_equal(all(infecteds >= config$host_pools[[1]]$infected), TRUE)
   expect_gte(infecteds[1, 2] + infecteds[2, 1] + infecteds[2, 2], 0)
 
-  ## currently not working
-  # doesn't disperse outside of originally infected cell
-  # parameter_means <- c(0.4, 1000, 1, 500, 0, 0, 0, 0)
-  # parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-
-  # data <- pops(infected_file_list = infected_file_list,
-  #              host_file_list = host_file_list,
-  #              total_populations_file = total_populations_file,
-  #              parameter_means = parameter_means,
-  #              parameter_cov_matrix = parameter_cov_matrix,
-  #              pest_host_table = pest_host_table,
-  #              competency_table = competency_table,
-  #              natural_kernel_type = "exponential-power")
-  # infecteds <- data$host_pools[[1]]$infected[[1]]
-  # expect_equal(all(infecteds >=
-  #                    terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
-  #              TRUE)
-  # expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
-  #
-  # # bad array when icdf is available
-  # data <- pops(infected_file_list = infected_file_list,
-  #              host_file_list = host_file_list,
-  #              total_populations_file = total_populations_file,
-  #              parameter_means = parameter_means,
-  #              parameter_cov_matrix = parameter_cov_matrix,
-  #              pest_host_table = pest_host_table,
-  #              competency_table = competency_table,
-  #              natural_kernel_type = "log normal")
-  # infecteds <- data$host_pools[[1]]$infected[[1]]
-  # expect_equal(all(infecteds >=
-  #                    terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
-  #              TRUE)
-  # expect_gt(infecteds[1,2] + infecteds[2,1] + infecteds[2,2], 0)
-
   # checks for anthropogenic kernel type
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "exponential")
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t9.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t9.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "cauchy")
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t10.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "uniform")
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t11.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "hyperbolic secant")
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t12.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "logistic")
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t13.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "weibull")
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t14.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "power law")
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
-
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               anthropogenic_kernel_type = "gamma")
-  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                     terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)), TRUE)
-
-  #
-  #   data <- pops(infected_file_list = infected_file_list,
-  #                host_file_list = host_file_list,
-  #                total_populations_file = total_populations_file,
-  #                parameter_means = parameter_means,
-  #                parameter_cov_matrix = parameter_cov_matrix,
-  #                pest_host_table = pest_host_table,
-  #                competency_table = competency_table,
-  #                anthropogenic_kernel_type = "exponential-power")
-  #   expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-  #                      terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
-  #                TRUE)
-
-  ## currently not working
-  #
-  #
-  # data <- pops(infected_file_list = infected_file_list,
-  #              host_file_list = host_file_list,
-  #              total_populations_file = total_populations_file,
-  #              parameter_means = parameter_means,
-  #              parameter_cov_matrix = parameter_cov_matrix,
-  #              pest_host_table = pest_host_table,
-  #              competency_table = competency_table,
-  #              anthropogenic_kernel_type = "log normal")
-  # expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-  #                    terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)),
-  #              TRUE)
-
+  config_file <- system.file("extdata", "configs_pops", "ts6_config_t15.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >= config$host_pools[[1]]$infected), TRUE)
 })
 
-test_that("Susceptibles are never negative", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  temperature_file <-
-    system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2010-12-31"
-  parameter_means <- c(0.4, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <- pops(infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               random_seed = 42,
-               start_date = start_date,
-               end_date = end_date)
-
+test_that("Test set 7: Susceptibles are never negative", {
+  config_file <- system.file("extdata", "configs_pops", "ts7_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(all(data$host_pools[[1]]$susceptible[[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
   expect_equal(all(data$host_pools[[1]]$susceptible[[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
   expect_equal(all(data$host_pools[[1]]$susceptible[[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
 
-  parameter_means <- c(0.5, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list =
-           system.file("extdata", "simple2x2",
-                       "total_plants_host_greater_than_infected.tif", package = "PoPS"),
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
-
+  config_file <- system.file("extdata", "configs_pops", "ts7_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(all(data$host_pools[[1]]$susceptible[[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
   expect_equal(all(data$host_pools[[1]]$susceptible[[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
   expect_equal(all(data$host_pools[[1]]$susceptible[[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-
 })
 
-test_that("SEI model works as intended", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  temperature_file <-
-    system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-12-31"
-  model_type <- "SI"
-  latency_period <- 2
-  time_step <- "month"
-  output_frequency <- "month"
-  treatment_dates <- "2008-02-25"
-  parameter_means <- c(0.4, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+test_that("Test set 8: SEI model works as intended", {
+  config_file <- system.file("extdata", "configs_pops", "ts8_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
 
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date,
-         model_type = model_type,
-         latency_period = latency_period,
-         output_frequency = output_frequency,
-         time_step = time_step,
-         treatment_dates = treatment_dates)
-  model_type <- "SEI"
-  data2 <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date,
-         model_type = model_type,
-         latency_period = latency_period,
-         output_frequency = output_frequency,
-         time_step = time_step,
-         treatment_dates = treatment_dates)
+  config_file <- system.file("extdata", "configs_pops", "ts8_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data2 <- pops(config)
 
   expect_equal(all(data2$exposed[[1]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
   expect_equal(all(data2$exposed[[1]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
@@ -561,178 +295,59 @@ test_that("SEI model works as intended", {
   expect_equal(all(data2$exposed[[12]][[1]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
   expect_equal(all(data2$exposed[[12]][[2]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
   expect_equal(all(data2$exposed[[12]][[3]] >= matrix(0, ncol = 2, nrow = 2)), TRUE)
-
   expect_equal(all(data$host_pools[[1]]$susceptible[[1]] <=
                      data2$host_pools[[1]]$susceptible[[1]]), TRUE)
   expect_equal(all(data$host_pools[[1]]$susceptible[[2]] <=
                      data2$host_pools[[1]]$susceptible[[1]]), TRUE)
   expect_equal(all(data$host_pools[[1]]$susceptible[[3]] <=
                      data2$host_pools[[1]]$susceptible[[1]]), TRUE)
-
   expect_equal(all(data$host_pools[[1]]$infected[[1]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
   expect_equal(all(data$infected[[2]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
   expect_equal(all(data$infected[[3]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
 
-  start_exposed <- TRUE
-  exposed_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  model_type <- "SEI"
-  data3 <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date,
-         model_type = model_type,
-         latency_period = latency_period,
-         output_frequency = output_frequency,
-         time_step = time_step,
-         treatment_dates = treatment_dates,
-         start_exposed = start_exposed,
-         exposed_file_list = exposed_file_list)
-
+  config_file <- system.file("extdata", "configs_pops", "ts8_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data3 <- pops(config)
   expect_equal(all(data3$host_pools[[1]]$susceptible[[1]] <=
                      data2$host_pools[[1]]$susceptible[[1]]), TRUE)
   expect_equal(all(data3$host_pools[[1]]$susceptible[[2]] <=
                      data2$host_pools[[1]]$susceptible[[1]]), TRUE)
   expect_equal(all(data3$host_pools[[1]]$susceptible[[3]] <=
                      data2$host_pools[[1]]$susceptible[[1]]), TRUE)
-
   expect_equal(all(data3$host_pools[[1]]$infected[[1]] >=
                      data2$host_pools[[1]]$infected[[1]]), TRUE)
   expect_equal(all(data3$infected[[2]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
   expect_equal(all(data3$infected[[3]] >= data2$host_pools[[1]]$infected[[1]]), TRUE)
-
 })
 
-test_that("Infected results with weather are less than those without weather", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  temperature_file <-
-    system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2010-12-31"
-  parameter_means <- c(3.0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  coefficient_sd_file <- system.file("extdata", "simple2x2", "coefficient_sd.tif", package = "PoPS")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+test_that("Test set 9: Infected results with weather are less than those without weather", {
+  config_file <- system.file("extdata", "configs_pops", "ts9_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
 
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
+  config_file <- system.file("extdata", "configs_pops", "ts9_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_temp <- pops(config)
 
-  data_temp <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
+  config_file <- system.file("extdata", "configs_pops", "ts9_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_precip <- pops(config)
 
-  data_precip <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         precip = TRUE,
-         precipitation_coefficient_file = coefficient_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
+  config_file <- system.file("extdata", "configs_pops", "ts9_config_t4.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_weather <- pops(config)
 
-  data_weather <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file,
-         precip = TRUE,
-         precipitation_coefficient_file = coefficient_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
+  config_file <- system.file("extdata", "configs_pops", "ts9_config_t5.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_temp_wsd <- pops(config)
 
-  data_temp_wsd <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date,
-         weather_type = "probabilistic",
-         temperature_coefficient_sd_file = coefficient_sd_file)
+  config_file <- system.file("extdata", "configs_pops", "ts9_config_t6.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_precip_wsd <- pops(config)
 
-  data_precip_wsd <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         precip = TRUE,
-         precipitation_coefficient_file = coefficient_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date,
-         weather_type = "probabilistic",
-         precipitation_coefficient_sd_file = coefficient_sd_file)
-
-  data_weather_wsd <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file,
-         precip = TRUE,
-         precipitation_coefficient_file = coefficient_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date,
-         weather_type = "probabilistic",
-         temperature_coefficient_sd_file = coefficient_sd_file,
-         precipitation_coefficient_sd_file = coefficient_sd_file)
+  config_file <- system.file("extdata", "configs_pops", "ts9_config_t7.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_weather_wsd <- pops(config)
 
   expect_gte(sum(data$host_pools[[1]]$infected[[1]]), sum(data_temp$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data$host_pools[[1]]$infected[[2]]), sum(data_temp$host_pools[[1]]$infected[[2]]))
@@ -775,245 +390,68 @@ test_that("Infected results with weather are less than those without weather", {
 })
 
 test_that(
-  "Infected results are greater with same parameters for weekly spread vs. monthly", {
-    infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-    total_populations_file <-
-      system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-    coefficient_file <-
-      system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-    temperature_file <-
-      system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
-    start_date <- "2008-01-01"
-    end_date <- "2010-12-31"
-    parameter_means <- c(0.2, 21, 1, 500, 0, 0)
-    parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-    pest_host_table <-
-      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-    data_week <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           time_step = "week",
-           random_seed = 42,
-           start_date = start_date,
-           end_date = end_date)
-    data_month <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           time_step = "month",
-           random_seed = 42,
-           start_date = start_date,
-           end_date = end_date)
-
+  "Test set 10: Infected results are greater with same parameters for weekly spread vs. monthly", {
+    config_file <- system.file("extdata", "configs_pops", "ts10_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data_week <- pops(config)
+    config_file <- system.file("extdata", "configs_pops", "ts10_config_t2.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data_month <- pops(config)
     expect_equal(all(data_week$host_pools[[1]]$infected[[1]] >=
                        data_month$host_pools[[1]]$infected[[1]]), TRUE)
     expect_equal(all(data_week$host_pools[[1]]$infected[[2]] >=
                        data_month$host_pools[[1]]$infected[[2]]), TRUE)
-
   })
-
-test_that("Infected results are greater with same parameters for daily spread vs. monthly and
-          weekly", {
-            infected_file_list <-
-              system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-            host_file_list <-
-              system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-            total_populations_file <-
-              system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-            coefficient_file <-
-              system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-            temperature_file <-
-              system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif",
-                          package = "PoPS")
-            start_date <- "2008-01-01"
-            end_date <- "2010-12-31"
-            parameter_means <- c(0.1, 21, 1, 500, 0, 0)
-            parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-            pest_host_table <-
-              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-            competency_table <-
-              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-            data_day <-
-              pops(infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   time_step = "day",
-                   random_seed = 42)
-            data_week <-
-              pops(infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   time_step = "week",
-                   random_seed = 42,
-                   start_date = start_date,
-                   end_date = end_date)
-            data_month <-
-              pops(infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   time_step = "month",
-                   random_seed = 42,
-                   start_date = start_date,
-                   end_date = end_date)
-
-            expect_equal(all(data_day$host_pools[[1]]$infected[[1]] >=
-                               data_month$host_pools[[1]]$infected[[1]]), TRUE)
-            expect_equal(all(data_day$host_pools[[1]]$infected[[1]] >=
-                               data_week$host_pools[[1]]$infected[[1]]), TRUE)
-            expect_equal(all(data_week$host_pools[[1]]$infected[[1]] >=
-                               data_month$host_pools[[1]]$infected[[1]]), TRUE)
-          })
 
 test_that(
-  "Infected results are greater without treatment than with treatment", {
-    infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-    total_populations_file <-
-      system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-    treatments_file <- system.file("extdata", "simple2x2", "treatments_1_1.tif", package = "PoPS")
-    treatment_dates <- c("2008-03-05")
-    start_date <- "2008-01-01"
-    end_date <- "2009-12-31"
-    parameter_means <- c(0.8, 21, 1, 500, 0, 0)
-    parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-    pest_host_table <-
-      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-    data <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           random_seed = 42,
-           start_date = start_date,
-           end_date = end_date)
-    data_treat <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           management = TRUE,
-           treatment_dates = treatment_dates,
-           treatments_file = treatments_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           random_seed = 42,
-           start_date = start_date,
-           end_date = end_date)
-
-    expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
-                       data_treat$host_pools[[1]]$infected[[1]]), TRUE)
-    expect_equal(all(data$host_pools[[1]]$infected[[2]] >=
-                       data_treat$host_pools[[1]]$infected[[2]]), TRUE)
+  "Test set 11: Infected results are greater with same parameters for daily spread vs. monthly and
+  weekly", {
+    config_file <- system.file("extdata", "configs_pops", "ts11_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data_day <- pops(config)
+    config_file <- system.file("extdata", "configs_pops", "ts11_config_t2.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data_week <- pops(config)
+    config_file <- system.file("extdata", "configs_pops", "ts11_config_t3.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data_month <- pops(config)
+    expect_equal(all(data_day$host_pools[[1]]$infected[[1]] >=
+                       data_month$host_pools[[1]]$infected[[1]]), TRUE)
+    expect_equal(all(data_day$host_pools[[1]]$infected[[1]] >=
+                       data_week$host_pools[[1]]$infected[[1]]), TRUE)
+    expect_equal(all(data_week$host_pools[[1]]$infected[[1]] >=
+                       data_month$host_pools[[1]]$infected[[1]]), TRUE)
   })
 
-test_that("Infected results are greater with higher reproductive rate", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2010-12-31"
-  parameter_means <- c(4.0, 15, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+test_that("Test set 12: Infected results are greater without treatment than with treatment", {
+  config_file <- system.file("extdata", "configs_pops", "ts12_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  config_file <- system.file("extdata", "configs_pops", "ts12_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_treat <- pops(config)
+  expect_equal(all(data$host_pools[[1]]$infected[[1]] >=
+                     data_treat$host_pools[[1]]$infected[[1]]), TRUE)
+  expect_equal(all(data$host_pools[[1]]$infected[[2]] >=
+                     data_treat$host_pools[[1]]$infected[[2]]), TRUE)
+})
 
-  data_1 <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         time_step = "month",
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
-  parameter_means <- c(3.0, 15, 1, 500, 0, 0)
-  data_075 <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         time_step = "month",
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
-  parameter_means <- c(2.0, 15, 1, 500, 0, 0)
-  data_050 <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         time_step = "month",
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
-  parameter_means <- c(1.0, 15, 1, 500, 0, 0)
-  data_025 <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         time_step = "month",
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
-  parameter_means <- c(0.5, 15, 1, 500, 0, 0)
-  data_010 <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         time_step = "month",
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date)
+test_that("Test set 13: Infected results are greater with higher reproductive rate", {
+  config_file <- system.file("extdata", "configs_pops", "ts13_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_1 <- pops(config)
+  config_file <- system.file("extdata", "configs_pops", "ts13_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_075 <- pops(config)
+  config_file <- system.file("extdata", "configs_pops", "ts13_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_050 <- pops(config)
+  config_file <- system.file("extdata", "configs_pops", "ts13_config_t4.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_025 <- pops(config)
+  config_file <- system.file("extdata", "configs_pops", "ts13_config_t5.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data_010 <- pops(config)
 
   expect_gte(sum(data_1$host_pools[[1]]$infected[[1]]), sum(data_075$host_pools[[1]]$infected[[1]]))
   expect_gte(sum(data_1$host_pools[[1]]$infected[[1]]), sum(data_050$host_pools[[1]]$infected[[1]]))
@@ -1042,647 +480,207 @@ test_that("Infected results are greater with higher reproductive rate", {
              sum(data_010$host_pools[[1]]$infected[[2]]))
 })
 
-test_that("Treatments apply no matter what time step", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  temperature_file <-
-    system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
-  start_date <- "2009-01-01"
-  end_date <- "2009-12-31"
-  treatments_file <- system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  dates <- seq.Date(as.Date(start_date), as.Date(end_date), by = "days")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+test_that("Test set 14: Treatments apply no matter what time step", {
+  config_file <- system.file("extdata", "configs_pops", "ts14_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  dates <- seq.Date(as.Date(config$start_date), as.Date(config$end_date), by = "days")
   for (i in seq_len(length(dates))) {
-    data <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           management  = TRUE,
-           treatment_dates = c(as.character(dates[i])),
-           treatments_file = treatments_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           start_date = start_date,
-           end_date = end_date)
+    config$treatment_dates <- c(paste(dates[[i]]))
+    data <- pops(config)
     expect_equal(data$host_pools[[1]]$infected[[1]], matrix(0, ncol = 2, nrow = 2))
     expect_equal(data$host_pools[[1]]$susceptible[[1]], matrix(0, ncol = 2, nrow = 2))
   }
 })
 
-test_that("Pesticide treatments apply no matter what time step", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  temperature_file <-
-    system.file("extdata", "simple2x2", "critical_temp_all_below_threshold.tif", package = "PoPS")
-  start_date <- "2009-01-01"
-  end_date <- "2009-12-31"
-  treatments_file <- system.file("extdata", "simple2x2", "treatments.tif", package = "PoPS")
-  pesticide_duration <- c(120)
-  pesticide_efficacy <- 1.0
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  dates <- seq.Date(as.Date(start_date), as.Date("2009-06-30"), by = "days")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  for (i in seq_len(length(dates))) {
-    data <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           management  = TRUE,
-           treatment_dates = c(as.character(dates[i])),
-           treatments_file = treatments_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           start_date = start_date,
-           end_date = end_date,
-           pesticide_duration = pesticide_duration,
-           pesticide_efficacy = pesticide_efficacy)
+test_that("Test set 15: Pesticide treatments apply no matter what time step", {
+  config_file <- system.file("extdata", "configs_pops", "ts15_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  dates <- seq.Date(as.Date(config$start_date), as.Date(config$end_date), by = "days")
+  # only go through the day in which pesticide duration end doesn't go beyond the end_date
+  for (i in 1:245) {
+    config$treatment_dates <- c(paste(dates[[i]]))
+    data <-pops(config)
     expect_equal(data$host_pools[[1]]$infected[[1]], matrix(0, ncol = 2, nrow = 2))
     expect_equal(data$host_pools[[1]]$susceptible[[1]],
-                 terra::as.matrix(terra::rast(host_file_list), wide = TRUE))
+                 config$host_pools[[1]]$susceptible + config$host_pools[[1]]$infected)
   }
 
-  pesticide_duration <- c(120)
-  pesticide_efficacy <- 0.5
-
-  for (i in seq_len(length(dates))) {
-    data <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           management  = TRUE,
-           treatment_dates = c(as.character(dates[i])),
-           treatments_file = treatments_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           start_date = start_date,
-           end_date = end_date,
-           pesticide_duration = pesticide_duration,
-           pesticide_efficacy = pesticide_efficacy)
+  config_file <- system.file("extdata", "configs_pops", "ts15_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  for (i in 1:245) {
+    config$treatment_dates <- c(paste(dates[[i]]))
+    data <-pops(config)
     expect_equal(data$host_pools[[1]]$infected[[1]], matrix(c(3, 0, 0, 0), ncol = 2, nrow = 2))
     expect_equal(data$host_pools[[1]]$susceptible[[1]],
                  matrix(c(14, 14, 6, 15), ncol = 2, nrow = 2))
   }
 })
 
-test_that("Changing the output frequency returns the correct number of outputs and output
-          statistics", {
-            infected_file_list <-
-              system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-            host_file_list <-
-              system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-            total_populations_file <-
-              system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-            start_date <- "2009-01-01"
-            end_date <- "2009-12-31"
-            treatment_dates <- c(start_date)
-            parameter_means <- c(0, 21, 1, 500, 0, 0)
-            parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-            pest_host_table <-
-              system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-            competency_table <-
-              system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+test_that(
+  "Test set 16: Changing the output frequency returns the correct number of outputs and output
+statistics", {
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 1)
 
-            data <-
-              pops(output_frequency = "year",
-                   time_step = "month",
-                   treatment_dates = treatment_dates,
-                   infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   start_date = start_date,
-                   end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 1)
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 1)
 
-            data <-
-              pops(output_frequency = "year",
-                   time_step = "week",
-                   treatment_dates = start_date,
-                   infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   start_date = start_date,
-                   end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 1)
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 1)
 
-            data <-
-              pops(output_frequency = "year",
-                   time_step = "day",
-                   treatment_dates = start_date,
-                   infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   start_date = start_date,
-                   end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 1)
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t4.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 12)
 
-            data <-
-              pops(output_frequency = "month",
-                   time_step = "week",
-                   treatment_dates = start_date,
-                   infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   start_date = start_date,
-                   end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 12)
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t5.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 12)
 
-            data <-
-              pops(output_frequency = "month",
-                   time_step = "day",
-                   treatment_dates = start_date,
-                   infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   start_date = start_date,
-                   end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 12)
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t6.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 52)
 
-            data <-
-              pops(output_frequency = "week",
-                   time_step = "week",
-                   treatment_dates = start_date,
-                   infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   start_date = start_date,
-                   end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 52)
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t7.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 52)
 
-            data <-
-              pops(output_frequency = "week",
-                   time_step = "day",
-                   treatment_dates = start_date,
-                   infected_file_list = infected_file_list,
-                   host_file_list = host_file_list,
-                   total_populations_file = total_populations_file,
-                   parameter_means = parameter_means,
-                   parameter_cov_matrix = parameter_cov_matrix,
-                   pest_host_table = pest_host_table,
-                   competency_table = competency_table,
-                   start_date = start_date,
-                   end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 52)
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t8.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 364)
 
-            expect_error(pops(output_frequency = "day",
-                              time_step = "week",
-                              treatment_dates = start_date,
-                              infected_file_list = infected_file_list,
-                              host_file_list = host_file_list,
-                              total_populations_file = total_populations_file,
-                              parameter_means = parameter_means,
-                              parameter_cov_matrix = parameter_cov_matrix,
-                              pest_host_table = pest_host_table,
-                              competency_table = competency_table,
-                              start_date = start_date,
-                              end_date = end_date), output_frequency_error)
-
-            expect_error(pops(output_frequency = "day",
-                              time_step = "month",
-                              treatment_dates = start_date,
-                              infected_file_list = infected_file_list,
-                              host_file_list = host_file_list,
-                              total_populations_file = total_populations_file,
-                              parameter_means = parameter_means,
-                              parameter_cov_matrix = parameter_cov_matrix,
-                              pest_host_table = pest_host_table,
-                              competency_table = competency_table,
-                              start_date = start_date,
-                              end_date = end_date), output_frequency_error)
-
-            expect_error(pops(output_frequency = "week",
-                              time_step = "month",
-                              treatment_dates = start_date,
-                              infected_file_list = infected_file_list,
-                              host_file_list = host_file_list,
-                              total_populations_file = total_populations_file,
-                              parameter_means = parameter_means,
-                              parameter_cov_matrix = parameter_cov_matrix,
-                              pest_host_table = pest_host_table,
-                              competency_table = competency_table,
-                              start_date = start_date,
-                              end_date = end_date), output_frequency_error)
-
-            data <- pops(output_frequency = "day",
-                         time_step = "day",
-                         treatment_dates = start_date,
-                         infected_file_list = infected_file_list,
-                         host_file_list = host_file_list,
-                         total_populations_file = total_populations_file,
-                         parameter_means = parameter_means,
-                         parameter_cov_matrix = parameter_cov_matrix,
-                         pest_host_table = pest_host_table,
-                         competency_table = competency_table,
-                         start_date = start_date,
-                         end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 364)
-
-            data <- pops(output_frequency = "every_n_steps",
-                         output_frequency_n = 5,
-                         time_step = "day",
-                         treatment_dates = start_date,
-                         infected_file_list = infected_file_list,
-                         host_file_list = host_file_list,
-                         total_populations_file = total_populations_file,
-                         parameter_means = parameter_means,
-                         parameter_cov_matrix = parameter_cov_matrix,
-                         pest_host_table = pest_host_table,
-                         competency_table = competency_table,
-                         start_date = start_date,
-                         end_date = end_date)
-            expect_equal(length(data$host_pools[[1]]$infected), 72)
-          })
+  config_file <- system.file("extdata", "configs_pops", "ts16_config_t9.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 72)
+})
 
 test_that(
-  "Outputs occur with non-full year date range for all time step output frequency combinations", {
-    infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-    total_populations_file <-
-      system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-    start_date <- "2009-05-01"
-    end_date <- "2009-10-29"
-    treatment_dates <- start_date
-    parameter_means <- c(0, 21, 1, 500, 0, 0)
-    parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-    pest_host_table <-
-      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-    data <- pops(output_frequency = "year",
-                 time_step = "month",
-                 treatment_dates = treatment_dates,
-                 infected_file_list = infected_file_list,
-                 host_file_list = host_file_list,
-                 total_populations_file = total_populations_file,
-                 parameter_means = parameter_means,
-                 parameter_cov_matrix = parameter_cov_matrix,
-                 pest_host_table = pest_host_table,
-                 competency_table = competency_table,
-                 start_date = start_date,
-                 end_date = end_date)
+  "Test set 17: Outputs occur with non-full year date range for all time step output frequency
+  combinations", {
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 1)
 
-    data <- pops(output_frequency = "year",
-                 time_step = "week",
-                 treatment_dates = start_date,
-                 infected_file_list = infected_file_list,
-                 host_file_list = host_file_list,
-                 total_populations_file = total_populations_file,
-                 parameter_means = parameter_means,
-                 parameter_cov_matrix = parameter_cov_matrix,
-                 pest_host_table = pest_host_table,
-                 competency_table = competency_table,
-                 start_date = start_date,
-                 end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t2.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 1)
 
-    data <- pops(output_frequency = "year",
-                 time_step = "day",
-                 treatment_dates = start_date,
-                 infected_file_list = infected_file_list,
-                 host_file_list = host_file_list,
-                 total_populations_file = total_populations_file,
-                 parameter_means = parameter_means,
-                 parameter_cov_matrix = parameter_cov_matrix,
-                 pest_host_table = pest_host_table,
-                 competency_table = competency_table,
-                 start_date = start_date,
-                 end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t3.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 1)
 
-    data <- pops(output_frequency = "month",
-                 time_step = "week",
-                 treatment_dates = start_date,
-                 infected_file_list = infected_file_list,
-                 host_file_list = host_file_list,
-                 total_populations_file = total_populations_file,
-                 parameter_means = parameter_means,
-                 parameter_cov_matrix = parameter_cov_matrix,
-                 pest_host_table = pest_host_table,
-                 competency_table = competency_table,
-                 start_date = start_date,
-                 end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t4.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 5)
 
-    data <- pops(output_frequency = "month",
-                 time_step = "day",
-                 treatment_dates = start_date,
-                 infected_file_list = infected_file_list,
-                 host_file_list = host_file_list,
-                 total_populations_file = total_populations_file,
-                 parameter_means = parameter_means,
-                 parameter_cov_matrix = parameter_cov_matrix,
-                 pest_host_table = pest_host_table,
-                 competency_table = competency_table,
-                 start_date = start_date,
-                 end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t5.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 5)
 
-    data <- pops(output_frequency = "week",
-                 time_step = "week",
-                 treatment_dates = start_date,
-                 infected_file_list = infected_file_list,
-                 host_file_list = host_file_list,
-                 total_populations_file = total_populations_file,
-                 parameter_means = parameter_means,
-                 parameter_cov_matrix = parameter_cov_matrix,
-                 pest_host_table = pest_host_table,
-                 competency_table = competency_table,
-                 start_date = start_date,
-                 end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t6.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 26)
 
-    data <- pops(output_frequency = "week",
-                 time_step = "day",
-                 treatment_dates = start_date,
-                 infected_file_list = infected_file_list,
-                 host_file_list = host_file_list,
-                 total_populations_file = total_populations_file,
-                 parameter_means = parameter_means,
-                 parameter_cov_matrix = parameter_cov_matrix,
-                 pest_host_table = pest_host_table,
-                 competency_table = competency_table,
-                 start_date = start_date,
-                 end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t7.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 26)
 
-    data <-
-      pops(output_frequency = "day"
-           , time_step = "day",
-           treatment_dates = start_date,
-           infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           start_date = start_date,
-           end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t8.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 182)
 
-    data <-
-      pops(output_frequency = "time_step",
-           time_step = "day",
-           treatment_dates = start_date,
-           infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           start_date = start_date,
-           end_date = end_date)
+    config_file <- system.file("extdata", "configs_pops", "ts17_config_t9.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
     expect_equal(length(data$host_pools[[1]]$infected), 182)
   })
 
-test_that("Quarantine and spread rates work at all timings", {
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2009-01-01"
-  end_date <- "2009-12-31"
-  treatment_dates <- start_date
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  quarantine_areas_file <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <- pops(output_frequency = "year",
-               time_step = "month",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+test_that("Test set 18: Quarantine and spread rates work at all timings", {
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 1)
   expect_equal(length(data$quarantine_escape), 1)
   expect_equal(length(data$quarantine_escape_distance), 1)
   expect_equal(length(data$quarantine_escape_directions), 1)
   expect_equal(length(data$rates), 1)
 
-  data <- pops(output_frequency = "year",
-               time_step = "week",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 1)
   expect_equal(length(data$quarantine_escape), 1)
   expect_equal(length(data$quarantine_escape_distance), 1)
   expect_equal(length(data$quarantine_escape_directions), 1)
   expect_equal(length(data$rates), 1)
 
-  data <- pops(output_frequency = "year",
-               time_step = "day",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
-  expect_equal(length(data$host_pools[[1]]$infected), 1)
-  expect_equal(length(data$quarantine_escape), 1)
-  expect_equal(length(data$quarantine_escape_distance), 1)
-  expect_equal(length(data$quarantine_escape_directions), 1)
-  expect_equal(length(data$rates), 1)
-
-  data <- pops(output_frequency = "month",
-               time_step = "week",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 12)
   expect_equal(length(data$quarantine_escape), 12)
   expect_equal(length(data$quarantine_escape_distance), 12)
   expect_equal(length(data$quarantine_escape_directions), 12)
   expect_equal(length(data$rates), 12)
 
-  data <- pops(output_frequency = "month",
-               time_step = "day",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t4.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 12)
   expect_equal(length(data$quarantine_escape), 12)
   expect_equal(length(data$quarantine_escape_distance), 12)
   expect_equal(length(data$quarantine_escape_directions), 12)
   expect_equal(length(data$rates), 12)
 
-  data <- pops(output_frequency = "week",
-               time_step = "week",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t5.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 52)
   expect_equal(length(data$quarantine_escape), 52)
   expect_equal(length(data$quarantine_escape_distance), 52)
   expect_equal(length(data$quarantine_escape_directions), 52)
   expect_equal(length(data$rates), 52)
 
-  data <- pops(output_frequency = "week",
-               time_step = "day",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file)
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t6.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 52)
   expect_equal(length(data$quarantine_escape), 52)
   expect_equal(length(data$quarantine_escape_distance), 52)
   expect_equal(length(data$quarantine_escape_directions), 52)
   expect_equal(length(data$rates), 52)
 
-  data <- pops(output_frequency = "day",
-               time_step = "day",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date, use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file,
-               quarantine_directions = "N,E,S,W")
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t7.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 364)
   expect_equal(length(data$quarantine_escape), 364)
   expect_equal(length(data$quarantine_escape_distance), 364)
   expect_equal(length(data$quarantine_escape_directions), 364)
   expect_equal(length(data$rates), 364)
 
-  data <- pops(output_frequency = "time_step",
-               time_step = "day",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_quarantine = TRUE,
-               use_spreadrates = TRUE,
-               quarantine_areas_file = quarantine_areas_file,
-               quarantine_directions = "N")
+  config_file <- system.file("extdata", "configs_pops", "ts18_config_t8.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 364)
   expect_equal(length(data$quarantine_escape), 364)
   expect_equal(length(data$quarantine_escape_distance), 364)
@@ -1690,107 +688,37 @@ test_that("Quarantine and spread rates work at all timings", {
   expect_equal(length(data$rates), 364)
 })
 
-test_that("Mortality works as expected with multiple hosts", {
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2009-01-01"
-  end_date <- "2009-12-31"
-  treatment_dates <- start_date
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <- system.file("extdata", "pest_host_table_singlehost.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <- pops(output_frequency = "month",
-               time_step = "month",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               mortality_frequency = "month",
-               mortality_frequency_n = 1)
-
+test_that("Test set 19: Mortality works as expected", {
+  config_file <- system.file("extdata", "configs_pops", "ts19_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
-  expect_equal(data$host_pools[[1]]$mortality[[1]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$mortality[[2]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$mortality[[3]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$mortality[[1]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$mortality[[2]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$mortality[[3]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$mortality[[4]], config$host_pools[[1]]$infected)
 
-  data <- pops(output_frequency = "week",
-               time_step = "week",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               mortality_frequency = "month",
-               mortality_frequency_n = 1)
-
+  config_file <- system.file("extdata", "configs_pops", "ts19_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
-  expect_equal(data$host_pools[[1]]$mortality[[3]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$mortality[[3]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$mortality[[3]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$mortality[[1]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$mortality[[2]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$mortality[[3]], config$host_pools[[1]]$infected)
 
-  pest_host_table <- system.file("extdata", "pest_host_table_singlehost025.csv", package = "PoPS")
-  data <- pops(output_frequency = "week",
-               time_step = "week",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               mortality_frequency = "month",
-               mortality_frequency_n = 1)
-
+  config_file <- system.file("extdata", "configs_pops", "ts19_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
   expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[3]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[4]], matrix(0, ncol = 20, nrow = 20))
-  expect_equal(data$host_pools[[1]]$mortality[[5]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$mortality[[5]], config$host_pools[[1]]$infected)
 
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost025tl3.csv", package = "PoPS")
-  data <- pops(output_frequency = "week",
-               time_step = "week",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               mortality_frequency = "month",
-               mortality_frequency_n = 1)
-
+  config_file <- system.file("extdata", "configs_pops", "ts19_config_t4.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
   expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
@@ -1798,27 +726,11 @@ test_that("Mortality works as expected with multiple hosts", {
   expect_equal(data$host_pools[[1]]$mortality[[4]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[5]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[6]], matrix(0, ncol = 20, nrow = 20))
-  expect_equal(data$host_pools[[1]]$mortality[[7]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$mortality[[7]], config$host_pools[[1]]$infected)
 
-
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost010tl1.csv", package = "PoPS")
-  data <- pops(output_frequency = "week",
-               time_step = "week",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               mortality_frequency = "month",
-               mortality_frequency_n = 1)
-
+  config_file <- system.file("extdata", "configs_pops", "ts19_config_t5.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
   expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
@@ -1830,75 +742,22 @@ test_that("Mortality works as expected with multiple hosts", {
   expect_equal(data$host_pools[[1]]$mortality[[8]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[9]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[10]], matrix(0, ncol = 20, nrow = 20))
-  expect_equal(data$host_pools[[1]]$mortality[[11]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$mortality[[11]], config$host_pools[[1]]$infected)
 })
 
-test_that("Movements works as expected", {
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2009-01-01"
-  end_date <- "2009-12-31"
-  treatment_dates <- start_date
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  use_movements <- TRUE
-  movements_file <- system.file("extdata", "simple20x20", "movements.tif", package = "PoPS")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  expect_error(pops(output_frequency = "month",
-                    time_step = "month",
-                    treatment_dates = start_date,
-                    infected_file_list = infected_file_list,
-                    host_file_list = host_file_list,
-                    total_populations_file = total_populations_file,
-                    parameter_means = parameter_means,
-                    parameter_cov_matrix = parameter_cov_matrix,
-                    pest_host_table = pest_host_table,
-                    competency_table = competency_table,
-                    start_date = start_date,
-                    end_date = end_date,
-                    use_movements = use_movements,
-                    movements_file = movements_file,
-                    random_seed = 42),
-               detailed_file_exists_error(movements_file))
-
-  movements_file <- system.file("extdata", "simple20x20", "movements.csv", package = "PoPS")
-  data <- pops(output_frequency = "month",
-               time_step = "month",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_movements = use_movements,
-               movements_file = movements_file,
-               random_seed = 42)
-
+test_that("Test set 20: Movements works as expected", {
+  config_file <- system.file("extdata", "configs_pops", "ts20_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 12)
-  expect_equal(data$host_pools[[1]]$infected[[1]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$infected[[2]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$infected[[3]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$infected[[4]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$infected[[1]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$infected[[2]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$infected[[3]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$infected[[4]], config$host_pools[[1]]$infected)
   infected_move <- matrix(0, ncol = 20, nrow = 20)
   infected_move[2, 1] <- 1
   expect_equal(data$host_pools[[1]]$infected[[5]], infected_move)
-  sus <- terra::rast(host_file_list) - terra::rast(infected_file_list)
-  sus <- terra::as.matrix(sus, wide = TRUE)
+  sus <- config$host_pools[[1]]$susceptible
   sus5 <- sus
   sus5[1, 1] <- sus5[1, 1] - 199
   sus5[2, 1] <- sus5[2, 1] + 199
@@ -1912,36 +771,18 @@ test_that("Movements works as expected", {
   expect_equal(data$host_pools[[1]]$susceptible[[5]], sus5)
   expect_equal(data$host_pools[[1]]$susceptible[[6]], sus6)
 
-  data <- pops(output_frequency = "month",
-               time_step = "month",
-               treatment_dates = start_date,
-               infected_file_list = infected_file_list,
-               host_file_list = host_file_list,
-               total_populations_file = total_populations_file,
-               parameter_means = parameter_means,
-               parameter_cov_matrix = parameter_cov_matrix,
-               pest_host_table = pest_host_table,
-               competency_table = competency_table,
-               start_date = start_date,
-               end_date = end_date,
-               use_movements = use_movements,
-               movements_file = movements_file,
-               random_seed = 45)
-
+  config_file <- system.file("extdata", "configs_pops", "ts20_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 12)
-  expect_equal(data$host_pools[[1]]$infected[[1]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$infected[[2]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$infected[[3]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
-  expect_equal(data$host_pools[[1]]$infected[[4]],
-               terra::as.matrix(terra::rast(infected_file_list), wide = TRUE))
+  expect_equal(data$host_pools[[1]]$infected[[1]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$infected[[2]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$infected[[3]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$infected[[4]], config$host_pools[[1]]$infected)
   infected_move <- matrix(0, ncol = 20, nrow = 20)
   infected_move[2, 1] <- 1
   expect_equal(data$host_pools[[1]]$infected[[5]], infected_move)
-  sus <- terra::rast(host_file_list) - terra::rast(infected_file_list)
-  sus <- terra::as.matrix(sus, wide = TRUE)
+  sus <- config$host_pools[[1]]$susceptible
   sus5 <- sus
   sus5[1, 1] <- sus5[1, 1] - 199
   sus5[2, 1] <- sus5[2, 1] + 199
@@ -1957,383 +798,103 @@ test_that("Movements works as expected", {
 })
 
 test_that(
-  "Overpopulation dispersal works as expected with directionality to prevent dispersers from
-  leaving the simulated area", {
-    infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-    host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-    total_populations_file <-
-      system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-    start_date <- "2008-01-01"
-    end_date <- "2008-12-31"
-    parameter_means <- c(0, 21, 1, 500, 0, 0)
-    parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-    pest_host_table <-
-      system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-    competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-    data <-
-      pops(infected_file_list = infected_file_list,
-           host_file_list = host_file_list,
-           total_populations_file = total_populations_file,
-           parameter_means = parameter_means,
-           parameter_cov_matrix = parameter_cov_matrix,
-           pest_host_table = pest_host_table,
-           competency_table = competency_table,
-           start_date = start_date,
-           end_date = end_date,
-           use_overpopulation_movements = TRUE,
-           overpopulation_percentage = 0.2,
-           leaving_percentage = 0.5,
-           leaving_scale_coefficient = 0.5,
-           natural_dir = "SE")
-    test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  "Test set 21: Overpopulation dispersal works as expected with directionality to prevent
+  dispersers from leaving the simulated area", {
+    config_file <- system.file("extdata", "configs_pops", "ts21_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    data <- pops(config)
+    test_mat <- config$host_pools[[1]]$infected
     expect_lte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
     expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
     expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
     expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
   })
 
-test_that("Deterministic dispersal works as expected", {
-  infected_file_list <- system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-12-31"
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         generate_stochasticity = FALSE,
-         establishment_stochasticity = FALSE,
-         movement_stochasticity = FALSE,
-         dispersal_stochasticity  = TRUE)
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+test_that("Test set 22: Network dispersal works as expected", {
+  config_file <- system.file("extdata", "configs_pops", "ts22_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
-test_that("Network dispersal works as expected", {
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-03-31"
-  parameter_means <- c(2, 21, 0.1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  network_filenames <-  c(system.file("extdata", "simple20x20", "segments.csv", package = "PoPS"))
-  anthropogenic_kernel_type <- c("network")
-  network_min_distances <- c(100)
-  network_max_distances <- c(1000)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
+test_that("Test set 23: Network dispersal works with multiple networks", {
+  config_file <- system.file("extdata", "configs_pops", "ts23_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         network_filenames = network_filenames,
-         network_movement_types = c("walk"),
-         network_min_distances = network_min_distances,
-         network_max_distance = network_max_distances)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts23_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
-test_that("Network dispersal works with multiple networks", {
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-03-31"
-  parameter_means <- c(2, 21, 0.01, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  network_filenames <-  c(system.file("extdata", "simple20x20", "segments1.csv", package = "PoPS"),
-                          system.file("extdata", "simple20x20", "segments2.csv", package = "PoPS"))
-  anthropogenic_kernel_type <- c("network")
-  network_min_distances <- c(100, 100)
-  network_max_distances <- c(1000, 1000)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         network_filenames = network_filenames,
-         network_movement_types = c("walk", "walk"),
-         network_weights = c(1000, 1),
-         network_min_distances = network_min_distances,
-         network_max_distance = network_max_distances)
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+test_that("Test set 24: uncertainty propogation works as expected", {
+  config_file <- system.file("extdata", "configs_pops", "ts24_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 
+  config_file <- system.file("extdata", "configs_pops", "ts24_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
+  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         network_filenames = network_filenames,
-         network_movement_types = c("walk", "walk"),
-         network_weights = c(1, 1000),
-         network_min_distances = network_min_distances,
-         network_max_distance = network_max_distances)
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts24_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
-
-test_that("uncertainty propogation works as expected", {
-  infected_file_list <- system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-03-31"
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  anthropogenic_kernel_type <- "cauchy"
-  use_initial_condition_uncertainty <- TRUE
-  use_host_uncertainty <- TRUE
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+test_that("Test that 25: multiple_random seeds works and returns expected results", {
+  config_file <- system.file("extdata", "configs_pops", "ts25_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 
-  infected_file_list <- system.file("extdata", "simple20x20", "infected_wsd.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  total_populations_file <- system.file("extdata", "simple20x20", "all_plants.tif",
-                                        package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-03-31"
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  anthropogenic_kernel_type <- "cauchy"
-  use_initial_condition_uncertainty <- TRUE
-  use_host_uncertainty <- FALSE
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-03-31"
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  anthropogenic_kernel_type <- "cauchy"
-  use_initial_condition_uncertainty <- FALSE
-  use_host_uncertainty <- TRUE
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts25_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
 })
 
-test_that("multiple_random seeds works and returns expected results", {
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "initial_infection.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-03-31"
-  parameter_means <- c(5, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  anthropogenic_kernel_type <- "cauchy"
-  multiple_random_seeds <- TRUE
-  file_random_seeds <- NULL
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         multiple_random_seeds = multiple_random_seeds,
-         file_random_seeds = file_random_seeds)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-
-  file_random_seeds <- system.file("extdata", "simple2x2", "randoms.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         multiple_random_seeds = multiple_random_seeds,
-         file_random_seeds = file_random_seeds)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
-  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
-  expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-})
-
-
-test_that("Using soils returns expected results", {
-  infected_file_list <-
-    system.file("extdata", "simple2x2", "infected.tif", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple2x2", "host.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2009-12-31"
-  parameter_means <- c(5, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  use_soils <- TRUE
-  dispersers_to_soils_percentage <- 0.05
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file,
-         use_soils = use_soils,
-         dispersers_to_soils_percentage = dispersers_to_soils_percentage)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+test_that("Test set 26: Using soils returns expected results", {
+  config_file <- system.file("extdata", "configs_pops", "ts26_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
@@ -2341,24 +902,10 @@ test_that("Using soils returns expected results", {
   expect_equal(length(data$soil_reservoirs[[1]]), 20)
   expect_equal(length(data$soil_reservoirs[[2]]), 20)
 
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         temp = TRUE,
-         temperature_coefficient_file = coefficient_file,
-         use_soils = use_soils,
-         dispersers_to_soils_percentage = dispersers_to_soils_percentage,
-         soil_starting_pest_file = infected_file_list,
-         start_with_soil_populations = TRUE)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list), wide = TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts26_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
@@ -2367,149 +914,52 @@ test_that("Using soils returns expected results", {
   expect_equal(length(data$soil_reservoirs[[2]]), 20)
 })
 
-test_that("Using multiple hosts works as expected", {
-  infected_file_list <-
-    c(system.file("extdata", "simple2x2", "infected_oak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_tanoak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_baylaurel.tif", package = "PoPS"))
-  host_file_list <-
-    c(system.file("extdata", "simple2x2", "host_oak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_tanoak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_baylaurel.tif", package = "PoPS"))
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2009-12-31"
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_multihost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         temp = TRUE,
-         random_seed = 42,
-         temperature_coefficient_file = coefficient_file)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[[1]]), wide = TRUE)
+test_that("Test set 27: Using multiple hosts works as expected", {
+  config_file <- system.file("extdata", "configs_pops", "ts27_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   test_mat[[1]] <- 4
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
-  expect_lte(data$host_pools[[2]]$infected[[1]][[1]],
-             test_mat[[1]])
-  expect_lte(data$host_pools[[2]]$infected[[1]][[2]],
-             test_mat[[2]])
-  expect_lte(data$host_pools[[2]]$infected[[1]][[3]],
-             test_mat[[3]])
-  expect_lte(data$host_pools[[2]]$infected[[1]][[4]],
-             test_mat[[4]])
+  test_mat <- config$host_pools[[2]]$infected
+  expect_lte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
+  expect_lte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
+  expect_lte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
+  expect_lte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
 
-  infected_file_list <-
-    c(system.file("extdata", "simple2x2", "infected_oak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_tanoak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_baylaurel.tif", package = "PoPS"))
-  host_file_list <-
-    c(system.file("extdata", "simple2x2", "host_oak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_tanoak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_baylaurel.tif", package = "PoPS"))
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2009-12-31"
-  parameter_means <- c(5, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_multihost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         temp = TRUE,
-         random_seed = 42,
-         temperature_coefficient_file = coefficient_file)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts27_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  test_mat <- config$host_pools[[2]]$infected
   expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
 
-
-  infected_file_list <-
-    c(system.file("extdata", "simple2x2", "infected_oak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_tanoak.tif", package = "PoPS"))
-  host_file_list <-
-    c(system.file("extdata", "simple2x2", "host_oak.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_tanoak.tif", package = "PoPS"))
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2009-12-31"
-  parameter_means <- c(5, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  coefficient_file <-
-    system.file("extdata", "simple2x2", "temperature_coefficient.tif", package = "PoPS")
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_2host.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_2host.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         temp = TRUE,
-         random_seed = 42,
-         temperature_coefficient_file = coefficient_file)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
+  config_file <- system.file("extdata", "configs_pops", "ts27_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
   expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  test_mat <- config$host_pools[[2]]$infected
   expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
 })
 
-
-test_that("Using multiple hosts with uncertainty works as expected", {
+test_that("Test set 28: Using multiple hosts with uncertainty works as expected", {
   infected_file_list <-
     c(system.file("extdata", "simple2x2", "infected_oak_wsd.tif", package = "PoPS"),
       system.file("extdata", "simple2x2", "infected_tanoak_wsd.tif", package = "PoPS"),
