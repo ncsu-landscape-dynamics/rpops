@@ -39,7 +39,7 @@ pops_model <-
       network_config$network_weights <- config$network_weights
 
       network_data_config <- c()
-      network_data_config$network_filenames <- network_files
+      network_data_config$network_filenames <- config$network_files
     }
 
     # List of frequencies type string
