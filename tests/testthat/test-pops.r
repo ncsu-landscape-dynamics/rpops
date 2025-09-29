@@ -960,43 +960,16 @@ test_that("Test set 27: Using multiple hosts works as expected", {
 })
 
 test_that("Test set 28: Using multiple hosts with uncertainty works as expected", {
-  infected_file_list <-
-    c(system.file("extdata", "simple2x2", "infected_oak_wsd.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_tanoak_wsd.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_baylaurel_wsd.tif", package = "PoPS"))
-  host_file_list <-
-    c(system.file("extdata", "simple2x2", "host_oak_wsd.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_tanoak_wsd.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_baylaurel_wsd.tif", package = "PoPS"))
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2009-12-31"
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_multihost.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         random_seed = 42,
-         start_date = start_date,
-         end_date = end_date,
-         use_host_uncertainty = TRUE)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1])[[1]], wide = TRUE)
-  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  config_file <- system.file("extdata", "configs_pops", "ts28_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]] + data$host_pools[[1]]$mortality[[1]][[1]],
+             test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
+  test_mat <- config$host_pools[[2]]$infected
   test_mat[[3]] <- 0
   expect_gte(data$host_pools[[2]]$infected[[1]][[1]] + data$host_pools[[2]]$infected[[1]][[1]],
              test_mat[[1]])
@@ -1007,224 +980,66 @@ test_that("Test set 28: Using multiple hosts with uncertainty works as expected"
   expect_gte(data$host_pools[[2]]$infected[[1]][[4]] + data$host_pools[[2]]$infected[[1]][[4]],
              test_mat[[4]])
 
-
-  infected_file_list <-
-    c(system.file("extdata", "simple2x2", "infected_oak_wsd.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "infected_tanoak_wsd.tif", package = "PoPS"))
-  host_file_list <-
-    c(system.file("extdata", "simple2x2", "host_oak_wsd.tif", package = "PoPS"),
-      system.file("extdata", "simple2x2", "host_tanoak_wsd.tif", package = "PoPS"))
-  total_populations_file <-
-    system.file("extdata", "simple2x2", "total_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2009-12-31"
-  parameter_means <- c(5, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_2host.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_2host.csv", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         random_seed = 42,
-         use_host_uncertainty = TRUE)
-
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[1]), wide = TRUE)
-  expect_gte(data$host_pools[[1]]$infected[[1]][[1]], test_mat[[1]])
+  config_file <- system.file("extdata", "configs_pops", "ts28_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_mat <- config$host_pools[[1]]$infected
+  expect_gte(data$host_pools[[1]]$infected[[1]][[1]] + data$host_pools[[1]]$mortality[[1]][[1]],
+             test_mat[[1]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[1]]$infected[[1]][[4]], test_mat[[4]])
-  test_mat <- terra::as.matrix(terra::rast(infected_file_list[2]), wide = TRUE)
-  expect_gte(data$host_pools[[2]]$infected[[1]][[1]], test_mat[[1]])
+  test_mat <- config$host_pools[[2]]$infected
+  expect_gte(data$host_pools[[2]]$infected[[1]][[1]] + data$host_pools[[2]]$mortality[[1]][[1]]
+             , test_mat[[1]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[2]], test_mat[[2]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[3]], test_mat[[3]])
   expect_gte(data$host_pools[[2]]$infected[[1]][[4]], test_mat[[4]])
 })
 
-test_that("county level infection works as expected", {
-  infected_file_list <-
-    system.file("extdata", "simple20x20", "county_infected.gpkg", package = "PoPS")
-  host_file_list <- system.file("extdata", "simple20x20", "host_w_sd2.tif", package = "PoPS")
-  total_populations_file <-
-    system.file("extdata", "simple20x20", "all_plants.tif", package = "PoPS")
-  start_date <- "2008-01-01"
-  end_date <- "2008-03-31"
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-  parameter_cov_matrix <- matrix(0, nrow = 6, ncol = 6)
-  anthropogenic_kernel_type <- "cauchy"
-  use_initial_condition_uncertainty <- FALSE
-  use_host_uncertainty <- FALSE
-  pest_host_table <-
-    system.file("extdata", "pest_host_table_singlehost_nomort.csv", package = "PoPS")
-  competency_table <- system.file("extdata", "competency_table_singlehost.csv", package = "PoPS")
-  county_level_infection_data <- TRUE
+test_that("Test set 29: county level infection works as expected", {
+  config_file <- system.file("extdata", "configs_pops", "ts29_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  expect_equal(data$number_infected[[1]], sum(test_infected$infected_mean))
 
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty,
-         county_level_infection_data = county_level_infection_data)
+  config_file <- system.file("extdata", "configs_pops", "ts29_config_t2.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  expect_gte(data$number_infected[[1]], sum(test_infected$infected_mean))
 
-  test_infected <- terra::vect(infected_file_list[[1]])
-  expect_equal(data$number_infected, sum(test_infected$infected_mean))
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
+  config_file <- system.file("extdata", "configs_pops", "ts29_config_t3.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  expect_gte(data$number_infected[[1]], 0)
 
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty,
-         county_level_infection_data = county_level_infection_data)
+  config_file <- system.file("extdata", "configs_pops", "ts29_config_t4.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  expect_gte(data$number_infected[[1]], 0)
 
-  test_infected <- terra::vect(infected_file_list[[1]])
-  expect_gte(data$number_infected, sum(test_infected$infected_mean))
-
-  use_initial_condition_uncertainty <- TRUE
-  use_host_uncertainty <- TRUE
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty,
-         county_level_infection_data = county_level_infection_data)
-
-  test_infected <- terra::vect(infected_file_list[[1]])
-  expect_gte(data$number_infected, 0)
-
-  use_initial_condition_uncertainty <- TRUE
-  use_host_uncertainty <- TRUE
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty,
-         county_level_infection_data = county_level_infection_data)
-
-  test_infected <- terra::vect(infected_file_list[[1]])
-  expect_gte(data$number_infected, 0)
-
-  use_initial_condition_uncertainty <- FALSE
-  use_host_uncertainty <- FALSE
-  parameter_means <- c(2, 21, 1, 500, 0, 0)
-  exposed_file_list <-
-    system.file("extdata", "simple20x20", "county_infected.gpkg", package = "PoPS")
-  start_exposed <- TRUE
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty,
-         county_level_infection_data = county_level_infection_data,
-         model_type = "SEI",
-         exposed_file_list = exposed_file_list,
-         latency_period = 2,
-         start_exposed = start_exposed)
-
-  test_infected <- terra::vect(infected_file_list[[1]])
-  expect_gte(data$number_infected, 0)
+  config_file <- system.file("extdata", "configs_pops", "ts29_config_t5.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  expect_gte(data$number_infected[[1]], 0)
   expect_gte(sum(data$host_pools[[1]]$total_exposed[[1]]), 0)
 
-  parameter_means <- c(0, 21, 1, 500, 0, 0)
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty,
-         county_level_infection_data = county_level_infection_data,
-         model_type = "SEI",
-         exposed_file_list = exposed_file_list,
-         latency_period = 5,
-         start_exposed = start_exposed)
-
-  test_infected <- terra::vect(infected_file_list[[1]])
-  expect_equal(data$number_infected, sum(test_infected$infected_mean))
+  config_file <- system.file("extdata", "configs_pops", "ts29_config_t6.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  expect_equal(data$number_infected[[1]], sum(test_infected$infected_mean))
   expect_equal(sum(data$host_pools[[1]]$total_exposed[[1]]), sum(test_infected$infected_mean))
 
-  host_file_list <- system.file("extdata", "simple20x20", "host_fullzeropoly.tif", package = "PoPS")
-
-  data <-
-    pops(infected_file_list = infected_file_list,
-         host_file_list = host_file_list,
-         total_populations_file = total_populations_file,
-         parameter_means = parameter_means,
-         parameter_cov_matrix = parameter_cov_matrix,
-         pest_host_table = pest_host_table,
-         competency_table = competency_table,
-         start_date = start_date,
-         end_date = end_date,
-         anthropogenic_kernel_type = anthropogenic_kernel_type,
-         use_initial_condition_uncertainty = use_initial_condition_uncertainty,
-         use_host_uncertainty = use_host_uncertainty,
-         county_level_infection_data = county_level_infection_data,
-         model_type = "SEI",
-         exposed_file_list = exposed_file_list,
-         latency_period = 5,
-         start_exposed = start_exposed)
-
-  test_infected <- terra::vect(infected_file_list[[1]])
-  expect_equal(data$number_infected, sum(test_infected$infected_mean))
+  config_file <- system.file("extdata", "configs_pops", "ts29_config_t7.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  expect_equal(data$number_infected[[1]], sum(test_infected$infected_mean))
   expect_equal(sum(data$host_pools[[1]]$total_exposed[[1]]), sum(test_infected$infected_mean))
 })
