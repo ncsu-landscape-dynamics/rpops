@@ -382,7 +382,8 @@ calibrate <- function(config_rds_file) {
             config$quantity_threshold <-
               mean(c(median(parameters_test[, 14], na.rm = TRUE), config$quantity_threshold)) + 0.02
             config$allocation_threshold <-
-              mean(c(median(parameters_test[, 15], na.rm = TRUE), config$allocation_threshold)) + 0.02
+              mean(c(median(parameters_test[, 15], na.rm = TRUE),
+                     config$allocation_threshold)) + 0.02
             config$configuration_threshold <-
               mean(c(median(parameters_test[, 16], na.rm = TRUE),
                      config$configuration_threshold)) + 0.02
@@ -818,7 +819,8 @@ calibrate <- function(config_rds_file) {
       round(config$number_of_observations * config$prior_number_of_observations)
     config$weight <- 1 - config$prior_weight
   } else if (config$prior_number_of_observations >= 1) {
-    config$total_number_of_observations <- config$prior_number_of_observations + config$number_of_observations
+    config$total_number_of_observations <-
+      config$prior_number_of_observations + config$number_of_observations
     config$prior_weight <- config$prior_number_of_observations / config$total_number_of_observations
     config$weight <- 1 - config$prior_weight
   }
