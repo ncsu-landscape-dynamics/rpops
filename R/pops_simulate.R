@@ -34,7 +34,7 @@
 #' @return list of infected and susceptible per year
 #' @export
 
-pops_simulate <- function(config_rds_file = "") {
+pops_simulate <- function(config_rds_file) {
 
   config <- readRDS(config_rds_file)
 

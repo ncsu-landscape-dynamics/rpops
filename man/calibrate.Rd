@@ -4,7 +4,11 @@
 \alias{calibrate}
 \title{Calibrates the reproductive rate and dispersal scales of the pops model.}
 \usage{
-calibrate(config)
+calibrate(config_rds_file)
+}
+\arguments{
+\item{config_rds_file}{Path to config file produced when calling `configuration`.
+The config file includes all data necessary used to set up c++ PoPS model}
 }
 \value{
 a dataframe of the variables saved and their success metrics for each run

@@ -712,7 +712,12 @@ calculate_all_stats <- function(config, data) {
       # need to assign reference, comparison, and mask in inner loop since
       # terra objects are pointers
 
-      comparison <- terra::rast(config$host_file_list[[1]])[[1]]
+      if (config$testing) {
+        file_return <- function(x) {system.file(x, package = "PoPS")}
+      } else {
+        file_return <- function(x) {file.path(config$input_path, x)}
+      }
+      comparison <- terra::rast(file_return(config$host_files[[1]]))[[1]]
       terra::values(comparison) <- 0
       reference <- comparison
       mask <- comparison
@@ -723,7 +728,7 @@ calculate_all_stats <- function(config, data) {
       }
       terra::values(mask) <- config$mask_matrix
       if (config$county_level_infection_data) {
-        reference <- terra::vect(config$infected_years_file[[1]])
+        reference <- terra::vect(file_return(config$infected_val_cal_file[[1]]))
         compare_vect <- reference[, c(1, (q + 1))]
         names(compare_vect) <- c("FIPS", "reference")
         compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
@@ -734,9 +739,8 @@ calculate_all_stats <- function(config, data) {
         ad$allocation_disagreement <- 0
         ad$configuration_disagreement <- 0
         ad$distance_difference <- 0
-
       } else {
-        terra::values(reference) <- config$infection_years2[[q]]
+        terra::values(reference) <- config$infection_comparison2[[q]]
         ad <-
           quantity_allocation_disagreement(reference,
                                            comparison,

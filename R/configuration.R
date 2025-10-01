@@ -22,9 +22,9 @@
 #' @export
 
 configuration <- function(config_file, testing = FALSE) {
-
   config <- yaml::yaml.load_file(config_file)
-  if (testing) {
+  config$testing <- testing
+  if (config$testing) {
     file_return <- function(x) {system.file(x, package = "PoPS")}
   } else {
     file_return <- function(x) {file.path(config$input_path, x)}
@@ -1019,9 +1019,9 @@ configuration <- function(config_file, testing = FALSE) {
     config$use_anthropogenic_kernel <- TRUE
     # Load observed data on occurrence
     if (config$county_level_infection_data) {
-      config$infection_years <-
+      config$infection_comparison <-
         terra::vect(file_return(config$infected_val_cal_file))
-      config$num_layers_infected_years <- length(names(config$infection_years))
+      config$num_layers_infected_years <- length(names(config$infection_comparison))
       if (config$num_layers_infected_years < config$number_of_outputs) {
         config$failure <-
           infection_years_length_error(config$num_layers_infected_years,

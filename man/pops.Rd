@@ -7,7 +7,7 @@
 pops(config)
 }
 \arguments{
-\item{config_rds_file}{Path to config file produced when calling `configuration`.
+\item{config}{Path to config file produced when calling `configuration`.
 The config file includes all data necessary used to set up c++ PoPS model}
 }
 \value{

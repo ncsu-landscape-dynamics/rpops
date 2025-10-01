@@ -7,6 +7,10 @@ scales of the pops model.}
 \usage{
 validate(config)
 }
+\arguments{
+\item{config}{Path to config file produced when calling `configuration`.
+The config file includes all data necessary used to set up c++ PoPS model}
+}
 \value{
 a data frame of statistical measures of model performance.
 }

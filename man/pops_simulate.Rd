@@ -4,7 +4,7 @@
 \alias{pops_simulate}
 \title{PoPS Simulate}
 \usage{
-pops_simulate(config_rds_file = "")
+pops_simulate(config_rds_file)
 }
 \arguments{
 \item{config_rds_file}{Path to config file produced when calling `configuration`.
