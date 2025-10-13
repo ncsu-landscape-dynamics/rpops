@@ -1,0 +1,6 @@
+"quantity_disagreement","allocation_disagreement","total_disagreement","configuration_disagreement","false_negatives","false_positives","true_positives","true_negatives","odds_ratio","unknown_positives","unknown_negatives","accuracy","precision","recall","specificity","residual_error","true_infected_locations","simulated_infected_locations","infected_locations_difference","true_infecteds","simulated_infecteds","infecteds_difference","rmse","distance_difference","mcc","output_ts"
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,1,1,1,0,2,1,-1,1,0,1,2
+1,0,1,0,1,0,1,398,398,0,0,0.9975,1,0.5,1,3,2,1,-1,4,1,-3,1.58113883008419,0,0.706220126566724,3
+3,0,3,0,3,0,1,396,132,0,0,0.9925,1,0.25,1,9,4,1,-3,10,1,-9,2.59807621135332,0,0.498116754136899,4
+5,0,5,0,5,0,1,394,78.8,0,0,0.9875,1,0.166666666666667,1,23,6,1,-5,24,1,-23,6.04152298679729,0,0.405682279556962,5
