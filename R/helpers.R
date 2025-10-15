@@ -704,83 +704,52 @@ calculated_stats_county_level <- function(compare_vect) {
 }
 
 calculate_all_stats <- function(config, data) {
-  all_disagreement <-
-    foreach::foreach(
-      q = seq_len(length(data$host_pools[[1]]$infected)), .combine = rbind,
-      .packages = c("terra", "PoPS")
-    ) %do% {
-      # need to assign reference, comparison, and mask in inner loop since
-      # terra objects are pointers
 
-      if (config$testing) {
-        file_return <- function(x) {system.file(x, package = "PoPS")}
-      } else {
-        file_return <- function(x) {file.path(config$input_path, x)}
-      }
-      comparison <- terra::rast(file_return(config$host_files[[1]]))[[1]]
-      terra::values(comparison) <- 0
-      reference <- comparison
-      mask <- comparison
-      infections <- comparison
-      for (p in seq_len(length(data$host_pools))) {
-        terra::values(infections) <- data$host_pools[[p]]$infected[[q]]
-        comparison <- comparison + infections
-      }
-      terra::values(mask) <- config$mask_matrix
-      if (config$county_level_infection_data) {
-        reference <- terra::vect(file_return(config$infected_val_cal_file[[1]]))
-        compare_vect <- reference[, c(1, (q + 1))]
-        names(compare_vect) <- c("FIPS", "reference")
-        compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
-        ad <- calculated_stats_county_level(compare_vect)
-        ad <- calculated_stats_county_level(compare_vect)
-        ad$quantity_disagreement <- 0
-        ad$allocation_disagreement <- 0
-        ad$allocation_disagreement <- 0
-        ad$configuration_disagreement <- 0
-        ad$distance_difference <- 0
-      } else {
-        terra::values(reference) <- config$infection_comparison2[[q]]
-        ad <-
-          quantity_allocation_disagreement(reference,
-                                           comparison,
-                                           use_configuration = config$use_configuration,
-                                           mask = mask,
-                                           use_distance = config$use_distance)
-        if (file.exists(config$point_file)) {
-          obs_data <- terra::vect(config$point_file)
-          obs_data <- terra::project(obs_data, comparison)
-          s <- extract(comparison, obs_data)
-          names(s) <- c("ID", paste("sim_value_output_", q, sep = ""))
-          s <- s[2]
-          obs_data <- cbind(obs_data, s)
-          ## calculate true positive, true negatives, false positives, false
-          ## negatives, and other statistics and add them to the data frame
-          ## for export
-          ad$points_true_positive <-
-            nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 > 0, ])
-          ad$points_false_negative <-
-            nrow(obs_data[obs_data$positive > 0 & obs_data$sim_value_output_1 == 0, ])
-          ad$points_false_positive <-
-            nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 > 0, ])
-          ad$points_true_negative <-
-            nrow(obs_data[obs_data$positive == 0 & obs_data$sim_value_output_1 == 0, ])
-          ad$points_total_obs <-
-            ad$points_true_negative + ad$points_true_positive +
-            ad$points_false_negative + ad$points_false_positive
-          ad$points_accuracy <-
-            (ad$points_true_negative + ad$points_true_positive) / ad$points_total_obs
-          ad$points_precision <-
-            ad$points_true_positive / (ad$points_true_positive + ad$points_false_positive)
-          ad$points_recall <-
-            ad$points_true_positive / (ad$points_true_positive + ad$points_false_negative)
-          ad$points_specificiity <-
-            ad$points_true_negative / (ad$points_true_negative + ad$points_false_positive)
-        }
-      }
-      ad$output <- q
-      ad
+  base_rast <- terra::rast(file.path(config$input_path, config$total_populations_file))
+  if (config$use_mask) {
+    mask <- base_rast[[1]]
+    terra::values(mask) <- config$mask_matrix
+  } else {
+    mask <- NULL
+  }
+
+  if (config$county_level_infection_data) {
+    reference <- terra::vect(file.path(config$input_path, config$infected_val_cal_file))
+  } else {
+    reference <- terra::rast(file.path(config$input_path, config$infected_val_cal_file))
+  }
+  comparison <- base_rast
+  terra::values(comparison) <- 0
+  infections <- comparison
+
+  vals <- lapply(seq_len(length(data$host_pools[[1]]$infected)), function(j) {
+    if (config$county_level_infection_data) {
+      compare_vect <- reference[, c(1, (j + 1))]
+      names(compare_vect) <- c("FIPS", "reference")
     }
-  all_disagreement <- data.frame(all_disagreement)
-  return(all_disagreement)
+
+    s <- lapply(length(data$host_pools), function(p) {
+      terra::values(infections) <- data$host_pools[[p]]$infected[[j]]
+      comparison <- comparison + infections
+    })
+    comparison <- s[[length(s)]]
+    if (config$county_level_infection_data) {
+      compare_vect$comparison <- terra::extract(comparison, reference, fun = "sum")[, 2]
+      ad <- calculated_stats_county_level(compare_vect)
+      ad$quantity_disagreement <- 0
+      ad$allocation_disagreement <- 0
+      ad$allocation_disagreement <- 0
+      ad$configuration_disagreement <- 0
+      ad$distance_difference <- 0
+      ad
+    } else {
+      quantity_allocation_disagreement(reference[[j]], comparison,
+                                       use_configuration = config$use_configuration,
+                                       mask = mask,
+                                       use_distance = config$use_distance)
+    }
+  })
+
+  means <- as.data.frame(do.call(rbind, vals))
+  return(means)
 }
