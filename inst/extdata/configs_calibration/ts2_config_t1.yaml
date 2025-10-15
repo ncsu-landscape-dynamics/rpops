@@ -1,13 +1,13 @@
 # File paths for input and output data
-input_path: "C:/Users/cjone/Projects/rpops/inst/extdata"
+input_path: "C:/Users/cjone/Projects/rpops/inst/extdata/"
 output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs"
 
 # pest parameters
-starting_infected_files: ["extdata/simple20x20/initial_infection.tif"]
-parameter_means_file: "extdata/parameter_means_default.csv" 
-parameter_cov_matrix_file: "extdata/parameter_cov_matrix_default.csv" 
-pest_host_table: "extdata/pest_host_table_singlehost_nomort.csv" 
-competency_table: "extdata/competency_table_singlehost.csv" 
+starting_infected_files: ["simple20x20/initial_infection.tif"]
+parameter_means_file: "parameter_means_default.csv" 
+parameter_cov_matrix_file: "parameter_cov_matrix_default.csv" 
+pest_host_table_file: "pest_host_table_singlehost_nomort.csv" 
+competency_table_file: "competency_table_singlehost.csv" 
 county_level_infection_data: false 
 use_initial_condition_uncertainty: false 
 start_exposed: false
@@ -15,12 +15,11 @@ latency_period: 0
 exposed_files: [""]
 
 # host data
-host_files: ["extdata/simple20x20/host.tif"]
-total_populations_file: "extdata/simple20x20/all_plants.tif"
+host_files: ["simple20x20/host.tif"]
+total_populations_file: "simple20x20/all_plants.tif"
 use_host_uncertainty: false
 
 # simulation settings
-random_seed: null
 start_date: "2003-01-01"
 end_date: "2003-02-11"
 time_step: "month"
@@ -31,23 +30,22 @@ number_of_iterations: 10
 number_of_cores: 2
 output_frequency: "year"
 output_frequency_n: 1
-mask: null
 
 # weather
 use_lethal_temperature: false
-lethal_temperature_file: "extdata/simple2x2/critical_temp_all_below_threshold.tif"
+lethal_temperature_file: "simple2x2/critical_temp_all_below_threshold.tif"
 lethal_temperature: -14
 lethal_temperature_month: 1
 use_overwinter_survival: false
 overwinter_survival_rate_month: 3
 overwinter_survival_rate_day: 15
-overwinter_survival_rates_file: "extdata/simple2x2/survival_rates.tif"
+overwinter_survival_rates_file: "simple2x2/survival_rates.tif"
 use_temperature: false
-temperature_coefficient_file: "extdata/simple2x2/temperature_coefficient.tif"
-temperature_coefficient_sd_file: "extdata/simple2x2/coefficient_sd.tif"
+temperature_coefficient_file: "simple2x2/temperature_coefficient.tif"
+temperature_coefficient_sd_file: "simple2x2/coefficient_sd.tif"
 use_precipitation: false
-precipitation_coefficient_file: "extdata/simple2x2/temperature_coefficient.tif"
-precipitation_coefficient_sd_file: "extdata/simple2x2/coefficient_sd.tif"
+precipitation_coefficient_file: "simple2x2/temperature_coefficient.tif"
+precipitation_coefficient_sd_file: "simple2x2/coefficient_sd.tif"
 weather_type: "deterministic"
 
 # mortality
@@ -56,13 +54,13 @@ mortality_frequency_n: 1
 
 # treatments
 use_treatment: false
-treatments_file: "extdata/simple2x2/treatments.tif"
+treatments_file: "simple2x2/treatments.tif"
 treatment_dates: ["2003-01-01"]
 treatment_method: "ratio"
 pesticide_durations: [0]
 pesticide_efficacy: 0.5
 use_quarantine: false
-quarantine_areas_file: "extdata/simple20x20/initial_infection.tif"
+quarantine_areas_file: "simple20x20/initial_infection.tif"
 quarantine_directions: ""
 
 # dispersal
@@ -71,7 +69,7 @@ natural_dir: "NONE"
 anthropogenic_kernel_type: "network"
 anthropogenic_dir: "NONE"
 # only used if anthropogenic_kernel_type == "network"
-network_files: ["extdata/simple20x20/segments.csv"]
+network_files: ["simple20x20/segments.csv"]
 network_movement_types: ["walk"]
 network_min_distances: [50]
 network_max_distances: [250]
@@ -102,14 +100,18 @@ soil_starting_pest_file: ""
 start_with_soil_populations: false
 dispersers_to_soils_percentage: 0
 
+# Mask out areas for comparison (e.g. water, or other landcover types)
+use_mask: false
+mask_file: null
+
 # validation and calibration
-infected_val_cal_file: "extdata/simple20x20/infected_single.tif"
+infected_val_cal_file: "simple20x20/infected_single.tif"
 
 # calibration only parameters
 perform_calibration: true
 params_to_estimate: [true, true, true, true, false, false]
-prior_means_file: "extdata/prior_means_0s.csv" 
-prior_cov_matrix_file: "extdata/prior_cov_matrix_0s.csv" 
+prior_means_file: "prior_means_0s.csv" 
+prior_cov_matrix_file: "prior_cov_matrix_0s.csv" 
 prior_number_of_observations: 0
 number_of_observations: 68
 success_metric: "rmse and distance"
@@ -125,7 +127,12 @@ number_of_generations: 2
 perform_validation: false
 point_file: ""
 use_configuration: false
+use_distance: false
 
 # Model API only never used unless you are pulling data from an S3 bucket in the cloud
 use_s3: false
 bucket: ""
+
+# testing only ignore for normal use
+random_seed: null
+testing: FALSE
