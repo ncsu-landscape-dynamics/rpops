@@ -13,13 +13,14 @@
 
 create_summary_stats_and_stacks <- function(config_rds_file) {
   config <- readRDS(config_rds_file)
+
   raster_template <- terra::rast(file.path(config$input_path, config$host_files)[[1]])[[1]]
   filelist <- list.files(file.path(config$output_path), pattern = "pops_output*")
 
   inf_indices <- lapply(seq_len(config$number_of_outputs), function(i) {
     seq(i, 2 * config$number_of_outputs * config$number_of_iterations, 2 * config$number_of_outputs)
   })
-  area_indices <- lapply((3 + seq_len(config$number_of_outputs)), function(i) {
+  area_indices <- lapply((config$number_of_outputs + seq_len(config$number_of_outputs)), function(i) {
     seq(i, 2 * config$number_of_outputs * config$number_of_iterations, 2 * config$number_of_outputs)
   })
   all_indices <-  c(inf_indices, area_indices)
