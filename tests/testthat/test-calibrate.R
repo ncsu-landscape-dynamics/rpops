@@ -2,8 +2,6 @@ context("test-calibrate")
 
 test_that(
   "ABC calibration has correctly formatted returns with multiple output comparisons with mask", {
-    skip_on_ci()
-    skip_on_covr()
     # config_file <-
     #   system.file("extdata", "configs_calibration", "ts1_config_t1.yaml", package = "PoPS")
     # config <- configuration(config_file = config_file, testing = TRUE)
