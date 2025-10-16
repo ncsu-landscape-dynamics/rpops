@@ -11,9 +11,6 @@
 #' nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell crs
 #' rowColFromCell global vect
 #' @importFrom stats runif rnorm median sd
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach  registerDoSEQ %dopar% %do%
-#' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom aws.s3 head_object save_object
 #' @importFrom yaml yaml.load_file

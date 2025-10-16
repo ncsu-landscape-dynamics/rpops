@@ -2,13 +2,12 @@
 % Please edit documentation in R/validate.R
 \name{validate}
 \alias{validate}
-\title{Validates the accuracy of the calibrated reproductive rate and dispersal
-scales of the pops model.}
+\title{Validates the accuracy of the calibrated model on out of sample data.}
 \usage{
-validate(config)
+validate(config_rds_file)
 }
 \arguments{
-\item{config}{Path to config file produced when calling `configuration`.
+\item{config_rds_file}{Path to config file produced when calling `configuration`.
 The config file includes all data necessary used to set up c++ PoPS model}
 }
 \value{

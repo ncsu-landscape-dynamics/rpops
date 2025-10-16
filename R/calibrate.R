@@ -18,9 +18,6 @@
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
 #' crs app vect
 #' @importFrom stats runif rnorm cov
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
-#' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
 #' @importFrom Metrics rmse

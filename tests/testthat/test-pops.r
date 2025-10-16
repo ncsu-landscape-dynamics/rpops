@@ -1001,45 +1001,52 @@ test_that("Test set 29: county level infection works as expected", {
   config_file <- system.file("extdata", "configs_pops", "ts29_config_t1.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
-  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  test_infected <-
+    terra::vect(system.file("extdata", config$starting_infected_files[[1]], package = "PoPS"))
   expect_equal(data$number_infected[[1]], sum(test_infected$infected_mean))
 
   config_file <- system.file("extdata", "configs_pops", "ts29_config_t2.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
-  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  test_infected <-
+    terra::vect(system.file("extdata", config$starting_infected_files[[1]], package = "PoPS"))
   expect_gte(data$number_infected[[1]], sum(test_infected$infected_mean))
 
   config_file <- system.file("extdata", "configs_pops", "ts29_config_t3.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
-  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  test_infected <-
+    terra::vect(system.file("extdata", config$starting_infected_files[[1]], package = "PoPS"))
   expect_gte(data$number_infected[[1]], 0)
 
   config_file <- system.file("extdata", "configs_pops", "ts29_config_t4.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
-  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  test_infected <-
+    terra::vect(system.file("extdata", config$starting_infected_files[[1]], package = "PoPS"))
   expect_gte(data$number_infected[[1]], 0)
 
   config_file <- system.file("extdata", "configs_pops", "ts29_config_t5.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
-  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  test_infected <-
+    terra::vect(system.file("extdata", config$starting_infected_files[[1]], package = "PoPS"))
   expect_gte(data$number_infected[[1]], 0)
   expect_gte(sum(data$host_pools[[1]]$total_exposed[[1]]), 0)
 
   config_file <- system.file("extdata", "configs_pops", "ts29_config_t6.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
-  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  test_infected <-
+    terra::vect(system.file("extdata", config$starting_infected_files[[1]], package = "PoPS"))
   expect_equal(data$number_infected[[1]], sum(test_infected$infected_mean))
   expect_equal(sum(data$host_pools[[1]]$total_exposed[[1]]), sum(test_infected$infected_mean))
 
   config_file <- system.file("extdata", "configs_pops", "ts29_config_t7.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
-  test_infected <- terra::vect(system.file(config$starting_infected_files[[1]], package = "PoPS"))
+  test_infected <-
+    terra::vect(system.file("extdata", config$starting_infected_files[[1]], package = "PoPS"))
   expect_equal(data$number_infected[[1]], sum(test_infected$infected_mean))
   expect_equal(sum(data$host_pools[[1]]$total_exposed[[1]]), sum(test_infected$infected_mean))
 })
