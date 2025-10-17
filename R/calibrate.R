@@ -749,12 +749,12 @@ calibrate <- function(infected_years_file,
               mean(c(median(parameters_test[, 14], na.rm = TRUE), config$distance_threshold)) + 10
             config$mcc_threshold <-
               mean(c(median(parameters_test[, 15], na.rm = TRUE), config$mcc_threshold)) - 0.02
-            config$quantity_threshold_threshold <-
-              mean(c(median(parameters_test[, 16], na.rm = TRUE), config$quantity)) - 0.02
+            config$quantity_threshold <-
+              mean(c(median(parameters_test[, 16], na.rm = TRUE), config$quantity)) + 0.02
             config$allocation_threshold <-
-              mean(c(median(parameters_test[, 17], na.rm = TRUE), config$allocation)) - 0.02
+              mean(c(median(parameters_test[, 17], na.rm = TRUE), config$allocation)) + 0.02
             config$configuration_threshold <-
-              mean(c(median(parameters_test[, 18], na.rm = TRUE), config$configuration_dis)) - 0.02
+              mean(c(median(parameters_test[, 18], na.rm = TRUE), config$configuration_dis)) + 0.02
             ## reset starting point of parameters kept and acceptance rate
             parameters_kept <- matrix(ncol = 18, nrow = config$num_particles)
             parameters_test <- matrix(ncol = 18, nrow = 200)

@@ -75,7 +75,7 @@ create_cal_print <- function(config) {
       "\nquantity:                ",
       config$quantity,
       "\nquantity threshold:      ",
-      config$allocation_threshold,
+      config$quantity_threshold,
       sep = " "
     )
   }
