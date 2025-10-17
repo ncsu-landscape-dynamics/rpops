@@ -20,7 +20,8 @@ create_summary_stats_and_stacks <- function(config_rds_file) {
   inf_indices <- lapply(seq_len(config$number_of_outputs), function(i) {
     seq(i, 2 * config$number_of_outputs * config$number_of_iterations, 2 * config$number_of_outputs)
   })
-  area_indices <- lapply((config$number_of_outputs + seq_len(config$number_of_outputs)), function(i) {
+  area_indices <-
+    lapply((config$number_of_outputs + seq_len(config$number_of_outputs)), function(i) {
     seq(i, 2 * config$number_of_outputs * config$number_of_iterations, 2 * config$number_of_outputs)
   })
   all_indices <-  c(inf_indices, area_indices)

@@ -1,10 +1,12 @@
 context("test-validate-simulate")
 
 test_that("TS1: Validation has correctly formatted returns with multiple output comparisons", {
-    # config_file <-
-    #   system.file("extdata", "configs_simulate_validate", "ts1_config_t1.yaml", package = "PoPS")
-    # config <- configuration(config_file = config_file, testing = TRUE)
-    # saveRDS(config, "inst/extdata/configs_simulate_validate/ts1_config_t1.rds")
+    config_file <-
+      system.file("extdata", "configs_simulate_validate", "ts1_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    saveRDS(config,
+            file.path(system.file("extdata/", package = "PoPS"),
+                      "configs_simulate_validate/ts1_config_t1.rds"))
     config_rds_file <-
       system.file("extdata/configs_simulate_validate/ts1_config_t1.rds", package = "PoPS")
     pops_simulate(config_rds_file = config_rds_file)
@@ -33,10 +35,12 @@ test_that("TS1: Validation has correctly formatted returns with multiple output 
 )
 
 test_that("Validation has correctly formatted returns and runs with a single output comparison", {
-    # config_file <-
-    #   system.file("extdata", "configs_simulate_validate", "ts2_config_t1.yaml", package = "PoPS")
-    # config <- configuration(config_file = config_file, testing = TRUE)
-    # saveRDS(config, "inst/extdata/configs_simulate_validate/ts2_config_t1.rds")
+    config_file <-
+      system.file("extdata", "configs_simulate_validate", "ts2_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    saveRDS(config,
+            file.path(system.file("extdata/", package = "PoPS"),
+                      "configs_simulate_validate/ts2_config_t1.rds"))
     config_rds_file <-
       system.file("extdata/configs_simulate_validate/ts2_config_t1.rds", package = "PoPS")
     pops_simulate(config_rds_file = config_rds_file)
@@ -65,10 +69,12 @@ test_that("Validation has correctly formatted returns and runs with a single out
 
 test_that(
   "Validation has correctly formatted returns and runs with a single output comparison with mask", {
-    # config_file <-
-    #   system.file("extdata", "configs_simulate_validate", "ts3_config_t1.yaml", package = "PoPS")
-    # config <- configuration(config_file = config_file, testing = TRUE)
-    # saveRDS(config, "inst/extdata/configs_simulate_validate/ts3_config_t1.rds")
+    config_file <-
+      system.file("extdata", "configs_simulate_validate", "ts3_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    saveRDS(config,
+            file.path(system.file("extdata/", package = "PoPS"),
+                      "configs_simulate_validate/ts3_config_t1.rds"))
     config_rds_file <-
       system.file("extdata/configs_simulate_validate/ts3_config_t1.rds", package = "PoPS")
     pops_simulate(config_rds_file = config_rds_file)
@@ -97,10 +103,12 @@ test_that(
 
 test_that(
   "Validation has correctly formatted returns/runs with host and initial condition uncertainty", {
-    # config_file <-
-    #   system.file("extdata", "configs_simulate_validate", "ts4_config_t1.yaml", package = "PoPS")
-    # config <- configuration(config_file = config_file, testing = TRUE)
-    # saveRDS(config, "inst/extdata/configs_simulate_validate/ts4_config_t1.rds")
+    config_file <-
+      system.file("extdata", "configs_simulate_validate", "ts4_config_t1.yaml", package = "PoPS")
+    config <- configuration(config_file = config_file, testing = TRUE)
+    saveRDS(config,
+            file.path(system.file("extdata/", package = "PoPS"),
+                      "configs_simulate_validate/ts4_config_t1.rds"))
     config_rds_file <-
       system.file("extdata/configs_simulate_validate/ts4_config_t1.rds", package = "PoPS")
     pops_simulate(config_rds_file = config_rds_file)
@@ -128,10 +136,12 @@ test_that(
 )
 
 test_that("Validation has correctly formatted returns/runs with polygon level data", {
-  # config_file <-
-  #   system.file("extdata", "configs_simulate_validate", "ts5_config_t1.yaml", package = "PoPS")
-  # config <- configuration(config_file = config_file, testing = TRUE)
-  # saveRDS(config, "inst/extdata/configs_simulate_validate/ts5_config_t1.rds")
+  config_file <-
+    system.file("extdata", "configs_simulate_validate", "ts5_config_t1.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  saveRDS(config,
+          file.path(system.file("extdata/", package = "PoPS"),
+                    "configs_simulate_validate/ts5_config_t1.rds"))
   config_rds_file <-
     system.file("extdata/configs_simulate_validate/ts5_config_t1.rds", package = "PoPS")
   pops_simulate(config_rds_file = config_rds_file)
