@@ -1,7 +1,7 @@
 input_path: C:/Users/cjone/Projects/rpops/inst/extdata/
 output_path: C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs
 starting_infected_files: simple2x2/infected.tif
-parameter_means_file: parameter_means_rr4.csv
+parameter_means_file: parameter_means_rr3.csv
 parameter_cov_matrix_file: parameter_cov_matrix_default.csv
 pest_host_table_file: pest_host_table_singlehost_nomort.csv
 competency_table_file: competency_table_singlehost.csv
@@ -21,7 +21,7 @@ season_month_start: 1
 season_month_end: 12
 number_of_iterations: 10
 number_of_cores: 2
-output_frequency: month
+output_frequency: year
 output_frequency_n: 1
 use_lethal_temperature: false
 lethal_temperature_file: simple2x2/critical_temp_all_below_threshold.tif

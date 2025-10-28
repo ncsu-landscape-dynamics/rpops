@@ -1,6 +1,6 @@
 # File paths for input and output data
 input_path: "C:/Users/cjone/Projects/rpops/inst/extdata/"
-output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs"
+output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple20x20/outputs/calibration/"
 
 # pest parameters
 starting_infected_files: ["simple20x20/county_infected.gpkg"]
