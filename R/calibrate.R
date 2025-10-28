@@ -851,16 +851,16 @@ calibrate <- function(config_rds_file) {
       "total_number_of_observations", "raw_calibration_data"
     )
 
-  if (!config$testing) {
-    file_name <- paste(config$output_folder_path, "calibration_outputs.rdata", sep = "")
-    save(outputs, file = file_name)
-    file_name <- paste(config$output_folder_path, "posterior_means.csv", sep = "")
-    write.csv(posterior_means, file_name, row.names = FALSE)
-    file_name <- paste(config$output_folder_path, "posterior_cov_matrix.csv", sep = "")
-    write.csv(posterior_cov_matrix, file_name, row.names = FALSE)
-    file_name <- paste(config$output_folder_path, "raw_calibration_data.csv", sep = "")
-    write.csv(parameters_kept, file_name, row.names = FALSE)
-  }
+
+  file_name <- paste(config$output_path, "calibration_outputs.rdata", sep = "")
+  save(outputs, file = file_name)
+  file_name <- paste(config$output_path, "posterior_means.csv", sep = "")
+  write.csv(posterior_means, file_name, row.names = FALSE)
+  file_name <- paste(config$output_path, "posterior_cov_matrix.csv", sep = "")
+  write.csv(posterior_cov_matrix, file_name, row.names = FALSE)
+  file_name <- paste(config$output_path, "raw_calibration_data.csv", sep = "")
+  write.csv(parameters_kept, file_name, row.names = FALSE)
+
 
   return(outputs)
 }
