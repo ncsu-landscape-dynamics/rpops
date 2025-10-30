@@ -189,7 +189,7 @@ test_that(
     output_frequency <- "week"
     time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
     expect_equal(time_check$checks_passed, TRUE)
-    expect_equal(time_check$number_of_time_steps, 53)
+    expect_equal(time_check$number_of_time_steps, 52)
     expect_equal(time_check$number_of_years, 1)
     expect_equal(time_check$number_of_outputs, 52)
 
@@ -197,7 +197,7 @@ test_that(
     output_frequency <- "month"
     time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
     expect_equal(time_check$checks_passed, TRUE)
-    expect_equal(time_check$number_of_time_steps, 53)
+    expect_equal(time_check$number_of_time_steps, 52)
     expect_equal(time_check$number_of_years, 1)
     expect_equal(time_check$number_of_outputs, 12)
 
@@ -205,7 +205,7 @@ test_that(
     output_frequency <- "year"
     time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
     expect_equal(time_check$checks_passed, TRUE)
-    expect_equal(time_check$number_of_time_steps, 53)
+    expect_equal(time_check$number_of_time_steps, 52)
     expect_equal(time_check$number_of_years, 1)
     expect_equal(time_check$number_of_outputs, 1)
 
@@ -215,7 +215,7 @@ test_that(
     output_frequency <- "week"
     time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
     expect_equal(time_check$checks_passed, TRUE)
-    expect_equal(time_check$number_of_time_steps, 5)
+    expect_equal(time_check$number_of_time_steps, 4)
     expect_equal(time_check$number_of_years, 1)
     expect_equal(time_check$number_of_outputs, 4)
 
@@ -225,7 +225,7 @@ test_that(
     output_frequency <- "time_step"
     time_check <- time_checks(end_date, start_date, time_step, output_frequency, output_frequency_n)
     expect_equal(time_check$checks_passed, TRUE)
-    expect_equal(time_check$number_of_time_steps, 5)
+    expect_equal(time_check$number_of_time_steps, 4)
     expect_equal(time_check$number_of_years, 1)
     expect_equal(time_check$number_of_outputs, 4)
   })

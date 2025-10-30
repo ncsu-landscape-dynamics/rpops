@@ -9,9 +9,21 @@
 
 ## Overview
 
-This is an R package for simulating the spread of pests and pathogens. The package is an R package with multiple functions built around the PoPS (Pest or Pathogen Spread) model implemented in the C++ library maintained in the [PoPS Core Repository](https://github.com/ncsu-landscape-dynamics/pops-core). 
+The Pest or Pathogen Spread (PoPS) model is an R package for simulating the spread of pests and 
+pathogens. This package contains multiple functions to calibrate, validate, and forecast pest or 
+pathogen spread in many locations. The R functions use our PoPS C++ library maintained in 
+the [PoPS Core Repository](https://github.com/ncsu-landscape-dynamics/pops-core). 
 
-PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to learn more visit [popsmodel.org](https://popsmodel.org/). The R package provides an easy way for researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model is also available in GRASS GIS you can install and use [r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS GIS.
+PoPs is a stochastic spread model of pests and pathogens in forest and agricultural landscapes to 
+learn more visit [popsmodel.org](https://popsmodel.org/). The R package provides an easy way for 
+researchers to calibrate, validate, and test what if scenarios of treatment interventions. The model
+is also available in GRASS GIS you can install and use 
+[r.pops.spread](https://github.com/ncsu-landscape-dynamics/r.pops.spread) to run the model in GRASS 
+GIS.
+
+## How to use PoPS (Workflow)
+
+PoPS is designed to be user friendly but does require specific data and partnerships
 
 ## Installation
 If you are on Windows, you need to first install
@@ -19,7 +31,8 @@ If you are on Windows, you need to first install
 
 ### Version Specific
 
-If you want to install a specific version just change the version number.
+If you want to install a specific version or commit just change the version number or the commit
+number.
 
 ```R
 install.packages("remotes")
@@ -74,7 +87,7 @@ If you use this software or code, please cite the following papers:
 
 In case you are using the automatic management feature in rpops or the
 steering version of r.pops.spread (from the branch steering), please
-cite also:
+also cite:
 
 * Petrasova, A., Gaydos, D.A., Petras, V., Jones, C.M., Mitasova, H. and
   Meentemeyer, R.K., 2020.

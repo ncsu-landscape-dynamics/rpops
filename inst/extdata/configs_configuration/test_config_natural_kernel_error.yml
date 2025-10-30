@@ -1,0 +1,138 @@
+# File paths for input and output data
+input_path: "C:/Users/cjone/Projects/rpops/inst/extdata" # folder with inputs
+output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple20x20/outputs" # folder to write outputs to
+
+# pest parameters
+starting_infected_files: ["simple20x20/infected_single.tif"] # GeoTiff File with the locations of initial infections to start the simulation
+parameter_means_file: "parameter_means_default.csv" # CSV File with the parameter means from the calibration
+parameter_cov_matrix_file: "parameter_cov_matrix_default.csv" # CSV File with the parameter covariance matrix from the calibration
+pest_host_table_file: "pest_host_table_singlehost.csv" # CSV file with the pest host table
+competency_table_file: "competency_table_singlehost.csv" # CSV file with the compentency table
+county_level_infection_data: false # is your infection data county level only
+use_initial_condition_uncertainty: false # Are you providing a mean and standard deviation for your starting infection files. This allows for propogating uncertainty through the model.
+start_exposed: false # Should you start with your known infections as exposed. Useful for simulating inoculation experiments.
+latency_period: 0 # what is the lantent period of your pathogen?
+exposed_files: [""] # A list of GeoTiff files with location of exposed infections at start of simulation.
+
+# host data
+host_files: ["simple20x20/host.tif"]
+total_populations_file: "simple20x20/all_plants.tif"
+use_host_uncertainty: false
+
+# simulation settings
+start_date: "2024-01-01"
+end_date: "2024-12-31"
+time_step: "week"
+model_type: "SI"
+season_month_start: 1
+season_month_end: 12
+number_of_iterations: 10
+number_of_cores: 2
+output_frequency: "year"
+output_frequency_n: 1
+
+# weather
+use_lethal_temperature: false
+lethal_temperature_file: ""
+lethal_temperature: -15
+lethal_temperature_month: 1
+use_overwinter_survival: false
+overwinter_survival_rate_month: 3
+overwinter_survival_rate_day: 15
+overwinter_survival_rates_file: ""
+use_temperature: false
+temperature_coefficient_file: ""
+temperature_coefficient_sd_file: ""
+use_precipitation: false
+precipitation_coefficient_file: ""
+precipitation_coefficient_sd_file: ""
+weather_type: "deterministic"
+
+# mortality
+mortality_frequency: "year"
+mortality_frequency_n: 1
+
+# treatments
+use_treatment: false
+treatments_file: ""
+treatment_dates: ["2024-12-24"]
+treatment_method: "ratio"
+pesticide_durations: [0]
+pesticide_efficacy: 1.0
+use_quarantine: false
+quarantine_areas_file: ""
+quarantine_directions: ""
+
+# dispersal
+natural_kernel_type: "hello"
+natural_dir: "NONE"
+anthropogenic_kernel_type: "cauchy"
+anthropogenic_dir: "NONE"
+# only used if anthropogenic_kernel_type == "network"
+network_files: [""]
+network_movement_types: ["walk"]
+network_min_distances: [0]
+network_max_distances: [0]
+network_weights: [1]
+
+# host movement
+use_movements: false # Boolean for moving hosts (used when animals move from farm to farm)
+movements_file: ""
+
+# stochasticity
+use_multiple_random_seeds: false
+multiple_random_seeds_file: null
+generate_stochasticity: true
+establishment_stochasticity: true
+movement_stochasticity: true
+dispersal_stochasticity: true
+establishment_probability: 0.5
+dispersal_percentage: 0.99
+use_spreadrates: false
+use_overpopulation_movements: false
+overpopulation_percentage: 0.75
+leaving_percentage: 0.5
+leaving_scale_coefficient: 5
+
+# soil_pests
+use_soils: false
+soil_starting_pest_file: ""
+start_with_soil_populations: false
+dispersers_to_soils_percentage: 0
+
+# Mask out areas for comparison (e.g. water, or other landcover types)
+use_mask: FALSE
+mask_file: ""
+
+# validation and calibration
+infected_val_cal_file: "" # GeoTiff file with the infections in which to compare the validation/calibration results with.
+
+# calibration only parameters
+perform_calibration: false
+params_to_estimate: [true, true, true, true, false, false] # Position 1 = reproductive rate, 2 =
+prior_means_file: ""
+prior_cov_matrix_file: ""
+prior_number_of_observations: 0 # observations that have been conducted at the start of the simulation
+number_of_observations: 0 # observations that were conducted during the simulation for validation/calibration (these are samples taken to confirm presence/absence and/or abundance)
+success_metric: "MCC"
+verbose: true
+natural_kappa: 0
+anthropogenic_kappa: 0
+calibration_method: "ABC" # Which method of calibration to use ABC or MCMC. We recommend ABC as it tends to provide more robust and accurate parameter sets.
+# ABC Parameters
+generation_size: 1000
+number_of_generations: 7
+
+# validation only
+perform_validation: false
+point_file: "" # only if you want to validate to specific point data ()
+use_configuration: false # Use if you want to calculate configuration disagreement. This takes longer to compute simulation statistics and success metrics).
+use_distance: false
+
+# Model API only never used unless you are pulling data from an S3 bucket in the cloud
+use_s3: false
+bucket: ""
+
+# testing only ignore for normal use
+random_seed: null
+testing: FALSE

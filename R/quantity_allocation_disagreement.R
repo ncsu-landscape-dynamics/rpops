@@ -28,8 +28,7 @@
 #' @export
 #'
 quantity_allocation_disagreement <-
-  function(reference, comparison, use_configuration = FALSE,
-           mask = NULL, use_distance = FALSE) {
+  function(reference, comparison, use_configuration = FALSE,  mask = NULL, use_distance = FALSE) {
     if (!is.null(mask)) {
       reference <- terra::mask(reference, mask)
       comparison <- terra::mask(comparison, mask)

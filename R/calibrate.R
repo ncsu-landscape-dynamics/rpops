@@ -12,98 +12,12 @@
 #' and doesn't improve for awhile it will exist calibration prior to reaching
 #' the total number of iterations specified.
 #'
-#' @inheritParams pops
-#' @param infected_years_file Raster file with years of initial
-#' infection/infestation as individual locations of a pest or pathogen. This is
-#' a multiband raster file (e.g. .tif) with each band representing a unique time
-#' step (e.g. band 1 = year 1 .... band 6 = year 6 or band 1 = week 1 .... band
-#' 6 = week 6). This needs to align with both the time step selection and start
-#' and end dates selection. Units for infections are based on data availability
-#' and the way the units used for your host file creation (e.g. percent area, #
-#' of hosts per cell, etc.). This doesn't include the start year which passed in
-#' in the initial_infected_file (e.g. if we had observation data from 2017,
-#' 2018, and 2019 the 2017 raster file would be the initial_infected_file and a
-#' dual band raster file would have band 1 = 2018 and band 2 = 2019 observations)
-#' @param number_of_observations the number of observations used for this
-#' calibration. Useful if using previous calibration. This is used to
-#' weight the parameters when updating parameters when new data becomes
-#' available. Example if we have 2,000 observations in 2019 and had 1,000
-#' observations in 2018 and 1,000 in 2017, we would use 2,000 here and 2,000 for
-#' our prior_number_of_observations.
-#' @param number_of_generations the number of generations to use to decrease
-#' the uncertainty in the parameter estimation (too many and it will take a
-#' long time, too few and your parameter sets will be too wide). This is an ABC
-#' implementation naming convention but should be set to greater than 7 for
-#' robust calibrations. There is a trade off between computational time and model
-#' accuracy the larger this number gets. Usually 7 to 9 is the ideal range.
-#' @param generation_size how many accepted parameter sets should occur in each
-#' generation. For example if generation size is 1,000 then the simulation runs
-#' until 1,000 model runs are less than the threshold value.
-#' We recommend running at least 1,000 but the greater this number the more
-#' accurate the model parameters selected will be.
-#' @param prior_number_of_observations the number of total observations from
-#' previous calibrations used to weight the posterior distributions (if this is
-#' a new calibration this value takes the form of a prior weight (0 - 1)). This
-#' is used to weight the parameters when updating parameters when new data
-#' becomes available. Example if we have 2,000 observations in 2019 and had
-#' 1,000 observations in 2018 and 1,000 in 2017, we would use 2,000 here and
-#' 2,000 for our number_of_observations.
-#' @param params_to_estimate A list of booleans specifying which parameters to
-#' estimate ordered from (reproductive_rate, natural_dispersal_distance,
-#' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
-#' and anthropogenic kappa)
-#' @param prior_means A vector of the means of your parameters you are
-#' estimating in order from (reproductive_rate, natural_dispersal_distance,
-#' percent_natural_dispersal, anthropogenic_dispersal_distance, natural kappa,
-#' and anthropogenic kappa). This is used when updating a parameter set from a
-#' previous calibration using the iterative framework.
-#' @param prior_cov_matrix A covariance matrix from the previous years
-#' posterior parameter estimation ordered from (reproductive_rate,
-#' natural_dispersal_distance, percent_natural_dispersal,
-#' anthropogenic_dispersal_distance, natural kappa, and anthropogenic kappa).
-#' This is used when updating a parameter set from a previous calibration using
-#' the iterative framework.
-#' @param mask Raster file used to provide a mask to remove 0's that are not
-#' true negatives from comparisons (e.g. mask out lakes and oceans from statics
-#' if modeling terrestrial species). A numerical value represents the area you
-#' want to calculate statistics on and an NA value represents the area to remove
-#' from the statistics.
-#' @param natural_kappa sets the strength of the natural direction in the
-#' von-mises distribution numeric value between 0.01 and 12
-#' @param anthropogenic_kappa sets the strength of the anthropogenic direction
-#' in the von-mises distribution numeric value between 0.01 and 12
-#' @param calibration_method choose which method of calibration to use either
-#' 'ABC' (Approximate Bayesian Computation) or 'MCMC' (Markov Chain Monte Carlo
-#' Approximation)
-#' @param number_of_iterations how many iterations do you want to run to allow
-#' the calibration to converge (recommend a minimum of at least 100,000 but
-#' preferably 1 million).
-#' @param verbose Boolean with true printing current status of calibration,
-#' (e.g. the current generation, current particle, and the acceptance rate).
-#' Defaults if FALSE.
-#' @param write_outputs Either c("summary_outputs", or "None"). If not
-#' "None" output folder path must be provided.
-#' @param output_folder_path this is the full path with either / or \\ (e.g.,
-#' "C:/user_name/desktop/pops_sod_2020_2023/outputs/")
-#' @param success_metric Choose the success metric that is most relevant to your system or data for
-#' comparing simulations vs. observations. Must be one of "quantity", "allocation", "configuration",
-#' "quantity and allocation","quantity and configuration", "allocation and configuration",
-#' "quantity, allocation, and configuration", "accuracy", "precision", "recall", "specificity",
-#' "accuracy and precision", "accuracy and specificity", "accuracy and recall",
-#' "precision and recall", "precision and specificity", "recall and specificity",
-#' "accuracy, precision, and recall", "accuracy, precision, and specificity",
-#' "accuracy, recall, and specificity", "precision, recall, and specificity",
-#' "accuracy, precision, recall, and specificity", "rmse", "distance", "mcc", "mcc and quantity",
-#' "mcc and distance", "rmse and distance", "mcc and configuration", "mcc and RMSE",
-#' "mcc, quantity, and configuration"). Default is "mcc"
+#' @inheritParams pops_simulate
 #'
 #' @importFrom terra global rast xres yres classify extract ext as.points ncol project
 #' nrow nlyr rowFromCell colFromCell values as.matrix rowFromCell colFromCell
 #' crs app vect
 #' @importFrom stats runif rnorm cov
-#' @importFrom doParallel registerDoParallel
-#' @importFrom foreach  registerDoSEQ %dopar% %do% %:% foreach
-#' @importFrom parallel makeCluster stopCluster detectCores
 #' @importFrom lubridate interval time_length mdy %within%
 #' @importFrom MASS mvrnorm
 #' @importFrom Metrics rmse
@@ -114,198 +28,8 @@
 #'
 #' @export
 
-calibrate <- function(infected_years_file,
-                      number_of_observations = 1,
-                      prior_number_of_observations = 0,
-                      prior_means = c(0, 0, 0, 0, 0, 0),
-                      prior_cov_matrix = matrix(0, 6, 6),
-                      params_to_estimate = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
-                      number_of_generations = 7,
-                      generation_size = 1000,
-                      pest_host_table,
-                      competency_table,
-                      infected_file_list,
-                      host_file_list,
-                      total_populations_file,
-                      temp = FALSE,
-                      temperature_coefficient_file = "",
-                      precip = FALSE,
-                      precipitation_coefficient_file = "",
-                      model_type = "SI",
-                      latency_period = 0,
-                      time_step = "month",
-                      season_month_start = 1,
-                      season_month_end = 12,
-                      start_date = "2008-01-01",
-                      end_date = "2008-12-31",
-                      use_survival_rates = FALSE,
-                      survival_rate_month = 3,
-                      survival_rate_day = 15,
-                      survival_rates_file = "",
-                      use_lethal_temperature = FALSE,
-                      temperature_file = "",
-                      lethal_temperature = -12.87,
-                      lethal_temperature_month = 1,
-                      mortality_frequency = "year",
-                      mortality_frequency_n = 1,
-                      management = FALSE,
-                      treatment_dates = c(""),
-                      treatments_file = "",
-                      treatment_method = "ratio",
-                      natural_kernel_type = "cauchy",
-                      anthropogenic_kernel_type = "cauchy",
-                      natural_dir = "NONE",
-                      natural_kappa = 0,
-                      anthropogenic_dir = "NONE",
-                      anthropogenic_kappa = 0,
-                      pesticide_duration = c(0),
-                      pesticide_efficacy = 1.0,
-                      mask = NULL,
-                      output_frequency = "year",
-                      output_frequency_n = 1,
-                      movements_file = "",
-                      use_movements = FALSE,
-                      start_exposed = FALSE,
-                      generate_stochasticity = TRUE,
-                      establishment_stochasticity = TRUE,
-                      movement_stochasticity = TRUE,
-                      dispersal_stochasticity = TRUE,
-                      establishment_probability = 0.5,
-                      dispersal_percentage = 0.99,
-                      quarantine_areas_file = "",
-                      use_quarantine = FALSE,
-                      use_spreadrates = FALSE,
-                      use_overpopulation_movements = FALSE,
-                      overpopulation_percentage = 0,
-                      leaving_percentage = 0,
-                      leaving_scale_coefficient = 1,
-                      calibration_method = "ABC",
-                      number_of_iterations = 100000,
-                      exposed_file_list = "",
-                      verbose = TRUE,
-                      write_outputs = "None",
-                      output_folder_path = "",
-                      network_filenames = c(""),
-                      network_movement_types = c("walk"),
-                      network_min_distances = c(0),
-                      network_max_distances = c(0),
-                      network_weights = c(1),
-                      success_metric = "mcc",
-                      use_initial_condition_uncertainty = FALSE,
-                      use_host_uncertainty = FALSE,
-                      weather_type = "deterministic",
-                      temperature_coefficient_sd_file = "",
-                      precipitation_coefficient_sd_file = "",
-                      dispersers_to_soils_percentage = 0,
-                      quarantine_directions = "",
-                      multiple_random_seeds = FALSE,
-                      file_random_seeds = NULL,
-                      use_soils = FALSE,
-                      soil_starting_pest_file = "",
-                      start_with_soil_populations = FALSE,
-                      county_level_infection_data = FALSE) {
-
-  # add all data to config list
-  config <- c()
-  config$infected_years_file <- infected_years_file
-  config$number_of_observations <- number_of_observations
-  config$prior_number_of_observations <- prior_number_of_observations
-  config$prior_means <- prior_means
-  config$prior_cov_matrix <- prior_cov_matrix
-  config$params_to_estimate <- params_to_estimate
-  config$number_of_generations <- number_of_generations
-  config$generation_size <- generation_size
-  config$infected_file_list <- infected_file_list
-  config$host_file_list <- host_file_list
-  config$total_populations_file <- total_populations_file
-  config$temp <- temp
-  config$temperature_coefficient_file <- temperature_coefficient_file
-  config$precip <- precip
-  config$precipitation_coefficient_file <- precipitation_coefficient_file
-  config$model_type <- model_type
-  config$latency_period <- latency_period
-  config$time_step <- time_step
-  config$season_month_start <- season_month_start
-  config$season_month_end <- season_month_end
-  config$start_date <- start_date
-  config$end_date <- end_date
-  config$use_lethal_temperature <- use_lethal_temperature
-  config$temperature_file <- temperature_file
-  config$lethal_temperature <- lethal_temperature
-  config$lethal_temperature_month <- lethal_temperature_month
-  config$use_survival_rates <- use_survival_rates
-  config$survival_rate_month <- survival_rate_month
-  config$survival_rate_day <- survival_rate_day
-  config$survival_rates_file <- survival_rates_file
-  config$management <- management
-  config$treatment_dates <- treatment_dates
-  config$treatments_file <- treatments_file
-  config$treatment_method <- treatment_method
-  config$natural_kernel_type <- natural_kernel_type
-  config$anthropogenic_kernel_type <- anthropogenic_kernel_type
-  config$natural_dir <- natural_dir
-  config$natural_kappa <- natural_kappa
-  config$anthropogenic_dir <- anthropogenic_dir
-  config$anthropogenic_kappa <- anthropogenic_kappa
-  config$pesticide_duration <- pesticide_duration
-  config$pesticide_efficacy <- pesticide_efficacy
-  config$mask <- mask
-  config$output_frequency <- output_frequency
-  config$output_frequency_n <- output_frequency_n
-  config$movements_file <- movements_file
-  config$use_movements <- use_movements
-  config$start_exposed <- start_exposed
-  config$generate_stochasticity <- generate_stochasticity
-  config$establishment_stochasticity <- establishment_stochasticity
-  config$movement_stochasticity <- movement_stochasticity
-  config$dispersal_stochasticity <- dispersal_stochasticity
-  config$establishment_probability <- establishment_probability
-  config$dispersal_percentage <- dispersal_percentage
-  config$quarantine_areas_file <- quarantine_areas_file
-  config$quarantine_directions <- quarantine_directions
-  config$use_quarantine <- use_quarantine
-  config$use_spreadrates <- use_spreadrates
-  config$use_overpopulation_movements <- use_overpopulation_movements
-  config$overpopulation_percentage <- overpopulation_percentage
-  config$leaving_percentage <- leaving_percentage
-  config$leaving_scale_coefficient <- leaving_scale_coefficient
-  config$calibration_method <- calibration_method
-  config$number_of_iterations <- number_of_iterations
-  config$exposed_file_list <- exposed_file_list
-  # add function name for use in configuration function to skip
-  # function specific specific configurations namely for validation and
-  # calibration.
-  config$function_name <- "calibrate"
-  config$failure <- NULL
-  config$write_outputs <- write_outputs
-  config$output_folder_path <- output_folder_path
-  config$mortality_frequency <- mortality_frequency
-  config$mortality_frequency_n <- mortality_frequency_n
-  config$network_filenames <- network_filenames
-  config$network_movement_types <- network_movement_types
-  config$network_min_distances <- network_min_distances
-  config$network_max_distances <- network_max_distances
-  config$network_weights <- network_weights
-  config$success_metric <- success_metric
-  config$use_initial_condition_uncertainty <- use_initial_condition_uncertainty
-  config$use_host_uncertainty <- use_host_uncertainty
-  config$weather_type <- weather_type
-  config$temperature_coefficient_sd_file <- temperature_coefficient_sd_file
-  config$precipitation_coefficient_sd_file <- precipitation_coefficient_sd_file
-  config$dispersers_to_soils_percentage <- dispersers_to_soils_percentage
-  config$multiple_random_seeds <- multiple_random_seeds
-  config$file_random_seeds <- file_random_seeds
-  config$use_soils <- use_soils
-  config$soil_starting_pest_file <- soil_starting_pest_file
-  config$start_with_soil_populations <- start_with_soil_populations
-  config$county_level_infection_data <- county_level_infection_data
-  config$pest_host_table <- pest_host_table
-  config$competency_table <- competency_table
-  config$point_file <- ""
-
-  # call configuration function to perform data checks and transform data into
-  # format used in pops c++
-  config <- configuration(config)
+calibrate <- function(config_rds_file) {
+  config <- readRDS(config_rds_file)
 
   if (!is.null(config$failure)) {
     stop(config$failure)
@@ -327,98 +51,26 @@ calibrate <- function(infected_years_file,
              natural_kappa,
              anthropogenic_kappa) {
 
+      config$reproductive_rate <- reproductive_rate
+      config$natural_distance_scale <- natural_distance_scale
+      config$anthropogenic_distance_scale <- anthropogenic_distance_scale
+      config$percent_natural_dispersal <- percent_natural_dispersal
+      config$natural_kappa <- natural_kappa
+      config$anthropogenic_kapp <- anthropogenic_kappa
       config$random_seed <- as.integer(sample.int(1e9, 1, replace = FALSE))
-      set.seed(config$random_seed[[1]])
-      random_seeds <- create_random_seeds(1)
+      set.seed(config$random_seed)
+      config <- draw_parameters(config) # draws parameter set for the run
       config <- host_pool_setup(config)
       while (any(config$total_hosts > config$total_populations, na.rm = TRUE) ||
-            any(config$total_exposed > config$total_populations, na.rm = TRUE) ||
-            any(config$total_infecteds > config$total_populations, na.rm = TRUE)) {
+             any(config$total_exposed > config$total_populations, na.rm = TRUE) ||
+             any(config$total_infecteds > config$total_populations, na.rm = TRUE)) {
         config <- host_pool_setup(config)
       }
       config$competency_table_list <- competency_table_list_creator(config$competency_table)
       config$pest_host_table_list <- pest_host_table_list_creator(config$pest_host_table)
+      config$random_seeds <- as.matrix(config$random_seeds_list[1, ])[1, ]
 
-      data <- pops_model(
-        random_seed = config$random_seed,
-        multiple_random_seeds = config$multiple_random_seeds,
-        random_seeds = as.matrix(random_seeds[1, ])[1, ],
-        use_lethal_temperature = config$use_lethal_temperature,
-        lethal_temperature = config$lethal_temperature,
-        lethal_temperature_month = config$lethal_temperature_month,
-        use_survival_rates = config$use_survival_rates,
-        survival_rate_month = config$survival_rate_month,
-        survival_rate_day = config$survival_rate_day,
-        host_pools = config$host_pools,
-        total_populations = config$total_populations,
-        competency_table = config$competency_table_list,
-        pest_host_table = config$pest_host_table_list,
-        mortality_on = config$mortality_on,
-        quarantine_areas = config$quarantine_areas,
-        quarantine_directions = config$quarantine_directions,
-        treatment_maps = config$treatment_maps,
-        treatment_dates = config$treatment_dates,
-        pesticide_duration = config$pesticide_duration,
-        use_movements = config$use_movements,
-        movements = config$movements,
-        movements_dates = config$movements_dates,
-        weather = config$weather,
-        temperature = config$temperature,
-        survival_rates = config$survival_rates,
-        weather_coefficient = config$weather_coefficient,
-        weather_coefficient_sd = config$weather_coefficient_sd,
-        res = config$res,
-        rows_cols = config$rows_cols,
-        time_step = config$time_step,
-        reproductive_rate = reproductive_rate,
-        spatial_indices = config$spatial_indices,
-        season_month_start_end = config$season_month_start_end,
-        soil_reservoirs = config$soil_reservoirs,
-        start_date = config$start_date,
-        end_date = config$end_date,
-        treatment_method = config$treatment_method,
-        natural_kernel_type = config$natural_kernel_type,
-        anthropogenic_kernel_type = config$anthropogenic_kernel_type,
-        use_anthropogenic_kernel = config$use_anthropogenic_kernel,
-        percent_natural_dispersal = percent_natural_dispersal,
-        natural_distance_scale = natural_distance_scale,
-        anthropogenic_distance_scale = anthropogenic_distance_scale,
-        natural_dir = config$natural_dir,
-        natural_kappa = natural_kappa,
-        anthropogenic_dir = config$anthropogenic_dir,
-        anthropogenic_kappa = anthropogenic_kappa,
-        output_frequency = config$output_frequency,
-        output_frequency_n = config$output_frequency_n,
-        quarantine_frequency = config$quarantine_frequency,
-        quarantine_frequency_n = config$quarantine_frequency_n,
-        use_quarantine = config$use_quarantine,
-        spreadrate_frequency = config$spreadrate_frequency,
-        spreadrate_frequency_n = config$spreadrate_frequency_n,
-        mortality_frequency = config$mortality_frequency,
-        mortality_frequency_n = config$mortality_frequency_n,
-        use_spreadrates = config$use_spreadrates,
-        model_type_ = config$model_type,
-        latency_period = config$latency_period,
-        generate_stochasticity = config$generate_stochasticity,
-        establishment_stochasticity = config$establishment_stochasticity,
-        movement_stochasticity = config$movement_stochasticity,
-        dispersal_stochasticity = config$dispersal_stochasticity,
-        establishment_probability = config$establishment_probability,
-        dispersal_percentage = config$dispersal_percentage,
-        use_overpopulation_movements = config$use_overpopulation_movements,
-        overpopulation_percentage = config$overpopulation_percentage,
-        leaving_percentage = config$leaving_percentage,
-        leaving_scale_coefficient = config$leaving_scale_coefficient,
-        bbox = config$bounding_box,
-        network_min_distances = config$network_min_distances,
-        network_max_distances = config$network_max_distances,
-        network_filenames = config$network_filenames,
-        network_movement_types = config$network_movement_types,
-        network_weights = config$network_weights,
-        weather_size = config$weather_size,
-        weather_type = config$weather_type,
-        dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
-        use_soils = config$use_soils)
+      data <- pops_model(config)
       return(data)
     }
 
@@ -440,7 +92,7 @@ calibrate <- function(infected_years_file,
     config$specificity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$rmse_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
     config$distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$mcc_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
+    config$mcc_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
 
     # assign thresholds for summary static values to be compared to the
     config$quantity_threshold <- 40 # starting threshold for quantity disagreement
@@ -468,33 +120,33 @@ calibrate <- function(infected_years_file,
           proposed_reproductive_rate <- round(runif(1, 0.055, 8), digits = 2)
           if (config$res$ew_res > 1000 || config$res$ns_res > 1000) {
             proposed_natural_distance_scale <- round(runif(1, 0.5, 500), digits = 1) * 10
-            if (params_to_estimate[4]) {
+            if (config$params_to_estimate[4]) {
               proposed_anthropogenic_distance_scale <- round(runif(1, 30, 800), digits = 0) * 100
             } else {
               proposed_anthropogenic_distance_scale <- 0.1
             }
           } else {
             proposed_natural_distance_scale <- round(runif(1, 0.5, 500), digits = 1)
-            if (params_to_estimate[4]) {
+            if (config$params_to_estimate[4]) {
               proposed_anthropogenic_distance_scale <- round(runif(1, 30, 80), digits = 0) * 100
             } else {
               proposed_anthropogenic_distance_scale <- 0.1
             }
           }
-          if (params_to_estimate[3]) {
+          if (config$params_to_estimate[3]) {
             proposed_percent_natural_dispersal <- round(runif(1, 0.87, 1), digits = 3)
           } else {
             proposed_percent_natural_dispersal <- 1.0
           }
-          if (params_to_estimate[5]) {
+          if (config$params_to_estimate[5]) {
             proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
           } else {
-            proposed_natural_kappa <- natural_kappa
+            proposed_natural_kappa <- config$natural_kappa
           }
-          if (params_to_estimate[6]) {
+          if (config$params_to_estimate[6]) {
             proposed_anthropogenic_kappa <- round(runif(1, 0, 5), digits = 1)
           } else {
-            proposed_anthropogenic_kappa <- anthropogenic_kappa
+            proposed_anthropogenic_kappa <- config$anthropogenic_kappa
           }
         } else {
           # draw from the multivariate normal distribution and ensure that
@@ -519,7 +171,6 @@ calibrate <- function(infected_years_file,
           proposed_anthropogenic_kappa <- proposed_parameters[6]
         }
 
-        # run the model with the proposed parameter set
         data <-
           param_func(
             proposed_reproductive_rate,
@@ -530,8 +181,7 @@ calibrate <- function(infected_years_file,
             proposed_anthropogenic_kappa
           )
 
-        # calculate comparison metrics for simulation data for each time step in
-        # the simulation
+        # calculate comparison metrics for simulation data for each time step in the simulation
         all_disagreement <- calculate_all_stats(config, data)
         all_disagreement <- colSums(all_disagreement)
 
@@ -726,12 +376,14 @@ calibrate <- function(infected_years_file,
               mean(c(median(parameters_test[, 12], na.rm = TRUE), config$distance_threshold)) + 10
             config$mcc_threshold <-
               mean(c(median(parameters_test[, 13], na.rm = TRUE), config$mcc_threshold)) - 0.02
-            config$quantity_threshold_threshold <-
-              mean(c(median(parameters_test[, 14], na.rm = TRUE), config$quantity)) - 0.02
+            config$quantity_threshold <-
+              mean(c(median(parameters_test[, 14], na.rm = TRUE), config$quantity_threshold)) + 0.02
             config$allocation_threshold <-
-              mean(c(median(parameters_test[, 15], na.rm = TRUE), config$allocation)) - 0.02
+              mean(c(median(parameters_test[, 15], na.rm = TRUE),
+                     config$allocation_threshold)) + 0.02
             config$configuration_threshold <-
-              mean(c(median(parameters_test[, 16], na.rm = TRUE), config$configuration_dis)) - 0.02
+              mean(c(median(parameters_test[, 16], na.rm = TRUE),
+                     config$configuration_threshold)) + 0.02
             ## reset starting point of parameters kept and acceptance rate
             parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
             parameters_test <- matrix(ncol = 16, nrow = 200)
@@ -758,13 +410,13 @@ calibrate <- function(infected_years_file,
           }
         }
 
-        if (verbose) {
+        if (config$verbose) {
           cat(config$acceptance_rate_info)
         }
       }
 
-      start_index <- config$current_bin * generation_size - generation_size + 1
-      end_index <- config$current_bin * generation_size
+      start_index <- config$current_bin * config$generation_size - config$generation_size + 1
+      end_index <- config$current_bin * config$generation_size
       config$parameter_means <- colMeans(parameters_kept[start_index:end_index, 1:6])
       config$parameter_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:6])
 
@@ -780,6 +432,7 @@ calibrate <- function(infected_years_file,
       config$rmse_thresholds[config$current_bin] <- config$rmse_threshold
       config$distance_thresholds[config$current_bin] <- config$distance_threshold
       config$specificity_thresholds[config$current_bin] <- config$specificity_threshold
+      config$mcc_thresholds[config$current_bin] <- config$mcc_threshold
       config$accuracy_threshold <- median(parameters_kept[start_index:end_index, 7])
       config$precision_threshold <- median(parameters_kept[start_index:end_index, 8])
       config$recall_threshold <- median(parameters_kept[start_index:end_index, 9])
@@ -813,12 +466,12 @@ calibrate <- function(infected_years_file,
     if (config$params_to_estimate[5]) {
       proposed_natural_kappa <- round(runif(1, 0, 5), digits = 1)
     } else {
-      proposed_natural_kappa <- natural_kappa
+      proposed_natural_kappa <- config$natural_kappa
     }
     if (config$params_to_estimate[6]) {
       proposed_anthropogenic_kappa <- round(runif(1, 0, 5), digits = 1)
     } else {
-      proposed_anthropogenic_kappa <- anthropogenic_kappa
+      proposed_anthropogenic_kappa <- config$anthropogenic_kappa
     }
 
     data <-
@@ -931,7 +584,7 @@ calibrate <- function(infected_years_file,
                         sd = current$natural_kappa / 20), digits = 3)
         }
       } else {
-        proposed_natural_kappa <- natural_kappa
+        proposed_natural_kappa <- config$natural_kappa
       }
 
       if (config$params_to_estimate[6]) {
@@ -943,7 +596,7 @@ calibrate <- function(infected_years_file,
                         sd = current$anthropogenic_kappa / 20), digits = 3)
         }
       } else {
-        proposed_anthropogenic_kappa <- anthropogenic_kappa
+        proposed_anthropogenic_kappa <- config$anthropogenic_kappa
       }
 
       data <-
@@ -1121,7 +774,7 @@ calibrate <- function(infected_years_file,
       }
 
       param <- current
-      if (verbose) {
+      if (config$verbose) {
         print(i)
       }
       params[i, ] <- param
@@ -1130,7 +783,7 @@ calibrate <- function(infected_years_file,
     if (config$number_of_iterations > 10000) {
       start_index <- 5000
     } else {
-      start_index <- number_of_iterations / 2
+      start_index <- config$number_of_iterations / 2
     }
 
     calibrated_means <-
@@ -1157,26 +810,27 @@ calibrate <- function(infected_years_file,
     return("Calibration method must be one of 'ABC' or 'MCMC'")
   }
 
-  if (prior_number_of_observations < 1) {
-    prior_weight <- prior_number_of_observations
-    total_number_of_observations <- number_of_observations +
-      round(number_of_observations * prior_number_of_observations)
-    weight <- 1 - prior_weight
-  } else if (prior_number_of_observations >= 1) {
-    total_number_of_observations <- prior_number_of_observations + number_of_observations
-    prior_weight <- prior_number_of_observations / total_number_of_observations
-    weight <- 1 - prior_weight
+  if (config$prior_number_of_observations < 1) {
+    config$prior_weight <- config$prior_number_of_observations
+    config$total_number_of_observations <- config$number_of_observations +
+      round(config$number_of_observations * config$prior_number_of_observations)
+    config$weight <- 1 - config$prior_weight
+  } else if (config$prior_number_of_observations >= 1) {
+    config$total_number_of_observations <-
+      config$prior_number_of_observations + config$number_of_observations
+    config$prior_weight <- config$prior_number_of_observations / config$total_number_of_observations
+    config$weight <- 1 - config$prior_weight
   }
 
   # Use prior and calibrated parameters to update to posteriors
   posterior_check <-
     bayesian_mnn_checks(
-      prior_means,
-      prior_cov_matrix,
+      config$prior_means,
+      config$prior_cov_matrix,
       calibrated_means,
       calibrated_cov_matrix,
-      prior_weight,
-      weight
+      config$prior_weight,
+      config$weight
     )
 
   if (posterior_check$checks_passed) {
@@ -1189,7 +843,7 @@ calibrate <- function(infected_years_file,
   outputs <-
     list(
       posterior_means, posterior_cov_matrix,
-      total_number_of_observations, parameters_kept
+      config$total_number_of_observations, parameters_kept
     )
   names(outputs) <-
     c(
@@ -1197,16 +851,16 @@ calibrate <- function(infected_years_file,
       "total_number_of_observations", "raw_calibration_data"
     )
 
-  if (config$write_outputs %in% config$output_write_list) {
-    file_name <- paste(config$output_folder_path, "calibration_outputs.rdata", sep = "")
-    save(outputs, file = file_name)
-    file_name <- paste(config$output_folder_path, "posterior_means.csv", sep = "")
-    write.csv(posterior_means, file_name, row.names = FALSE)
-    file_name <- paste(config$output_folder_path, "posterior_cov_matrix.csv", sep = "")
-    write.csv(posterior_cov_matrix, file_name, row.names = FALSE)
-    file_name <- paste(config$output_folder_path, "raw_calibration_data.csv", sep = "")
-    write.csv(parameters_kept, file_name, row.names = FALSE)
-  }
+
+  file_name <- paste(config$output_path, "calibration_outputs.rdata", sep = "")
+  save(outputs, file = file_name)
+  file_name <- paste(config$output_path, "posterior_means.csv", sep = "")
+  write.csv(posterior_means, file_name, row.names = FALSE)
+  file_name <- paste(config$output_path, "posterior_cov_matrix.csv", sep = "")
+  write.csv(posterior_cov_matrix, file_name, row.names = FALSE)
+  file_name <- paste(config$output_path, "raw_calibration_data.csv", sep = "")
+  write.csv(parameters_kept, file_name, row.names = FALSE)
+
 
   return(outputs)
 }

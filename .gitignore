@@ -7,3 +7,4 @@ rpops.Rproj
 docs
 inst/doc
 *env
+*.rds

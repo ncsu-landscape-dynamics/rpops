@@ -32,7 +32,8 @@ Imports:
     aws.s3,
     Metrics,
     methods,
-    truncnorm
+    truncnorm,
+    yaml
 License: GPL-3 | file LICENSE
 BugReports: https://github.com/ncsu-landscape-dynamics/rpops/issues
 URL: http://www.github.com/ncsu-landscape-dynamics/rpops
@@ -53,5 +54,5 @@ Suggests:
     pkgdown
 LinkingTo: 
     Rcpp
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr

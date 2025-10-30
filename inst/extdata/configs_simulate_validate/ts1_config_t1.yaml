@@ -1,0 +1,138 @@
+# File paths for input and output data
+input_path: "C:/Users/cjone/Projects/rpops/inst/extdata/"
+output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple20x20/outputs/TS1"
+
+# pest parameters
+starting_infected_files: ["simple20x20/initial_infection.tif"]
+parameter_means_file: "parameter_means_default.csv" 
+parameter_cov_matrix_file: "parameter_cov_matrix_default.csv" 
+pest_host_table_file: "pest_host_table_singlehost_nomort.csv" 
+competency_table_file: "competency_table_singlehost.csv" 
+county_level_infection_data: false 
+use_initial_condition_uncertainty: false 
+start_exposed: false
+latency_period: 14
+exposed_files: [""]
+
+# host data
+host_files: ["simple20x20/host.tif"]
+total_populations_file: "simple20x20/all_plants.tif"
+use_host_uncertainty: false
+
+# simulation settings
+start_date: "2003-01-01"
+end_date: "2003-02-11"
+time_step: "day"
+model_type: "SEI"
+season_month_start: 1
+season_month_end: 12
+number_of_iterations: 10
+number_of_cores: 2
+output_frequency: "week"
+output_frequency_n: 1
+
+# weather
+use_lethal_temperature: false
+lethal_temperature_file: "simple2x2/critical_temp_all_below_threshold.tif"
+lethal_temperature: -14
+lethal_temperature_month: 1
+use_overwinter_survival: false
+overwinter_survival_rate_month: 3
+overwinter_survival_rate_day: 15
+overwinter_survival_rates_file: "simple2x2/survival_rates.tif"
+use_temperature: false
+temperature_coefficient_file: "simple2x2/temperature_coefficient.tif"
+temperature_coefficient_sd_file: "simple2x2/coefficient_sd.tif"
+use_precipitation: false
+precipitation_coefficient_file: "simple2x2/temperature_coefficient.tif"
+precipitation_coefficient_sd_file: "simple2x2/coefficient_sd.tif"
+weather_type: "deterministic"
+
+# mortality
+mortality_frequency: "year"
+mortality_frequency_n: 1
+
+# treatments
+use_treatment: false
+treatments_file: "simple2x2/treatments.tif"
+treatment_dates: ["2003-01-01"]
+treatment_method: "ratio"
+pesticide_durations: [0]
+pesticide_efficacy: 0.5
+use_quarantine: false
+quarantine_areas_file: "simple20x20/initial_infection.tif"
+quarantine_directions: ""
+
+# dispersal
+natural_kernel_type: "exponential"
+natural_dir: "NONE"
+anthropogenic_kernel_type: "cauchy"
+anthropogenic_dir: "NONE"
+# only used if anthropogenic_kernel_type == "network"
+network_files: ["simple20x20/segments.csv"]
+network_movement_types: ["walk"]
+network_min_distances: [50]
+network_max_distances: [250]
+network_weights: [1]
+
+# host movement
+use_movements: false
+movements_file: ""
+
+# stochasticity
+use_multiple_random_seeds: false
+multiple_random_seeds_file: null
+generate_stochasticity: true
+establishment_stochasticity: true
+movement_stochasticity: true
+dispersal_stochasticity: true
+establishment_probability: 0.5
+dispersal_percentage: 0.99
+use_spreadrates: false
+use_overpopulation_movements: false
+overpopulation_percentage: 0.75
+leaving_percentage: 0.5
+leaving_scale_coefficient: 5
+
+# soil_pests
+use_soils: false
+soil_starting_pest_file: ""
+start_with_soil_populations: false
+dispersers_to_soils_percentage: 0
+
+# Mask out areas for comparison (e.g. water, or other landcover types)
+use_mask: FALSE
+mask_file: ""
+
+# validation and calibration
+infected_val_cal_file: "simple20x20/infected_years.tif"
+
+# calibration only parameters
+perform_calibration: false
+params_to_estimate: [true, true, true, true, false, false]
+prior_means_file: "prior_means_0s.csv" 
+prior_cov_matrix_file: "prior_cov_matrix_0s.csv" 
+prior_number_of_observations: 0
+number_of_observations: 68
+success_metric: "rmse and distance"
+verbose: true
+natural_kappa: 0
+anthropogenic_kappa: 0
+calibration_method: "ABC"
+# ABC Parameters
+generation_size: 5
+number_of_generations: 2
+
+# validation only
+perform_validation: true
+point_file: ""
+use_configuration: false
+use_distance: false
+
+# Model API only never used unless you are pulling data from an S3 bucket in the cloud
+use_s3: false
+bucket: ""
+
+# testing only ignore for normal use
+random_seed: null
+testing: FALSE

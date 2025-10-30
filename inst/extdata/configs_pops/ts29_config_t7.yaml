@@ -1,0 +1,120 @@
+input_path: C:/Users/cjone/Projects/rpops/inst/extdata/
+output_path: C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs
+starting_infected_files: simple20x20/county_infected.gpkg
+parameter_means_file: parameter_means_default.csv
+parameter_cov_matrix_file: parameter_cov_matrix_default.csv
+pest_host_table_file: pest_host_table_singlehost_nomort.csv
+competency_table_file: competency_table_singlehost.csv
+county_level_infection_data: true
+use_initial_condition_uncertainty: false
+start_exposed: true
+latency_period: 5
+exposed_files: simple20x20/county_infected.gpkg
+host_files: simple20x20/host_fullzeropoly.tif
+total_populations_file: simple20x20/all_plants.tif
+use_host_uncertainty: false
+start_date: '2008-01-01'
+end_date: '2008-03-31'
+time_step: month
+model_type: SEI
+season_month_start: 1
+season_month_end: 12
+number_of_iterations: 10
+number_of_cores: 2
+output_frequency: month
+output_frequency_n: 1
+use_lethal_temperature: false
+lethal_temperature_file: simple2x2/critical_temp_all_below_threshold.tif
+lethal_temperature: -14
+lethal_temperature_month: 1
+use_overwinter_survival: false
+overwinter_survival_rate_month: 3
+overwinter_survival_rate_day: 15
+overwinter_survival_rates_file: simple2x2/survival_rates.tif
+use_temperature: false
+temperature_coefficient_file: simple2x2/temperature_coefficient.tif
+temperature_coefficient_sd_file: simple2x2/coefficient_sd.tif
+use_precipitation: false
+precipitation_coefficient_file: simple2x2/temperature_coefficient.tif
+precipitation_coefficient_sd_file: simple2x2/coefficient_sd.tif
+weather_type: deterministic
+mortality_frequency: month
+mortality_frequency_n: 1
+use_treatment: false
+treatments_file: simple2x2/treatments.tif
+treatment_dates: '2008-02-01'
+treatment_method: ratio
+pesticide_durations: 0
+pesticide_efficacy: 0.5
+use_quarantine: false
+quarantine_areas_file: simple20x20/initial_infection.tif
+quarantine_directions: ''
+natural_kernel_type: cauchy
+natural_dir: NONE
+anthropogenic_kernel_type: cauchy
+anthropogenic_dir: NONE
+network_files:
+  - simple20x20/segments1.csv
+  - simple20x20/segments2.csv
+network_movement_types:
+  - walk
+  - walk
+network_min_distances:
+  - 100
+  - 100
+network_max_distances:
+  - 1000
+  - 1000
+network_weights:
+  - 1
+  - 1000
+use_movements: false
+movements_file: ''
+use_multiple_random_seeds: false
+multiple_random_seeds_file: ~
+generate_stochasticity: true
+establishment_stochasticity: true
+movement_stochasticity: true
+dispersal_stochasticity: true
+establishment_probability: 0.5
+dispersal_percentage: 0.99
+use_spreadrates: false
+use_overpopulation_movements: false
+overpopulation_percentage: 0.75
+leaving_percentage: 0.5
+leaving_scale_coefficient: 5
+use_soils: false
+soil_starting_pest_file: ''
+start_with_soil_populations: false
+dispersers_to_soils_percentage: 0
+use_mask: false
+infected_val_cal_file: ''
+perform_calibration: false
+params_to_estimate:
+  - true
+  - true
+  - true
+  - true
+  - false
+  - false
+prior_means_file: prior_means_0s.csv
+prior_cov_matrix_file: prior_cov_matrix_0s.csv
+prior_number_of_observations: 0
+number_of_observations: 0
+success_metric: MCC
+verbose: true
+natural_kappa: 0
+anthropogenic_kappa: 0
+calibration_method: ABC
+generation_size: 1000
+number_of_generations: 7
+perform_validation: false
+point_file: ''
+use_configuration: false
+use_distance: false
+use_s3: false
+bucket: ''
+random_seed: ~
+testing: false
+mask_file: ''
+
