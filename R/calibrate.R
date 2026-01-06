@@ -1273,6 +1273,26 @@ calibrate <- function(infected_years_file,
       "total_number_of_observations", "raw_calibration_data"
     )
 
+  parameters_kept <- as.data.frame(parameters_kept)
+  names(parameters_kept) <-  c("reproductive_rate",
+                               "natural_distance_scale",
+                               "percent_natural_dispersal",
+                               "anthropogenic_distance_scale",
+                               "natural_kappa",
+                               "anthropogenic_kappa",
+                               "network_min_distance",
+                               "network_max_distance",
+                               "accuracy",
+                               "precision",
+                               "recall",
+                               "specificity",
+                               "rmse",
+                               "distance_difference",
+                               "mcc",
+                               "quantity_disagreement",
+                               "allocation_disagreement",
+                               "configuration_disagreement")
+
   if (config$write_outputs %in% config$output_write_list) {
     file_name <- paste(config$output_folder_path, "calibration_outputs.rdata", sep = "")
     save(outputs, file = file_name)
