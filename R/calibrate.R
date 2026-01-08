@@ -851,6 +851,24 @@ calibrate <- function(config_rds_file) {
       "total_number_of_observations", "raw_calibration_data"
     )
 
+  parameters_kept <- as.data.frame(parameters_kept)
+  names(parameters_kept) <-  c("reproductive_rate",
+                               "natural_distance_scale",
+                               "percent_natural_dispersal",
+                               "anthropogenic_distance_scale",
+                               "natural_kappa",
+                               "anthropogenic_kappa",
+                               "accuracy",
+                               "precision",
+                               "recall",
+                               "specificity",
+                               "rmse",
+                               "distance_difference",
+                               "mcc",
+                               "quantity_disagreement",
+                               "allocation_disagreement",
+                               "configuration_disagreement")
+
   file_name <- paste(config$output_path, "calibration_outputs.rdata", sep = "")
   save(outputs, file = file_name)
   file_name <- paste(config$output_path, "posterior_means.csv", sep = "")
