@@ -743,6 +743,31 @@ test_that("Test set 19: Mortality works as expected", {
   expect_equal(data$host_pools[[1]]$mortality[[9]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[10]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[11]], config$host_pools[[1]]$infected)
+
+  #timestep = day, mortality_frequency = day, mortality_frequency_n = 1, rate = 0.2 and lag = 0
+  config_file <- system.file("extdata", "configs_pops", "ts19_config_t6.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$mortality), 364)
+  expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[3]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[4]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[5]], config$host_pools[[1]]$infected)
+
+  #timestep = day, mortality_frequency = day, and mortality_frequency_n = 1
+  config_file <- system.file("extdata", "configs_pops", "ts19_config_t7.yaml", package = "PoPS")
+  config <- configuration(config_file = config_file, testing = TRUE)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$mortality), 364)
+  expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[2]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[3]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[4]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[5]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[6]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[7]], matrix(0, ncol = 20, nrow = 20))
+  expect_equal(data$host_pools[[1]]$mortality[[8]], config$host_pools[[1]]$infected)
 })
 
 test_that("Test set 20: Movements works as expected", {
