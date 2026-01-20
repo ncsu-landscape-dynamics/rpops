@@ -8,3 +8,4 @@ docs
 inst/doc
 *env
 *.rds
+inst/extdata/simple20x20/outputs/
