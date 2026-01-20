@@ -1,6 +1,6 @@
 input_path: C:/Users/cjone/Projects/rpops/inst/extdata/
 output_path: C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs
-starting_infected_files: simple20x20/initial_infection.tif
+starting_infected_files: simple20x20/initial_infection_5c1.tif
 parameter_means_file: parameter_means_rr0.5.csv
 parameter_cov_matrix_file: parameter_cov_matrix_default.csv
 pest_host_table_file: pest_host_table_singlehost020tl3.csv
