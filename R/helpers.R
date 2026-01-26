@@ -485,6 +485,7 @@ competency_table_list_creator <- function(competency_table) {
 # in the pest_host_table
 
 pest_host_table_list_creator <- function(pest_host_table) {
+  pest_host_table <- pest_host_table[, -1]
   pest_host_table2 <- pest_host_table[, !grepl("_sd", colnames(pest_host_table))]
   susceptibilities <-
     rnorm(n = nrow(pest_host_table), mean = pest_host_table$susceptibility_mean,
