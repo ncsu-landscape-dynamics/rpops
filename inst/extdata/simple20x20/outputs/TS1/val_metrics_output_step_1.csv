@@ -1,0 +1,11 @@
+"quantity_disagreement","allocation_disagreement","total_disagreement","configuration_disagreement","false_negatives","false_positives","true_positives","true_negatives","odds_ratio","unknown_positives","unknown_negatives","accuracy","precision","recall","specificity","residual_error","true_infected_locations","simulated_infected_locations","infected_locations_difference","true_infecteds","simulated_infecteds","infecteds_difference","rmse","distance_difference","mcc","output_ts"
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
+0,0,0,0,0,0,1,399,399,0,0,1,1,1,1,0,1,1,0,1,1,0,0,0,1,1
