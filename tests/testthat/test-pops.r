@@ -693,7 +693,7 @@ test_that("Test set 19: Mortality works as expected", {
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
-  expect_equal(data$host_pools[[1]]$mortality[[1]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[2]], config$host_pools[[1]]$infected)
   expect_equal(data$host_pools[[1]]$mortality[[3]], config$host_pools[[1]]$infected)
   expect_equal(data$host_pools[[1]]$mortality[[4]], config$host_pools[[1]]$infected)
@@ -702,7 +702,7 @@ test_that("Test set 19: Mortality works as expected", {
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$mortality), 12)
-  expect_equal(data$host_pools[[1]]$mortality[[1]], config$host_pools[[1]]$infected)
+  expect_equal(data$host_pools[[1]]$mortality[[1]], matrix(0, ncol = 20, nrow = 20))
   expect_equal(data$host_pools[[1]]$mortality[[2]], config$host_pools[[1]]$infected)
   expect_equal(data$host_pools[[1]]$mortality[[3]], config$host_pools[[1]]$infected)
 
@@ -771,6 +771,25 @@ test_that("Test set 19: Mortality works as expected", {
 })
 
 test_that("Test set 20: Movements works as expected", {
+  config_file <- system.file("extdata", "configs_pops", "ts20_config_t1.yaml", package = "PoPS")
+  config_file <- file.path("inst", "extdata", "configs_pops", "ts20_config_t1.yaml")
+  config <- configuration(config_file = config_file)
+  data <- pops(config)
+  expect_equal(length(data$host_pools[[1]]$infected), 4)
+  infected_move <- matrix(0, ncol = 20, nrow = 20)
+  infected_move[2, 1] <- 1 #one infected animal moved
+  expect_equal(data$host_pools[[1]]$infected[[1]], infected_move)
+  expect_equal(data$host_pools[[1]]$exposed[[1]][[1]], infected_move)
+  infected_move[2, 1] <- 2 #one exposed animal moved to infected which becomes 2
+  zeros <- matrix(0, ncol = 20, nrow = 20)
+  expect_equal(data$host_pools[[1]]$infected[[2]], infected_move)
+  expect_equal(data$host_pools[[1]]$infected[[3]], infected_move)
+  expect_equal(data$host_pools[[1]]$infected[[4]], infected_move)
+  expect_equal(data$host_pools[[1]]$exposed[[2]][[1]], zeros)
+  expect_equal(data$host_pools[[1]]$exposed[[3]][[1]], zeros)
+  expect_equal(data$host_pools[[1]]$exposed[[4]][[1]], zeros)
+
+
   config_file <- system.file("extdata", "configs_pops", "ts20_config_t2.yaml", package = "PoPS")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
