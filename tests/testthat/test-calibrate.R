@@ -373,3 +373,29 @@ test_that(
     expect_equal(nrow(data$raw_calibration_data),
                  config$number_of_generations * config$generation_size)
   })
+
+test_that(
+  "ABC calibration has correctly formatted returns and starts from a previous point", {
+  config_rds_file <-
+    system.file("extdata/configs_calibration/ts13_not_complete.rds", package = "PoPS")
+  data <- calibrate(config_rds_file)
+  expect_length(data$posterior_means, 6)
+  expect_vector(data$posterior_means, ptype = double(), size = 6)
+  expect_gt(data$posterior_means[1], 0)
+  expect_gt(data$posterior_means[2], 0)
+  expect_lte(data$posterior_means[2], 1000)
+  expect_gte(data$posterior_means[3], 0)
+  expect_lte(data$posterior_means[3], 1)
+  expect_gt(data$posterior_means[4], 0)
+  expect_gte(data$posterior_means[5], 0)
+  expect_gte(data$posterior_means[6], 0)
+  expect_is(data$posterior_cov_matrix, class = "matrix")
+  expect_type(data$posterior_cov_matrix, "double")
+  expect_equal(nrow(data$posterior_cov_matrix), 6)
+  expect_equal(ncol(data$posterior_cov_matrix), 6)
+  expect_type(data$total_number_of_observations, "double")
+  config <- readRDS(config_rds_file)
+  expect_equal(data$total_number_of_observations, config$number_of_observations)
+  expect_equal(nrow(data$raw_calibration_data),
+               config$number_of_generations * config$generation_size)
+})
