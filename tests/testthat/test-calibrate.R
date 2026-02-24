@@ -374,16 +374,10 @@ test_that(
                  config$number_of_generations * config$generation_size)
   })
 
-
 test_that(
-  "ABC calibration has correctly formatted returns with multiple output comparisons with mask", {
-  config_file <-
-    system.file("extdata", "configs_calibration", "ts13_config_t1.yaml", package = "PoPS")
-  config <- configuration(config_file = config_file, testing = TRUE)
-  saveRDS(config, file.path(system.file("extdata/", package = "PoPS"),
-                            "configs_calibration/ts13_config_t1.rds"))
+  "ABC calibration has correctly formatted returns and starts from a previous point", {
   config_rds_file <-
-    system.file("extdata/configs_calibration/ts13_config_t1.rds", package = "PoPS")
+    system.file("extdata/configs_calibration/ts13_not_complete.rds", package = "PoPS")
   data <- calibrate(config_rds_file)
   expect_length(data$posterior_means, 6)
   expect_vector(data$posterior_means, ptype = double(), size = 6)

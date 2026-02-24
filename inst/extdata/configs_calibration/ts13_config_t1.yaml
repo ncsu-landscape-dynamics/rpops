@@ -120,8 +120,13 @@ natural_kappa: 0
 anthropogenic_kappa: 0
 calibration_method: "ABC"
 # ABC Parameters
+<<<<<<< HEAD
 generation_size: 10
 number_of_generations: 2
+=======
+generation_size: 5
+number_of_generations: 3
+>>>>>>> c09aa6395c987b704f893f00f086ff475994145a
 
 # validation only
 perform_validation: false

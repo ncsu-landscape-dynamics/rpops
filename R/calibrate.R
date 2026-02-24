@@ -364,23 +364,28 @@ calibrate <- function(config_rds_file) {
             ) {
           if (config$acceptance_rate < 0.05) {
             config$accuracy_threshold <-
-              mean(c(median(config$parameters_test[, 7], na.rm = TRUE), config$accuracy_threshold)) - 0.03
+              mean(c(median(config$parameters_test[, 7], na.rm = TRUE),
+                     config$accuracy_threshold)) - 0.03
             config$precision_threshold <-
               mean(c(median(config$parameters_test[, 8], na.rm = TRUE), config$precision_threshold))
               - 0.03
             config$recall_threshold <-
-              mean(c(median(config$parameters_test[, 9], na.rm = TRUE), config$recall_threshold)) - 0.03
+              mean(c(median(config$parameters_test[, 9], na.rm = TRUE),
+                     config$recall_threshold)) - 0.03
             config$specificity_threshold <-
-              mean(c(median(config$parameters_test[, 10], na.rm = TRUE), config$specificity_threshold))
-              - 0.03
+              mean(c(median(config$parameters_test[, 10], na.rm = TRUE),
+                     config$specificity_threshold)) - 0.03
             config$rmse_threshold <-
               mean(c(median(config$parameters_test[, 11], na.rm = TRUE), config$rmse_threshold)) + 2
             config$distance_threshold <-
-              mean(c(median(config$parameters_test[, 12], na.rm = TRUE), config$distance_threshold)) + 10
+              mean(c(median(config$parameters_test[, 12], na.rm = TRUE),
+                     config$distance_threshold)) + 10
             config$mcc_threshold <-
-              mean(c(median(config$parameters_test[, 13], na.rm = TRUE), config$mcc_threshold)) - 0.02
+              mean(c(median(config$parameters_test[, 13], na.rm = TRUE),
+                     config$mcc_threshold)) - 0.02
             config$quantity_threshold <-
-              mean(c(median(config$parameters_test[, 14], na.rm = TRUE), config$quantity_threshold)) + 0.02
+              mean(c(median(config$parameters_test[, 14], na.rm = TRUE),
+                     config$quantity_threshold)) + 0.02
             config$allocation_threshold <-
               mean(c(median(config$parameters_test[, 15], na.rm = TRUE),
                      config$allocation_threshold)) + 0.02

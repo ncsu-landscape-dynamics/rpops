@@ -1,4 +1,4 @@
-input_path: C:/Users/cjone/Projects/rpops/inst/extdata/
+input_path: C:/Users/cjone/Projects/rpops/inst/extdata
 output_path: C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs
 starting_infected_files: simple20x20/initial_infection.tif
 parameter_means_file: parameter_means_default.csv
@@ -7,16 +7,16 @@ pest_host_table_file: pest_host_table_singlehost_nomort.csv
 competency_table_file: competency_table_singlehost.csv
 county_level_infection_data: false
 use_initial_condition_uncertainty: false
-start_exposed: false
-latency_period: 2
-exposed_files: ''
+start_exposed: true
+latency_period: 1
+exposed_files: simple20x20/initial_infection.tif
 host_files: simple20x20/all_plants.tif
 total_populations_file: simple20x20/all_plants.tif
 use_host_uncertainty: false
-start_date: '2009-01-01'
-end_date: '2009-12-31'
+start_date: '2009-05-01'
+end_date: '2009-08-30'
 time_step: month
-model_type: SI
+model_type: SEI
 season_month_start: 1
 season_month_end: 12
 number_of_iterations: 10
@@ -42,7 +42,7 @@ mortality_frequency: month
 mortality_frequency_n: 1
 use_treatment: false
 treatments_file: simple2x2/treatments.tif
-treatment_dates: '2009-05-01'
+treatment_dates: '2009-06-01'
 treatment_method: ratio
 pesticide_durations: 120
 pesticide_efficacy: 0.5
@@ -59,7 +59,7 @@ network_min_distances: 0
 network_max_distances: 0
 network_weights: 1
 use_movements: true
-movements_file: simple20x20/movements.tif
+movements_file: simple20x20/movements.csv
 use_multiple_random_seeds: false
 multiple_random_seeds_file: ~
 generate_stochasticity: true

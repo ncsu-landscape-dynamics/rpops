@@ -1,0 +1,2 @@
+"FIPS","reference","comparison","true_positives","true_negatives","false_negatives","false_positives","unknown_negatives","unknown_positives","infected_difference","total_obs","accuracy","precision","recall","specificity","tp_fp","tp_fn","tn_fp","tn_fn","mcc","rmse","odds_ratio","residual_error","quantity_disagreement","allocation_disagreement","configuration_disagreement","distance_difference","output_ts"
+45,29,4184,5,0,0,3,0,0,-4155,8,0.625,0.625,1,0,8,5,3,1,0,796.651507875307,0,4155,0,0,0,0,1
