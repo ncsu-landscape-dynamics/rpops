@@ -74,6 +74,42 @@ the PoPS package in R is built on top of PoPS Core C++ library includes:
 * `pops_multirun:` Parallel execution of multiple stochastic runs (`number_of_cores` used to set cores used if left NULL defaults to using n - 1 cores on the machine). Outputs statistics of infected/infested hosts across multiple runs (`simulation_mean`,  `single_run`,  `simulation_sd`, `simulation_min`, `simulation_max`), current state using the median (`infected`,  `exposed`, and `susceptible`), average and standard deviations whole area statistics (`number_infecteds`, `infected_areas`), and probability of infection (`probability`) which is the percent of model runs that a cell has at least one infestation/infection.
 * `pops:` Runs a single stochastic run of the model. This function is primarily used for automated testing of model functionality.
 
+### Grower Behavior Module
+
+PoPS includes an optional grower behavior module that couples spatially explicit
+farmer decision-making to the spread simulation. Rather than applying blanket
+treatment schedules, each management unit (farm or field) is assigned a grower type
+whose perception, risk threshold, and willingness to treat evolve with observed
+infection prevalence. This allows exploration of how heterogeneous adoption of
+control measures shapes epidemic trajectories in agricultural landscapes.
+
+The module exports four functions:
+
+* `delineate_management_units:` Groups raster cells into management units representing
+  individual farms or fields. Three methods are supported: `"raster"` (contiguous host
+  patches via `terra::patches`), `"polygon"` (rasterise supplied field/farm boundary
+  vectors), and `"grid"` (regular square blocks of a specified side length in map
+  units). Returns an integer unit-ID matrix and a table of unit centroids and cell
+  counts.
+
+* `assign_grower_types:` Assigns each management unit a grower type drawn from a
+  user-defined set of behavioral archetypes (e.g. early-adopter, late-adopter,
+  non-adopter) with specified prevalence probabilities. Spatial structure options are
+  `"random"`, `"clustered"` (Gaussian or exponential decay kernels controlled by
+  `cluster_range`), and `"empirical"` (resample from a supplied probability raster).
+
+* `grower_decision:` Evaluates, at a given decision date, whether each management
+  unit treats. Each grower type is characterised by a perception noise level, an
+  infection-prevalence threshold, and a treatment efficacy. Returns a treatment map
+  (binary or continuous) compatible with the PoPS `treatment_map` input.
+
+* `behavior_configuration:` Reads and validates a YAML behavior config file — checking
+  grower-type definitions, decision dates, and spatial-structure parameters — and
+  returns a configuration list for use in the PoPS workflow.
+
+Example YAML configs are provided in `inst/extdata/configs_behavior/`. Validation
+and benchmark notebooks live in `tests-behavior/`.
+
 ## How to cite
 
 If you use this software or code, please cite the following papers:
@@ -124,6 +160,7 @@ _(alphabetical order)_
 * Devon Gaydos
 * Margaret Lawrimore
 * Nick Kruskamp
+* Rachel Seibel
 * Francesco Tonini
 
 See Git commit history, GitHub insights, or CHANGELOG.md file for details about

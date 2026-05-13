@@ -33,7 +33,23 @@ this repository.
 - Added in PoPS lite features which make the model faster and less memory intensive (@cyborginhas and @ChrisJones687, #207).
 
 - Added in ability to use multiple networks as part of the anthropogenic kernel (@ChrisJones687, #226).
-    
+
+- Added grower behavior module: spatially explicit farmer decision-making coupled to
+  the spread simulation (@rseibel). Introduces four new exported functions:
+  `delineate_management_units`, `assign_grower_types`, `grower_decision`, and
+  `behavior_configuration`. Each management unit (farm or field) is assigned a grower
+  type archetype with a configurable perception noise level, infection-prevalence
+  treatment threshold, and treatment efficacy. Spatial structure of grower types can
+  be random, clustered (Gaussian or exponential decay kernels), or drawn from an
+  empirical probability raster.
+
+- Added `behavior_checks.R` with internal validation helpers for the behavior module
+  (`behavior_type_checks`, `decision_date_checks`, `management_unit_checks`,
+  `trust_config_checks`) (@rseibel).
+
+- Added example YAML behavior configs in `inst/extdata/configs_behavior/` and
+  behavior validation/benchmark notebooks in `tests-behavior/` (@rseibel).
+
 ### Changed
 
 - Quarantine directions can now be calculated only for directions of interest (@petrasovaa, #168).
