@@ -1,0 +1,333 @@
+---
+title: "PoPS model — test notebook"
+author: "Rachel Seibel"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+# Install rpops from github
+# remotes::install_github("https://github.com/ncsu-landscape-dynamics/rpops")
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 7,
+  fig.height = 4
+)
+devtools::load_all("rpops", compile = FALSE)
+```
+
+# Setup
+
+```{r packages}
+library(PoPS)
+library(terra)
+library(yaml)
+library(ggplot2)
+```
+
+Locate the package's built-in test data. All configs distributed with the
+package use a hard-coded Windows `input_path`; we replace it at runtime with
+the correct installation path.
+
+```{r paths}
+# Prefer the local development tree: rpops/inst/extdata sits one level below
+# this Rmd inside the PoPS-model-behavior repo.  When knitted from RStudio the
+# working directory is the folder containing the Rmd, so the relative path
+# "rpops/inst/extdata" resolves correctly.  We fall back to the installed
+# package only when the local tree is absent.
+local_extdata <- normalizePath(
+  file.path(getwd(), "rpops", "inst", "extdata"),
+  mustWork = FALSE
+)
+
+if (dir.exists(local_extdata)) {
+  extdata <- local_extdata
+} else {
+  pkg_root <- system.file(package = "PoPS")
+  if (nchar(pkg_root) == 0) {
+    pkg_root <- normalizePath(file.path(getwd(), ".."), mustWork = FALSE)
+  }
+  extdata <- file.path(pkg_root, "extdata")
+}
+
+stopifnot("extdata directory not found — check pkg_root above" =
+            dir.exists(extdata))
+
+out_dir  <- file.path(tempdir(), "pops_test_output")
+dir.create(out_dir, showWarnings = FALSE)
+
+# Helper: load a bundled YAML, fix input_path, write to a temp file, return path
+patch_config <- function(yaml_name, subdir = "configs_pops",
+                          extra = list()) {
+  src <- file.path(extdata, subdir, yaml_name)
+  if (!file.exists(src)) stop("Config not found: ", src)
+  cfg <- yaml::yaml.load_file(src)
+  cfg$input_path  <- paste0(normalizePath(extdata, mustWork = FALSE), "/")
+  cfg$output_path <- paste0(normalizePath(out_dir,  mustWork = FALSE), "/")
+  cfg$random_seed <- 42L
+  for (nm in names(extra)) cfg[[nm]] <- extra[[nm]]
+  tmp <- tempfile(fileext = ".yaml")
+  yaml::write_yaml(cfg, tmp)
+  tmp
+}
+```
+
+---
+
+# 1  Inspect the test rasters
+
+The `simple2x2` dataset is a 2 × 2 cell toy raster — small enough to trace by
+hand and fast enough to iterate on.
+
+```{r inspect-rasters, fig.height=3}
+host_r     <- rast(file.path(extdata, "simple2x2/susceptible.tif"))
+infected_r <- rast(file.path(extdata, "simple2x2/infected.tif"))
+temp_r     <- rast(file.path(extdata, "simple2x2/temperature_coefficient.tif"))
+
+par(mfrow = c(1, 3), mar = c(2, 2, 2, 1))
+plot(host_r,     main = "Host density",         col = hcl.colors(10, "YlGn"))
+plot(infected_r, main = "Initial infected",     col = hcl.colors(10, "Reds"))
+plot(temp_r[[1]], main = "Temp coefficient [1]", col = hcl.colors(10, "Blues"))
+```
+
+Cell values and dimensions:
+
+```{r raster-info}
+data.frame(
+  layer  = c("host", "infected", "temp_coeff"),
+  nrow   = c(nrow(host_r), nrow(infected_r), nrow(temp_r)),
+  ncol   = c(ncol(host_r), ncol(infected_r), ncol(temp_r)),
+  nlyr   = c(nlyr(host_r), nlyr(infected_r), nlyr(temp_r)),
+  values = c(
+    paste(as.vector(values(host_r)),     collapse = ", "),
+    paste(as.vector(values(infected_r)), collapse = ", "),
+    paste(round(as.vector(values(temp_r[[1]])), 2), collapse = ", ")
+  )
+)
+```
+
+---
+
+# 2  Minimal SI run (no weather, monthly, 1 year)
+
+`ts6_config_t9.yaml` is the simplest single-host, no-weather, monthly config
+available in the package.
+
+```{r run-minimal}
+cfg_path <- patch_config("simple_test_config.yaml",
+                         extra = list(number_of_iterations = 5L,
+                                      number_of_cores      = 1L))
+
+config <- configuration(cfg_path)
+stopifnot(is.null(config$failure))
+
+config <- PoPS:::draw_parameters(config)
+config <- PoPS:::host_pool_setup(config)
+config$competency_table_list <- PoPS:::competency_table_list_creator(config$competency_table)
+config$pest_host_table_list  <- PoPS:::pest_host_table_list_creator(config$pest_host_table)
+config$random_seed  <- 42L
+config$random_seeds <- as.integer(config$random_seeds_list[1, ])
+
+result <- pops_model(config)
+```
+
+## 2.1  Infected counts over time
+
+```{r plot-infected-counts}
+infected_df <- data.frame(
+  step            = seq_along(result$number_infected),
+  number_infected = result$number_infected
+)
+
+ggplot(infected_df, aes(step, number_infected)) +
+  geom_line(color = "#c0392b", linewidth = 0.8) +
+  geom_point(color = "#c0392b", size = 2) +
+  labs(title = "Infected host count over time",
+       x = "Output step", y = "Number of infected cells") +
+  theme_minimal(base_size = 12)
+```
+
+## 2.2  Final infected raster
+
+```{r plot-final-raster, fig.height=3}
+last_step   <- length(result$host_pools[[1]]$infected)
+final_inf   <- rast(result$host_pools[[1]]$infected[[last_step]])
+ext(final_inf) <- ext(host_r)
+crs(final_inf) <- crs(host_r)
+
+par(mfrow = c(1, 2), mar = c(2, 2, 2, 1))
+plot(infected_r,  main = "t = 0",   col = hcl.colors(10, "Reds"), range = c(0, 3))
+plot(final_inf,   main = "t = end", col = hcl.colors(10, "Reds"), range = c(0, 3))
+```
+
+## 2.3  Output list structure
+
+```{r output-structure}
+str(result, max.level = 2)
+```
+
+---
+
+# 3  Multi-year run with weather (monthly, 3 years)
+
+`ts9_config_t5.yaml` adds a temperature coefficient raster — the model
+multiplies the reproductive rate by the weather coefficient at each step.
+
+```{r run-weather}
+cfg_path_wx <- patch_config("simple_test_config.yaml",
+                            extra = list(number_of_iterations = 5L,
+                                         number_of_cores      = 1L,
+                                         start_date           = "2008-01-01",
+                                         end_date             = "2010-12-31"))
+
+config_wx <- configuration(cfg_path_wx)
+stopifnot(is.null(config_wx$failure))
+
+config_wx <- PoPS:::draw_parameters(config_wx)
+config_wx <- PoPS:::host_pool_setup(config_wx)
+config_wx$competency_table_list <- PoPS:::competency_table_list_creator(config_wx$competency_table)
+config_wx$pest_host_table_list  <- PoPS:::pest_host_table_list_creator(config_wx$pest_host_table)
+config_wx$random_seed  <- 42L
+config_wx$random_seeds <- as.integer(config_wx$random_seeds_list[1, ])
+
+result_wx <- pops_model(config_wx)
+
+data.frame(
+  step           = seq_along(result_wx$number_infected),
+  n_infected     = result_wx$number_infected,
+  area_infected  = result_wx$area_infected
+)
+```
+
+```{r plot-weather-run}
+ggplot(data.frame(step = seq_along(result_wx$number_infected),
+                  n    = result_wx$number_infected),
+       aes(step, n)) +
+  geom_line(color = "#2980b9", linewidth = 0.8) +
+  geom_point(color = "#2980b9", size = 2) +
+  labs(title = "Infected count — 3-year run with temperature coefficient",
+       x = "Annual output step", y = "Number of infected cells") +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+# 4  Behavior module pre-processing
+
+The C++ behavior module is not yet wired into `pops_model_cpp()`.  These
+chunks test the R pre-processing functions that will supply it with inputs.
+
+## 4.1  Delineate management units
+
+```{r delineate}
+units <- delineate_management_units(host_r, method = "raster")
+
+cat("Unit IDs found:", sort(unique(as.integer(
+  units$management_unit_matrix[units$management_unit_matrix > 0]
+))), "\n")
+
+print(units$management_unit_table)
+```
+
+```{r plot-units, fig.height=3}
+unit_rast <- rast(units$management_unit_matrix)
+ext(unit_rast) <- ext(host_r)
+crs(unit_rast) <- crs(host_r)
+plot(unit_rast, main = "Management unit IDs",
+     col = hcl.colors(max(units$management_unit_matrix), "Set2"))
+```
+
+## 4.2  Assign grower types
+
+Assign two behavioral types (early adopter, late adopter) with equal prior
+probability:
+
+```{r assign-types}
+type_mat <- assign_grower_types(
+  management_units  = units$management_unit_matrix,
+  type_names        = c("early_adopter", "late_adopter"),
+  type_probs        = c(0.5, 0.5),
+  spatial_structure = "random",
+  random_seed       = 42L
+)
+
+cat("Type assignment (1 = early adopter, 2 = late adopter):\n")
+print(type_mat)
+```
+
+## 4.3  Grower decision at a single time step
+
+```{r grower-decision}
+infected_mat <- as.matrix(infected_r, wide = TRUE)
+storage.mode(infected_mat) <- "integer"
+host_mat     <- as.matrix(host_r,     wide = TRUE)
+storage.mode(host_mat)     <- "integer"
+
+behavior_params <- list(
+  list(detection_prob       = 0.8,   # early adopter: observant
+       willingness_to_treat = 0.9,
+       treatment_efficacy   = 0.85,
+       decision_threshold   = 0.05),
+  list(detection_prob       = 0.4,   # late adopter: less responsive
+       willingness_to_treat = 0.3,
+       treatment_efficacy   = 0.85,
+       decision_threshold   = 0.20)
+)
+
+decision <- grower_decision(
+  infected_matrix        = infected_mat,
+  host_matrix            = host_mat,
+  grower_type_matrix     = type_mat,
+  management_unit_matrix = units$management_unit_matrix,
+  management_unit_table  = units$management_unit_table,
+  behavior_params       = behavior_params,
+  output                 = "continuous",
+  random_seed            = 42L
+)
+
+cat("Treatment map (efficacy values):\n")
+print(decision)
+
+tbl <- attr(decision, "management_unit_table")
+cat("\nUnit-level infection summary:\n")
+print(tbl[, c("unit_id", "infected_cells", "host_cells", "prevalence")])
+```
+
+## 4.4  behavior_configuration()
+
+Validate a configuration list with the new field set:
+
+```{r bc-validate}
+bc <- behavior_configuration(
+  config_input = list(
+    use_behavior_module     = TRUE,
+    grower_id_file           = file.path(extdata, "simple2x2/host.tif"),
+    grower_params_file       = "",
+    behavior_decision_dates = c("2008-05-01", "2008-09-01"),
+    behavior_params         = behavior_params
+  ),
+  start_date = "2008-01-01",
+  end_date   = "2008-12-31"
+)
+
+cat("Failure:", ifelse(is.null(bc$failure), "none", bc$failure), "\n")
+cat("Module enabled:", bc$use_behavior_module, "\n")
+cat("Decision dates:", paste(bc$behavior_decision_dates, collapse = ", "), "\n")
+cat("Type 1 detection_prob:", bc$behavior_params[[1]]$detection_prob, "\n")
+cat("Type 2 decision_threshold:", bc$behavior_params[[2]]$decision_threshold, "\n")
+```
+
+---
+
+# 5  Session info
+
+```{r session-info}
+sessionInfo()
+```

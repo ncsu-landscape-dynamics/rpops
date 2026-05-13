@@ -1103,6 +1103,60 @@ configuration <- function(config_file, testing = FALSE) {
   bounding_box$west <- config$xmin
   bounding_box$east <- config$xmax
   config$bounding_box <- bounding_box
+
+  # ── Behavior module fields ───────────────────────────────────────────────────
+  # Toggle — canonical name use_behavior_module; accept legacy enable_behavior_module
+  if (is.null(config$use_behavior_module) && !is.null(config$enable_behavior_module)) {
+    config$use_behavior_module <- config$enable_behavior_module
+  }
+  config$use_behavior_module <- config$use_behavior_module %||% FALSE
+
+  # Grower management-unit ID raster (integer GeoTIFF, 0 = background)
+  config$grower_id_file <- config$grower_id_file %||% ""
+  config$grower_id_matrix <- NULL
+  if (nchar(config$grower_id_file) > 0) {
+    gid_rast <- terra::rast(file.path(config$input_path, config$grower_id_file))
+    gid_mat  <- terra::as.matrix(gid_rast[[1]], wide = TRUE)
+    gid_mat[is.na(gid_mat)] <- 0L
+    storage.mode(gid_mat) <- "integer"
+    config$grower_id_matrix <- gid_mat
+  }
+
+  # Grower type raster (integer GeoTIFF, values 1:K, 0 = background)
+  # Pre-computed via assign_grower_types(); optional — may be set at runtime.
+  config$grower_type_file <- config$grower_type_file %||% ""
+  config$grower_type_matrix <- NULL
+  if (nchar(config$grower_type_file) > 0) {
+    gtype_rast <- terra::rast(file.path(config$input_path, config$grower_type_file))
+    gtype_mat  <- terra::as.matrix(gtype_rast[[1]], wide = TRUE)
+    gtype_mat[is.na(gtype_mat)] <- 0L
+    storage.mode(gtype_mat) <- "integer"
+    config$grower_type_matrix <- gtype_mat
+  }
+
+  # Decision dates (character vector YYYY-MM-DD)
+  if (is.null(config$behavior_decision_dates) && !is.null(config$decision_dates)) {
+    config$behavior_decision_dates <- config$decision_dates
+  }
+  config$behavior_decision_dates <- config$behavior_decision_dates %||% character(0)
+
+  # Duration (in time steps) of behavior-driven pesticide applications
+  config$behavior_pesticide_duration <- config$behavior_pesticide_duration %||% 0L
+
+  # Per-type behavior parameters: fill missing sub-fields with defaults
+  if (!is.null(config$behavior_params)) {
+    for (i in seq_along(config$behavior_params)) {
+      p <- config$behavior_params[[i]]
+      p$detection_prob       <- p$detection_prob       %||% 1.0
+      p$willingness_to_treat <- p$willingness_to_treat %||% 0.5
+      p$treatment_efficacy   <- p$treatment_efficacy   %||% 1.0
+      p$decision_threshold   <- p$decision_threshold   %||% 0.0
+      config$behavior_params[[i]] <- p
+    }
+  } else {
+    config$behavior_params <- NULL
+  }
+
   gc()
   return(config)
 }

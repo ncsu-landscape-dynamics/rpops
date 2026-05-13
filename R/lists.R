@@ -118,3 +118,9 @@ csv_list <- c("csv", "txt")
 pest_host_table_colnames <- c("host", "susceptibility_mean", "susceptibility_sd",
                           "mortality_rate_mean", "mortality_rate_sd", "mortality_time_lag")
 competency_table_colnames <- c("competency_mean", "competency_sd")
+
+# Behavior module constants
+behavior_structure_list <- c("random", "clustered", "empirical")
+cluster_model_list <- c("gaussian", "exponential")
+decision_output_list <- c("binary", "continuous")
+management_unit_method_list <- c("raster", "polygon", "grid")

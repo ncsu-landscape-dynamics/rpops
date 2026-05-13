@@ -1,0 +1,143 @@
+# Base config for behavior module tests
+# Uses simple2x2 test rasters
+input_path: C:/Users/cjone/Projects/rpops/inst/extdata/
+output_path: C:/Users/cjone/Projects/rpops/inst/extdata/simple2x2/outputs
+starting_infected_files: simple2x2/infected.tif
+parameter_means_file: parameter_means_rr0.5.csv
+parameter_cov_matrix_file: parameter_cov_matrix_default.csv
+pest_host_table_file: pest_host_table_singlehost_nomort.csv
+competency_table_file: competency_table_singlehost.csv
+county_level_infection_data: false
+use_initial_condition_uncertainty: false
+start_exposed: false
+latency_period: 0
+exposed_files: ''
+host_files: simple2x2/host.tif
+total_populations_file: simple2x2/total_plants.tif
+use_host_uncertainty: false
+start_date: '2008-01-01'
+end_date: '2009-12-31'
+time_step: month
+model_type: SI
+season_month_start: 1
+season_month_end: 12
+number_of_iterations: 1
+number_of_cores: 1
+output_frequency: year
+output_frequency_n: 1
+use_lethal_temperature: false
+lethal_temperature_file: simple2x2/critical_temp.tif
+lethal_temperature: -15
+lethal_temperature_month: 1
+use_overwinter_survival: false
+overwinter_survival_rate_month: 3
+overwinter_survival_rate_day: 15
+overwinter_survival_rates_file: ''
+use_temperature: false
+temperature_coefficient_file: simple2x2/temperature_coefficient.tif
+temperature_coefficient_sd_file: ''
+use_precipitation: false
+precipitation_coefficient_file: simple2x2/temperature_coefficient.tif
+precipitation_coefficient_sd_file: ''
+weather_type: deterministic
+mortality_frequency: year
+mortality_frequency_n: 1
+use_treatment: false
+treatments_file: ''
+treatment_dates: '2008-06-01'
+treatment_method: ratio
+pesticide_durations: 0
+pesticide_efficacy: 1.0
+use_quarantine: false
+quarantine_areas_file: ''
+quarantine_directions: ''
+natural_kernel_type: cauchy
+natural_dir: NONE
+anthropogenic_kernel_type: cauchy
+anthropogenic_dir: NONE
+network_files: ''
+network_movement_types: walk
+network_min_distances: 0
+network_max_distances: 0
+network_weights: 1
+use_movements: false
+movements_file: ''
+use_multiple_random_seeds: false
+multiple_random_seeds_file: ~
+generate_stochasticity: true
+establishment_stochasticity: true
+movement_stochasticity: true
+dispersal_stochasticity: true
+establishment_probability: 0.5
+dispersal_percentage: 0.99
+use_spreadrates: false
+use_overpopulation_movements: false
+overpopulation_percentage: 0.75
+leaving_percentage: 0.5
+leaving_scale_coefficient: 5
+use_soils: false
+soil_starting_pest_file: ''
+start_with_soil_populations: false
+dispersers_to_soils_percentage: 0
+use_mask: false
+infected_val_cal_file: ''
+perform_calibration: false
+params_to_estimate:
+  - true
+  - true
+  - true
+  - true
+  - false
+  - false
+prior_means_file: prior_means_0s.csv
+prior_cov_matrix_file: prior_cov_matrix_0s.csv
+prior_number_of_observations: 0
+number_of_observations: 0
+success_metric: MCC
+verbose: false
+natural_kappa: 0
+anthropogenic_kappa: 0
+calibration_method: ABC
+generation_size: 1000
+number_of_generations: 7
+perform_validation: false
+point_file: ''
+use_configuration: false
+use_distance: false
+use_s3: false
+bucket: ''
+random_seed: 42
+testing: false
+mask_file: ''
+# ── Behavior module ──────────────────────────────────────────────────────────
+# Toggle: mirrors use_movements, use_lethal_temperature, etc.
+use_behavior_module: true
+
+# Path to a GeoTIFF with integer grower/management-unit IDs (0 = background).
+# Produced by delineate_management_units() and saved as a .tif.
+grower_id_file: simple2x2/grower_id.tif
+
+# Path to a CSV with grower-specific parameters.  Must have a column named
+# `grower_id` matching the IDs in grower_id_file, plus any parameter columns
+# (detection_prob, willingness_to_treat, treatment_efficacy, decision_threshold).
+# Rows with IDs not present in the raster are silently ignored.
+grower_params_file: simple2x2/grower_params.csv
+
+# Dates on which growers make treatment decisions (YYYY-MM-DD).
+# Must fall within [start_date, end_date].
+behavior_decision_dates:
+  - '2008-05-01'
+  - '2009-05-01'
+
+# Global fallback behavior parameters (used when grower_params_file is not
+# supplied or a grower_id is absent from the table).
+# One entry per grower type; each entry is a named list.
+behavior_params:
+  - detection_prob: 0.7
+    willingness_to_treat: 0.6
+    treatment_efficacy: 0.8
+    decision_threshold: 0.05
+  - detection_prob: 0.4
+    willingness_to_treat: 0.3
+    treatment_efficacy: 0.8
+    decision_threshold: 0.15

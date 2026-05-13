@@ -16,8 +16,10 @@
 #include <Rcpp.h>
 #include <fstream>
 #include <iostream>
+#include <algorithm>
 #include <map>
 #include <memory>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -114,7 +116,13 @@ List pops_model_cpp(
     Nullable<List> network_data_config = R_NilValue,
     int weather_size = 0,
     std::string weather_type = "deterministic",
-    double dispersers_to_soils_percentage = 0)
+    double dispersers_to_soils_percentage = 0,
+    bool use_behavior_module = false,
+    Nullable<IntegerMatrix> grower_id_raster = R_NilValue,
+    Nullable<IntegerMatrix> grower_type_raster = R_NilValue,
+    Nullable<List> behavior_params_list = R_NilValue,
+    std::vector<std::string> behavior_decision_dates = std::vector<std::string>(),
+    int behavior_pesticide_duration = 0)
 {
     Config config;
     config.random_seed = random_seed;
@@ -379,6 +387,16 @@ List pops_model_cpp(
       model.activate_soils(soil_reservoirs);
     }
 
+    // Pre-compute simulation step indices for behavior decision dates
+    std::vector<unsigned> behavior_decision_steps;
+    if (use_behavior_module && !behavior_decision_dates.empty()) {
+        for (const auto& bdate_str : behavior_decision_dates) {
+            pops::Date bdate(bdate_str);
+            unsigned step = unsigned(config.scheduler().schedule_action_date(bdate));
+            behavior_decision_steps.push_back(step);
+        }
+    }
+
     for (unsigned current_index = 0; current_index < config.scheduler().get_num_steps();
          ++current_index) {
 
@@ -391,6 +409,105 @@ List pops_model_cpp(
       else if (weather_typed == WeatherType::Deterministic) {
         model.environment().update_weather_coefficient(weather_coefficient[weather_step]);
       }
+
+        // ── Behavior-driven reactive treatment injection ───────────────────────
+        if (use_behavior_module && !behavior_decision_steps.empty()) {
+            auto bit = std::find(behavior_decision_steps.begin(),
+                                 behavior_decision_steps.end(), current_index);
+            if (bit != behavior_decision_steps.end() &&
+                grower_id_raster.isNotNull() &&
+                grower_type_raster.isNotNull() &&
+                behavior_params_list.isNotNull()) {
+
+                IntegerMatrix gid_mat(grower_id_raster);
+                IntegerMatrix gtype_mat(grower_type_raster);
+                List bparams(behavior_params_list);
+
+                // Sum infected and total_hosts across all host pools
+                IntegerMatrix total_infected_now(config.rows, config.cols);
+                IntegerMatrix total_hosts_now(config.rows, config.cols);
+                for (unsigned p = 0; p < input_host_pool.infected.size(); p++) {
+                    total_infected_now += input_host_pool.infected[p];
+                    total_hosts_now   += input_host_pool.total_hosts[p];
+                }
+
+                // Collect unique management unit IDs from the grower ID raster
+                std::set<int> uid_set;
+                for (int r = 0; r < config.rows; r++)
+                    for (int c = 0; c < config.cols; c++)
+                        if (gid_mat(r, c) > 0) uid_set.insert(gid_mat(r, c));
+
+                // Per-unit aggregation of infection/host counts and grower type
+                std::map<int, long long> unit_inf, unit_host;
+                std::map<int, int>       unit_type;
+                for (int uid : uid_set) {
+                    unit_inf[uid]  = 0;
+                    unit_host[uid] = 0;
+                }
+                for (int r = 0; r < config.rows; r++) {
+                    for (int c = 0; c < config.cols; c++) {
+                        int uid = gid_mat(r, c);
+                        if (uid > 0) {
+                            unit_inf[uid]  += total_infected_now(r, c);
+                            unit_host[uid] += total_hosts_now(r, c);
+                            if (!unit_type.count(uid))
+                                unit_type[uid] = gtype_mat(r, c);
+                        }
+                    }
+                }
+
+                NumericMatrix behavior_tmap(config.rows, config.cols);
+                auto& rng = model.random_number_generator();
+
+                for (int uid : uid_set) {
+                    int type_idx = unit_type.count(uid) ? unit_type[uid] : 0;
+                    if (type_idx < 1 ||
+                        type_idx > static_cast<int>(bparams.size())) continue;
+
+                    List p        = bparams[type_idx - 1];
+                    long long n_inf   = unit_inf[uid];
+                    long long n_hosts = unit_host[uid];
+                    if (n_hosts <= 0) continue;
+
+                    double det_prob = p.containsElementNamed("detection_prob")
+                        ? static_cast<double>(p["detection_prob"]) : 1.0;
+                    double threshold = p.containsElementNamed("decision_threshold")
+                        ? static_cast<double>(p["decision_threshold"]) : 0.0;
+                    double willingness = p.containsElementNamed("willingness_to_treat")
+                        ? static_cast<double>(p["willingness_to_treat"]) : 0.0;
+                    double efficacy = p.containsElementNamed("treatment_efficacy")
+                        ? static_cast<double>(p["treatment_efficacy"]) : 1.0;
+
+                    // Binomial thinning: each infected cell detected independently
+                    std::binomial_distribution<long long> binom_det(n_inf, det_prob);
+                    long long observed = binom_det(rng);
+                    double perceived = static_cast<double>(observed) / n_hosts;
+
+                    if (perceived <= threshold) continue;
+
+                    std::bernoulli_distribution treat_draw(willingness);
+                    if (!treat_draw(rng)) continue;
+
+                    // Write efficacy value to all host cells of this unit
+                    for (int r = 0; r < config.rows; r++) {
+                        for (int c = 0; c < config.cols; c++) {
+                            if (gid_mat(r, c) == uid && total_hosts_now(r, c) > 0) {
+                                behavior_tmap(r, c) = efficacy;
+                            }
+                        }
+                    }
+                }
+
+                // Register with treatment system; applied in this step's run_step()
+                size_t step_pos =
+                    std::distance(behavior_decision_steps.begin(), bit);
+                pops::Date treat_date(behavior_decision_dates[step_pos]);
+                treatments.add_treatment(behavior_tmap, treat_date,
+                                          behavior_pesticide_duration,
+                                          treatment_application);
+                config.use_treatments = true;
+            }
+        }
 
         model.run_step(
             current_index,

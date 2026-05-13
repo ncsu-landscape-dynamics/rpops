@@ -1,0 +1,154 @@
+# PoPS config for Septoria tritici blotch in winter wheat
+# Example landscape: 10 wheat fields, 40×40 grid at 100 m resolution, OSGB
+# Growing season: February–September (monthly time step)
+#
+# input_path and output_path are injected at runtime by patch_config().
+# All raster file values are relative to input_path.
+
+input_path: ""          # set at runtime
+output_path: ""         # set at runtime
+
+# ── Rasters -------------------------------------------------------------------
+starting_infected_files: stb_example/infected.tif
+host_files: stb_example/host.tif
+total_populations_file: stb_example/total_plants.tif
+
+# ── Parameters ----------------------------------------------------------------
+# RR = 3 per month — captures the rapid polycyclic nature of STB
+parameter_means_file: parameter_means_rr3.csv
+parameter_cov_matrix_file: parameter_cov_matrix_default.csv
+pest_host_table_file: pest_host_table_singlehost_nomort.csv
+competency_table_file: competency_table_singlehost.csv
+
+# ── Host / initial conditions -------------------------------------------------
+county_level_infection_data: false
+use_initial_condition_uncertainty: false
+start_exposed: false
+latency_period: 0
+exposed_files: ''
+use_host_uncertainty: false
+
+# ── Simulation settings -------------------------------------------------------
+model_type: SI
+start_date: '2024-02-01'
+end_date: '2024-09-30'
+time_step: week
+# STB main season in England: February (spring growth) – September (harvest)
+season_month_start: 2
+season_month_end: 9
+number_of_iterations: 20
+number_of_cores: 1
+output_frequency: week
+output_frequency_n: 1
+
+# ── Dispersal kernel ----------------------------------------------------------
+# STB primary spread: rain-splash (short range, well described by exponential)
+# natural_distance_scale in map units (metres for OSGB); 300 m ≈ 3 cells
+natural_kernel_type: exponential
+natural_distance_scale: 300
+natural_dir: NONE
+natural_kappa: 0
+# Small anthropogenic component (wind-dispersed asci / spore drift)
+anthropogenic_kernel_type: cauchy
+anthropogenic_distance_scale: 500
+percent_natural_dispersal: 0.95
+anthropogenic_dir: NONE
+anthropogenic_kappa: 0
+
+# ── Network (off) -------------------------------------------------------------
+network_files: ''
+network_movement_types: walk
+network_min_distances: 0
+network_max_distances: 0
+network_weights: 1
+
+# ── Weather (off for baseline) ------------------------------------------------
+use_lethal_temperature: false
+lethal_temperature_file: ''
+lethal_temperature: -15
+lethal_temperature_month: 1
+use_overwinter_survival: false
+overwinter_survival_rate_month: 3
+overwinter_survival_rate_day: 15
+overwinter_survival_rates_file: ''
+use_temperature: false
+temperature_coefficient_file: ''
+temperature_coefficient_sd_file: ''
+use_precipitation: false
+precipitation_coefficient_file: ''
+precipitation_coefficient_sd_file: ''
+weather_type: deterministic
+
+# ── Mortality (off — STB reduces yield but does not kill wheat) ---------------
+mortality_frequency: year
+mortality_frequency_n: 1
+
+# ── Treatment / management (off for baseline) ---------------------------------
+use_treatment: false
+treatments_file: ''
+treatment_dates: '2024-05-01'
+treatment_method: ratio
+pesticide_durations: 0
+pesticide_efficacy: 1.0
+
+# ── Quarantine (off) ----------------------------------------------------------
+use_quarantine: false
+quarantine_areas_file: ''
+quarantine_directions: ''
+
+# ── Host movement (off) -------------------------------------------------------
+use_movements: false
+movements_file: ''
+
+# ── Stochasticity -------------------------------------------------------------
+use_multiple_random_seeds: false
+multiple_random_seeds_file: ~
+generate_stochasticity: true
+establishment_stochasticity: true
+movement_stochasticity: true
+dispersal_stochasticity: true
+establishment_probability: 0.5
+dispersal_percentage: 0.99
+
+# ── Spread rates / overpopulation (off) ---------------------------------------
+use_spreadrates: false
+use_overpopulation_movements: false
+overpopulation_percentage: 0.75
+leaving_percentage: 0.5
+leaving_scale_coefficient: 5
+
+# ── Soils / mask / S3 (off) --------------------------------------------------
+use_soils: false
+soil_starting_pest_file: ''
+start_with_soil_populations: false
+dispersers_to_soils_percentage: 0
+use_mask: false
+mask_file: ''
+use_s3: false
+bucket: ''
+
+# ── Calibration (off) ---------------------------------------------------------
+random_seed: ~
+testing: false
+infected_val_cal_file: ''
+perform_calibration: false
+params_to_estimate:
+  - true
+  - true
+  - true
+  - true
+  - false
+  - false
+prior_means_file: prior_means_0s.csv
+prior_cov_matrix_file: prior_cov_matrix_0s.csv
+prior_number_of_observations: 0
+number_of_observations: 0
+success_metric: MCC
+verbose: false
+calibration_method: ABC
+generation_size: 1000
+number_of_generations: 7
+perform_validation: false
+point_file: ''
+use_configuration: false
+use_distance: false

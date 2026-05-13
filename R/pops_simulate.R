@@ -73,11 +73,27 @@ pops_simulate <- function(config_rds_file) {
 
   i <- NULL
   cl <- parallel::makeCluster(config$number_of_cores)
+
+  # When PoPS is loaded via devtools::load_all() the installed package (if any)
+  # may have a different compiled interface. Detect the dev-package case and
+  # load the source tree directly in each worker so the versions match.
+  if (requireNamespace("pkgload", quietly = TRUE) &&
+      pkgload::is_dev_package("PoPS")) {
+    pops_path <- dirname(attr(utils::packageDescription("PoPS"), "file"))
+    parallel::clusterExport(cl, "pops_path", envir = environment())
+    parallel::clusterEvalQ(cl, pkgload::load_all(pops_path, quiet = TRUE))
+    worker_pkgs <- c("terra")
+  } else {
+    worker_pkgs <- c("PoPS", "terra")
+  }
+
   doParallel::registerDoParallel(cl)
 
   foreach::foreach(
     i = seq_len(config$number_of_iterations),
-    .packages = c("PoPS", "terra")
+    .packages = worker_pkgs,
+    .export = c("draw_parameters", "host_pool_setup",
+                "competency_table_list_creator", "pest_host_table_list_creator")
   ) %dopar% {
 
     set.seed(config$random_seed_list[[i]])

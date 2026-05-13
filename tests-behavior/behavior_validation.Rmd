@@ -1,0 +1,740 @@
+---
+title: "Behavior module — validation report"
+author: "Rachel Seibel"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    code_folding: show
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 8,
+  fig.height = 4
+)
+
+# Load local development tree (compile = TRUE will recompile C++ if needed)
+devtools::load_all("rpops")
+
+library(terra)
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(yaml)
+
+# ── Helpers ──────────────────────────────────────────────────────────────────
+# Resolve extdata from local repo, fall back to installed package
+local_extdata <- normalizePath(
+  file.path(getwd(), "rpops", "inst", "extdata"), mustWork = FALSE
+)
+extdata <- if (dir.exists(local_extdata)) local_extdata else {
+  file.path(system.file(package = "PoPS"), "extdata")
+}
+stopifnot("extdata directory not found" = dir.exists(extdata))
+
+out_dir <- file.path(tempdir(), "behavior_validation")
+dir.create(out_dir, showWarnings = FALSE)
+
+patch_config <- function(yaml_name, subdir = "configs_pops", extra = list()) {
+  src <- file.path(extdata, subdir, yaml_name)
+  if (!file.exists(src)) stop("Config not found: ", src)
+  cfg <- yaml::yaml.load_file(src)
+  cfg$input_path  <- paste0(normalizePath(extdata, mustWork = FALSE), "/")
+  cfg$output_path <- paste0(normalizePath(out_dir,  mustWork = FALSE), "/")
+  cfg$random_seed <- 42L
+  for (nm in names(extra)) cfg[[nm]] <- extra[[nm]]
+  tmp <- tempfile(fileext = ".yaml")
+  yaml::write_yaml(cfg, tmp)
+  tmp
+}
+
+# Convenience: matrix → SpatRaster (unit extent, fake CRS)
+mat_to_rast <- function(m) {
+  r <- rast(m)
+  ext(r) <- c(0, ncol(m), 0, nrow(m))
+  r
+}
+
+# Pass / Fail badge
+pf <- function(condition) {
+  if (condition) "✅ PASS" else "❌ FAIL"
+}
+```
+
+---
+
+# Overview
+
+This report exercises each R-layer component of the behavior module in
+isolation before testing the full C++ pipeline.  Every scenario has a stated
+expectation and a pass/fail verdict; figures show spatial or temporal patterns
+that cannot be captured by a scalar check.
+
+Components covered:
+
+1. `delineate_management_units()` — unit detection and centroid placement
+2. `assign_grower_types()` — distribution matching and spatial clustering
+3. `grower_decision()` — detection, threshold, willingness, and `spatial_radius`
+4. `behavior_configuration()` — validation of YAML-derived config lists
+5. Full pipeline — spread suppression under contrasting behavioral scenarios
+
+---
+
+# 1  `delineate_management_units()`
+
+## 1.1  Two-patch synthetic raster
+
+We construct a 6 × 6 raster with two clearly separated host patches (top-left
+and bottom-right 2 × 2 blocks separated by an empty column and row).
+`method = "raster"` should identify exactly **2 management units**.
+
+```{r delineate-synthetic}
+# Two non-adjacent 2×2 host patches in a 6×6 grid
+host_vals <- matrix(c(
+  3, 3, 0, 0, 0, 0,
+  3, 3, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 2, 2,
+  0, 0, 0, 0, 2, 2,
+  0, 0, 0, 0, 0, 0
+), nrow = 6, byrow = TRUE)
+
+host_6x6 <- mat_to_rast(host_vals)
+
+units_6x6 <- delineate_management_units(host_6x6, method = "raster")
+
+n_units_found <- max(units_6x6$management_unit_matrix)
+cat(sprintf("Units found: %d  |  Expected: 2  |  %s\n",
+            n_units_found, pf(n_units_found == 2)))
+print(units_6x6$management_unit_table)
+```
+
+```{r delineate-synthetic-plot, fig.height=3.5}
+unit_df <- as.data.frame(mat_to_rast(units_6x6$management_unit_matrix),
+                          xy = TRUE) |>
+  rename(unit = lyr.1) |>
+  mutate(unit = factor(ifelse(unit == 0, NA, unit)))
+
+centroids <- units_6x6$management_unit_table
+
+ggplot(unit_df, aes(x, y, fill = unit)) +
+  geom_raster(na.rm = TRUE) +
+  geom_point(data = centroids,
+             aes(x = centroid_x, y = centroid_y),
+             inherit.aes = FALSE, shape = 4, size = 4, stroke = 1.5) +
+  scale_fill_manual(values = c("1" = "#2ecc71", "2" = "#3498db"),
+                    na.value = "grey92", name = "Unit ID") +
+  labs(title = "Delineated management units (synthetic 6×6)",
+       subtitle = "× marks computed centroids",
+       x = NULL, y = NULL) +
+  coord_equal() +
+  theme_minimal(base_size = 12)
+```
+
+## 1.2  Grid delineation
+
+With `method = "grid"` and `grid_size = 3` (cells), the 6 × 6 raster is split
+into four 3 × 3 blocks (rows 1–3 / 4–6 × cols 1–3 / 4–6).  Patch 1 (rows 1–2,
+cols 1–2) sits entirely within the top-left block; patch 2 (rows 4–5, cols 5–6)
+sits entirely within the bottom-right block.  Neither patch straddles a block
+boundary, so the result should be exactly **2** non-empty units with centroids
+at (1, 5) and (5, 2).
+
+```{r delineate-grid}
+# Re-use host_6x6 from section 1.1.
+# grid_size = 3 places block boundaries at rows 1-3 / 4-6 and cols 1-3 / 4-6,
+# so both 2×2 patches fall entirely within a single block — no splitting.
+units_grid <- delineate_management_units(host_6x6, method = "grid",
+                                          grid_size = 3)
+# Grid IDs are global (not re-numbered to 1..N), so count distinct non-zero IDs
+n_grid <- length(unique(units_grid$management_unit_matrix[
+                          units_grid$management_unit_matrix > 0]))
+cat(sprintf("Grid units (non-empty): %d  |  Expected: 2  |  %s\n",
+            n_grid, pf(n_grid == 2)))
+print(units_grid$management_unit_table)
+```
+
+---
+
+# 2  `assign_grower_types()`
+
+## 2.1  Deterministic edge cases
+
+When `type_probs = c(1, 0)` every unit must receive type 1; when
+`type_probs = c(0, 1)` every unit must receive type 2.
+
+```{r assign-deterministic}
+units_2x2  <- delineate_management_units(
+  rast(matrix(c(1,1,1,1), nrow=2)), method = "raster"
+)
+
+# All type 1
+t1 <- assign_grower_types(units_2x2$management_unit_matrix,
+                            type_names = c("A","B"), type_probs = c(1,0),
+                            random_seed = 1L)
+all1 <- all(t1[t1 > 0] == 1L)
+cat(sprintf("type_probs = c(1,0): all cells type 1?  %s\n", pf(all1)))
+
+# All type 2
+t2 <- assign_grower_types(units_2x2$management_unit_matrix,
+                            type_names = c("A","B"), type_probs = c(0,1),
+                            random_seed = 1L)
+all2 <- all(t2[t2 > 0] == 2L)
+cat(sprintf("type_probs = c(0,1): all cells type 2?  %s\n", pf(all2)))
+```
+
+## 2.2  Approximate distribution on a larger landscape
+
+On a 10 × 10 fully-host raster the random assignment should approximately
+respect the requested proportions.  We check with a tolerance of ±15 pp.
+
+```{r assign-distribution, fig.height=3.5}
+set.seed(99)
+
+# 10×10 fully-host landscape — expect ~12 contiguous patches
+host_10 <- rast(matrix(sample(c(0L, 1L), 100, replace = TRUE, prob = c(0.2, 0.8)),
+                        nrow = 10))
+ext(host_10) <- c(0, 10, 0, 10)
+
+units_10 <- delineate_management_units(host_10, method = "raster")
+
+results <- lapply(c(25, 50, 75), function(p1) {
+  t_mat <- assign_grower_types(
+    units_10$management_unit_matrix,
+    type_names = c("early","late"),
+    type_probs = c(p1, 100-p1) / 100,
+    random_seed = 42L
+  )
+  vals <- t_mat[t_mat > 0]
+  data.frame(
+    target_p1 = p1,
+    observed_p1 = round(mean(vals == 1) * 100, 1),
+    n_cells = length(vals)
+  )
+}) |> bind_rows()
+
+results$pass <- abs(results$observed_p1 - results$target_p1) <= 15
+print(results)
+cat(sprintf("All within ±15 pp?  %s\n", pf(all(results$pass))))
+
+ggplot(results, aes(x = factor(target_p1), y = observed_p1)) +
+  geom_col(fill = "#2980b9", width = 0.5) +
+  geom_point(aes(y = target_p1), shape = 18, size = 4, colour = "#e74c3c") +
+  geom_errorbar(aes(ymin = target_p1 - 15, ymax = target_p1 + 15),
+                colour = "#e74c3c", width = 0.2, linetype = "dashed") +
+  labs(title = "assign_grower_types(): observed vs target early-adopter %",
+       subtitle = "Red diamond = target; dashed lines = ±15 pp tolerance",
+       x = "Target % early adopters", y = "Observed % early adopters") +
+  ylim(0, 100) +
+  theme_minimal(base_size = 12)
+```
+
+## 2.3  Spatial clustering
+
+We compare random vs clustered type assignment visually.  With a small
+`cluster_range` (= 1 cell unit) the pattern should look random; with a large
+`cluster_range` (= 10) spatial contiguity should be visible.
+
+```{r assign-clustering, fig.height=4}
+# Large fully-host 8×8 raster for visual clarity
+host_8 <- rast(matrix(rep(1L, 64), nrow = 8))
+ext(host_8) <- c(0, 8, 0, 8)
+units_8 <- delineate_management_units(host_8, method = "raster",
+                                        min_cells = 1)
+
+make_type_df <- function(type_probs, spatial_structure, cluster_range = 1,
+                          label) {
+  mat <- assign_grower_types(
+    units_8$management_unit_matrix,
+    type_names = c("early","late"),
+    type_probs = type_probs,
+    spatial_structure = spatial_structure,
+    cluster_range = cluster_range,
+    random_seed = 7L
+  )
+  as.data.frame(mat_to_rast(mat), xy = TRUE) |>
+    rename(type = lyr.1) |>
+    mutate(label = label,
+           type  = factor(ifelse(type == 0, NA, type),
+                          levels = c(1L, 2L),
+                          labels = c("early","late")))
+}
+
+df_clust <- bind_rows(
+  make_type_df(c(0.5, 0.5), "random",    label = "Random"),
+  make_type_df(c(0.5, 0.5), "clustered", cluster_range = 1,
+               label = "Clustered (range = 1)"),
+  make_type_df(c(0.5, 0.5), "clustered", cluster_range = 5,
+               label = "Clustered (range = 5)")
+)
+
+ggplot(df_clust, aes(x, y, fill = type)) +
+  geom_raster(na.rm = TRUE) +
+  facet_wrap(~label) +
+  scale_fill_manual(values = c(early = "#27ae60", late = "#e67e22"),
+                    na.value = "grey90") +
+  labs(title = "assign_grower_types(): spatial structure comparison",
+       x = NULL, y = NULL, fill = "Grower type") +
+  coord_equal() +
+  theme_minimal(base_size = 11) +
+  theme(strip.text = element_text(face = "bold"))
+```
+
+---
+
+# 3  `grower_decision()`
+
+We use a controlled 4 × 4 landscape: two management units (left two columns /
+right two columns), left unit infected, right unit clean.
+
+```{r decision-setup}
+# ── Shared geometry ──────────────────────────────────────────────────────────
+# 4×4 grid; unit 1 = left 2 cols, unit 2 = right 2 cols
+unit_mat <- matrix(c(
+  1L, 1L, 2L, 2L,
+  1L, 1L, 2L, 2L,
+  1L, 1L, 2L, 2L,
+  1L, 1L, 2L, 2L
+), nrow = 4, byrow = TRUE)
+
+host_mat <- matrix(4L, nrow = 4, ncol = 4)   # 4 host cells everywhere
+
+infected_mat <- matrix(c(
+  2L, 2L, 0L, 0L,
+  2L, 2L, 0L, 0L,
+  2L, 2L, 0L, 0L,
+  2L, 2L, 0L, 0L
+), nrow = 4, byrow = TRUE)                   # unit 1: 50% prevalence, unit 2: 0%
+
+# Management unit table
+mut <- data.frame(unit_id   = c(1L, 2L),
+                  n_cells   = c(8L, 8L),
+                  centroid_x = c(1.0, 3.0),
+                  centroid_y = c(2.0, 2.0))
+
+run_decision <- function(params1, params2 = NULL, output = "continuous",
+                          seed = 42L) {
+  # Both units get same params unless params2 supplied
+  if (is.null(params2)) params2 <- params1
+  grower_type_mat <- unit_mat   # type 1 = unit 1, type 2 = unit 2
+  storage.mode(grower_type_mat) <- "integer"
+  grower_decision(
+    infected_matrix        = infected_mat,
+    host_matrix            = host_mat,
+    grower_type_matrix     = grower_type_mat,
+    management_unit_matrix = unit_mat,
+    management_unit_table  = mut,
+    behavior_params        = list(params1, params2),
+    output                 = output,
+    random_seed            = seed
+  )
+}
+```
+
+## 3.1  Always detect, always treat (detection_prob = 1, willingness = 1)
+
+Unit 1 has 50% prevalence well above any plausible threshold.  With
+`detection_prob = 1` and `willingness_to_treat = 1` it **must** be treated.
+Unit 2 has 0% prevalence, so it should **not** be treated regardless.
+
+```{r decision-always-treat}
+eager <- list(detection_prob = 1.0, willingness_to_treat = 1.0,
+              treatment_efficacy = 0.8, decision_threshold = 0.0)
+
+dec_always <- run_decision(eager)
+tbl_always <- attr(dec_always, "management_unit_table")
+
+u1_treated <- tbl_always$treated[1]
+u2_treated <- tbl_always$treated[2]
+cat(sprintf("Unit 1 (infected) treated: %s  |  Expected TRUE  |  %s\n",
+            u1_treated, pf(isTRUE(u1_treated))))
+cat(sprintf("Unit 2 (clean)    treated: %s  |  Expected FALSE |  %s\n",
+            u2_treated, pf(isFALSE(u2_treated))))
+
+# Treatment map values should be 0.8 in unit 1, 0 in unit 2
+u1_val <- dec_always[1, 1]
+u2_val <- dec_always[1, 3]
+cat(sprintf("Treatment efficacy in unit 1: %.2f  |  Expected 0.80  |  %s\n",
+            u1_val, pf(abs(u1_val - 0.8) < 1e-9)))
+cat(sprintf("Treatment efficacy in unit 2: %.2f  |  Expected 0.00  |  %s\n",
+            u2_val, pf(abs(u2_val - 0.0) < 1e-9)))
+```
+
+## 3.2  Zero detection probability — no treatment
+
+```{r decision-no-detect}
+blind <- list(detection_prob = 0.0, willingness_to_treat = 1.0,
+              treatment_efficacy = 0.8, decision_threshold = 0.0)
+
+dec_blind <- run_decision(blind)
+max_val <- max(dec_blind)
+cat(sprintf("Max treatment value: %.2f  |  Expected 0.00  |  %s\n",
+            max_val, pf(max_val == 0.0)))
+```
+
+## 3.3  High decision threshold blocks treatment
+
+Unit 1 prevalence is 0.50.  Setting `decision_threshold = 0.60` means the
+grower only treats above 60% prevalence — so unit 1 should remain untreated.
+
+```{r decision-threshold}
+cautious <- list(detection_prob = 1.0, willingness_to_treat = 1.0,
+                 treatment_efficacy = 0.8, decision_threshold = 0.60)
+
+dec_thresh <- run_decision(cautious)
+u1_thresh <- attr(dec_thresh, "management_unit_table")$treated[1]
+cat(sprintf("Unit 1 treated at threshold 0.60 (prevalence 0.50): %s  |  Expected FALSE  |  %s\n",
+            u1_thresh, pf(isFALSE(u1_thresh))))
+```
+
+## 3.4  `spatial_radius` neighbourhood aggregation
+
+We place a third small unit (unit 3) adjacent to unit 1, with a clean patch.
+Unit 3's grower has `spatial_radius = 2.5`, large enough to include unit 1's
+centroid (distance ≈ 1 cell).  With all-infected unit 1 in the neighbourhood,
+unit 3's perceived prevalence should rise above zero even though its own patch
+is clean.
+
+```{r decision-spatial-radius}
+# Extended geometry: 4×6 grid — unit 1 left, unit 2 right, unit 3 centre strip
+unit_mat2 <- matrix(c(
+  1L, 1L, 3L, 3L, 2L, 2L,
+  1L, 1L, 3L, 3L, 2L, 2L,
+  1L, 1L, 3L, 3L, 2L, 2L,
+  1L, 1L, 3L, 3L, 2L, 2L
+), nrow = 4, byrow = TRUE)
+
+host_mat2     <- matrix(4L, nrow = 4, ncol = 6)
+infected_mat2 <- matrix(0L, nrow = 4, ncol = 6)
+infected_mat2[, 1:2] <- 3L    # unit 1: ~75% prevalence; unit 2,3: clean
+
+mut2 <- data.frame(unit_id    = c(1L, 2L, 3L),
+                   n_cells    = c(8L, 8L, 8L),
+                   centroid_x = c(1.0, 5.0, 3.0),
+                   centroid_y = c(2.0, 2.0, 2.0))
+
+# Units 1,2: no spatial radius; unit 3: spatial_radius = 2.5
+p_no_radius <- list(detection_prob = 1.0, willingness_to_treat = 1.0,
+                    treatment_efficacy = 0.8, decision_threshold = 0.1)
+p_with_radius <- modifyList(p_no_radius, list(spatial_radius = 2.5))
+
+gtype_mat2 <- unit_mat2  # unit i → type i (1:3)
+storage.mode(gtype_mat2) <- "integer"
+
+dec_radius <- grower_decision(
+  infected_matrix        = infected_mat2,
+  host_matrix            = host_mat2,
+  grower_type_matrix     = gtype_mat2,
+  management_unit_matrix = unit_mat2,
+  management_unit_table  = mut2,
+  behavior_params        = list(p_no_radius, p_no_radius, p_with_radius),
+  output                 = "continuous",
+  random_seed            = 42L
+)
+
+tbl2 <- attr(dec_radius, "management_unit_table")
+cat("Unit-level decisions with spatial_radius on unit 3:\n")
+print(tbl2[, c("unit_id","infected_cells","host_cells","prevalence",
+               "perceived_prevalence","treated")])
+
+u3_pp <- tbl2$perceived_prevalence[3]
+cat(sprintf("\nUnit 3 perceived prevalence: %.3f  |  Expected > 0  |  %s\n",
+            u3_pp, pf(!is.na(u3_pp) && u3_pp > 0)))
+```
+
+## 3.5  Scenario comparison heatmaps
+
+```{r decision-heatmaps, fig.height=5}
+# Three contrasting parameter sets applied to the original 4×4 landscape
+scenarios <- list(
+  list(label = "Eager\n(det=1, wt=1, thr=0)",
+       params = list(detection_prob=1.0, willingness_to_treat=1.0,
+                     treatment_efficacy=0.8, decision_threshold=0.0)),
+  list(label = "Threshold-limited\n(det=1, wt=1, thr=0.6)",
+       params = list(detection_prob=1.0, willingness_to_treat=1.0,
+                     treatment_efficacy=0.8, decision_threshold=0.6)),
+  list(label = "Reluctant\n(det=0.4, wt=0.3, thr=0.1)",
+       params = list(detection_prob=0.4, willingness_to_treat=0.3,
+                     treatment_efficacy=0.8, decision_threshold=0.1))
+)
+
+# Run each scenario 50 times (stochastic) and take mean treatment map
+n_rep <- 50
+hm_df <- lapply(scenarios, function(s) {
+  maps <- lapply(seq_len(n_rep), function(seed) {
+    m <- run_decision(s$params, seed = seed)
+    as.vector(m)
+  })
+  mean_map <- rowMeans(do.call(cbind, maps))
+
+  expand.grid(row = 1:4, col = 1:4) |>
+    mutate(value = mean_map,
+           label = s$label)
+}) |> bind_rows()
+
+ggplot(hm_df, aes(col, rev(row), fill = value)) +
+  geom_tile(colour = "white", linewidth = 0.8) +
+  facet_wrap(~label) +
+  scale_fill_gradient(low = "white", high = "#c0392b",
+                      limits = c(0, 0.8),
+                      name = "Mean\ntreatment") +
+  labs(title = "grower_decision(): mean treatment intensity across 50 replicates",
+       subtitle = "Left 2 cols = infected (50% prevalence); right 2 cols = clean",
+       x = "Column", y = "Row") +
+  coord_equal() +
+  theme_minimal(base_size = 11) +
+  theme(strip.text = element_text(face = "bold", size = 9))
+```
+
+---
+
+# 4  `behavior_configuration()`
+
+```{r bc-validation}
+valid_params <- list(
+  list(detection_prob = 0.8, willingness_to_treat = 0.9,
+       treatment_efficacy = 0.85, decision_threshold = 0.05),
+  list(detection_prob = 0.4, willingness_to_treat = 0.3,
+       treatment_efficacy = 0.85, decision_threshold = 0.20)
+)
+
+# ── Test 1: valid config ──────────────────────────────────────────────────────
+bc_valid <- behavior_configuration(
+  config_input = list(
+    use_behavior_module     = TRUE,
+    grower_id_file           = "",
+    grower_params_file       = "",
+    behavior_decision_dates  = c("2008-05-01", "2009-05-01"),
+    behavior_params          = valid_params
+  ),
+  start_date = "2008-01-01",
+  end_date   = "2009-12-31"
+)
+cat(sprintf("Valid config — failure field: '%s'  |  %s\n",
+            ifelse(is.null(bc_valid$failure), "none", bc_valid$failure),
+            pf(is.null(bc_valid$failure))))
+
+# ── Test 2: decision date outside simulation window ───────────────────────────
+bc_bad_date <- behavior_configuration(
+  config_input = list(
+    use_behavior_module    = TRUE,
+    grower_id_file          = "",
+    grower_params_file      = "",
+    behavior_decision_dates = c("2010-05-01"),   # after end_date
+    behavior_params         = valid_params
+  ),
+  start_date = "2008-01-01",
+  end_date   = "2009-12-31"
+)
+cat(sprintf("Out-of-range date — failure: '%s'  |  %s\n",
+            ifelse(is.null(bc_bad_date$failure), "none", bc_bad_date$failure),
+            pf(!is.null(bc_bad_date$failure))))
+
+# ── Test 3: defaults applied when module disabled ─────────────────────────────
+bc_off <- behavior_configuration(
+  config_input = list(use_behavior_module = FALSE),
+  start_date = "2008-01-01", end_date = "2008-12-31"
+)
+cat(sprintf("Module off — decision_dates length: %d  |  %s\n",
+            length(bc_off$behavior_decision_dates),
+            pf(length(bc_off$behavior_decision_dates) == 0)))
+```
+
+---
+
+# 5  Full pipeline — spread suppression scenarios
+
+> **Requires compiled C++.**  If the package was loaded with
+> `compile = FALSE` (or not yet installed from source), this section
+> wraps each run in `tryCatch` and reports the compilation status.
+
+We compare three scenarios over a 2-year monthly run on the `simple2x2`
+rasters:
+
+| Scenario | `use_behavior_module` | Grower type | Expected outcome |
+|---|---|---|---|
+| Baseline | FALSE | — | Unconstrained spread |
+| Eager | TRUE | 100% early-adopter | Slowest spread |
+| Reluctant | TRUE | 100% late-adopter | Spread near baseline |
+
+```{r pipeline-setup}
+run_pipeline <- function(label, extra_config = list()) {
+  cfg_path <- patch_config(
+    "simple_test_config.yaml",
+    extra = c(list(number_of_iterations = 10L,
+                   number_of_cores      = 1L,
+                   start_date           = "2008-01-01",
+                   end_date             = "2009-12-31"),
+              extra_config)
+  )
+
+  config <- tryCatch(configuration(cfg_path), error = function(e) {
+    message("configuration() failed: ", e$message)
+    return(NULL)
+  })
+  if (is.null(config) || !is.null(config$failure)) {
+    message("Config failure: ", config$failure)
+    return(NULL)
+  }
+
+  config <- PoPS:::draw_parameters(config)
+  config <- PoPS:::host_pool_setup(config)
+  config$competency_table_list <-
+    PoPS:::competency_table_list_creator(config$competency_table)
+  config$pest_host_table_list  <-
+    PoPS:::pest_host_table_list_creator(config$pest_host_table)
+  config$random_seed  <- 42L
+  config$random_seeds <- as.integer(config$random_seeds_list[1, ])
+
+  result <- tryCatch(pops_model(config), error = function(e) {
+    message("pops_model() failed: ", e$message)
+    return(NULL)
+  })
+  if (is.null(result)) return(NULL)
+
+  # Average number_infected across stochastic iterations
+  inf_vec <- result$number_infected
+  data.frame(
+    scenario = label,
+    step     = seq_along(inf_vec),
+    n_infected = inf_vec
+  )
+}
+```
+
+```{r pipeline-baseline}
+# ── 1. Baseline (no behavior) ─────────────────────────────────────────────────
+df_base <- run_pipeline("Baseline")
+```
+
+```{r pipeline-behavior}
+# ── 2. Eager growers ──────────────────────────────────────────────────────────
+# Use the built-in behavior config (gb_base_config.yaml) as a starting point;
+# override grower_id_file with a blank path so configuration() falls through
+# to the behavior_params list we provide programmatically.
+eager_params <- list(
+  list(detection_prob = 1.0, willingness_to_treat = 1.0,
+       treatment_efficacy = 0.9, decision_threshold = 0.0)
+)
+
+reluctant_params <- list(
+  list(detection_prob = 0.2, willingness_to_treat = 0.2,
+       treatment_efficacy = 0.9, decision_threshold = 0.4)
+)
+
+df_eager <- run_pipeline("Eager growers", extra_config = list(
+  use_behavior_module     = TRUE,
+  grower_id_file          = "",
+  grower_params_file      = "",
+  behavior_decision_dates = list("2008-06-01", "2009-06-01"),
+  behavior_pesticide_duration = 30L,
+  behavior_params         = eager_params
+))
+
+df_reluctant <- run_pipeline("Reluctant growers", extra_config = list(
+  use_behavior_module     = TRUE,
+  grower_id_file          = "",
+  grower_params_file      = "",
+  behavior_decision_dates = list("2008-06-01", "2009-06-01"),
+  behavior_pesticide_duration = 30L,
+  behavior_params         = reluctant_params
+))
+```
+
+```{r pipeline-plot, fig.height=4.5}
+# Collect whichever scenarios succeeded
+all_dfs <- Filter(Negate(is.null), list(df_base, df_eager, df_reluctant))
+
+if (length(all_dfs) == 0) {
+  cat("⚠️  All pipeline runs failed — recompile the package and re-knit.\n")
+} else {
+  df_all <- bind_rows(all_dfs)
+
+  pal <- c(Baseline         = "#7f8c8d",
+           `Eager growers`  = "#27ae60",
+           `Reluctant growers` = "#e67e22")
+
+  p <- ggplot(df_all, aes(step, n_infected, colour = scenario, group = scenario)) +
+    geom_line(linewidth = 1) +
+    geom_point(size = 2.5) +
+    scale_colour_manual(values = pal, name = "Scenario") +
+    labs(title = "Full pipeline: infected host count over time",
+         subtitle = "Averaged across 10 stochastic replicates",
+         x = "Output step (months)", y = "Number of infected cells") +
+    theme_minimal(base_size = 12) +
+    theme(legend.position = "bottom")
+
+  print(p)
+
+  # Print reduction summary if all three ran
+  if (length(all_dfs) == 3) {
+    final <- df_all |>
+      group_by(scenario) |>
+      summarise(final_infected = last(n_infected), .groups = "drop")
+    base_val <- final$final_infected[final$scenario == "Baseline"]
+    final$reduction_pct <- round((base_val - final$final_infected) / base_val * 100, 1)
+    cat("\nFinal step infection reduction vs baseline:\n")
+    print(final)
+    cat(sprintf(
+      "Eager growers suppress more than reluctant?  %s\n",
+      pf(final$reduction_pct[final$scenario == "Eager growers"] >
+         final$reduction_pct[final$scenario == "Reluctant growers"])
+    ))
+  }
+}
+```
+
+---
+
+# 6  Summary
+
+```{r summary-table, echo=FALSE}
+summary_df <- data.frame(
+  Component = c(
+    "delineate_management_units()",
+    "delineate_management_units() — grid",
+    "assign_grower_types() deterministic",
+    "assign_grower_types() distribution",
+    "assign_grower_types() clustering",
+    "grower_decision() always-treat",
+    "grower_decision() no-detect",
+    "grower_decision() threshold block",
+    "grower_decision() spatial_radius",
+    "behavior_configuration() valid",
+    "behavior_configuration() bad date",
+    "behavior_configuration() module off"
+  ),
+  `What is tested` = c(
+    "Two separate host patches → 2 units",
+    "Grid delineation produces correct unit count",
+    "type_probs = c(1,0) and c(0,1) enforce exact assignment",
+    "Observed proportions within ±15 pp of target",
+    "cluster_range widens spatial autocorrelation",
+    "det=1, wt=1: infected unit treated, clean unit not",
+    "det=0: no treatment regardless of prevalence",
+    "threshold > prevalence: infected unit not treated",
+    "Neighbour's infection raises perceived prevalence",
+    "Valid config returns no failure field",
+    "Out-of-range date returns failure message",
+    "Disabled module returns empty decision_dates"
+  )
+)
+knitr::kable(summary_df, align = "ll",
+             caption = "Validation checklist (detailed pass/fail in each section above)")
+```
+
+---
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
