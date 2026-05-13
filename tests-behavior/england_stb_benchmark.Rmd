@@ -1,0 +1,447 @@
+---
+title: "England winter wheat STB — benchmark and daily vs. weekly time step comparison"
+author: "Rachel Seibel"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    code_folding: show
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 9,
+  fig.height = 6
+)
+
+devtools::load_all("rpops", recompile = FALSE)
+
+library(terra)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(yaml)
+library(patchwork)
+library(stringr)
+```
+
+---
+
+# Overview
+
+This notebook runs a small PoPS ensemble on the native-resolution England 2024
+CROME winter wheat raster and compares a **weekly** vs. **daily** time step for
+the same seed county (Lincolnshire).  A handful of stochastic iterations are run
+under each setting to characterise (a) computational cost at the native grid
+resolution and (b) whether the coarser weekly step materially changes spread
+trajectories relative to the daily step.
+
+---
+
+# 1  Load England winter wheat raster
+
+```{r load-mosaic}
+# ── Adjust this path to wherever your 2024 county TIFs live ───────────────────
+RASTER_DIR <- "/Users/rachelseibel/Desktop/grower_behaviour_working/rasters/2024"
+if (nchar(Sys.getenv("STB_RASTER_DIR")) > 0)
+  RASTER_DIR <- Sys.getenv("STB_RASTER_DIR")
+
+tif_files <- list.files(RASTER_DIR, pattern = "_winter\\.tif$", full.names = TRUE)
+cat(sprintf("Found %d county TIFs\n", length(tif_files)))
+
+# Mosaic at native resolution — no resampling
+county_rasts <- lapply(tif_files, rast)
+england      <- mosaic(sprc(county_rasts), fun = "sum")
+england      <- subst(england, NA, 0)   # replace NA with 0 for PoPS
+
+cat(sprintf("Mosaic: %d rows x %d cols | res = %.0f m | CRS: %s\n",
+            nrow(england), ncol(england), res(england)[1],
+            crs(england, describe = TRUE)$name))
+cat(sprintf("Host cells: %d | Total cells: %d\n",
+            sum(values(england) > 0, na.rm = TRUE), ncell(england)))
+```
+
+```{r map-england, fig.height = 8}
+# Aggregate to ~1 km for plotting only — never convert the full raster to a
+# data frame (at 20 m resolution that is ~450 M rows and will exhaust memory).
+PLOT_AGG <- max(1L, round(1000 / res(england)[1]))   # cells per 1 km
+england_plot <- aggregate(england, fact = PLOT_AGG, fun = "sum", na.rm = TRUE)
+cat(sprintf("Plot raster: %d × %d cells (aggregated %d×)\n",
+            nrow(england_plot), ncol(england_plot), PLOT_AGG))
+
+df_eng <- as.data.frame(england_plot, xy = TRUE) |>
+  setNames(c("x", "y", "host")) |>
+  mutate(host = ifelse(host <= 0, NA, host),
+         x = x / 1000, y = y / 1000)
+
+ggplot(df_eng, aes(x, y, fill = log1p(host))) +
+  geom_raster(na.rm = TRUE) +
+  scale_fill_distiller(palette = "YlGn", direction = 1,
+                       name = "log(host + 1)", na.value = "grey95") +
+  labs(title = "England winter wheat 2024 (CROME, native resolution)",
+       subtitle = sprintf("Displayed at ~1 km aggregation | native res = %.0f m",
+                          res(england)[1]),
+       x = "Easting (km)", y = "Northing (km)") +
+  coord_equal() +
+  theme_minimal(base_size = 12)
+```
+
+---
+
+# 2  Setup
+
+## 2.1  Extdata paths and output directory
+
+```{r extdata}
+local_extdata <- normalizePath(file.path(getwd(), "rpops", "inst", "extdata"),
+                               mustWork = FALSE)
+extdata <- if (dir.exists(local_extdata)) local_extdata else
+             system.file("extdata", package = "PoPS")
+stopifnot("extdata not found" = dir.exists(extdata))
+out_dir <- file.path(tempdir(), "stb_england_out")
+dir.create(out_dir, showWarnings = FALSE)
+```
+
+## 2.2  Seed-infection raster (Lincolnshire)
+
+```{r seed-raster}
+# Approximate OSGB bounding box for Lincolnshire (metres)
+LINCS_BBOX <- c(xmin = 480000, xmax = 560000, ymin = 320000, ymax = 410000)
+
+# Crop to county, flag ~1 % of host cells as initially infected, extend back
+make_seed_rast <- function(host_rast, bbox, seed_fraction = 0.01,
+                            random_seed = 42L) {
+  county_ext  <- ext(bbox["xmin"], bbox["xmax"], bbox["ymin"], bbox["ymax"])
+  county_host <- crop(host_rast, county_ext)
+  host_vals   <- as.vector(values(county_host))
+  host_idx    <- which(host_vals > 0)
+  if (length(host_idx) == 0) stop("No host cells in bounding box.")
+
+  set.seed(random_seed)
+  n_seed   <- max(1L, round(length(host_idx) * seed_fraction))
+  seed_idx <- sample(host_idx, n_seed)
+
+  inf_county <- county_host * 0L
+  inf_vals   <- as.vector(values(inf_county))
+  # Infected = 1 % of host density, minimum 1
+  inf_vals[seed_idx] <- pmax(1L, as.integer(host_vals[seed_idx] * seed_fraction))
+  values(inf_county) <- as.integer(inf_vals)
+
+  # Extend to full extent, snap to host grid, replace any NA with 0
+  inf_full <- extend(inf_county, host_rast, fill = 0)
+  resample(inf_full, host_rast, method = "near") |> subst(NA, 0)
+}
+
+lincs_inf <- make_seed_rast(england, LINCS_BBOX)
+cat(sprintf("Seed cells (Lincolnshire): %d\n",
+            sum(values(lincs_inf) > 0, na.rm = TRUE)))
+```
+
+```{r seed-map, fig.height = 8}
+# Aggregate for plotting at same ~1 km scale as the host map
+lincs_inf_plot <- aggregate(lincs_inf, fact = PLOT_AGG, fun = "sum", na.rm = TRUE)
+
+df_seed <- as.data.frame(lincs_inf_plot, xy = TRUE) |>
+  setNames(c("x", "y", "infected")) |>
+  mutate(infected = ifelse(infected <= 0, NA, infected),
+         x = x / 1000, y = y / 1000)
+
+ggplot(df_seed, aes(x, y, fill = infected)) +
+  geom_raster(na.rm = TRUE) +
+  scale_fill_viridis_c(option = "inferno", direction = -1,
+                       name = "Infected\nunits", na.value = "grey95") +
+  labs(title = "Initial infection — Lincolnshire seed",
+       x = "Easting (km)", y = "Northing (km)") +
+  coord_equal() +
+  theme_minimal(base_size = 12)
+```
+
+## 2.3  Write rasters to temp directory
+
+```{r write-rasters}
+rast_dir <- file.path(tempdir(), "stb_england_rasts")
+dir.create(rast_dir, showWarnings = FALSE)
+
+writeRaster(england,   file.path(rast_dir, "host.tif"),     overwrite = TRUE,
+            datatype = "INT4S")
+writeRaster(england,   file.path(rast_dir, "total.tif"),    overwrite = TRUE,
+            datatype = "INT4S")
+writeRaster(lincs_inf, file.path(rast_dir, "infected.tif"), overwrite = TRUE,
+            datatype = "INT4S")
+
+# Copy required CSVs so configuration() can find them relative to input_path
+csv_needed <- c("parameter_means_rr3.csv", "parameter_cov_matrix_default.csv",
+                "pest_host_table_singlehost_nomort.csv",
+                "competency_table_singlehost.csv",
+                "prior_means_0s.csv", "prior_cov_matrix_0s.csv")
+for (f in csv_needed)
+  file.copy(file.path(extdata, f), file.path(rast_dir, f), overwrite = TRUE)
+
+cat("Rasters and CSVs written to", rast_dir, "\n")
+```
+
+## 2.4  Config builder
+
+```{r config-builder}
+make_stb_config <- function(time_step = "week", n_iter = 3L) {
+
+  # Time-step-specific parameter choices (see stb_parameterization_notes.md)
+  #   Weekly: RR = 3/step, no latency, 5% long-range dispersal per step
+  #   Daily:  RR = 0.5/step (~3/7), 14-day latency, 1% long-range per step
+  #           (flux-equivalent: 5%/week ≈ 0.7%/day → round to 1%)
+  is_daily <- time_step == "day"
+  rr_csv   <- if (is_daily) "parameter_means_rr0.5.csv" else "parameter_means_rr3.csv"
+  latency  <- if (is_daily) 14L else 0L
+  pct_nat  <- if (is_daily) 0.99 else 0.95
+
+  # Also copy the daily RR CSV to rast_dir if needed
+  if (is_daily) {
+    src <- file.path(extdata, "parameter_means_rr0.5.csv")
+    file.copy(src, file.path(rast_dir, "parameter_means_rr0.5.csv"), overwrite = TRUE)
+  }
+
+  start_date <- "2024-02-01"
+  end_date   <- "2024-09-30"
+
+  cfg <- list(
+    # Paths (all relative to input_path)
+    input_path                    = paste0(normalizePath(rast_dir), "/"),
+    output_path                   = paste0(normalizePath(out_dir),  "/"),
+    host_files                    = "host.tif",
+    starting_infected_files       = "infected.tif",
+    total_populations_file        = "total.tif",
+    exposed_files                 = "",
+    parameter_means_file          = rr_csv,
+    parameter_cov_matrix_file     = "parameter_cov_matrix_default.csv",
+    pest_host_table_file          = "pest_host_table_singlehost_nomort.csv",
+    competency_table_file         = "competency_table_singlehost.csv",
+    prior_means_file              = "prior_means_0s.csv",
+    prior_cov_matrix_file         = "prior_cov_matrix_0s.csv",
+
+    # Simulation settings
+    model_type                    = "SI",
+    latency_period                = latency,
+    start_exposed                 = FALSE,
+    start_date                    = start_date,
+    end_date                      = end_date,
+    time_step                     = time_step,
+    # Always output weekly regardless of time step — this is the key memory fix.
+    # At daily resolution, 242 daily maps × raster size exhausts 16 GB.
+    # Weekly output stores 35 maps instead and costs ~7× less memory.
+    output_frequency              = "week",
+    output_frequency_n            = 1L,
+    season_month_start            = 2L,
+    season_month_end              = 9L,
+    number_of_iterations          = as.integer(n_iter),
+    number_of_cores               = 1L,
+    random_seed                   = 42L,
+    use_multiple_random_seeds     = FALSE,
+    county_level_infection_data   = FALSE,
+    use_host_uncertainty          = FALSE,
+    use_initial_condition_uncertainty = FALSE,
+
+    # Dispersal — exponential splash + Cauchy ascospore
+    # Kernel distances are in metres and do not change with time step.
+    # percent_natural_dispersal is flux-adjusted: 0.95/week → 0.99/day
+    # so that expected long-range events per week stay equivalent.
+    natural_kernel_type           = "exponential",
+    natural_distance_scale        = 300,
+    natural_dir                   = "NONE",
+    natural_kappa                 = 0,
+    anthropogenic_kernel_type     = "cauchy",
+    anthropogenic_distance_scale  = 5000,
+    anthropogenic_dir             = "NONE",
+    anthropogenic_kappa           = 0,
+    percent_natural_dispersal     = pct_nat,
+
+    # Stochasticity
+    generate_stochasticity        = TRUE,
+    establishment_stochasticity   = TRUE,
+    movement_stochasticity        = TRUE,
+    dispersal_stochasticity       = TRUE,
+    establishment_probability     = 0.5,
+    dispersal_percentage          = 0.99,
+
+    # Weather / mortality / treatment — all off
+    use_lethal_temperature        = FALSE,
+    lethal_temperature_file       = "",
+    lethal_temperature            = -15,
+    lethal_temperature_month      = 1L,
+    use_overwinter_survival       = FALSE,
+    overwinter_survival_rate_month = 3L,
+    overwinter_survival_rate_day  = 15L,
+    overwinter_survival_rates_file = "",
+    use_temperature               = FALSE,
+    temperature_coefficient_file  = "",
+    temperature_coefficient_sd_file = "",
+    use_precipitation             = FALSE,
+    precipitation_coefficient_file = "",
+    weather_type                  = "deterministic",
+    mortality_frequency           = "year",
+    mortality_frequency_n         = 1L,
+    use_treatment                 = FALSE,
+    treatments_file               = "",
+    treatment_dates               = start_date,
+    treatment_method              = "ratio",
+    pesticide_durations           = 0L,
+    pesticide_efficacy            = 1.0,
+
+    # Everything else off
+    use_quarantine                = FALSE,
+    quarantine_areas_file         = "",
+    quarantine_directions         = "",
+    use_movements                 = FALSE,
+    movements_file                = "",
+    use_spreadrates               = FALSE,
+    use_overpopulation_movements  = FALSE,
+    overpopulation_percentage     = 0.75,
+    leaving_percentage            = 0.5,
+    leaving_scale_coefficient     = 5,
+    use_soils                     = FALSE,
+    soil_starting_pest_file       = "",
+    start_with_soil_populations   = FALSE,
+    dispersers_to_soils_percentage = 0,
+    use_mask                      = FALSE,
+    mask_file                     = "",
+    use_s3                        = FALSE,
+    bucket                        = "",
+
+    # Calibration off
+    testing                       = FALSE,
+    infected_val_cal_file         = "",
+    perform_calibration           = FALSE,
+    perform_validation            = FALSE,
+    success_metric                = "MCC",
+    calibration_method            = "ABC",
+    generation_size               = 1000L,
+    number_of_generations         = 7L,
+    prior_number_of_observations  = 0L,
+    number_of_observations        = 0L,
+    params_to_estimate            = list(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE),
+    point_file                    = "",
+    use_distance                  = FALSE,
+    use_configuration             = FALSE,
+    network_files                 = "",
+    network_movement_types        = "walk",
+    network_min_distances         = 0,
+    network_max_distances         = 0,
+    network_weights               = 1,
+    verbose                       = FALSE
+  )
+
+  tmp <- tempfile(fileext = ".yaml")
+  yaml::write_yaml(cfg, tmp)
+  tmp
+}
+```
+
+## 2.5  Run helper
+
+```{r run-helper}
+run_stb <- function(config_path) {
+  config <- configuration(config_path)
+  if (!is.null(config$failure)) stop("Config failure: ", config$failure)
+  config <- PoPS:::draw_parameters(config)
+  config <- PoPS:::host_pool_setup(config)
+  config$competency_table_list <-
+    PoPS:::competency_table_list_creator(config$competency_table)
+  config$pest_host_table_list  <-
+    PoPS:::pest_host_table_list_creator(config$pest_host_table)
+  config$random_seed  <- 42L
+  config$random_seeds <- as.integer(config$random_seeds_list[1, ])
+  pops_model(config)
+}
+```
+
+---
+
+# 3  Weekly time step run
+
+```{r run-weekly}
+N_ITER <- 1L   # start with 1; increase once timing is known
+
+cfg_weekly <- make_stb_config(time_step = "week", n_iter = N_ITER)
+t_weekly   <- system.time({ res_weekly <- run_stb(cfg_weekly) })
+
+cat(sprintf("Weekly | %d iterations | %.1f s total | %.1f s per iteration\n",
+            N_ITER, t_weekly["elapsed"], t_weekly["elapsed"] / N_ITER))
+cat(sprintf("Steps: %d | Final mean infected: %.0f host units\n",
+            length(res_weekly$number_infected),
+            res_weekly$number_infected[length(res_weekly$number_infected)]))
+```
+
+---
+
+# 4  Daily time step run
+
+```{r run-daily}
+cfg_daily <- make_stb_config(time_step = "day", n_iter = N_ITER)
+t_daily   <- system.time({ res_daily <- run_stb(cfg_daily) })
+
+cat(sprintf("Daily  | %d iterations | %.1f s total | %.1f s per iteration\n",
+            N_ITER, t_daily["elapsed"], t_daily["elapsed"] / N_ITER))
+cat(sprintf("Steps: %d | Final mean infected: %.0f host units\n",
+            length(res_daily$number_infected),
+            res_daily$number_infected[length(res_daily$number_infected)]))
+```
+
+---
+
+# 5  Comparison
+
+## 5.1  Timing summary
+
+```{r timing-table}
+timing_df <- data.frame(
+  `Time step`       = c("Weekly", "Daily"),
+  `Steps per season`= c(length(res_weekly$number_infected),
+                         length(res_daily$number_infected)),
+  `Total (s)`       = round(c(t_weekly["elapsed"], t_daily["elapsed"]), 1),
+  `Per iteration (s)` = round(c(t_weekly["elapsed"], t_daily["elapsed"]) / N_ITER, 1),
+  check.names = FALSE
+)
+knitr::kable(timing_df, caption = "Computational time — Lincolnshire seed, native resolution")
+```
+
+## 5.2  Epidemic curves
+
+Both runs use weekly output frequency, so steps are directly comparable.
+
+```{r epidemic-curves, fig.height = 5}
+epi_df <- bind_rows(
+  data.frame(week      = seq_along(res_weekly$number_infected),
+             n_infected = res_weekly$number_infected,
+             time_step  = "Weekly (step = week)"),
+  data.frame(week      = seq_along(res_daily$number_infected),
+             n_infected = res_daily$number_infected,
+             time_step  = "Daily (output = week)")
+)
+
+ggplot(epi_df, aes(week, n_infected, colour = time_step, group = time_step)) +
+  geom_line(linewidth = 1.2) +
+  geom_point(size = 2.5) +
+  scale_colour_manual(values = c("Weekly (step = week)"   = "#e74c3c",
+                                  "Daily (output = week)"  = "#2980b9"),
+                      name = NULL) +
+  labs(title = "STB epidemic curve — weekly vs. daily time step",
+       subtitle = sprintf("Lincolnshire seed | %d iteration(s) | weekly output | native resolution",
+                          N_ITER),
+       x = "Week of growing season", y = "Infected host units") +
+  theme_minimal(base_size = 13) +
+  theme(legend.position = "bottom")
+```
+
+---
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```

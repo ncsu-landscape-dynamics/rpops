@@ -222,39 +222,3 @@ multiexposed_gt_totpop_error <-
 crs_infected_county_error <-
   "Coordinate reference system (crs) of input infected vector does not match. Ensure that all of
   your input rasters and vectors have the same crs"
-
-# Behavior module error messages
-behavior_structure_error <-
-  "spatial_structure must be one of 'random', 'clustered', or 'empirical'"
-cluster_model_error <-
-  "cluster_model must be one of 'gaussian' or 'exponential'"
-type_probs_sum_error <-
-  "type_probs must sum to 1 (within a tolerance of 1e-6)"
-type_names_length_error <-
-  "type_names and type_probs must be the same length"
-type_names_empty_error <-
-  "type_names must have at least one element"
-decision_output_error <-
-  "output must be one of 'binary' or 'continuous'"
-management_unit_method_error <-
-  "method must be one of 'raster', 'polygon', or 'grid'"
-grid_size_missing_error <-
-  "grid_size must be provided when method = 'grid'"
-polygon_file_missing_error <-
-  "polygon_file must be provided when method = 'polygon'"
-decision_dates_format_error <-
-  "All decision_dates must be valid dates in YYYY-MM-DD format"
-decision_dates_bounds_error <-
-  "All decision_dates must fall within the simulation start_date and end_date"
-behavior_params_type_error <-
-  "behavior_params must have one named entry per grower type matching type_names"
-learning_rate_error <-
-  "learning_rate must be a numeric value in (0, 1]"
-memory_length_error <-
-  "memory_length must be a positive integer"
-success_threshold_behavior_error <-
-  "success_threshold must be a numeric value in [0, 1]"
-management_unit_dim_error <-
-  "management_unit_matrix dimensions do not match host_matrix dimensions"
-management_unit_id_error <-
-  "management_unit_matrix IDs must be non-negative integers starting from 0 (background) and 1 (first unit)"

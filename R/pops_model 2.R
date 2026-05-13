@@ -122,13 +122,7 @@ pops_model <-
                      network_data_config = network_data_config,
                      weather_size = config$weather_size,
                      weather_type = config$weather_type,
-                     dispersers_to_soils_percentage = config$dispersers_to_soils_percentage,
-                     use_behavior_module = config$use_behavior_module %||% FALSE,
-                     grower_id_raster = config$grower_id_matrix,
-                     grower_type_raster = config$grower_type_matrix,
-                     behavior_params_list = config$behavior_params,
-                     behavior_decision_dates = config$behavior_decision_dates %||% character(0),
-                     behavior_pesticide_duration = config$behavior_pesticide_duration %||% 0L
+                     dispersers_to_soils_percentage = config$dispersers_to_soils_percentage
     ))
 
     return(data)

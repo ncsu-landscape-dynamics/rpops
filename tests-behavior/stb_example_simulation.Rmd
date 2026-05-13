@@ -1,0 +1,805 @@
+---
+title: "Septoria tritici blotch in winter wheat — example simulation"
+author: "Rachel Seibel"
+date: "`r Sys.Date()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    code_folding: show
+    theme: flatly
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE,
+  fig.width  = 8,
+  fig.height = 5
+)
+
+devtools::load_all("rpops", recompile = FALSE)  # set recompile = TRUE after any C++ change
+
+library(terra)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(yaml)
+library(patchwork)
+library(stringr)
+```
+
+---
+
+# Overview
+
+This notebook sets up a simplified simulation of *Zymoseptoria tritici*
+(causal agent of Septoria tritici blotch, STB) spreading across ten winter
+wheat fields in an example English landscape.
+
+Key modelling choices:
+
+| Setting | Value | Rationale |
+|---|---|---|
+| Grid | 40 × 40 cells at 100 m | Field-scale resolution |
+| Season | February – September 2024 | STB main epidemic window |
+| Time step | Weekly | Resolves within-season STB dynamics |
+| Spread kernel | Exponential, scale 300 m | Short-range rain-splash primary |
+| Reproductive rate | ~3 per week | Rapid polycyclic STB dynamics |
+| Behaviour | Off (baseline), then two grower types | Contrast management strategies |
+
+---
+
+# 1  Landscape construction
+
+We create ten winter wheat fields ranging from ~15 to 60 ha, arranged in three
+loose rows across a 4 × 4 km landscape.  Fields are rectangular for simplicity;
+replace with the CROME 2024 winter wheat polygons for a production run.
+
+```{r build-landscape}
+# ── Raster dimensions ─────────────────────────────────────────────────────────
+NR      <- 40L          # rows (north–south)
+NC      <- 40L          # cols (east–west)
+RES_M   <- 100L         # cell size in metres
+ORIGIN  <- c(450000, 200000)  # OSGB easting, northing (somewhere in E England)
+
+# ── Field extents (row_start, row_end, col_start, col_end) — 1-indexed ───────
+#    Each field is a rectangle; non-overlapping, separated by ≥1 cell gap.
+field_defs <- data.frame(
+  id = 1:10,
+  r1 = c( 2,  2,  2,  9,  9,  9, 17, 17, 17, 28),
+  r2 = c( 7,  6,  8, 15, 14, 13, 23, 22, 24, 35),
+  c1 = c( 2, 14, 28,  2, 15, 29,  3, 16, 29,  9),
+  c2 = c(11, 24, 38, 10, 26, 37,  9, 27, 38, 25)
+)
+field_defs$n_cells <- with(field_defs, (r2 - r1 + 1L) * (c2 - c1 + 1L))
+
+# ── Build matrices ─────────────────────────────────────────────────────────────
+host_mat     <- matrix(0L, nrow = NR, ncol = NC)
+total_mat    <- matrix(0L, nrow = NR, ncol = NC)
+infected_mat <- matrix(0L, nrow = NR, ncol = NC)
+field_id_mat <- matrix(0L, nrow = NR, ncol = NC)
+
+# Host density: 100 "plant units" per 100 m cell (arbitrary but consistent)
+# Host units per 100 m cell.  Think of these as tiller-equivalents: a 1 ha cell
+# of winter wheat at typical UK seed rates carries O(100) "units" at the scale
+# we are modelling.  Increase this when coarsening resolution so that total host
+# units — and therefore number_infected — remain comparable across grid sizes.
+HOST_DENSITY <- 100L
+
+for (i in seq_len(nrow(field_defs))) {
+  fd <- field_defs[i, ]
+  host_mat[fd$r1:fd$r2, fd$c1:fd$c2]     <- HOST_DENSITY
+  total_mat[fd$r1:fd$r2, fd$c1:fd$c2]    <- HOST_DENSITY
+  field_id_mat[fd$r1:fd$r2, fd$c1:fd$c2] <- i
+}
+
+# Initial focus: small infection in the north-west corner of field 1.
+# Values represent infected host units within each cell (<= HOST_DENSITY).
+infected_mat[3:4, 3:4] <- 5L   # ~5 % of hosts in this 2×2 block
+infected_mat[2,   2]   <- 3L
+
+total_host_units <- sum(host_mat)   # used as denominator in all plots
+
+cat(sprintf(
+  "Landscape: %d rows × %d cols at %d m\n%-20s %d fields | %d host cells | %d total host units\n",
+  NR, NC, RES_M,
+  "", nrow(field_defs), sum(field_defs$n_cells), total_host_units
+))
+print(field_defs[, c("id", "n_cells")])
+```
+
+```{r save-rasters}
+# ── Write rasters to extdata/stb_example/ ─────────────────────────────────────
+local_extdata <- normalizePath(
+  file.path(getwd(), "rpops", "inst", "extdata"), mustWork = FALSE
+)
+extdata <- if (dir.exists(local_extdata)) local_extdata else
+  file.path(system.file(package = "PoPS"), "extdata")
+stopifnot(dir.exists(extdata))
+
+stb_dir <- file.path(extdata, "stb_example")
+dir.create(stb_dir, showWarnings = FALSE)
+
+# Helper: matrix → SpatRaster with OSGB CRS and correct extent
+# (overwrite = TRUE ensures stale rasters from any previous run are replaced)
+make_rast <- function(m, datatype = "INT4S") {
+  r <- rast(m)
+  ext(r) <- c(ORIGIN[1], ORIGIN[1] + NC * RES_M,
+              ORIGIN[2], ORIGIN[2] + NR * RES_M)
+  crs(r) <- "EPSG:27700"
+  r
+}
+
+writeRaster(make_rast(host_mat),     file.path(stb_dir, "host.tif"),
+            overwrite = TRUE, datatype = "INT4S")
+writeRaster(make_rast(total_mat),    file.path(stb_dir, "total_plants.tif"),
+            overwrite = TRUE, datatype = "INT4S")
+writeRaster(make_rast(infected_mat), file.path(stb_dir, "infected.tif"),
+            overwrite = TRUE, datatype = "INT4S")
+cat("Rasters written to extdata/stb_example/\n")
+```
+
+```{r plot-landscape, fig.height=5}
+# Colour palette for the 10 fields
+field_pal <- setNames(
+  hcl.colors(10, "Set2"),
+  as.character(1:10)
+)
+
+field_df <- as.data.frame(make_rast(field_id_mat), xy = TRUE) |>
+  rename(field = lyr.1) |>
+  mutate(field = factor(ifelse(field == 0, NA, field)),
+         x = x / 1000, y = y / 1000)
+
+inf_df <- as.data.frame(make_rast(infected_mat), xy = TRUE) |>
+  rename(infected = lyr.1) |>
+  filter(infected > 0) |>
+  mutate(x = x / 1000, y = y / 1000)
+
+p_landscape <- ggplot(field_df, aes(x, y, fill = field)) +
+  geom_raster(na.rm = TRUE) +
+  geom_raster(data = inf_df, aes(x, y), fill = "#c0392b",
+              inherit.aes = FALSE) +
+  scale_fill_manual(values = field_pal, na.value = "grey93",
+                    name = "Field", guide = guide_legend(ncol = 2)) +
+  labs(title = "Example STB landscape — 10 winter wheat fields",
+       subtitle = "Red cells: initial infection focus (field 1, top-left)",
+       x = "Easting (km)", y = "Northing (km)") +
+  coord_equal() +
+  theme_minimal(base_size = 12)
+
+p_landscape
+```
+
+```{r field-size-chart, fig.height=3}
+ggplot(field_defs, aes(x = reorder(factor(id), n_cells), y = n_cells)) +
+  geom_col(fill = "#2980b9", width = 0.6) +
+  geom_text(aes(label = paste0(n_cells, " ha")), hjust = -0.15, size = 3.5) +
+  coord_flip(ylim = c(0, max(field_defs$n_cells) * 1.25)) +
+  labs(title = "Field sizes", x = "Field ID", y = "Area (ha)") +
+  theme_minimal(base_size = 11)
+```
+
+---
+
+# 2  Model configuration
+
+```{r config-helper}
+# ── Time step ─────────────────────────────────────────────────────────────────
+# Switch here to change the temporal resolution of the whole simulation.
+# Valid values: "day", "week", "month"
+TIME_STEP <- "week"
+
+out_dir <- file.path(tempdir(), "stb_out")
+dir.create(out_dir, showWarnings = FALSE)
+
+patch_stb_config <- function(extra = list()) {
+  src <- file.path(extdata, "configs_pops", "stb_example_config.yaml")
+  cfg <- yaml::yaml.load_file(src)
+  cfg$input_path       <- paste0(normalizePath(extdata, mustWork = FALSE), "/")
+  cfg$output_path      <- paste0(normalizePath(out_dir,  mustWork = FALSE), "/")
+  cfg$random_seed      <- 42L
+  cfg$time_step        <- TIME_STEP          # propagate time step to YAML
+  cfg$output_frequency <- TIME_STEP          # match output frequency
+  for (nm in names(extra)) cfg[[nm]] <- extra[[nm]]
+  tmp <- tempfile(fileext = ".yaml")
+  yaml::write_yaml(cfg, tmp)
+  tmp
+}
+
+run_stb <- function(label, extra = list(), n_rep = 20L,
+                     grower_id_mat = NULL, grower_type_mat = NULL) {
+
+  # Build config once (single iteration; we loop over reps manually)
+  cfg_path <- patch_stb_config(c(extra, list(number_of_iterations = 1L)))
+  config   <- configuration(cfg_path)
+  if (!is.null(config$failure)) stop("configuration() failed: ", config$failure)
+
+  config <- PoPS:::draw_parameters(config)
+  config <- PoPS:::host_pool_setup(config)
+  config$competency_table_list <-
+    PoPS:::competency_table_list_creator(config$competency_table)
+  config$pest_host_table_list  <-
+    PoPS:::pest_host_table_list_creator(config$pest_host_table)
+  config$random_seeds <- as.integer(config$random_seeds_list[1, ])
+
+  # Inject grower matrices directly — bypasses the grower_id_file = "" path in
+  # configuration(), which leaves both matrices NULL and causes the C++ behavior
+  # block to skip treatment injection (it guards on grower_id_raster.isNotNull())
+  config$grower_id_matrix   <- grower_id_mat
+  config$grower_type_matrix <- grower_type_mat
+
+  if (isTRUE(config$use_behavior_module)) {
+    cat(sprintf(
+      "[%s] behavior ON | grower_id_mat: %s | grower_type_mat: %s | dates: %s\n",
+      label,
+      ifelse(is.null(grower_id_mat),  "NULL ⚠", "set ✓"),
+      ifelse(is.null(grower_type_mat), "NULL ⚠", "set ✓"),
+      paste(unlist(config$behavior_decision_dates), collapse = ", ")
+    ))
+  }
+
+  # Run n_rep times with different seeds; collect individual trajectories
+  rep_results <- lapply(seq_len(n_rep), function(i) {
+    cfg_i <- config
+    cfg_i$random_seed <- 42L + i - 1L
+    tryCatch(pops_model(cfg_i), error = function(e) NULL)
+  })
+  rep_results <- Filter(Negate(is.null), rep_results)
+  if (length(rep_results) == 0) return(NULL)
+
+  # Date sequence derived from first successful run
+  n_steps <- length(rep_results[[1]]$number_infected)
+  dates   <- seq(as.Date("2024-02-01"), by = TIME_STEP, length.out = n_steps)
+
+  # Tidy data frame: one row per (rep, step)
+  # 'step' is a plain integer generation counter used on the x-axis of all plots.
+  runs_df <- lapply(seq_along(rep_results), function(i) {
+    data.frame(
+      rep        = i,
+      step       = seq_len(n_steps),
+      date       = dates,
+      n_infected = rep_results[[i]]$number_infected
+    )
+  }) |> bind_rows()
+
+  list(
+    label       = label,
+    runs_df     = runs_df,
+    last_result = rep_results[[length(rep_results)]],  # one run kept for maps
+    months      = dates,
+    n_steps     = n_steps,
+    config      = config
+  )
+}
+```
+
+---
+
+# 3  Baseline simulation — no management
+
+```{r run-baseline}
+baseline <- run_stb("Baseline (no treatment)")
+if (!is.null(baseline)) {
+  final_means <- baseline$runs_df |>
+    group_by(rep) |> summarise(final = last(n_infected), .groups = "drop")
+  cat(sprintf("Steps: %d  |  Final infected count (mean ± sd): %.1f ± %.1f\n",
+              baseline$n_steps, mean(final_means$final), sd(final_means$final)))
+}
+```
+
+## 3.1  Epidemic curve
+
+```{r plot-epidemic-curve, fig.height=4}
+if (!is.null(baseline)) {
+  mean_df <- baseline$runs_df |>
+    group_by(step) |>
+    summarise(n_infected = mean(n_infected), .groups = "drop")
+
+  p_epi <- ggplot(baseline$runs_df,
+                   aes(step, n_infected, group = rep)) +
+    geom_line(colour = "#c0392b", alpha = 0.25, linewidth = 0.4) +
+    geom_line(data = mean_df, aes(step, n_infected, group = 1),
+              colour = "#c0392b", linewidth = 1.2, inherit.aes = FALSE) +
+    geom_hline(yintercept = total_host_units, linetype = "dashed",
+               colour = "grey50", linewidth = 0.5) +
+    annotate("text", x = 1, y = total_host_units * 1.02,
+             label = sprintf("Total host units: %d", total_host_units),
+             hjust = 0, vjust = 0, size = 3.5, colour = "grey40") +
+    labs(title = "STB epidemic curve — baseline (no management)",
+         subtitle = "Thin lines: individual runs; bold line: mean",
+         x = paste0("Time step (", TIME_STEP, ")"), y = "Infected host units") +
+    theme_minimal(base_size = 12)
+
+  print(p_epi)
+}
+```
+
+## 3.2  Spread maps
+
+Snapshots of the infection state at eight evenly-spaced weeks across the season.
+
+```{r spread-maps, fig.height=9}
+if (!is.null(baseline)) {
+  # Use the last replicate's rasters for the map sequence
+  hp <- baseline$last_result$host_pools[[1]]
+  n_steps <- length(hp$infected)
+
+  # Select 8 evenly-spaced weekly steps to display
+  display_steps <- round(seq(1, n_steps, length.out = min(n_steps, 8)))
+
+  map_df <- lapply(display_steps, function(s) {
+    inf_r <- rast(hp$infected[[s]])
+    ext(inf_r) <- c(ORIGIN[1], ORIGIN[1] + NC * RES_M,
+                    ORIGIN[2], ORIGIN[2] + NR * RES_M)
+    as.data.frame(inf_r, xy = TRUE) |>
+      rename(infected = lyr.1) |>
+      mutate(x = x / 1000, y = y / 1000,
+             step_label = paste0(stringr::str_to_title(TIME_STEP), " ", s))
+  }) |> bind_rows()
+
+  # Preserve chronological order across facets
+  step_order <- paste0(stringr::str_to_title(TIME_STEP), " ", display_steps)
+  map_df$step_label <- factor(map_df$step_label, levels = step_order)
+
+  ggplot(map_df, aes(x, y, fill = infected)) +
+    geom_raster() +
+    facet_wrap(~step_label, ncol = 4) +
+    scale_fill_gradientn(
+      colours  = c("grey93", "#f9e79f", "#f39c12", "#c0392b", "#7b241c"),
+      values   = scales::rescale(c(0, 1, 5, 20, 50)),
+      na.value = "grey93",
+      name     = "Infected\nhost units"
+    ) +
+    labs(title = "STB baseline — spread maps by time step",
+         x = "Easting (km)", y = "Northing (km)") +
+    coord_equal() +
+    theme_minimal(base_size = 10) +
+    theme(strip.text = element_text(face = "bold"),
+          axis.text  = element_text(size = 7))
+}
+```
+
+---
+
+# 4  Grower management scenarios
+
+We delineate the ten fields as management units and assign two grower types
+to compare how treatment behaviour affects the epidemic.
+
+```{r delineate-fields}
+host_rast <- rast(file.path(extdata, "stb_example", "host.tif"))
+
+units <- delineate_management_units(host_rast, method = "raster", min_cells = 1)
+
+cat(sprintf("Management units found: %d\n", max(units$management_unit_matrix)))
+print(units$management_unit_table)
+```
+
+```{r assign-types}
+# 50 / 50 split: early adopters (type 1) vs late adopters (type 2)
+type_mat <- assign_grower_types(
+  management_units  = units$management_unit_matrix,
+  type_names        = c("early_adopter", "late_adopter"),
+  type_probs        = c(0.5, 0.5),
+  spatial_structure = "random",
+  random_seed       = 42L
+)
+
+type_df <- as.data.frame(make_rast(type_mat), xy = TRUE) |>
+  rename(type = lyr.1) |>
+  mutate(type = factor(ifelse(type == 0, NA, type),
+                        levels = c(1L, 2L),
+                        labels = c("Early adopter", "Late adopter")),
+         x = x / 1000, y = y / 1000)
+
+ggplot(type_df, aes(x, y, fill = type)) +
+  geom_raster(na.rm = TRUE) +
+  scale_fill_manual(values = c("Early adopter" = "#27ae60",
+                                "Late adopter"  = "#e67e22"),
+                    na.value = "grey93", name = "Grower type") +
+  labs(title = "Grower type assignment — 5 early, 5 late adopters",
+       x = "Easting (km)", y = "Northing (km)") +
+  coord_equal() +
+  theme_minimal(base_size = 12)
+```
+
+## 4.1  Per-scenario grower type matrices
+
+The C++ behavior block requires a non-NULL `grower_id_raster` to activate; it
+uses it to aggregate cell-level infection counts into per-unit prevalences.
+We build three type matrices here — one for each management scenario — and pass
+them explicitly into `run_stb()`.
+
+```{r type-matrices}
+gid_mat <- units$management_unit_matrix   # unit IDs; same matrix type_mat was built from
+
+# All early adopters: every unit cell → type 1
+type_mat_all_early <- gid_mat
+type_mat_all_early[gid_mat > 0] <- 1L
+storage.mode(type_mat_all_early) <- "integer"
+
+# All late adopters: every unit cell → type 2
+type_mat_all_late <- gid_mat
+type_mat_all_late[gid_mat > 0] <- 2L
+storage.mode(type_mat_all_late) <- "integer"
+
+# Mixed: use the 50/50 assignment from assign_grower_types() above
+type_mat_mixed <- type_mat   # already integer
+
+cat("Type matrix summary:\n")
+for (nm in c("type_mat_all_early", "type_mat_mixed", "type_mat_all_late")) {
+  m <- get(nm)
+  vals <- m[m > 0]
+  cat(sprintf("  %-22s  type 1: %d cells  |  type 2: %d cells\n",
+              nm, sum(vals == 1), sum(vals == 2)))
+}
+```
+
+## 4.2  Behaviour parameter sets
+
+```{r behavior-params}
+# Early adopter: vigilant, lowers treatment threshold
+params_early <- list(
+  detection_prob       = 0.85,   # high chance of noticing disease
+  willingness_to_treat = 0.90,   # acts decisively once detected
+  treatment_efficacy   = 0.75,   # typical fungicide efficacy for STB
+  decision_threshold   = 0.05    # treats above 5% local prevalence
+)
+
+# Late adopter: reactive, waits until disease is obvious
+params_late <- list(
+  detection_prob       = 0.40,
+  willingness_to_treat = 0.35,
+  treatment_efficacy   = 0.75,
+  decision_threshold   = 0.25    # only treats when >25% local prevalence
+)
+
+# Decision points: T1 (stem extension) and T2 (flag leaf) spray timings
+decision_dates <- list("2024-04-01", "2024-06-01")
+pesticide_duration <- 45L   # days (~6 weeks protection)
+
+cat("Early adopter parameters:\n"); print(as.data.frame(params_early))
+cat("\nLate adopter parameters:\n"); print(as.data.frame(params_late))
+```
+
+## 4.3  Simulate: both grower types
+
+```{r run-with-behavior}
+# Shared behavior config fields (grower matrices injected separately)
+behavior_extra <- list(
+  use_behavior_module         = TRUE,
+  grower_id_file              = "",
+  grower_params_file          = "",
+  behavior_decision_dates     = decision_dates,
+  behavior_pesticide_duration = pesticide_duration,
+  behavior_params             = list(params_early, params_late)
+)
+
+mixed <- run_stb("Mixed (early + late adopters)", extra = behavior_extra,
+                  grower_id_mat  = gid_mat,
+                  grower_type_mat = type_mat_mixed)
+```
+
+```{r check-treatment}
+# Sanity check: compare mean infection at T1 and T2 between baseline and mixed.
+if (!is.null(baseline) && !is.null(mixed)) {
+  mean_at <- function(s, target_date) {
+    step <- which.min(abs(s$months - target_date))
+    s$runs_df |> filter(date == s$months[step]) |> pull(n_infected) |> mean()
+  }
+
+  t1_date <- as.Date("2024-04-01")
+  t2_date <- as.Date("2024-06-01")
+  t1_step <- which.min(abs(baseline$months - t1_date))
+  t2_step <- which.min(abs(baseline$months - t2_date))
+
+  cat(sprintf("T1 (Apr 01, step ~%d): baseline = %.1f  |  mixed = %.1f\n",
+              t1_step, mean_at(baseline, t1_date), mean_at(mixed, t1_date)))
+  cat(sprintf("T2 (Jun 01, step ~%d): baseline = %.1f  |  mixed = %.1f  (Δ = %.1f)\n",
+              t2_step,
+              mean_at(baseline, t2_date), mean_at(mixed, t2_date),
+              mean_at(baseline, t2_date) - mean_at(mixed, t2_date)))
+
+  if (mean_at(baseline, t2_date) > mean_at(mixed, t2_date)) {
+    cat("✅ Treatment is suppressing infection — behavior module is active.\n")
+  } else {
+    cat("⚠️  No divergence detected. Likely cause: C++ not recompiled.\n",
+        "   Run devtools::install('rpops') then restart R and re-knit.\n")
+  }
+}
+```
+
+## 4.4  Simulate: all early adopters
+
+```{r run-all-early}
+all_early_extra <- modifyList(behavior_extra, list(
+  behavior_params = list(params_early, params_late)   # type 1 = early, type 2 unused
+))
+all_early <- run_stb("All early adopters", extra = all_early_extra,
+                      grower_id_mat  = gid_mat,
+                      grower_type_mat = type_mat_all_early)
+```
+
+```{r debug-all-early, fig.height=4}
+# Diagnostic: plot all_early in isolation to check data and column structure.
+cat("Columns in all_early$runs_df:", paste(names(all_early$runs_df), collapse = ", "), "\n")
+cat("Rows:", nrow(all_early$runs_df), "\n")
+print(head(all_early$runs_df))
+
+# ggplot(all_early$runs_df, aes(step, n_infected, group = rep)) +
+#   geom_line(colour = "#27ae60", alpha = 0.35, linewidth = 0.5) +
+#   labs(title = "All early adopters — individual runs",
+#        x = paste0("Time step (", TIME_STEP, ")"), y = "Infected host units") +
+#   theme_minimal(base_size = 12)
+```
+
+## 4.5  Simulate: all late adopters
+
+```{r run-all-late}
+all_late_extra <- modifyList(behavior_extra, list(
+  behavior_params = list(params_early, params_late)   # type 2 = late
+))
+all_late <- run_stb("All late adopters", extra = all_late_extra,
+                     grower_id_mat  = gid_mat,
+                     grower_type_mat = type_mat_all_late)
+```
+
+---
+
+# 5  Results comparison
+
+```{r scenario-diagnostics}
+# Quick sanity check: confirm each scenario produced runs and what infection levels look like.
+# If a row shows NULL the run failed; if mean_final ≈ 0 the behavior module is suppressing
+# infection effectively (lines will appear near the x-axis in the comparison plot).
+scenario_check <- lapply(
+  list(baseline = baseline, all_early = all_early, mixed = mixed, all_late = all_late),
+  function(s) {
+    if (is.null(s)) return(data.frame(n_reps = NA, mean_final = NA, max_final = NA))
+    finals <- s$runs_df |>
+      group_by(rep) |>
+      summarise(f = last(n_infected), .groups = "drop")
+    data.frame(
+      n_reps     = nrow(finals),
+      mean_final = round(mean(finals$f), 1),
+      sd_final   = round(sd(finals$f),   1),
+      max_final  = max(finals$f)
+    )
+  }
+)
+print(do.call(rbind, scenario_check))
+```
+
+```{r comparison-curve, fig.height=10}
+scenario_list <- list(baseline, all_early, mixed, all_late)
+scenario_list <- Filter(Negate(is.null), scenario_list)
+
+if (length(scenario_list) > 0) {
+  # Individual runs
+  combined_df <- lapply(scenario_list, function(s) {
+    s$runs_df |> mutate(scenario = s$label)
+  }) |> bind_rows()
+
+  # Fix factor order so rows appear in a logical sequence top-to-bottom
+  scenario_order <- c("Baseline (no treatment)", "All early adopters",
+                       "Mixed (early + late adopters)", "All late adopters")
+  combined_df$scenario <- factor(combined_df$scenario,
+                                  levels = intersect(scenario_order,
+                                                     unique(combined_df$scenario)))
+
+  # Per-scenario means for the bold summary line
+  mean_df <- combined_df |>
+    group_by(scenario, step) |>
+    summarise(n_infected = mean(n_infected), .groups = "drop")
+
+  # Convert T1/T2 decision dates to step numbers
+  decision_steps <- vapply(unlist(decision_dates), function(d) {
+    which.min(abs(baseline$months - as.Date(d)))
+  }, integer(1))
+
+  scenario_pal <- c(
+    "Baseline (no treatment)"       = "#7f8c8d",
+    "All early adopters"            = "#27ae60",
+    "Mixed (early + late adopters)" = "#8e44ad",
+    "All late adopters"             = "#e67e22"
+  )
+
+  # T1/T2 label positions per facet (using each panel's own y_max via after_stat)
+  vline_df <- data.frame(step = decision_steps, label = c("T1", "T2"))
+
+  ggplot(combined_df, aes(step, n_infected, group = rep, colour = scenario)) +
+    geom_vline(data = vline_df, aes(xintercept = step),
+               linetype = "dashed", colour = "steelblue",
+               linewidth = 0.4, alpha = 0.7, inherit.aes = FALSE) +
+    geom_line(alpha = 0.25, linewidth = 0.4) +
+    geom_line(data = mean_df,
+              aes(step, n_infected, group = scenario, colour = scenario),
+              linewidth = 1.2, inherit.aes = FALSE) +
+    geom_text(data = vline_df, aes(x = step, label = label),
+              y = -Inf, vjust = -0.5, hjust = -0.3,
+              colour = "steelblue", size = 3, inherit.aes = FALSE) +
+    facet_wrap(~scenario, ncol = 1) +
+    scale_colour_manual(values = scenario_pal, guide = "none") +
+    labs(title = "STB epidemic curves — management scenarios",
+         subtitle = "Thin lines: individual runs; bold line: mean. T1/T2: treatment decision dates",
+         x = paste0("Time step (", TIME_STEP, ")"),
+         y = "Infected host units") +
+    theme_minimal(base_size = 12) +
+    theme(strip.text       = element_text(face = "bold", size = 10),
+          strip.background = element_rect(fill = "grey95", colour = NA),
+          panel.spacing    = unit(1, "lines"))
+}
+```
+
+```{r reduction-table}
+if (length(scenario_list) > 1) {
+  summary_tbl <- lapply(scenario_list, function(s) {
+    final_inf <- s$runs_df |>
+      group_by(rep) |>
+      summarise(final = last(n_infected), .groups = "drop") |>
+      pull(final)
+    data.frame(
+      Scenario                         = s$label,
+      `Mean final infected host units` = round(mean(final_inf), 1),
+      `SD`                             = round(sd(final_inf), 1),
+      `% host units infected (mean)`   = round(mean(final_inf) / total_host_units * 100, 1)
+    )
+  }) |> bind_rows()
+
+  base_mean <- summary_tbl$Mean.final.infected.host.units[
+    summary_tbl$Scenario == "Baseline (no treatment)"]
+  summary_tbl$`Reduction vs baseline (pp)` <-
+    round((base_mean - summary_tbl$Mean.final.infected.host.units) /
+            total_host_units * 100, 1)
+
+  knitr::kable(summary_tbl, align = "lrrrr",
+               caption = "Season-end infection summary (means ± SD across 20 runs)")
+}
+```
+
+## 5.1  Spread maps at season end — scenario comparison
+
+```{r final-maps, fig.height=5, fig.width=10}
+if (length(scenario_list) > 0) {
+  final_maps <- lapply(scenario_list, function(s) {
+    hp      <- s$last_result$host_pools[[1]]
+    n_steps <- length(hp$infected)
+    inf_r   <- rast(hp$infected[[n_steps]])
+    ext(inf_r) <- c(ORIGIN[1], ORIGIN[1] + NC * RES_M,
+                    ORIGIN[2], ORIGIN[2] + NR * RES_M)
+    as.data.frame(inf_r, xy = TRUE) |>
+      rename(infected = lyr.1) |>
+      mutate(x = x / 1000, y = y / 1000,
+             scenario = s$label)
+  }) |> bind_rows()
+
+  scenario_order <- c("Baseline (no treatment)", "All early adopters",
+                       "Mixed (early + late adopters)", "All late adopters")
+  final_maps$scenario <- factor(final_maps$scenario,
+                                 levels = intersect(scenario_order,
+                                                    unique(final_maps$scenario)))
+
+  ggplot(final_maps, aes(x, y, fill = infected)) +
+    geom_raster() +
+    facet_wrap(~scenario, ncol = 2) +
+    scale_fill_gradientn(
+      colours  = c("grey93", "#f9e79f", "#f39c12", "#c0392b", "#7b241c"),
+      values   = scales::rescale(c(0, 1, 5, 20, 50)),
+      na.value = "grey93",
+      name     = "Infected\nhost units"
+    ) +
+    labs(title = "Season-end infection maps by management scenario",
+         x = "Easting (km)", y = "Northing (km)") +
+    coord_equal() +
+    theme_minimal(base_size = 10) +
+    theme(strip.text = element_text(face = "bold", size = 8),
+          axis.text  = element_text(size = 6))
+}
+```
+
+---
+
+# 6  grower_decision() at T1 (April)
+
+To inspect how the decision model works at the first treatment date, we
+extract the infection state at step 3 (April) and run `grower_decision()`
+manually.
+
+```{r grower-decision-t1, fig.height=4}
+if (!is.null(baseline)) {
+  # Extract infection state at T1 from the last replicate's rasters
+  hp        <- baseline$last_result$host_pools[[1]]
+  step_apr  <- which.min(abs(baseline$months - as.Date("2024-04-01")))
+  inf_apr   <- as.matrix(rast(hp$infected[[step_apr]]), wide = TRUE)
+  storage.mode(inf_apr) <- "integer"
+  host_arr  <- as.matrix(host_rast, wide = TRUE)
+  storage.mode(host_arr) <- "integer"
+
+  decision_apr <- grower_decision(
+    infected_matrix        = inf_apr,
+    host_matrix            = host_arr,
+    grower_type_matrix     = type_mat,
+    management_unit_matrix = units$management_unit_matrix,
+    management_unit_table  = units$management_unit_table,
+    behavior_params        = list(params_early, params_late),
+    output                 = "continuous",
+    random_seed            = 42L
+  )
+
+  unit_tbl <- attr(decision_apr, "management_unit_table")
+
+  # Plot decision output
+  dec_rast <- make_rast(decision_apr)
+  dec_df   <- as.data.frame(dec_rast, xy = TRUE) |>
+    rename(treatment = lyr.1) |>
+    mutate(x = x / 1000, y = y / 1000)
+
+  inf_apr_df <- as.data.frame(make_rast(inf_apr), xy = TRUE) |>
+    rename(infected = lyr.1) |>
+    mutate(x = x / 1000, y = y / 1000)
+
+  p_dec <- ggplot(dec_df, aes(x, y, fill = treatment)) +
+    geom_raster() +
+    scale_fill_gradient(low = "grey93", high = "#27ae60",
+                        name = "Fungicide\nefficacy") +
+    labs(title = "T1 treatment map (grower_decision() output, April)",
+         subtitle = "Non-zero cells receive fungicide; intensity = efficacy × willingness",
+         x = "Easting (km)", y = "Northing (km)") +
+    coord_equal() +
+    theme_minimal(base_size = 11)
+
+  p_inf <- ggplot(inf_apr_df |> filter(infected > 0),
+                   aes(x, y, fill = infected)) +
+    geom_raster() +
+    scale_fill_gradient(low = "#f9e79f", high = "#c0392b",
+                        name = "Infected\nhost units") +
+    labs(title = "Infection state at T1 (April)",
+         x = "Easting (km)", y = "Northing (km)") +
+    coord_equal() +
+    theme_minimal(base_size = 11)
+
+  print(p_inf + p_dec)
+
+  cat("\nUnit-level decision summary at T1:\n")
+  print(unit_tbl[, c("unit_id", "infected_cells", "host_cells",
+                       "prevalence", "treated")])
+}
+```
+
+---
+
+# 7  Notes for moving to real England data
+
+When you are ready to replace the synthetic landscape with real CROME 2024
+fields:
+
+1. **Mosaic** the county-level `rasters/2024/*_winter.tif` files into a
+   single England-wide raster:
+   ```r
+   county_files <- list.files("grower_behaviour_working/rasters/2024",
+                              pattern = "_winter\\.tif$", full.names = TRUE)
+   england_winter <- terra::mosaic(sprc(lapply(county_files, rast)),
+                                   fun = "max")
+   ```
+2. **Reproject** to OSGB (EPSG:27700) if not already there:
+   ```r
+   england_winter <- terra::project(england_winter, "EPSG:27700")
+   ```
+3. **Crop** to your study area (e.g., a county or region), then pass to
+   `delineate_management_units()` with `method = "raster"` or
+   `method = "polygon"` if you have field boundary data.
+4. Replace `stb_example/host.tif` and `stb_example/total_plants.tif` with the
+   real rasters in the YAML config, then re-run from section 3 onwards.
+
+---
+
+# Session info
+
+```{r session-info}
+sessionInfo()
+```
