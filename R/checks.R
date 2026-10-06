@@ -382,7 +382,7 @@ multihost_checks <-
     failed_check <- pest_host_table_row_length_error
   } else {
     host_names <- pest_host_table$host
-    pest_host_table <- pest_host_table[, -1]
+    # pest_host_table <- pest_host_table[, -1]
     pest_host_table_list <- pest_host_table_list_creator(pest_host_table)
   }
 

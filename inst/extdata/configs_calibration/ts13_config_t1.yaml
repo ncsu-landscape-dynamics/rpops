@@ -1,17 +1,17 @@
 # File paths for input and output data
 input_path: "C:/Users/cjone/Projects/rpops/inst/extdata/"
-output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple20x20/outputs/calibration/"
+output_path: "C:/Users/cjone/Projects/rpops/inst/extdata/simple20x20/outputs/calibration"
 
 # pest parameters
-starting_infected_files: ["/simple20x20/initial_infection.tif"]
-parameter_means_file: "parameter_means_default.csv" 
-parameter_cov_matrix_file: "parameter_cov_matrix_default.csv" 
-pest_host_table_file: "pest_host_table_singlehost_nomort.csv" 
-competency_table_file: "competency_table_singlehost.csv" 
-county_level_infection_data: false 
-use_initial_condition_uncertainty: false 
+starting_infected_files: ["simple20x20/initial_infection.tif"]
+parameter_means_file: "parameter_means_default.csv"
+parameter_cov_matrix_file: "parameter_cov_matrix_default.csv"
+pest_host_table_file: "pest_host_table_singlehost_nomort.csv"
+competency_table_file: "competency_table_singlehost.csv"
+county_level_infection_data: false
+use_initial_condition_uncertainty: false
 start_exposed: false
-latency_period: 0
+latency_period: 2
 exposed_files: [""]
 
 # host data
@@ -21,14 +21,14 @@ use_host_uncertainty: false
 
 # simulation settings
 start_date: "2003-01-01"
-end_date: "2003-12-31"
-time_step: "month"
+end_date: "2003-02-11"
+time_step: "week"
 model_type: "SI"
 season_month_start: 1
 season_month_end: 12
 number_of_iterations: 10
 number_of_cores: 2
-output_frequency: "year"
+output_frequency: "week"
 output_frequency_n: 1
 
 # weather
@@ -66,13 +66,13 @@ quarantine_directions: ""
 # dispersal
 natural_kernel_type: "exponential"
 natural_dir: "NONE"
-anthropogenic_kernel_type: "network"
+anthropogenic_kernel_type: "cauchy"
 anthropogenic_dir: "NONE"
 # only used if anthropogenic_kernel_type == "network"
-network_files: ["simple20x20/segments.csv"]
+network_files: [""]
 network_movement_types: ["walk"]
-network_min_distances: [50]
-network_max_distances: [250]
+network_min_distances: [0]
+network_max_distances: [0]
 network_weights: [1]
 
 # host movement
@@ -101,27 +101,32 @@ start_with_soil_populations: false
 dispersers_to_soils_percentage: 0
 
 # Mask out areas for comparison (e.g. water, or other landcover types)
-use_mask: false
-mask_file: null
+use_mask: true
+mask_file: "simple20x20/mask.tif"
 
 # validation and calibration
-infected_val_cal_file: "simple20x20/infected_single.tif"
+infected_val_cal_file: "simple20x20/infected_years.tif"
 
 # calibration only parameters
 perform_calibration: true
 params_to_estimate: [true, true, true, true, false, false]
-prior_means_file: "prior_means_0s.csv" 
-prior_cov_matrix_file: "prior_cov_matrix_0s.csv" 
+prior_means_file: "prior_means_0s.csv"
+prior_cov_matrix_file: "prior_cov_matrix_0s.csv"
 prior_number_of_observations: 0
 number_of_observations: 68
-success_metric: "quantity, allocation, and configuration"
+success_metric: "mcc"
 verbose: true
 natural_kappa: 0
 anthropogenic_kappa: 0
 calibration_method: "ABC"
 # ABC Parameters
-generation_size: 5
+<<<<<<< HEAD
+generation_size: 10
 number_of_generations: 2
+=======
+generation_size: 5
+number_of_generations: 3
+>>>>>>> c09aa6395c987b704f893f00f086ff475994145a
 
 # validation only
 perform_validation: false

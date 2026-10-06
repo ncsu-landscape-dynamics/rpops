@@ -78,8 +78,8 @@ calibrate <- function(config_rds_file) {
   # Computation or Markov Chain Monte Carlo.
   if (config$calibration_method == "ABC") {
     # set up data structures for storing results
-    parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
-    parameters_test <- matrix(ncol = 16, nrow = 200)
+    config$parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
+    config$parameters_test <- matrix(ncol = 16, nrow = 200)
     config$acceptance_rate <- 1
     config$acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
 
@@ -106,8 +106,8 @@ calibrate <- function(config_rds_file) {
     config$distance_threshold <- 1000 # starting threshold for distance between simulated
     # and observed data in units
     config$mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
-    acceptance_rate_particle_check <- seq(60, 200, 20)
-
+    config$acceptance_rate_particle_check <- seq(60, 200, 20)
+    config$save_particle_check <- seq(100, 900, 100)
     # loop through until all generations are complete
     while (config$current_bin <= config$number_of_generations) {
       # loop until all # of parameter sets kept equals the generation size
@@ -281,7 +281,7 @@ calibrate <- function(config_rds_file) {
         }
 
         if (model_improved && config$total_particles <= config$num_particles) {
-          parameters_kept[config$total_particles, ] <-
+          config$parameters_kept[config$total_particles, ] <-
             c(
               proposed_reproductive_rate,
               proposed_natural_distance_scale,
@@ -302,7 +302,7 @@ calibrate <- function(config_rds_file) {
             )
 
           if (config$current_bin == 1 && config$proposed_particles <= 200) {
-            parameters_test[config$proposed_particles, ] <-
+            config$parameters_test[config$proposed_particles, ] <-
               c(
                 proposed_reproductive_rate,
                 proposed_natural_distance_scale,
@@ -327,7 +327,7 @@ calibrate <- function(config_rds_file) {
           config$proposed_particles <- config$proposed_particles + 1
         } else {
           if (config$current_bin == 1 && config$proposed_particles <= 200) {
-            parameters_test[config$proposed_particles, ] <-
+            config$parameters_test[config$proposed_particles, ] <-
               c(
                 proposed_reproductive_rate,
                 proposed_natural_distance_scale,
@@ -353,57 +353,65 @@ calibrate <- function(config_rds_file) {
         config$acceptance_rate <- config$current_particles / config$proposed_particles
         config <- create_cal_print(config)
 
+        if (config$current_particle %in% config$save_particle_check) {
+          saveRDS(config, file.path(config$output_path, "calibration_not_complete.rds"))
+        }
         ## Check that acceptance rates are within a range for the first generation
         ## if the acceptance rate is less than 5% or greater than 15% adjust the
         ## thresholds to bring the acceptance rate within that range.
-        if (config$proposed_particles %in% acceptance_rate_particle_check &&
+        if (config$proposed_particles %in% config$acceptance_rate_particle_check &&
             config$current_bin == 1
             ) {
           if (config$acceptance_rate < 0.05) {
             config$accuracy_threshold <-
-              mean(c(median(parameters_test[, 7], na.rm = TRUE), config$accuracy_threshold)) - 0.03
+              mean(c(median(config$parameters_test[, 7], na.rm = TRUE),
+                     config$accuracy_threshold)) - 0.03
             config$precision_threshold <-
-              mean(c(median(parameters_test[, 8], na.rm = TRUE), config$precision_threshold))
+              mean(c(median(config$parameters_test[, 8], na.rm = TRUE), config$precision_threshold))
               - 0.03
             config$recall_threshold <-
-              mean(c(median(parameters_test[, 9], na.rm = TRUE), config$recall_threshold)) - 0.03
+              mean(c(median(config$parameters_test[, 9], na.rm = TRUE),
+                     config$recall_threshold)) - 0.03
             config$specificity_threshold <-
-              mean(c(median(parameters_test[, 10], na.rm = TRUE), config$specificity_threshold))
-              - 0.03
+              mean(c(median(config$parameters_test[, 10], na.rm = TRUE),
+                     config$specificity_threshold)) - 0.03
             config$rmse_threshold <-
-              mean(c(median(parameters_test[, 11], na.rm = TRUE), config$rmse_threshold)) + 2
+              mean(c(median(config$parameters_test[, 11], na.rm = TRUE), config$rmse_threshold)) + 2
             config$distance_threshold <-
-              mean(c(median(parameters_test[, 12], na.rm = TRUE), config$distance_threshold)) + 10
+              mean(c(median(config$parameters_test[, 12], na.rm = TRUE),
+                     config$distance_threshold)) + 10
             config$mcc_threshold <-
-              mean(c(median(parameters_test[, 13], na.rm = TRUE), config$mcc_threshold)) - 0.02
+              mean(c(median(config$parameters_test[, 13], na.rm = TRUE),
+                     config$mcc_threshold)) - 0.02
             config$quantity_threshold <-
-              mean(c(median(parameters_test[, 14], na.rm = TRUE), config$quantity_threshold)) + 0.02
+              mean(c(median(config$parameters_test[, 14], na.rm = TRUE),
+                     config$quantity_threshold)) + 0.02
             config$allocation_threshold <-
-              mean(c(median(parameters_test[, 15], na.rm = TRUE),
+              mean(c(median(config$parameters_test[, 15], na.rm = TRUE),
                      config$allocation_threshold)) + 0.02
             config$configuration_threshold <-
-              mean(c(median(parameters_test[, 16], na.rm = TRUE),
+              mean(c(median(config$parameters_test[, 16], na.rm = TRUE),
                      config$configuration_threshold)) + 0.02
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 16, nrow = 200)
+            config$parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
+            config$parameters_test <- matrix(ncol = 16, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
           } else if (config$acceptance_rate > 0.15) {
-            config$accuracy_threshold <- median(parameters_kept[, 7], na.rm = TRUE)
-            config$precision_threshold <- median(parameters_kept[, 8], na.rm = TRUE)
-            config$recall_threshold <- median(parameters_kept[, 9], na.rm = TRUE)
-            config$specificity_threshold <- median(parameters_kept[, 10], na.rm = TRUE)
-            config$rmse_threshold <- median(parameters_kept[, 11], na.rm = TRUE)
-            config$distance_threshold <- median(parameters_kept[, 12], na.rm = TRUE)
-            config$mcc_threshold <- median(parameters_kept[, 13], na.rm = TRUE)
-            config$quantity_threshold <- median(parameters_kept[, 14], na.rm = TRUE)
-            config$allocation_threshold <- median(parameters_kept[, 15], na.rm = TRUE)
-            config$configuration_threshold <- median(parameters_kept[, 16], na.rm = TRUE)
+            config$accuracy_threshold <- median(config$parameters_kept[, 7], na.rm = TRUE)
+            config$precision_threshold <- median(config$parameters_kept[, 8], na.rm = TRUE)
+            config$recall_threshold <- median(config$parameters_kept[, 9], na.rm = TRUE)
+            config$specificity_threshold <- median(config$parameters_kept[, 10], na.rm = TRUE)
+            config$rmse_threshold <- median(config$parameters_kept[, 11], na.rm = TRUE)
+            config$distance_threshold <- median(config$parameters_kept[, 12], na.rm = TRUE)
+            config$mcc_threshold <- median(config$parameters_kept[, 13], na.rm = TRUE)
+            config$quantity_threshold <- median(config$parameters_kept[, 14], na.rm = TRUE)
+            config$allocation_threshold <- median(config$parameters_kept[, 15], na.rm = TRUE)
+            config$configuration_threshold <- median(config$parameters_kept[, 16], na.rm = TRUE)
             ## reset starting point of parameters kept and acceptance rate
-            parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
-            parameters_test <- matrix(ncol = 16, nrow = 200)
+            config$parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
+            config$parameters_test <- matrix(ncol = 16, nrow = 200)
             config$current_particles <- 1
             config$total_particles <- 1
             config$proposed_particles <- 1
@@ -417,8 +425,8 @@ calibrate <- function(config_rds_file) {
 
       start_index <- config$current_bin * config$generation_size - config$generation_size + 1
       end_index <- config$current_bin * config$generation_size
-      config$parameter_means <- colMeans(parameters_kept[start_index:end_index, 1:6])
-      config$parameter_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:6])
+      config$parameter_means <- colMeans(config$parameters_kept[start_index:end_index, 1:6])
+      config$parameter_cov_matrix <- cov(config$parameters_kept[start_index:end_index, 1:6])
 
       config$current_particles <- 1
       config$proposed_particles <- 1
@@ -433,21 +441,25 @@ calibrate <- function(config_rds_file) {
       config$distance_thresholds[config$current_bin] <- config$distance_threshold
       config$specificity_thresholds[config$current_bin] <- config$specificity_threshold
       config$mcc_thresholds[config$current_bin] <- config$mcc_threshold
-      config$accuracy_threshold <- median(parameters_kept[start_index:end_index, 7])
-      config$precision_threshold <- median(parameters_kept[start_index:end_index, 8])
-      config$recall_threshold <- median(parameters_kept[start_index:end_index, 9])
-      config$specificity_threshold <- median(parameters_kept[start_index:end_index, 10])
-      config$rmse_threshold <- median(parameters_kept[start_index:end_index, 11])
-      config$distance_threshold <- median(parameters_kept[start_index:end_index, 12])
-      config$mcc_threshold <- median(parameters_kept[start_index:end_index, 13])
-      config$quantity_threshold <- median(parameters_kept[start_index:end_index, 14])
-      config$allocation_threshold <- median(parameters_kept[start_index:end_index, 15])
-      config$configuration_threshold <- median(parameters_kept[start_index:end_index, 16])
+      config$accuracy_threshold <- median(config$parameters_kept[start_index:end_index, 7])
+      config$precision_threshold <- median(config$parameters_kept[start_index:end_index, 8])
+      config$recall_threshold <- median(config$parameters_kept[start_index:end_index, 9])
+      config$specificity_threshold <- median(config$parameters_kept[start_index:end_index, 10])
+      config$rmse_threshold <- median(config$parameters_kept[start_index:end_index, 11])
+      config$distance_threshold <- median(config$parameters_kept[start_index:end_index, 12])
+      config$mcc_threshold <- median(config$parameters_kept[start_index:end_index, 13])
+      config$quantity_threshold <- median(config$parameters_kept[start_index:end_index, 14])
+      config$allocation_threshold <- median(config$parameters_kept[start_index:end_index, 15])
+      config$configuration_threshold <- median(config$parameters_kept[start_index:end_index, 16])
       config$current_bin <- config$current_bin + 1
+
+      if (config$current_bin < config$number_of_generations) {
+        saveRDS(config, file.path(config$output_path, "calibration_not_complete.rds"))
+      }
     }
 
-    calibrated_means <- colMeans(parameters_kept[start_index:end_index, 1:6])
-    calibrated_cov_matrix <- cov(parameters_kept[start_index:end_index, 1:6])
+    calibrated_means <- colMeans(config$parameters_kept[start_index:end_index, 1:6])
+    calibrated_cov_matrix <- cov(config$parameters_kept[start_index:end_index, 1:6])
 
   } else if (config$calibration_method == "MCMC") {
     proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
@@ -804,7 +816,7 @@ calibrate <- function(config_rds_file) {
                    "natural_kappa",
                    "anthropogenic_kappa")])
 
-    parameters_kept <- params
+    config$parameters_kept <- params
 
   } else {
     return("Calibration method must be one of 'ABC' or 'MCMC'")
@@ -843,7 +855,7 @@ calibrate <- function(config_rds_file) {
   outputs <-
     list(
       posterior_means, posterior_cov_matrix,
-      config$total_number_of_observations, parameters_kept
+      config$total_number_of_observations, config$parameters_kept
     )
   names(outputs) <-
     c(
@@ -851,6 +863,23 @@ calibrate <- function(config_rds_file) {
       "total_number_of_observations", "raw_calibration_data"
     )
 
+  config$parameters_kept <- as.data.frame(config$parameters_kept)
+  names(config$parameters_kept) <-  c("reproductive_rate",
+                               "natural_distance_scale",
+                               "percent_natural_dispersal",
+                               "anthropogenic_distance_scale",
+                               "natural_kappa",
+                               "anthropogenic_kappa",
+                               "accuracy",
+                               "precision",
+                               "recall",
+                               "specificity",
+                               "rmse",
+                               "distance_difference",
+                               "mcc",
+                               "quantity_disagreement",
+                               "allocation_disagreement",
+                               "configuration_disagreement")
 
   file_name <- paste(config$output_path, "calibration_outputs.rdata", sep = "")
   save(outputs, file = file_name)
@@ -859,8 +888,7 @@ calibrate <- function(config_rds_file) {
   file_name <- paste(config$output_path, "posterior_cov_matrix.csv", sep = "")
   write.csv(posterior_cov_matrix, file_name, row.names = FALSE)
   file_name <- paste(config$output_path, "raw_calibration_data.csv", sep = "")
-  write.csv(parameters_kept, file_name, row.names = FALSE)
-
+  write.csv(config$parameters_kept, file_name, row.names = FALSE)
 
   return(outputs)
 }

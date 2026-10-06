@@ -492,11 +492,31 @@ configuration <- function(config_file, testing = FALSE) {
       }
     }
 
-    config$weather_coefficient <- vector("list", config$weather_size)
-    for (i in seq_along(config$weather_coefficient)) {
-      current_month <- i %% 12
-      current_month <- ifelse(current_month == 0, 12, current_month)
+    if (config$time_step == "day") {
+      config$dates <- seq.Date(as.Date(config$start_date), as.Date(config$end_date), by = "day")
+    } else if (config$time_step == "week") {
+      config$dates <- seq.Date(as.Date(config$start_date), as.Date(config$end_date), by = "week")
+      current_year <- lubridate::year(config$dates[1])
+      for (i in seq_along(config$dates)) {
+        if (lubridate::year(config$dates[i]) > current_year) {
+          config$dates[i - 1] <- paste0(lubridate::year(config$dates[i]), "-01-01")
+          config$dates[(i - 1):length(config$dates)] <-
+            seq.Date(as.Date(config$dates[i - 1]), as.Date(config$end_date), by = "week")
+        }
+        current_year <- lubridate::year(config$dates[i])
+      }
+    } else if (config$time_step == "month") {
+      config$dates <- seq.Date(as.Date(config$start_date), as.Date(config$end_date), by = "month")
+    }
 
+    if (length(config$dates) > config$weather_size) {
+      config$dates <- config$dates[1:config$weather_size]
+    }
+
+    config$weather_coefficient <- vector("list", length(config$dates))
+
+    for (i in seq_along(config$dates)) {
+      current_month <- lubridate::month(config$dates[[i]])
       if (current_month >= config$season_month_start && current_month <= config$season_month_end) {
         config$weather_coefficient[[i]] <-
           terra::as.matrix(weather_coefficient_stack[[i]], wide = TRUE)
@@ -518,10 +538,9 @@ configuration <- function(config_file, testing = FALSE) {
         return(config)
       }
 
-      config$weather_coefficient_sd <- vector("list", config$weather_size)
+      config$weather_coefficient_sd <- vector("list", length(config$dates))
       for (i in seq_along(config$weather_coefficient_sd)) {
-        current_month <- i %% 12
-        current_month <- ifelse(current_month == 0, 12, current_month)
+        current_month <- lubridate::month(config$dates[[i]])
 
         if (current_month >= config$season_month_start && current_month
             <= config$season_month_end) {
