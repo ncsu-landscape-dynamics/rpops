@@ -1,0 +1,32 @@
+# Calibrates the reproductive rate and dispersal scales of the pops model.
+
+Either Approximate Bayesian Computation or Markov Chain Monte Carlo
+Approximation is used to estimate relevant model parameters. Model
+accuracy is gauged using a custom quantity allocation disagreement
+function to assess accuracy of spatial configuration. We test number of
+predictions, number of predicted locations, cumulative distance to
+nearest infection. The calibration uses these metrics to determine if a
+run is kept if it is under a threshold. either because it improves the
+results or randomly gets kept despite being worse. We recommend running
+calibration for at least 10,000 iterations but even more will provide a
+better result. If the model converges and doesn't improve for awhile it
+will exist calibration prior to reaching the total number of iterations
+specified.
+
+## Usage
+
+``` r
+calibrate(config_rds_file)
+```
+
+## Arguments
+
+- config_rds_file:
+
+  Path to config file produced when calling \`configuration\`. The
+  config file includes all data necessary used to set up c++ PoPS model
+
+## Value
+
+a dataframe of the variables saved and their success metrics for each
+run
