@@ -772,7 +772,6 @@ test_that("Test set 19: Mortality works as expected", {
 
 test_that("Test set 20: Movements works as expected", {
   config_file <- system.file("extdata", "configs_pops", "ts20_config_t1.yaml", package = "PoPS")
-  config_file <- file.path("inst", "extdata", "configs_pops", "ts20_config_t1.yaml")
   config <- configuration(config_file = config_file, testing = TRUE)
   data <- pops(config)
   expect_equal(length(data$host_pools[[1]]$infected), 4)
