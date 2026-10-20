@@ -41,6 +41,15 @@ calibrate <- function(config_rds_file) {
 
   config <- set_success_metrics(config)
 
+  # Check for an existing checkpoint file to resume from an interrupted calibration
+  # and resume from that point.
+  checkpoint_file <- file.path(config$output_path, "calibration_not_complete.rds")
+  resuming_from_checkpoint <- file.exists(checkpoint_file)
+  if (resuming_from_checkpoint) {
+    message("Checkpoint found. Resuming calibration from: ", checkpoint_file)
+    config <- readRDS(checkpoint_file)
+  }
+
   # set the parameter function to only need the parameters that change so that
   # each call to param func needs to pass in the parameters being calibrated
   param_func <-
@@ -77,37 +86,39 @@ calibrate <- function(config_rds_file) {
   # Check which calibration method is being used either Approximate Bayesian
   # Computation or Markov Chain Monte Carlo.
   if (config$calibration_method == "ABC") {
-    # set up data structures for storing results
-    config$parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
-    config$parameters_test <- matrix(ncol = 16, nrow = 200)
-    config$acceptance_rate <- 1
-    config$acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
+    if (!resuming_from_checkpoint) {
+      # set up data structures for storing results
+      config$parameters_kept <- matrix(ncol = 16, nrow = config$num_particles)
+      config$parameters_test <- matrix(ncol = 16, nrow = 200)
+      config$acceptance_rate <- 1
+      config$acceptance_rates <- matrix(ncol = 1, nrow = config$number_of_generations)
 
-    config$quantity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$allocation_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$configuration_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$accuracy_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$precision_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$recall_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$specificity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$rmse_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
-    config$mcc_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$quantity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$allocation_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$configuration_threshold <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$accuracy_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$precision_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$recall_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$specificity_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$rmse_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$distance_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
+      config$mcc_thresholds <- matrix(ncol = 1, nrow = config$number_of_generations)
 
-    # assign thresholds for summary static values to be compared to the
-    config$quantity_threshold <- 40 # starting threshold for quantity disagreement
-    config$allocation_threshold <- 40 # starting threshold for allocation disagreement
-    config$configuration_threshold <- 0.20 # starting threshold for configuration disagreement
-    config$accuracy_threshold <- 0.70 # starting threshold for model accuracy
-    config$precision_threshold <- 0.70 # starting threshold for model precision
-    config$recall_threshold <- 0.70 # starting threshold for model recall
-    config$specificity_threshold <- 0.70 # starting threshold for model
-    config$rmse_threshold <- 5 # starting threshold for RMSE (root mean squared error)
-    config$distance_threshold <- 1000 # starting threshold for distance between simulated
-    # and observed data in units
-    config$mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
-    config$acceptance_rate_particle_check <- seq(60, 200, 20)
-    config$save_particle_check <- seq(100, 900, 100)
+      # assign thresholds for summary static values to be compared to the current values
+      config$quantity_threshold <- 40 # starting threshold for quantity disagreement
+      config$allocation_threshold <- 40 # starting threshold for allocation disagreement
+      config$configuration_threshold <- 0.20 # starting threshold for configuration disagreement
+      config$accuracy_threshold <- 0.70 # starting threshold for model accuracy
+      config$precision_threshold <- 0.70 # starting threshold for model precision
+      config$recall_threshold <- 0.70 # starting threshold for model recall
+      config$specificity_threshold <- 0.70 # starting threshold for model
+      config$rmse_threshold <- 5 # starting threshold for RMSE (root mean squared error)
+      config$distance_threshold <- 1000 # starting threshold for distance between simulated
+      # and observed data in units
+      config$mcc_threshold <- 0.50 # starting threshold for Mathews Correlation Coefficient
+        config$acceptance_rate_particle_check <- seq(60, 200, 20)
+        config$save_particle_check <- seq(100, 900, 100)
+    } # end !resuming_from_checkpoint initialisation
     # loop through until all generations are complete
     while (config$current_bin <= config$number_of_generations) {
       # loop until all # of parameter sets kept equals the generation size
@@ -462,11 +473,15 @@ calibrate <- function(config_rds_file) {
     calibrated_cov_matrix <- cov(config$parameters_kept[start_index:end_index, 1:6])
 
   } else if (config$calibration_method == "MCMC") {
-    proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
-    proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
-    if (config$params_to_estimate[3]) {
-      proposed_percent_natural_dispersal <-
-        round(runif(1, 0.93, 1.000), digits = 3)
+    # Determine starting iteration (1, or restored from checkpoint)
+    mcmc_start_i <- 1
+    if (!resuming_from_checkpoint || is.null(config$mcmc_state)) {
+      # Fresh start: draw initial parameters and run model once
+      proposed_reproductive_rate <- round(runif(1, 0.05, 8), digits = 2)
+      proposed_natural_distance_scale <- round(runif(1, 0.5, 100), digits = 1)
+      if (config$params_to_estimate[3]) {
+        proposed_percent_natural_dispersal <-
+          round(runif(1, 0.93, 1.000), digits = 3)
     } else {
       proposed_percent_natural_dispersal <- 1.0
     }
@@ -547,7 +562,15 @@ calibrate <- function(config_rds_file) {
                  natural_kappa = rep(0, config$number_of_iterations),
                  anthropogenic_kappa = rep(0, config$number_of_iterations))
 
-    for (i in seq_len(config$number_of_iterations)) {
+    } else {
+      # Resuming: restore MCMC local state from the checkpoint
+      params   <- config$mcmc_state$params
+      current  <- config$mcmc_state$current
+      mcmc_start_i <- config$mcmc_state$last_i + 1
+      message("Resuming MCMC from iteration ", mcmc_start_i)
+    } # end resume guard
+
+    for (i in mcmc_start_i:config$number_of_iterations) {
 
       proposed_reproductive_rate <- 0
       while (proposed_reproductive_rate <= 0.1) {
@@ -790,6 +813,13 @@ calibrate <- function(config_rds_file) {
         print(i)
       }
       params[i, ] <- param
+
+      # Save a checkpoint every 100 iterations so calibration can be resumed
+      # if interrupted.  The checkpoint stores MCMC local state in config.
+      if (i %% 100 == 0 || i == config$number_of_iterations) {
+        config$mcmc_state <- list(params = params, current = current, last_i = i)
+        saveRDS(config, file.path(config$output_path, "calibration_not_complete.rds"))
+      }
     }
 
     if (config$number_of_iterations > 10000) {
@@ -889,6 +919,11 @@ calibrate <- function(config_rds_file) {
   write.csv(posterior_cov_matrix, file_name, row.names = FALSE)
   file_name <- paste(config$output_path, "raw_calibration_data.csv", sep = "")
   write.csv(config$parameters_kept, file_name, row.names = FALSE)
+
+  # Calibration complete: remove the checkpoint so the next run starts fresh.
+  if (file.exists(checkpoint_file)) {
+    file.remove(checkpoint_file)
+  }
 
   return(outputs)
 }
