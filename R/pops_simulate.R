@@ -73,6 +73,9 @@ pops_simulate <- function(config_rds_file) {
 
   i <- NULL
   cl <- parallel::makeCluster(config$number_of_cores)
+  # always shut the workers down, even if a run errors, so no orphaned
+  # R processes are left behind (these can hang R CMD check on Windows)
+  on.exit(parallel::stopCluster(cl), add = TRUE)
   doParallel::registerDoParallel(cl)
 
   foreach::foreach(
@@ -132,6 +135,5 @@ pops_simulate <- function(config_rds_file) {
     rm(data)
     gc()
   }
-  stopCluster(cl)
   return(cat("Raw PoPS runs outputs saved to output_path: "))
 }

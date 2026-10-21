@@ -21,7 +21,7 @@ use_host_uncertainty: false
 
 # simulation settings
 start_date: "2003-01-01"
-end_date: "2003-02-11"
+end_date: "2003-12-31"
 time_step: "month"
 model_type: "SI"
 season_month_start: 1

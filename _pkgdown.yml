@@ -1,8 +1,9 @@
 title: PoPS
 
 template:
-  params:
-    bootswatch: slate
+  bootstrap: 5
+  bootswatch: slate
+
 home:
   strip_header: true
 
@@ -26,14 +27,11 @@ reference:
     desc: "Functions for running a PoPS model."
     contents:
     - pops
-    - pops_multirun
-    - pops_lite
+    - pops_simulate
   - title: "Internal data handlers"
     desc: "Functions for error checks and data handling for pops setup"
     contents:
     - configuration
     - pops_model
     - quantity_allocation_disagreement
-    - configuration_qad_lite
-    - quantity_allocation_disagreement_lite
     - create_summary_stats_and_stacks
