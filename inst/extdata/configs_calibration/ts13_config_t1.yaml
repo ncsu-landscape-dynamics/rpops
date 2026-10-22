@@ -11,7 +11,7 @@ competency_table_file: "competency_table_singlehost.csv"
 county_level_infection_data: false
 use_initial_condition_uncertainty: false
 start_exposed: false
-latency_period: 2
+latency_period: 0
 exposed_files: [""]
 
 # host data
@@ -120,13 +120,8 @@ natural_kappa: 0
 anthropogenic_kappa: 0
 calibration_method: "ABC"
 # ABC Parameters
-<<<<<<< HEAD
-generation_size: 10
-number_of_generations: 2
-=======
 generation_size: 5
 number_of_generations: 3
->>>>>>> c09aa6395c987b704f893f00f086ff475994145a
 
 # validation only
 perform_validation: false
