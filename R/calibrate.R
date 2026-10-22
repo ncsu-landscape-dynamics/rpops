@@ -44,6 +44,17 @@ calibrate <- function(config_rds_file) {
   # Check for an existing checkpoint file to resume from an interrupted calibration
   # and resume from that point.
   checkpoint_file <- file.path(config$output_path, "calibration_not_complete.rds")
+  # Fall back to the directory containing the config file (supports testing and
+  # portable setups where output_path differs from the config location).
+  if (!file.exists(checkpoint_file)) {
+    alt_checkpoint <- file.path(
+      dirname(normalizePath(config_rds_file)),
+      "calibration_not_complete.rds"
+    )
+    if (file.exists(alt_checkpoint)) {
+      checkpoint_file <- alt_checkpoint
+    }
+  }
   resuming_from_checkpoint <- file.exists(checkpoint_file)
   if (resuming_from_checkpoint) {
     message("Checkpoint found. Resuming calibration from: ", checkpoint_file)
